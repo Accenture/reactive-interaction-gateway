@@ -1,5 +1,6 @@
 defmodule Gateway.Router do
   use Gateway.Web, :router
+  use Terraform, terraformer: Gateway.Terraformers.Proxy
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -14,13 +15,7 @@ defmodule Gateway.Router do
   end
 
   scope "/", Gateway do
-    pipe_through :browser # Use the default browser stack
-
-    get "/", PageController, :index
+    pipe_through :api
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", Gateway do
-  #   pipe_through :api
-  # end
+  
 end
