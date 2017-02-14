@@ -8,7 +8,7 @@ use Mix.Config
 # with brunch.io to recompile .js and .css sources.
 config :gateway, Gateway.Endpoint,
   http: [port: 4000],
-  debug_errors: true,
+  # debug_errors: true, # Uncomment to see full error descriptions in API as HTML
   code_reloader: true,
   check_origin: false,
   watchers: []

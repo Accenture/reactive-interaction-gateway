@@ -1,17 +1,24 @@
 defmodule Gateway.ErrorView do
   use Gateway.Web, :view
 
-  def render("404.html", _assigns) do
-    "Page not found"
+  def render("400.json", assigns) do
+    %{reason: reason} = assigns
+    %{errors: %{message: "#{reason.exception.message}"}}
   end
 
-  def render("500.html", _assigns) do
-    "Internal server error"
+  def render("404.json", assigns) do
+    %{reason: reason} = assigns
+    %{errors: %{message: "#{reason.exception.message}"}}
+  end
+
+  def render("500.json", assigns) do
+    %{reason: reason} = assigns
+    %{errors: %{message: "#{reason.exception.message}"}}
   end
 
   # In case no render clause matches or no
   # template is found, let's render it as 500
   def template_not_found(_template, assigns) do
-    render "500.html", assigns
+    render "500.json", assigns
   end
 end
