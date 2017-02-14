@@ -3,6 +3,6 @@ defmodule Gateway.PageControllerTest do
 
   test "GET /", %{conn: conn} do
     conn = get conn, "/"
-    assert response(conn, 503) =~ "{\"message\":\"Route is not available\"}"
+    assert response(conn, 404) =~ "{\"message\":\"Route is not available\"}"
   end
 end

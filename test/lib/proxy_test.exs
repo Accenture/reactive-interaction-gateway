@@ -3,7 +3,7 @@ defmodule Gateway.Terraformers.ProxyTest do
 
   test "GET /random/route", %{conn: conn} do
     conn = get conn, "/random/route"
-    assert response(conn, 503) =~ "{\"message\":\"Route is not available\"}"
+    assert response(conn, 404) =~ "{\"message\":\"Route is not available\"}"
   end
   
   test "GET /is/user-info", %{conn: conn} do

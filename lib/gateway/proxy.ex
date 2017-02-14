@@ -34,7 +34,7 @@ defmodule Gateway.Terraformers.Proxy do
 
   # Handle unsupported route
   defp authenticate_request(nil, conn) do
-    send_resp(conn, 503, encode_error_message("Route is not available"))
+    send_resp(conn, 404, encode_error_message("Route is not available"))
   end
   # Check route authentication and forward
   defp authenticate_request(service, conn) do
