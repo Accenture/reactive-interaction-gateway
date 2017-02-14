@@ -1,15 +1,19 @@
 defmodule Gateway.Terraformers.Proxy do
-  alias Gateway.Clients.Proxy
+  @moduledoc """
+  Provides middleware proxy for incoming REST requests at specific routes.
+  """
   use Plug.Router
   import Joken
+  alias Gateway.Clients.Proxy
+  alias Mix.Config
 
   plug :match
   plug :dispatch
-  
+
   match _ do
     %{request_path: request_path} = conn
     # Load proxy config
-    proxy = Mix.Config.read!("config/proxy.exs")
+    proxy = Config.read!("config/proxy.exs")
     # Get list of routes
     routes = elem(Enum.at(elem(List.first(proxy), 1), 0), 1)
     # Find match of request path in proxy routes
@@ -29,7 +33,9 @@ defmodule Gateway.Terraformers.Proxy do
   end
 
   # Handle unsupported route
-  defp authenticate_request(nil, conn), do: send_resp(conn, 503, encode_error_message("Route is not available"))
+  defp authenticate_request(nil, conn) do
+    send_resp(conn, 503, encode_error_message("Route is not available"))
+  end
   # Check route authentication and forward
   defp authenticate_request(service, conn) do
     case service.auth do
@@ -37,7 +43,7 @@ defmodule Gateway.Terraformers.Proxy do
       false -> forward_request(service, conn)
     end
   end
-  
+
   defp process_authentication(service, conn) do
     # Get request headers
     %{req_headers: req_headers} = conn
@@ -48,7 +54,7 @@ defmodule Gateway.Terraformers.Proxy do
       false -> send_resp(conn, 401, encode_error_message("Missing authentication"))
     end
   end
-  
+
   # Authentication failed if JWT in not provided
   defp is_authenticated(nil), do: false
   # Verify JWT
@@ -56,7 +62,7 @@ defmodule Gateway.Terraformers.Proxy do
     # Get value for JWT from tuple
     jwt_value = elem(jwt, 1)
     # Verify JWT with Joken
-    joken_map = 
+    joken_map =
     jwt_value
     |> token
     |> with_validation("exp", &(&1 > current_time()))
@@ -67,10 +73,14 @@ defmodule Gateway.Terraformers.Proxy do
   end
 
   defp forward_request(service, conn) do
-    %{method: method, request_path: request_path, params: params, req_headers: req_headers} = conn
+    %{
+      method: method,
+      request_path: request_path,
+      params: params,
+      req_headers: req_headers
+    } = conn
     # Build URL
-    host = System.get_env(service.host) || "localhost"
-    url = "#{host}:#{service.port}#{request_path}"
+    url = build_url(service, request_path)
     # Match URL against HTTP method to forward it to specific service
     res =
       case method do
@@ -80,15 +90,23 @@ defmodule Gateway.Terraformers.Proxy do
         "DELETE" -> Proxy.delete!(url, Poison.encode!(params), req_headers)
         _ -> nil
       end
-      
+
     send_response({:ok, conn, res})
   end
 
+  # Builds URL where REST request should be proxied
+  defp build_url(service, request_path) do
+    host = System.get_env(service.host) || "localhost"
+    "#{host}:#{service.port}#{request_path}"
+  end
+
   # Function for sending response back to client
-  defp send_response({:ok, conn, nil}), do: send_resp(conn, 405, encode_error_message("Method is not supported"))
+  defp send_response({:ok, conn, nil}) do
+    send_resp(conn, 405, encode_error_message("Method is not supported"))
+  end
   defp send_response({:ok, conn, %{headers: headers, status_code: status_code, body: body}}) do
     conn = %{conn | resp_headers: headers}
     send_resp(conn, status_code, body)
   end
-  
+
 end

@@ -1,7 +1,10 @@
 defmodule Gateway.Clients.Proxy do
+  @moduledoc """
+  Provides forwarding of REST requests to external services.
+  """
   use HTTPoison.Base
-    
-  def process_headers(headers) do
+
+  def process_headers do
     [{"Content-Type", "application/json; charset=utf-8"}, {"Content-Encoding", "gzip"}]
   end
 end
