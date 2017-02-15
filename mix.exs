@@ -9,7 +9,9 @@ defmodule Gateway.Mixfile do
      compilers: [:phoenix, :gettext] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps()]
+     deps: deps(),
+     test_coverage: [tool: ExCoveralls],
+     preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test]]
   end
 
   # Configuration for the OTP application.
@@ -38,6 +40,7 @@ defmodule Gateway.Mixfile do
      {:terraform, "~> 0.1.1"},
      {:joken, "~> 1.4"},
      {:credo, "~> 0.5", only: [:dev, :test]},
-     {:bypass, "~> 0.1", only: :test}]
+     {:bypass, "~> 0.1", only: :test},
+     {:excoveralls, "~> 0.6.2"}]
   end
 end
