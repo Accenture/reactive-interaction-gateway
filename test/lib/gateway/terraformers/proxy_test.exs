@@ -19,21 +19,21 @@ defmodule Gateway.Terraformers.ProxyTest do
     assert conn.status == 401
     assert conn.resp_body =~ "{\"message\":\"Missing authentication\"}"
   end
-  
-  test "PATCH /is/auth shoudl return 405 for unsupported HTTP method" do
-    conn = call(Gateway.Router, conn(:patch, "/is/auth"))
-    assert conn.status == 405
-    assert conn.resp_body =~ "{\"message\":\"Method is not supported\"}"
+
+  test "GET /is/auth should return 404 as unspported method for given route" do
+    conn = call(Gateway.Router, conn(:get, "/is/auth"))
+    assert conn.status == 404
+    assert conn.resp_body =~ "{\"message\":\"Route is not available\"}"
   end
 
-  test "GET /is/auth should return token", %{bypass: bypass} do
+  test "POST /is/auth should return token", %{bypass: bypass} do
     Bypass.expect bypass, fn conn ->
       assert "/is/auth" == conn.request_path
-      assert "GET" == conn.method
+      assert "POST" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"token": "123"}>)
     end
     
-    conn = call(Gateway.Router, conn(:get, "/is/auth"))
+    conn = call(Gateway.Router, conn(:post, "/is/auth"))
     assert conn.status == 200
     assert conn.resp_body =~ "{\"token\": \"123\"}"
   end

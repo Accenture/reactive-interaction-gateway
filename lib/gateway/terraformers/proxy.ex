@@ -5,27 +5,33 @@ defmodule Gateway.Terraformers.Proxy do
   use Plug.Router
   import Joken
   alias Gateway.Clients.Proxy
-  alias Mix.Config
 
   plug :match
   plug :dispatch
 
   match _ do
-    %{request_path: request_path} = conn
-    # Load proxy config
-    proxy = Config.read!("config/proxy.exs")
-    # Get list of routes
-    routes = elem(Enum.at(elem(List.first(proxy), 1), 0), 1)
+    %{method: method, request_path: request_path} = conn
+    # Load proxy config and get list of routes
+    # Config can't be located inside /config to be able to use it on runtime
+    routes = Poison.decode!(File.read!("priv/proxy/proxy.json"))
     # Find match of request path in proxy routes
     service = Enum.find(routes, fn(route) ->
-      # Replace wildcards with regex words
-      replace_wildcards = String.replace(route.path, "{id}", "\\w*")
-      # Match requested path against regex
-      String.match?(request_path, ~r/#{replace_wildcards}$/)
+      match_path(route, request_path) && match_http_method(route, method)
     end)
     # Authenticate request if needed
     authenticate_request(service, conn)
   end
+
+  # Match route path against requested path
+  defp match_path(route, request_path) do
+    # Replace wildcards with regex words
+    replace_wildcards = String.replace(route["path"], "{id}", "\\w*")
+    # Match requested path against regex
+    String.match?(request_path, ~r/#{replace_wildcards}$/)
+  end
+
+  # Match route method against requested method
+  defp match_http_method(route, method), do: route["method"] == method
 
   # Encode custom error messages with Poison to JSON format
   defp encode_error_message(message) do
@@ -38,7 +44,7 @@ defmodule Gateway.Terraformers.Proxy do
   end
   # Check route authentication and forward
   defp authenticate_request(service, conn) do
-    case service.auth do
+    case service["auth"] do
       true -> process_authentication(service, conn)
       false -> forward_request(service, conn)
     end
@@ -96,8 +102,8 @@ defmodule Gateway.Terraformers.Proxy do
 
   # Builds URL where REST request should be proxied
   defp build_url(service, request_path) do
-    host = System.get_env(service.host) || "localhost"
-    "#{host}:#{service.port}#{request_path}"
+    host = System.get_env(service["host"]) || "localhost"
+    "#{host}:#{service["port"]}#{request_path}"
   end
 
   # Function for sending response back to client
