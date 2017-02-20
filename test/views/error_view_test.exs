@@ -4,18 +4,35 @@ defmodule Gateway.ErrorViewTest do
   # Bring render/3 and render_to_string/3 for testing custom views
   import Phoenix.View
 
-  test "renders 404.html" do
-    assert render_to_string(Gateway.ErrorView, "404.html", []) ==
-           "Page not found"
+  test "renders 400.json" do
+    assert render_to_string(
+      Gateway.ErrorView,
+      "400.json",
+      [reason: %{exception: %{message: "Bad Request"}}]
+    ) == "{\"errors\":{\"message\":\"Bad Request\"}}"
   end
 
-  test "render 500.html" do
-    assert render_to_string(Gateway.ErrorView, "500.html", []) ==
-           "Internal server error"
+  test "renders 404.json" do
+    assert render_to_string(
+      Gateway.ErrorView,
+      "404.json",
+      [reason: %{exception: %{message: "Not Found"}}]
+    ) == "{\"errors\":{\"message\":\"Not Found\"}}"
   end
-
-  test "render any other" do
-    assert render_to_string(Gateway.ErrorView, "505.html", []) ==
-           "Internal server error"
+  
+  test "renders 500.json" do
+    assert render_to_string(
+      Gateway.ErrorView,
+      "500.json",
+      [reason: %{exception: %{message: "Server Error"}}]
+    ) == "{\"errors\":{\"message\":\"Server Error\"}}"
+  end
+  
+  test "render any other as 500" do
+    assert render_to_string(
+      Gateway.ErrorView,
+      "123.json",
+      [reason: %{exception: %{message: "Server Error"}}]
+    ) == "{\"errors\":{\"message\":\"Server Error\"}}"
   end
 end
