@@ -2,24 +2,41 @@ defmodule Gateway.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :gateway,
-     version: "0.0.1",
-     elixir: "~> 1.2",
-     elixirc_paths: elixirc_paths(Mix.env),
-     compilers: [:phoenix, :gettext] ++ Mix.compilers,
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps(),
-     test_coverage: [tool: ExCoveralls],
-     preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test]]
+    [
+      app: :gateway,
+      version: "0.0.1",
+      elixir: "~> 1.2",
+      elixirc_paths: elixirc_paths(Mix.env),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers,
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        "coveralls": :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
+    ]
   end
 
   # Configuration for the OTP application.
   #
   # Type `mix help compile.app` for more information.
   def application do
-    [mod: {Gateway, []},
-     applications: [:phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext, :httpoison]]
+    [
+      mod: {Gateway, []},
+      applications: [
+        :phoenix,
+        :phoenix_pubsub,
+        :phoenix_html,
+        :cowboy,
+        :logger,
+        :gettext,
+        :httpoison,
+      ]
+    ]
   end
 
   # Specifies which paths to compile per environment.
@@ -30,17 +47,21 @@ defmodule Gateway.Mixfile do
   #
   # Type `mix help deps` for examples and options.
   defp deps do
-    [{:phoenix, "~> 1.2.1"},
-     {:phoenix_pubsub, "~> 1.0"},
-     {:phoenix_html, "~> 2.6"},
-     {:phoenix_live_reload, "~> 1.0", only: :dev},
-     {:gettext, "~> 0.11"},
-     {:cowboy, "~> 1.0"},
-     {:httpoison, "~> 0.11.0"},
-     {:terraform, "~> 0.1.1"},
-     {:joken, "~> 1.4"},
-     {:credo, "~> 0.5", only: [:dev, :test]},
-     {:bypass, "~> 0.1", only: :test},
-     {:excoveralls, "~> 0.6.2"}]
+    [
+      {:phoenix, "~> 1.2.1"},
+      {:phoenix_pubsub, "~> 1.0"},
+      {:phoenix_html, "~> 2.6"},
+      {:phoenix_live_reload, "~> 1.0", only: :dev},
+      {:gettext, "~> 0.11"},
+      {:cowboy, "~> 1.0"},
+      {:httpoison, "~> 0.11.0"},
+      {:terraform, "~> 0.1.1"},
+      {:joken, "~> 1.4"},
+      {:credo, "~> 0.5", only: [:dev, :test]},
+      {:bypass, "~> 0.1", only: :test},
+      {:excoveralls, "~> 0.6.2"},
+      {:brod, "~> 2.2"},
+      {:supervisor3, "~> 1.1"},
+    ]
   end
 end

@@ -1,15 +1,31 @@
 # Gateway
 
-To start your Phoenix app:
+## Getting started
+
+To get up and running:
 
   * Install dependencies with `mix deps.get`
   * Start Phoenix endpoint with `mix phoenix.server`
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
-Ready to run in production? Please [check our deployment guides](http://www.phoenixframework.org/docs/deployment).
+When debugging multi-node features, it's helpful to run the (named) nodes in `iex` sessions using `iex --sname nodename -S mix`.
 
-## Learn more
+
+## Architecture
+
+Todo: a picture of the supervisor tree.
+
+#### Kafka consumer
+In order to scale horizontally, Kafka Consumer Group are used. Brod, which is the library used for communicating with Kafka, has its client supervised by `Gateway.Kafka.Sup`, which also takes care of the group subscriber. It uses delays between restarts, in order to delay reconnects in the case of connection errors.
+
+`Gateway.Kafka.Sup` is itself supervised by `Gateway.Kafka.SupWrapper`. The wrapper's sole purpose is to allow the application to come up even if there is not a single broker online. Without it, the failure to connect to any broker would propagate all the way to the Phoenix application, bringing it down in the process. Having the wrapper makes the application startup more reliable.
+
+The consumer setup is done in `Gateway.Kafka.GroupSubscriber`; take a look at its moduledoc for more information. Finally, `Gateway.Kafka.MessageHandler` hosts the code for the actual processing of incoming messages.
+
+## More info on Phoenix
+
+Ready to run in production? Please [check our deployment guides](http://www.phoenixframework.org/docs/deployment).
 
   * Official website: http://www.phoenixframework.org/
   * Guides: http://phoenixframework.org/docs/overview
