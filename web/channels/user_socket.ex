@@ -1,8 +1,9 @@
 defmodule Gateway.UserSocket do
   use Phoenix.Socket
+  require Logger
 
   ## Channels
-  # channel "room:*", Gateway.RoomChannel
+  channel "presence:*", Gateway.PresenceChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
@@ -19,8 +20,10 @@ defmodule Gateway.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(_params, socket) do
-    {:ok, socket}
+  def connect(params, socket) do
+    # TODO(kevin) the params should contain a (verifyable) JWT, which can then
+    # be used to extract the (thus valid) user ID
+    {:ok, assign(socket, :user_id, Map.get(params, "user_id"))}
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:

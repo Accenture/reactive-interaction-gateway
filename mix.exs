@@ -61,6 +61,7 @@ defmodule Gateway.Mixfile do
       {:excoveralls, "~> 0.6.2"},
       {:brod, "~> 2.2"},
       {:supervisor3, "~> 1.1"},
+      {:poison, "~> 2.0 or ~> 3.0"},
       {:credo, "~> 0.7", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test]},
     ]
