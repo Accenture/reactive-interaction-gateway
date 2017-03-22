@@ -2,22 +2,35 @@ defmodule Gateway.Kafka.MessageHandlerTest do
   use ExUnit.Case, async: true
 
   test "a message should get broadcasted to the right room" do
-    assert 1 == broadcast? "fooUser", ~s({"username":"fooUser","payload":"ahaoho"})
+    assert 1 == check_broadcasts "fooUser", ~w({"username":"fooUser","payload":"ahaoho"})
   end
 
   test "a non-json message should not be broadcasted" do
-    assert 0 == broadcast? "", ~s(some bogus message)
+    assert 0 == check_broadcasts "nouser", ~w(some-bogus-message)
   end
 
   test "a message without a username field should not be broadcasted" do
-    assert 0 == broadcast? "", ~s({"payload":"ahaoho"})
+    assert 0 == check_broadcasts "nouser", ~w({"payload":"ahaoho"})
   end
 
-  defp broadcast?(user_id, message_value) do
+  test "multiple messages cause multiple broadcasts" do
+    assert 4 == check_broadcasts(
+      "fooUser",
+      ~w(
+        {"username":"fooUser","payload":"one"}
+        {"username":"fooUser","payload":"two"}
+        {"username":"fooUser","payload":"three"}
+        {"username":"fooUser","payload":"four"}
+      )
+    )
+  end
+
+  @spec check_broadcasts(String.t, nonempty_list(String.t)) :: boolean()
+  defp check_broadcasts(user_id, messages) do
     test_pid = self()
-    topic = "message"
+    kafka_topic = "message"
     partition = "0"
-    offset = 14
+    base_offset = 14
     target_room = "presence:#{user_id}"
 
     # the Agent is used to track the broadcasts invoked by the message handler:
@@ -26,26 +39,34 @@ defmodule Gateway.Kafka.MessageHandlerTest do
     # run the message handler loop in its own process:
     handler = spawn_link fn ->
       Gateway.Kafka.MessageHandler.message_handler_loop(
-        topic, partition,
+        kafka_topic, partition,
         _group_subscriber_pid = test_pid,
         _broadcast = fn
-          ^target_room, "message", %{"username" => ^user_id} ->
+          ^target_room, ^kafka_topic, %{"username" => ^user_id} ->
             Agent.update(
               broadcast_agent,
               fn state -> Map.update!(state, :call_count, &(&1 + 1)) end
             )
             nil
-          topic, event, message ->
-            raise "unexpected broadcast: topic=#{inspect topic}, event=#{inspect event}, message=#{inspect message}"
+          channel_topic, event, message ->
+            raise "unexpected broadcast: channel_topic=#{inspect channel_topic}, event=#{inspect event}, message=#{inspect message}"
         end
       )
     end
 
-    # emulate an incoming Kafka message:
-    send handler, create_kafka_message(offset, message_value)
+    # emulate incoming Kafka messages:
+    messages
+    |> Stream.with_index(base_offset)
+    |> Enum.each(fn {message_value, offset} ->
+      send handler, create_kafka_message(offset, message_value)
+    end)
 
     # wait until the handler has sent an ack to was it thinks is the group subscriber:
-    assert_receive {:"$gen_cast", {:ack, ^topic, ^partition, ^offset}}
+    messages
+    |> Stream.with_index(base_offset)
+    |> Enum.each(fn {_message_value, offset} ->
+      assert_receive {:"$gen_cast", {:ack, ^kafka_topic, ^partition, ^offset}}
+    end)
 
     # returns the number of times the broadcast callback has been invoked:
     Agent.get broadcast_agent, &Map.fetch!(&1, :call_count)

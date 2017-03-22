@@ -21,8 +21,8 @@ defmodule Gateway.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   def connect(params, socket) do
-    # validate jwt token and extract user_id from it
-
+    # TODO(kevin) the params should contain a (verifyable) JWT, which can then
+    # be used to extract the (thus valid) user ID
     {:ok, assign(socket, :user_id, Map.get(params, "user_id"))}
   end
 
