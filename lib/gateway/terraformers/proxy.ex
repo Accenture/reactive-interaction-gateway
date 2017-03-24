@@ -5,6 +5,7 @@ defmodule Gateway.Terraformers.Proxy do
   use Plug.Router
   import Joken
   alias Gateway.Clients.Proxy
+  alias Gateway.Jwt.Jwt
 
   plug :match
   plug :dispatch
@@ -55,27 +56,20 @@ defmodule Gateway.Terraformers.Proxy do
     %{req_headers: req_headers} = conn
     # Search for authorization token
     jwt = Enum.find(req_headers, fn(item) -> elem(item, 0) == "authorization" end)
-    case is_authenticated(jwt) do
+    case authenticate?(jwt) do
       true -> forward_request(service, conn)
       false -> send_resp(conn, 401, encode_error_message("Missing authentication"))
     end
   end
 
   # Authentication failed if JWT in not provided
-  defp is_authenticated(nil), do: false
+  defp authenticate?(nil), do: false
   # Verify JWT
-  defp is_authenticated(jwt) do
+  defp authenticate?(jwt) do
     # Get value for JWT from tuple
-    jwt_value = elem(jwt, 1)
-    # Verify JWT with Joken
-    joken_map =
-    jwt_value
-    |> token
-    |> with_validation("exp", &(&1 > current_time()))
-    |> with_signer(hs256(Application.get_env(:gateway, Gateway.Endpoint)[:jwt_key]))
-    |> verify
-    # Check if any error occurred
-    Map.get(joken_map, :errors) == []
+    jwt
+    |> elem(1)
+    |> Jwt.verify?
   end
 
   defp forward_request(service, conn) do
