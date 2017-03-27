@@ -20,7 +20,7 @@ defmodule Gateway.Utils.Jwt do
   end
 
   @spec decode(String.t) :: map
-  defp decode (token) do
+  defp decode(token) do
     token
     |> token
     |> with_validation("exp", &(&1 > current_time()))
