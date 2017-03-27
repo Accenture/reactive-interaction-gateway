@@ -64,16 +64,16 @@ defmodule Gateway.Terraformers.Proxy do
     # Search for authorization token
     jwt = Enum.find(req_headers, fn(item) -> elem(item, 0) == "authorization" end)
     case authenticated?(jwt) do
-      true -> forward_request(service, conn)
-      false -> send_resp(conn, 401, encode_error_message("Missing authentication"))
+      {:ok, _token} -> forward_request(service, conn)
+      {:error, message} -> send_resp(conn, 401, encode_error_message(message))
     end
   end
 
   # Authentication failed if JWT in not provided
-  @spec authenticated?(nil) :: false
-  defp authenticated?(nil), do: false
+  @spec authenticated?(nil) :: {:error, String.t}
+  defp authenticated?(nil), do: {:error, "Missing token"}
   # Verify JWT
-  @spec authenticated?(tuple) :: boolean
+  @spec authenticated?(tuple) :: {atom, String.t}
   defp authenticated?(jwt) do
     # Get value for JWT from tuple
     jwt_value = elem(jwt, 1)
