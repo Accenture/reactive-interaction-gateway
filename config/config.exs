@@ -17,7 +17,28 @@ config :gateway, Gateway.Endpoint,
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  metadata: [:module, :request_id]
+
+#
+# Kafka
+#
+
+kafka_default_client = :gateway_brod_client
+
+config :gateway, :kafka, %{
+  kafka_default_client: kafka_default_client,
+  consumer_group_id: "gateway-consumer-group",
+  topics: ["message"],
+}
+
+# Read by brod_sup (which is started as an application by mix)
+# and used to start the default brod client.
+config :brod,
+  clients: [
+    {kafka_default_client, [
+      endpoints: ["0.0.0.0": 9092]
+    ]}
+  ]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
