@@ -1,11 +1,11 @@
-defmodule Gateway.Jwt.Jwt do
+defmodule Gateway.Utils.Jwt do
   @moduledoc """
   Provides utility functions over JWT using Joken
   """
   import Joken
 
-  @spec verify?(String.t) :: boolean
-  def verify?(token) do
+  @spec valid?(String.t) :: boolean
+  def valid?(token) do
     token
     |> decode
     |> get_error == nil
