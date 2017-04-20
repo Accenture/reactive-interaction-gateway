@@ -11,12 +11,11 @@ defmodule Gateway.Utils.Jwt do
     |> get_error == nil
   end
 
-  @spec decode(String.t) :: map
+  @spec decode(String.t) :: {:ok, map} | {:error, String.t}
   def decode(jwt) do
     jwt
     |> validate
     |> get_data
-    |> elem(1)
   end
 
   @spec validate(String.t) :: map
