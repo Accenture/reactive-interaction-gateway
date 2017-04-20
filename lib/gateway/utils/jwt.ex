@@ -4,25 +4,27 @@ defmodule Gateway.Utils.Jwt do
   """
   import Joken
 
-  @spec valid?(String.t) :: map
+  @spec valid?(String.t) :: boolean
   def valid?(jwt) do
+    jwt
+    |> validate
+    |> get_error == nil
+  end
+
+  @spec decode(String.t) :: map
+  def decode(jwt) do
+    jwt
+    |> validate
+    |> get_data
+    |> elem(1)
+  end
+
+  @spec validate(String.t) :: map
+  defp validate(jwt) do
     jwt
     |> token
     |> with_validation("exp", &(&1 > current_time()))
     |> with_signer(hs256(Application.get_env(:gateway, Gateway.Endpoint)[:jwt_key]))
-    |> verify!
+    |> verify
   end
-
-  @spec user_id(String.t) :: String.t
-  def user_id(jwt) do
-    with {_status, decoded} <- valid?(jwt) do
-      decoded
-      |> get_user_id
-    end
-  end
-
-  @spec get_user_id(map) :: tuple
-  defp get_user_id(%{"username" => username}), do: {:ok, username}
-  defp get_user_id(_user), do: {:error, "Invalid token"}
-
 end
