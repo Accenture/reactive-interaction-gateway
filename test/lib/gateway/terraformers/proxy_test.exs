@@ -17,7 +17,7 @@ defmodule Gateway.Terraformers.ProxyTest do
   test "GET /is/user-info should return 401 for invalid JWT" do
     conn = call(Gateway.Router, conn(:get, "/is/user-info"))
     assert conn.status == 401
-    assert conn.resp_body =~ "{\"message\":\"Missing authentication\"}"
+    assert conn.resp_body =~ "{\"message\":\"Missing token\"}"
   end
 
   test "GET /is/auth should return 404 as unspported method for given route" do

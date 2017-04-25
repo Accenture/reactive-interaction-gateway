@@ -5,6 +5,7 @@ defmodule Gateway.Terraformers.Proxy do
   use Plug.Router
   import Joken
   alias Gateway.Clients.Proxy
+  alias Gateway.Utils.Jwt
 
   plug :match
   plug :dispatch
@@ -23,6 +24,7 @@ defmodule Gateway.Terraformers.Proxy do
   end
 
   # Match route path against requested path
+  @spec match_path(map, String.t) :: boolean
   defp match_path(route, request_path) do
     # Replace wildcards with regex words
     replace_wildcards = String.replace(route["path"], "{id}", "\\w*")
@@ -31,18 +33,23 @@ defmodule Gateway.Terraformers.Proxy do
   end
 
   # Match route method against requested method
+  @spec match_http_method(map, String.t) :: boolean
   defp match_http_method(route, method), do: route["method"] == method
 
   # Encode custom error messages with Poison to JSON format
+  @type json_message :: %{message: String.t}
+  @spec encode_error_message(String.t) :: json_message
   defp encode_error_message(message) do
     Poison.encode!(%{message: message})
   end
 
   # Handle unsupported route
+  @spec authenticate_request(nil, map) :: map
   defp authenticate_request(nil, conn) do
     send_resp(conn, 404, encode_error_message("Route is not available"))
   end
   # Check route authentication and forward
+  @spec authenticate_request(map, map) :: map
   defp authenticate_request(service, conn) do
     case service["auth"] do
       true -> process_authentication(service, conn)
@@ -50,34 +57,30 @@ defmodule Gateway.Terraformers.Proxy do
     end
   end
 
+  @spec process_authentication(String.t, map) :: map
   defp process_authentication(service, conn) do
     # Get request headers
     %{req_headers: req_headers} = conn
     # Search for authorization token
     jwt = Enum.find(req_headers, fn(item) -> elem(item, 0) == "authorization" end)
-    case is_authenticated(jwt) do
+    case authenticated?(jwt) do
       true -> forward_request(service, conn)
-      false -> send_resp(conn, 401, encode_error_message("Missing authentication"))
+      false -> send_resp(conn, 401, encode_error_message("Missing token"))
     end
   end
 
   # Authentication failed if JWT in not provided
-  defp is_authenticated(nil), do: false
+  @spec authenticated?(nil) :: false
+  defp authenticated?(nil), do: false
   # Verify JWT
-  defp is_authenticated(jwt) do
+  @spec authenticated?(tuple) :: boolean
+  defp authenticated?(jwt) do
     # Get value for JWT from tuple
     jwt_value = elem(jwt, 1)
-    # Verify JWT with Joken
-    joken_map =
-    jwt_value
-    |> token
-    |> with_validation("exp", &(&1 > current_time()))
-    |> with_signer(hs256(Application.get_env(:gateway, Gateway.Endpoint)[:jwt_key]))
-    |> verify
-    # Check if any error occurred
-    Map.get(joken_map, :errors) == []
+    Jwt.valid?(jwt_value)
   end
 
+  @spec forward_request(map, map) :: map
   defp forward_request(service, conn) do
     %{
       method: method,
@@ -101,15 +104,18 @@ defmodule Gateway.Terraformers.Proxy do
   end
 
   # Builds URL where REST request should be proxied
+  @spec build_url(map, String.t) :: String.t
   defp build_url(service, request_path) do
     host = System.get_env(service["host"]) || "localhost"
     "#{host}:#{service["port"]}#{request_path}"
   end
 
   # Function for sending response back to client
+  @spec send_response({:ok, map, nil}) :: map
   defp send_response({:ok, conn, nil}) do
     send_resp(conn, 405, encode_error_message("Method is not supported"))
   end
+  @spec send_response({:ok, map, map}) :: map
   defp send_response({:ok, conn, %{headers: headers, status_code: status_code, body: body}}) do
     conn = %{conn | resp_headers: headers}
     send_resp(conn, status_code, body)
