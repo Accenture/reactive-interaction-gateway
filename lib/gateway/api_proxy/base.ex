@@ -1,4 +1,4 @@
-defmodule Gateway.Clients.Proxy do
+defmodule Gateway.ApiProxy.Base do
   @moduledoc """
   Provides forwarding of REST requests to external services.
   """

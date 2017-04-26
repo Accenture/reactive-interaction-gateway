@@ -1,4 +1,4 @@
-defmodule Gateway.Terraformers.ProxyTest do
+defmodule Gateway.ApiProxy.ProxyTest do
   use ExUnit.Case, async: true
   use Plug.Test
   import Joken

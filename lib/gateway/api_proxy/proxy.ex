@@ -1,10 +1,10 @@
-defmodule Gateway.Terraformers.Proxy do
+defmodule Gateway.ApiProxy.Proxy do
   @moduledoc """
   Provides middleware proxy for incoming REST requests at specific routes.
   """
   use Plug.Router
-  import Joken
-  alias Gateway.Clients.Proxy
+
+  alias Gateway.ApiProxy.Base
   alias Gateway.Utils.Jwt
 
   plug :match
@@ -93,10 +93,10 @@ defmodule Gateway.Terraformers.Proxy do
     # Match URL against HTTP method to forward it to specific service
     res =
       case method do
-        "GET" -> Proxy.get!(url, req_headers, [params: Map.to_list(params)])
-        "POST" -> Proxy.post!(url, Poison.encode!(params), req_headers)
-        "PUT" -> Proxy.put!(url, Poison.encode!(params), req_headers)
-        "DELETE" -> Proxy.delete!(url, Poison.encode!(params), req_headers)
+        "GET" -> Base.get!(url, req_headers, [params: Map.to_list(params)])
+        "POST" -> Base.post!(url, Poison.encode!(params), req_headers)
+        "PUT" -> Base.put!(url, Poison.encode!(params), req_headers)
+        "DELETE" -> Base.delete!(url, Poison.encode!(params), req_headers)
         _ -> nil
       end
 
