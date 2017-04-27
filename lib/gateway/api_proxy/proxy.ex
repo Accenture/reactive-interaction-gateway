@@ -26,8 +26,8 @@ defmodule Gateway.ApiProxy.Proxy do
   # Match route path against requested path
   @spec match_path(map, String.t) :: boolean
   defp match_path(route, request_path) do
-    # Replace wildcards with regex words
-    replace_wildcards = String.replace(route["path"], "{id}", "\\w*")
+    # Replace wildcards with actual params
+    replace_wildcards = String.replace(route["path"], "{id}", ".*")
     # Match requested path against regex
     String.match?(request_path, ~r/#{replace_wildcards}$/)
   end
@@ -65,7 +65,7 @@ defmodule Gateway.ApiProxy.Proxy do
     jwt = Enum.find(req_headers, fn(item) -> elem(item, 0) == "authorization" end)
     case authenticated?(jwt) do
       true -> forward_request(service, conn)
-      false -> send_resp(conn, 401, encode_error_message("Missing token"))
+      false -> send_resp(conn, 401, encode_error_message("Missing or invalid token"))
     end
   end
 
@@ -91,9 +91,9 @@ defmodule Gateway.ApiProxy.Proxy do
     # Build URL
     url = build_url(service, request_path)
     # Match URL against HTTP method to forward it to specific service
-    res =
+    res = 
       case method do
-        "GET" -> Base.get!(url, req_headers, [params: Map.to_list(params)])
+        "GET" -> Base.get!(attachQueryParams(url, params), req_headers)
         "POST" -> Base.post!(url, Poison.encode!(params), req_headers)
         "PUT" -> Base.put!(url, Poison.encode!(params), req_headers)
         "DELETE" -> Base.delete!(url, Poison.encode!(params), req_headers)
@@ -110,11 +110,21 @@ defmodule Gateway.ApiProxy.Proxy do
     "#{host}:#{service["port"]}#{request_path}"
   end
 
+  # workaound for HTTPoison/URI.encode not supporting nested query params
+  @spec attachQueryParams(String.t, nil) :: String.t
+  defp attachQueryParams(url, nil), do: url
+
+  @spec attachQueryParams(String.t, map) :: String.t
+  defp attachQueryParams(url, params) do 
+    url <> "?" <> Plug.Conn.Query.encode(params)
+  end
+
   # Function for sending response back to client
   @spec send_response({:ok, map, nil}) :: map
   defp send_response({:ok, conn, nil}) do
     send_resp(conn, 405, encode_error_message("Method is not supported"))
   end
+
   @spec send_response({:ok, map, map}) :: map
   defp send_response({:ok, conn, %{headers: headers, status_code: status_code, body: body}}) do
     conn = %{conn | resp_headers: headers}
