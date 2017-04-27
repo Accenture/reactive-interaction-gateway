@@ -4,14 +4,14 @@ defmodule Gateway.ApiProxy.ProxyTest do
   import Joken
 
   setup do
-    identity_service = Bypass.open(port: 7070)
-    process_service = Bypass.open(port: 8080)
-    transaction_service = Bypass.open(port: 8889)
+    first_service = Bypass.open(port: 7070)
+    second_service = Bypass.open(port: 8080)
+    third_service = Bypass.open(port: 8889)
 
     {:ok, 
-      identity_service: identity_service,
-      process_service: process_service,
-      transaction_service: transaction_service
+      first_service: first_service,
+      second_service: second_service,
+      third_service: third_service
     }
   end
 
@@ -33,8 +33,8 @@ defmodule Gateway.ApiProxy.ProxyTest do
     assert conn.resp_body =~ "{\"message\":\"Route is not available\"}"
   end
 
-  test "POST /is/auth should return token", %{identity_service: identity_service} do
-    Bypass.expect identity_service, fn conn ->
+  test "POST /is/auth should return token", %{first_service: first_service} do
+    Bypass.expect first_service, fn conn ->
       assert "/is/auth" == conn.request_path
       assert "POST" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"token": "123"}>)
@@ -45,8 +45,8 @@ defmodule Gateway.ApiProxy.ProxyTest do
     assert conn.resp_body =~ "{\"token\": \"123\"}"
   end
   
-  test "GET /is/user-info should verify JWT and return data", %{identity_service: identity_service} do
-    Bypass.expect identity_service, fn conn ->
+  test "GET /is/user-info should verify JWT and return data", %{first_service: first_service} do
+    Bypass.expect first_service, fn conn ->
       assert "/is/user-info" == conn.request_path
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"response": "ok"}>)
@@ -59,8 +59,8 @@ defmodule Gateway.ApiProxy.ProxyTest do
     assert conn.resp_body =~ "{\"response\": \"ok\"}"
   end
   
-  test "POST /is/user-info should verify JWT and return data", %{identity_service: identity_service} do
-    Bypass.expect identity_service, fn conn ->
+  test "POST /is/user-info should verify JWT and return data", %{first_service: first_service} do
+    Bypass.expect first_service, fn conn ->
       assert "/is/user-info" == conn.request_path
       assert "POST" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"response": "ok"}>)
@@ -73,8 +73,8 @@ defmodule Gateway.ApiProxy.ProxyTest do
     assert conn.resp_body =~ "{\"response\": \"ok\"}"
   end
   
-  test "PUT /is/users{id} should verify JWT and return data", %{identity_service: identity_service} do
-    Bypass.expect identity_service, fn conn ->
+  test "PUT /is/users/{id} should verify JWT and return data", %{first_service: first_service} do
+    Bypass.expect first_service, fn conn ->
       assert "/is/users/mike" == conn.request_path
       assert "PUT" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"response": "ok"}>)
@@ -87,8 +87,23 @@ defmodule Gateway.ApiProxy.ProxyTest do
     assert conn.resp_body =~ "{\"response\": \"ok\"}"
   end
 
-  test "forward_request should handle IDs with . symbol", %{identity_service: identity_service} do
-    Bypass.expect identity_service, fn conn ->
+  test "forward_request should handle DELETE method", %{second_service: second_service} do
+    Bypass.expect second_service, fn conn ->
+      assert "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040" == conn.request_path
+      assert "DELETE" == conn.method
+      Plug.Conn.resp(conn, 204, ~s<>)
+    end
+
+    jwt = generate_jwt()
+    request = conn(:delete, "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040") 
+      |> put_req_header("authorization", jwt)
+    conn = call(Gateway.Router, request)
+    assert conn.status == 204
+    assert conn.resp_body =~ ""
+  end
+
+  test "forward_request should handle IDs with . symbol", %{first_service: first_service} do
+    Bypass.expect first_service, fn conn ->
       assert "/is/users/first.user" == conn.request_path
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
@@ -102,8 +117,8 @@ defmodule Gateway.ApiProxy.ProxyTest do
     assert conn.resp_body =~ "{\"response\":\"[]\"}"
   end
 
-  test "forward_request should handle UUIDs", %{process_service: process_service} do
-    Bypass.expect process_service, fn conn ->
+  test "forward_request should handle UUIDs", %{second_service: second_service} do
+    Bypass.expect second_service, fn conn ->
       assert "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040" == conn.request_path
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
@@ -117,8 +132,8 @@ defmodule Gateway.ApiProxy.ProxyTest do
     assert conn.resp_body =~ "{\"response\":\"[]\"}"
   end
 
-  test "forward_request should handle nested query params", %{transaction_service: transaction_service} do
-    Bypass.expect transaction_service, fn conn ->
+  test "forward_request should handle nested query params", %{third_service: third_service} do
+    Bypass.expect third_service, fn conn ->
       assert "/ts/transactions" == conn.request_path
       assert "GET" == conn.method
       assert "page[limit]=10&page[offset]=0" == conn.query_string

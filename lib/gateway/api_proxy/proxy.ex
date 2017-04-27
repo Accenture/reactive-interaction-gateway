@@ -13,8 +13,7 @@ defmodule Gateway.ApiProxy.Proxy do
 
   match _ do
     %{method: method, request_path: request_path} = conn
-    # Load proxy config and get list of routes
-    # Config can't be located inside /config to be able to use it on runtime
+    # Load proxy routes during the runtime
     routes = Application.fetch_env!(:gateway, :proxy_route_config)
       |> File.read!()
       |> Poison.decode!()
@@ -95,12 +94,13 @@ defmodule Gateway.ApiProxy.Proxy do
     # Build URL
     url = build_url(service, request_path)
     # Match URL against HTTP method to forward it to specific service
+
     res =
       case method do
         "GET" -> Base.get!(attachQueryParams(url, params), req_headers)
         "POST" -> Base.post!(url, Poison.encode!(params), req_headers)
         "PUT" -> Base.put!(url, Poison.encode!(params), req_headers)
-        "DELETE" -> Base.delete!(url, Poison.encode!(params), req_headers)
+        "DELETE" -> Base.delete!(url, req_headers)
         _ -> nil
       end
 
