@@ -4,6 +4,7 @@ defmodule Gateway.ApiProxy.Proxy do
   """
   use Plug.Router
 
+  alias Plug.Conn.Query
   alias Gateway.ApiProxy.Base
   alias Gateway.Utils.Jwt
 
@@ -91,7 +92,7 @@ defmodule Gateway.ApiProxy.Proxy do
     # Build URL
     url = build_url(service, request_path)
     # Match URL against HTTP method to forward it to specific service
-    res = 
+    res =
       case method do
         "GET" -> Base.get!(attachQueryParams(url, params), req_headers)
         "POST" -> Base.post!(url, Poison.encode!(params), req_headers)
@@ -115,8 +116,8 @@ defmodule Gateway.ApiProxy.Proxy do
   defp attachQueryParams(url, nil), do: url
 
   @spec attachQueryParams(String.t, map) :: String.t
-  defp attachQueryParams(url, params) do 
-    url <> "?" <> Plug.Conn.Query.encode(params)
+  defp attachQueryParams(url, params) do
+    url <> "?" <> Query.encode(params)
   end
 
   # Function for sending response back to client
