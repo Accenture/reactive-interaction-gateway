@@ -4,8 +4,15 @@ defmodule Gateway.ApiProxy.ProxyTest do
   import Joken
 
   setup do
-    bypass = Bypass.open(port: 7070)
-    {:ok, bypass: bypass}
+    identity_service = Bypass.open(port: 7070)
+    process_service = Bypass.open(port: 8080)
+    transaction_service = Bypass.open(port: 8889)
+
+    {:ok, 
+      identity_service: identity_service,
+      process_service: process_service,
+      transaction_service: transaction_service
+    }
   end
 
   test "GET /random/route should return 404 as non existing route" do
@@ -26,8 +33,8 @@ defmodule Gateway.ApiProxy.ProxyTest do
     assert conn.resp_body =~ "{\"message\":\"Route is not available\"}"
   end
 
-  test "POST /is/auth should return token", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
+  test "POST /is/auth should return token", %{identity_service: identity_service} do
+    Bypass.expect identity_service, fn conn ->
       assert "/is/auth" == conn.request_path
       assert "POST" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"token": "123"}>)
@@ -38,48 +45,94 @@ defmodule Gateway.ApiProxy.ProxyTest do
     assert conn.resp_body =~ "{\"token\": \"123\"}"
   end
   
-  test "GET /is/user-info should verify JWT and return data", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
+  test "GET /is/user-info should verify JWT and return data", %{identity_service: identity_service} do
+    Bypass.expect identity_service, fn conn ->
       assert "/is/user-info" == conn.request_path
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"response": "ok"}>)
     end
     
     jwt = generate_jwt()
-    conn = conn(:get, "/is/user-info") |> put_req_header("authorization", jwt)
-    conn = call(Gateway.Router, conn)
+    request = conn(:get, "/is/user-info") |> put_req_header("authorization", jwt)
+    conn = call(Gateway.Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"response\": \"ok\"}"
   end
   
-  test "POST /is/user-info should verify JWT and return data", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
+  test "POST /is/user-info should verify JWT and return data", %{identity_service: identity_service} do
+    Bypass.expect identity_service, fn conn ->
       assert "/is/user-info" == conn.request_path
       assert "POST" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"response": "ok"}>)
     end
     
     jwt = generate_jwt()
-    conn = conn(:post, "/is/user-info") |> put_req_header("authorization", jwt)
-    conn = call(Gateway.Router, conn)
+    request = conn(:post, "/is/user-info") |> put_req_header("authorization", jwt)
+    conn = call(Gateway.Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"response\": \"ok\"}"
   end
   
-  test "PUT /is/users{id} should verify JWT and return data", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
+  test "PUT /is/users{id} should verify JWT and return data", %{identity_service: identity_service} do
+    Bypass.expect identity_service, fn conn ->
       assert "/is/users/mike" == conn.request_path
       assert "PUT" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"response": "ok"}>)
     end
 
     jwt = generate_jwt()
-    conn = conn(:put, "/is/users/mike") |> put_req_header("authorization", jwt)
-    conn = call(Gateway.Router, conn)
+    request = conn(:put, "/is/users/mike") |> put_req_header("authorization", jwt)
+    conn = call(Gateway.Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"response\": \"ok\"}"
   end
-  
+
+  test "forward_request should handle IDs with . symbol", %{identity_service: identity_service} do
+    Bypass.expect identity_service, fn conn ->
+      assert "/is/users/first.user" == conn.request_path
+      assert "GET" == conn.method
+      Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
+    end
+
+    jwt = generate_jwt()
+    request = conn(:get, "/is/users/first.user") 
+      |> put_req_header("authorization", jwt)
+    conn = call(Gateway.Router, request)
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"response\":\"[]\"}"
+  end
+
+  test "forward_request should handle UUIDs", %{process_service: process_service} do
+    Bypass.expect process_service, fn conn ->
+      assert "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040" == conn.request_path
+      assert "GET" == conn.method
+      Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
+    end
+
+    jwt = generate_jwt()
+    request = conn(:get, "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040") 
+      |> put_req_header("authorization", jwt)
+    conn = call(Gateway.Router, request)
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"response\":\"[]\"}"
+  end
+
+  test "forward_request should handle nested query params", %{transaction_service: transaction_service} do
+    Bypass.expect transaction_service, fn conn ->
+      assert "/ts/transactions" == conn.request_path
+      assert "GET" == conn.method
+      assert "page[limit]=10&page[offset]=0" == conn.query_string
+      Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
+    end
+
+    jwt = generate_jwt()
+    request = conn(:get, "/ts/transactions", %{"page" => %{"offset" => 0, "limit" => 10}}) 
+      |> put_req_header("authorization", jwt)
+    conn = call(Gateway.Router, request)
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"response\":\"[]\"}"
+  end
+
   defp generate_jwt do
     token()
       |> with_signer(hs256(Application.get_env(:gateway, Gateway.Endpoint)[:jwt_key]))
