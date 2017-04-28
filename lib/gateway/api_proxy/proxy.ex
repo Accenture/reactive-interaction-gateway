@@ -114,7 +114,7 @@ defmodule Gateway.ApiProxy.Proxy do
     "#{host}:#{service["port"]}#{request_path}"
   end
 
-  # workaound for HTTPoison/URI.encode not supporting nested query params
+  # workaround for HTTPoison/URI.encode not supporting nested query params
   @spec attachQueryParams(String.t, nil) :: String.t
   defp attachQueryParams(url, nil), do: url
 
