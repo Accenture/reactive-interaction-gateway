@@ -94,6 +94,13 @@
     "host": "PS_HOST",
     "port": 8080,
     "path": "/ps/tasks/{id}",
+    "method": "PUT",
+    "auth": true
+  },
+  {
+    "host": "PS_HOST",
+    "port": 8080,
+    "path": "/ps/tasks/{id}",
     "method": "DELETE",
     "auth": true
   },

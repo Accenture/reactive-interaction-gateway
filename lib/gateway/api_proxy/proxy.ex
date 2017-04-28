@@ -14,10 +14,9 @@ defmodule Gateway.ApiProxy.Proxy do
   match _ do
     %{method: method, request_path: request_path} = conn
     # Load proxy routes during the runtime
-    routes = Application.fetch_env!(:gateway, :proxy_route_config)
-      |> File.read!()
-      |> Poison.decode!()
-    
+    routes_config = Application.fetch_env!(:gateway, :proxy_route_config)
+    routes = Poison.decode!(File.read!(routes_config))
+
     # Find match of request path in proxy routes
     service = Enum.find(routes, fn(route) ->
       match_path(route, request_path) && match_http_method(route, method)
