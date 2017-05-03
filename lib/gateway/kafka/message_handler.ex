@@ -7,6 +7,9 @@ defmodule Gateway.Kafka.MessageHandler do
   import Record, only: [defrecord: 2, extract: 2]
   defrecord :kafka_message, extract(:kafka_message, from_lib: "brod/include/brod.hrl")
 
+  alias Gateway.PresenceChannel
+  alias Poison.Parser
+
   @broadcast &Gateway.Endpoint.broadcast/3
 
   def message_handler_loop(topic, partition, group_subscriber_pid, broadcast \\ @broadcast) do
@@ -27,7 +30,7 @@ defmodule Gateway.Kafka.MessageHandler do
 
   defp act_on_message(value, broadcast) do
     result =
-      with {:ok, parsed} <- Poison.Parser.parse(value),
+      with {:ok, parsed} <- Parser.parse(value),
            {:ok, username} <- Map.fetch(parsed, "username")
         do
           broadcast_to_user(username, parsed, broadcast)
@@ -39,11 +42,11 @@ defmodule Gateway.Kafka.MessageHandler do
   end
 
   defp broadcast_to_user(username, data, broadcast) do
-    room = Gateway.PresenceChannel.room_name(username)
+    room = PresenceChannel.room_name(username)
     Logger.debug("will broadcast to #{inspect room}: #{inspect data}")
     broadcast.(
       _topic = room,
-      _event = "kafka_message",
+      _event = "message",
       _msg = data
     )
   end

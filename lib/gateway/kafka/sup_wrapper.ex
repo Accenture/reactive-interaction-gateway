@@ -15,6 +15,8 @@ defmodule Gateway.Kafka.SupWrapper do
   use GenServer
   require Logger
 
+  alias Gateway.Kafka.Sup, as: KafkaSupervisor
+
   @restart_delay_ms 20_000
 
   ## Client API
@@ -33,7 +35,7 @@ defmodule Gateway.Kafka.SupWrapper do
 
   def handle_info(:start_sup, old_state) do
     Logger.debug "Starting Kafka supervisor (attempt #{next_attempt_no(old_state)})"
-    new_state = case Gateway.Kafka.Sup.start_link() do
+    new_state = case KafkaSupervisor.start_link() do
       {:ok, _} ->
         Map.put old_state, :n_attempts, 0
       _ ->

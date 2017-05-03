@@ -29,7 +29,7 @@ defmodule Gateway.Kafka.MessageHandlerTest do
         topic, partition,
         _group_subscriber_pid = test_pid,
         _broadcast = fn
-          ^target_room, "kafka_message", %{"username" => ^user_id} ->
+          ^target_room, "message", %{"username" => ^user_id} ->
             Agent.update(
               broadcast_agent,
               fn state -> Map.update!(state, :call_count, &(&1 + 1)) end
