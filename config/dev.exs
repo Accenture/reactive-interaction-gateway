@@ -7,7 +7,6 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
 config :gateway, Gateway.Endpoint,
-  http: [port: 4000],
   # debug_errors: true, # Uncomment to see full error descriptions in API as HTML
   code_reloader: true,
   check_origin: false,
@@ -31,3 +30,6 @@ config :gateway, Gateway.Endpoint,
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
+
+# Proxy route config file location
+config :gateway, proxy_route_config: "priv/proxy/proxy.json"

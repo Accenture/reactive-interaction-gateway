@@ -7,7 +7,8 @@ use Mix.Config
 
 # Configures the endpoint
 config :gateway, Gateway.Endpoint,
-  url: [host: "localhost"],
+  url: [host: System.get_env("HOST") || "localhost"],
+  http: [port: System.get_env("PORT") || 4000],
   jwt_key: "supersecrettoken",
   secret_key_base: "qjiJFnMIbw3Bs2lbM0TWouWlVht+NUlcgrUURL+7vJ2yjQYQKonWUYC0UoCtXpVq",
   render_errors: [view: Gateway.ErrorView, accepts: ~w(json), default_format: "json"],
@@ -19,10 +20,7 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:module, :request_id]
 
-#
 # Kafka
-#
-
 kafka_default_client = :gateway_brod_client
 
 config :gateway, :kafka, %{

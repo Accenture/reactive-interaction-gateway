@@ -1,6 +1,6 @@
 defmodule Gateway.Router do
   use Gateway.Web, :router
-  use Terraform, terraformer: Gateway.Terraformers.Proxy
+  use Terraform, terraformer: Gateway.ApiProxy.Proxy
 
   pipeline :api do
     plug :accepts, ["json"]
@@ -9,5 +9,4 @@ defmodule Gateway.Router do
   scope "/", Gateway do
     pipe_through :api
   end
-
 end
