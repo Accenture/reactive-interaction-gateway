@@ -58,3 +58,6 @@ config :logger, level: :info
 # Finally import the config/prod.secret.exs
 # which should be versioned separately.
 import_config "prod.secret.exs"
+
+# Proxy route config file location
+config :gateway, proxy_route_config: "priv/proxy/proxy.json"

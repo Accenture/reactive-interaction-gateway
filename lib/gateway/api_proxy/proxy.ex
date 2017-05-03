@@ -1,10 +1,11 @@
-defmodule Gateway.Terraformers.Proxy do
+defmodule Gateway.ApiProxy.Proxy do
   @moduledoc """
   Provides middleware proxy for incoming REST requests at specific routes.
   """
   use Plug.Router
-  import Joken
-  alias Gateway.Clients.Proxy
+
+  alias Plug.Conn.Query
+  alias Gateway.ApiProxy.Base
   alias Gateway.Utils.Jwt
 
   plug :match
@@ -12,9 +13,10 @@ defmodule Gateway.Terraformers.Proxy do
 
   match _ do
     %{method: method, request_path: request_path} = conn
-    # Load proxy config and get list of routes
-    # Config can't be located inside /config to be able to use it on runtime
-    routes = Poison.decode!(File.read!("priv/proxy/proxy.json"))
+    # Load proxy routes during the runtime
+    routes_config = Application.fetch_env!(:gateway, :proxy_route_config)
+    routes = Poison.decode!(File.read!(routes_config))
+
     # Find match of request path in proxy routes
     service = Enum.find(routes, fn(route) ->
       match_path(route, request_path) && match_http_method(route, method)
@@ -26,8 +28,8 @@ defmodule Gateway.Terraformers.Proxy do
   # Match route path against requested path
   @spec match_path(map, String.t) :: boolean
   defp match_path(route, request_path) do
-    # Replace wildcards with regex words
-    replace_wildcards = String.replace(route["path"], "{id}", "\\w*")
+    # Replace wildcards with actual params
+    replace_wildcards = String.replace(route["path"], "{id}", ".*")
     # Match requested path against regex
     String.match?(request_path, ~r/#{replace_wildcards}$/)
   end
@@ -65,7 +67,7 @@ defmodule Gateway.Terraformers.Proxy do
     jwt = Enum.find(req_headers, fn(item) -> elem(item, 0) == "authorization" end)
     case authenticated?(jwt) do
       true -> forward_request(service, conn)
-      false -> send_resp(conn, 401, encode_error_message("Missing token"))
+      false -> send_resp(conn, 401, encode_error_message("Missing or invalid token"))
     end
   end
 
@@ -91,12 +93,13 @@ defmodule Gateway.Terraformers.Proxy do
     # Build URL
     url = build_url(service, request_path)
     # Match URL against HTTP method to forward it to specific service
+
     res =
       case method do
-        "GET" -> Proxy.get!(url, req_headers, [params: Map.to_list(params)])
-        "POST" -> Proxy.post!(url, Poison.encode!(params), req_headers)
-        "PUT" -> Proxy.put!(url, Poison.encode!(params), req_headers)
-        "DELETE" -> Proxy.delete!(url, Poison.encode!(params), req_headers)
+        "GET" -> Base.get!(attachQueryParams(url, params), req_headers)
+        "POST" -> Base.post!(url, Poison.encode!(params), req_headers)
+        "PUT" -> Base.put!(url, Poison.encode!(params), req_headers)
+        "DELETE" -> Base.delete!(url, req_headers)
         _ -> nil
       end
 
@@ -110,11 +113,21 @@ defmodule Gateway.Terraformers.Proxy do
     "#{host}:#{service["port"]}#{request_path}"
   end
 
+  # workaround for HTTPoison/URI.encode not supporting nested query params
+  @spec attachQueryParams(String.t, nil) :: String.t
+  defp attachQueryParams(url, nil), do: url
+
+  @spec attachQueryParams(String.t, map) :: String.t
+  defp attachQueryParams(url, params) do
+    url <> "?" <> Query.encode(params)
+  end
+
   # Function for sending response back to client
   @spec send_response({:ok, map, nil}) :: map
   defp send_response({:ok, conn, nil}) do
     send_resp(conn, 405, encode_error_message("Method is not supported"))
   end
+
   @spec send_response({:ok, map, map}) :: map
   defp send_response({:ok, conn, %{headers: headers, status_code: status_code, body: body}}) do
     conn = %{conn | resp_headers: headers}
