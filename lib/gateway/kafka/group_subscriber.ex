@@ -69,7 +69,7 @@ defmodule Gateway.Kafka.GroupSubscriber do
 
   We receive the message here and hand it off to the respective message handler.
   """
-  def handle_message(topic, partition, message, %{handlers: handlers} = state) do
+  def handle_message(topic, partition, message, state = %{handlers: handlers}) do
     handler_pid = handlers["#{topic}-#{partition}"]
     send handler_pid, message
     {:ok, state}

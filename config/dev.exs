@@ -30,6 +30,3 @@ config :gateway, Gateway.Endpoint,
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
-
-# Proxy route config file location
-config :gateway, proxy_route_config: "priv/proxy/proxy.json"

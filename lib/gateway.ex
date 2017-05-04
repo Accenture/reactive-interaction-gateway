@@ -1,4 +1,7 @@
 defmodule Gateway do
+  @moduledoc """
+  This is the main entry point of the Gateway application.
+  """
   use Application
   alias Gateway.Endpoint
 

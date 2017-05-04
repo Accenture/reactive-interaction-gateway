@@ -57,11 +57,13 @@ defmodule Gateway.Mixfile do
       {:httpoison, "~> 0.11.0"},
       {:terraform, "~> 0.1.1"},
       {:joken, "~> 1.4"},
-      {:credo, "~> 0.5", only: [:dev, :test]},
       {:bypass, "~> 0.1", only: :test},
       {:excoveralls, "~> 0.6.2"},
       {:brod, "~> 2.2"},
       {:supervisor3, "~> 1.1"},
+      {:poison, "~> 2.0 or ~> 3.0"},
+      {:credo, "~> 0.7", only: [:dev, :test]},
+      {:dialyxir, "~> 0.5", only: [:dev, :test]},
     ]
   end
 end
