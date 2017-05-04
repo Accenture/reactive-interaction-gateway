@@ -9,5 +9,5 @@ config :gateway, Gateway.Endpoint,
 # Print only warnings and errors during test
 config :logger, level: :warn
 
-# Proxy route config file location
+# Proxy test route config file location
 config :gateway, proxy_route_config: "priv/proxy/proxy.test.json"

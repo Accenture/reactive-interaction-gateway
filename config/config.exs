@@ -41,3 +41,6 @@ config :brod,
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"
+
+# Proxy route config file location
+config :gateway, proxy_route_config: "priv/proxy/proxy.json"
