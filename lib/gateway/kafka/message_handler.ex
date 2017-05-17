@@ -11,7 +11,9 @@ defmodule Gateway.Kafka.MessageHandler do
   alias Poison.Parser
 
   @broadcast &Gateway.Endpoint.broadcast/3
+  @type broadcast_t :: (String.t, String.t, String.t -> any)
 
+  @spec message_handler_loop(String.t, String.t | non_neg_integer, pid, broadcast_t) :: no_return
   def message_handler_loop(topic, partition, group_subscriber_pid, broadcast \\ @broadcast) do
     receive do
       msg ->
@@ -28,6 +30,7 @@ defmodule Gateway.Kafka.MessageHandler do
     end
   end
 
+  @spec act_on_message(String.t, broadcast_t) :: any
   defp act_on_message(value, broadcast) do
     result =
       with {:ok, parsed} <- Parser.parse(value),
@@ -41,6 +44,7 @@ defmodule Gateway.Kafka.MessageHandler do
     end
   end
 
+  @spec broadcast_to_user(String.t, %{optional(any) => any}, broadcast_t) :: any
   defp broadcast_to_user(username, data, broadcast) do
     room = PresenceChannel.room_name(username)
     Logger.debug("will broadcast to #{inspect room}: #{inspect data}")

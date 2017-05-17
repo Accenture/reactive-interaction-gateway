@@ -33,6 +33,8 @@ defmodule Gateway.Kafka.GroupSubscriber do
   require Logger
 
   @behaviour :brod_group_subscriber
+  @type handlers_t :: %{required(String.t) => nonempty_list(pid)}
+  @type state_t :: %{handlers: handlers_t}
 
   @doc """
   Makes sure the Brod client is running and starts the group subscriber.
@@ -58,6 +60,7 @@ defmodule Gateway.Kafka.GroupSubscriber do
 
   We spawn one message handler for each topic-partition.
   """
+  @spec init(String.t, {String.t, nonempty_list(String.t)}) :: {:ok, state_t}
   def init(consumer_group_id, {brod_client_id, topics}) do
     Logger.info "Starting Kafka group subscriber (group=#{inspect consumer_group_id}, client=#{inspect brod_client_id}, topics=#{inspect topics})"
     handlers = spawn_message_handlers(brod_client_id, topics)
@@ -69,12 +72,14 @@ defmodule Gateway.Kafka.GroupSubscriber do
 
   We receive the message here and hand it off to the respective message handler.
   """
+  @spec handle_message(String.t, String.t | non_neg_integer, String.t, state_t) :: {:ok, state_t}
   def handle_message(topic, partition, message, state = %{handlers: handlers}) do
     handler_pid = handlers["#{topic}-#{partition}"]
     send handler_pid, message
     {:ok, state}
   end
 
+  @spec spawn_message_handlers(String.t, nonempty_list(String.t)) :: handlers_t
   defp spawn_message_handlers(brod_client_id, [topic | remaining_topics]) do
     {:ok, n_partitions} = :brod.get_partitions_count(brod_client_id, topic)
     spawn_for_partition = &spawn_link(

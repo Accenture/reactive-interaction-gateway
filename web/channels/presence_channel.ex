@@ -16,14 +16,15 @@ defmodule Gateway.PresenceChannel do
   @doc """
   The room name for a specific user.
   """
-  def room_name(user_id), do: "presence:#{user_id}"
+  def room_name(username), do: "presence:#{username}"
 
-  def join(room = "presence:" <> user_id, _params, socket) do
-    if user_id != socket.assigns.user_id do
-      Logger.warn(msg = "user with id #{inspect socket.assigns.user_id} tried to enter room #{inspect room} (only own room allowed)!")
+  def join(room = "presence:" <> user_subtopic_name, _params, socket) do
+    username = Map.fetch!(socket.assigns.user_info, "username")
+    if user_subtopic_name != username do
+      Logger.warn(msg = "user with id #{inspect username} tried to join #{inspect room} (only own room allowed)!")
       {:error, msg}
     else
-      Logger.debug("user #{inspect user_id} has joined #{room}")
+      Logger.debug("user #{inspect username} has joined #{room}")
       {:ok, socket}
     end
   end

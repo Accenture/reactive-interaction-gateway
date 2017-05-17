@@ -1,6 +1,7 @@
 defmodule Gateway.UserSocket do
   use Phoenix.Socket
   require Logger
+  alias Gateway.Utils.Jwt
 
   ## Channels
   channel "presence:*", Gateway.PresenceChannel
@@ -21,9 +22,15 @@ defmodule Gateway.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   def connect(params, socket) do
-    # validate jwt token and extract user_id from it
-
-    {:ok, assign(socket, :user_id, Map.get(params, "user_id"))}
+    with {:ok, raw_token} <- Map.fetch(params, "token"),
+         {:ok, token_map} <- Jwt.decode(raw_token)
+    do
+      {:ok, assign(socket, :user_info, token_map)}
+    else
+      err ->
+        Logger.error("Denied UserSocket connect: #{inspect err}")
+        :error
+    end
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:

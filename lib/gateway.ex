@@ -5,17 +5,22 @@ defmodule Gateway do
   use Application
   alias Gateway.Endpoint
 
+  require Logger
+
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
   def start(_type, _args) do
     import Supervisor.Spec
 
     # Define workers and child supervisors to be supervised
-    children = [
-      # Start the endpoint when the application starts
-      supervisor(Gateway.Endpoint, _args = []),
-      worker(Gateway.Kafka.SupWrapper, _args = []),
-    ]
+    maybe_kafka_worker =
+      if Mix.env == :test do
+        Logger.info "Mix.env == :test => not starting Kafka"
+        []
+      else
+        [worker(Gateway.Kafka.SupWrapper, _args = [])]
+      end
+    children = [supervisor(Gateway.Endpoint, _args = [])] ++ maybe_kafka_worker
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
