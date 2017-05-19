@@ -18,14 +18,28 @@ defmodule Gateway.PresenceChannel do
   """
   def room_name(username), do: "presence:#{username}"
 
+  @authorized_roles ["support"]
+
+  @spec join(String.t, map, map) :: tuple
   def join(room = "presence:" <> user_subtopic_name, _params, socket) do
-    username = Map.fetch!(socket.assigns.user_info, "username")
-    if user_subtopic_name != username do
-      Logger.warn(msg = "user with id #{inspect username} tried to join #{inspect room} (only own room allowed)!")
-      {:error, msg}
-    else
-      Logger.debug("user #{inspect username} has joined #{room}")
-      {:ok, socket}
+    %{"username" => username, "role" => roles} = socket.assigns.user_info
+
+    cond do
+      username == user_subtopic_name -> join_channel(:ok, room, username, socket)
+      length(roles -- (roles -- @authorized_roles)) > 0 -> join_channel(:ok, room, username, socket)
+      true -> join_channel(:error, room, username)
     end
+  end
+
+  @spec join_channel(:ok, String.t, String.t, map) :: tuple
+  defp join_channel(:ok, room, username, socket) do
+    Logger.debug("user #{inspect username} has joined #{room}")
+    {:ok, socket}
+  end
+
+  @spec join_channel(:error, String.t, String.t) :: tuple
+  defp join_channel(:error, room, username) do
+    Logger.warn(msg = "user with id #{inspect username} tried to join #{inspect room} (only own room allowed)!")
+    {:error, msg}
   end
 end
