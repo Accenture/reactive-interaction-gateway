@@ -5,6 +5,7 @@ defmodule Gateway.UserSocket do
 
   ## Channels
   channel "presence:*", Gateway.PresenceChannel
+  channel "presence.role:*", Gateway.PresenceChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
