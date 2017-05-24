@@ -12,8 +12,8 @@ defmodule Gateway.PresenceChannel do
   """
   use Gateway.Web, :channel
   require Logger
+  alias Gateway.Presence
 
-  @broadcast &Gateway.Endpoint.broadcast/3
   @authorised_roles ["support"]
 
   @doc """
@@ -31,7 +31,7 @@ defmodule Gateway.PresenceChannel do
 
     cond do
       username == user_subtopic_name ->
-        send(self(), {:after_join, roles, "-joined"})
+        send(self(), {:after_join, roles})
         join_channel(:ok, room, username, socket)
       has_authorised_role?(roles) -> join_channel(:ok, room, username, socket)
       true -> join_channel(:error, room, username)
@@ -52,29 +52,21 @@ defmodule Gateway.PresenceChannel do
   end
 
   @doc """
-  Leaving common role based channel sends broadcast message to common role based channels.
-  """
-  @spec terminate(String.t, map) :: {:noreply, map}
-  def terminate(_reason, socket) do
-    %{"role" => roles} = socket.assigns.user_info
-    broadcast_announce(roles, "-left", %{})
-    {:noreply, socket}
-  end
-
-  @doc """
   Send broadcast announce to role based channels after user joined his own channel.
   """
   @spec handle_info({:after_join, list(String.t), String.t}, map) :: {:noreply, map}
-  def handle_info({:after_join, roles, event}, socket) do
-    broadcast_announce(roles, event, %{})
+  def handle_info({:after_join, roles}, socket) do
+    push(socket, "presence_state", Presence.list(socket))
+    track_presence(socket, roles)
     {:noreply, socket}
   end
 
-  @spec broadcast_announce(list(String.t), String.t, map) :: any
-  defp broadcast_announce(roles, event, data) do
+  defp track_presence(socket, roles) do
+    %{"username" => username} = socket.assigns.user_info
     Enum.each(roles, fn(role) ->
-      Logger.debug("broadcasting in topic presence.role:#{role} to event #{role}#{event}")
-      @broadcast.("presence.role:" <> role, role <> event, data)
+      {:ok, _} = Presence.track(socket.channel_pid, "presence.role:" <> role, username, %{
+        online_at: inspect(System.system_time(:seconds))
+      })
     end)
   end
 

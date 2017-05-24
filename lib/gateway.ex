@@ -20,7 +20,10 @@ defmodule Gateway do
       else
         [worker(Gateway.Kafka.SupWrapper, _args = [])]
       end
-    children = [supervisor(Gateway.Endpoint, _args = [])] ++ maybe_kafka_worker
+    children = [
+      supervisor(Gateway.Endpoint, _args = []),
+      supervisor(Gateway.Presence, [])
+    ] ++ maybe_kafka_worker
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
