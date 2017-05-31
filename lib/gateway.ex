@@ -22,7 +22,7 @@ defmodule Gateway do
       end
     children = [
       supervisor(Gateway.Endpoint, _args = []),
-      supervisor(Gateway.Presence, [])
+      supervisor(Gateway.Presence, []),
     ] ++ maybe_kafka_worker
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

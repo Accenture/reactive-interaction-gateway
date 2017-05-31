@@ -4,7 +4,7 @@ defmodule Gateway.PresenceChannelTest do
   alias Gateway.PresenceChannel
   alias Gateway.Presence
 
-  test "an user connecting to her own topic works" do
+  test "a user connecting to her own topic works" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "testuser",
       ["customer"],
@@ -13,7 +13,7 @@ defmodule Gateway.PresenceChannelTest do
     leave sock
   end
 
-  test "an user connecting to someone else's topic with not authorized role fails" do
+  test "a user connecting to someone else's topic with not authorized role fails" do
     assert {:error, _message} = subscribe_and_join_user(
       "foo-user",
       ["customer"],
@@ -21,7 +21,7 @@ defmodule Gateway.PresenceChannelTest do
     )
   end
 
-  test "an user connecting to someone else's topic with authorized role works" do
+  test "a user connecting to someone else's topic with authorized role works" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "foo-user",
       ["support"],
@@ -30,7 +30,7 @@ defmodule Gateway.PresenceChannelTest do
     leave sock
   end
 
-  test "an user connecting to role specific topic with authorised role works" do
+  test "a user connecting to role specific topic with authorised role works" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "foo-user",
       ["support"],
@@ -39,7 +39,7 @@ defmodule Gateway.PresenceChannelTest do
     leave sock
   end
 
-  test "an user connecting to role specific topic without authorised role fails" do
+  test "a user connecting to role specific topic without authorised role fails" do
     assert {:error, _message} = subscribe_and_join_user(
       "foo-user",
       ["customer"],
@@ -47,7 +47,7 @@ defmodule Gateway.PresenceChannelTest do
     )
   end
 
-  test "an user joining/leaving channel should be tracked by presence" do
+  test "a user joining/leaving channel should be tracked by presence" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "testuser",
       ["customer"],
@@ -62,7 +62,6 @@ defmodule Gateway.PresenceChannelTest do
 
   defp subscribe_and_join_user(username, roles, topic) do
     token_info_customer = %{"username" => username, "role" => roles}
-    # {:ok, _response, sock_customer} =
     socket("", %{user_info: token_info_customer})
     |> subscribe_and_join(PresenceChannel, topic)
   end
