@@ -3,11 +3,14 @@ defmodule Gateway.PresenceChannelTest do
   use Gateway.ChannelCase
   alias Gateway.PresenceChannel
   alias Gateway.Presence
+  
+  @support_role "support"
+  @customer_role "customer"
 
   test "a user connecting to her own topic works" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "testuser",
-      ["customer"],
+      [@customer_role],
       "user:testuser"
     )
     leave sock
@@ -16,7 +19,7 @@ defmodule Gateway.PresenceChannelTest do
   test "a user connecting to someone else's topic with not authorised role fails" do
     assert {:error, _message} = subscribe_and_join_user(
       "foo-user",
-      ["customer"],
+      [@customer_role],
       "user:bar-user"
     )
   end
@@ -24,7 +27,7 @@ defmodule Gateway.PresenceChannelTest do
   test "a user connecting to someone else's topic with authorised role works" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "foo-user",
-      ["support"],
+      [@support_role],
       "user:testuser"
     )
     leave sock
@@ -33,7 +36,7 @@ defmodule Gateway.PresenceChannelTest do
   test "a user connecting to role specific topic with authorised role works" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "foo-user",
-      ["support"],
+      [@support_role],
       "role:customer"
     )
     leave sock
@@ -42,7 +45,7 @@ defmodule Gateway.PresenceChannelTest do
   test "a user connecting to role specific topic without authorised role fails" do
     assert {:error, _message} = subscribe_and_join_user(
       "foo-user",
-      ["customer"],
+      [@customer_role],
       "role:customer"
     )
   end
@@ -50,7 +53,7 @@ defmodule Gateway.PresenceChannelTest do
   test "a user joining/leaving channel should be tracked by presence" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "testuser",
-      ["customer"],
+      [@customer_role],
       "user:testuser"
     )
 
