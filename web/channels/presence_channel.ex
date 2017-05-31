@@ -19,7 +19,7 @@ defmodule Gateway.PresenceChannel do
   @doc """
   The room name for a specific user.
   """
-  def room_name(username), do: "presence:#{username}"
+  def room_name(username), do: "user:#{username}"
 
   @doc """
   Join user specific channel. Only owner of given channel or user with authorised
@@ -32,9 +32,9 @@ defmodule Gateway.PresenceChannel do
     cond do
       username == user_subtopic_name ->
         send(self(), {:after_join, roles})
-        join_channel(:ok, room, username, socket)
-      has_authorised_role?(roles) -> join_channel(:ok, room, username, socket)
-      true -> join_channel(:error, room, username)
+        authorized_join(room, username, socket)
+      has_authorised_role?(roles) -> authorized_join(room, username, socket)
+      true -> unauthorized_join(room, username)
     end
   end
 
@@ -45,9 +45,9 @@ defmodule Gateway.PresenceChannel do
   def join(room = "role:" <> _, _params, socket) do
     %{"username" => username, "role" => roles} = socket.assigns.user_info
     if has_authorised_role?(roles) do
-      join_channel(:ok, room, username, socket)
+      authorized_join(room, username, socket)
     else
-      join_channel(:error, room, username)
+      unauthorized_join(room, username)
     end
   end
 
@@ -75,14 +75,14 @@ defmodule Gateway.PresenceChannel do
     length(roles -- (roles -- @authorised_roles)) > 0
   end
 
-  @spec join_channel(:ok, String.t, String.t, map) :: {:ok, map}
-  defp join_channel(:ok, room, username, socket) do
+  @spec authorized_join(String.t, String.t, map) :: {:ok, map}
+  defp authorized_join(room, username, socket) do
     Logger.debug("user #{inspect username} has joined #{room}")
     {:ok, socket}
   end
 
-  @spec join_channel(:error, String.t, String.t) :: {:error, String.t}
-  defp join_channel(:error, room, username) do
+  @spec unauthorized_join(String.t, String.t) :: {:error, String.t}
+  defp unauthorized_join(room, username) do
     Logger.warn(msg = "unauthorised user with id #{inspect username} tried to join #{inspect room}!")
     {:error, msg}
   end
