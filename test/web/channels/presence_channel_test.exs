@@ -8,24 +8,24 @@ defmodule Gateway.PresenceChannelTest do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "testuser",
       ["customer"],
-      "presence:testuser"
+      "user:testuser"
     )
     leave sock
   end
 
-  test "a user connecting to someone else's topic with not authorized role fails" do
+  test "a user connecting to someone else's topic with not authorised role fails" do
     assert {:error, _message} = subscribe_and_join_user(
       "foo-user",
       ["customer"],
-      "presence:bar-user"
+      "user:bar-user"
     )
   end
 
-  test "a user connecting to someone else's topic with authorized role works" do
+  test "a user connecting to someone else's topic with authorised role works" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "foo-user",
       ["support"],
-      "presence:testuser"
+      "user:testuser"
     )
     leave sock
   end
@@ -34,7 +34,7 @@ defmodule Gateway.PresenceChannelTest do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "foo-user",
       ["support"],
-      "presence.role:customer"
+      "role:customer"
     )
     leave sock
   end
@@ -43,7 +43,7 @@ defmodule Gateway.PresenceChannelTest do
     assert {:error, _message} = subscribe_and_join_user(
       "foo-user",
       ["customer"],
-      "presence.role:customer"
+      "role:customer"
     )
   end
 
@@ -51,13 +51,13 @@ defmodule Gateway.PresenceChannelTest do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "testuser",
       ["customer"],
-      "presence:testuser"
+      "user:testuser"
     )
 
-    assert Map.has_key?(Presence.list("presence.role:customer"), "testuser")
+    assert Map.has_key?(Presence.list("role:customer"), "testuser")
     Process.unlink(sock.channel_pid)
     close sock
-    assert !Map.has_key?(Presence.list("presence.role:customer"), "testuser")
+    assert !Map.has_key?(Presence.list("role:customer"), "testuser")
   end
 
   defp subscribe_and_join_user(username, roles, topic) do

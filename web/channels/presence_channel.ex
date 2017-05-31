@@ -26,7 +26,7 @@ defmodule Gateway.PresenceChannel do
   role is able to join.
   """
   @spec join(String.t, map, map) :: {atom, map}
-  def join(room = "presence:" <> user_subtopic_name, _params, socket) do
+  def join(room = "user:" <> user_subtopic_name, _params, socket) do
     %{"username" => username, "role" => roles} = socket.assigns.user_info
 
     cond do
@@ -42,7 +42,7 @@ defmodule Gateway.PresenceChannel do
   Join common role based channel. Only user with authorised role is able to join.
   """
   @spec join(String.t, map, map) :: {atom, map}
-  def join(room = "presence.role:" <> _, _params, socket) do
+  def join(room = "role:" <> _, _params, socket) do
     %{"username" => username, "role" => roles} = socket.assigns.user_info
     if has_authorised_role?(roles) do
       join_channel(:ok, room, username, socket)
@@ -64,7 +64,7 @@ defmodule Gateway.PresenceChannel do
   defp track_presence(socket, roles) do
     %{"username" => username} = socket.assigns.user_info
     Enum.each(roles, fn(role) ->
-      {:ok, _} = Presence.track(socket.channel_pid, "presence.role:" <> role, username, %{
+      {:ok, _} = Presence.track(socket.channel_pid, "role:" <> role, username, %{
         online_at: inspect(System.system_time(:seconds))
       })
     end)

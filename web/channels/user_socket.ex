@@ -4,8 +4,8 @@ defmodule Gateway.UserSocket do
   alias Gateway.Utils.Jwt
 
   ## Channels
-  channel "presence:*", Gateway.PresenceChannel
-  channel "presence.role:*", Gateway.PresenceChannel
+  channel "user:*", Gateway.PresenceChannel
+  channel "role:*", Gateway.PresenceChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
