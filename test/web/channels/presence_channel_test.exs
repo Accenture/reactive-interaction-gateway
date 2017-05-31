@@ -16,7 +16,7 @@ defmodule Gateway.PresenceChannelTest do
     leave sock
   end
 
-  test "a user connecting to someone else's topic with not authorised role fails" do
+  test "a user connecting to someone else's topic with not authorized role fails" do
     assert {:error, _message} = subscribe_and_join_user(
       "foo-user",
       [@customer_role],
@@ -24,7 +24,7 @@ defmodule Gateway.PresenceChannelTest do
     )
   end
 
-  test "a user connecting to someone else's topic with authorised role works" do
+  test "a user connecting to someone else's topic with authorized role works" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "foo-user",
       [@support_role],
@@ -33,7 +33,7 @@ defmodule Gateway.PresenceChannelTest do
     leave sock
   end
 
-  test "a user connecting to role specific topic with authorised role works" do
+  test "a user connecting to role specific topic with authorized role works" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "foo-user",
       [@support_role],
@@ -42,7 +42,7 @@ defmodule Gateway.PresenceChannelTest do
     leave sock
   end
 
-  test "a user connecting to role specific topic without authorised role fails" do
+  test "a user connecting to role specific topic without authorized role fails" do
     assert {:error, _message} = subscribe_and_join_user(
       "foo-user",
       [@customer_role],

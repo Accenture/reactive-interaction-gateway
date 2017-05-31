@@ -14,7 +14,7 @@ defmodule Gateway.PresenceChannel do
   require Logger
   alias Gateway.Presence
 
-  @authorised_roles ["support"]
+  @authorized_roles ["support"]
 
   @doc """
   The room name for a specific user.
@@ -22,7 +22,7 @@ defmodule Gateway.PresenceChannel do
   def room_name(username), do: "user:#{username}"
 
   @doc """
-  Join user specific channel. Only owner of given channel or user with authorised
+  Join user specific channel. Only owner of given channel or user with authorized
   role is able to join.
   """
   @spec join(String.t, map, map) :: {atom, map}
@@ -33,18 +33,18 @@ defmodule Gateway.PresenceChannel do
       username == user_subtopic_name ->
         send(self(), {:after_join, roles})
         authorized_join(room, username, socket)
-      has_authorised_role?(roles) -> authorized_join(room, username, socket)
+      has_authorized_role?(roles) -> authorized_join(room, username, socket)
       true -> unauthorized_join(room, username)
     end
   end
 
   @doc """
-  Join common role based channel. Only user with authorised role is able to join.
+  Join common role based channel. Only user with authorized role is able to join.
   """
   @spec join(String.t, map, map) :: {atom, map}
   def join(room = "role:" <> _, _params, socket) do
     %{"username" => username, "role" => roles} = socket.assigns.user_info
-    if has_authorised_role?(roles) do
+    if has_authorized_role?(roles) do
       authorized_join(room, username, socket)
     else
       unauthorized_join(room, username)
@@ -70,9 +70,9 @@ defmodule Gateway.PresenceChannel do
     end)
   end
 
-  @spec has_authorised_role?(list(String.t)) :: boolean
-  defp has_authorised_role?(roles) do
-    length(roles -- (roles -- @authorised_roles)) > 0
+  @spec has_authorized_role?(list(String.t)) :: boolean
+  defp has_authorized_role?(roles) do
+    length(roles -- (roles -- @authorized_roles)) > 0
   end
 
   @spec authorized_join(String.t, String.t, map) :: {:ok, map}
@@ -83,7 +83,7 @@ defmodule Gateway.PresenceChannel do
 
   @spec unauthorized_join(String.t, String.t) :: {:error, String.t}
   defp unauthorized_join(room, username) do
-    Logger.warn(msg = "unauthorised user with id #{inspect username} tried to join #{inspect room}!")
+    Logger.warn(msg = "unauthorized user with id #{inspect username} tried to join #{inspect room}!")
     {:error, msg}
   end
 end
