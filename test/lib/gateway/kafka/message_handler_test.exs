@@ -31,7 +31,7 @@ defmodule Gateway.Kafka.MessageHandlerTest do
     kafka_topic = "message"
     partition = "0"
     base_offset = 14
-    target_room = "presence:#{user_id}"
+    target_room = "user:#{user_id}"
 
     # the Agent is used to track the broadcasts invoked by the message handler:
     {:ok, broadcast_agent} = Agent.start_link fn -> %{call_count: 0} end

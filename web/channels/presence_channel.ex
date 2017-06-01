@@ -12,20 +12,81 @@ defmodule Gateway.PresenceChannel do
   """
   use Gateway.Web, :channel
   require Logger
+  alias Gateway.Presence
+
+  @authorized_roles ["support"]
 
   @doc """
   The room name for a specific user.
   """
-  def room_name(username), do: "presence:#{username}"
+  def room_name(username), do: "user:#{username}"
 
-  def join(room = "presence:" <> user_subtopic_name, _params, socket) do
-    username = Map.fetch!(socket.assigns.user_info, "username")
-    if user_subtopic_name != username do
-      Logger.warn(msg = "user with id #{inspect username} tried to join #{inspect room} (only own room allowed)!")
-      {:error, msg}
-    else
-      Logger.debug("user #{inspect username} has joined #{room}")
-      {:ok, socket}
+  @doc """
+  Join user specific channel. Only owner of given channel or user with authorized
+  role is able to join.
+  """
+  @spec join(String.t, map, map) :: {atom, map}
+  def join(room = "user:" <> user_subtopic_name, _params, socket) do
+    %{"username" => username, "role" => roles} = socket.assigns.user_info
+
+    cond do
+      username == user_subtopic_name ->
+        send(self(), {:after_join, roles})
+        authorized_join(room, username, socket)
+      has_authorized_role?(roles) -> authorized_join(room, username, socket)
+      true -> unauthorized_join(room, username)
     end
+  end
+
+  @doc """
+  Join common role based channel. Only user with authorized role is able to join.
+  """
+  @spec join(String.t, map, map) :: {atom, map}
+  def join(room = "role:" <> _, _params, socket) do
+    %{"username" => username, "role" => roles} = socket.assigns.user_info
+    if has_authorized_role?(roles) do
+      authorized_join(room, username, socket)
+    else
+      unauthorized_join(room, username)
+    end
+  end
+
+  @doc """
+  Send broadcast announce to role based channels after user joined his own channel.
+  """
+  @spec handle_info({:after_join, list(String.t), String.t}, map) :: {:noreply, map}
+  def handle_info({:after_join, roles}, socket) do
+    push(socket, "presence_state", Presence.list(socket))
+    track_presence(socket, roles)
+    {:noreply, socket}
+  end
+
+  defp track_presence(socket, roles) do
+    %{"username" => username} = socket.assigns.user_info
+    Enum.each(roles, fn(role) ->
+      {:ok, _} = Presence.track(socket.channel_pid, "role:" <> role, username, %{
+        online_at: inspect(System.system_time(:seconds))
+      })
+    end)
+  end
+
+  @spec has_authorized_role?(list(String.t)) :: boolean
+  defp has_authorized_role?(roles) do
+    valid_roles_length =
+      MapSet.intersection(Enum.into(roles, MapSet.new), Enum.into(@authorized_roles, MapSet.new))
+      |> MapSet.size
+    valid_roles_length > 0
+  end
+
+  @spec authorized_join(String.t, String.t, map) :: {:ok, map}
+  defp authorized_join(room, username, socket) do
+    Logger.debug("user #{inspect username} has joined #{room}")
+    {:ok, socket}
+  end
+
+  @spec unauthorized_join(String.t, String.t) :: {:error, String.t}
+  defp unauthorized_join(room, username) do
+    Logger.warn(msg = "unauthorized user with id #{inspect username} tried to join #{inspect room}!")
+    {:error, msg}
   end
 end
