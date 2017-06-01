@@ -72,7 +72,10 @@ defmodule Gateway.PresenceChannel do
 
   @spec has_authorized_role?(list(String.t)) :: boolean
   defp has_authorized_role?(roles) do
-    length(roles -- (roles -- @authorized_roles)) > 0
+    valid_roles_length =
+      MapSet.intersection(Enum.into(roles, MapSet.new), Enum.into(@authorized_roles, MapSet.new))
+      |> MapSet.size
+    valid_roles_length > 0
   end
 
   @spec authorized_join(String.t, String.t, map) :: {:ok, map}
