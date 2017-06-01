@@ -23,6 +23,8 @@ defmodule Gateway.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   def connect(params, socket) do
+    IO.inspect params
+    IO.inspect socket
     with {:ok, raw_token} <- Map.fetch(params, "token"),
          {:ok, token_map} <- Jwt.decode(raw_token)
     do
@@ -44,5 +46,5 @@ defmodule Gateway.UserSocket do
   #     Gateway.Endpoint.broadcast("users_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
-  def id(_socket), do: nil
+  def id(socket), do: Map.get(socket.assigns.user_info, "jti")
 end

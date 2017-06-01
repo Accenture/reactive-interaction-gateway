@@ -26,9 +26,10 @@ defmodule Gateway.PresenceChannel do
   role is able to join.
   """
   @spec join(String.t, map, map) :: {atom, map}
-  def join(room = "user:" <> user_subtopic_name, _params, socket) do
+  def join(room = "user:" <> user_subtopic_name, params, socket) do
     %{"username" => username, "role" => roles} = socket.assigns.user_info
-
+    IO.inspect Map.keys(socket.transport)
+    IO.inspect params
     cond do
       username == user_subtopic_name ->
         send(self(), {:after_join, roles})
@@ -60,12 +61,17 @@ defmodule Gateway.PresenceChannel do
     track_presence(socket, roles)
     {:noreply, socket}
   end
+  
+  def channels_list() do
+    Presence.list("role:customer")
+  end
 
   defp track_presence(socket, roles) do
     %{"username" => username} = socket.assigns.user_info
     Enum.each(roles, fn(role) ->
       {:ok, _} = Presence.track(socket.channel_pid, "role:" <> role, username, %{
-        online_at: inspect(System.system_time(:seconds))
+        online_at: inspect(System.system_time(:seconds)),
+        jwt_payload: socket.assigns.user_info,
       })
     end)
   end

@@ -64,7 +64,7 @@ defmodule Gateway.PresenceChannelTest do
   end
 
   defp subscribe_and_join_user(username, roles, topic) do
-    token_info_customer = %{"username" => username, "role" => roles}
+    token_info_customer = %{"username" => username, "role" => roles, "jti" => "123"}
     socket("", %{user_info: token_info_customer})
     |> subscribe_and_join(PresenceChannel, topic)
   end

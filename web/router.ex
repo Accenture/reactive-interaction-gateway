@@ -5,7 +5,13 @@ defmodule Gateway.Router do
   pipeline :api do
     plug :accepts, ["json"]
   end
-
+  
+  scope "/rg", Gateway do
+    pipe_through :api
+    get "/sessions", ChannelsController, :list_channels
+    get "/sessions/:id", ChannelsController, :list_channel_connections
+  end
+  
   scope "/", Gateway do
     pipe_through :api
   end
