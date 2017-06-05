@@ -26,15 +26,16 @@ defmodule Gateway.PresenceChannel do
   role is able to join.
   """
   @spec join(String.t, map, map) :: {atom, map}
-  def join(room = "user:" <> user_subtopic_name, params, socket) do
+  def join(room = "user:" <> user_subtopic_name, _params, socket) do
     %{"username" => username, "role" => roles} = socket.assigns.user_info
-    IO.inspect Map.keys(socket.transport)
-    IO.inspect params
+
     cond do
       username == user_subtopic_name ->
-        send(self(), {:after_join, roles})
+        send(self(), {:after_join, username, roles})
         authorized_join(room, username, socket)
-      has_authorized_role?(roles) -> authorized_join(room, username, socket)
+      has_authorized_role?(roles) ->
+        send(self(), {:after_join, user_subtopic_name})
+        authorized_join(room, username, socket)
       true -> unauthorized_join(room, username)
     end
   end
@@ -53,33 +54,68 @@ defmodule Gateway.PresenceChannel do
   end
 
   @doc """
-  Send broadcast announce to role based channels after user joined his own channel.
+  Start tracking of user in global role baes channels and also in his specific channel.
   """
   @spec handle_info({:after_join, list(String.t), String.t}, map) :: {:noreply, map}
-  def handle_info({:after_join, roles}, socket) do
+  def handle_info({:after_join, username, roles}, socket) do
+    # track global role channels
     push(socket, "presence_state", Presence.list(socket))
-    track_presence(socket, roles)
+    track_multiple_presences("role", roles, socket)
+
+    # track user specific channel
+    track_presence("user:#{username}", socket)
+
     {:noreply, socket}
   end
-  
-  def channels_list() do
-    Presence.list("role:customer")
+
+  @doc """
+  Start tracking of user in his specific channel.
+  """
+  @spec handle_info({:after_join, String.t}, map) :: {:noreply, map}
+  def handle_info({:after_join, username}, socket) do
+    # track user specific channel
+    track_presence("user:#{username}", socket)
+    {:noreply, socket}
   end
 
-  defp track_presence(socket, roles) do
-    %{"username" => username} = socket.assigns.user_info
-    Enum.each(roles, fn(role) ->
-      {:ok, _} = Presence.track(socket.channel_pid, "role:" <> role, username, %{
-        online_at: inspect(System.system_time(:seconds)),
-        jwt_payload: socket.assigns.user_info,
-      })
+  @doc """
+  List all presences in given topic.
+  """
+  @spec channels_list(String.t) :: map
+  def channels_list(topic), do: Presence.list(topic)
+
+  @spec track_multiple_presences(String.t, list(String.t), map) :: any
+  defp track_multiple_presences(topic_namespace, subtopics, socket) do
+    Enum.each(subtopics, fn(subtopic) ->
+      track_presence("#{topic_namespace}:#{subtopic}", socket)
     end)
+  end
+
+  @spec track_presence(String.t, map) :: any
+  defp track_presence(topic, socket) do
+    %{"username" => username} = socket.assigns.user_info
+
+    {:ok, _} = Presence.track(
+      socket.channel_pid,
+      topic,
+      username,
+      Map.merge(socket.assigns.user_info,
+        %{
+          time: inspect(System.system_time(:milli_seconds)),
+          address: "192.168.0.1",
+          device: "desktop",
+          browser: "Chrome",
+        }
+      )
+    )
   end
 
   @spec has_authorized_role?(list(String.t)) :: boolean
   defp has_authorized_role?(roles) do
     valid_roles_length =
-      MapSet.intersection(Enum.into(roles, MapSet.new), Enum.into(@authorized_roles, MapSet.new))
+      roles
+      |> Enum.into(MapSet.new)
+      |> MapSet.intersection(Enum.into(@authorized_roles, MapSet.new))
       |> MapSet.size
     valid_roles_length > 0
   end

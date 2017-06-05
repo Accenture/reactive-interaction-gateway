@@ -23,8 +23,6 @@ defmodule Gateway.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   def connect(params, socket) do
-    IO.inspect params
-    IO.inspect socket
     with {:ok, raw_token} <- Map.fetch(params, "token"),
          {:ok, token_map} <- Jwt.decode(raw_token)
     do

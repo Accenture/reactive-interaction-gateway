@@ -1,11 +1,8 @@
 defmodule Gateway.PresenceChannelTest do
   use ExUnit.Case, async: true
   use Gateway.ChannelCase
-  alias Gateway.PresenceChannel
   alias Gateway.Presence
-  
-  @support_role "support"
-  @customer_role "customer"
+  alias Gateway.PresenceChannel
 
   test "a user connecting to her own topic works" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
@@ -62,10 +59,15 @@ defmodule Gateway.PresenceChannelTest do
     close sock
     assert !Map.has_key?(Presence.list("role:customer"), "testuser")
   end
+  
+  test "an authorized user should be able to list presences" do
+    assert {:ok, _response, sock} = subscribe_and_join_user(
+      "testuser",
+      [@customer_role],
+      "user:testuser"
+    )
 
-  defp subscribe_and_join_user(username, roles, topic) do
-    token_info_customer = %{"username" => username, "role" => roles, "jti" => "123"}
-    socket("", %{user_info: token_info_customer})
-    |> subscribe_and_join(PresenceChannel, topic)
+    assert Map.has_key?(PresenceChannel.channels_list("user:testuser"), "testuser")
+    leave sock
   end
 end
