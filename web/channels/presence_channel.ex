@@ -101,7 +101,7 @@ defmodule Gateway.PresenceChannel do
       username,
       Map.merge(socket.assigns.user_info,
         %{
-          time: inspect(System.system_time(:milli_seconds)),
+          time: System.system_time(:milli_seconds),
           address: "192.168.0.1",
           device: "desktop",
           browser: "Chrome",
