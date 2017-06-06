@@ -58,7 +58,7 @@
   {
     "host": "PS_HOST",
     "port": 8080,
-    "path": "/ps/{id/form/last}",
+    "path": "/ps/{id}/form/last",
     "method": "GET",
     "auth": true
   },

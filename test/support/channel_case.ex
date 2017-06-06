@@ -19,14 +19,26 @@ defmodule Gateway.ChannelCase do
     quote do
       # Import conveniences for testing with channels
       use Phoenix.ChannelTest
+      alias Gateway.PresenceChannel
 
 
       # The default endpoint for testing
       @endpoint Gateway.Endpoint
+
+      # Roles definitions
+      @support_role "support"
+      @customer_role "customer"
+
+      # Generic subscribe and join function to channels
+      def subscribe_and_join_user(username, roles, topic) do
+        token_info_customer = %{"username" => username, "role" => roles, "jti" => "abc123"}
+        socket("", %{user_info: token_info_customer})
+        |> subscribe_and_join(PresenceChannel, topic)
+      end
     end
   end
 
-  setup tags do
+  setup do
 
     :ok
   end

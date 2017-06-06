@@ -1,6 +1,6 @@
 defmodule Gateway.ApiProxy.ProxyTest do
   use ExUnit.Case, async: true
-  use Plug.Test
+  use Gateway.ConnCase
   import Joken
 
   setup do
@@ -16,19 +16,19 @@ defmodule Gateway.ApiProxy.ProxyTest do
   end
 
   test "GET /random/route should return 404 as non existing route" do
-    conn = call(Gateway.Router, conn(:get, "/random/route"))
+    conn = call(Gateway.Router, build_conn(:get, "/random/route"))
     assert conn.status == 404
     assert conn.resp_body =~ "{\"message\":\"Route is not available\"}"
   end
-  
+
   test "GET /is/user-info should return 401 for invalid JWT" do
-    conn = call(Gateway.Router, conn(:get, "/is/user-info"))
+    conn = call(Gateway.Router, build_conn(:get, "/is/user-info"))
     assert conn.status == 401
     assert conn.resp_body =~ "{\"message\":\"Missing or invalid token\"}"
   end
 
   test "GET /is/auth should return 404 as unspported method for given route" do
-    conn = call(Gateway.Router, conn(:get, "/is/auth"))
+    conn = call(Gateway.Router, build_conn(:get, "/is/auth"))
     assert conn.status == 404
     assert conn.resp_body =~ "{\"message\":\"Route is not available\"}"
   end
@@ -39,8 +39,8 @@ defmodule Gateway.ApiProxy.ProxyTest do
       assert "POST" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"token": "123"}>)
     end
-    
-    conn = call(Gateway.Router, conn(:post, "/is/auth"))
+
+    conn = call(Gateway.Router, build_conn(:post, "/is/auth"))
     assert conn.status == 200
     assert conn.resp_body =~ "{\"token\": \"123\"}"
   end
@@ -51,28 +51,28 @@ defmodule Gateway.ApiProxy.ProxyTest do
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"response": "ok"}>)
     end
-    
+
     jwt = generate_jwt()
-    request = conn(:get, "/is/user-info") |> put_req_header("authorization", jwt)
+    request = build_conn(:get, "/is/user-info") |> put_req_header("authorization", jwt)
     conn = call(Gateway.Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"response\": \"ok\"}"
   end
-  
+
   test "POST /is/user-info should verify JWT and return data", %{first_service: first_service} do
     Bypass.expect first_service, fn conn ->
       assert "/is/user-info" == conn.request_path
       assert "POST" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"response": "ok"}>)
     end
-    
+
     jwt = generate_jwt()
-    request = conn(:post, "/is/user-info") |> put_req_header("authorization", jwt)
+    request = build_conn(:post, "/is/user-info") |> put_req_header("authorization", jwt)
     conn = call(Gateway.Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"response\": \"ok\"}"
   end
-  
+
   test "PUT /is/users/{id} should verify JWT and return data", %{first_service: first_service} do
     Bypass.expect first_service, fn conn ->
       assert "/is/users/mike" == conn.request_path
@@ -81,7 +81,7 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = conn(:put, "/is/users/mike") |> put_req_header("authorization", jwt)
+    request = build_conn(:put, "/is/users/mike") |> put_req_header("authorization", jwt)
     conn = call(Gateway.Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"response\": \"ok\"}"
@@ -95,7 +95,7 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = conn(:delete, "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040") 
+    request = build_conn(:delete, "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040") 
       |> put_req_header("authorization", jwt)
     conn = call(Gateway.Router, request)
     assert conn.status == 204
@@ -110,7 +110,7 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = conn(:get, "/is/users/first.user") 
+    request = build_conn(:get, "/is/users/first.user") 
       |> put_req_header("authorization", jwt)
     conn = call(Gateway.Router, request)
     assert conn.status == 200
@@ -125,7 +125,7 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = conn(:get, "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040") 
+    request = build_conn(:get, "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040") 
       |> put_req_header("authorization", jwt)
     conn = call(Gateway.Router, request)
     assert conn.status == 200
@@ -141,20 +141,13 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = conn(:get, "/ts/transactions", %{"page" => %{"offset" => 0, "limit" => 10}}) 
+    request = build_conn(:get, "/ts/transactions", %{"page" => %{"offset" => 0, "limit" => 10}}) 
       |> put_req_header("authorization", jwt)
     conn = call(Gateway.Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"response\":\"[]\"}"
   end
 
-  defp generate_jwt do
-    token()
-      |> with_signer(hs256(Application.get_env(:gateway, Gateway.Endpoint)[:jwt_key]))
-      |> sign
-      |> get_compact
-  end
-  
   defp call(mod, conn) do
     mod.call(conn, [])
   end
