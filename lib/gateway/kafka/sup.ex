@@ -16,6 +16,8 @@ defmodule Gateway.Kafka.Sup do
 
   # supervisor3 callback
   def init(:ok) do
+    # Temporary: shutdown already existed client
+    :brod.stop
     [client_conf] = Application.fetch_env!(:brod, :clients)
     {brod_client_id, [endpoints: brokers]} = client_conf
     Logger.debug "brod_client config: id=#{inspect brod_client_id} brokers=#{inspect brokers}"

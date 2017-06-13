@@ -22,6 +22,16 @@ config :logger, :console,
 
 # Kafka
 kafka_default_client = :gateway_brod_client
+kafka_urls = System.get_env("KAFKA_URL") || "localhost:9092"
+kafka_urls_formatted =
+  kafka_urls
+  |> String.split(",")
+  |> Enum.map(fn(kafka_url) ->
+    url = String.split(kafka_url, ":")
+    host = List.first(url) |> String.to_atom
+    port = List.last(url) |> String.to_integer
+    {host, port}
+  end)
 
 config :gateway, :kafka, %{
   kafka_default_client: kafka_default_client,
@@ -34,7 +44,7 @@ config :gateway, :kafka, %{
 config :brod,
   clients: [
     {kafka_default_client, [
-      endpoints: ["0.0.0.0": 9092]
+      endpoints: kafka_urls_formatted
     ]}
   ]
 
@@ -43,4 +53,4 @@ config :brod,
 import_config "#{Mix.env}.exs"
 
 # Proxy route config file location
-config :gateway, proxy_route_config: "priv/proxy/proxy.json"
+config :gateway, proxy_route_config: "proxy/proxy.json"

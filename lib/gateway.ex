@@ -12,10 +12,14 @@ defmodule Gateway do
   def start(_type, _args) do
     import Supervisor.Spec
 
+    app_env =
+      :gateway
+      |> Application.get_env(Gateway.Endpoint)
+      |> Keyword.get(:env)
+
     # Define workers and child supervisors to be supervised
     maybe_kafka_worker =
-      if Mix.env == :test do
-        Logger.info "Mix.env == :test => not starting Kafka"
+      if app_env == :test do
         []
       else
         [worker(Gateway.Kafka.SupWrapper, _args = [])]
