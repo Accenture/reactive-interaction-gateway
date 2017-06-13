@@ -37,7 +37,6 @@ Ready to run in production? Please [check our deployment guides](http://www.phoe
 
 ```
 # build environment
-KAFKA_URL=my_ip_address_or_container_alias:9092 \
 docker build \
 -t rge-build \
 -f Dockerfile_build \
