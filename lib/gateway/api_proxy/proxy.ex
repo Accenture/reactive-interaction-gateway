@@ -1,6 +1,9 @@
 defmodule Gateway.ApiProxy.Proxy do
   @moduledoc """
   Provides middleware proxy for incoming REST requests at specific routes.
+  Matches all incoming HTTP requests and checks if such route is defined in json file.
+  If route needs authentication it is automatically triggered.
+  Valid HTTP requests are forwarded to given service an their response is sent back to client.
   """
   use Plug.Router
 
@@ -11,18 +14,18 @@ defmodule Gateway.ApiProxy.Proxy do
   plug :match
   plug :dispatch
 
+  # Get all incoming HTTP requests, check if they are valid, provide authentication if needed
   match _ do
     %{method: method, request_path: request_path} = conn
-    # Load proxy routes during the runtime
-    routes_config = Application.fetch_env!(:gateway, :proxy_route_config)
-    routes = Poison.decode!(File.read!(routes_config))
 
-    # Find match of request path in proxy routes
-    service = Enum.find(routes, fn(route) ->
+    :gateway
+    |> Application.fetch_env!(:proxy_route_config)
+    |> File.read!
+    |> Poison.decode!
+    |> Enum.find(fn(route) ->
       match_path(route, request_path) && match_http_method(route, method)
     end)
-    # Authenticate request if needed
-    authenticate_request(service, conn)
+    |> authenticate_request(conn)
   end
 
   # Match route path against requested path
@@ -50,36 +53,39 @@ defmodule Gateway.ApiProxy.Proxy do
   defp authenticate_request(nil, conn) do
     send_resp(conn, 404, encode_error_message("Route is not available"))
   end
-  # Check route authentication and forward
+
+  # Authentication required
   @spec authenticate_request(map, map) :: map
-  defp authenticate_request(service, conn) do
-    case service["auth"] do
-      true -> process_authentication(service, conn)
-      false -> forward_request(service, conn)
-    end
+  defp authenticate_request(service = %{"auth" => true}, conn) do
+    process_authentication(service, conn)
+  end
+
+  # Authentication not required
+  defp authenticate_request(service = %{"auth" => false}, conn) do
+    forward_request(service, conn)
   end
 
   @spec process_authentication(String.t, map) :: map
   defp process_authentication(service, conn) do
-    # Get request headers
-    %{req_headers: req_headers} = conn
-    # Search for authorization token
-    jwt = Enum.find(req_headers, fn(item) -> elem(item, 0) == "authorization" end)
-    case authenticated?(jwt) do
-      true -> forward_request(service, conn)
-      false -> send_resp(conn, 401, encode_error_message("Missing or invalid token"))
+    # Get authorization form request header
+    jwt = get_req_header(conn, "authorization")
+
+    if authenticated?(jwt) do
+      forward_request(service, conn)
+    else
+      send_resp(conn, 401, encode_error_message("Missing or invalid token"))
     end
   end
 
   # Authentication failed if JWT in not provided
-  @spec authenticated?(nil) :: false
-  defp authenticated?(nil), do: false
-  # Verify JWT
+  @spec authenticated?([]) :: false
+  defp authenticated?([]), do: false
+  # Validate present JWT
   @spec authenticated?(tuple) :: boolean
   defp authenticated?(jwt) do
-    # Get value for JWT from tuple
-    jwt_value = elem(jwt, 1)
-    Jwt.valid?(jwt_value)
+    jwt
+    |> List.first
+    |> Jwt.valid?
   end
 
   @spec forward_request(map, map) :: map
@@ -92,8 +98,8 @@ defmodule Gateway.ApiProxy.Proxy do
     } = conn
     # Build URL
     url = build_url(service, request_path)
-    # Match URL against HTTP method to forward it to specific service
 
+    # Match URL against HTTP method to forward it to specific service
     res =
       case method do
         "GET" -> Base.get!(attachQueryParams(url, params), req_headers)
@@ -113,7 +119,7 @@ defmodule Gateway.ApiProxy.Proxy do
     "#{host}:#{service["port"]}#{request_path}"
   end
 
-  # workaround for HTTPoison/URI.encode not supporting nested query params
+  # Workaround for HTTPoison/URI.encode not supporting nested query params
   @spec attachQueryParams(String.t, nil) :: String.t
   defp attachQueryParams(url, nil), do: url
 
@@ -130,8 +136,7 @@ defmodule Gateway.ApiProxy.Proxy do
 
   @spec send_response({:ok, map, map}) :: map
   defp send_response({:ok, conn, %{headers: headers, status_code: status_code, body: body}}) do
-    conn = %{conn | resp_headers: headers}
-    send_resp(conn, status_code, body)
+    %{conn | resp_headers: headers} |> send_resp(status_code, body)
   end
 
 end
