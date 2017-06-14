@@ -22,17 +22,6 @@ config :logger, :console,
 
 # Kafka
 kafka_default_client = :gateway_brod_client
-kafka_urls = System.get_env("KAFKA_URL") || "localhost:9092"
-kafka_urls_formatted =
-  kafka_urls
-  |> String.split(",")
-  |> Enum.map(fn(kafka_url) ->
-    url = String.split(kafka_url, ":")
-    host = List.first(url) |> String.to_atom
-    port = List.last(url) |> String.to_integer
-    {host, port}
-  end)
-
 config :gateway, :kafka, %{
   kafka_default_client: kafka_default_client,
   consumer_group_id: "gateway-consumer-group",
@@ -44,7 +33,7 @@ config :gateway, :kafka, %{
 config :brod,
   clients: [
     {kafka_default_client, [
-      endpoints: kafka_urls_formatted
+      endpoints: System.get_env("KAFKA_URL") || "localhost:9092"
     ]}
   ]
 

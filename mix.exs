@@ -37,6 +37,8 @@ defmodule Gateway.Mixfile do
         :httpoison,
         :terraform,
         :joken,
+      ],
+      included_applications: [
         :supervisor3,
         :brod,
       ]

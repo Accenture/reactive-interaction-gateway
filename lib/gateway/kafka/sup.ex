@@ -16,10 +16,9 @@ defmodule Gateway.Kafka.Sup do
 
   # supervisor3 callback
   def init(:ok) do
-    # Temporary: shutdown already existed client
-    :brod.stop
-    [client_conf] = Application.fetch_env!(:brod, :clients)
-    {brod_client_id, [endpoints: brokers]} = client_conf
+    [{brod_client_id, endpoints: brokers}] = Application.fetch_env!(:brod, :clients)
+    formatted_brokers = format_kafka_brokers(brokers)
+    client_conf = {brod_client_id, [endpoints: formatted_brokers]}
     Logger.debug "brod_client config: id=#{inspect brod_client_id} brokers=#{inspect brokers}"
     {
       :ok,
@@ -30,7 +29,7 @@ defmodule Gateway.Kafka.Sup do
           _max_time = 1,
         },
         _children = [
-          child_spec(:brod_client, :worker, [brokers, brod_client_id, [client_conf]]),
+          child_spec(:brod_client, :worker, [formatted_brokers, brod_client_id, [client_conf]]),
           child_spec(Gateway.Kafka.GroupSubscriber, :worker, []),
         ]
       }
@@ -40,6 +39,17 @@ defmodule Gateway.Kafka.Sup do
   # supervisor3 callback
   def post_init(_) do
     :ignore
+  end
+
+  defp format_kafka_brokers(brokers) do
+    brokers
+    |> String.split(",")
+    |> Enum.map(fn(broker) ->
+      url = String.split(broker, ":")
+      host = List.first(url) |> String.to_atom
+      port = List.last(url) |> String.to_integer
+      {host, port}
+    end)
   end
 
   defp child_spec(module, type, args) do
