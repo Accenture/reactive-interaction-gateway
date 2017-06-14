@@ -46,7 +46,7 @@ docker build \
 # run build environment
 docker run \
 --name rg-build \
--v ${PWD}/fsa-reactive-gateway:/opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway \
+-v "${PWD}"/fsa-reactive-gateway:/opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway \
 rge-build
 
 # build app
