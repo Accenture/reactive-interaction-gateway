@@ -2,6 +2,7 @@
 /_build
 /db
 /deps
+/fsa-reactive-gateway
 /*.ez
 /cover
 /rel

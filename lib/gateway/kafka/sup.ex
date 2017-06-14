@@ -16,9 +16,9 @@ defmodule Gateway.Kafka.Sup do
 
   # supervisor3 callback
   def init(:ok) do
-    [{brod_client_id, endpoints: brokers}] = Application.fetch_env!(:brod, :clients)
-    formatted_brokers = format_kafka_brokers(brokers)
-    client_conf = {brod_client_id, [endpoints: formatted_brokers]}
+    [{brod_client_id, endpoints: broker_csv}] = Application.fetch_env!(:brod, :clients)
+    brokers = parse_broker_csv(broker_csv)
+    client_conf = {brod_client_id, [endpoints: brokers]}
     Logger.debug "brod_client config: id=#{inspect brod_client_id} brokers=#{inspect brokers}"
     {
       :ok,
@@ -29,7 +29,7 @@ defmodule Gateway.Kafka.Sup do
           _max_time = 1,
         },
         _children = [
-          child_spec(:brod_client, :worker, [formatted_brokers, brod_client_id, [client_conf]]),
+          child_spec(:brod_client, :worker, [brokers, brod_client_id, [client_conf]]),
           child_spec(Gateway.Kafka.GroupSubscriber, :worker, []),
         ]
       }
@@ -41,7 +41,7 @@ defmodule Gateway.Kafka.Sup do
     :ignore
   end
 
-  defp format_kafka_brokers(brokers) do
+  defp parse_broker_csv(brokers) do
     brokers
     |> String.split(",")
     |> Enum.map(fn(broker) ->
