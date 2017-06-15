@@ -55,12 +55,13 @@ defmodule Gateway.ApiProxy.Proxy do
   end
 
   # Authentication required
-  @spec authenticate_request(map, map) :: map
+  @spec authenticate_request(%{auth: true}, map) :: map
   defp authenticate_request(service = %{"auth" => true}, conn) do
     process_authentication(service, conn)
   end
 
   # Authentication not required
+  @spec authenticate_request(%{auth: false}, map) :: map
   defp authenticate_request(service = %{"auth" => false}, conn) do
     forward_request(service, conn)
   end

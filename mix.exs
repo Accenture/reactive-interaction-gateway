@@ -55,7 +55,7 @@ defmodule Gateway.Mixfile do
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 0.11.0"},
-      {:terraform, "~> 0.1.1"},
+      {:terraform, "~> 1.0.1"},
       {:joken, "~> 1.4"},
       {:bypass, "~> 0.1", only: :test},
       {:excoveralls, "~> 0.6.2"},
