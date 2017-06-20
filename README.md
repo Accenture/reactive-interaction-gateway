@@ -40,7 +40,6 @@ Ready to run in production? Please [check our deployment guides](http://www.phoe
 docker build \
 -t rge-build \
 -f build.dockerfile \
---build-arg KAFKA_URL=my_ip_address_or_container_alias:9092 \
 .
 
 # run build environment
@@ -56,6 +55,7 @@ docker build -t rge-app .
 docker run \
 --name rg-app \
 -p 6060:6060 \
+-e KAFKA_HOSTS=my_ip_address_or_container_alias:9092 \
 -e IS_HOST=my_ip_address_or_container_alias \
 -e PS_HOST=my_ip_address_or_container_alias \
 -e TS_HOST=my_ip_address_or_container_alias \

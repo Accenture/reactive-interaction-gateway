@@ -32,9 +32,7 @@ config :gateway, :kafka, %{
 # and used to start the default brod client.
 config :brod,
   clients: [
-    {kafka_default_client, [
-      endpoints: System.get_env("KAFKA_URL") || "localhost:9092"
-    ]}
+    {kafka_default_client}
   ]
 
 # Import environment specific config. This must remain at the bottom

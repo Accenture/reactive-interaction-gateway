@@ -7,10 +7,8 @@ RUN mix local.rebar --force
 WORKDIR /opt/sites/fsa-reactive-gateway
 COPY . /opt/sites/fsa-reactive-gateway
 
-ARG KAFKA_URL
 ENV MIX_ENV=prod \
-    PORT=6060 \
-    KAFKA_URL=$KAFKA_URL
+    PORT=6060
 
 # Install project dependencies
 RUN mix deps.get
