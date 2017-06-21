@@ -1,0 +1,14 @@
+_build/
+.git/
+cover/
+deps/
+doc/
+test/
+rel/
+.adr-dir
+.credo.exs
+.DS_Store
+.gitignore
+Dockerfile
+Dockerfile_build
+README.md

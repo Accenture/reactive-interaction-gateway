@@ -22,7 +22,6 @@ config :logger, :console,
 
 # Kafka
 kafka_default_client = :gateway_brod_client
-
 config :gateway, :kafka, %{
   kafka_default_client: kafka_default_client,
   consumer_group_id: "gateway-consumer-group",
@@ -33,9 +32,7 @@ config :gateway, :kafka, %{
 # and used to start the default brod client.
 config :brod,
   clients: [
-    {kafka_default_client, [
-      endpoints: ["0.0.0.0": 9092]
-    ]}
+    {kafka_default_client}
   ]
 
 # Import environment specific config. This must remain at the bottom
@@ -43,4 +40,4 @@ config :brod,
 import_config "#{Mix.env}.exs"
 
 # Proxy route config file location
-config :gateway, proxy_route_config: "priv/proxy/proxy.json"
+config :gateway, proxy_route_config: "proxy/proxy.json"

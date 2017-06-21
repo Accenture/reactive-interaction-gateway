@@ -32,3 +32,32 @@ Ready to run in production? Please [check our deployment guides](http://www.phoe
   * Docs: https://hexdocs.pm/phoenix
   * Mailing list: http://groups.google.com/group/phoenix-talk
   * Source: https://github.com/phoenixframework/phoenix
+
+## Deployment
+
+```
+# build environment
+docker build \
+-t rge-build \
+-f build.dockerfile \
+.
+
+# run build environment
+docker run \
+--name rg-build \
+-v "${PWD}"/fsa-reactive-gateway:/opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway \
+rge-build
+
+# build app
+docker build -t rge-app .
+
+# run app
+docker run \
+--name rg-app \
+-p 6060:6060 \
+-e KAFKA_HOSTS=<host>:9092 \
+-e IS_HOST=<host> \
+-e PS_HOST=<host> \
+-e TS_HOST=<host> \
+rge-app
+```
