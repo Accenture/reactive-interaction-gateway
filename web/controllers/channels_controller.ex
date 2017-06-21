@@ -24,40 +24,7 @@ defmodule Gateway.ChannelsController do
     json(conn, connections)
   end
 
-  def disconnect_channel_connection(conn, params) do
-    %{"jti" => jti} = params
-
-    "role:customer"
-    |> PresenceChannel.channels_list
-    |> Enum.find(fn(user) ->
-      elem(user, 1).metas
-      |> Enum.find(fn(user_info) -> Map.get(user_info, "jti") == jti end)
-    end)
-    |> find_username
-    |> send_response(jti, conn)
-  end
-
-  defp find_username(nil), do: nil
-  defp find_username(user_info) do
-    user_info
-    |> elem(1)
-    |> Map.get(:metas)
-    |> List.first
-    |> Map.get("username")
-  end
-
-  defp send_response(nil, _jti, conn) do
-    conn
-    |> put_status(404)
-    |> json(%{})
-  end
-
-  defp send_response(username, jti, conn) do
-    Endpoint.broadcast(
-      "user:#{username}",
-      "kill",
-      %{msg: "You have been forcefully logged out."}
-    )
+  def disconnect_channel_connection(conn, %{"jti" => jti}) do
     Endpoint.broadcast(jti, "disconnect", %{})
 
     conn
