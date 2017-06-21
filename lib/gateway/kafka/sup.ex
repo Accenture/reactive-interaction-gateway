@@ -50,18 +50,8 @@ defmodule Gateway.Kafka.Sup do
     brokers
     |> String.split(",")
     |> Enum.map(fn(broker) ->
-      url = String.split(broker, ":")
-      host =
-        url
-        |> List.first
-        |> String.to_atom
-
-      port =
-        url
-        |> List.last
-        |> String.to_integer
-
-      {host, port}
+      [host, port] = String.split(broker, ":")
+      {String.to_atom(host), String.to_integer(port)}
     end)
   end
 
