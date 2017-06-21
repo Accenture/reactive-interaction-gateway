@@ -35,6 +35,12 @@ defmodule Gateway.Mixfile do
         :logger,
         :gettext,
         :httpoison,
+        :terraform,
+        :joken,
+      ],
+      included_applications: [
+        :supervisor3,
+        :brod,
       ]
     ]
   end
@@ -58,12 +64,13 @@ defmodule Gateway.Mixfile do
       {:terraform, "~> 1.0.1"},
       {:joken, "~> 1.4"},
       {:bypass, "~> 0.1", only: :test},
-      {:excoveralls, "~> 0.6.2"},
+      {:excoveralls, "~> 0.6.2", only: [:dev, :test]},
       {:brod, "~> 2.2"},
       {:supervisor3, "~> 1.1"},
       {:poison, "~> 2.0 or ~> 3.0"},
       {:credo, "~> 0.7", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test]},
+      {:distillery, "~> 1.4"},
     ]
   end
 end

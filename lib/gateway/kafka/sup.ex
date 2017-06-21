@@ -16,8 +16,13 @@ defmodule Gateway.Kafka.Sup do
 
   # supervisor3 callback
   def init(:ok) do
-    [client_conf] = Application.fetch_env!(:brod, :clients)
-    {brod_client_id, [endpoints: brokers]} = client_conf
+    [{brod_client_id}] = Application.fetch_env!(:brod, :clients)
+    brokers =
+      "KAFKA_HOSTS"
+      |> System.get_env
+      |> parse_broker_csv
+
+    client_conf = {brod_client_id, [endpoints: brokers]}
     Logger.debug "brod_client config: id=#{inspect brod_client_id} brokers=#{inspect brokers}"
     {
       :ok,
@@ -38,6 +43,16 @@ defmodule Gateway.Kafka.Sup do
   # supervisor3 callback
   def post_init(_) do
     :ignore
+  end
+
+  defp parse_broker_csv(nil), do: ["localhost": 9092]
+  defp parse_broker_csv(brokers) do
+    brokers
+    |> String.split(",")
+    |> Enum.map(fn(broker) ->
+      [host, port] = String.split(broker, ":")
+      {String.to_atom(host), String.to_integer(port)}
+    end)
   end
 
   defp child_spec(module, type, args) do

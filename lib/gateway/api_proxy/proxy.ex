@@ -18,8 +18,12 @@ defmodule Gateway.ApiProxy.Proxy do
   match _ do
     %{method: method, request_path: request_path} = conn
 
+    # Load proxy routes during the runtime
+    proxy_file_location = Application.fetch_env!(:gateway, :proxy_route_config)
+
     :gateway
-    |> Application.fetch_env!(:proxy_route_config)
+    |> :code.priv_dir
+    |> Path.join(proxy_file_location)
     |> File.read!
     |> Poison.decode!
     |> Enum.find(fn(route) ->

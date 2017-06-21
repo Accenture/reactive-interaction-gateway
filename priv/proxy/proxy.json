@@ -87,13 +87,6 @@
     "host": "PS_HOST",
     "port": 8080,
     "path": "/ps/tasks/{id}",
-    "method": "POST",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/tasks/{id}",
     "method": "PUT",
     "auth": true
   },
@@ -157,6 +150,13 @@
     "host": "TS_HOST",
     "port": 8889,
     "path": "ts/users",
+    "method": "POST",
+    "auth": true
+  },
+  {
+    "host": "TS_HOST",
+    "port": 8889,
+    "path": "ts/tokens",
     "method": "POST",
     "auth": true
   }

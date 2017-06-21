@@ -2,8 +2,10 @@
 /_build
 /db
 /deps
+/fsa-reactive-gateway
 /*.ez
 /cover
+/rel
 
 # Generated on crash by the VM
 erl_crash.dump
