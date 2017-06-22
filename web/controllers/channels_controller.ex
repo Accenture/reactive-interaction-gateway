@@ -2,6 +2,7 @@ defmodule Gateway.ChannelsController do
   use Gateway.Web, :controller
   alias Gateway.PresenceChannel
   alias Gateway.Endpoint
+  alias Gateway.Blacklist
 
   def list_channels(conn, _params) do
     channels =
@@ -25,6 +26,7 @@ defmodule Gateway.ChannelsController do
   end
 
   def disconnect_channel_connection(conn, %{"jti" => jti}) do
+    Blacklist.add_jti(Blacklist, jti)
     Endpoint.broadcast(jti, "disconnect", %{})
 
     conn

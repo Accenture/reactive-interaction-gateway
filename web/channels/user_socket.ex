@@ -24,7 +24,9 @@ defmodule Gateway.UserSocket do
   # performing token verification on connect.
   def connect(params, socket) do
     with {:ok, raw_token} <- Map.fetch(params, "token"),
-         {:ok, token_map} <- Jwt.decode(raw_token)
+         {:ok, token_map} <- Jwt.decode(raw_token),
+         {:ok, jti} <- Map.fetch(token_map, "jti"),
+         true <- Gateway.Blacklist.contains_jti?(Gateway.Blacklist, jti)
     do
       {:ok, assign(socket, :user_info, token_map)}
     else
