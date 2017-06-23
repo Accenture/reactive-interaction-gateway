@@ -35,14 +35,13 @@ defmodule Gateway.PageControllerTest do
     leave sock
   end
 
-  test "GET /rg/connections/abc123 should broadcast kill and disconnect events to user with jti abc123", %{sock: sock} do
+  test "DELETE /rg/connections/abc123 should broadcast disconnect event to user with jti abc123", %{sock: sock} do
     @endpoint.subscribe("abc123")
     conn =
       setup_conn(["deleteConnection"])
       |> delete("/rg/connections/abc123")
 
     assert_broadcast("disconnect", %{})
-    assert_broadcast("kill", %{msg: "You have been forcefully logged out."})
     assert response(conn, 204) =~ "{}"
 
     leave sock
