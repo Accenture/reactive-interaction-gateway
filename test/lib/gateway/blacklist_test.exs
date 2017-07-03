@@ -4,7 +4,69 @@ defmodule Gateway.BlacklistTest do
   alias Gateway.Blacklist
   import Gateway.Blacklist, only: [add_jti: 4, contains_jti?: 2]
 
-  setup do
+  describe "a blacklist" do
+    setup [:with_tracker_mock]
+
+    test "tracks an added jti", ctx do
+      {:ok, blacklist} = Blacklist.start_link(ctx.tracker, name: nil)
+      refute blacklist |> contains_jti?("FOO_JTI")
+      assert ctx.tracker |> Stubr.called_with?(:find, ["FOO_JTI"])
+      refute blacklist |> contains_jti?("BAR_JTI")
+
+      expiry = Timex.now() |> Timex.shift(days: 1)
+      # Also tests that chaining works:
+      blacklist
+      |> add_jti("FOO_JTI", expiry, _listener = nil)
+      |> add_jti("BAR_JTI", expiry, _listener = nil)
+
+      assert blacklist |> contains_jti?("FOO_JTI")
+      assert blacklist |> contains_jti?("BAR_JTI")
+      assert ctx.tracker |> Stubr.called_twice?(:track)
+      refute ctx.tracker |> Stubr.called?(:untrack)
+    end
+
+    test "drops a jti after expiry", ctx do
+      {:ok, blacklist} = Blacklist.start_link(ctx.tracker, name: nil)
+
+      jti = "FOO_JTI"
+      expiry = Timex.now() |> Timex.shift(seconds: -1)
+      blacklist |> add_jti(jti, expiry, _listener = self())
+
+      assert_receive {:expired, ^jti}
+      refute blacklist |> contains_jti?(jti)
+      assert ctx.tracker |> Stubr.called_once?(:track)
+      assert ctx.tracker |> Stubr.called_once?(:untrack)
+    end
+
+    test "allows adding a jti more than once without effect", ctx do
+      {:ok, blacklist} = Blacklist.start_link(ctx.tracker, name: nil)
+
+      future = Timex.now() |> Timex.shift(days: 1)
+      blacklist
+      |> add_jti("FOO_JTI", future, _listener = nil)
+      |> add_jti("FOO_JTI", future, _listener = nil)  # same again
+
+      assert blacklist |> contains_jti?("FOO_JTI")
+      assert ctx.tracker |> Stubr.called_twice?(:track)
+      assert ctx.tracker.list() |> length == 1
+    end
+
+    test "expires stale records on startup", ctx do
+      past = Timex.now() |> Timex.shift(weeks: -1)
+      future = Timex.now() |> Timex.shift(weeks: 1)
+      ctx.tracker.track("foo", past)    # should be expired
+      ctx.tracker.track("bar", past)    # should be expired
+      ctx.tracker.track("baz", future)  # should be kept
+
+      {:ok, blacklist} = Blacklist.start_link(ctx.tracker, name: nil)
+
+      refute blacklist |> contains_jti?("foo")
+      refute blacklist |> contains_jti?("bar")
+      assert blacklist |> contains_jti?("baz")
+    end
+  end
+
+  defp with_tracker_mock(_ctx) do
     {:ok, agent} = Agent.start_link(fn -> [] end)
     tracker = Stubr.stub!([
         # @callback track(jti: String.t, expiry: Timex.DateTime.t) :: {:ok, String.t}
@@ -51,67 +113,4 @@ defmodule Gateway.BlacklistTest do
     )
     [tracker: tracker]
   end
-
-  test "blacklisting a JTI causes it to be tracked", ctx do
-    {:ok, blacklist} = Blacklist.start_link(ctx.tracker, name: nil)
-    refute blacklist |> contains_jti?("FOO_JTI")
-    assert ctx.tracker |> Stubr.called_with?(:find, ["FOO_JTI"])
-    refute blacklist |> contains_jti?("BAR_JTI")
-
-    expiry = Timex.now() |> Timex.shift(days: 1)
-    # Also tests that chaining works:
-    blacklist
-    |> add_jti("FOO_JTI", expiry, _listener = nil)
-    |> add_jti("BAR_JTI", expiry, _listener = nil)
-
-    assert blacklist |> contains_jti?("FOO_JTI")
-    assert blacklist |> contains_jti?("BAR_JTI")
-    assert ctx.tracker |> Stubr.called_twice?(:track)
-    refute ctx.tracker |> Stubr.called?(:untrack)
-  end
-
-  test "a JTI expiry removes it from the blacklist", ctx do
-    {:ok, blacklist} = Blacklist.start_link(ctx.tracker, name: nil)
-
-    jti = "FOO_JTI"
-    expiry = Timex.now() |> Timex.shift(seconds: -1)
-    blacklist |> add_jti(jti, expiry, _listener = self())
-
-    assert_receive {:expired, ^jti}
-    refute blacklist |> contains_jti?(jti)
-    assert ctx.tracker |> Stubr.called_once?(:track)
-    assert ctx.tracker |> Stubr.called_once?(:untrack)
-  end
-
-  test "adding a JTI more than once is a no-op", ctx do
-    {:ok, blacklist} = Blacklist.start_link(ctx.tracker, name: nil)
-
-    future = Timex.now() |> Timex.shift(days: 1)
-    blacklist
-    |> add_jti("FOO_JTI", future, _listener = nil)
-    |> add_jti("FOO_JTI", future, _listener = nil)  # same again
-
-    assert blacklist |> contains_jti?("FOO_JTI")
-    assert ctx.tracker |> Stubr.called_twice?(:track)
-    assert ctx.tracker.list() |> length == 1
-  end
-
-  test "after a restart, stale records are expired", ctx do
-    past = Timex.now() |> Timex.shift(weeks: -1)
-    future = Timex.now() |> Timex.shift(weeks: 1)
-    ctx.tracker.track("foo", past)    # should be expired
-    ctx.tracker.track("bar", past)    # should be expired
-    ctx.tracker.track("baz", future)  # should be kept
-
-    {:ok, blacklist} = Blacklist.start_link(ctx.tracker, name: nil)
-
-    refute blacklist |> contains_jti?("foo")
-    refute blacklist |> contains_jti?("bar")
-    assert blacklist |> contains_jti?("baz")
-  end
-
-  # defp assert_added(jti) do
-  #   # sent by Gateway.PubSub by broadcast from PresenceHandler
-  #   assert_receive {:join, ^jti, _}, 10_000
-  # end
 end
