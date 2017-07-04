@@ -25,11 +25,8 @@ defmodule Gateway.UserSocket do
   def connect(params, socket) do
     with {:ok, raw_token} <- Map.fetch(params, "token"),
          {:ok, token_map} <- Jwt.decode(raw_token),
-         {:ok, jti} <- Map.fetch(token_map, "jti"),
-         :ok <- (if Gateway.Blacklist.contains_jti?(Gateway.Blacklist, jti), do: {:error, :blacklisted}, else: :ok)
+         :ok <- check_token_not_blacklisted(token_map)
     do
-      blacklisted? = Gateway.Blacklist.contains_jti?(Gateway.Blacklist, jti)
-      Logger.warn "jti #{if blacklisted?, do: "is", else: "is not"} blacklisted"
       {:ok, assign(socket, :user_info, token_map)}
     else
       err ->
@@ -49,4 +46,11 @@ defmodule Gateway.UserSocket do
   #
   # Returning `nil` makes this socket anonymous.
   def id(socket), do: Map.get(socket.assigns.user_info, "jti")
+
+  defp check_token_not_blacklisted(%{"jti" => jti}) do
+    case Gateway.Blacklist.contains_jti?(Gateway.Blacklist, jti) do
+      true -> {:error, :blacklisted}
+      false -> :ok
+    end
+  end
 end
