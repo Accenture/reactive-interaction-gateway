@@ -26,8 +26,10 @@ defmodule Gateway.UserSocket do
     with {:ok, raw_token} <- Map.fetch(params, "token"),
          {:ok, token_map} <- Jwt.decode(raw_token),
          {:ok, jti} <- Map.fetch(token_map, "jti"),
-         true <- Gateway.Blacklist.contains_jti?(Gateway.Blacklist, jti)
+         :ok <- (if Gateway.Blacklist.contains_jti?(Gateway.Blacklist, jti), do: {:error, :blacklisted}, else: :ok)
     do
+      blacklisted? = Gateway.Blacklist.contains_jti?(Gateway.Blacklist, jti)
+      Logger.warn "jti #{if blacklisted?, do: "is", else: "is not"} blacklisted"
       {:ok, assign(socket, :user_info, token_map)}
     else
       err ->
