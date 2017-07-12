@@ -4,7 +4,7 @@ defmodule Gateway.Blacklist.PresenceHandler do
 
   alias Gateway.Blacklist
 
-  @topic "blacklist"
+  @blacklist_topic "blacklist"
 
   def start_link(opts) do
     opts = Keyword.merge([name: __MODULE__], opts)
@@ -37,7 +37,7 @@ defmodule Gateway.Blacklist.PresenceHandler do
   def handle_diff(diff, state) do
     for {topic, {joins, leaves}} <- diff do
       for {key, meta} <- joins do
-        if topic == "blacklist" do
+        if topic == @blacklist_topic do
           [jti, expiry] = [key, Map.get(meta, :expiry)]
           state.blacklist |> Blacklist.add_jti(jti, expiry)
         end
