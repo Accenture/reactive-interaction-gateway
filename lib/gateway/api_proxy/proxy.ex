@@ -36,7 +36,7 @@ defmodule Gateway.ApiProxy.Proxy do
   @spec match_path(map, String.t) :: boolean
   defp match_path(route, request_path) do
     # Replace wildcards with actual params
-    replace_wildcards = String.replace(route["path"], "{id}", ".*")
+    replace_wildcards = String.replace(route["path"], "{id}", "[^/]+")
     # Match requested path against regex
     String.match?(request_path, ~r/#{replace_wildcards}$/)
   end
