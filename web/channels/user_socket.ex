@@ -2,6 +2,7 @@ defmodule Gateway.UserSocket do
   use Phoenix.Socket
   require Logger
   alias Gateway.Utils.Jwt
+  alias Gateway.Blacklist
 
   ## Channels
   channel "user:*", Gateway.PresenceChannel
@@ -24,7 +25,8 @@ defmodule Gateway.UserSocket do
   # performing token verification on connect.
   def connect(params, socket) do
     with {:ok, raw_token} <- Map.fetch(params, "token"),
-         {:ok, token_map} <- Jwt.decode(raw_token)
+         {:ok, token_map} <- Jwt.decode(raw_token),
+         :ok <- check_token_not_blacklisted(token_map)
     do
       {:ok, assign(socket, :user_info, token_map)}
     else
@@ -45,4 +47,11 @@ defmodule Gateway.UserSocket do
   #
   # Returning `nil` makes this socket anonymous.
   def id(socket), do: Map.get(socket.assigns.user_info, "jti")
+
+  defp check_token_not_blacklisted(%{"jti" => jti}) do
+    case Blacklist.contains_jti?(Blacklist, jti) do
+      true -> {:error, :blacklisted}
+      false -> :ok
+    end
+  end
 end

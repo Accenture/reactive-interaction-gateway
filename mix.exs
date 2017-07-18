@@ -35,6 +35,7 @@ defmodule Gateway.Mixfile do
         :logger,
         :gettext,
         :httpoison,
+        :timex,
         :terraform,
         :joken,
       ],
@@ -70,7 +71,9 @@ defmodule Gateway.Mixfile do
       {:poison, "~> 2.0 or ~> 3.0"},
       {:credo, "~> 0.7", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test]},
+      {:timex, "~> 3.0"},
       {:distillery, "~> 1.4"},
+      {:stubr, "~> 1.5.0", only: :test},
     ]
   end
 end
