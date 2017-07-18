@@ -1,4 +1,5 @@
 defmodule Gateway.ChannelsController do
+  require Logger
   use Gateway.Web, :controller
   alias Gateway.PresenceChannel
   alias Gateway.Endpoint
@@ -26,13 +27,7 @@ defmodule Gateway.ChannelsController do
   end
 
   def disconnect_channel_connection(conn, %{"jti" => jti}) do
-    Blacklist.add_jti(
-      Blacklist,
-      jti,
-      _expiry =
-        get_req_header(conn, "authorization")
-        |> extract_jti_expiration
-    )
+    Blacklist.add_jti(Blacklist, jti, jwt_expiry(conn))
     Endpoint.broadcast(jti, "disconnect", %{})
 
     conn
@@ -40,34 +35,20 @@ defmodule Gateway.ChannelsController do
     |> json(%{})
   end
 
-  defp extract_jti_expiration(authorization_tokens) do
-    authorization_tokens
-    # Try to decode the tokens:
-    |> Stream.map(&Gateway.Utils.Jwt.decode/1)
-    # If successful, map it to the stringified expiry timestamp:
-    |> Stream.map(
-      fn
-        {:ok, %{"exp" => exp}} -> inspect(exp)  # comes as int, convert to string
-        _ -> nil
-      end
-    )
-    # Reject any invalid tokens:
-    |> Stream.reject(&is_nil/1)
-    # Convert expiration timestamps into Timex structs:
-    |> Stream.map(
-      fn exp ->
-        case Timex.parse(exp, "{s-epoch}") do
-          {:ok, timestamp} -> timestamp
-          _ -> nil
-        end
-      end
-    )
-    # Reject any invalid timestamps:
-    |> Stream.reject(&is_nil/1)
-    # Use only the first:
-    |> Stream.take(1)
-    # Stop being lazy:
-    |> Enum.to_list
-    |> List.first
+  defp jwt_expiry(conn) do
+    get_req_header(conn, "authorization") |> jwt_expiry_from_tokens
+  rescue
+    e ->
+      Logger.warn "No token (expiration) found, using default blacklist expiration timeout (#{inspect e})."
+      nil
+  end
+
+  defp jwt_expiry_from_tokens([]), do: nil
+  defp jwt_expiry_from_tokens([token]) do
+    {:ok, %{"exp" => expiry}} = Gateway.Utils.Jwt.decode(token)
+    # Comes as int, convert to string:
+    Integer.to_string(expiry)
+    # Parse as UTC epoch:
+    |> Timex.parse!("{s-epoch}")
   end
 end
