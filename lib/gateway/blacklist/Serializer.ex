@@ -1,4 +1,8 @@
 defmodule Gateway.Blacklist.Serializer do
+  @moduledoc """
+  Serialization for types used in the Blacklist Presence struct.
+
+  """
 
   @spec serialize_datetime!(Timex.DateTime.t) :: String.t
   def serialize_datetime!(dt) do

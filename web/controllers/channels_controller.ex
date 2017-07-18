@@ -4,6 +4,7 @@ defmodule Gateway.ChannelsController do
   alias Gateway.PresenceChannel
   alias Gateway.Endpoint
   alias Gateway.Blacklist
+  alias Gateway.Utils.Jwt
 
   def list_channels(conn, _params) do
     channels =
@@ -36,7 +37,9 @@ defmodule Gateway.ChannelsController do
   end
 
   defp jwt_expiry(conn) do
-    get_req_header(conn, "authorization") |> jwt_expiry_from_tokens
+    conn
+    |> get_req_header("authorization")
+    |> jwt_expiry_from_tokens
   rescue
     e ->
       Logger.warn "No token (expiration) found, using default blacklist expiration timeout (#{inspect e})."
@@ -45,10 +48,9 @@ defmodule Gateway.ChannelsController do
 
   defp jwt_expiry_from_tokens([]), do: nil
   defp jwt_expiry_from_tokens([token]) do
-    {:ok, %{"exp" => expiry}} = Gateway.Utils.Jwt.decode(token)
-    # Comes as int, convert to string:
-    Integer.to_string(expiry)
-    # Parse as UTC epoch:
-    |> Timex.parse!("{s-epoch}")
+    {:ok, %{"exp" => expiry}} = Jwt.decode(token)
+    expiry
+    |> Integer.to_string  # Comes as int, convert to string
+    |> Timex.parse!("{s-epoch}")  # Parse as UTC epoch
   end
 end

@@ -1,4 +1,23 @@
 defmodule Gateway.Blacklist do
+  @moduledoc """
+  Enables blacklisting of JWTs by their jti claim.
+
+  The entries representing the banned claims feature an expiration timestamp,
+  which prevents the blacklist from growing indefinitely.
+
+  In a distributed setting, the node that does the blacklisting spreads the
+  information via Phoenix' PubSub Server as Phoenix Presence information. The
+  other nodes react by tracking the same record themselves, which means that
+  for one record and n nodes there are n items in the Presence list. The
+  following properties are a result of this:
+
+  - Blacklisting can occur on/by any node.
+  - The blacklist is eventually consistent over all nodes.
+  - Any node can go down and come up at any time without affecting the
+    blacklist, except if all nodes go down at the same time (in that case
+    there is nothing to synchronize from -- the list is not stored on disk).
+
+  """
   require Logger
   alias Gateway.Blacklist.Serializer
 
@@ -12,12 +31,12 @@ defmodule Gateway.Blacklist do
     Logger.debug "Blacklist with tracker #{inspect tracker_mod}"
     GenServer.start_link(
       __MODULE__,
-      _state=%{tracker_mod: tracker_mod},
+      _state = %{tracker_mod: tracker_mod},
       Keyword.merge([name: __MODULE__], opts))
   end
 
   def add_jti(server, jti, expiry \\ nil, listener \\ nil)
-  def add_jti(server, jti, _expiry=nil, listener) do
+  def add_jti(server, jti, _expiry = nil, listener) do
     default_expiry = Timex.now() |> Timex.shift(hours: @default_expiry_hours)
     add_jti(server, jti, default_expiry, listener)
   end
@@ -45,9 +64,10 @@ defmodule Gateway.Blacklist do
 
   def handle_cast({:add, jti, expiry, listener}, state) do
     with {:ok, _phx_ref} <- state.tracker_mod.track(jti, expiry) do
-      remaining_ms =
-        (Timex.diff(expiry, Timex.now(), :seconds) + 1) * 1_000
-        |> max(0)
+      remaining_ms = max(
+        (Timex.diff(expiry, Timex.now(), :seconds) + 1) * 1_000,
+        0
+      )
       Process.send_after(self(), {:expire, jti, listener}, _timeout = remaining_ms)
     end
     {:noreply, state}

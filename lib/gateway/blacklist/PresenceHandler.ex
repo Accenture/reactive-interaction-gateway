@@ -1,4 +1,15 @@
 defmodule Gateway.Blacklist.PresenceHandler do
+  @moduledoc """
+  Handles Phoenix Presence events.
+
+  Implemented as a Phoenix.Tracker, this module tracks all events it receives
+  from the given Phoenix PubSub server. Only join events that refer to the
+  `@blacklist_topic` are considered for inclusion into the blacklist, and
+  leave events are ignored (i.e., forwarded only).
+
+  The blacklist server is started from, and linked against, this server.
+
+  """
   require Logger
   @behaviour Phoenix.Tracker
 
@@ -17,7 +28,7 @@ defmodule Gateway.Blacklist.PresenceHandler do
   # callbacks
 
   def init(opts) do
-    {:ok, blacklist} = Gateway.Blacklist.start_link()
+    {:ok, blacklist} = Blacklist.start_link()
     pubsub = Keyword.fetch!(opts, :pubsub_server)
     {:ok, %{
       pubsub_server: pubsub,

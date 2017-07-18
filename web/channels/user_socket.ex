@@ -2,6 +2,7 @@ defmodule Gateway.UserSocket do
   use Phoenix.Socket
   require Logger
   alias Gateway.Utils.Jwt
+  alias Gateway.Blacklist
 
   ## Channels
   channel "user:*", Gateway.PresenceChannel
@@ -48,7 +49,7 @@ defmodule Gateway.UserSocket do
   def id(socket), do: Map.get(socket.assigns.user_info, "jti")
 
   defp check_token_not_blacklisted(%{"jti" => jti}) do
-    case Gateway.Blacklist.contains_jti?(Gateway.Blacklist, jti) do
+    case Blacklist.contains_jti?(Blacklist, jti) do
       true -> {:error, :blacklisted}
       false -> :ok
     end

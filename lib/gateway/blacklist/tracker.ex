@@ -1,5 +1,11 @@
 defmodule Gateway.Blacklist.Tracker do
+  @moduledoc """
+  Encapsulates Phoenix Presence, mainly to ease testing.
+
+  """
+
   defmodule TrackerBehaviour do
+    @moduledoc false
     @callback track(jti: String.t, expiry: Timex.DateTime.t) :: {:ok, String.t}
     @callback untrack(jti: String.t) :: :ok
     @callback list() :: [{String.t, %{optional(String.t) => String.t}}]
@@ -17,20 +23,20 @@ defmodule Gateway.Blacklist.Tracker do
   @spec track(String.t, Timex.DateTime.t) :: {:ok, String.t}
   def track(jti, expiry) do
     Phoenix.Tracker.track(
-      _tracker=Presence,
-      _pid=Process.whereis(Gateway.PubSub),
+      _tracker = Presence,
+      _pid = Process.whereis(Gateway.PubSub),
       @topic,
-      _key=jti,
-      _meta=%{expiry: Serializer.serialize_datetime!(expiry)})
+      _key = jti,
+      _meta = %{expiry: Serializer.serialize_datetime!(expiry)})
   end
 
   @spec untrack(String.t) :: :ok
   def untrack(jti) do
     Phoenix.Tracker.untrack(
-      _tracker=Presence,
-      _pid=Process.whereis(Gateway.PubSub),
+      _tracker = Presence,
+      _pid = Process.whereis(Gateway.PubSub),
       @topic,
-      _key=jti)
+      _key = jti)
   end
 
   @spec list() :: [{String.t, %{optional(String.t) => String.t}}]

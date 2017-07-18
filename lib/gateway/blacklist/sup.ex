@@ -1,4 +1,9 @@
 defmodule Gateway.Blacklist.Sup do
+  @moduledoc """
+  Supervisor for the global Blacklist.
+
+  """
+
   use Supervisor
 
   def start_link do
