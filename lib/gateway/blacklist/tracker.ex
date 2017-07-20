@@ -6,10 +6,10 @@ defmodule Gateway.Blacklist.Tracker do
 
   defmodule TrackerBehaviour do
     @moduledoc false
-    @callback track(jti: String.t, expiry: Timex.DateTime.t) :: {:ok, String.t}
-    @callback untrack(jti: String.t) :: :ok
+    @callback track(jti :: String.t, expiry :: Timex.DateTime.t) :: {:ok, String.t}
+    @callback untrack(jti :: String.t) :: :ok
     @callback list() :: [{String.t, %{optional(String.t) => String.t}}]
-    @callback find(jti: String.t) :: {String.t, %{optional(String.t) => String.t}} | nil
+    @callback find(jti :: String.t) :: {String.t, %{optional(String.t) => String.t}} | nil
   end
 
   require Logger
