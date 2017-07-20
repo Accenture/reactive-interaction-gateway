@@ -10,6 +10,9 @@ defmodule Gateway.ApiProxy.Proxy do
   alias Plug.Conn.Query
   alias Gateway.ApiProxy.Base
   alias Gateway.Utils.Jwt
+  alias Gateway.Kafka
+
+  @typep route_map :: %{required(String.t) => String.t}
 
   plug :match
   plug :dispatch
@@ -26,14 +29,14 @@ defmodule Gateway.ApiProxy.Proxy do
     |> Path.join(proxy_file_location)
     |> File.read!
     |> Poison.decode!
-    |> Enum.find(fn(route) ->
+    |> Enum.find(fn route ->
       match_path(route, request_path) && match_http_method(route, method)
     end)
-    |> authenticate_request(conn)
+    |> check_and_forward_request(conn)
   end
 
   # Match route path against requested path
-  @spec match_path(map, String.t) :: boolean
+  @spec match_path(route_map, String.t) :: boolean
   defp match_path(route, request_path) do
     # Replace wildcards with actual params
     replace_wildcards = String.replace(route["path"], "{id}", "[^/]+")
@@ -42,7 +45,7 @@ defmodule Gateway.ApiProxy.Proxy do
   end
 
   # Match route method against requested method
-  @spec match_http_method(map, String.t) :: boolean
+  @spec match_http_method(route_map, String.t) :: boolean
   defp match_http_method(route, method), do: route["method"] == method
 
   # Encode custom error messages with Poison to JSON format
@@ -53,48 +56,36 @@ defmodule Gateway.ApiProxy.Proxy do
   end
 
   # Handle unsupported route
-  @spec authenticate_request(nil, map) :: map
-  defp authenticate_request(nil, conn) do
+  @spec check_and_forward_request(nil, %Plug.Conn{}) :: %Plug.Conn{}
+  defp check_and_forward_request(nil, conn) do
     send_resp(conn, 404, encode_error_message("Route is not available"))
   end
-
   # Authentication required
-  @spec authenticate_request(%{auth: true}, map) :: map
-  defp authenticate_request(service = %{"auth" => true}, conn) do
-    process_authentication(service, conn)
+  @spec check_and_forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
+  defp check_and_forward_request(service = %{"auth" => true}, conn) do
+    # Get authorization from request header (returns a list):
+    tokens = get_req_header(conn, "authorization")
+    case any_token_valid?(tokens) do
+      true -> forward_request(service, conn)
+      false -> send_resp(conn, 401, encode_error_message("Missing or invalid token"))
+    end
   end
-
   # Authentication not required
-  @spec authenticate_request(%{auth: false}, map) :: map
-  defp authenticate_request(service = %{"auth" => false}, conn) do
+  @spec check_and_forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
+  defp check_and_forward_request(service = %{"auth" => false}, conn) do
     forward_request(service, conn)
   end
 
-  @spec process_authentication(String.t, map) :: map
-  defp process_authentication(service, conn) do
-    # Get authorization form request header
-    jwt = get_req_header(conn, "authorization")
-
-    if authenticated?(jwt) do
-      forward_request(service, conn)
-    else
-      send_resp(conn, 401, encode_error_message("Missing or invalid token"))
-    end
+  @spec any_token_valid?([]) :: false
+  defp any_token_valid?([]), do: false
+  @spec any_token_valid?([String.t, ...]) :: boolean
+  defp any_token_valid?(tokens) do
+    tokens |> Enum.any?(&Jwt.valid?/1)
   end
 
-  # Authentication failed if JWT in not provided
-  @spec authenticated?([]) :: false
-  defp authenticated?([]), do: false
-  # Validate present JWT
-  @spec authenticated?(tuple) :: boolean
-  defp authenticated?(jwt) do
-    jwt
-    |> List.first
-    |> Jwt.valid?
-  end
-
-  @spec forward_request(map, map) :: map
+  @spec forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
   defp forward_request(service, conn) do
+    log_to_kafka(service, conn)
     %{
       method: method,
       request_path: request_path,
@@ -103,7 +94,6 @@ defmodule Gateway.ApiProxy.Proxy do
     } = conn
     # Build URL
     url = build_url(service, request_path)
-
     # Match URL against HTTP method to forward it to specific service
     res =
       case method do
@@ -113,12 +103,20 @@ defmodule Gateway.ApiProxy.Proxy do
         "DELETE" -> Base.delete!(url, req_headers)
         _ -> nil
       end
-
     send_response({:ok, conn, res})
   end
 
+  @spec log_to_kafka(route_map, %Plug.Conn{}) :: :ok
+  defp log_to_kafka(%{"auth" => true} = service, conn) do
+    Kafka.log_proxy_api_call(service, conn)
+  end
+  defp log_to_kafka(_service, _conn) do
+    # no-op - we only log authenticated requests for now.
+    :ok
+  end
+
   # Builds URL where REST request should be proxied
-  @spec build_url(map, String.t) :: String.t
+  @spec build_url(route_map, String.t) :: String.t
   defp build_url(service, request_path) do
     host = System.get_env(service["host"]) || "localhost"
     "#{host}:#{service["port"]}#{request_path}"
@@ -134,14 +132,13 @@ defmodule Gateway.ApiProxy.Proxy do
   end
 
   # Function for sending response back to client
-  @spec send_response({:ok, map, nil}) :: map
+  @spec send_response({:ok, %Plug.Conn{}, nil}) :: %Plug.Conn{}
   defp send_response({:ok, conn, nil}) do
     send_resp(conn, 405, encode_error_message("Method is not supported"))
   end
 
-  @spec send_response({:ok, map, map}) :: map
+  @spec send_response({:ok, %Plug.Conn{}, map}) :: %Plug.Conn{}
   defp send_response({:ok, conn, %{headers: headers, status_code: status_code, body: body}}) do
     %{conn | resp_headers: headers} |> send_resp(status_code, body)
   end
-
 end
