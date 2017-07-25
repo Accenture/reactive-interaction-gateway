@@ -4,14 +4,24 @@ FROM elixir:1.3.4
 RUN mix local.hex --force
 RUN mix local.rebar --force
 
-WORKDIR /opt/sites/fsa-reactive-gateway
-COPY . /opt/sites/fsa-reactive-gateway
-
 ENV MIX_ENV=prod \
     PORT=6060
 
+WORKDIR /opt/sites/fsa-reactive-gateway
+
+# Copy necessary files for dependencies
+COPY mix.exs /opt/sites/fsa-reactive-gateway
+COPY mix.lock /opt/sites/fsa-reactive-gateway
+
 # Install project dependencies
 RUN mix deps.get
+
+# Copy application files
+COPY config /opt/sites/fsa-reactive-gateway
+COPY lib /opt/sites/fsa-reactive-gateway
+COPY priv /opt/sites/fsa-reactive-gateway
+COPY web /opt/sites/fsa-reactive-gateway
+
 # Digest Phoenix static files
 RUN mix phoenix.digest
 # Initialize release & compile application
