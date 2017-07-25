@@ -34,9 +34,9 @@ node {
         }
         
         stage('Test') {
-            // build environment for Elixir app release
+            // build environment for Elixir app test
             sh "docker build -t ${imageName}-${languageTag}-${imageTestSuffix} -f test.dockerfile ."
-            // run release for app and mount artifacts to volume
+            // run test
             sh "docker run --name ${imageName}-${languageTag}-${imageTestSuffix} ${imageName}-${languageTag}-${imageTestSuffix}"
         }
         
@@ -73,12 +73,13 @@ node {
                 fi
             )'''
             
-            // remove dead container with build environment
+            // remove dead containers
+            sh "docker rm ${imageName}-${languageTag}-${imageTestSuffix}"
             sh "docker rm ${imageName}-${languageTag}-${imageBuildSuffix}"
             // delete images
             // sh "docker rmi ${imageName}-${languageTag}-${imageBuildSuffix}"
             // sh "docker rmi ${imageName}-${languageTag}-${imageDeploySuffix}"
-            sh "docker rmi \$(docker images --format '{{.Repository}}:{{.Tag}}' | grep ${imageName})"
+            sh "docker rmi \$(docker images --format '{{.Repository}}:{{.Tag}}' | grep \"${imageName}:${languageTag}\")"
             // sh "docker rmi \$(docker images --format '{{.Repository}}:{{.Tag}}' | grep ${gitHash})"
         }
     }
