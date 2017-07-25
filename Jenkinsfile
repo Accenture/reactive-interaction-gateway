@@ -16,7 +16,7 @@ node {
             deleteDir()
             
             // clone repository
-            // git url: 'ssh://git@innersource.accenture.com/a2495/reactive-gateway-elixir.git', branch: 'feature/deploy', credentialsId: '4c9b7d51-e0d4-4184-ab62-04b48b0dc227'
+            git url: 'ssh://git@innersource.accenture.com/a2495/reactive-gateway-elixir.git', branch: 'feature/deploy', credentialsId: '4c9b7d51-e0d4-4184-ab62-04b48b0dc227'
             
             // get last commit hash
             gitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
