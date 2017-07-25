@@ -17,10 +17,10 @@ COPY mix.lock /opt/sites/fsa-reactive-gateway
 RUN mix deps.get
 
 # Copy application files
-COPY config /opt/sites/fsa-reactive-gateway
-COPY lib /opt/sites/fsa-reactive-gateway
-COPY priv /opt/sites/fsa-reactive-gateway
-COPY web /opt/sites/fsa-reactive-gateway
+COPY config/ /opt/sites/fsa-reactive-gateway
+COPY lib/ /opt/sites/fsa-reactive-gateway
+COPY priv/ /opt/sites/fsa-reactive-gateway
+COPY web/ /opt/sites/fsa-reactive-gateway
 
 # Digest Phoenix static files
 RUN mix phoenix.digest
