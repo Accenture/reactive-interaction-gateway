@@ -16,7 +16,7 @@ node {
             deleteDir()
             
             // clone repository
-            git url: 'ssh://git@innersource.accenture.com/a2495/reactive-gateway-elixir.git', branch: 'feature/deploy', credentialsId: '4c9b7d51-e0d4-4184-ab62-04b48b0dc227'
+            // git url: 'ssh://git@innersource.accenture.com/a2495/reactive-gateway-elixir.git', branch: 'feature/deploy', credentialsId: '4c9b7d51-e0d4-4184-ab62-04b48b0dc227'
             
             // get last commit hash
             gitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
@@ -37,14 +37,14 @@ node {
             // build environment for Elixir app test
             sh "docker build -t ${imageName}-${languageTag}-${imageTestSuffix} -f test.dockerfile ."
             // run test
-            sh "docker run --name ${imageName}-${languageTag}-${imageTestSuffix} ${imageName}-${languageTag}-${imageTestSuffix}"
+            sh "docker run --rm --name ${imageName}-${languageTag}-${imageTestSuffix} ${imageName}-${languageTag}-${imageTestSuffix}"
         }
         
         stage('Build') {
             // build environment for Elixir app release
             sh "docker build -t ${imageName}-${languageTag}-${imageBuildSuffix} -f build.dockerfile ."
             // run release for app and mount artifacts to volume
-            sh "docker run --name ${imageName}-${languageTag}-${imageBuildSuffix} -v /var/jenkins_home/jobs/banking-ref-app/jobs/reactive-gateway-elixir/workspace/fsa-reactive-gateway:/opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway ${imageName}-${languageTag}-${imageBuildSuffix}"
+            sh "docker run --rm --name ${imageName}-${languageTag}-${imageBuildSuffix} -v /var/jenkins_home/jobs/banking-ref-app/jobs/reactive-gateway-elixir/workspace/fsa-reactive-gateway:/opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway ${imageName}-${languageTag}-${imageBuildSuffix}"
         }
         
         stage('Deploy') {
@@ -73,14 +73,9 @@ node {
                 fi
             )'''
             
-            // remove dead containers
-            sh "docker rm ${imageName}-${languageTag}-${imageTestSuffix}"
-            sh "docker rm ${imageName}-${languageTag}-${imageBuildSuffix}"
-            // delete images
-            // sh "docker rmi ${imageName}-${languageTag}-${imageBuildSuffix}"
-            // sh "docker rmi ${imageName}-${languageTag}-${imageDeploySuffix}"
-            sh "docker rmi \$(docker images --format '{{.Repository}}:{{.Tag}}' | grep \"${imageName}:${languageTag}\")"
-            // sh "docker rmi \$(docker images --format '{{.Repository}}:{{.Tag}}' | grep ${gitHash})"
+            // remove images
+            sh "docker rmi ${imageName}-${languageTag}-${imageDeploySuffix}"
+            sh "docker rmi \$(docker images --format '{{.Repository}}:{{.Tag}}' | grep \"${dockerhubDomain}/${dockerhubAccount}/${imageName}:${languageTag}\")"
         }
     }
 }
