@@ -2,10 +2,8 @@ FROM elixir:1.3.4
 
 # Install Elixir & Erlang environment dependencies
 RUN mix local.hex --force
-RUN mix local.rebar --force
 
-ENV MIX_ENV=prod \
-    PORT=6060
+ENV MIX_ENV=test
 
 WORKDIR /opt/sites/fsa-reactive-gateway
 
@@ -20,11 +18,8 @@ RUN mix deps.get
 COPY config /opt/sites/fsa-reactive-gateway/config
 COPY lib /opt/sites/fsa-reactive-gateway/lib
 COPY priv /opt/sites/fsa-reactive-gateway/priv
+COPY test /opt/sites/fsa-reactive-gateway/test
 COPY web /opt/sites/fsa-reactive-gateway/web
 
-# Digest Phoenix static files
-RUN mix phoenix.digest
-# Initialize release & compile application
-RUN mix release.init
-# Release application production code
-CMD ["mix", "release"]
+# Run tests
+CMD ["mix", "test"]

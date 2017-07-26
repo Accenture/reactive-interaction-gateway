@@ -3,12 +3,11 @@ _build/
 cover/
 deps/
 doc/
-test/
 rel/
 .adr-dir
-.credo.exs
 .DS_Store
 .gitignore
 Dockerfile
 Dockerfile_build
+Dockerfile_test
 README.md
