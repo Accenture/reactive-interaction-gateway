@@ -63,16 +63,6 @@ node {
         }
         
         stage('Clean') {
-            sh '''(
-                if [ `docker images -q -f dangling=true | wc -l` -gt 0 ]
-                then
-                    echo 'Removing dangling images ...'
-                    docker rmi -f $(docker images -q -f dangling=true)
-                else
-                    echo 'No dangling images found'
-                fi
-            )'''
-            
             // remove images
             sh "docker rmi ${imageName}-${languageTag}-${imageDeploySuffix}"
             sh "docker rmi \$(docker images --format '{{.Repository}}:{{.Tag}}' | grep \"${dockerhubDomain}/${dockerhubAccount}/${imageName}:${languageTag}\")"
