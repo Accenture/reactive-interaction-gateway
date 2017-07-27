@@ -6,7 +6,7 @@ RUN mix local.rebar --force
 
 ENV MIX_ENV=prod \
     PORT=6060 \
-    ORIGIN=$ORIGIN
+    ORIGIN=https://lwa.accenture.com
 
 WORKDIR /opt/sites/fsa-reactive-gateway
 
