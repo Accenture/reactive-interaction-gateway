@@ -5,7 +5,8 @@ RUN mix local.hex --force
 RUN mix local.rebar --force
 
 ENV MIX_ENV=prod \
-    PORT=6060
+    PORT=6060 \
+    ORIGIN=$ORIGIN
 
 WORKDIR /opt/sites/fsa-reactive-gateway
 
