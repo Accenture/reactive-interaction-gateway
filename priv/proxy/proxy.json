@@ -111,7 +111,7 @@
     "method": "GET",
     "auth": true
   },
-    {
+  {
     "host": "TS_HOST",
     "port": 8889,
     "path": "/ts/transaction/{id}",
