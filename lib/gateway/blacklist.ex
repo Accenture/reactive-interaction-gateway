@@ -30,7 +30,7 @@ defmodule Gateway.Blacklist do
 
   def start_link(tracker_mod \\ nil, opts \\ []) do
     tracker_mod = if tracker_mod, do: tracker_mod, else: @default_tracker_mod
-    Logger.debug "Blacklist with tracker #{inspect tracker_mod}"
+    Logger.debug("Blacklist with tracker #{inspect tracker_mod}")
     GenServer.start_link(
       __MODULE__,
       _state = %{tracker_mod: tracker_mod},
@@ -99,8 +99,8 @@ defmodule Gateway.Blacklist do
   def handle_info(:expire_stale_records, state) do
     now = Timex.now()
     state.tracker_mod.list()
-    |> Stream.filter(fn {_jti, meta} -> meta.expiry |> Timex.before?(now) end)
-    |> Enum.each(fn {jti, _meta} -> expire(state.tracker_mod, jti) end)
+    |> Stream.filter(fn({_jti, meta}) -> meta.expiry |> Timex.before?(now) end)
+    |> Enum.each(fn({jti, _meta}) -> expire(state.tracker_mod, jti) end)
     {:noreply, state}
   end
 
@@ -116,6 +116,6 @@ defmodule Gateway.Blacklist do
   @spec send_expiration_notification(pid, String.t) :: any
   defp send_expiration_notification(listener, jti) do
     send(listener, {:expired, jti})
-    Logger.debug "notified #{inspect listener} about expiration of JTI #{inspect jti}"
+    Logger.debug("notified #{inspect listener} about expiration of JTI #{inspect jti}")
   end
 end

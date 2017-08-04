@@ -62,7 +62,7 @@ defmodule Gateway.Kafka.GroupSubscriber do
   """
   @spec init(String.t, {String.t, nonempty_list(String.t)}) :: {:ok, state_t}
   def init(consumer_group_id, {brod_client_id, topics}) do
-    Logger.info "Starting Kafka group subscriber (group=#{inspect consumer_group_id}, client=#{inspect brod_client_id}, topics=#{inspect topics})"
+    Logger.info("Starting Kafka group subscriber (group=#{inspect consumer_group_id}, client=#{inspect brod_client_id}, topics=#{inspect topics})")
     handlers = spawn_message_handlers(brod_client_id, topics)
     {:ok, %{handlers: handlers}}
   end
@@ -75,7 +75,7 @@ defmodule Gateway.Kafka.GroupSubscriber do
   @spec handle_message(String.t, String.t | non_neg_integer, String.t, state_t) :: {:ok, state_t}
   def handle_message(topic, partition, message, state = %{handlers: handlers}) do
     handler_pid = handlers["#{topic}-#{partition}"]
-    send handler_pid, message
+    send(handler_pid, message)
     {:ok, state}
   end
 
@@ -88,7 +88,7 @@ defmodule Gateway.Kafka.GroupSubscriber do
       [topic, _partition = &1, _group_subscriber_pid = self()]
     )
     0..(n_partitions - 1)
-    |> Enum.reduce(%{}, fn partition, acc ->
+    |> Enum.reduce(%{}, fn(partition, acc) ->
       handler_pid = spawn_for_partition.(partition)
       Map.put(acc, "#{topic}-#{partition}", handler_pid)
     end)

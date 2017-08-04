@@ -46,6 +46,6 @@ defmodule Gateway.Blacklist.Tracker do
 
   @spec find(String.t) :: {String.t, %{optional(String.t) => String.t}} | nil
   def find(jti) do
-    list() |> Enum.find(fn {key, _meta} -> key == jti end)
+    list() |> Enum.find(fn({key, _meta}) -> key == jti end)
   end
 end

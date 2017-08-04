@@ -45,7 +45,7 @@ defmodule Gateway.Kafka do
     [claims] =
       conn
       |> Plug.Conn.get_req_header("authorization")
-      |> Stream.map(fn token ->
+      |> Stream.map(fn(token) ->
         {:ok, claims} = Jwt.decode(token)
         claims
       end)

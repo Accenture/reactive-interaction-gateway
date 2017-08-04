@@ -29,7 +29,7 @@ defmodule Gateway.ApiProxy.Proxy do
     |> Path.join(proxy_file_location)
     |> File.read!
     |> Poison.decode!
-    |> Enum.find(fn route ->
+    |> Enum.find(fn(route) ->
       match_path(route, request_path) && match_http_method(route, method)
     end)
     |> check_and_forward_request(conn)
