@@ -7,29 +7,37 @@ defmodule Gateway.Kafka do
   alias Gateway.ApiProxy.Proxy
 
   @brod_client_id Application.fetch_env!(:gateway, :kafka).kafka_default_client
+  @kafka_topic Application.fetch_env!(:gateway, :kafka).kafka_default_topic
 
   @spec log_proxy_api_call(Proxy.route_map, %Plug.Conn{}) :: Jwt.claim_map
   def log_proxy_api_call(route, conn) do
     claims = extract_claims!(conn)
     username = Map.fetch!(claims, "username")
-    message_payload =
+    message =
       %{
-        user_id: username,
+        username: username,
         jti: Map.fetch!(claims, "jti"),
-        service: inspect(route),
-        remote_ip: conn.remote_ip |> format_ip
+        type: "PROXY_API_CALL",
+        version: "1.0",
+        timestamp: Timex.now |> Timex.to_unix,
+        level: 0,
+        payload: %{
+          service_def: inspect(route),
+          request_path: conn.request_path,
+          remote_ip: conn.remote_ip |> format_ip,
+        },
       }
-      |> Poison.encode!
+    message_json = message |> Poison.encode!
     # If topic does not exist, it will be created automatically,
     # provided the server is configured that way. However,
     # this call then returns with {:error, :LeaderNotAvailable},
     # as at that point there won't be a partition leader yet.
     :ok = :brod.produce_sync(
       @brod_client_id,
-      _topic = "PROXY_API_CALL",
+      @kafka_topic,
       _partition = &compute_kafka_partition/4,
       _key = username,
-      _value = message_payload
+      _value = message_json
     )
   rescue
     err ->
