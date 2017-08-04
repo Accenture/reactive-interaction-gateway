@@ -50,14 +50,13 @@ defmodule Gateway.Kafka do
 
   @spec extract_claims!(%Plug.Conn{}) :: Jwt.claim_map
   defp extract_claims!(conn) do
-    [claims] =
+    # we assume there is exactly one valid token:
+    [token] =
       conn
       |> Plug.Conn.get_req_header("authorization")
-      |> Stream.map(fn(token) ->
-        {:ok, claims} = Jwt.decode(token)
-        claims
-      end)
+      |> Stream.filter(&Jwt.valid?/1)
       |> Enum.take(1)
+    {:ok, claims} = Jwt.decode(token)
     claims
   end
 
