@@ -114,6 +114,13 @@
   {
     "host": "TS_HOST",
     "port": 8889,
+    "path": "/ts/transactions/{id}",
+    "method": "GET",
+    "auth": true
+  },
+  {
+    "host": "TS_HOST",
+    "port": 8889,
     "path": "/ts/transactions",
     "method": "POST",
     "auth": true
@@ -121,14 +128,14 @@
   {
     "host": "TS_HOST",
     "port": 8889,
-    "path": "/ts/transactions/balance",
+    "path": "/ts/balance",
     "method": "GET",
     "auth": true
   },
   {
     "host": "TS_HOST",
     "port": 8889,
-    "path": "/ts/transactions/sum",
+    "path": "/ts/sum",
     "method": "GET",
     "auth": true
   },
