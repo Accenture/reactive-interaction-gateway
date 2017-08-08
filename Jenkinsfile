@@ -17,6 +17,7 @@ node {
             
             // clone repository
             checkout scm
+            poll: true
             
             // get last commit hash
             gitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
