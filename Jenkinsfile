@@ -45,7 +45,7 @@ node {
             // build environment for Elixir app release
             sh "docker build -t ${imageName}-${languageTag}-${imageBuildSuffix} -f build.dockerfile ."
             // run release for app and mount artifacts to volume
-            sh "docker run --rm --name ${imageName}-${languageTag}-${imageBuildSuffix} -v /var/jenkins_home/jobs/banking-ref-app/jobs/reactive-gateway-elixir/workspace/fsa-reactive-gateway:/opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway ${imageName}-${languageTag}-${imageBuildSuffix}"
+            sh "docker run --rm --name ${imageName}-${languageTag}-${imageBuildSuffix} -v $WORKSPACE/fsa-reactive-gateway:/opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway ${imageName}-${languageTag}-${imageBuildSuffix}"
         }
         
         stage('Deploy') {
