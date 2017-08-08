@@ -42,6 +42,7 @@ defmodule Gateway.Mixfile do
       included_applications: [
         :supervisor3,
         :brod,
+        :murmur,
       ]
     ]
   end
