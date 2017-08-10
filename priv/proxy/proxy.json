@@ -105,6 +105,27 @@
     "auth": true
   },
   {
+    "host": "PS_HOST",
+    "port": 8080,
+    "path": "/ps/tasks/{id}/attachments",
+    "method": "POST",
+    "auth": true
+  },
+  {
+    "host": "PS_HOST",
+    "port": 8080,
+    "path": "/ps/tasks/{id}/attachments/{id}",
+    "method": "GET",
+    "auth": true
+  },
+  {
+    "host": "PS_HOST",
+    "port": 8080,
+    "path": "/ps/tasks/{id}/attachments/{id}",
+    "method": "DELETE",
+    "auth": true
+  },
+  {
     "host": "TS_HOST",
     "port": 8889,
     "path": "/ts/transactions",
