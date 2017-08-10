@@ -42,7 +42,7 @@ defmodule Gateway.ChannelsController do
     |> jwt_expiry_from_tokens
   rescue
     e ->
-      Logger.warn "No token (expiration) found, using default blacklist expiration timeout (#{inspect e})."
+      Logger.warn("No token (expiration) found, using default blacklist expiration timeout (#{inspect e}).")
       nil
   end
 

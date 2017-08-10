@@ -23,10 +23,12 @@ config :logger, :console,
 
 # Kafka
 kafka_default_client = :gateway_brod_client
+kafka_default_topic = "message"
 config :gateway, :kafka, %{
   kafka_default_client: kafka_default_client,
+  kafka_default_topic: kafka_default_topic,
   consumer_group_id: "gateway-consumer-group",
-  topics: ["message"],
+  topics: [kafka_default_topic],
 }
 
 # Read by brod_sup (which is started as an application by mix)

@@ -29,12 +29,12 @@ defmodule Gateway.Kafka.SupWrapper do
 
   def init(:ok) do
     Process.flag :trap_exit, true
-    send self(), :start_sup
+    send(self(), :start_sup)
     {:ok, %{n_attempts: 0}}
   end
 
   def handle_info(:start_sup, old_state) do
-    Logger.debug "Starting Kafka supervisor (attempt #{next_attempt_no(old_state)})"
+    Logger.debug("Starting Kafka supervisor (attempt #{next_attempt_no(old_state)})")
     new_state = case KafkaSupervisor.start_link() do
       {:ok, _} ->
         Map.put old_state, :n_attempts, 0
@@ -53,12 +53,12 @@ defmodule Gateway.Kafka.SupWrapper do
     },
     old_state
   ) do
-    Logger.warn """
+    Logger.warn("""
     Supervisor startup failed (attempt #{cur_attempt_no(old_state)}, #{inspect module}): #{inspect err}
     Attempt #{next_attempt_no(old_state)} commences in #{@restart_delay_ms / 1000} seconds..
-    """
+    """)
     :timer.sleep @restart_delay_ms
-    send self(), :start_sup
+    send(self(), :start_sup)
     {:noreply, old_state}
   end
 

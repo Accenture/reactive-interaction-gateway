@@ -4,6 +4,8 @@ defmodule Gateway.Utils.Jwt do
   """
   import Joken
 
+  @type claim_map :: %{required(String.t) => String.t}
+
   @spec valid?(String.t) :: boolean
   def valid?(jwt) do
     jwt
@@ -38,7 +40,7 @@ defmodule Gateway.Utils.Jwt do
 
   @spec has_valid_scope?(nil, String.t, String.t) :: false
   defp has_valid_scope?(nil, _namespace, _action), do: false
-  @spec has_valid_scope?(map, String.t, String.t) :: boolean
+  @spec has_valid_scope?(claim_map, String.t, String.t) :: boolean
   defp has_valid_scope?(claims, namespace, action) do
     claims
     |> Map.get("scopes")

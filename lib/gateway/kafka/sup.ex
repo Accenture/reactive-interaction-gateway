@@ -21,9 +21,16 @@ defmodule Gateway.Kafka.Sup do
       "KAFKA_HOSTS"
       |> System.get_env
       |> parse_broker_csv
-
-    client_conf = {brod_client_id, [endpoints: brokers]}
-    Logger.debug "brod_client config: id=#{inspect brod_client_id} brokers=#{inspect brokers}"
+    client_conf = [
+      auto_start_producers: true,
+      default_producer_config: []
+    ]
+    Logger.debug("""
+    Starting brod_client
+      id=#{inspect brod_client_id}
+      brokers=#{inspect brokers}
+      config=#{inspect client_conf}
+    """)
     {
       :ok,
       {
@@ -33,7 +40,7 @@ defmodule Gateway.Kafka.Sup do
           _max_time = 1,
         },
         _children = [
-          child_spec(:brod_client, :worker, [brokers, brod_client_id, [client_conf]]),
+          child_spec(:brod_client, :worker, [brokers, brod_client_id, client_conf]),
           child_spec(Gateway.Kafka.GroupSubscriber, :worker, []),
         ]
       }

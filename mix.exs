@@ -42,6 +42,7 @@ defmodule Gateway.Mixfile do
       included_applications: [
         :supervisor3,
         :brod,
+        :murmur,
       ]
     ]
   end
@@ -74,6 +75,7 @@ defmodule Gateway.Mixfile do
       {:timex, "~> 3.0"},
       {:distillery, "~> 1.4"},
       {:stubr, "~> 1.5.0", only: :test},
+      {:murmur, "~> 1.0"},  # for Kafka, partition from MurmurHash(key)
     ]
   end
 end
