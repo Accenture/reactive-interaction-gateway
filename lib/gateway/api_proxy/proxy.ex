@@ -63,8 +63,14 @@ defmodule Gateway.ApiProxy.Proxy do
   # Authentication required
   @spec check_and_forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
   defp check_and_forward_request(service = %{"auth" => true}, conn) do
-    # Get authorization from request header (returns a list):
-    tokens = get_req_header(conn, "authorization")
+    # Get authorization from request header and query param (returns a list):
+    tokens =
+      conn
+      |> Map.get(:query_params)
+      |> Map.get("token", "")
+      |> String.split
+      |> Enum.concat(get_req_header(conn, "authorization"))
+
     case any_token_valid?(tokens) do
       true -> forward_request(service, conn)
       false -> send_resp(conn, 401, encode_error_message("Missing or invalid token"))
@@ -98,12 +104,24 @@ defmodule Gateway.ApiProxy.Proxy do
     res =
       case method do
         "GET" -> Base.get!(attachQueryParams(url, params), req_headers)
-        "POST" -> Base.post!(url, Poison.encode!(params), req_headers)
+        "POST" -> format_post_request(url, params, req_headers)
         "PUT" -> Base.put!(url, Poison.encode!(params), req_headers)
         "DELETE" -> Base.delete!(url, req_headers)
         _ -> nil
       end
     send_response({:ok, conn, res})
+  end
+
+  defp format_post_request(url, %{"qqfile" => %Plug.Upload{}} = params, headers) do
+    %{
+      "qquuid" => qquuid,
+      "qqfile" => qqfile,
+    } = params
+    Base.post!(url, {:multipart, [{"qquuid", qquuid}, {:file, qqfile.path}, {"content-type", qqfile.content_type}, {"filename", qqfile.filename}]}, headers)
+  end
+
+  defp format_post_request(url, params, headers) do
+    Base.post!(url, Poison.encode!(params), headers)
   end
 
   @spec log_to_kafka(route_map, %Plug.Conn{}) :: :ok

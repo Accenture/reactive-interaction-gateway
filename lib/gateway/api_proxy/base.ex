@@ -5,7 +5,9 @@ defmodule Gateway.ApiProxy.Base do
   use HTTPoison.Base
 
   @spec process_headers(map) :: list(tuple)
-  def process_headers(_headers) do
-    [{"Content-Type", "application/json; charset=utf-8"}, {"Content-Encoding", "gzip"}]
+  def process_headers(headers) do
+    # Remove transfer Encoding from headers since it collides with Content-length and leads to error request
+    headers
+    |> List.keydelete("Transfer-Encoding", 0)
   end
 end
