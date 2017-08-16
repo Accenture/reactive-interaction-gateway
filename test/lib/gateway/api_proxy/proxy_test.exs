@@ -2,11 +2,6 @@ defmodule Gateway.ApiProxy.ProxyTest do
   use ExUnit.Case, async: true
   use Gateway.ConnCase
   import Joken
-  
-  # plug Plug.Parsers,
-  #   parsers: [:urlencoded, :multipart, :json],
-  #   pass: ["*/*"],
-  #   json_decoder: Poison
 
   setup do
     first_service = Bypass.open(port: 7070)

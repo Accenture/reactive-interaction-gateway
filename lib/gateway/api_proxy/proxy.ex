@@ -112,6 +112,7 @@ defmodule Gateway.ApiProxy.Proxy do
     send_response({:ok, conn, res})
   end
 
+  @spec format_post_request(String.t, %{required(String.t) => %Plug.Upload{}}, map) :: %Plug.Conn{}
   defp format_post_request(url, %{"qqfile" => %Plug.Upload{}} = params, headers) do
     %{"qqfile" => file} = params
     optional_params = params |> Map.delete("qqfile")
@@ -123,6 +124,7 @@ defmodule Gateway.ApiProxy.Proxy do
     Base.post!(url, {:multipart, params_merged}, headers)
   end
 
+  @spec format_post_request(String.t, map, map) :: %Plug.Conn{}
   defp format_post_request(url, params, headers) do
     Base.post!(url, Poison.encode!(params), headers)
   end
