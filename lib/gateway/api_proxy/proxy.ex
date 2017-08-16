@@ -113,11 +113,14 @@ defmodule Gateway.ApiProxy.Proxy do
   end
 
   defp format_post_request(url, %{"qqfile" => %Plug.Upload{}} = params, headers) do
-    %{
-      "qquuid" => qquuid,
-      "qqfile" => qqfile,
-    } = params
-    Base.post!(url, {:multipart, [{"qquuid", qquuid}, {:file, qqfile.path}, {"content-type", qqfile.content_type}, {"filename", qqfile.filename}]}, headers)
+    %{"qqfile" => file} = params
+    optional_params = params |> Map.delete("qqfile")
+    params_merged = Enum.concat(
+      optional_params,
+      [{:file, file.path}, {"content-type", file.content_type}, {"filename", file.filename}]
+    )
+
+    Base.post!(url, {:multipart, params_merged}, headers)
   end
 
   defp format_post_request(url, params, headers) do
