@@ -6,6 +6,9 @@ defmodule Gateway.Kafka.Sup do
   @behaviour :supervisor3
   require Logger
 
+  @brod_client_id Application.fetch_env!(:gateway, :kafka_client_id)
+  @broker_csv_list Application.fetch_env!(:gateway, :kafka_broker_csv_list)
+
   def start_link do
     :supervisor3.start_link(
       _sup_name = {:local, __MODULE__},
@@ -16,18 +19,14 @@ defmodule Gateway.Kafka.Sup do
 
   # supervisor3 callback
   def init(:ok) do
-    [{brod_client_id}] = Application.fetch_env!(:brod, :clients)
-    brokers =
-      "KAFKA_HOSTS"
-      |> System.get_env
-      |> parse_broker_csv
+    brokers = @broker_csv_list |> parse_broker_csv
     client_conf = [
       auto_start_producers: true,
       default_producer_config: []
     ]
     Logger.debug("""
     Starting brod_client
-      id=#{inspect brod_client_id}
+      id=#{inspect @brod_client_id}
       brokers=#{inspect brokers}
       config=#{inspect client_conf}
     """)
@@ -40,7 +39,7 @@ defmodule Gateway.Kafka.Sup do
           _max_time = 1,
         },
         _children = [
-          child_spec(:brod_client, :worker, [brokers, brod_client_id, client_conf]),
+          child_spec(:brod_client, :worker, [brokers, @brod_client_id, client_conf]),
           child_spec(Gateway.Kafka.GroupSubscriber, :worker, []),
         ]
       }
@@ -52,7 +51,7 @@ defmodule Gateway.Kafka.Sup do
     :ignore
   end
 
-  defp parse_broker_csv(nil), do: ["localhost": 9092]
+  @spec parse_broker_csv(String.t) :: keyword(pos_integer())
   defp parse_broker_csv(brokers) do
     brokers
     |> String.split(",")

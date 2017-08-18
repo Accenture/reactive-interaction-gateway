@@ -35,21 +35,23 @@ defmodule Gateway.Kafka.GroupSubscriber do
   @behaviour :brod_group_subscriber
   @type handlers_t :: %{required(String.t) => nonempty_list(pid)}
   @type state_t :: %{handlers: handlers_t}
+  
+  @brod_client_id Application.fetch_env!(:gateway, :kafka_client_id)
+  @consumer_group_id Application.fetch_env!(:gateway, :kafka_consumer_group_id)
+  @topics Application.fetch_env!(:gateway, :kafka_consumed_topics)
 
   @doc """
   Makes sure the Brod client is running and starts the group subscriber.
   """
   def start_link do
-    conf = Application.fetch_env!(:gateway, :kafka)
-    brod_client_id = conf.kafka_default_client
     :brod.start_link_group_subscriber(
-      brod_client_id,
-      conf.consumer_group_id,
-      conf.topics,
+      @brod_client_id,
+      @consumer_group_id,
+      @topics,
       _group_config = [rejoin_delay_seconds: 5],
       _consumer_config = [begin_offset: :earliest],
       _callback_module = __MODULE__,
-      _callback_init_args = {brod_client_id, conf.topics}
+      _callback_init_args = :no_args
     )
   end
 
@@ -60,10 +62,10 @@ defmodule Gateway.Kafka.GroupSubscriber do
 
   We spawn one message handler for each topic-partition.
   """
-  @spec init(String.t, {String.t, nonempty_list(String.t)}) :: {:ok, state_t}
-  def init(consumer_group_id, {brod_client_id, topics}) do
-    Logger.info("Starting Kafka group subscriber (group=#{inspect consumer_group_id}, client=#{inspect brod_client_id}, topics=#{inspect topics})")
-    handlers = spawn_message_handlers(brod_client_id, topics)
+  @spec init(String.t, :no_args) :: {:ok, state_t}
+  def init(consumer_group_id, :no_args) do
+    Logger.info("Starting Kafka group subscriber (group=#{inspect consumer_group_id}, client=#{inspect @brod_client_id}, topics=#{inspect @topics})")
+    handlers = spawn_message_handlers(@brod_client_id, @topics)
     {:ok, %{handlers: handlers}}
   end
 
