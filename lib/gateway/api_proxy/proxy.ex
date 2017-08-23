@@ -162,6 +162,35 @@ defmodule Gateway.ApiProxy.Proxy do
 
   @spec send_response({:ok, %Plug.Conn{}, map}) :: %Plug.Conn{}
   defp send_response({:ok, conn, %{headers: headers, status_code: status_code, body: body}}) do
-    %{conn | resp_headers: headers} |> send_resp(status_code, body)
+    conn = %{conn | resp_headers: headers}
+    if header_value?(conn, "transfer-encoding", "chunked") do
+      send_chunked_response(conn, headers, status_code, body)
+    else
+      %{conn | resp_headers: headers} |> send_resp(status_code, body)
+    end
+  end
+
+  # Evaluate if headers contain value, downcases keys to avoid mismatches
+  @spec header_value?(%Plug.Conn{}, String.t, String.t) :: boolean
+  defp header_value?(conn, key, value) do
+    conn
+    |> Map.get(:resp_headers)
+    |> Enum.find({}, fn(headers_tuple) ->
+      key_downcase =
+        headers_tuple
+        |> elem(0)
+        |> String.downcase
+      key_downcase == key
+    end)
+    |> Tuple.to_list
+    |> Enum.member?(value)
+  end
+
+  # Sends chunked response with body and set transfer-encoding to client
+  @spec send_chunked_response(%Plug.Conn{}, [String.t, ...], integer, map) :: %Plug.Conn{}
+  defp send_chunked_response(conn, headers, status_code, body) do
+    conn = %{conn | resp_headers: headers} |> send_chunked(status_code)
+    conn |> chunk(body)
+    conn
   end
 end

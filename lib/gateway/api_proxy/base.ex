@@ -1,14 +1,7 @@
 defmodule Gateway.ApiProxy.Base do
   @moduledoc """
-  Provides forwarding of REST requests to external services.
+  HTTP wrapper for HTTPoison library. Possible to extend functions for outgoing/ingoing headers,
+  body, etc. at this place. https://github.com/edgurgel/httpoison, Wrapping HTTPoison.Base section
   """
   use HTTPoison.Base
-
-  @spec process_headers(map) :: list(tuple)
-  def process_headers(headers) do
-    # Remove transfer Encoding from headers since it collides with
-    # Content-length and leads to error request
-    headers
-    |> List.keydelete("Transfer-Encoding", 0)
-  end
 end

@@ -174,6 +174,27 @@ defmodule Gateway.ApiProxy.ProxyTest do
     assert conn.resp_body =~ "{\"response\": \"file uploaded successfully\"}"
   end
 
+  test "send_response should chunk response if transfer-encoding is set", %{third_service: third_service} do
+    Bypass.expect third_service, fn conn ->
+      assert "/ts/transactions" == conn.request_path
+      assert "GET" == conn.method
+      {:ok, conn} =
+        conn
+        |> put_resp_header("transfer-encoding", "chunked")
+        |> Plug.Conn.send_chunked(200)
+        |> Plug.Conn.chunk(~s<{"response":"[]"}>)
+      conn
+    end
+
+    jwt = generate_jwt()
+    request = build_conn(:get, "/ts/transactions") 
+      |> put_req_header("authorization", jwt)
+    conn = call(Gateway.Router, request)
+    
+    assert conn.status == 200
+    assert conn.state == :chunked
+  end
+
   defp call(mod, conn) do
     mod.call(conn, [])
   end
