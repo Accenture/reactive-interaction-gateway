@@ -63,8 +63,14 @@ defmodule Gateway.ApiProxy.Proxy do
   # Authentication required
   @spec check_and_forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
   defp check_and_forward_request(service = %{"auth" => true}, conn) do
-    # Get authorization from request header (returns a list):
-    tokens = get_req_header(conn, "authorization")
+    # Get authorization from request header and query param (returns a list):
+    tokens =
+      conn
+      |> Map.get(:query_params)
+      |> Map.get("token", "")
+      |> String.split
+      |> Enum.concat(get_req_header(conn, "authorization"))
+
     case any_token_valid?(tokens) do
       true -> forward_request(service, conn)
       false -> send_resp(conn, 401, encode_error_message("Missing or invalid token"))
@@ -98,12 +104,29 @@ defmodule Gateway.ApiProxy.Proxy do
     res =
       case method do
         "GET" -> Base.get!(attachQueryParams(url, params), req_headers)
-        "POST" -> Base.post!(url, Poison.encode!(params), req_headers)
+        "POST" -> format_post_request(url, params, req_headers)
         "PUT" -> Base.put!(url, Poison.encode!(params), req_headers)
         "DELETE" -> Base.delete!(url, req_headers)
         _ -> nil
       end
     send_response({:ok, conn, res})
+  end
+
+  @spec format_post_request(String.t, %{required(String.t) => %Plug.Upload{}}, map) :: %Plug.Conn{}
+  defp format_post_request(url, %{"qqfile" => %Plug.Upload{}} = params, headers) do
+    %{"qqfile" => file} = params
+    optional_params = params |> Map.delete("qqfile")
+    params_merged = Enum.concat(
+      optional_params,
+      [{:file, file.path}, {"content-type", file.content_type}, {"filename", file.filename}]
+    )
+
+    Base.post!(url, {:multipart, params_merged}, headers)
+  end
+
+  @spec format_post_request(String.t, map, map) :: %Plug.Conn{}
+  defp format_post_request(url, params, headers) do
+    Base.post!(url, Poison.encode!(params), headers)
   end
 
   @spec log_to_kafka(route_map, %Plug.Conn{}) :: :ok
@@ -139,6 +162,35 @@ defmodule Gateway.ApiProxy.Proxy do
 
   @spec send_response({:ok, %Plug.Conn{}, map}) :: %Plug.Conn{}
   defp send_response({:ok, conn, %{headers: headers, status_code: status_code, body: body}}) do
-    %{conn | resp_headers: headers} |> send_resp(status_code, body)
+    conn = %{conn | resp_headers: headers}
+    if header_value?(conn, "transfer-encoding", "chunked") do
+      send_chunked_response(conn, headers, status_code, body)
+    else
+      %{conn | resp_headers: headers} |> send_resp(status_code, body)
+    end
+  end
+
+  # Evaluate if headers contain value, downcases keys to avoid mismatches
+  @spec header_value?(%Plug.Conn{}, String.t, String.t) :: boolean
+  defp header_value?(conn, key, value) do
+    conn
+    |> Map.get(:resp_headers)
+    |> Enum.find({}, fn(headers_tuple) ->
+      key_downcase =
+        headers_tuple
+        |> elem(0)
+        |> String.downcase
+      key_downcase == key
+    end)
+    |> Tuple.to_list
+    |> Enum.member?(value)
+  end
+
+  # Sends chunked response with body and set transfer-encoding to client
+  @spec send_chunked_response(%Plug.Conn{}, [String.t, ...], integer, map) :: %Plug.Conn{}
+  defp send_chunked_response(conn, headers, status_code, body) do
+    conn = %{conn | resp_headers: headers} |> send_chunked(status_code)
+    conn |> chunk(body)
+    conn
   end
 end

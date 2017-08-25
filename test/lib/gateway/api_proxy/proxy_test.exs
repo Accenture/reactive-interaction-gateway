@@ -63,11 +63,13 @@ defmodule Gateway.ApiProxy.ProxyTest do
     Bypass.expect first_service, fn conn ->
       assert "/is/user-info" == conn.request_path
       assert "POST" == conn.method
+      {:ok, body, _conn} = Plug.Conn.read_body(conn)
+      assert body == "{\"status\":\"ok\"}"
       Plug.Conn.resp(conn, 200, ~s<{"response": "ok"}>)
     end
 
     jwt = generate_jwt()
-    request = build_conn(:post, "/is/user-info") |> put_req_header("authorization", jwt)
+    request = build_conn(:post, "/is/user-info", %{"status" => "ok"}) |> put_req_header("authorization", jwt)
     conn = call(Gateway.Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"response\": \"ok\"}"
@@ -146,6 +148,51 @@ defmodule Gateway.ApiProxy.ProxyTest do
     conn = call(Gateway.Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"response\":\"[]\"}"
+  end
+  
+  test "forward_request should handle POST request with file body", %{first_service: first_service} do
+    Bypass.expect first_service, fn conn ->
+      assert "/is/auth" == conn.request_path
+      assert "POST" == conn.method
+      {:ok, body, _conn} = Plug.Conn.read_body(conn)
+      assert body |> String.contains?("name=\"random_data\"\r\n\r\n123\r\n")
+      Plug.Conn.resp(conn, 201, ~s<{"response": "file uploaded successfully"}>)
+    end
+
+    jwt = generate_jwt()
+    upload = %Plug.Upload{
+      path: "test/lib/gateway/api_proxy/upload_example.txt",
+      filename: "upload_example.txt",
+      content_type: "plain/text",
+    }
+    request = build_conn(
+      :post,
+      "/is/auth",
+      %{:qqfile => upload, :random_data => "123"}) |> put_req_header("authorization", jwt)
+    conn = call(Gateway.Router, request)
+    assert conn.status == 201
+    assert conn.resp_body =~ "{\"response\": \"file uploaded successfully\"}"
+  end
+
+  test "send_response should chunk response if transfer-encoding is set", %{third_service: third_service} do
+    Bypass.expect third_service, fn conn ->
+      assert "/ts/transactions" == conn.request_path
+      assert "GET" == conn.method
+      {:ok, conn} =
+        conn
+        |> put_resp_header("transfer-encoding", "chunked")
+        |> Plug.Conn.send_chunked(200)
+        |> Plug.Conn.chunk(~s<{"response":"[]"}>)
+      conn
+    end
+
+    jwt = generate_jwt()
+    request = build_conn(:get, "/ts/transactions") 
+      |> put_req_header("authorization", jwt)
+    conn = call(Gateway.Router, request)
+    
+    assert conn.status == 200
+    assert conn.state == :chunked
   end
 
   defp call(mod, conn) do
