@@ -7,7 +7,6 @@ defmodule Gateway.Kafka.Sup do
   require Logger
 
   @brod_client_id Application.fetch_env!(:gateway, :kafka_client_id)
-  @broker_csv_list Application.fetch_env!(:gateway, :kafka_broker_csv_list)
 
   def start_link do
     :supervisor3.start_link(
@@ -19,7 +18,7 @@ defmodule Gateway.Kafka.Sup do
 
   # supervisor3 callback
   def init(:ok) do
-    brokers = @broker_csv_list |> parse_broker_csv
+    brokers = fetch_kafka_broker_list()
     client_conf = [
       auto_start_producers: true,
       default_producer_config: []
@@ -49,6 +48,16 @@ defmodule Gateway.Kafka.Sup do
   # supervisor3 callback
   def post_init(_) do
     :ignore
+  end
+
+  @spec fetch_kafka_broker_list() :: keyword(pos_integer())
+  defp fetch_kafka_broker_list do
+    # Allow for defining the Kafka brokers using an environment variable:
+    case System.get_env("KAFKA_HOSTS") do
+      nil -> Application.fetch_env!(:gateway, :kafka_broker_csv_list)
+      csv -> csv
+    end
+    |> parse_broker_csv
   end
 
   @spec parse_broker_csv(String.t) :: keyword(pos_integer())
