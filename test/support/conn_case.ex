@@ -15,8 +15,6 @@ defmodule Gateway.ConnCase do
 
   use ExUnit.CaseTemplate
 
-  @jwt_key Application.fetch_env!(:gateway, :auth_jwt_key)
-
   using do
     quote do
       # Import conveniences for testing with connections
@@ -27,6 +25,9 @@ defmodule Gateway.ConnCase do
 
       # The default endpoint for testing
       @endpoint Gateway.Endpoint
+
+      # The key for signing JWTs:
+      @jwt_key Application.fetch_env!(:gateway, :auth_jwt_key)
 
       # Generation of JWT
       def generate_jwt(actions \\ []) do
