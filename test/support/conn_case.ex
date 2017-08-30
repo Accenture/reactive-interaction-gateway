@@ -26,12 +26,15 @@ defmodule Gateway.ConnCase do
       # The default endpoint for testing
       @endpoint Gateway.Endpoint
 
+      # The key for signing JWTs:
+      @jwt_key Application.fetch_env!(:gateway, :auth_jwt_key)
+
       # Generation of JWT
       def generate_jwt(actions \\ []) do
         %{"scopes" => %{"rg" => %{"actions" => actions}}}
           |> token
           |> with_exp
-          |> with_signer(hs256(Application.get_env(:gateway, @endpoint)[:jwt_key]))
+          |> with_signer(@jwt_key |> hs256)
           |> sign
           |> get_compact
       end

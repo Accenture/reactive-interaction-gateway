@@ -6,8 +6,8 @@ defmodule Gateway.Kafka do
   alias Gateway.Utils.Jwt
   alias Gateway.ApiProxy.Proxy
 
-  @brod_client_id Application.fetch_env!(:gateway, :kafka).kafka_default_client
-  @kafka_topic Application.fetch_env!(:gateway, :kafka).kafka_default_topic
+  @brod_client_id Application.fetch_env!(:gateway, :kafka_client_id)
+  @call_log_topic Application.fetch_env!(:gateway, :kafka_call_log_topic)
 
   @spec log_proxy_api_call(Proxy.route_map, %Plug.Conn{}) :: Jwt.claim_map
   def log_proxy_api_call(route, conn) do
@@ -34,7 +34,7 @@ defmodule Gateway.Kafka do
     # as at that point there won't be a partition leader yet.
     :ok = :brod.produce_sync(
       @brod_client_id,
-      @kafka_topic,
+      @call_log_topic,
       _partition = &compute_kafka_partition/4,
       _key = username,
       _value = message_json

@@ -6,6 +6,8 @@ defmodule Gateway.Utils.Jwt do
 
   @type claim_map :: %{required(String.t) => String.t}
 
+  @jwt_key Application.fetch_env!(:gateway, :auth_jwt_key)
+
   @spec valid?(String.t) :: boolean
   def valid?(jwt) do
     jwt
@@ -34,7 +36,7 @@ defmodule Gateway.Utils.Jwt do
     jwt
     |> token
     |> with_validation("exp", &(&1 > current_time()))
-    |> with_signer(hs256(Application.get_env(:gateway, Gateway.Endpoint)[:jwt_key]))
+    |> with_signer(@jwt_key |> hs256)
     |> verify
   end
 

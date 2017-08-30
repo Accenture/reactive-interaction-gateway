@@ -25,7 +25,7 @@ defmodule Gateway.Kafka.MessageHandlerTest do
     )
   end
 
-  @spec check_broadcasts(String.t, nonempty_list(String.t)) :: boolean()
+  @spec check_broadcasts(String.t, [String.t, ...]) :: boolean()
   defp check_broadcasts(user_id, messages) do
     test_pid = self()
     kafka_topic = "message"

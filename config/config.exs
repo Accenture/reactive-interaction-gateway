@@ -5,42 +5,34 @@
 # is restricted to this project.
 use Mix.Config
 
-# Configures the endpoint
-config :gateway, Gateway.Endpoint,
-  url: [host: System.get_env("HOST") || "localhost"],
-  http: [port: System.get_env("PORT") || 4000],
-  jwt_key: "supersecrettoken",
-  jwt_blacklist_default_expiry_hours: 1,
-  secret_key_base: "qjiJFnMIbw3Bs2lbM0TWouWlVht+NUlcgrUURL+7vJ2yjQYQKonWUYC0UoCtXpVq",
-  render_errors: [view: Gateway.ErrorView, accepts: ~w(json), default_format: "json"],
-  pubsub: [name: Gateway.PubSub,
-           adapter: Phoenix.PubSub.PG2]
-
-# Configures Elixir's Logger
+# Logger:
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:module, :request_id]
 
-# Kafka
-kafka_default_client = :gateway_brod_client
-kafka_default_topic = "message"
-config :gateway, :kafka, %{
-  kafka_default_client: kafka_default_client,
-  kafka_default_topic: kafka_default_topic,
-  consumer_group_id: "gateway-consumer-group",
-  topics: [kafka_default_topic],
-}
+# Phoenix endpoint:
+config :gateway, Gateway.Endpoint,
+  url: [host: System.get_env("HOST") || "localhost"],
+  http: [port: System.get_env("PORT") || 4000],
+  render_errors: [view: Gateway.ErrorView, accepts: ~w(json), default_format: "json"],
+  pubsub: [name: Gateway.PubSub,
+           adapter: Phoenix.PubSub.PG2]
 
-# Read by brod_sup (which is started as an application by mix)
-# and used to start the default brod client.
-config :brod,
-  clients: [
-    {kafka_default_client}
-  ]
+# Authentication:
+config :gateway, auth_jwt_key: "supersecrettoken"
+config :gateway, auth_jwt_blacklist_default_expiry_hours: 1
+
+# Proxy:
+config :gateway, proxy_config_file: "proxy/proxy.json"
+
+# Kafka:
+kafka_client_id = :gateway_brod_client
+config :gateway, kafka_broker_csv_list: System.get_env("KAFKA_HOSTS") || "localhost:9092"
+config :gateway, kafka_client_id: kafka_client_id
+config :gateway, kafka_consumer_group_id: "gateway-consumer-group"
+config :gateway, kafka_consumed_topics: ["message"]
+config :gateway, kafka_call_log_topic: "message"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"
-
-# Proxy route config file location
-config :gateway, proxy_route_config: "proxy/proxy.json"

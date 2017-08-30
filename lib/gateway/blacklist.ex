@@ -24,9 +24,7 @@ defmodule Gateway.Blacklist do
   @typep state_t :: map
 
   @default_tracker_mod Gateway.Blacklist.Tracker
-  @default_expiry_hours :gateway
-  |> Application.fetch_env!(Gateway.Endpoint)
-  |> Keyword.get(:jwt_blacklist_default_expiry_hours)
+  @default_expiry_hours Application.fetch_env!(:gateway, :auth_jwt_blacklist_default_expiry_hours)
 
   def start_link(tracker_mod \\ nil, opts \\ []) do
     tracker_mod = if tracker_mod, do: tracker_mod, else: @default_tracker_mod

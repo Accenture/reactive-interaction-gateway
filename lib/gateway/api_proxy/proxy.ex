@@ -17,16 +17,16 @@ defmodule Gateway.ApiProxy.Proxy do
   plug :match
   plug :dispatch
 
+  @config_file Application.fetch_env!(:gateway, :proxy_config_file)
+
   # Get all incoming HTTP requests, check if they are valid, provide authentication if needed
   match _ do
     %{method: method, request_path: request_path} = conn
 
     # Load proxy routes during the runtime
-    proxy_file_location = Application.fetch_env!(:gateway, :proxy_route_config)
-
     :gateway
     |> :code.priv_dir
-    |> Path.join(proxy_file_location)
+    |> Path.join(@config_file)
     |> File.read!
     |> Poison.decode!
     |> Enum.find(fn(route) ->
