@@ -35,7 +35,7 @@ defmodule Gateway.Kafka.GroupSubscriber do
   @behaviour :brod_group_subscriber
   @type handlers_t :: %{required(String.t) => nonempty_list(pid)}
   @type state_t :: %{handlers: handlers_t}
-  
+
   @brod_client_id Application.fetch_env!(:gateway, :kafka_client_id)
   @consumer_group_id Application.fetch_env!(:gateway, :kafka_consumer_group_id)
   @topics Application.fetch_env!(:gateway, :kafka_consumed_topics)
