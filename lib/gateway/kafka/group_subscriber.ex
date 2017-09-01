@@ -62,6 +62,7 @@ defmodule Gateway.Kafka.GroupSubscriber do
 
   We spawn one message handler for each topic-partition.
   """
+  @impl :brod_group_subscriber
   @spec init(String.t, :no_args) :: {:ok, state_t}
   def init(consumer_group_id, :no_args) do
     Logger.info("Starting Kafka group subscriber (group=#{inspect consumer_group_id}, client=#{inspect @brod_client_id}, topics=#{inspect @topics})")
@@ -74,6 +75,7 @@ defmodule Gateway.Kafka.GroupSubscriber do
 
   We receive the message here and hand it off to the respective message handler.
   """
+  @impl :brod_group_subscriber
   @spec handle_message(String.t, String.t | non_neg_integer, String.t, state_t) :: {:ok, state_t}
   def handle_message(topic, partition, message, state = %{handlers: handlers}) do
     handler_pid = handlers["#{topic}-#{partition}"]
@@ -99,5 +101,4 @@ defmodule Gateway.Kafka.GroupSubscriber do
   defp spawn_message_handlers(_brod_client_id, []) do
     %{}
   end
-
 end

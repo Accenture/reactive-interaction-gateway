@@ -16,7 +16,7 @@ defmodule Gateway.Kafka.Sup do
     )
   end
 
-  # supervisor3 callback
+  @impl :supervisor3
   def init(:ok) do
     brokers = fetch_kafka_broker_list()
     client_conf = [
@@ -45,7 +45,7 @@ defmodule Gateway.Kafka.Sup do
     }
   end
 
-  # supervisor3 callback
+  @impl :supervisor3
   def post_init(_) do
     :ignore
   end
