@@ -26,13 +26,8 @@ defmodule Gateway.Transports.ServerSentEvents.Encoder do
   end
   defp format_event(_), do: ""
 
-  defp format_data(%Phoenix.Socket.Message{topic: nil, payload: nil}), do:
-    ""
-  defp format_data(%Phoenix.Socket.Message{topic: nil, payload: payload}), do:
-    "data: #{%{payload: payload} |> Poison.encode!}\n"
-  defp format_data(%Phoenix.Socket.Message{topic: topic, payload: nil}), do:
-    "data: #{%{topic: topic} |> Poison.encode!}\n"
-  defp format_data(%Phoenix.Socket.Message{topic: topic, payload: payload}), do:
-    "data: #{%{topic: topic, payload: payload} |> Poison.encode!}\n"
+  defp format_data(%Phoenix.Socket.Message{payload: nil}), do: ""
+  defp format_data(%Phoenix.Socket.Message{payload: payload}), do:
+    "data: #{payload |> Poison.encode!}\n"
 end
 

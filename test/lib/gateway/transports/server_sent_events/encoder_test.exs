@@ -2,7 +2,7 @@ defmodule Gateway.Transports.ServerSentEvents.EncoderTest do
   use ExUnit.Case
   alias Phoenix.Socket.Message
 
-  import Gateway.Transports.ServerSentEvents.Encoder, only: [format: 2]
+  import Gateway.Transports.ServerSentEvents.Encoder, only: [format: 1]
 
   test "a full message" do
     msg = %Message{
@@ -15,7 +15,7 @@ defmodule Gateway.Transports.ServerSentEvents.EncoderTest do
     expected = """
                id: 123
                event: some:event
-               data: {"topic":"rooms:lobby","payload":{"user":"foo","body":"bar"}}
+               data: {"user":"foo","body":"bar"}
 
                """
     assert actual == expected
@@ -30,7 +30,7 @@ defmodule Gateway.Transports.ServerSentEvents.EncoderTest do
     actual = format(msg)
     expected = """
                event: some:event
-               data: {"topic":"rooms:lobby","payload":{"user":"foo","body":"bar"}}
+               data: {"user":"foo","body":"bar"}
 
                """
     assert actual == expected
@@ -45,7 +45,7 @@ defmodule Gateway.Transports.ServerSentEvents.EncoderTest do
     actual = format(msg)
     expected = """
                id: 123
-               data: {"topic":"rooms:lobby","payload":{"user":"foo","body":"bar"}}
+               data: {"user":"foo","body":"bar"}
 
                """
     assert actual == expected
