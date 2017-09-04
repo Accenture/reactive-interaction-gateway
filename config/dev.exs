@@ -6,24 +6,12 @@ use Mix.Config
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
-config :gateway, Gateway.Endpoint,
+config :gateway, GatewayWeb.Endpoint,
   # debug_errors: true, # Uncomment to see full error descriptions in API as HTML
   env: :dev,
-  code_reloader: true,
   check_origin: false,
   watchers: []
 
-
-# Watch static and templates for browser reloading.
-config :gateway, Gateway.Endpoint,
-  live_reload: [
-    patterns: [
-      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
-      ~r{priv/gettext/.*(po)$},
-      ~r{web/views/.*(ex)$},
-      ~r{web/templates/.*(eex)$}
-    ]
-  ]
 
 # Do not include metadata nor timestamps in development logs TODO why?
 #config :logger, :console, format: "[$level] $message\n"

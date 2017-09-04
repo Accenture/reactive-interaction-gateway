@@ -1,4 +1,4 @@
-defmodule Gateway.ConnCase do
+defmodule GatewayWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -20,11 +20,11 @@ defmodule Gateway.ConnCase do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
 
-      import Gateway.Router.Helpers
+      import GatewayWeb.Router.Helpers
       import Joken
 
       # The default endpoint for testing
-      @endpoint Gateway.Endpoint
+      @endpoint GatewayWeb.Endpoint
 
       # The key for signing JWTs:
       @jwt_key Application.fetch_env!(:gateway, :auth_jwt_key)

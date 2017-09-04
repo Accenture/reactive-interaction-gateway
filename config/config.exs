@@ -11,12 +11,11 @@ config :logger, :console,
   metadata: [:module, :request_id]
 
 # Phoenix endpoint:
-config :gateway, Gateway.Endpoint,
+config :gateway, GatewayWeb.Endpoint,
   url: [host: System.get_env("HOST") || "localhost"],
   http: [port: System.get_env("PORT") || 4000],
-  render_errors: [view: Gateway.ErrorView, accepts: ~w(json), default_format: "json"],
-  pubsub: [name: Gateway.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+  render_errors: [view: GatewayWeb.ErrorView, accepts: ~w(html json xml)],
+  pubsub: [name: Gateway.PubSub, adapter: Phoenix.PubSub.PG2]
 
 # Authentication:
 config :gateway, auth_jwt_key: "supersecrettoken"
