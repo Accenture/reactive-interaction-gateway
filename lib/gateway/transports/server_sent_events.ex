@@ -15,7 +15,7 @@ defmodule Gateway.Transports.ServerSentEvents do
   alias Gateway.Transports.ServerSentEvents.Encoder
 
   defmodule ConnectionClosed do
-    defexception message: "the connection has been closed unexpectedly"
+    defexception message: "connection closed"
   end
 
   ## Transport callbacks
@@ -78,41 +78,18 @@ defmodule Gateway.Transports.ServerSentEvents do
   # forwarding incoming messages to the client.
   #
   # Expected parameters:
-  #   user  .. the name of the user the channel belongs to
-  #   token .. the JWT, which will be validated by the socket
+  #   token .. (required) the JWT, which will be validated by the socket.
+  #   users .. if given, messages that target the given users are forwarded to the client.
+  #   roles .. if given, messages that target the given roles are forwarded to the client.
   #
-  defp dispatch(%{method: "GET", params: %{"user" => user, "token" => _token}} = conn,
+  defp dispatch(%{method: "GET", params: %{"token" => _token} = params} = conn,
                 endpoint, handler, transport_name, opts) do
-    topic = PresenceChannel.room_name(user)
-    serializer = opts[:serializer]
-    # Connect this Transport with the Socket configured for this route:
-    case Transport.connect(endpoint, handler, transport_name, _transport = __MODULE__, serializer, conn.params) do
-      {:ok, socket} ->
-        # We're connected to the socket now, but we still need to join the
-        # channel. To this end, we need to send a phx_join message to the
-        # Channel Server using the Transport's dispatch function. If all goes
-        # well (e.g., we're authorized to join), we automatically get
-        # subscribed to the channel. Note that if we would just subscribe to
-        # the respective PubSub topic directly, we'd skip the socket's auth
-        # check as well as the channel implementation.
-        join_msg = %Phoenix.Socket.Message{topic: topic, event: "phx_join", payload: %{}, ref: "1"}
-        case Transport.dispatch(join_msg, _channels = %{}, socket) do
-          {:joined, _channel_pid, reply_msg} ->
-            Logger.debug("joined topic=#{topic} reply=#{inspect reply_msg}")
-            conn
-            |> set_up_chunked_transfer
-            |> send_chunk(reply_msg |> serializer.encode! |> Encoder.format)
-            |> receive_and_forward_loop(opts)
-            |> send_chunk(:bye)
-          {:error, reason, error_reply_msg} ->
-            Logger.warn("failed to join topic=#{inspect topic}, reason=#{inspect reason}, msg=#{inspect error_reply_msg}")
-            conn
-            |> send_resp(:internal_server_error, error_reply_msg |> serializer.encode! |> Encoder.format)
-        end
-      :error ->
-        Logger.debug("failed to connect with socket transport=#{inspect transport_name}/#{inspect __MODULE__} (opts=#{inspect opts}) handler=#{inspect handler} conn=#{inspect conn, pretty: true, limit: 30_000}")
-        conn
-        |> send_resp(:unauthorized, :unauthorized |> Encoder.format)
+    user_channels = Map.get(params, "users", []) |> Enum.map(&PresenceChannel.user_channel_name/1)
+    role_channels = Map.get(params, "roles", []) |> Enum.map(&PresenceChannel.role_channel_name/1)
+    channels = Enum.uniq(user_channels ++ role_channels)
+    case channels do
+      [] -> conn |> send_resp(:not_found, "no channels selected\n")
+      _ -> conn |> connect_subscribe_listen_forward(endpoint, handler, transport_name, channels, opts)
     end
   rescue
     ex in ConnectionClosed ->
@@ -124,7 +101,36 @@ defmodule Gateway.Transports.ServerSentEvents do
   # All other requests should fail.
   defp dispatch(conn, _, _, _, _) do
     conn
-    |> send_resp(:bad_request, "Bad request. Make sure you supply \"user\" and \"token\" parameters, and that you're authorized to access the user's channel.\n")
+    |> send_resp(:bad_request,
+                 """
+                 Bad request. Make sure you supply the right parameters, and that you're authorized to access the user's channel.
+
+                 Example: ?users[]=some.user&users[]=other.user&roles[]=support&token=my-jwt
+                 """)
+  end
+
+  defp connect_subscribe_listen_forward(conn, endpoint, handler, transport_name,
+                                        channels, opts) when length(channels) > 0 do
+    case Transport.connect(endpoint, handler, transport_name, _transport = __MODULE__, opts[:serializer], conn.params) do
+      {:ok, socket} ->
+        # We're connected to the socket now, but we still need to join the channel.
+        conn = conn |> set_up_chunked_transfer
+        ok? =
+          socket
+          |> subscribe_to_channels(channels)
+          |> Enum.map(fn(reply) -> handle_dispatch_reply(reply, conn, opts[:serializer]) end)
+          |> Enum.all?(&(&1 == :ok))
+        if ok? do
+          conn |> receive_and_forward_loop(opts)
+        else
+          conn
+        end
+        |> send_chunk(:bye)
+      :error ->
+        Logger.debug("failed to connect with socket transport=#{inspect transport_name}/#{inspect __MODULE__} (opts=#{inspect opts}) handler=#{inspect handler} conn=#{inspect conn, pretty: true, limit: 30_000}")
+        conn
+        |> send_resp(:unauthorized, :unauthorized |> Encoder.format)
+    end
   end
 
   defp set_up_chunked_transfer(conn) do
@@ -135,6 +141,31 @@ defmodule Gateway.Transports.ServerSentEvents do
       {"connection", "keep-alive"},
     ])
     |> send_chunked(_status = 200)
+  end
+
+  defp subscribe_to_channels(socket, channels) do
+    Enum.map(channels, fn
+      (channel) ->
+        # Special message for joining the channel:
+        join_msg = %Phoenix.Socket.Message{topic: channel, event: "phx_join", payload: %{}}
+        # If successful, we get subscribed to the channel. Note that if we
+        # would just subscribe to the respective PubSub topic directly, we'd
+        # skip the socket's auth check as well as the channel implementation.
+        Transport.dispatch(join_msg, _channels = %{}, socket)
+      end)
+  end
+
+  defp handle_dispatch_reply({:joined, _channel_pid, reply_msg}, conn, serializer) do
+    Logger.debug(":joined msg=#{inspect reply_msg}")
+    conn
+    |> send_chunk(reply_msg |> serializer.encode! |> Encoder.format)
+    :ok
+  end
+  defp handle_dispatch_reply({:error, reason, error_reply_msg}, conn, serializer) do
+    Logger.debug(":error reason=#{inspect reason} msg=#{inspect error_reply_msg}")
+    conn
+    |> send_resp(:internal_server_error, error_reply_msg |> serializer.encode! |> Encoder.format)
+    :error
   end
 
   defp receive_and_forward_loop(conn, opts, next_heartbeat_timeout \\ nil)

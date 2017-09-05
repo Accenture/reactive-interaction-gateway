@@ -46,7 +46,7 @@ defmodule Gateway.Kafka.MessageHandler do
 
   @spec broadcast_to_user(String.t, %{optional(any) => any}, broadcast_t) :: any
   defp broadcast_to_user(username, data, broadcast) do
-    room = PresenceChannel.room_name(username)
+    room = PresenceChannel.user_channel_name(username)
     Logger.debug("will broadcast to #{inspect room}: #{inspect data}")
     broadcast.(
       _topic = room,

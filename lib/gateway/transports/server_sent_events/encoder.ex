@@ -26,7 +26,10 @@ defmodule Gateway.Transports.ServerSentEvents.Encoder do
   end
   defp format_event(_), do: ""
 
-  defp format_data(%Phoenix.Socket.Message{payload: nil}), do: ""
+  defp format_data(%Phoenix.Socket.Message{event: "phx_reply"} = msg), do:
+    "data: #{msg |> Poison.encode!}\n"
+  defp format_data(%Phoenix.Socket.Message{payload: nil}), do:
+    ""
   defp format_data(%Phoenix.Socket.Message{payload: payload}), do:
     "data: #{payload |> Poison.encode!}\n"
 end
