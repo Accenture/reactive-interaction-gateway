@@ -76,6 +76,7 @@ defmodule Gateway.Mixfile do
       {:distillery, "~> 1.4"},
       {:stubr, "~> 1.5.0", only: :test},
       {:murmur, "~> 1.0"},  # for Kafka, partition from MurmurHash(key)
+      {:uuid, "~> 1.1"},
     ]
   end
 end
