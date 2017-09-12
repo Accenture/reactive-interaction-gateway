@@ -43,7 +43,7 @@ node {
         
         stage('Build') {
             // build environment for Elixir app release
-            sh "docker build -t ${imageName}-${languageTag}-${imageBuildSuffix} -f build.dockerfile ."
+            sh "docker build -t ${imageName}-${languageTag}-${imageBuildSuffix} -f build.dockerfile --no-cache=true ."
             // run release for app and mount artifacts to volume
             sh "docker run --rm --name ${imageName}-${languageTag}-${imageBuildSuffix} -v $WORKSPACE/fsa-reactive-gateway:/opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway ${imageName}-${languageTag}-${imageBuildSuffix}"
         }
