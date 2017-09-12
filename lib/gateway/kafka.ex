@@ -1,6 +1,27 @@
 defmodule Gateway.Kafka do
   @moduledoc """
   Produce/send Kafka messages.
+
+  ## About the Kafka Integration
+  In order to scale horizontally, [Kafka Consumer
+  Groups](https://kafka.apache.org/documentation/#distributionimpl) are used.
+  [Brod](https://github.com/klarna/brod), which is the library used for
+  communicating with Kafka, has its client supervised by `Gateway.Kafka.Sup`,
+  which also takes care of the group subscriber. It uses delays between
+  restarts, in order to delay reconnects in the case of connection errors.
+
+  `Gateway.Kafka.Sup` is itself supervised by `Gateway.Kafka.SupWrapper`. The
+  wrapper's sole purpose is to allow the application to come up even if there
+  is not a single broker online. Without it, the failure to connect to any
+  broker would propagate all the way to the Phoenix application, bringing it
+  down in the process. Having the wrapper makes the application startup more
+  reliable.
+
+  The consumer setup is done in `Gateway.Kafka.GroupSubscriber`; take a look
+  at its moduledoc for more information. Finally,
+  `Gateway.Kafka.MessageHandler` hosts the code for the actual processing of
+  incoming messages.
+
   """
   require Logger
   alias Gateway.Utils.Jwt
@@ -9,6 +30,13 @@ defmodule Gateway.Kafka do
   @brod_client_id Application.fetch_env!(:gateway, :kafka_client_id)
   @call_log_topic Application.fetch_env!(:gateway, :kafka_call_log_topic)
 
+  @doc """
+  Log proxied API calls to Kafka.
+
+  The log message includes, among other data, the payload, the JWT jti, and
+  the current timestamp. Messages are produced to the Kafka broker
+  synchronously.
+  """
   @spec log_proxy_api_call(Proxy.route_map, %Plug.Conn{}) :: Jwt.claim_map
   def log_proxy_api_call(route, conn, produce_sync \\ &:brod.produce_sync/5) do
     claims = extract_claims!(conn)
