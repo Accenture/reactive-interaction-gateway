@@ -38,6 +38,7 @@ defmodule Gateway.Mixfile do
         :timex,
         :terraform,
         :joken,
+        :uuid,
       ],
       included_applications: [
         :supervisor3,
