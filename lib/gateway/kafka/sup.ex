@@ -1,8 +1,9 @@
 defmodule Gateway.Kafka.Sup do
   @moduledoc """
-  Supervisor for all Kafka-related processes.
+  Supervisor handling Kafka-related processes.
+
+  Also see Gateway.Kafka.SupWrapper.
   """
-  #use Supervisor
   @behaviour :supervisor3
   require Logger
 

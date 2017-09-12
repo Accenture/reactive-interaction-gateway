@@ -58,6 +58,7 @@ defmodule Gateway.Mixfile do
       {:stubr, "~> 1.5.0", only: :test},
       {:murmur, "~> 1.0"},  # for Kafka, partition from MurmurHash(key)
       {:uuid, "~> 1.1"},
+      {:ex2ms, "~> 1.0"},  # Elixir-compatible :ets.fun2ms/1
     ]
   end
 end
