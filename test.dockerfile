@@ -2,6 +2,7 @@ FROM elixir:1.5
 
 # Install Elixir & Erlang environment dependencies
 RUN mix local.hex --force
+RUN mix local.rebar --force
 
 ENV MIX_ENV=test
 
