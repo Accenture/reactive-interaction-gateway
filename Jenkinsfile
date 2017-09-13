@@ -11,7 +11,7 @@ node {
     def gitHash
     
     ansiColor('xterm') {
-        stage('Preparation') {            
+        stage('Preparation') {
             // wipe out workspace
             deleteDir()
             
@@ -43,13 +43,13 @@ node {
         
         stage('Build') {
             // build environment for Elixir app release
-            sh "docker build -t ${imageName}-${languageTag}-${imageBuildSuffix} -f build.dockerfile ."
+            sh "docker build -t ${imageName}-${languageTag}-${imageBuildSuffix} -f build.dockerfile --no-cache=true ."
             // run release for app and mount artifacts to volume
             sh "docker run --rm --name ${imageName}-${languageTag}-${imageBuildSuffix} -v $WORKSPACE/fsa-reactive-gateway:/opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway ${imageName}-${languageTag}-${imageBuildSuffix}"
         }
         
         stage('Deploy') {
-            withCredentials([usernamePassword(credentialsId: 'martin-dockerhub', passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
+            withCredentials([usernamePassword(credentialsId: 'lwa-service-account', passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
                 sh "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD $dockerhubDomain"
                 
                 // build image of application from artifacts in volume
