@@ -20,7 +20,7 @@ defmodule Gateway.Blacklist.Tracker do
 
   @topic "blacklist"
 
-  @spec track(String.t, Timex.DateTime.t) :: {:ok, String.t}
+  @impl TrackerBehaviour
   def track(jti, expiry) do
     Phoenix.Tracker.track(
       _tracker = Presence,
@@ -30,7 +30,7 @@ defmodule Gateway.Blacklist.Tracker do
       _meta = %{expiry: Serializer.serialize_datetime!(expiry)})
   end
 
-  @spec untrack(String.t) :: :ok
+  @impl TrackerBehaviour
   def untrack(jti) do
     Phoenix.Tracker.untrack(
       _tracker = Presence,
@@ -39,12 +39,12 @@ defmodule Gateway.Blacklist.Tracker do
       _key = jti)
   end
 
-  @spec list() :: [{String.t, %{optional(String.t) => String.t}}]
+  @impl TrackerBehaviour
   def list do
     Phoenix.Tracker.list(Presence, @topic)
   end
 
-  @spec find(String.t) :: {String.t, %{optional(String.t) => String.t}} | nil
+  @impl TrackerBehaviour
   def find(jti) do
     list() |> Enum.find(fn({key, _meta}) -> key == jti end)
   end

@@ -5,7 +5,7 @@ defmodule Gateway.Mixfile do
     [
       app: :gateway,
       version: "0.0.1",
-      elixir: "~> 1.2",
+      elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
       build_embedded: Mix.env == :prod,
@@ -25,26 +25,7 @@ defmodule Gateway.Mixfile do
   #
   # Type `mix help compile.app` for more information.
   def application do
-    [
-      mod: {Gateway, []},
-      applications: [
-        :phoenix,
-        :phoenix_pubsub,
-        :phoenix_html,
-        :cowboy,
-        :logger,
-        :gettext,
-        :httpoison,
-        :timex,
-        :terraform,
-        :joken,
-      ],
-      included_applications: [
-        :supervisor3,
-        :brod,
-        :murmur,
-      ]
-    ]
+    [mod: {Gateway, []}]
   end
 
   # Specifies which paths to compile per environment.
@@ -62,7 +43,7 @@ defmodule Gateway.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
-      {:httpoison, "~> 0.11.0"},
+      {:httpoison, "~> 0.13.0"},
       {:terraform, "~> 1.0.1"},
       {:joken, "~> 1.4"},
       {:bypass, "~> 0.1", only: :test},
@@ -72,10 +53,11 @@ defmodule Gateway.Mixfile do
       {:poison, "~> 2.0 or ~> 3.0"},
       {:credo, "~> 0.7", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test]},
-      {:timex, "~> 3.0"},
+      {:timex, "~> 3.1.22"},
       {:distillery, "~> 1.4"},
       {:stubr, "~> 1.5.0", only: :test},
       {:murmur, "~> 1.0"},  # for Kafka, partition from MurmurHash(key)
+      {:uuid, "~> 1.1"},
     ]
   end
 end

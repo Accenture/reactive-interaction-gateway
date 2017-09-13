@@ -15,6 +15,7 @@ defmodule Gateway.Kafka do
     username = Map.fetch!(claims, "username")
     message =
       %{
+        id: UUID.uuid4(),
         username: username,
         jti: Map.fetch!(claims, "jti"),
         type: "PROXY_API_CALL",
