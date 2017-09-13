@@ -11,7 +11,7 @@ node {
     def gitHash
     
     ansiColor('xterm') {
-        stage('Preparation') {            
+        stage('Preparation') {
             // wipe out workspace
             deleteDir()
             
@@ -49,7 +49,7 @@ node {
         }
         
         stage('Deploy') {
-            withCredentials([usernamePassword(credentialsId: 'martin-dockerhub', passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
+            withCredentials([usernamePassword(credentialsId: 'lwa-service-account', passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
                 sh "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD $dockerhubDomain"
                 
                 // build image of application from artifacts in volume
