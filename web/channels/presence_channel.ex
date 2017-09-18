@@ -19,7 +19,12 @@ defmodule Gateway.PresenceChannel do
   @doc """
   The room name for a specific user.
   """
-  def room_name(username), do: "user:#{username}"
+  def user_channel_name(username), do: "user:#{username}"
+
+  @doc """
+  The room name for a specific role.
+  """
+  def role_channel_name(role), do: "role:#{role}"
 
   @doc """
   Join user specific channel. Only owner of given channel or user with authorized
@@ -56,7 +61,7 @@ defmodule Gateway.PresenceChannel do
   @doc """
   Start tracking of user in global role baes channels and also in his specific channel.
   """
-  @spec handle_info({:after_join, list(String.t), String.t}, map) :: {:noreply, map}
+  @spec handle_info({:after_join, String.t, [String.t]}, map) :: {:noreply, map}
   def handle_info({:after_join, username, roles}, socket) do
     # track global role channels
     push(socket, "presence_state", Presence.list(socket))
