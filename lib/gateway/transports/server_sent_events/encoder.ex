@@ -33,4 +33,3 @@ defmodule Gateway.Transports.ServerSentEvents.Encoder do
   defp format_data(%Phoenix.Socket.Message{payload: payload}), do:
     "data: #{payload |> Poison.encode!}\n"
 end
-
