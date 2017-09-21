@@ -20,7 +20,6 @@ COPY config /opt/sites/fsa-reactive-gateway/config
 COPY lib /opt/sites/fsa-reactive-gateway/lib
 COPY priv /opt/sites/fsa-reactive-gateway/priv
 COPY test /opt/sites/fsa-reactive-gateway/test
-COPY web /opt/sites/fsa-reactive-gateway/web
 
 # Run tests
 CMD ["mix", "test"]
