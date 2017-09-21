@@ -44,9 +44,8 @@ defmodule Gateway.Blacklist do
   def add_jti(server, jti, expiry, listener) do
     expires_at =
       case Timex.is_valid? expiry do
-        {:error, :invalid_date} -> Serializer.deserialize_datetime!(expiry)
         true -> expiry
-        # else fail
+        _ -> Serializer.deserialize_datetime!(expiry)
       end
     GenServer.cast(server, {:add, jti, expires_at, listener})
     server  # allow for chaining calls
