@@ -21,8 +21,8 @@ defmodule Gateway.Transports.ServerSentEvents do
   ## Transport callbacks
 
   @behaviour Phoenix.Socket.Transport
-  
-  def default_config() do
+
+  def default_config do
     [
       heartbeat_timeout_ms: 10_000,
       serializer: Gateway.Transports.ServerSentEvents.Serializer,
@@ -37,7 +37,7 @@ defmodule Gateway.Transports.ServerSentEvents do
   import Plug.Conn
 
   alias Phoenix.Socket.Transport
-  alias Gateway.PresenceChannel
+  alias GatewayWeb.Presence.Channel, as: PresenceChannel
 
   @doc false
   def init(opts), do: opts
@@ -88,8 +88,12 @@ defmodule Gateway.Transports.ServerSentEvents do
     role_channels = Map.get(params, "roles", []) |> Enum.map(&PresenceChannel.role_channel_name/1)
     channels = Enum.uniq(user_channels ++ role_channels)
     case channels do
-      [] -> conn |> send_resp(:not_found, "no channels selected\n")
-      _ -> conn |> connect_subscribe_listen_forward(endpoint, handler, transport_name, channels, opts)
+      [] ->
+        conn
+        |> send_resp(:not_found, "no channels selected\n")
+      _ ->
+        conn
+        |> connect_subscribe_listen_forward(endpoint, handler, transport_name, channels, opts)
     end
   rescue
     ex in ConnectionClosed ->
@@ -111,7 +115,9 @@ defmodule Gateway.Transports.ServerSentEvents do
 
   defp connect_subscribe_listen_forward(conn, endpoint, handler, transport_name,
                                         channels, opts) when length(channels) > 0 do
-    case Transport.connect(endpoint, handler, transport_name, _transport = __MODULE__, opts[:serializer], conn.params) do
+    case Transport.connect(endpoint, handler,
+                           transport_name, _transport = __MODULE__,
+                           opts[:serializer], conn.params) do
       {:ok, socket} ->
         # We're connected to the socket now, but we still need to join the channel.
         conn = conn |> set_up_chunked_transfer
@@ -215,4 +221,3 @@ defmodule Gateway.Transports.ServerSentEvents do
     |> Phoenix.Controller.json(data)
   end
 end
-

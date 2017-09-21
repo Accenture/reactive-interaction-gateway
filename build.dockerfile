@@ -21,10 +21,7 @@ RUN mix deps.get
 COPY config /opt/sites/fsa-reactive-gateway/config
 COPY lib /opt/sites/fsa-reactive-gateway/lib
 COPY priv /opt/sites/fsa-reactive-gateway/priv
-COPY web /opt/sites/fsa-reactive-gateway/web
 
-# Digest Phoenix static files
-RUN mix phoenix.digest
 # Initialize release & compile application
 RUN mix release.init
 # Release application production code

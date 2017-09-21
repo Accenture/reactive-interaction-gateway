@@ -1,4 +1,4 @@
-defmodule Gateway.ChannelCase do
+defmodule GatewayWeb.ChannelCase do
   @moduledoc """
   This module defines the test case to be used by
   channel tests.
@@ -19,11 +19,11 @@ defmodule Gateway.ChannelCase do
     quote do
       # Import conveniences for testing with channels
       use Phoenix.ChannelTest
-      alias Gateway.PresenceChannel
+      alias GatewayWeb.Presence.Channel, as: PresenceChannel
 
 
       # The default endpoint for testing
-      @endpoint Gateway.Endpoint
+      @endpoint GatewayWeb.Endpoint
 
       # Roles definitions
       @support_role "support"

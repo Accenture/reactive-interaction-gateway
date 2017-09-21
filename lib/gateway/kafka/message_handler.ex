@@ -7,10 +7,10 @@ defmodule Gateway.Kafka.MessageHandler do
   import Record, only: [defrecord: 2, extract: 2]
   defrecord :kafka_message, extract(:kafka_message, from_lib: "brod/include/brod.hrl")
 
-  alias Gateway.PresenceChannel
+  alias GatewayWeb.Presence.Channel
   alias Poison.Parser
 
-  @broadcast &Gateway.Endpoint.broadcast/3
+  @broadcast &GatewayWeb.Endpoint.broadcast/3
   @type broadcast_t :: (String.t, String.t, String.t -> any)
 
   @spec message_handler_loop(String.t, String.t | non_neg_integer, pid, broadcast_t) :: no_return
@@ -46,7 +46,7 @@ defmodule Gateway.Kafka.MessageHandler do
 
   @spec broadcast_to_user(String.t, %{optional(any) => any}, broadcast_t) :: any
   defp broadcast_to_user(username, data, broadcast) do
-    room = PresenceChannel.user_channel_name(username)
+    room = Channel.user_channel_name(username)
     Logger.debug("will broadcast to #{inspect room}: #{inspect data}")
     broadcast.(
       _topic = room,

@@ -27,6 +27,7 @@ defmodule Gateway.Blacklist.PresenceHandler do
 
   # callbacks
 
+  @impl Phoenix.Tracker
   def init(opts) do
     {:ok, blacklist} = Blacklist.start_link()
     pubsub = Keyword.fetch!(opts, :pubsub_server)
@@ -45,6 +46,7 @@ defmodule Gateway.Blacklist.PresenceHandler do
   because we cannot distinguish between an expiry event and an offline node;
   therefore, each node expires the entries by itself.
   """
+  @impl Phoenix.Tracker
   def handle_diff(diff, state) do
     for {topic, {joins, leaves}} <- diff do
       for {key, meta} <- joins do
