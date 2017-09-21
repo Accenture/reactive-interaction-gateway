@@ -37,7 +37,7 @@ defmodule Gateway.Transports.ServerSentEvents do
   import Plug.Conn
 
   alias Phoenix.Socket.Transport
-  alias Gateway.PresenceChannel
+  alias GatewayWeb.Presence.Channel, as: PresenceChannel
 
   @doc false
   def init(opts), do: opts

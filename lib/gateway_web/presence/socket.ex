@@ -45,7 +45,7 @@ defmodule GatewayWeb.Presence.Socket do
   # Would allow you to broadcast a "disconnect" event and terminate
   # all active sockets and channels for a given user:
   #
-  #     Gateway.Endpoint.broadcast("users_socket:#{user.id}", "disconnect", %{})
+  #     GatewayWeb.Endpoint.broadcast("users_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
   def id(socket), do: Map.get(socket.assigns.user_info, "jti")
