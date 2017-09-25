@@ -1,4 +1,10 @@
 defmodule Gateway.ApiProxy.Router do
+  @moduledoc """
+  Provides middleware proxy for incoming REST requests at specific endpoints.
+  Matches all incoming HTTP requests and checks if such endpoint is defined in json file.
+  If endpoint needs authentication, it is automatically triggered.
+  Valid HTTP requests are forwarded to given service and their response is sent back to client.
+  """
   use Plug.Router
 
   alias Plug.Conn.Query
