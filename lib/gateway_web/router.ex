@@ -1,6 +1,5 @@
 defmodule GatewayWeb.Router do
   use GatewayWeb, :router
-  use Terraform, terraformer: Gateway.ApiProxy.Proxy
 
   pipeline :api do
     plug :accepts, ["json"]
@@ -16,7 +15,5 @@ defmodule GatewayWeb.Router do
     delete "/connections/:jti", Presence.Controller, :disconnect_channel_connection
   end
 
-  scope "/", GatewayWeb do
-    pipe_through :api
-  end
+  forward "/", Gateway.ApiProxy.Plug
 end
