@@ -1,4 +1,6 @@
 defmodule Gateway.JwtPlugTest do
+  @moduledoc false
+  use ExUnit.Case, async: true
   use GatewayWeb.ConnCase
 
   test "should return 200 status for authorized /rg/sessions request" do
