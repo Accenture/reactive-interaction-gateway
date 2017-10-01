@@ -23,6 +23,7 @@ defmodule Gateway.RateLimit.Common do
     heir_pid = Process.whereis(RateLimit.TableOwner)
     :ets.new table_name, [:set, :public, :named_table, {:heir, heir_pid, :noargs}]
     Logger.debug "Created ETS table #{inspect table_name}"
+    table_name
   rescue
     _ in ArgumentError ->
       # This usually just means that the table already exists
