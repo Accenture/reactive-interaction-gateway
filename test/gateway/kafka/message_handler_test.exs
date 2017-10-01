@@ -1,16 +1,24 @@
 defmodule Gateway.Kafka.MessageHandlerTest do
+  @moduledoc false
   use ExUnit.Case, async: true
+  import ExUnit.CaptureLog
 
   test "a message should get broadcasted to the right room" do
     assert 1 == check_broadcasts "fooUser", ~w({"username":"fooUser","payload":"ahaoho"})
   end
 
   test "a non-json message should not be broadcasted" do
-    assert 0 == check_broadcasts "nouser", ~w(some-bogus-message)
+    fun = fn ->
+      assert 0 == check_broadcasts "nouser", ~w(some-bogus-message)
+    end
+    assert capture_log(fun) =~ "failed to parse incoming message"
   end
 
   test "a message without a username field should not be broadcasted" do
-    assert 0 == check_broadcasts "nouser", ~w({"payload":"ahaoho"})
+    fun = fn ->
+      assert 0 == check_broadcasts "nouser", ~w({"payload":"ahaoho"})
+    end
+    assert capture_log(fun) =~ "failed to parse incoming message"
   end
 
   test "multiple messages cause multiple broadcasts" do
