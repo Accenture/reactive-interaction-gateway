@@ -1,8 +1,8 @@
 defmodule GatewayWeb.Presence.ChannelTest do
+  @moduledoc false
   use ExUnit.Case, async: true
+  import ExUnit.CaptureLog
   use GatewayWeb.ChannelCase
-  alias GatewayWeb.Presence
-  alias GatewayWeb.Presence.Channel
 
   test "a user connecting to her own topic works" do
     assert {:ok, _response, sock} = subscribe_and_join_user(
@@ -14,11 +14,14 @@ defmodule GatewayWeb.Presence.ChannelTest do
   end
 
   test "a user connecting to someone else's topic with not authorized role fails" do
-    assert {:error, _message} = subscribe_and_join_user(
-      "foo-user",
-      [@customer_role],
-      "user:bar-user"
-    )
+    fun = fn ->
+      assert {:error, _message} = subscribe_and_join_user(
+        "foo-user",
+        [@customer_role],
+        "user:bar-user"
+      )
+    end
+    assert capture_log(fun) =~ "unauthorized"
   end
 
   test "a user connecting to someone else's topic with authorized role works" do
@@ -40,34 +43,13 @@ defmodule GatewayWeb.Presence.ChannelTest do
   end
 
   test "a user connecting to role specific topic without authorized role fails" do
-    assert {:error, _message} = subscribe_and_join_user(
-      "foo-user",
-      [@customer_role],
-      "role:customer"
-    )
-  end
-
-  test "a user joining/leaving channel should be tracked by presence" do
-    assert {:ok, _response, sock} = subscribe_and_join_user(
-      "testuser",
-      [@customer_role],
-      "user:testuser"
-    )
-
-    assert Map.has_key?(Presence.list("role:customer"), "testuser")
-    Process.unlink(sock.channel_pid)
-    close sock
-    assert !Map.has_key?(Presence.list("role:customer"), "testuser")
-  end
-  
-  test "an authorized user should be able to list presences" do
-    assert {:ok, _response, sock} = subscribe_and_join_user(
-      "testuser",
-      [@customer_role],
-      "user:testuser"
-    )
-
-    assert Map.has_key?(Channel.channels_list("user:testuser"), "testuser")
-    leave sock
+    fun = fn ->
+      assert {:error, _message} = subscribe_and_join_user(
+        "foo-user",
+        [@customer_role],
+        "role:customer"
+      )
+    end
+    assert capture_log(fun) =~ "unauthorized"
   end
 end
