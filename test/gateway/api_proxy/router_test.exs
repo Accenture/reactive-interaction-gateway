@@ -7,11 +7,13 @@ defmodule Gateway.ApiProxy.RouterTest do
   import ExUnit.CaptureLog
 
   alias GatewayWeb.Router
+  alias Gateway.RateLimit.Common
 
   setup do
     # Other tests might have filled the table, so we reset it:
-    :rate_limit_buckets
-    |> Gateway.RateLimit.Common.ensure_table
+    %{table_name: table} = Common.settings()
+    table
+    |> Common.ensure_table
     |> :ets.delete_all_objects
 
     first_service = Bypass.open(port: 7070)
@@ -38,8 +40,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
     
+    request = construct_request_with_jwt(:get, "/myapi/books")
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:get, "/myapi/books")
       conn = call(Router, request)
       assert conn.status == 200
       assert conn.resp_body =~ "{\"status\":\"ok\"}"
@@ -63,8 +65,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
 
+    request = construct_request_with_jwt(:post, "/myapi/books")
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:post, "/myapi/books")
       conn = call(Router, request)
       assert conn.status == 200
       assert conn.resp_body =~ "{\"status\":\"ok\"}"
@@ -77,8 +79,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
 
+    request = construct_request_with_jwt(:put, "/myapi/books")
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:put, "/myapi/books")
       conn = call(Router, request)
       assert conn.status == 200
       assert conn.resp_body =~ "{\"status\":\"ok\"}"
@@ -91,8 +93,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
 
+    request = construct_request_with_jwt(:patch, "/myapi/books")
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:patch, "/myapi/books")
       conn = call(Router, request)
       assert conn.status == 200
       assert conn.resp_body =~ "{\"status\":\"ok\"}"
@@ -105,8 +107,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
 
+    request = construct_request_with_jwt(:delete, "/myapi/books")
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:delete, "/myapi/books")
       conn = call(Router, request)
       assert conn.status == 200
       assert conn.resp_body =~ "{\"status\":\"ok\"}"
@@ -119,8 +121,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
 
+    request = construct_request_with_jwt(:head, "/myapi/books")
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:head, "/myapi/books")
       conn = call(Router, request)
       assert conn.status == 200
       # HEAD request responds only with headers
@@ -134,8 +136,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"status": "ok"}>)
     end
 
+    request = construct_request_with_jwt(:options, "/myapi/books")
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:options, "/myapi/books")
       conn = call(Router, request)
       assert conn.status == 200
       assert conn.resp_body =~ "{\"status\": \"ok\"}"
@@ -143,8 +145,8 @@ defmodule Gateway.ApiProxy.RouterTest do
   end
 
   test "endpoint with unsupported method should return 405" do
+    request = construct_request_with_jwt(:badmethod, "/myapi/books")
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:badmethod, "/myapi/books")
       conn = call(Router, request)
       assert conn.status == 405
       assert conn.resp_body =~ "{\"message\":\"Method is not supported\"}"
@@ -156,8 +158,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
     end
 
+    request = construct_request_with_jwt(:get, "/myapi/detail/first.user")
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:get, "/myapi/detail/first.user")
       conn = call(Router, request)
       assert conn.status == 200
       assert conn.resp_body =~ "{\"response\":\"[]\"}"
@@ -169,8 +171,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
     end
 
+    request = construct_request_with_jwt(:get, "/myapi/detail/95258830-28c6-11e7-a7ed-a1b56e729040")
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:get, "/myapi/detail/95258830-28c6-11e7-a7ed-a1b56e729040")
       conn = call(Router, request)
       assert conn.status == 200
       assert conn.resp_body =~ "{\"response\":\"[]\"}"
@@ -183,8 +185,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
     end
 
+    request = construct_request_with_jwt(:get, "/myapi/books", %{"page" => %{"offset" => 0, "limit" => 10}})
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:get, "/myapi/books", %{"page" => %{"offset" => 0, "limit" => 10}})
       conn = call(Router, request)
       assert conn.status == 200
       assert conn.resp_body =~ "{\"response\":\"[]\"}"
@@ -205,8 +207,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       content_type: "plain/text",
     }
   
+    request = construct_request_with_jwt(:post, "/myapi/books", %{"qqfile" => upload, "random_data" => "123"})
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:post, "/myapi/books", %{"qqfile" => upload, "random_data" => "123"})
       conn = call(Router, request)
       assert conn.status == 201
       assert conn.resp_body =~ "{\"response\": \"file uploaded successfully\"}"
@@ -224,8 +226,8 @@ defmodule Gateway.ApiProxy.RouterTest do
       conn
     end
 
+    request = construct_request_with_jwt(:get, "/myapi/books")
     assert capture_log(fn ->
-      request = construct_request_with_jwt(:get, "/myapi/books")
       conn = call(Router, request)
       assert conn.status == 200
       assert conn.state == :chunked
