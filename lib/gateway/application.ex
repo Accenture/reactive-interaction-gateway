@@ -8,28 +8,14 @@ defmodule Gateway.Application do
   # for more information on OTP Applications
   def start(_type, _args) do
     import Supervisor.Spec
-
-    app_env =
-      :gateway
-      |> Application.get_env(GatewayWeb.Endpoint)
-      |> Keyword.get(:env)
-
-    # Define workers and child supervisors to be supervised
-    maybe_kafka_worker =
-      if app_env == :test do
-        []
-      else
-        [worker(Gateway.Kafka.SupWrapper, _args = [])]
-      end
     children = [
       supervisor(GatewayWeb.Endpoint, _args = []),
       supervisor(GatewayWeb.Presence, []),
       supervisor(Gateway.Blacklist.Sup, _args = []),
+      supervisor(Gateway.RateLimit.Sup, _args = []),
       supervisor(Gateway.ApiProxy.Sup, _args = []),
-    ] ++ maybe_kafka_worker
-
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
+      worker(Gateway.Kafka.SupWrapper, _args = []),
+    ]
     opts = [strategy: :one_for_one, name: Gateway.Supervisor]
     Supervisor.start_link(children, opts)
   end
