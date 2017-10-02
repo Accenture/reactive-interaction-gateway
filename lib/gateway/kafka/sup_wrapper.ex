@@ -8,10 +8,12 @@ defmodule Gateway.Kafka.SupWrapper do
   not be desirable, as the Gateway might be started before Kafka comes up. In
   case a disaster happens, this makes booting up the overall system easier.
 
-  Note that we trap only :failed_to_start_child here; all other errors will
-  crash this server, and thus propagate up.
-  """
+  We trap only :failed_to_start_child here; all other errors will crash this
+  server, and thus propagate up.
 
+  Also note that in case :kafka_enabled? is false in the env config, the
+  GenServer doesn't start anything.
+  """
   use GenServer
   require Logger
 
@@ -22,17 +24,23 @@ defmodule Gateway.Kafka.SupWrapper do
   ## Client API
 
   def start_link do
-    GenServer.start_link(__MODULE__, :ok, [name: __MODULE__])
+    kafka_enabled? = Application.get_env(:gateway, :kafka_enabled?, true)
+    GenServer.start_link(__MODULE__, _args = kafka_enabled?, name: __MODULE__)
   end
 
   ## Server callbacks
 
-  def init(:ok) do
+  @impl GenServer
+  def init(_kafka_enabled? = false) do
+    :ignore
+  end
+  def init(_kafka_enabled? = true) do
     Process.flag :trap_exit, true
     send(self(), :start_sup)
     {:ok, %{n_attempts: 0}}
   end
 
+  @impl GenServer
   def handle_info(:start_sup, old_state) do
     Logger.debug("Starting Kafka supervisor (attempt #{next_attempt_no(old_state)})")
     new_state = case KafkaSupervisor.start_link() do
@@ -44,6 +52,7 @@ defmodule Gateway.Kafka.SupWrapper do
     {:noreply, new_state}
   end
 
+  @impl GenServer
   def handle_info(
     {:EXIT,
       _pid,

@@ -11,6 +11,7 @@
   "dialyxir": {:hex, :dialyxir, "0.5.0", "5bc543f9c28ecd51b99cc1a685a3c2a1a93216990347f259406a910cf048d1d7", [:mix], []},
   "distillery": {:hex, :distillery, "1.4.0", "d633cd322c8efa0428082b00b7f902daf8caa166d45f9022bbc19a896d2e1e56", [:mix], []},
   "erlware_commons": {:hex, :erlware_commons, "1.0.0", "087467de5833c0bb5b3ccdd387f9e9c1fb816a75b7a709629bf24b5ed3246c51", [:rebar3], [{:cf, "0.2.2", [hex: :cf, optional: false]}]},
+  "ex2ms": {:hex, :ex2ms, "1.5.0", "19e27f9212be9a96093fed8cdfbef0a2b56c21237196d26760f11dfcfae58e97", [:mix], []},
   "excoveralls": {:hex, :excoveralls, "0.6.2", "0e993d096f1fbb6e70a3daced5c89aac066bda6bce57829622aa2d1e2b338cfb", [:mix], [{:exjsx, "~> 3.0", [hex: :exjsx, optional: false]}, {:hackney, ">= 0.12.0", [hex: :hackney, optional: false]}]},
   "exjsx": {:hex, :exjsx, "3.2.1", "1bc5bf1e4fd249104178f0885030bcd75a4526f4d2a1e976f4b428d347614f0f", [:mix], [{:jsx, "~> 2.8.0", [hex: :jsx, optional: false]}]},
   "exrm": {:hex, :exrm, "1.0.8", "5aa8990cdfe300282828b02cefdc339e235f7916388ce99f9a1f926a9271a45d", [:mix], [{:relx, "~> 3.5", [hex: :relx, optional: false]}]},

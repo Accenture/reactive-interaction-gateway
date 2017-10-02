@@ -6,11 +6,13 @@ defmodule Gateway.ApiProxy.Router do
   Valid HTTP requests are forwarded to given service and their response is sent back to client.
   """
   use Plug.Router
+  require Logger
 
   alias Plug.Conn.Query
   alias Gateway.ApiProxy.Base
   alias Gateway.Utils.Jwt
   alias Gateway.Kafka
+  alias Gateway.RateLimit
 
   @typep route_map :: %{required(String.t) => String.t}
 
@@ -24,15 +26,32 @@ defmodule Gateway.ApiProxy.Router do
     %{method: method, request_path: request_path} = conn
 
     # Load proxy routes during the runtime
-    :gateway
-    |> :code.priv_dir
-    |> Path.join(@config_file)
-    |> File.read!
-    |> Poison.decode!
-    |> Enum.find(fn(route) ->
-      match_path(route, request_path) && match_http_method(route, method)
-    end)
-    |> check_and_forward_request(conn)
+    service =
+      :gateway
+      |> :code.priv_dir
+      |> Path.join(@config_file)
+      |> File.read!
+      |> Poison.decode!
+      |> Enum.find(fn(route) ->
+        match_path(route, request_path) && match_http_method(route, method)
+      end)
+
+    case service do
+      nil ->
+        send_resp(conn, 404, encode_error_message("Route is not available"))
+      _ ->
+        source_ip = conn.remote_ip |> Tuple.to_list |> Enum.join(".")
+        endpoint = "#{service["host"]}:#{service["port"]}"
+        endpoint
+        |> RateLimit.request_passage(source_ip)
+        |> case do
+          :ok ->
+            check_auth_and_forward_request(service, conn)
+          :passage_denied ->
+            Logger.warn("Too many requests (429) from #{source_ip} to #{endpoint}.")
+            send_resp(conn, 429, encode_error_message("Too many requests."))
+        end
+    end
   end
 
   # Match route path against requested path
@@ -55,14 +74,9 @@ defmodule Gateway.ApiProxy.Router do
     Poison.encode!(%{message: message})
   end
 
-  # Handle unsupported route
-  @spec check_and_forward_request(nil, %Plug.Conn{}) :: %Plug.Conn{}
-  defp check_and_forward_request(nil, conn) do
-    send_resp(conn, 404, encode_error_message("Route is not available"))
-  end
+  @spec check_auth_and_forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
   # Authentication required
-  @spec check_and_forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
-  defp check_and_forward_request(service = %{"auth" => true}, conn) do
+  defp check_auth_and_forward_request(service = %{"auth" => true}, conn) do
     # Get authorization from request header and query param (returns a list):
     tokens =
       conn
@@ -77,8 +91,7 @@ defmodule Gateway.ApiProxy.Router do
     end
   end
   # Authentication not required
-  @spec check_and_forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
-  defp check_and_forward_request(service = %{"auth" => false}, conn) do
+  defp check_auth_and_forward_request(service = %{"auth" => false}, conn) do
     forward_request(service, conn)
   end
 

@@ -23,6 +23,11 @@ config :gateway, auth_jwt_blacklist_default_expiry_hours: 1
 
 # Proxy:
 config :gateway, proxy_config_file: "proxy/proxy.json"
+config :gateway, proxy_rate_limit_enabled?: true
+config :gateway, proxy_rate_limit_per_ip?: true
+config :gateway, proxy_rate_limit_avg_rate_per_sec: 4
+config :gateway, proxy_rate_limit_burst_size: 10
+config :gateway, proxy_rate_limit_sweep_interval_ms: 5_000
 
 # Kafka:
 kafka_client_id = :gateway_brod_client

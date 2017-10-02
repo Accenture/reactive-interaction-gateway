@@ -10,6 +10,7 @@ defmodule Gateway.Blacklist.Sup do
     Supervisor.start_link(__MODULE__, :ok)
   end
 
+  @impl Supervisor
   def init(:ok) do
     children = [
       # The PresenceHandler also starts the Blacklist server. Since that's kind
