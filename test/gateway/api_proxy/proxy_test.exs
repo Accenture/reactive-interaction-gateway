@@ -1,5 +1,7 @@
 defmodule Gateway.ApiProxy.ProxyTest do
-  use ExUnit.Case, async: true
+  @moduledoc false
+  use ExUnit.Case, async: false  # cause Bypass opens ports
+  import ExUnit.CaptureLog
   use GatewayWeb.ConnCase
   import Joken
   alias GatewayWeb.Router
@@ -54,10 +56,14 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = build_conn(:get, "/is/user-info") |> put_req_header("authorization", jwt)
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"response\": \"ok\"}"
+    request =
+      build_conn(:get, "/is/user-info")
+      |> put_req_header("authorization", jwt)
+    assert capture_log(fn ->
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"response\": \"ok\"}"
+    end) =~ "username is required"
   end
 
   test "POST /is/user-info should verify JWT and return data", %{first_service: first_service} do
@@ -70,10 +76,14 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = build_conn(:post, "/is/user-info", %{"status" => "ok"}) |> put_req_header("authorization", jwt)
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"response\": \"ok\"}"
+    request =
+      build_conn(:post, "/is/user-info", %{"status" => "ok"})
+      |> put_req_header("authorization", jwt)
+    assert capture_log(fn ->
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"response\": \"ok\"}"
+    end) =~ "username is required"
   end
 
   test "PUT /is/users/{id} should verify JWT and return data", %{first_service: first_service} do
@@ -84,10 +94,14 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = build_conn(:put, "/is/users/mike") |> put_req_header("authorization", jwt)
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"response\": \"ok\"}"
+    request =
+      build_conn(:put, "/is/users/mike")
+      |> put_req_header("authorization", jwt)
+    assert capture_log(fn ->
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"response\": \"ok\"}"
+    end) =~ "username is required"
   end
 
   test "forward_request should handle DELETE method", %{second_service: second_service} do
@@ -98,11 +112,14 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = build_conn(:delete, "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040") 
+    request =
+      build_conn(:delete, "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040") 
       |> put_req_header("authorization", jwt)
-    conn = call(Router, request)
-    assert conn.status == 204
-    assert conn.resp_body =~ ""
+    assert capture_log(fn ->
+      conn = call(Router, request)
+      assert conn.status == 204
+      assert conn.resp_body =~ ""
+    end) =~ "username is required"
   end
 
   test "forward_request should handle IDs with . symbol", %{first_service: first_service} do
@@ -113,11 +130,14 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = build_conn(:get, "/is/users/first.user") 
+    request =
+      build_conn(:get, "/is/users/first.user") 
       |> put_req_header("authorization", jwt)
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"response\":\"[]\"}"
+    assert capture_log(fn ->
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"response\":\"[]\"}"
+    end) =~ "username is required"
   end
 
   test "forward_request should handle UUIDs", %{second_service: second_service} do
@@ -128,11 +148,14 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = build_conn(:get, "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040") 
+    request =
+      build_conn(:get, "/ps/tasks/95258830-28c6-11e7-a7ed-a1b56e729040") 
       |> put_req_header("authorization", jwt)
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"response\":\"[]\"}"
+    assert capture_log(fn ->
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"response\":\"[]\"}"
+    end) =~ "username is required"
   end
 
   test "forward_request should handle nested query params", %{third_service: third_service} do
@@ -144,11 +167,14 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = build_conn(:get, "/ts/transactions", %{"page" => %{"offset" => 0, "limit" => 10}}) 
+    request =
+      build_conn(:get, "/ts/transactions", %{"page" => %{"offset" => 0, "limit" => 10}}) 
       |> put_req_header("authorization", jwt)
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"response\":\"[]\"}"
+    assert capture_log(fn ->
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"response\":\"[]\"}"
+    end) =~ "username is required"
   end
   
   test "forward_request should handle POST request with file body", %{first_service: first_service} do
@@ -166,10 +192,11 @@ defmodule Gateway.ApiProxy.ProxyTest do
       filename: "upload_example.txt",
       content_type: "plain/text",
     }
-    request = build_conn(
-      :post,
-      "/is/auth",
-      %{"qqfile" => upload, "random_data" => "123"}) |> put_req_header("authorization", jwt)
+    request =
+      build_conn(:post,
+                 "/is/auth",
+                 %{"qqfile" => upload, "random_data" => "123"})
+      |> put_req_header("authorization", jwt)
     conn = call(Router, request)
     assert conn.status == 201
     assert conn.resp_body =~ "{\"response\": \"file uploaded successfully\"}"
@@ -188,12 +215,14 @@ defmodule Gateway.ApiProxy.ProxyTest do
     end
 
     jwt = generate_jwt()
-    request = build_conn(:get, "/ts/transactions") 
+    request =
+      build_conn(:get, "/ts/transactions") 
       |> put_req_header("authorization", jwt)
-    conn = call(Router, request)
-    
-    assert conn.status == 200
-    assert conn.state == :chunked
+    assert capture_log(fn ->
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.state == :chunked
+    end) =~ "username is required"
   end
 
   defp call(mod, conn) do
