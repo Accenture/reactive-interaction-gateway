@@ -1,0 +1,37 @@
+[
+  {
+    "id": "uuid1",
+    "name": "identity-service",
+    "auth_type": "jwt",
+    "auth_detail": {
+      "auth_token_place": "header",
+      "auth_token_key": "Authorization"
+    },
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "uuid",
+            "path": "is/auth/register",
+            "method": "GET",
+            "secured": false
+          },
+          {
+            "id": "uuid",
+            "path": "/is/auth",
+            "method": "POST",
+            "secured": false
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "IS_HOST",
+      "port": 7070,
+      "tls": false
+    },
+    "active": true
+  }
+]

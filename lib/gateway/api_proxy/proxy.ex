@@ -22,7 +22,8 @@ defmodule Gateway.ApiProxy.Proxy do
   # Get all incoming HTTP requests, check if they are valid, provide authentication if needed
   match _ do
     %{method: method, request_path: request_path} = conn
-
+    IO.puts "CALL"
+    IO.inspect Gateway.ProxyTest.list_apis
     # Load proxy routes during the runtime
     :gateway
     |> :code.priv_dir

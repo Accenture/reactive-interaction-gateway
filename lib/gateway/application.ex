@@ -25,6 +25,7 @@ defmodule Gateway.Application do
       supervisor(GatewayWeb.Endpoint, _args = []),
       supervisor(GatewayWeb.Presence, []),
       supervisor(Gateway.Blacklist.Sup, _args = []),
+      supervisor(Gateway.ApiProxy.Sup, _args = []),
     ] ++ maybe_kafka_worker
 
     # See https://hexdocs.pm/elixir/Supervisor.html
