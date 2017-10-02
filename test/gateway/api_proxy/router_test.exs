@@ -1,8 +1,10 @@
 defmodule Gateway.ApiProxy.RouterTest do
-  use ExUnit.Case, async: false
+  @moduledoc false
+  use ExUnit.Case, async: false  # cause Bypass opens ports
   use GatewayWeb.ConnCase
 
   import Joken
+  import ExUnit.CaptureLog
 
   alias GatewayWeb.Router
 
@@ -31,11 +33,13 @@ defmodule Gateway.ApiProxy.RouterTest do
     Bypass.expect_once first_service, "GET", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
-
-    request = construct_request_with_jwt(:get, "/myapi/books")
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"status\":\"ok\"}"
+    
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:get, "/myapi/books")
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"status\":\"ok\"}"
+    end) =~ "username is required"
   end
   
   test "authentication free endpoint should successfully return response",

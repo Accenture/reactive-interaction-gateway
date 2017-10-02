@@ -1,6 +1,7 @@
 defmodule Gateway.BlacklistTest do
+  @moduledoc false
+  use ExUnit.Case, async: true
   require Logger
-  use ExUnit.Case, async: false
   alias Gateway.Blacklist
   import Gateway.Blacklist, only: [add_jti: 4, contains_jti?: 2]
 

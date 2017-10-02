@@ -1,5 +1,6 @@
 defmodule Gateway.Transports.ServerSentEvents.EncoderTest do
-  use ExUnit.Case
+  @moduledoc false
+  use ExUnit.Case, async: true
   alias Phoenix.Socket.Message
 
   import Gateway.Transports.ServerSentEvents.Encoder, only: [format: 1]
