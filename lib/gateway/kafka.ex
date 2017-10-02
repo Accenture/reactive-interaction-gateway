@@ -42,11 +42,14 @@ defmodule Gateway.Kafka do
     )
   rescue
     err ->
-      Logger.warn("""
-      Failed to log API call: #{inspect err}
-        route=#{inspect route}
-        conn=#{inspect conn}
-      """)
+      test_env? = Application.get_env(:gateway, GatewayWeb.Endpoint, [])[:env] == :test
+      if not test_env? do
+        Logger.warn("""
+        Failed to log API call: #{inspect err}
+          route=#{inspect route}
+          conn=#{inspect conn}
+        """)
+      end
   end
 
   @spec extract_claims!(%Plug.Conn{}) :: Jwt.claim_map
