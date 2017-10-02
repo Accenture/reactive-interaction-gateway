@@ -9,8 +9,12 @@ defmodule Gateway.ApiProxy.RouterTest do
   alias GatewayWeb.Router
 
   setup do
-    first_service = Bypass.open(port: 7070)
+    # Other tests might have filled the table, so we reset it:
+    :rate_limit_buckets
+    |> Gateway.RateLimit.Common.ensure_table
+    |> :ets.delete_all_objects
 
+    first_service = Bypass.open(port: 7070)
     {:ok, 
       first_service: first_service,
     }
@@ -58,11 +62,13 @@ defmodule Gateway.ApiProxy.RouterTest do
     Bypass.expect_once first_service, "POST", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
-  
-    request = construct_request_with_jwt(:post, "/myapi/books")
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"status\":\"ok\"}"
+
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:post, "/myapi/books")
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"status\":\"ok\"}"
+    end) =~ "username is required"
   end
 
   test "endpoint with PUT method should successfully return response",
@@ -70,11 +76,13 @@ defmodule Gateway.ApiProxy.RouterTest do
     Bypass.expect_once first_service, "PUT", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
-  
-    request = construct_request_with_jwt(:put, "/myapi/books")
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"status\":\"ok\"}"
+
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:put, "/myapi/books")
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"status\":\"ok\"}"
+    end) =~ "username is required"
   end
 
   test "endpoint with PATCH method should successfully return response",
@@ -82,11 +90,13 @@ defmodule Gateway.ApiProxy.RouterTest do
     Bypass.expect_once first_service, "PATCH", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
-  
-    request = construct_request_with_jwt(:patch, "/myapi/books")
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"status\":\"ok\"}"
+
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:patch, "/myapi/books")
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"status\":\"ok\"}"
+    end) =~ "username is required"
   end
 
   test "endpoint with DELETE method should successfully return response",
@@ -94,11 +104,13 @@ defmodule Gateway.ApiProxy.RouterTest do
     Bypass.expect_once first_service, "DELETE", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
-  
-    request = construct_request_with_jwt(:delete, "/myapi/books")
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"status\":\"ok\"}"
+
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:delete, "/myapi/books")
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"status\":\"ok\"}"
+    end) =~ "username is required"
   end
 
   test "endpoint with HEAD method should successfully return response",
@@ -106,12 +118,14 @@ defmodule Gateway.ApiProxy.RouterTest do
     Bypass.expect_once first_service, "HEAD", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
-  
-    request = construct_request_with_jwt(:head, "/myapi/books")
-    conn = call(Router, request)
-    assert conn.status == 200
-    # HEAD request responds only with headers
-    assert conn.resp_body =~ ""
+
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:head, "/myapi/books")
+      conn = call(Router, request)
+      assert conn.status == 200
+      # HEAD request responds only with headers
+      assert conn.resp_body =~ ""
+    end) =~ "username is required"
   end
 
   test "endpoint with OPTIONS method should successfully return response",
@@ -119,18 +133,22 @@ defmodule Gateway.ApiProxy.RouterTest do
     Bypass.expect_once first_service, "OPTIONS", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status": "ok"}>)
     end
-  
-    request = construct_request_with_jwt(:options, "/myapi/books")
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"status\": \"ok\"}"
+
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:options, "/myapi/books")
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"status\": \"ok\"}"
+    end) =~ "username is required"
   end
 
-  test "endpoint with unsupported method should return 405" do  
-    request = construct_request_with_jwt(:badmethod, "/myapi/books")
-    conn = call(Router, request)
-    assert conn.status == 405
-    assert conn.resp_body =~ "{\"message\":\"Method is not supported\"}"
+  test "endpoint with unsupported method should return 405" do
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:badmethod, "/myapi/books")
+      conn = call(Router, request)
+      assert conn.status == 405
+      assert conn.resp_body =~ "{\"message\":\"Method is not supported\"}"
+    end) =~ "username is required"
   end
   
   test "forward_request should handle IDs with . symbol", %{first_service: first_service} do
@@ -138,21 +156,25 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
     end
 
-    request = construct_request_with_jwt(:get, "/myapi/detail/first.user")
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"response\":\"[]\"}"
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:get, "/myapi/detail/first.user")
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"response\":\"[]\"}"
+    end) =~ "username is required"
   end
 
   test "forward_request should handle UUIDs", %{first_service: first_service} do
     Bypass.expect_once first_service, "GET", "/myapi/detail/95258830-28c6-11e7-a7ed-a1b56e729040", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
     end
-  
-    request = construct_request_with_jwt(:get, "/myapi/detail/95258830-28c6-11e7-a7ed-a1b56e729040")
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"response\":\"[]\"}"
+
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:get, "/myapi/detail/95258830-28c6-11e7-a7ed-a1b56e729040")
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"response\":\"[]\"}"
+    end) =~ "username is required"
   end
 
   test "forward_request should handle nested query params", %{first_service: first_service} do
@@ -161,10 +183,12 @@ defmodule Gateway.ApiProxy.RouterTest do
       Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
     end
 
-    request = construct_request_with_jwt(:get, "/myapi/books", %{"page" => %{"offset" => 0, "limit" => 10}})
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"response\":\"[]\"}"
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:get, "/myapi/books", %{"page" => %{"offset" => 0, "limit" => 10}})
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.resp_body =~ "{\"response\":\"[]\"}"
+    end) =~ "username is required"
   end
   
   test "forward_request should handle POST request with file body", %{first_service: first_service} do
@@ -180,10 +204,13 @@ defmodule Gateway.ApiProxy.RouterTest do
       filename: "upload_example.txt",
       content_type: "plain/text",
     }
-    request = construct_request_with_jwt(:post, "/myapi/books", %{"qqfile" => upload, "random_data" => "123"})
-    conn = call(Router, request)
-    assert conn.status == 201
-    assert conn.resp_body =~ "{\"response\": \"file uploaded successfully\"}"
+  
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:post, "/myapi/books", %{"qqfile" => upload, "random_data" => "123"})
+      conn = call(Router, request)
+      assert conn.status == 201
+      assert conn.resp_body =~ "{\"response\": \"file uploaded successfully\"}"
+    end) =~ "username is required"
   end
 
   test "send_response should chunk response if transfer-encoding is set to chunked",
@@ -197,10 +224,12 @@ defmodule Gateway.ApiProxy.RouterTest do
       conn
     end
 
-    request = construct_request_with_jwt(:get, "/myapi/books")
-    conn = call(Router, request)
-    assert conn.status == 200
-    assert conn.state == :chunked
+    assert capture_log(fn ->
+      request = construct_request_with_jwt(:get, "/myapi/books")
+      conn = call(Router, request)
+      assert conn.status == 200
+      assert conn.state == :chunked
+    end) =~ "username is required"
   end
 
   defp construct_request_with_jwt(method, url, query \\ %{}) do

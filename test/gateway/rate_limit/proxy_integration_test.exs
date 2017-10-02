@@ -10,7 +10,7 @@ defmodule Gateway.RateLimit.ProxyIntegrationTest do
 
     call_endpoint = fn ->
       conn =
-        Phoenix.ConnTest.build_conn(:post, "/is/auth")
+        Phoenix.ConnTest.build_conn(:get, "/myapi/free")
         |> GatewayWeb.Router.call([])
       conn.status
     end
