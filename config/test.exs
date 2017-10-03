@@ -11,7 +11,7 @@ config :gateway, GatewayWeb.Endpoint,
 config :logger, level: :warn
 
 # Proxy test route config file location
-config :gateway, proxy_route_config: "proxy/proxy.test.json"
+config :gateway, proxy_config_file: "proxy/proxy.test.json"
 
 config :gateway, proxy_rate_limit_enabled?: true
 config :gateway, proxy_rate_limit_sweep_interval_ms: 0
