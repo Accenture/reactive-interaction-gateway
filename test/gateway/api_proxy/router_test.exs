@@ -11,8 +11,8 @@ defmodule Gateway.ApiProxy.RouterTest do
 
   setup do
     # Other tests might have filled the table, so we reset it:
-    %{table_name: table} = Common.settings()
-    table
+    Common.settings()
+    |> Map.fetch!(:table_name)
     |> Common.ensure_table
     |> :ets.delete_all_objects
 
