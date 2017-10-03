@@ -1,4 +1,6 @@
 defmodule GatewayWeb.Presence.ControllerTest do
+  @moduledoc false
+  use ExUnit.Case, async: false
   use GatewayWeb.ConnCase
   use GatewayWeb.ChannelCase
 

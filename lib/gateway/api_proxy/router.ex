@@ -1,9 +1,9 @@
-defmodule Gateway.ApiProxy.Proxy do
+defmodule Gateway.ApiProxy.Router do
   @moduledoc """
-  Provides middleware proxy for incoming REST requests at specific routes.
-  Matches all incoming HTTP requests and checks if such route is defined in json file.
-  If route needs authentication it is automatically triggered.
-  Valid HTTP requests are forwarded to given service an their response is sent back to client.
+  Provides middleware proxy for incoming REST requests at specific endpoints.
+  Matches all incoming HTTP requests and checks if such endpoint is defined in json file.
+  If endpoint needs authentication, it is automatically triggered.
+  Valid HTTP requests are forwarded to given service and their response is sent back to client.
   """
   use Plug.Router
   require Logger
@@ -114,13 +114,17 @@ defmodule Gateway.ApiProxy.Proxy do
     } = conn
     # Build URL
     url = build_url(service, request_path)
+
     # Match URL against HTTP method to forward it to specific service
     res =
       case method do
         "GET" -> Base.get!(attachQueryParams(url, params), req_headers)
         "POST" -> format_post_request(url, params, req_headers)
         "PUT" -> Base.put!(url, Poison.encode!(params), req_headers)
+        "PATCH" -> Base.patch!(url, Poison.encode!(params), req_headers)
         "DELETE" -> Base.delete!(url, req_headers)
+        "HEAD" -> Base.head!(url, req_headers)
+        "OPTIONS" -> Base.options!(url, req_headers)
         _ -> nil
       end
     send_response({:ok, conn, res})
@@ -161,7 +165,7 @@ defmodule Gateway.ApiProxy.Proxy do
 
   # Workaround for HTTPoison/URI.encode not supporting nested query params
   @spec attachQueryParams(String.t, nil) :: String.t
-  defp attachQueryParams(url, nil), do: url
+  defp attachQueryParams(url, params) when params == %{}, do: url
 
   @spec attachQueryParams(String.t, map) :: String.t
   defp attachQueryParams(url, params) do

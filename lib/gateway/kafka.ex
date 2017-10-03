@@ -10,14 +10,21 @@ defmodule Gateway.Kafka do
   @call_log_topic Application.fetch_env!(:gateway, :kafka_call_log_topic)
 
   @spec log_proxy_api_call(Proxy.route_map, %Plug.Conn{}) :: Jwt.claim_map
-  def log_proxy_api_call(route, conn) do
+  def log_proxy_api_call(route, conn, produce_sync \\ &:brod.produce_sync/5) do
     claims = extract_claims!(conn)
     username = Map.fetch!(claims, "username")
+    jti =
+      case Map.get(claims, "jti") do
+        nil ->
+          Logger.warn("jti not found in claims (#{inspect claims})")
+          nil
+        jti -> jti
+      end
     message =
       %{
         id: UUID.uuid4(),
         username: username,
-        jti: Map.fetch!(claims, "jti"),
+        jti: jti,
         type: "PROXY_API_CALL",
         version: "1.0",
         timestamp: Timex.now |> Timex.to_unix,
@@ -33,7 +40,7 @@ defmodule Gateway.Kafka do
     # provided the server is configured that way. However,
     # this call then returns with {:error, :LeaderNotAvailable},
     # as at that point there won't be a partition leader yet.
-    :ok = :brod.produce_sync(
+    :ok = produce_sync.(
       @brod_client_id,
       @call_log_topic,
       _partition = &compute_kafka_partition/4,
@@ -42,14 +49,20 @@ defmodule Gateway.Kafka do
     )
   rescue
     err ->
-      test_env? = Application.get_env(:gateway, GatewayWeb.Endpoint, [])[:env] == :test
-      if not test_env? do
-        Logger.warn("""
-        Failed to log API call: #{inspect err}
-          route=#{inspect route}
-          conn=#{inspect conn}
-        """)
+      case err do
+        %KeyError{key: "username", term: claims} ->
+          Logger.warn("""
+          A username is required for publishing to the right Kafka topic, \
+          but no such field is found in the given claims: #{inspect claims}
+          """)
+        _ ->
+          Logger.error("""
+          Failed to log API call: #{inspect err}
+            ROUTE=#{inspect route}
+            CONN=#{inspect conn}
+          """)
       end
+      {:error, err}
   end
 
   @spec extract_claims!(%Plug.Conn{}) :: Jwt.claim_map
