@@ -12,15 +12,12 @@ defmodule Gateway.ApiProxy.PresenceHandler do
   require Logger
   @behaviour Phoenix.Tracker
 
-  alias Gateway.ProxyTest
+  alias Gateway.Proxy
 
   @topic "proxy"
 
   def start_link(opts) do
-    IO.inspect opts
     opts = Keyword.merge([name: __MODULE__], opts)
-    IO.puts "---MERGED---"
-    IO.inspect opts
     GenServer.start_link(
       Phoenix.Tracker,
       [__MODULE__, opts, opts],
@@ -31,12 +28,10 @@ defmodule Gateway.ApiProxy.PresenceHandler do
 
   @impl Phoenix.Tracker
   def init(opts) do
-    {:ok, proxy_test} = ProxyTest.start_link()
+    {:ok, proxy_test} = Proxy.start_link()
     pubsub = Keyword.fetch!(opts, :pubsub_server)
-    IO.puts "starting with filling"
-    ProxyTest.fill_presence
-    IO.puts "init pubsub"
-    IO.inspect proxy_test
+
+    Proxy.fill_presence
     {:ok, %{
       pubsub_server: pubsub,
       node_name: Phoenix.PubSub.node_name(pubsub),

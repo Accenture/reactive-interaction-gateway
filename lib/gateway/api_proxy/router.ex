@@ -13,41 +13,90 @@ defmodule Gateway.ApiProxy.Router do
   alias Gateway.Utils.Jwt
   alias Gateway.Kafka
   alias Gateway.RateLimit
+  alias Gateway.Proxy
 
   @typep route_map :: %{required(String.t) => String.t}
 
   plug :match
   plug :dispatch
 
-  @config_file Application.fetch_env!(:gateway, :proxy_config_file)
-
   # Get all incoming HTTP requests, check if they are valid, provide authentication if needed
   match _ do
-    %{method: method, request_path: request_path} = conn
-    IO.puts "CALL"
-    IO.inspect Gateway.ProxyTest.list_apis
+    %{method: request_method, request_path: request_path} = conn
+    # IO.puts "CALL"
+    # IO.inspect Gateway.Proxy.list_apis
     # Load proxy routes during the runtime
-    service =
-      :gateway
-      |> :code.priv_dir
-      |> Path.join(@config_file)
-      |> File.read!
-      |> Poison.decode!
-      |> Enum.find(fn(route) ->
-        match_path(route, request_path) && match_http_method(route, method)
-      end)
+    # fd =
+    # :gateway
+    # |> :code.priv_dir
+    # |> Path.join(@config_file)
+    # |> File.read!
+    # |> Poison.decode!
 
-    case service do
+    # IO.inspect fd
+
+    # ps =
+    # Proxy.list_apis
+    # |> Enum.map(fn(api) ->
+    #   {_id, api_definition} = api
+    #   IO.inspect api_definition
+    #   api_definition
+    # end)
+    # 
+    # IO.inspect ps
+
+    IO.inspect "PICKER"
+    IO.inspect conn
+    list_apis = Proxy.list_apis
+    |> Enum.map(fn(api) ->
+      {_id, api_definition} = api
+      api_definition
+    end)
+    list_length = length(list_apis)
+    {ap, endp} = pick_endpoint(list_apis, request_path, request_method, list_length)
+    # IO.puts "END"
+    # IO.inspect ap
+    # IO.inspect endp
+
+    # {service, endpoint} =
+    #   # :gateway
+    #   # |> :code.priv_dir
+    #   # |> Path.join(@config_file)
+    #   # |> File.read!
+    #   # |> Poison.decode!
+    #   Proxy.list_apis
+    #   |> Enum.map(fn(api) ->
+    #     {_id, api_definition} = api
+    #     api_definition
+    #   end)
+    #   |> Enum.find?(fn(api) ->
+    #     IO.puts "MATCH PATH & METHOD"
+    #     IO.inspect api
+    #     # IO.inspect match_path(api, request_path)
+    #     validate_request(api, request_path, request_method)
+    #     # match_path(route, request_path) && match_http_method(route, method)
+    #   end)
+    #   # |> pick_endpoint
+    # 
+    # IO.puts "SERVICE"
+    # IO.inspect service
+
+    case endp do
       nil ->
         send_resp(conn, 404, encode_error_message("Route is not available"))
       _ ->
+        IO.puts "RATE LIMITING"
         source_ip = conn.remote_ip |> Tuple.to_list |> Enum.join(".")
-        endpoint = "#{service["host"]}:#{service["port"]}"
+        %{"port" => port, "target_url" => host} = Map.fetch!(ap, "proxy")
+        endpoint = "#{host}:#{port}"
+        IO.inspect endpoint
         endpoint
         |> RateLimit.request_passage(source_ip)
         |> case do
           :ok ->
-            check_auth_and_forward_request(service, conn)
+            IO.puts "CHECK AUTH"
+            IO.inspect endp
+            check_auth_and_forward_request(endp, ap, conn)
           :passage_denied ->
             Logger.warn("Too many requests (429) from #{source_ip} to #{endpoint}.")
             send_resp(conn, 429, encode_error_message("Too many requests."))
@@ -55,18 +104,53 @@ defmodule Gateway.ApiProxy.Router do
     end
   end
 
+  # Recursively search for valid endpoint and return API definition and matched endpoint
+  defp pick_endpoint([head | tail], request_path, request_method, iterator) when iterator >= 1 do
+    IO.inspect iterator
+    IO.inspect head
+    res = validate_request(head, request_path, request_method)
+    # IO.inspect res
+    # IO.inspect iterator > 1
+    cond do
+      res == nil && iterator > 1 -> pick_endpoint(tail, request_path, request_method, iterator - 1)
+      true -> {head, res}
+    end
+    # if res == nil && iterator > 1 do
+    #   IO.inspect tail
+    #   pick_endpoint(tail, request_path, request_method, iterator - 1)
+    # end
+    # IO.inspect "END #{iterator}"
+    # IO.inspect res
+    # {head, res}
+  end
+
+  # Validate API definition if there is any valid endpoint, match path and HTTP method
+  defp validate_request(%{"versioned" => false} = route, request_path, request_method) do # TODO: VERSIONED APIs
+    IO.puts "NON VERSIONED API"
+    endpoints = Kernel.get_in(route, ["version_data", "default", "endpoints"])
+
+    endpoints
+    |> Enum.find(fn(endpoint) ->
+      %{"path" => path, "method" => method} = endpoint
+      match_path(path, request_path) && match_http_method(method, request_method)
+    end)
+  end
+
   # Match route path against requested path
   @spec match_path(route_map, String.t) :: boolean
-  defp match_path(route, request_path) do
+  defp match_path(path, request_path) do
     # Replace wildcards with actual params
-    replace_wildcards = String.replace(route["path"], "{id}", "[^/]+")
+    full_path = String.replace(path, "{id}", "[^/]+")
+    String.match?(request_path, ~r/#{full_path}$/)
+
+    # replace_wildcards = String.replace(route["path"], "{id}", "[^/]+")
     # Match requested path against regex
-    String.match?(request_path, ~r/#{replace_wildcards}$/)
+    # String.match?(request_path, ~r/#{replace_wildcards}$/)
   end
 
   # Match route method against requested method
   @spec match_http_method(route_map, String.t) :: boolean
-  defp match_http_method(route, method), do: route["method"] == method
+  defp match_http_method(method, request_method), do: method == request_method
 
   # Encode custom error messages with Poison to JSON format
   @type json_message :: %{message: String.t}
@@ -75,9 +159,10 @@ defmodule Gateway.ApiProxy.Router do
     Poison.encode!(%{message: message})
   end
 
-  @spec check_auth_and_forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
+  # @spec check_auth_and_forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
   # Authentication required
-  defp check_auth_and_forward_request(service = %{"auth" => true}, conn) do
+  defp check_auth_and_forward_request(endpoint = %{"secured" => true}, api, conn) do
+    IO.puts "SECURED"
     # Get authorization from request header and query param (returns a list):
     tokens =
       conn
@@ -87,13 +172,14 @@ defmodule Gateway.ApiProxy.Router do
       |> Enum.concat(get_req_header(conn, "authorization"))
 
     case any_token_valid?(tokens) do
-      true -> forward_request(service, conn)
+      true -> forward_request(endpoint, api, conn)
       false -> send_resp(conn, 401, encode_error_message("Missing or invalid token"))
     end
   end
   # Authentication not required
-  defp check_auth_and_forward_request(service = %{"auth" => false}, conn) do
-    forward_request(service, conn)
+  defp check_auth_and_forward_request(endpoint = %{"secured" => false}, api, conn) do
+    IO.puts "NOT SECURED"
+    forward_request(endpoint, api, conn)
   end
 
   @spec any_token_valid?([]) :: false
@@ -103,9 +189,9 @@ defmodule Gateway.ApiProxy.Router do
     tokens |> Enum.any?(&Jwt.valid?/1)
   end
 
-  @spec forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
-  defp forward_request(service, conn) do
-    log_to_kafka(service, conn)
+  # @spec forward_request(route_map, %Plug.Conn{}) :: %Plug.Conn{}
+  defp forward_request(endpoint, api, conn) do
+    log_to_kafka(endpoint, conn)
     %{
       method: method,
       request_path: request_path,
@@ -113,8 +199,8 @@ defmodule Gateway.ApiProxy.Router do
       req_headers: req_headers
     } = conn
     # Build URL
-    url = build_url(service, request_path)
-
+    url = build_url(api["proxy"], request_path)
+    IO.inspect "URL #{url}"
     # Match URL against HTTP method to forward it to specific service
     res =
       case method do
@@ -148,8 +234,8 @@ defmodule Gateway.ApiProxy.Router do
   end
 
   @spec log_to_kafka(route_map, %Plug.Conn{}) :: :ok
-  defp log_to_kafka(%{"auth" => true} = service, conn) do
-    Kafka.log_proxy_api_call(service, conn)
+  defp log_to_kafka(%{"secured" => true} = proxy, conn) do
+    Kafka.log_proxy_api_call(proxy, conn)
   end
   defp log_to_kafka(_service, _conn) do
     # no-op - we only log authenticated requests for now.
@@ -158,9 +244,9 @@ defmodule Gateway.ApiProxy.Router do
 
   # Builds URL where REST request should be proxied
   @spec build_url(route_map, String.t) :: String.t
-  defp build_url(service, request_path) do
-    host = System.get_env(service["host"]) || "localhost"
-    "#{host}:#{service["port"]}#{request_path}"
+  defp build_url(proxy = %{"use_env" => true}, request_path) do # TODO: HANDLE FALSE
+    host = System.get_env(proxy["target_url"]) || "localhost"
+    "#{host}:#{proxy["port"]}#{request_path}"
   end
 
   # Workaround for HTTPoison/URI.encode not supporting nested query params

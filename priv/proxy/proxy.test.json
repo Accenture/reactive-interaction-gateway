@@ -1,72 +1,108 @@
 [
   {
-    "host": "API_HOST",
-    "port": 7070,
-    "path": "/myapi/books",
-    "method": "GET",
-    "auth": true
+    "id": "uuid1",
+    "name": "identity-service",
+    "auth_type": "jwt",
+    "auth_detail": {
+      "auth_token_place": "header",
+      "auth_token_key": "Authorization"
+    },
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "uuid1",
+            "path": "/myapi/detail/{id}",
+            "method": "GET",
+            "secured": true
+          },
+          {
+            "id": "uuid2",
+            "path": "/myapi/free",
+            "method": "GET",
+            "secured": false
+          },
+          {
+            "id": "uuid3",
+            "path": "/myapi/books",
+            "method": "BADMETHOD",
+            "secured": true
+          },
+          {
+            "id": "uuid4",
+            "path": "/myapi/books",
+            "method": "OPTIONS",
+            "secured": true
+          },
+          {
+            "id": "uuid5",
+            "path": "/myapi/books",
+            "method": "HEAD",
+            "secured": true
+          },
+          {
+            "id": "uuid6",
+            "path": "/myapi/books",
+            "method": "DELETE",
+            "secured": true
+          },
+          {
+            "id": "uuid7",
+            "path": "/myapi/books",
+            "method": "PATCH",
+            "secured": true
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "API_HOST",
+      "port": 7070,
+      "tls": false
+    },
+    "active": true
   },
   {
-    "host": "API_HOST",
-    "port": 7070,
-    "path": "/myapi/books",
-    "method": "POST",
-    "auth": true
-  },
-  {
-    "host": "API_HOST",
-    "port": 7070,
-    "path": "/myapi/books",
-    "method": "PUT",
-    "auth": true
-  },
-  {
-    "host": "API_HOST",
-    "port": 7070,
-    "path": "/myapi/books",
-    "method": "PATCH",
-    "auth": true
-  },
-  {
-    "host": "API_HOST",
-    "port": 7070,
-    "path": "/myapi/books",
-    "method": "DELETE",
-    "auth": true
-  },
-  {
-    "host": "API_HOST",
-    "port": 7070,
-    "path": "/myapi/books",
-    "method": "HEAD",
-    "auth": true
-  },
-  {
-    "host": "API_HOST",
-    "port": 7070,
-    "path": "/myapi/books",
-    "method": "OPTIONS",
-    "auth": true
-  },
-  {
-    "host": "API_HOST",
-    "port": 7070,
-    "path": "/myapi/books",
-    "method": "BADMETHOD",
-    "auth": true
-  },
-  {
-    "host": "API_HOST",
-    "port": 7070,
-    "path": "/myapi/free",
-    "method": "GET",
-    "auth": false
-  },
-  {
-    "host": "API_HOST",
-    "port": 7070,
-    "path": "/myapi/detail/{id}",
-    "method": "GET",
-    "auth": true
+    "id": "uuid2",
+    "name": "identity-service",
+    "auth_type": "jwt",
+    "auth_detail": {
+      "auth_token_place": "header",
+      "auth_token_key": "Authorization"
+    },
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "uuid8",
+            "path": "/myapi/books",
+            "method": "PUT",
+            "secured": true
+          },
+          {
+            "id": "uuid9",
+            "path": "/myapi/books",
+            "method": "POST",
+            "secured": true
+          },
+          {
+            "id": "uuid10",
+            "path": "/myapi/books",
+            "method": "GET",
+            "secured": true
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "API_HOST",
+      "port": 7070,
+      "tls": false
+    },
+    "active": true
   }
 ]

@@ -1,4 +1,4 @@
-defmodule Gateway.ProxyTest do
+defmodule Gateway.Proxy do
   @moduledoc """
   Enables blacklisting of JWTs by their jti claim.
 
@@ -24,12 +24,8 @@ defmodule Gateway.ProxyTest do
 
   @default_tracker_mod Gateway.ApiProxy.Tracker
   @config_file Application.fetch_env!(:gateway, :proxy_config_file)
-  # @default_expiry_hours Application.fetch_env!(:gateway, :auth_jwt_blacklist_default_expiry_hours)
 
   def start_link(tracker_mod \\ nil, opts \\ []) do
-    IO.puts "MAIN PROXY FILE START_LINK"
-    IO.inspect tracker_mod
-    IO.inspect opts
     tracker_mod = if tracker_mod, do: tracker_mod, else: @default_tracker_mod
     Logger.debug("API MANAGEMENT with tracker #{inspect tracker_mod}")
     GenServer.start_link(
@@ -43,14 +39,12 @@ defmodule Gateway.ProxyTest do
     read_init_apis
     |> Enum.each(fn(api) ->
       api_id = Map.get(api, "id")
-      IO.inspect api_id
-      IO.inspect api
-      GenServer.cast(Gateway.ProxyTest, {:add, api_id, api, nil})
+      GenServer.cast(Gateway.Proxy, {:add, api_id, api, nil})
     end)
   end
 
   def list_apis() do
-    GenServer.call(Gateway.ProxyTest, {:list_api})
+    GenServer.call(Gateway.Proxy, {:list_api})
   end
 
   # callbacks
@@ -61,10 +55,6 @@ defmodule Gateway.ProxyTest do
   end
 
   def handle_cast({:add, api_id, api_map, listener}, state) do
-    # Logger.info("Handling APIs INIT with data=#{api}")
-    IO.inspect api_id
-    IO.inspect api_map
-    IO.inspect state
     state.tracker_mod.track(api_id, api_map)
     IO.puts "----------STATE UPDATED-------"
     {:noreply, state}
@@ -80,7 +70,7 @@ defmodule Gateway.ProxyTest do
   defp read_init_apis do
     :gateway
     |> :code.priv_dir
-    |> Path.join("proxy/proxy_new.json")
+    |> Path.join(@config_file)
     |> File.read!
     |> Poison.decode!
   end
