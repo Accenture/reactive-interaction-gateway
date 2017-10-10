@@ -17,8 +17,10 @@ defmodule Gateway.ApiProxy.RouterTest do
     |> :ets.delete_all_objects
 
     first_service = Bypass.open(port: 7070)
+    second_service = Bypass.open(port: 4040)
     {:ok, 
       first_service: first_service,
+      second_service: second_service,
     }
   end
 
@@ -36,7 +38,7 @@ defmodule Gateway.ApiProxy.RouterTest do
 
   test "protected endpoint with valid JWT should return response",
   %{first_service: first_service} do
-    Bypass.expect_once first_service, "GET", "/myapi/books", fn conn ->
+    Bypass.expect first_service, "GET", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
     
@@ -50,7 +52,7 @@ defmodule Gateway.ApiProxy.RouterTest do
   
   test "authentication free endpoint should successfully return response",
   %{first_service: first_service} do
-    Bypass.expect_once first_service, "GET", "/myapi/free", fn conn ->
+    Bypass.expect first_service, "GET", "/myapi/free", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
   
@@ -61,7 +63,7 @@ defmodule Gateway.ApiProxy.RouterTest do
 
   test "endpoint with POST method should successfully return response",
   %{first_service: first_service} do
-    Bypass.expect_once first_service, "POST", "/myapi/books", fn conn ->
+    Bypass.expect first_service, "POST", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
 
@@ -75,7 +77,7 @@ defmodule Gateway.ApiProxy.RouterTest do
 
   test "endpoint with PUT method should successfully return response",
   %{first_service: first_service} do
-    Bypass.expect_once first_service, "PUT", "/myapi/books", fn conn ->
+    Bypass.expect first_service, "PUT", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
 
@@ -89,7 +91,7 @@ defmodule Gateway.ApiProxy.RouterTest do
 
   test "endpoint with PATCH method should successfully return response",
   %{first_service: first_service} do
-    Bypass.expect_once first_service, "PATCH", "/myapi/books", fn conn ->
+    Bypass.expect first_service, "PATCH", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
 
@@ -103,7 +105,7 @@ defmodule Gateway.ApiProxy.RouterTest do
 
   test "endpoint with DELETE method should successfully return response",
   %{first_service: first_service} do
-    Bypass.expect_once first_service, "DELETE", "/myapi/books", fn conn ->
+    Bypass.expect first_service, "DELETE", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
 
@@ -117,7 +119,7 @@ defmodule Gateway.ApiProxy.RouterTest do
 
   test "endpoint with HEAD method should successfully return response",
   %{first_service: first_service} do
-    Bypass.expect_once first_service, "HEAD", "/myapi/books", fn conn ->
+    Bypass.expect first_service, "HEAD", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
     end
 
@@ -132,7 +134,7 @@ defmodule Gateway.ApiProxy.RouterTest do
 
   test "endpoint with OPTIONS method should successfully return response",
   %{first_service: first_service} do
-    Bypass.expect_once first_service, "OPTIONS", "/myapi/books", fn conn ->
+    Bypass.expect first_service, "OPTIONS", "/myapi/books", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"status": "ok"}>)
     end
 
@@ -154,7 +156,7 @@ defmodule Gateway.ApiProxy.RouterTest do
   end
   
   test "forward_request should handle IDs with . symbol", %{first_service: first_service} do
-    Bypass.expect_once first_service, "GET", "/myapi/detail/first.user", fn conn ->
+    Bypass.expect first_service, "GET", "/myapi/detail/first.user", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
     end
 
@@ -167,7 +169,7 @@ defmodule Gateway.ApiProxy.RouterTest do
   end
 
   test "forward_request should handle UUIDs", %{first_service: first_service} do
-    Bypass.expect_once first_service, "GET", "/myapi/detail/95258830-28c6-11e7-a7ed-a1b56e729040", fn conn ->
+    Bypass.expect first_service, "GET", "/myapi/detail/95258830-28c6-11e7-a7ed-a1b56e729040", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
     end
 
@@ -180,7 +182,7 @@ defmodule Gateway.ApiProxy.RouterTest do
   end
 
   test "forward_request should handle nested query params", %{first_service: first_service} do
-    Bypass.expect_once first_service, "GET", "/myapi/books", fn conn ->
+    Bypass.expect first_service, "GET", "/myapi/books", fn conn ->
       assert "page[limit]=10&page[offset]=0" == conn.query_string
       Plug.Conn.resp(conn, 200, ~s<{"response":"[]"}>)
     end
@@ -194,7 +196,7 @@ defmodule Gateway.ApiProxy.RouterTest do
   end
   
   test "forward_request should handle POST request with file body", %{first_service: first_service} do
-    Bypass.expect_once first_service, "POST", "/myapi/books", fn conn ->
+    Bypass.expect first_service, "POST", "/myapi/books", fn conn ->
       {:ok, body, _conn} = Plug.Conn.read_body(conn)
       assert body |> String.contains?("name=\"random_data\"\r\n\r\n123\r\n")
       assert body |> String.contains?("filename=\"upload_example.txt\"\r\n\r\nHello\r\n")
@@ -217,7 +219,7 @@ defmodule Gateway.ApiProxy.RouterTest do
 
   test "send_response should chunk response if transfer-encoding is set to chunked",
   %{first_service: first_service} do
-    Bypass.expect_once first_service, "GET", "/myapi/books", fn conn ->
+    Bypass.expect first_service, "GET", "/myapi/books", fn conn ->
       {:ok, conn} =
         conn
         |> put_resp_header("transfer-encoding", "chunked")
@@ -232,6 +234,17 @@ defmodule Gateway.ApiProxy.RouterTest do
       assert conn.status == 200
       assert conn.state == :chunked
     end) =~ "username is required"
+  end
+
+  test "should skip auth if no auth method is set",
+  %{first_service: first_service} do
+    Bypass.expect first_service, "GET", "/myapi/direct", fn conn ->
+      Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
+    end
+  
+    conn = call(Router, build_conn(:get, "/myapi/direct"))
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"status\":\"ok\"}"
   end
 
   defp construct_request_with_jwt(method, url, query \\ %{}) do

@@ -1,184 +1,230 @@
 [
   {
-    "host": "IS_HOST",
-    "port": 7070,
-    "path": "/is/auth/register",
-    "method": "POST",
-    "auth": false
+    "id": "uuid1",
+    "name": "identity-service",
+    "auth_type": "jwt",
+    "auth": {
+      "use_header": true,
+      "header_name": "Authorization",
+      "use_query": false,
+      "query_name": ""
+    },
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "uuid1",
+            "path": "/is/auth/register",
+            "method": "GET",
+            "not_secured": true
+          },
+          {
+            "id": "uuid2",
+            "path": "/is/auth",
+            "method": "POST",
+            "not_secured": true
+          },
+          {
+            "id": "uuid3",
+            "path": "/is/user-info",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid4",
+            "path": "/is/user-info",
+            "method": "POST",
+            "not_secured": false
+          },
+          {
+            "id": "uuid5",
+            "path": "/is/users/{id}",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid6",
+            "path": "/is/users/{id}",
+            "method": "PUT",
+            "not_secured": false
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "IS_HOST",
+      "port": 7070
+    },
+    "active": true
   },
   {
-    "host": "IS_HOST",
-    "port": 7070,
-    "path": "/is/auth",
-    "method": "POST",
-    "auth": false
+    "id": "uuid2",
+    "name": "process-service",
+    "auth_type": "jwt",
+    "auth": {
+      "use_header": true,
+      "header_name": "Authorization",
+      "use_query": false,
+      "query_name": ""
+    },
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "uuid1",
+            "path": "/ps/{id}/form/last",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid2",
+            "path": "/ps/tasks",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid3",
+            "path": "/ps/tasks",
+            "method": "POST",
+            "not_secured": false
+          },
+          {
+            "id": "uuid4",
+            "path": "/ps/tasks/{id}",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid5",
+            "path": "/ps/tasks/{id}",
+            "method": "PUT",
+            "not_secured": false
+          },
+          {
+            "id": "uuid6",
+            "path": "/ps/tasks/{id}",
+            "method": "DELETE",
+            "not_secured": false
+          },
+          {
+            "id": "uuid7",
+            "path": "/ps/tasks/{id}/submit",
+            "method": "PUT",
+            "not_secured": false
+          },
+          {
+            "id": "uuid8",
+            "path": "/ps/forms",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid9",
+            "path": "/ps/forms/{id}",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid10",
+            "path": "/ps/tasks/{id}/attachments",
+            "method": "POST",
+            "not_secured": false
+          },
+          {
+            "id": "uuid11",
+            "path": "/ps/tasks/{id}/attachments/{id}",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid12",
+            "path": "/ps/tasks/{id}/attachments/{id}",
+            "method": "DELETE",
+            "not_secured": false
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "PS_HOST",
+      "port": 8080
+    },
+    "active": true
   },
   {
-    "host": "IS_HOST",
-    "port": 7070,
-    "path": "/is/user-info",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "IS_HOST",
-    "port": 7070,
-    "path": "/is/user-info",
-    "method": "POST",
-    "auth": true
-  },
-  {
-    "host": "IS_HOST",
-    "port": 7070,
-    "path": "/is/users/{id}",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "IS_HOST",
-    "port": 7070,
-    "path": "/is/users/{id}",
-    "method": "PUT",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/{id}/form/last",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/tasks",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/tasks",
-    "method": "POST",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/tasks/{id}",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/tasks/{id}",
-    "method": "PUT",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/tasks/{id}",
-    "method": "DELETE",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/tasks/{id}/submit",
-    "method": "PUT",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/forms",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/forms/{id}",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/tasks/{id}/attachments",
-    "method": "POST",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/tasks/{id}/attachments/{id}",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "PS_HOST",
-    "port": 8080,
-    "path": "/ps/tasks/{id}/attachments/{id}",
-    "method": "DELETE",
-    "auth": true
-  },
-  {
-    "host": "TS_HOST",
-    "port": 8889,
-    "path": "/ts/transactions",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "TS_HOST",
-    "port": 8889,
-    "path": "/ts/transactions/{id}",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "TS_HOST",
-    "port": 8889,
-    "path": "/ts/transactions",
-    "method": "POST",
-    "auth": true
-  },
-  {
-    "host": "TS_HOST",
-    "port": 8889,
-    "path": "/ts/balance",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "TS_HOST",
-    "port": 8889,
-    "path": "/ts/sum",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "TS_HOST",
-    "port": 8889,
-    "path": "/ts/monthly_history",
-    "method": "GET",
-    "auth": true
-  },
-  {
-    "host": "TS_HOST",
-    "port": 8889,
-    "path": "ts/users",
-    "method": "POST",
-    "auth": true
-  },
-  {
-    "host": "TS_HOST",
-    "port": 8889,
-    "path": "ts/tokens",
-    "method": "POST",
-    "auth": true
+    "id": "uuid3",
+    "name": "transaction-service",
+    "auth_type": "jwt",
+    "auth": {
+      "use_header": true,
+      "header_name": "Authorization",
+      "use_query": false,
+      "query_name": ""
+    },
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "uuid1",
+            "path": "/ts/transactions",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid2",
+            "path": "/ts/transactions/{id}",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid3",
+            "path": "/ts/transactions",
+            "method": "POST",
+            "not_secured": false
+          },
+          {
+            "id": "uuid4",
+            "path": "/ts/balance",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid5",
+            "path": "/ts/sum",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid6",
+            "path": "/ts/monthly_history",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "uuid7",
+            "path": "ts/users",
+            "method": "POST",
+            "not_secured": false
+          },
+          {
+            "id": "uuid8",
+            "path": "ts/tokens",
+            "method": "POST",
+            "not_secured": false
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "TS_HOST",
+      "port": 8889
+    },
+    "active": true
   }
 ]

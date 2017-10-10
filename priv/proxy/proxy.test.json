@@ -3,9 +3,11 @@
     "id": "uuid1",
     "name": "identity-service",
     "auth_type": "jwt",
-    "auth_detail": {
-      "auth_token_place": "header",
-      "auth_token_key": "Authorization"
+    "auth": {
+      "use_header": true,
+      "header_name": "Authorization",
+      "use_query": false,
+      "query_name": ""
     },
     "versioned": false,
     "version_data": {
@@ -15,43 +17,61 @@
             "id": "uuid1",
             "path": "/myapi/detail/{id}",
             "method": "GET",
-            "secured": true
+            "not_secured": false
           },
           {
             "id": "uuid2",
             "path": "/myapi/free",
             "method": "GET",
-            "secured": false
+            "not_secured": true
           },
           {
             "id": "uuid3",
             "path": "/myapi/books",
             "method": "BADMETHOD",
-            "secured": true
+            "not_secured": false
           },
           {
             "id": "uuid4",
             "path": "/myapi/books",
             "method": "OPTIONS",
-            "secured": true
+            "not_secured": false
           },
           {
             "id": "uuid5",
             "path": "/myapi/books",
             "method": "HEAD",
-            "secured": true
+            "not_secured": false
           },
           {
             "id": "uuid6",
             "path": "/myapi/books",
             "method": "DELETE",
-            "secured": true
+            "not_secured": false
           },
           {
             "id": "uuid7",
             "path": "/myapi/books",
             "method": "PATCH",
-            "secured": true
+            "not_secured": false
+          },
+          {
+            "id": "uuid8",
+            "path": "/myapi/books",
+            "method": "PUT",
+            "not_secured": false
+          },
+          {
+            "id": "uuid9",
+            "path": "/myapi/books",
+            "method": "POST",
+            "not_secured": false
+          },
+          {
+            "id": "uuid10",
+            "path": "/myapi/books",
+            "method": "GET",
+            "not_secured": false
           }
         ]
       }
@@ -59,40 +79,29 @@
     "proxy": {
       "use_env": true,
       "target_url": "API_HOST",
-      "port": 7070,
-      "tls": false
+      "port": 7070
     },
     "active": true
   },
   {
     "id": "uuid2",
-    "name": "identity-service",
-    "auth_type": "jwt",
-    "auth_detail": {
-      "auth_token_place": "header",
-      "auth_token_key": "Authorization"
+    "name": "random-service",
+    "auth_type": "none",
+    "auth": {
+      "use_header": false,
+      "header_name": "",
+      "use_query": false,
+      "query_name": ""
     },
     "versioned": false,
     "version_data": {
       "default": {
         "endpoints": [
           {
-            "id": "uuid8",
-            "path": "/myapi/books",
-            "method": "PUT",
-            "secured": true
-          },
-          {
-            "id": "uuid9",
-            "path": "/myapi/books",
-            "method": "POST",
-            "secured": true
-          },
-          {
-            "id": "uuid10",
-            "path": "/myapi/books",
+            "id": "uuid1",
+            "path": "/myapi/direct",
             "method": "GET",
-            "secured": true
+            "not_secured": false
           }
         ]
       }
@@ -100,8 +109,7 @@
     "proxy": {
       "use_env": true,
       "target_url": "API_HOST",
-      "port": 7070,
-      "tls": false
+      "port": 7070
     },
     "active": true
   }

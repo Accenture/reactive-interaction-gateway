@@ -22,7 +22,7 @@ config :gateway, auth_jwt_key: "supersecrettoken"
 config :gateway, auth_jwt_blacklist_default_expiry_hours: 1
 
 # Proxy:
-config :gateway, proxy_config_file: "proxy/proxy_new.json"
+config :gateway, proxy_config_file: "proxy/proxy.json"
 config :gateway, proxy_rate_limit_enabled?: true
 config :gateway, proxy_rate_limit_per_ip?: true
 config :gateway, proxy_rate_limit_avg_rate_per_sec: 4
