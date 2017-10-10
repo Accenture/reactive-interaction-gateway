@@ -56,8 +56,7 @@
       "use_env": true,
       "target_url": "IS_HOST",
       "port": 7070
-    },
-    "active": true
+    }
   },
   {
     "id": "uuid2",
@@ -152,8 +151,7 @@
       "use_env": true,
       "target_url": "PS_HOST",
       "port": 8080
-    },
-    "active": true
+    }
   },
   {
     "id": "uuid3",
@@ -224,7 +222,6 @@
       "use_env": true,
       "target_url": "TS_HOST",
       "port": 8889
-    },
-    "active": true
+    }
   }
 ]

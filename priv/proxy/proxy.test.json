@@ -80,8 +80,7 @@
       "use_env": true,
       "target_url": "API_HOST",
       "port": 7070
-    },
-    "active": true
+    }
   },
   {
     "id": "uuid2",
@@ -110,7 +109,6 @@
       "use_env": true,
       "target_url": "API_HOST",
       "port": 7070
-    },
-    "active": true
+    }
   }
 ]
