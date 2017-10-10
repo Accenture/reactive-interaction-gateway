@@ -1,6 +1,6 @@
 [
   {
-    "id": "uuid1",
+    "id": "identity-service",
     "name": "identity-service",
     "auth_type": "jwt",
     "auth": {
@@ -14,61 +14,61 @@
       "default": {
         "endpoints": [
           {
-            "id": "uuid1",
+            "id": "get-myapi-detail-id",
             "path": "/myapi/detail/{id}",
             "method": "GET",
             "not_secured": false
           },
           {
-            "id": "uuid2",
+            "id": "get-myapi-free",
             "path": "/myapi/free",
             "method": "GET",
             "not_secured": true
           },
           {
-            "id": "uuid3",
+            "id": "badmethod-myapi-books",
             "path": "/myapi/books",
             "method": "BADMETHOD",
             "not_secured": false
           },
           {
-            "id": "uuid4",
+            "id": "options-myapi-books",
             "path": "/myapi/books",
             "method": "OPTIONS",
             "not_secured": false
           },
           {
-            "id": "uuid5",
+            "id": "head-myapi-books",
             "path": "/myapi/books",
             "method": "HEAD",
             "not_secured": false
           },
           {
-            "id": "uuid6",
+            "id": "delete-myapi-books",
             "path": "/myapi/books",
             "method": "DELETE",
             "not_secured": false
           },
           {
-            "id": "uuid7",
+            "id": "patch-myapi-books",
             "path": "/myapi/books",
             "method": "PATCH",
             "not_secured": false
           },
           {
-            "id": "uuid8",
+            "id": "put-myapi-books",
             "path": "/myapi/books",
             "method": "PUT",
             "not_secured": false
           },
           {
-            "id": "uuid9",
+            "id": "post-myapi-books",
             "path": "/myapi/books",
             "method": "POST",
             "not_secured": false
           },
           {
-            "id": "uuid10",
+            "id": "get-myapi-books",
             "path": "/myapi/books",
             "method": "GET",
             "not_secured": false
@@ -83,7 +83,7 @@
     }
   },
   {
-    "id": "uuid2",
+    "id": "random-service",
     "name": "random-service",
     "auth_type": "none",
     "auth": {
@@ -97,7 +97,7 @@
       "default": {
         "endpoints": [
           {
-            "id": "uuid1",
+            "id": "get-myapi-direct",
             "path": "/myapi/direct",
             "method": "GET",
             "not_secured": false
