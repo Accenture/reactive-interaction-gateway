@@ -1,6 +1,6 @@
 defmodule Gateway.Proxy do
   @moduledoc """
-  Enables persisting and CRUD operations for Proxie's API definitions in presence.
+  Enables persisting and CRUD operations for Proxy's API definitions in presence.
 
   In a distributed setting, the node that does the persisting of API definitions
   spreads the information via Phoenix' PubSub Server as Phoenix Presence information.
