@@ -33,9 +33,7 @@ defmodule Gateway.ApiProxy.Router do
     list_apis =
       Proxy.list_apis
       |> Enum.map(fn(api) -> elem(api, 1) end)
-    list_length = length(list_apis)
-    {api_map, endpoint} =
-      pick_api_and_endpoint(list_apis, request_path, request_method, list_length)
+    {api_map, endpoint} = pick_api_and_endpoint(list_apis, request_path, request_method)
 
     case endpoint do
       nil ->
@@ -57,11 +55,13 @@ defmodule Gateway.ApiProxy.Router do
   end
 
   # Recursively search for valid endpoint and return API definition and matched endpoint
-  @spec pick_api_and_endpoint([route_map], String.t, String.t, integer) :: {map, route_map}
-  defp pick_api_and_endpoint([head | tail], request_path, request_method, iterator) when iterator >= 1 do
+  @spec pick_api_and_endpoint([], String.t, String.t) :: {nil, nil}
+  defp pick_api_and_endpoint([], _request_path, _request_method), do: {nil, nil}
+  @spec pick_api_and_endpoint([route_map], String.t, String.t) :: {map, route_map}
+  defp pick_api_and_endpoint([head | tail], request_path, request_method) do
     res = validate_request(head, request_path, request_method)
-    if res == nil && iterator > 1 do
-      pick_api_and_endpoint(tail, request_path, request_method, iterator - 1)
+    if res == nil do
+      pick_api_and_endpoint(tail, request_path, request_method)
     else
       {head, res}
     end
