@@ -41,14 +41,14 @@ defmodule Gateway.ApiProxy.Router do
       _ ->
         source_ip = conn.remote_ip |> Tuple.to_list |> Enum.join(".")
         %{"port" => port, "target_url" => host} = Map.fetch!(api_map, "proxy")
-        endpoint_url = "#{host}:#{port}"
-        endpoint_url
+        endpoint_socket = "#{host}:#{port}"
+        endpoint_socket
         |> RateLimit.request_passage(source_ip)
         |> case do
           :ok ->
             check_auth_and_forward_request(endpoint, api_map, conn)
           :passage_denied ->
-            Logger.warn("Too many requests (429) from #{source_ip} to #{endpoint_url}.")
+            Logger.warn("Too many requests (429) from #{source_ip} to #{endpoint_socket}.")
             send_resp(conn, 429, Serializer.encode_error_message("Too many requests."))
         end
     end
