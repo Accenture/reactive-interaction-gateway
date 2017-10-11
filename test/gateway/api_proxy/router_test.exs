@@ -16,12 +16,15 @@ defmodule Gateway.ApiProxy.RouterTest do
     |> Common.ensure_table
     |> :ets.delete_all_objects
 
-    first_service = Bypass.open(port: 7070)
-    second_service = Bypass.open(port: 4040)
-    {:ok, 
-      first_service: first_service,
-      second_service: second_service,
-    }
+    boot_service(Bypass.open(port: 7070))
+  end
+
+  defp boot_service(first_service) do
+    case first_service do
+      {:error, :eaddrinuse} -> boot_service(Bypass.open(port: 7070))
+      # Retry for new instance if previous didn't manage to exit
+      _ -> {:ok, first_service: first_service}
+    end
   end
 
   test "not defined endpoint should return 404" do
