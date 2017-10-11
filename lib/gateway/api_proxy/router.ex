@@ -56,7 +56,7 @@ defmodule Gateway.ApiProxy.Router do
   @spec pick_api_and_endpoint(
     [Proxy.api_definition], String.t, String.t) :: {Proxy.api_definition, Proxy.endpoint}
   defp pick_api_and_endpoint([head | tail], request_path, request_method) do
-  endpoint = validate_request(head, request_path, request_method)
+    endpoint = validate_request(head, request_path, request_method)
     if endpoint == nil do
       pick_api_and_endpoint(tail, request_path, request_method)
     else
