@@ -17,6 +17,35 @@ defmodule Gateway.Proxy do
   """
   require Logger
 
+  @type endpoint :: %{
+    id: String.t,
+    path: String.t,
+    method: String.t,
+    not_secured: boolean,
+  }
+  @type api_definition :: %{
+    id: String.t,
+    name: String.t,
+    auth: String.t,
+    auth_type: %{
+      use_header: boolean,
+      header_name: String.t,
+      use_query: boolean,
+      query_name: String.t,
+    },
+    versioned: boolean,
+    version_data: %{
+      optional(String.t) => %{
+        endpoints: [endpoint]
+      }
+    },
+    proxy: %{
+      use_env: boolean,
+      target_url: String.t,
+      port: integer,
+    },
+  }
+
   @typep state_t :: map
 
   @default_tracker_mod Gateway.ApiProxy.Tracker
@@ -41,7 +70,7 @@ defmodule Gateway.Proxy do
     GenServer.call(Gateway.Proxy, {:list_api})
   end
 
-  @spec add_api(pid | atom, String.t, map) :: pid
+  @spec add_api(pid | atom, String.t, api_definition) :: pid
   def add_api(server, id, api) do
     GenServer.cast(server, {:add, id, api})
     server  # allow for chaining calls
@@ -61,7 +90,7 @@ defmodule Gateway.Proxy do
     {:noreply, state}
   end
 
-  @spec handle_cast({:add, String.t, map}, state_t) :: {:noreply, state_t}
+  @spec handle_cast({:add, String.t, api_definition}, state_t) :: {:noreply, state_t}
   def handle_cast({:add, api_id, api_map}, state) do
     Logger.info("Adding new API definition with id=#{api_id} to presence")
     state.tracker_mod.track(api_id, api_map)

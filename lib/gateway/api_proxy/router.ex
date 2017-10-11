@@ -16,11 +16,7 @@ defmodule Gateway.ApiProxy.Router do
   alias Gateway.RateLimit
   alias Gateway.Proxy
 
-  @typep route_map :: %{required(String.t) => String.t}
   @typep headers_list :: [{String.t, String.t}, ...]
-  @typep map_string_true :: %{required(String.t) => true}
-  @typep map_string_false :: %{required(String.t) => false}
-  @typep map_string_string :: %{required(String.t) => false}
   @typep map_string_upload :: %{required(String.t) => %Plug.Upload{}}
 
   plug :match
@@ -57,18 +53,19 @@ defmodule Gateway.ApiProxy.Router do
   # Recursively search for valid endpoint and return API definition and matched endpoint
   @spec pick_api_and_endpoint([], String.t, String.t) :: {nil, nil}
   defp pick_api_and_endpoint([], _request_path, _request_method), do: {nil, nil}
-  @spec pick_api_and_endpoint([route_map], String.t, String.t) :: {map, route_map}
+  @spec pick_api_and_endpoint(
+    [Proxy.api_definition], String.t, String.t) :: {Proxy.api_definition, Proxy.endpoint}
   defp pick_api_and_endpoint([head | tail], request_path, request_method) do
-    res = validate_request(head, request_path, request_method)
-    if res == nil do
+  endpoint = validate_request(head, request_path, request_method)
+    if endpoint == nil do
       pick_api_and_endpoint(tail, request_path, request_method)
     else
-      {head, res}
+      {head, endpoint}
     end
   end
 
   # Validate API definition if there is any valid endpoint, match path and HTTP method
-  @spec validate_request(map_string_false, String.t, String.t) :: map
+  @spec validate_request(Proxy.api_definition, String.t, String.t) :: Proxy.endpoint
   defp validate_request(%{"versioned" => false} = route, request_path, request_method) do
     Kernel.get_in(route, ["version_data", "default", "endpoints"])
     |> Enum.find(fn(endpoint) ->
@@ -90,18 +87,20 @@ defmodule Gateway.ApiProxy.Router do
   defp match_http_method(method, request_method), do: method == request_method
 
   # Skip authentication if turned off
-  @spec check_auth_and_forward_request(map_string_true, map, %Plug.Conn{}) :: %Plug.Conn{}
+  @spec check_auth_and_forward_request(
+    Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
   defp check_auth_and_forward_request(endpoint = %{"not_secured" => true}, api, conn) do
     forward_request(endpoint, api, conn)
   end
   # Skip authentication if no auth type is set
-  @spec check_auth_and_forward_request(map, map_string_string, %Plug.Conn{}) :: %Plug.Conn{}
+  @spec check_auth_and_forward_request(
+    Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
   defp check_auth_and_forward_request(endpoint, %{"auth_type" => "none"} = api, conn) do
     forward_request(endpoint, api, conn)
   end
   # Authentication with JWT
   @spec check_auth_and_forward_request(
-    map_string_false, map_string_string, %Plug.Conn{}) :: %Plug.Conn{}
+    Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
   defp check_auth_and_forward_request(%{"not_secured" => false} = endpoint, %{"auth_type" => "jwt"} = api, conn) do
     tokens = Enum.concat(Auth.pick_query_token(conn, api), Auth.pick_header_token(conn, api))
     case Auth.any_token_valid?(tokens) do
@@ -110,7 +109,7 @@ defmodule Gateway.ApiProxy.Router do
     end
   end
 
-  @spec forward_request(map, route_map, %Plug.Conn{}) :: %Plug.Conn{}
+  @spec forward_request(Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
   defp forward_request(endpoint, api, conn) do
     log_to_kafka(api, endpoint, conn)
     %{
@@ -156,7 +155,7 @@ defmodule Gateway.ApiProxy.Router do
   end
 
   # Log API call to Kafka
-  @spec log_to_kafka(map_string_string, map_string_false, %Plug.Conn{}) :: :ok
+  @spec log_to_kafka(Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: :ok
   defp log_to_kafka(%{"auth_type" => "jwt"}, %{"not_secured" => false} = endpoint, conn) do
     Kafka.log_proxy_api_call(endpoint, conn)
   end
