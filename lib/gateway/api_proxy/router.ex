@@ -31,6 +31,10 @@ defmodule Gateway.ApiProxy.Router do
       |> Enum.map(fn(api) -> elem(api, 1) end)
     {api_map, endpoint} = pick_api_and_endpoint(list_apis, request_path, request_method)
 
+    IO.puts "-----"
+    IO.inspect Proxy.list_apis
+    IO.puts "-----"
+
     case endpoint do
       nil ->
         send_resp(conn, 404, Serializer.encode_error_message("Route is not available"))

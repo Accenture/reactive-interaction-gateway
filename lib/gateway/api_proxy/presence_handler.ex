@@ -40,16 +40,19 @@ defmodule Gateway.ApiProxy.PresenceHandler do
   end
 
   @doc """
-  Forwards joins/leaves/updates on the "proxy" topic to the Proxy server.
+  Forwards joins/leaves on the "proxy" topic to the Proxy server.
 
   """
   @impl Phoenix.Tracker
   def handle_diff(diff, state) do
     for {topic, {joins, leaves}} <- diff do
+      IO.puts "JOINS"
+      IO.inspect state
+      IO.inspect joins
       for {key, meta} <- joins do
         if topic == @topic do
-          [id, api] = [key, Map.delete(meta, :phx_ref)]
-          state.proxy |> Proxy.add_api(id, api)
+          # [id, api] = [key, Map.delete(meta, :phx_ref)]
+          state.proxy |> Proxy.add_api(key, meta)
         end
         msg = {:join, key, meta}
         Phoenix.PubSub.direct_broadcast!(state.node_name, state.pubsub_server, topic, msg)

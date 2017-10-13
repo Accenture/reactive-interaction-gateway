@@ -76,6 +76,11 @@ defmodule Gateway.Proxy do
     server  # allow for chaining calls
   end
 
+  def update_api(server, id, api) do
+    GenServer.cast(server, {:update, id, api})
+    server  # allow for chaining calls
+  end
+
   # callbacks
 
   @spec init(state_t) :: {:ok, state_t}
@@ -93,7 +98,14 @@ defmodule Gateway.Proxy do
   @spec handle_cast({:add, String.t, api_definition}, state_t) :: {:noreply, state_t}
   def handle_cast({:add, api_id, api_map}, state) do
     Logger.info("Adding new API definition with id=#{api_id} to presence")
-    state.tracker_mod.track(api_id, api_map)
+    IO.inspect Phoenix.PubSub.node_name(Gateway.PubSub)
+    state.tracker_mod.track(api_id, api_map, Phoenix.PubSub.node_name(Gateway.PubSub))
+    {:noreply, state}
+  end
+
+  def handle_cast({:update, api_id, api_map}, state) do
+    Logger.info("Updating API definition with id=#{api_id} to presence")
+    state.tracker_mod.update(api_id, api_map)
     {:noreply, state}
   end
 
