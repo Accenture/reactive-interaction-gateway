@@ -18,29 +18,29 @@ defmodule Gateway.Proxy do
   require Logger
 
   @type endpoint :: %{
+    optional(:not_secured) => boolean,
     id: String.t,
     path: String.t,
     method: String.t,
-    not_secured: boolean,
-  }
+}
   @type api_definition :: %{
+    optional(:auth) => String.t,
+    optional(:versioned) => boolean,
     id: String.t,
     name: String.t,
-    auth: String.t,
     auth_type: %{
-      use_header: boolean,
-      header_name: String.t,
-      use_query: boolean,
-      query_name: String.t,
+      optional(:use_header) => boolean,
+      optional(:header_name) => String.t,
+      optional(:use_query) => boolean,
+      optional(:query_name) => String.t,
     },
-    versioned: boolean,
     version_data: %{
       optional(String.t) => %{
         endpoints: [endpoint]
       }
     },
     proxy: %{
-      use_env: boolean,
+      optional(:use_env) => boolean,
       target_url: String.t,
       port: integer,
     },
