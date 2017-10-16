@@ -24,11 +24,11 @@ defmodule Gateway.Proxy do
     method: String.t,
 }
   @type api_definition :: %{
-    optional(:auth) => String.t,
+    optional(:auth_type) => String.t,
     optional(:versioned) => boolean,
     id: String.t,
     name: String.t,
-    auth_type: %{
+    auth: %{
       optional(:use_header) => boolean,
       optional(:header_name) => String.t,
       optional(:use_query) => boolean,
