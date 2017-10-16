@@ -46,18 +46,25 @@ defmodule Gateway.ApiProxy.PresenceHandler do
   @impl Phoenix.Tracker
   def handle_diff(diff, state) do
     for {topic, {joins, leaves}} <- diff do
-      IO.puts "JOINS"
-      IO.inspect state
-      IO.inspect joins
       for {key, meta} <- joins do
+        IO.puts "JOINS #{key}"
+        # IO.inspect state
+        IO.inspect joins
         if topic == @topic do
           # [id, api] = [key, Map.delete(meta, :phx_ref)]
-          state.proxy |> Proxy.add_api(key, meta)
+          # state.proxy |> Proxy.add_api(key, meta)
+          state.proxy |> Proxy.add_or_update_api(key, meta)
         end
         msg = {:join, key, meta}
         Phoenix.PubSub.direct_broadcast!(state.node_name, state.pubsub_server, topic, msg)
       end
       for {key, meta} <- leaves do
+        IO.puts "LEAVES #{key}"
+        # IO.inspect state
+        IO.inspect leaves
+        if topic == @topic do
+          state.proxy |> Proxy.handle_delete_api(key, meta)
+        end
         msg = {:leave, key, meta}
         Phoenix.PubSub.direct_broadcast!(state.node_name, state.pubsub_server, topic, msg)
       end

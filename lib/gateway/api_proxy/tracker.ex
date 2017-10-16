@@ -7,6 +7,7 @@ defmodule Gateway.ApiProxy.Tracker do
   defmodule TrackerBehaviour do
     @moduledoc false
     @callback track(id :: String.t, api :: map, node_name :: String.t) :: {:ok, String.t}
+    @callback untrack(id :: String.t) :: :ok
     @callback list() :: [{String.t, %{optional(String.t) => String.t}}]
   end
 
@@ -45,11 +46,11 @@ defmodule Gateway.ApiProxy.Tracker do
           _key = id,
           _meta = api_with_internal_info)
       {:ok, :update_no_ref} ->
-        Logger.info("API definition with id=#{id} adopted more recent version from other nodes")
+        Logger.info("API definition with id=#{id} adopted new version with no REF update")
         api_with_internal_info = add_internal_info(api, %{"node_name" => node_name})
         update(id, api_with_internal_info)
       {:ok, :update_with_ref} ->
-        Logger.info("API definition with id=#{id} adopted new version")
+        Logger.info("API definition with id=#{id} adopted new version with REF update")
         internal_info = %{
           "ref_number" => prev_api["ref_number"] + 1,
           "node_name" => node_name,
@@ -116,6 +117,7 @@ defmodule Gateway.ApiProxy.Tracker do
   defp remove_internal_info(api) do
     api
     |> Map.delete(:phx_ref)
+    |> Map.delete(:phx_ref_prev)
     |> Map.delete("node_name")
     |> Map.delete("timestamp")
   end
@@ -129,6 +131,46 @@ defmodule Gateway.ApiProxy.Tracker do
       @topic,
       _key = id,
       _meta = api)
+  end
+
+  @impl TrackerBehaviour
+  def untrack(id) do
+    IO.puts "UNTRACKING #{id}"
+    Phoenix.Tracker.untrack(
+      _tracker = Presence,
+      _pid = Process.whereis(Gateway.PubSub),
+      @topic,
+      _key = id)
+  end
+
+  def handle_untrack(id, next_api, node_name) do
+    IO.puts "UNTRACK FROM DIFF"
+    case check_node_origin(id, next_api, node_name) do
+      {:error, :exit} ->
+        Logger.warn("Blocked unwanted deletion of API definition with id=#{id} from presence")
+        {:error, :exit}
+      {:ok, :untrack} ->
+        Logger.warn("DIFF DELETE of API definition with id=#{id} from presence")
+        untrack(id)
+    end
+  end
+
+  defp check_node_origin(id, next_api, node_name) do
+    if node_name != next_api["node_name"] do
+      {:ok, :untrack}
+    else
+      find(id, node_name)
+      |> check_phx_ref(next_api)
+    end
+  end
+
+  defp check_phx_ref(nil, _next_api), do: {:error, :exit}
+  defp check_phx_ref({_id, prev_api}, next_api) do
+    if prev_api.phx_ref == next_api.phx_ref do
+      {:ok, :untrack}
+    else
+      {:error, :exit}
+    end
   end
 
   @impl TrackerBehaviour

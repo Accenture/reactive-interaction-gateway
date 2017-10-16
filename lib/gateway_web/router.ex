@@ -15,5 +15,14 @@ defmodule GatewayWeb.Router do
     delete "/connections/:jti", Presence.Controller, :disconnect_channel_connection
   end
 
+  scope "/apis", GatewayWeb do
+    pipe_through :api
+    get "/", Proxy.Controller, :list_apis
+    post "/", Proxy.Controller, :add_api
+    # get "/:id", Proxy.Controller, :api_detail
+    put "/:id", Proxy.Controller, :update_api
+    delete "/:id", Proxy.Controller, :delete_api
+  end
+
   forward "/", Gateway.ApiProxy.Plug
 end

@@ -70,14 +70,33 @@ defmodule Gateway.Proxy do
     GenServer.call(Gateway.Proxy, {:list_api})
   end
 
+  def get_api(id) do
+    GenServer.call(Gateway.Proxy, {:get_api, id})
+  end
+
   @spec add_api(pid | atom, String.t, api_definition) :: pid
   def add_api(server, id, api) do
     GenServer.cast(server, {:add, id, api})
     server  # allow for chaining calls
   end
 
+  def add_or_update_api(server, id, api) do
+    GenServer.cast(server, {:add_or_update, id, api})
+    server  # allow for chaining calls
+  end
+
   def update_api(server, id, api) do
     GenServer.cast(server, {:update, id, api})
+    server  # allow for chaining calls
+  end
+
+  def delete_api(server, id) do
+    GenServer.cast(server, {:delete, id})
+    server  # allow for chaining calls
+  end
+
+  def handle_delete_api(server, id, api) do
+    GenServer.cast(server, {:handle_delete, id, api})
     server  # allow for chaining calls
   end
 
@@ -98,14 +117,52 @@ defmodule Gateway.Proxy do
   @spec handle_cast({:add, String.t, api_definition}, state_t) :: {:noreply, state_t}
   def handle_cast({:add, api_id, api_map}, state) do
     Logger.info("Adding new API definition with id=#{api_id} to presence")
-    IO.inspect Phoenix.PubSub.node_name(Gateway.PubSub)
-    state.tracker_mod.track(api_id, api_map, Phoenix.PubSub.node_name(Gateway.PubSub))
+
+    node_name = Phoenix.PubSub.node_name(Gateway.PubSub)
+    # TODO: may cause infinite loop
+    api_with_internal_info =
+      api_map
+      |> Map.put("ref_number", 0)
+      |> Map.put("node_name", node_name)
+      |> Map.put("timestamp", Timex.now)
+
+    state.tracker_mod.track(api_id, api_map, node_name)
     {:noreply, state}
   end
 
-  def handle_cast({:update, api_id, api_map}, state) do
-    Logger.info("Updating API definition with id=#{api_id} to presence")
-    state.tracker_mod.update(api_id, api_map)
+  def handle_cast({:add_or_update, api_id, api_map}, state) do
+    Logger.info("Adding or update API definition with id=#{api_id} to presence")
+
+    node_name = Phoenix.PubSub.node_name(Gateway.PubSub)
+
+    state.tracker_mod.track(api_id, api_map, node_name)
+    {:noreply, state}
+  end
+
+  def handle_cast({:update, id, api}, state) do
+    Logger.info("Updating API definition with id=#{id} in presence")
+
+    # TODO: may cause infinite loop
+    # TODO: should get by ID, merge and update ref + timestamp
+    api_with_internal_info =
+      api
+      |> Map.update!("ref_number", &(&1 + 1))
+      |> Map.put("timestamp", Timex.now)
+
+    state.tracker_mod.update(id, api_with_internal_info)
+    {:noreply, state}
+  end
+
+  def handle_cast({:delete, id}, state) do
+    Logger.info("Deleting API definition with id=#{id} from presence")
+    state.tracker_mod.untrack(id)
+    {:noreply, state}
+  end
+
+  def handle_cast({:handle_delete, id, api}, state) do
+    Logger.info("Potential deleting API definition with id=#{id} from presence")
+    node_name = Phoenix.PubSub.node_name(Gateway.PubSub)
+    state.tracker_mod.handle_untrack(id, api, node_name)
     {:noreply, state}
   end
 
@@ -113,6 +170,12 @@ defmodule Gateway.Proxy do
   def handle_call({:list_api}, _from, state) do
     list_of_apis = state.tracker_mod.list
     {:reply, list_of_apis, state}
+  end
+
+  def handle_call({:get_api, id}, _from, state) do
+    node_name = Phoenix.PubSub.node_name(Gateway.PubSub)
+    api = state.tracker_mod.find(id, node_name)
+    {:reply, api, state}
   end
 
   # private functions
