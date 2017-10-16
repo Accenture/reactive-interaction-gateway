@@ -67,7 +67,7 @@ defmodule Gateway.Proxy do
   end
 
   def list_apis do
-    GenServer.call(Gateway.Proxy, {:list_api})
+    GenServer.call(Gateway.Proxy, {:list_apis})
   end
 
   @spec add_api(pid | atom, String.t, api_definition) :: pid
@@ -97,8 +97,8 @@ defmodule Gateway.Proxy do
     {:noreply, state}
   end
 
-  @spec handle_call({:list_api}, any, state_t) :: {:reply, state_t}
-  def handle_call({:list_api}, _from, state) do
+  @spec handle_call({:list_apis}, any, state_t) :: {:reply, state_t}
+  def handle_call({:list_apis}, _from, state) do
     list_of_apis = state.tracker_mod.list
     {:reply, list_of_apis, state}
   end
