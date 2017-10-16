@@ -42,42 +42,47 @@ defmodule Gateway.Kafka.MessageHandlerTest do
     target_room = "user:#{user_id}"
 
     # the Agent is used to track the broadcasts invoked by the message handler:
-    {:ok, broadcast_agent} = Agent.start_link fn -> %{call_count: 0} end
+    {:ok, broadcast_agent} = Agent.start_link(fn -> %{call_count: 0} end)
 
     # run the message handler loop in its own process:
-    handler = spawn_link fn ->
+    handler = spawn(fn ->
       Gateway.Kafka.MessageHandler.message_handler_loop(
         kafka_topic, partition,
         _group_subscriber_pid = test_pid,
         _broadcast = fn
-          ^target_room, ^kafka_topic, %{"username" => ^user_id} ->
+          (^target_room, ^kafka_topic, %{"username" => ^user_id}) ->
             Agent.update(
               broadcast_agent,
-              fn state -> Map.update!(state, :call_count, &(&1 + 1)) end
+              fn(state) -> Map.update!(state, :call_count, &(&1 + 1)) end
             )
             nil
-          channel_topic, event, message ->
+          (channel_topic, event, message) ->
             raise "unexpected broadcast: channel_topic=#{inspect channel_topic}, event=#{inspect event}, message=#{inspect message}"
         end
       )
-    end
+    end)
 
     # emulate incoming Kafka messages:
     messages
     |> Stream.with_index(base_offset)
-    |> Enum.each(fn {message_value, offset} ->
-      send handler, create_kafka_message(offset, message_value)
+    |> Enum.each(fn({message_value, offset}) ->
+      send(handler, create_kafka_message(offset, message_value))
     end)
 
-    # wait until the handler has sent an ack to was it thinks is the group subscriber:
+    # wait until the handler has sent an ack to what it thinks is the group subscriber:
     messages
     |> Stream.with_index(base_offset)
-    |> Enum.each(fn {_message_value, offset} ->
+    |> Enum.each(fn({_message_value, offset}) ->
       assert_receive {:"$gen_cast", {:ack, ^kafka_topic, ^partition, ^offset}}
     end)
 
-    # returns the number of times the broadcast callback has been invoked:
-    Agent.get broadcast_agent, &Map.fetch!(&1, :call_count)
+    # kill the handler:
+    Process.exit(handler, :kill)
+
+    # return the number of times the broadcast callback has been invoked and stop the agent:
+    n_callback_invocations = Agent.get(broadcast_agent, &(Map.fetch!(&1, :call_count)))
+    Agent.stop(broadcast_agent)
+    n_callback_invocations
   end
 
   defp create_kafka_message(offset, value) do
