@@ -76,27 +76,27 @@ defmodule Gateway.Proxy do
 
   @spec add_api(pid | atom, String.t, api_definition) :: pid
   def add_api(server, id, api) do
-    GenServer.cast(server, {:add, id, api})
-    server  # allow for chaining calls
-  end
-
-  def add_or_update_api(server, id, api) do
-    GenServer.cast(server, {:add_or_update, id, api})
+    GenServer.cast(server, {:add_api, id, api})
     server  # allow for chaining calls
   end
 
   def update_api(server, id, api) do
-    GenServer.cast(server, {:update, id, api})
+    GenServer.cast(server, {:update_api, id, api})
     server  # allow for chaining calls
   end
 
   def delete_api(server, id) do
-    GenServer.cast(server, {:delete, id})
+    GenServer.cast(server, {:delete_api, id})
     server  # allow for chaining calls
   end
 
-  def handle_delete_api(server, id, api) do
-    GenServer.cast(server, {:handle_delete, id, api})
+  def handle_join_api(server, id, api) do
+    GenServer.cast(server, {:handle_join_api, id, api})
+    server  # allow for chaining calls
+  end
+
+  def handle_leave_api(server, id, api) do
+    GenServer.cast(server, {:handle_leave_api, id, api})
     server  # allow for chaining calls
   end
 
@@ -114,8 +114,8 @@ defmodule Gateway.Proxy do
     {:noreply, state}
   end
 
-  @spec handle_cast({:add, String.t, api_definition}, state_t) :: {:noreply, state_t}
-  def handle_cast({:add, api_id, api_map}, state) do
+  @spec handle_cast({:add_api, String.t, api_definition}, state_t) :: {:noreply, state_t}
+  def handle_cast({:add_api, api_id, api_map}, state) do
     Logger.info("Adding new API definition with id=#{api_id} to presence")
 
     node_name = Phoenix.PubSub.node_name(Gateway.PubSub)
@@ -125,20 +125,11 @@ defmodule Gateway.Proxy do
       |> Map.put("node_name", node_name)
       |> Map.put("timestamp", Timex.now)
 
-    state.tracker_mod.track(api_id, api_with_internal_info, node_name)
+    state.tracker_mod.track(api_id, api_with_internal_info)
     {:noreply, state}
   end
 
-  def handle_cast({:add_or_update, api_id, api_map}, state) do
-    Logger.info("Adding or update API definition with id=#{api_id} to presence")
-
-    node_name = Phoenix.PubSub.node_name(Gateway.PubSub)
-
-    state.tracker_mod.track(api_id, api_map, node_name)
-    {:noreply, state}
-  end
-
-  def handle_cast({:update, id, api}, state) do
+  def handle_cast({:update_api, id, api}, state) do
     Logger.info("Updating API definition with id=#{id} in presence")
 
     # TODO: should get by ID, merge and update ref + timestamp
@@ -151,16 +142,67 @@ defmodule Gateway.Proxy do
     {:noreply, state}
   end
 
-  def handle_cast({:delete, id}, state) do
+  def handle_cast({:delete_api, id}, state) do
     Logger.info("Deleting API definition with id=#{id} from presence")
     state.tracker_mod.untrack(id)
     {:noreply, state}
   end
 
-  def handle_cast({:handle_delete, id, api}, state) do
-    Logger.info("Potential deleting API definition with id=#{id} from presence")
+  def handle_cast({:handle_join_api, id, api}, state) do
     node_name = Phoenix.PubSub.node_name(Gateway.PubSub)
-    state.tracker_mod.handle_untrack(id, api, node_name)
+    Logger.info("Handling JOIN differential for API definition with id=#{id} for node=#{node_name}")
+
+    prev_api = state.tracker_mod.find(id, node_name)
+    IO.puts "PREV API"
+    IO.inspect prev_api
+    IO.puts "----------"
+    IO.puts "NEXT API"
+    IO.inspect api
+    IO.puts "----------"
+
+    case compare_api(id, prev_api, api, state) do
+      {:error, :exit} ->
+        Logger.warn("There is already most recent API definition with id=#{id} in presence")
+        {:error, :exit}
+      {:ok, :track} ->
+        internal_info = %{
+          "ref_number" => 0,
+          "node_name" => node_name,
+          "timestamp" => Timex.now,
+        }
+        api_with_internal_info = add_internal_info(api, internal_info)
+        state.tracker_mod.track(id, api_with_internal_info)
+      {:ok, :update_no_ref} ->
+        Logger.info("API definition with id=#{id} adopted new version with no REF update")
+        api_with_internal_info = add_internal_info(api, %{"node_name" => node_name})
+        state.tracker_mod.update(id, api_with_internal_info)
+      {:ok, :update_with_ref} ->
+        Logger.info("API definition with id=#{id} adopted new version with REF update")
+        prev_api_data = elem(prev_api, 1)
+        internal_info = %{
+          "ref_number" => prev_api_data["ref_number"] + 1,
+          "node_name" => node_name,
+        }
+        api_with_internal_info = add_internal_info(api, internal_info)
+        state.tracker_mod.update(id, api_with_internal_info)
+    end
+
+    {:noreply, state}
+  end
+
+  def handle_cast({:handle_leave_api, id, api}, state) do
+    node_name = Phoenix.PubSub.node_name(Gateway.PubSub)
+    Logger.info("Handling LEAVE differential for API definition with id=#{id} for node=#{node_name}")
+
+    case check_node_origin(id, api, node_name, state) do
+      {:error, :exit} ->
+        Logger.warn("Blocked unwanted deletion of API definition with id=#{id} from presence")
+        {:error, :exit}
+      {:ok, :untrack} ->
+        Logger.warn("DIFF DELETE of API definition with id=#{id} from presence")
+        state.tracker_mod.untrack(id)
+    end
+
     {:noreply, state}
   end
 
@@ -174,6 +216,99 @@ defmodule Gateway.Proxy do
     node_name = Phoenix.PubSub.node_name(Gateway.PubSub)
     api = state.tracker_mod.find(id, node_name)
     {:reply, api, state}
+  end
+
+  # TEMPORARY FUNCTIONS => SHOULD BE MOVED ELSEWHERE PROLLY
+
+  defp compare_api(_id, nil, _next_api, _state), do: {:ok, :track}
+  defp compare_api(id, {id, prev_api}, next_api, state) do
+    IO.inspect prev_api["ref_number"]
+    IO.inspect next_api["ref_number"]
+
+    cond do
+      next_api["ref_number"] < prev_api["ref_number"] -> {:error, :exit}
+      next_api["ref_number"] > prev_api["ref_number"] -> {:ok, :update_with_ref}
+      true -> eval_data_change(id, prev_api, next_api, state)
+    end
+  end
+
+  defp eval_data_change(id, prev_api, next_api, state) do
+    prev_apis = state.tracker_mod.find_all(id)
+    h_n_of_prev_apis = length(prev_apis) / 2
+
+    next_api_without_meta = next_api |> remove_internal_info
+
+    changed_apis = prev_apis |> Enum.filter(fn({_key, meta}) ->
+      api_without_meta =
+        meta
+        |> remove_internal_info
+        |> MapDiff.diff(next_api_without_meta)
+
+      api_without_meta.changed != :equal
+    end)
+    n_of_changed_apis = length(changed_apis)
+    IO.puts "NUMBER OF CHANGED APIS #{n_of_changed_apis}"
+    IO.puts "DOES AT LEAST HALF OF NODES CHANGE #{n_of_changed_apis >= h_n_of_prev_apis}"
+
+    cond do
+      n_of_changed_apis < h_n_of_prev_apis -> {:error, :exit}
+      n_of_changed_apis > h_n_of_prev_apis -> {:ok, :update_no_ref}
+      true ->
+        next_api["timestamp"]
+        |> Timex.after?(prev_api["timestamp"])
+        |> eval_time
+    end
+  end
+
+  defp eval_time(false) do
+    IO.puts "NEXT TIMESTAMP IS OLDER OR SAME AS PREV TIMESTAMP"
+    {:error, :exit}
+  end
+  defp eval_time(true) do
+    IO.puts "NEXT TIMESTAMP IS NEWER THAN PREV TIMESTAMP"
+    {:ok, :update_no_ref}
+  end
+  
+  defp add_internal_info(api, internal_info) do
+    Map.merge(api, internal_info)
+  end
+
+  defp remove_internal_info(api) do
+    api
+    |> Map.delete(:phx_ref)
+    |> Map.delete(:phx_ref_prev)
+    |> Map.delete("node_name")
+    |> Map.delete("timestamp")
+  end
+
+  defp check_node_origin(id, next_api, node_name, state) do
+    if node_name != next_api["node_name"] do
+      IO.puts "DIFFERENT NODE"
+      state.tracker_mod.find(id, next_api["node_name"])
+      |> check_phx_ref(next_api, true)
+    else
+      IO.puts "SAME NODE"
+      state.tracker_mod.find(id, node_name)
+      |> check_phx_ref(next_api, false)
+    end
+  end
+
+  defp check_phx_ref(nil, _next_api, true) do
+    IO.puts "DIFFERENT NODE - NO API FOR DIFFERENT NODE IN MY PRESENCE, KILL OURS"
+    {:ok, :untrack}
+  end
+  defp check_phx_ref(nil, _next_api, false) do
+    IO.puts "SAME NODE - NO API FOR THIS NODE IN MY PRESENCE, SKIP UNTRACK"
+    {:error, :exit}
+  end
+  defp check_phx_ref({_id, prev_api}, next_api, _different_node) do # TODO: MAYBE USE REF NUMBERS
+    if prev_api.phx_ref == next_api.phx_ref do
+      IO.puts "PHX_REF are same"
+      {:ok, :untrack}
+    else
+      IO.puts "PHX_REF are different"
+      {:error, :exit}
+    end
   end
 
   # private functions
