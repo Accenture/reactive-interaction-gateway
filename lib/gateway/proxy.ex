@@ -119,14 +119,13 @@ defmodule Gateway.Proxy do
     Logger.info("Adding new API definition with id=#{api_id} to presence")
 
     node_name = Phoenix.PubSub.node_name(Gateway.PubSub)
-    # TODO: may cause infinite loop
     api_with_internal_info =
       api_map
       |> Map.put("ref_number", 0)
       |> Map.put("node_name", node_name)
       |> Map.put("timestamp", Timex.now)
 
-    state.tracker_mod.track(api_id, api_map, node_name)
+    state.tracker_mod.track(api_id, api_with_internal_info, node_name)
     {:noreply, state}
   end
 
@@ -142,7 +141,6 @@ defmodule Gateway.Proxy do
   def handle_cast({:update, id, api}, state) do
     Logger.info("Updating API definition with id=#{id} in presence")
 
-    # TODO: may cause infinite loop
     # TODO: should get by ID, merge and update ref + timestamp
     api_with_internal_info =
       api

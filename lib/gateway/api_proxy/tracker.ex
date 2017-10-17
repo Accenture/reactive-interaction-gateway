@@ -24,7 +24,12 @@ defmodule Gateway.ApiProxy.Tracker do
     IO.puts "tracker.ex - TRACK #{id}"
     IO.puts "NODE NAME #{node_name}"
     prev_api = find(id, node_name)
+    IO.puts "PREV API"
     IO.inspect prev_api
+    IO.puts "----------"
+    IO.puts "NEXT API"
+    IO.inspect api
+    IO.puts "----------"
 
     case compare_api(id, prev_api, api) do
       {:error, :exit} ->
@@ -51,8 +56,9 @@ defmodule Gateway.ApiProxy.Tracker do
         update(id, api_with_internal_info)
       {:ok, :update_with_ref} ->
         Logger.info("API definition with id=#{id} adopted new version with REF update")
+        prev_api_data = elem(prev_api, 1)
         internal_info = %{
-          "ref_number" => prev_api["ref_number"] + 1,
+          "ref_number" => prev_api_data["ref_number"] + 1,
           "node_name" => node_name,
         }
         api_with_internal_info = add_internal_info(api, internal_info)
@@ -157,18 +163,30 @@ defmodule Gateway.ApiProxy.Tracker do
 
   defp check_node_origin(id, next_api, node_name) do
     if node_name != next_api["node_name"] do
-      {:ok, :untrack}
+      IO.puts "DIFFERENT NODE"
+      find(id, next_api["node_name"])
+      |> check_phx_ref(next_api, true)
     else
+      IO.puts "SAME NODE"
       find(id, node_name)
-      |> check_phx_ref(next_api)
+      |> check_phx_ref(next_api, false)
     end
   end
 
-  defp check_phx_ref(nil, _next_api), do: {:error, :exit}
-  defp check_phx_ref({_id, prev_api}, next_api) do
+  defp check_phx_ref(nil, _next_api, true) do
+    IO.puts "DIFFERENT NODE - NO API FOR DIFFERENT NODE IN MY PRESENCE, KILL OURS"
+    {:ok, :untrack}
+  end
+  defp check_phx_ref(nil, _next_api, false) do
+    IO.puts "SAME NODE - NO API FOR THIS NODE IN MY PRESENCE, SKIP UNTRACK"
+    {:error, :exit}
+  end
+  defp check_phx_ref({_id, prev_api}, next_api, _different_node) do # TODO: MAYBE USE REF NUMBERS
     if prev_api.phx_ref == next_api.phx_ref do
+      IO.puts "PHX_REF are same"
       {:ok, :untrack}
     else
+      IO.puts "PHX_REF are different"
       {:error, :exit}
     end
   end
