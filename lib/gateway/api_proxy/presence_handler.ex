@@ -47,8 +47,8 @@ defmodule Gateway.ApiProxy.PresenceHandler do
   def handle_diff(diff, state) do
     for {topic, {joins, leaves}} <- diff do
       for {key, meta} <- joins do
-        IO.puts "JOINS #{key}"
-        IO.inspect joins
+        # IO.puts "JOINS #{key}"
+        # IO.inspect joins
         if topic == @topic do
           state.proxy |> Proxy.handle_join_api(key, meta)
         end
@@ -56,8 +56,8 @@ defmodule Gateway.ApiProxy.PresenceHandler do
         Phoenix.PubSub.direct_broadcast!(state.node_name, state.pubsub_server, topic, msg)
       end
       for {key, meta} <- leaves do
-        IO.puts "LEAVES #{key}"
-        IO.inspect leaves
+        # IO.puts "LEAVES #{key}"
+        # IO.inspect leaves
         if topic == @topic do
           state.proxy |> Proxy.handle_leave_api(key, meta)
         end

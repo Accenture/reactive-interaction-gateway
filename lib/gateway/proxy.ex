@@ -47,6 +47,7 @@ defmodule Gateway.Proxy do
   }
 
   @typep state_t :: map
+  @typep server_t :: pid | atom
 
   @default_tracker_mod Gateway.ApiProxy.Tracker
   @config_file Application.fetch_env!(:gateway, :proxy_config_file)
@@ -60,6 +61,7 @@ defmodule Gateway.Proxy do
       Keyword.merge([name: __MODULE__], opts))
   end
 
+  @spec init_presence(state_t) :: TODO
   def init_presence(state) do
     Logger.info("Initial loading of API definitions to presence")
     read_init_apis()
@@ -71,31 +73,37 @@ defmodule Gateway.Proxy do
     end)
   end
 
+  @spec list_apis(server_t) :: [api_definition, ...]
   def list_apis(server) do
     GenServer.call(server, {:list_api})
   end
 
+  @spec get_api(server_t, String.t) :: api_definition
   def get_api(server, id) do
     GenServer.call(server, {:get_api, id})
   end
 
-  @spec add_api(pid | atom, String.t, api_definition) :: pid
+  @spec add_api(server_t, String.t, api_definition) :: any
   def add_api(server, id, api) do
     GenServer.call(server, {:add_api, id, api})
   end
 
+  @spec update_api(server_t, String.t, api_definition) :: any
   def update_api(server, id, api) do
     GenServer.call(server, {:update_api, id, api})
   end
 
+  @spec delete_api(server_t, String.t) :: atom
   def delete_api(server, id) do
     GenServer.call(server, {:delete_api, id})
   end
 
+  @spec handle_join_api(server_t, String.t, api_definition) :: server_t
   def handle_join_api(server, id, api) do
     GenServer.cast(server, {:handle_join_api, id, api})
   end
 
+  @spec handle_leave_api(server_t, String.t, api_definition) :: server_t
   def handle_leave_api(server, id, api) do
     GenServer.cast(server, {:handle_leave_api, id, api})
   end
@@ -114,6 +122,7 @@ defmodule Gateway.Proxy do
     {:noreply, state}
   end
 
+  @spec handle_cast({:handle_join_api, String.t, api_definition}, state_t) :: {:noreply, state_t}
   def handle_cast({:handle_join_api, id, api}, state) do
     node_name = get_node_name()
     Logger.info("Handling JOIN differential for API definition with id=#{id} for node=#{node_name}")
@@ -145,6 +154,7 @@ defmodule Gateway.Proxy do
     {:noreply, state}
   end
 
+  @spec handle_cast({:handle_leave_api, String.t, api_definition}, state_t) :: {:noreply, state_t}
   def handle_cast({:handle_leave_api, id, api}, state) do
     node_name = get_node_name()
     Logger.info("Handling LEAVE differential for API definition with id=#{id} for node=#{node_name}")
@@ -160,7 +170,7 @@ defmodule Gateway.Proxy do
     {:noreply, state}
   end
 
-  # @spec handle_call({:add_api, String.t, api_definition}, state_t) :: {:noreply, state_t}
+  @spec handle_call({:add_api, String.t, api_definition}, any, state_t) :: {:reply, any, state_t}
   def handle_call({:add_api, id, api}, _from, state) do
     Logger.info("Adding new API definition with id=#{id} to presence")
 
@@ -170,42 +180,47 @@ defmodule Gateway.Proxy do
       |> Map.merge(meta_info)
       |> Map.put_new("node_name", get_node_name())
 
-    res = state.tracker_mod.track(id, api_with_meta_info)
-    {:reply, res, state}
+    response = state.tracker_mod.track(id, api_with_meta_info)
+    {:reply, response, state}
   end
 
+  @spec handle_call({:update_api, String.t, api_definition}, any, state_t) :: {:reply, any, state_t}
   def handle_call({:update_api, id, api}, _from, state) do
     Logger.info("Updating API definition with id=#{id} in presence")
 
     meta_info = %{"ref_number" => api["ref_number"] + 1, "timestamp" => Timex.now}
     api_with_meta_info = add_meta_info(api, meta_info)
 
-    res = state.tracker_mod.update(id, api_with_meta_info)
-    {:reply, res, state}
+    response = state.tracker_mod.update(id, api_with_meta_info)
+    {:reply, response, state}
   end
 
+  @spec handle_call({:delete_api, String.t, api_definition}, any, state_t) :: {:reply, atom, state_t}
   def handle_call({:delete_api, id}, _from, state) do
     Logger.info("Deleting API definition with id=#{id} from presence")
 
-    res = state.tracker_mod.untrack(id)
-    {:reply, res, state}
+    response = state.tracker_mod.untrack(id)
+    {:reply, response, state}
   end
 
-  @spec handle_call({:list_api}, any, state_t) :: {:reply, state_t}
+  @spec handle_call({:list_api}, any, state_t) :: {:reply, [api_definition, ...], state_t}
   def handle_call({:list_api}, _from, state) do
     list_of_apis = get_node_name() |> state.tracker_mod.list_by_node
     {:reply, list_of_apis, state}
   end
 
+  @spec handle_call({:get_api}, any, state_t) :: {:reply, api_definition, state_t}
   def handle_call({:get_api, id}, _from, state) do
     node_name = get_node_name()
     api = state.tracker_mod.find_by_node(id, node_name)
     {:reply, api, state}
   end
 
-  # TEMPORARY FUNCTIONS => SHOULD BE MOVED ELSEWHERE PROLLY
+  # private functions
 
+  @spec compare_api(String.t, nil, api_definition, state_t) :: {:ok, :track}
   defp compare_api(_id, nil, _next_api, _state), do: {:ok, :track}
+  @spec compare_api(String.t, {String.t, api_definition}, api_definition, state_t) :: {atom, atom}
   defp compare_api(id, {id, prev_api}, next_api, state) do
     cond do
       next_api["ref_number"] < prev_api["ref_number"] -> {:error, :exit}
@@ -214,6 +229,7 @@ defmodule Gateway.Proxy do
     end
   end
 
+  @spec eval_data_change(String.t, api_definition, api_definition, state_t) :: {atom, atom}
   defp eval_data_change(id, prev_api, next_api, state) do
     if data_equal?(prev_api, next_api) do
       {:error, :exit}
@@ -222,6 +238,7 @@ defmodule Gateway.Proxy do
     end
   end
 
+  @spec eval_all_nodes_data(String.t, api_definition, api_definition, state_t) :: {atom, atom}
   defp eval_all_nodes_data(id, prev_api, next_api, state) do
     prev_apis = state.tracker_mod.find_all(id)
     h_n_of_prev_apis = length(prev_apis) / 2
@@ -241,6 +258,7 @@ defmodule Gateway.Proxy do
     end
   end
 
+  @spec data_equal?(api_definition, api_definition) :: boolean
   defp data_equal?(prev_api, next_api) do
     next_api_without_meta = next_api |> remove_meta_info
 
@@ -249,21 +267,26 @@ defmodule Gateway.Proxy do
     |> Map.equal?(next_api_without_meta)
   end
 
+  @spec eval_time(false) :: {:error, :exit}
   defp eval_time(false) do
     {:error, :exit}
   end
+  @spec eval_time(true) :: {:ok, :update_no_ref}
   defp eval_time(true) do
     {:ok, :update_no_ref}
   end
 
+  @spec get_node_name() :: atom
   defp get_node_name, do: Phoenix.PubSub.node_name(Gateway.PubSub)
 
+  @spec add_meta_info(api_definition, map) :: api_definition
   defp add_meta_info(api, meta_info \\ %{}) do
     api
     |> Map.merge(meta_info)
     |> Map.put("node_name", get_node_name())
   end
 
+  @spec remove_meta_info(api_definition) :: api_definition
   defp remove_meta_info(api) do
     api
     |> Map.delete(:phx_ref)
@@ -272,6 +295,7 @@ defmodule Gateway.Proxy do
     |> Map.delete("timestamp")
   end
 
+  @spec check_node_origin(String.t, api_definition, atom, state_t) :: {atom, atom}
   defp check_node_origin(id, next_api, node_name, state) do
     if node_name != next_api["node_name"] do
       state.tracker_mod.find_by_node(id, next_api["node_name"])
@@ -282,12 +306,15 @@ defmodule Gateway.Proxy do
     end
   end
 
+  @spec check_phx_ref(nil, api_definition, true) :: {:ok, :untrack}
   defp check_phx_ref(nil, _next_api, true) do
     {:ok, :untrack}
   end
+  @spec check_phx_ref(nil, api_definition, false) :: {:error, :exit}
   defp check_phx_ref(nil, _next_api, false) do
     {:error, :exit}
   end
+  @spec check_phx_ref({String.t, api_definition}, api_definition, boolean) :: {atom, atom}
   defp check_phx_ref({_id, prev_api}, next_api, _different_node) do # TODO: MAYBE USE REF NUMBERS
     if prev_api.phx_ref == next_api.phx_ref do
       {:ok, :untrack}
@@ -296,8 +323,7 @@ defmodule Gateway.Proxy do
     end
   end
 
-  # private functions
-
+  @spec read_init_apis() :: [api_definition, ...]
   defp read_init_apis do
     :gateway
     |> :code.priv_dir

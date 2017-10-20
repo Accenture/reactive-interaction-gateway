@@ -454,7 +454,7 @@ defmodule Gateway.ProxyTest do
           end)
         end,
       ],
-      behaviour: Gateway.Proxy.Tracker.TrackerBehaviour,
+      behaviour: Gateway.ApiProxy.Tracker.TrackerBehaviour,
       call_info: true,
     )
     [tracker: tracker]
