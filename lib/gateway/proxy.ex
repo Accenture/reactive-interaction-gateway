@@ -119,29 +119,26 @@ defmodule Gateway.Proxy do
     Logger.info("Handling JOIN differential for API definition with id=#{id} for node=#{node_name}")
 
     prev_api = state.tracker_mod.find_by_node(id, node_name)
-    IO.puts "PREV API"
-    IO.inspect prev_api
-    IO.puts "NEXT API"
-    IO.inspect api
 
     case compare_api(id, prev_api, api, state) do
       {:error, :exit} ->
         Logger.debug("There is already most recent API definition with id=#{id} in presence")
       {:ok, :track} ->
+        Logger.debug("API definition with id=#{id} doesn't exist yet, starting tracking")
         meta_info = %{"ref_number" => 0, "timestamp" => Timex.now}
         api_with_meta_info = add_meta_info(api, meta_info)
 
         state.tracker_mod.track(id, api_with_meta_info)
       {:ok, :update_no_ref} ->
-        Logger.debug("API definition with id=#{id} adopted new version with no REF update")
+        Logger.debug("API definition with id=#{id} adopted new version with no ref_number update")
         state.tracker_mod.update(id, add_meta_info(api))
       {:ok, :update_with_ref} ->
-        Logger.debug("API definition with id=#{id} adopted new version with REF update")
+        Logger.debug("API definition with id=#{id} adopted new version with ref_number update")
 
         prev_api_data = elem(prev_api, 1)
         meta_info = %{"ref_number" => prev_api_data["ref_number"] + 1}
         api_with_meta_info = add_meta_info(api, meta_info)
-  
+
         state.tracker_mod.update(id, api_with_meta_info)
     end
 
@@ -210,9 +207,6 @@ defmodule Gateway.Proxy do
 
   defp compare_api(_id, nil, _next_api, _state), do: {:ok, :track}
   defp compare_api(id, {id, prev_api}, next_api, state) do
-    IO.inspect prev_api["ref_number"]
-    IO.inspect next_api["ref_number"]
-
     cond do
       next_api["ref_number"] < prev_api["ref_number"] -> {:error, :exit}
       next_api["ref_number"] > prev_api["ref_number"] -> {:ok, :update_with_ref}
@@ -230,17 +224,12 @@ defmodule Gateway.Proxy do
 
   defp eval_all_nodes_data(id, prev_api, next_api, state) do
     prev_apis = state.tracker_mod.find_all(id)
-    IO.puts "OLD APIS"
-    IO.inspect prev_apis
     h_n_of_prev_apis = length(prev_apis) / 2
 
     equal_apis = prev_apis |> Enum.filter(fn({_key, meta}) ->
       meta |> data_equal?(next_api)
     end)
     n_of_equal_apis = length(equal_apis)
-
-    IO.puts "NUMBER OF EQUAL APIS IN CLUSTER #{n_of_equal_apis}"
-    IO.puts "DOES AT LEAST HALF OF NODES AGREE #{n_of_equal_apis >= h_n_of_prev_apis}"
 
     cond do
       n_of_equal_apis < h_n_of_prev_apis -> {:error, :exit}
@@ -261,16 +250,14 @@ defmodule Gateway.Proxy do
   end
 
   defp eval_time(false) do
-    IO.puts "NEXT TIMESTAMP IS OLDER OR SAME AS PREV TIMESTAMP"
     {:error, :exit}
   end
   defp eval_time(true) do
-    IO.puts "NEXT TIMESTAMP IS NEWER THAN PREV TIMESTAMP"
     {:ok, :update_no_ref}
   end
 
   defp get_node_name, do: Phoenix.PubSub.node_name(Gateway.PubSub)
-  
+
   defp add_meta_info(api, meta_info \\ %{}) do
     api
     |> Map.merge(meta_info)
@@ -287,30 +274,24 @@ defmodule Gateway.Proxy do
 
   defp check_node_origin(id, next_api, node_name, state) do
     if node_name != next_api["node_name"] do
-      IO.puts "DIFFERENT NODE"
       state.tracker_mod.find_by_node(id, next_api["node_name"])
       |> check_phx_ref(next_api, true)
     else
-      IO.puts "SAME NODE"
       state.tracker_mod.find_by_node(id, node_name)
       |> check_phx_ref(next_api, false)
     end
   end
 
   defp check_phx_ref(nil, _next_api, true) do
-    IO.puts "DIFFERENT NODE - NO API FOR DIFFERENT NODE IN MY PRESENCE, KILL OURS"
     {:ok, :untrack}
   end
   defp check_phx_ref(nil, _next_api, false) do
-    IO.puts "SAME NODE - NO API FOR THIS NODE IN MY PRESENCE, SKIP UNTRACK"
     {:error, :exit}
   end
   defp check_phx_ref({_id, prev_api}, next_api, _different_node) do # TODO: MAYBE USE REF NUMBERS
     if prev_api.phx_ref == next_api.phx_ref do
-      IO.puts "PHX_REF are same"
       {:ok, :untrack}
     else
-      IO.puts "PHX_REF are different"
       {:error, :exit}
     end
   end

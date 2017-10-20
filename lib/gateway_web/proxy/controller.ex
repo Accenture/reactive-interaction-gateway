@@ -7,7 +7,7 @@ defmodule GatewayWeb.Proxy.Controller do
   use GatewayWeb, :controller
   alias Gateway.Proxy
 
-  def list_apis(conn, _params) do # TODO: UNIQUE
+  def list_apis(conn, _params) do
     apis =
       Proxy
       |> Proxy.list_apis
@@ -16,7 +16,7 @@ defmodule GatewayWeb.Proxy.Controller do
     send_response(conn, 200, apis)
   end
 
-  def get_api_detail(conn, params) do # TODO: UNIQUE
+  def get_api_detail(conn, params) do
     %{"id" => id} = params
 
     case Proxy.get_api(Proxy, id) do

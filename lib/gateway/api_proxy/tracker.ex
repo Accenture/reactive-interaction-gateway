@@ -60,7 +60,7 @@ defmodule Gateway.ApiProxy.Tracker do
     |> Phoenix.Tracker.list(@topic)
     |> Enum.filter(fn({_key, meta}) -> meta["node_name"] == node_name end)
   end
-  
+
   def find_all(id) do
     list_all() |> Enum.filter(fn({key, _meta}) -> key == id end)
   end

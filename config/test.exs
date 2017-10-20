@@ -8,7 +8,7 @@ config :gateway, GatewayWeb.Endpoint,
   server: false
 
 # Print only warnings and errors during test
-config :logger, level: :info
+config :logger, level: :warn
 
 # Proxy test route config file location
 config :gateway, proxy_config_file: "proxy/proxy.test.json"
