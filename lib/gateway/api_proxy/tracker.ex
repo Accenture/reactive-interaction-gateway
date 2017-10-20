@@ -21,33 +21,33 @@ defmodule Gateway.ApiProxy.Tracker do
 
   @impl TrackerBehaviour
   def track(id, api) do
+    Logger.info("Started tracking for new API definition with id=#{id}")
     Phoenix.Tracker.track(
       _tracker = Presence,
       _pid = Process.whereis(Gateway.PubSub),
       @topic,
       _key = id,
       _meta = api)
-    Logger.info("Started tracking for new API definition with id=#{id}")
   end
 
   def update(id, api) do
+    Logger.info("Updated API definition with id=#{id}")
     Phoenix.Tracker.update(
       _tracker = Presence,
       _pid = Process.whereis(Gateway.PubSub),
       @topic,
       _key = id,
       _meta = api)
-    Logger.info("Updated API definition with id=#{id}")
   end
 
   @impl TrackerBehaviour
   def untrack(id) do
+    Logger.info("Untracked API definition with id=#{id}")
     Phoenix.Tracker.untrack(
       _tracker = Presence,
       _pid = Process.whereis(Gateway.PubSub),
       @topic,
       _key = id)
-    Logger.info("Untracked API definition with id=#{id}")
   end
 
   @impl TrackerBehaviour

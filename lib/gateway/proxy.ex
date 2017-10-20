@@ -60,44 +60,46 @@ defmodule Gateway.Proxy do
       Keyword.merge([name: __MODULE__], opts))
   end
 
-  def init_presence do
+  def init_presence(state) do
     Logger.info("Initial loading of API definitions to presence")
     read_init_apis()
-    |> Enum.each(fn(api) -> add_api(Gateway.Proxy, api["id"], api) end)
+    |> Enum.each(fn(api) ->
+      meta_info = %{"ref_number" => 0, "timestamp" => Timex.now}
+      api_with_meta_info = add_meta_info(api, meta_info)
+
+      state.tracker_mod.track(api["id"], api_with_meta_info)
+    end)
   end
 
-  def list_apis do
-    GenServer.call(Gateway.Proxy, {:list_api})
+  def list_apis(server) do
+    GenServer.call(server, {:list_api})
   end
 
-  def get_api(id) do
-    GenServer.call(Gateway.Proxy, {:get_api, id})
+  def get_api(server, id) do
+    GenServer.call(server, {:get_api, id})
   end
 
   @spec add_api(pid | atom, String.t, api_definition) :: pid
   def add_api(server, id, api) do
-    GenServer.cast(server, {:add_api, id, api})
-    server  # allow for chaining calls
+    GenServer.call(server, {:add_api, id, api})
   end
 
   def update_api(server, id, api) do
-    GenServer.cast(server, {:update_api, id, api})
-    server  # allow for chaining calls
+    GenServer.call(server, {:update_api, id, api})
   end
 
   def delete_api(server, id) do
-    GenServer.cast(server, {:delete_api, id})
-    server  # allow for chaining calls
+    GenServer.call(server, {:delete_api, id})
   end
 
   def handle_join_api(server, id, api) do
     GenServer.cast(server, {:handle_join_api, id, api})
-    server  # allow for chaining calls
+    # server  # allow for chaining calls
   end
 
   def handle_leave_api(server, id, api) do
     GenServer.cast(server, {:handle_leave_api, id, api})
-    server  # allow for chaining calls
+    # server  # allow for chaining calls
   end
 
   # callbacks
@@ -110,36 +112,7 @@ defmodule Gateway.Proxy do
 
   @spec handle_info(:init_apis, state_t) :: {:noreply, state_t}
   def handle_info(:init_apis, state) do
-    init_presence()
-    {:noreply, state}
-  end
-
-  @spec handle_cast({:add_api, String.t, api_definition}, state_t) :: {:noreply, state_t}
-  def handle_cast({:add_api, id, api}, state) do
-    Logger.info("Adding new API definition with id=#{id} to presence")
-
-    meta_info = %{"ref_number" => 0, "timestamp" => Timex.now}
-    api_with_meta_info = add_meta_info(api, meta_info)
-
-    state.tracker_mod.track(id, api_with_meta_info)
-    {:noreply, state}
-  end
-
-  def handle_cast({:update_api, id, api}, state) do
-    Logger.info("Updating API definition with id=#{id} in presence")
-    # TODO: should get by ID, merge and update ref + timestamp
-
-    meta_info = %{"ref_number" => api["ref_number"] + 1, "timestamp" => Timex.now}
-    api_with_meta_info = add_meta_info(api, meta_info)
-
-    state.tracker_mod.update(id, api_with_meta_info)
-    {:noreply, state}
-  end
-
-  def handle_cast({:delete_api, id}, state) do
-    Logger.info("Deleting API definition with id=#{id} from presence")
-
-    state.tracker_mod.untrack(id)
+    init_presence(state)
     {:noreply, state}
   end
 
@@ -183,13 +156,45 @@ defmodule Gateway.Proxy do
 
     case check_node_origin(id, api, node_name, state) do
       {:error, :exit} ->
-        Logger.debug("Blocked unwanted deletion of API definition with id=#{id} from presence")
+        Logger.debug("Skipped deletion of API definition with id=#{id} from presence")
       {:ok, :untrack} ->
-        Logger.debug("DIFF DELETE of API definition with id=#{id} from presence")
+        Logger.debug("Deleting API definition with id=#{id} from presence")
         state.tracker_mod.untrack(id)
     end
 
     {:noreply, state}
+  end
+
+  # @spec handle_call({:add_api, String.t, api_definition}, state_t) :: {:noreply, state_t}
+  def handle_call({:add_api, id, api}, _from, state) do
+    Logger.info("Adding new API definition with id=#{id} to presence")
+
+    meta_info = %{"ref_number" => 0, "timestamp" => Timex.now}
+    api_with_meta_info =
+      api
+      |> Map.merge(meta_info)
+      |> Map.put_new("node_name", get_node_name())
+
+    res = state.tracker_mod.track(id, api_with_meta_info)
+    {:reply, res, state}
+  end
+
+  def handle_call({:update_api, id, api}, _from, state) do
+    Logger.info("Updating API definition with id=#{id} in presence")
+    # TODO: should get by ID, merge and update ref + timestamp
+
+    meta_info = %{"ref_number" => api["ref_number"] + 1, "timestamp" => Timex.now}
+    api_with_meta_info = add_meta_info(api, meta_info)
+
+    res = state.tracker_mod.update(id, api_with_meta_info)
+    {:reply, res, state}
+  end
+
+  def handle_call({:delete_api, id}, _from, state) do
+    Logger.info("Deleting API definition with id=#{id} from presence")
+
+    res = state.tracker_mod.untrack(id)
+    {:reply, res, state}
   end
 
   @spec handle_call({:list_api}, any, state_t) :: {:reply, state_t}
@@ -219,30 +224,45 @@ defmodule Gateway.Proxy do
   end
 
   defp eval_data_change(id, prev_api, next_api, state) do
+    # next_api_without_meta = next_api |> remove_meta_info
+
+    if data_equal?(prev_api, next_api) do
+      {:error, :exit}
+    else
+      eval_all_nodes_data(id, prev_api, next_api, state)
+    end
+  end
+
+  defp eval_all_nodes_data(id, prev_api, next_api, state) do
     prev_apis = state.tracker_mod.find_all(id)
     IO.puts "OLD APIS"
     IO.inspect prev_apis
     h_n_of_prev_apis = length(prev_apis) / 2
-    next_api_without_meta = next_api |> remove_meta_info
-    different_apis = prev_apis |> Enum.filter(fn({_key, meta}) ->
-      meta
-      |> remove_meta_info
-      |> Map.equal?(next_api_without_meta)
-      |> Kernel.not
-    end)
-    n_of_different_apis = length(different_apis)
 
-    IO.puts "NUMBER OF CHANGED APIS #{n_of_different_apis}"
-    IO.puts "DOES AT LEAST HALF OF NODES CHANGE #{n_of_different_apis >= h_n_of_prev_apis}"
+    equal_apis = prev_apis |> Enum.filter(fn({_key, meta}) ->
+      meta |> data_equal?(next_api)
+    end)
+    n_of_equal_apis = length(equal_apis)
+
+    IO.puts "NUMBER OF EQUAL APIS IN CLUSTER #{n_of_equal_apis}"
+    IO.puts "DOES AT LEAST HALF OF NODES AGREE #{n_of_equal_apis >= h_n_of_prev_apis}"
 
     cond do
-      n_of_different_apis < h_n_of_prev_apis -> {:error, :exit}
-      n_of_different_apis > h_n_of_prev_apis -> {:ok, :update_no_ref}
+      n_of_equal_apis < h_n_of_prev_apis -> {:error, :exit}
+      n_of_equal_apis > h_n_of_prev_apis -> {:ok, :update_no_ref}
       true ->
         next_api["timestamp"]
         |> Timex.after?(prev_api["timestamp"])
         |> eval_time
     end
+  end
+
+  defp data_equal?(prev_api, next_api) do
+    next_api_without_meta = next_api |> remove_meta_info
+
+    prev_api
+    |> remove_meta_info
+    |> Map.equal?(next_api_without_meta)
   end
 
   defp eval_time(false) do

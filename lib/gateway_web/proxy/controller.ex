@@ -5,55 +5,74 @@ defmodule GatewayWeb.Proxy.Controller do
   """
   require Logger
   use GatewayWeb, :controller
-
-  # alias GatewayWeb.Endpoint
   alias Gateway.Proxy
-  
-  # TODO strip internal info from outgoing data
 
-  def list_apis(conn, _params) do
+  def list_apis(conn, _params) do # TODO: UNIQUE
     apis =
-      Proxy.list_apis
+      Proxy
+      |> Proxy.list_apis
       |> Enum.map(&(elem(&1, 1)))
 
-    json(conn, apis)
+    send_response(conn, 200, apis)
+  end
+
+  def get_api_detail(conn, params) do # TODO: UNIQUE
+    %{"id" => id} = params
+
+    case Proxy.get_api(Proxy, id) do
+      nil -> send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
+      {_id, api} -> send_response(conn, 200, api)
+      _ -> send_response(conn, 500)
+    end
   end
 
   def add_api(conn, params) do
-    IO.inspect params
     %{"id" => id} = params
-    IO.puts "DONE"
-    new_api = Proxy.add_api(Proxy, id, params)
-    IO.inspect new_api
 
-    json(conn, %{"status" => "ok"}) # TODO handle error/success
+    case Proxy.add_api(Proxy, id, params) do
+      {:error, {:already_tracked, _pid, _server, _api_id}} ->
+        send_response(conn, 409, %{message: "API with id=#{id} already exists."})
+      {:ok, _phx_ref} ->
+        send_response(conn, 201, %{message: "ok"})
+      _ ->
+        send_response(conn, 500)
+    end
   end
 
   def update_api(conn, params) do
-    IO.inspect params
     %{"id" => id} = params
-    IO.puts "DONE"
-    new_api =
-      id
-      |> Proxy.get_api
-      |> elem(1)
-      |> Map.merge(params)
-    IO.inspect new_api
-    upd = Proxy.update_api(Proxy, id, new_api)
-    IO.inspect upd
 
-    json(conn, %{"status" => "ok"}) # TODO handle error/success
+    with {_id, current_api} <- Proxy.get_api(Proxy, id),
+         {:ok, _phx_ref} <- merge_and_update(id, params, current_api)
+    do
+      send_response(conn, 200, %{message: "ok"})
+    else
+      nil -> send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
+      _ -> send_response(conn, 500)
+    end
   end
 
   def delete_api(conn, params) do
-    IO.inspect params
     %{"id" => id} = params
-    IO.puts "DONE"
-    old_api = Proxy.delete_api(Proxy, id)
-    IO.inspect old_api
-  
+
+    with {_id, _current_api} <- Proxy.get_api(Proxy, id),
+         :ok <- Proxy.delete_api(Proxy, id)
+    do
+      send_response(conn, 204)
+    else
+      nil -> send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
+      _ -> send_response(conn, 500)
+    end
+  end
+
+  defp merge_and_update(id, current_api, updated_api) do
+    merged_api = current_api |> Map.merge(updated_api)
+    Proxy.update_api(Proxy, id, merged_api)
+  end
+
+  defp send_response(conn, status_code, body \\ %{}) do
     conn
-    |> put_status(204)
-    |> json(%{"status" => "ok"}) # TODO handle error/success
+    |> put_status(status_code)
+    |> json(body)
   end
 end
