@@ -73,7 +73,7 @@ defmodule Gateway.Kafka.MessageHandlerTest do
     messages
     |> Stream.with_index(base_offset)
     |> Enum.each(fn {_message_value, offset} ->
-      assert_receive {:"$gen_cast", {:ack, ^kafka_topic, ^partition, ^offset}}
+      assert_receive {:"$gen_cast", {:ack, ^kafka_topic, ^partition, ^offset}}, 200
     end)
 
     # returns the number of times the broadcast callback has been invoked:
