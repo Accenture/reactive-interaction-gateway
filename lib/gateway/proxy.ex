@@ -122,6 +122,7 @@ defmodule Gateway.Proxy do
     {:noreply, state}
   end
 
+  # Handle incoming JOIN events with new data from Presence
   @spec handle_cast({:handle_join_api, String.t, api_definition}, state_t) :: {:noreply, state_t}
   def handle_cast({:handle_join_api, id, api}, state) do
     node_name = get_node_name()
@@ -154,6 +155,7 @@ defmodule Gateway.Proxy do
     {:noreply, state}
   end
 
+  # Handle incoming LEAVE events with old data from Presence
   @spec handle_cast({:handle_leave_api, String.t, api_definition}, state_t) :: {:noreply, state_t}
   def handle_cast({:handle_leave_api, id, api}, state) do
     node_name = get_node_name()
@@ -218,6 +220,12 @@ defmodule Gateway.Proxy do
 
   # private functions
 
+  # Compare current API and new API based by ID
+  # Comparison is done by several steps:
+  #   - Reference number
+  #   - Data equality (without internal information like phx_ref, node_name, timestamp, etc.)
+  #   - Data equality across nodes in cluster
+  #   - Timestamp
   @spec compare_api(String.t, nil, api_definition, state_t) :: {:ok, :track}
   defp compare_api(_id, nil, _next_api, _state), do: {:ok, :track}
   @spec compare_api(String.t, {String.t, api_definition}, api_definition, state_t) :: {atom, atom}
@@ -229,6 +237,7 @@ defmodule Gateway.Proxy do
     end
   end
 
+  # Evaluate if current API and new API are the same or not => data wise
   @spec eval_data_change(String.t, api_definition, api_definition, state_t) :: {atom, atom}
   defp eval_data_change(id, prev_api, next_api, state) do
     if data_equal?(prev_api, next_api) do
@@ -238,6 +247,8 @@ defmodule Gateway.Proxy do
     end
   end
 
+  # Evaluate how many nodes have data from new API
+  # If exactly half of the nodes are different => compare timestamps
   @spec eval_all_nodes_data(String.t, api_definition, api_definition, state_t) :: {atom, atom}
   defp eval_all_nodes_data(id, prev_api, next_api, state) do
     prev_apis = state.tracker_mod.find_all(id)
@@ -258,6 +269,8 @@ defmodule Gateway.Proxy do
     end
   end
 
+  # Checks if current API and new API are equal => data wise
+  # Strips internal information such as timestamp, phx_ref, node_name, ...
   @spec data_equal?(api_definition, api_definition) :: boolean
   defp data_equal?(prev_api, next_api) do
     next_api_without_meta = next_api |> remove_meta_info
@@ -279,6 +292,7 @@ defmodule Gateway.Proxy do
   @spec get_node_name() :: atom
   defp get_node_name, do: Phoenix.PubSub.node_name(Gateway.PubSub)
 
+  # Enhance API definition with internal information
   @spec add_meta_info(api_definition, map) :: api_definition
   defp add_meta_info(api, meta_info \\ %{}) do
     api
@@ -286,6 +300,7 @@ defmodule Gateway.Proxy do
     |> Map.put("node_name", get_node_name())
   end
 
+  # Remove internal information from API definition => to have just raw data
   @spec remove_meta_info(api_definition) :: api_definition
   defp remove_meta_info(api) do
     api
@@ -295,6 +310,7 @@ defmodule Gateway.Proxy do
     |> Map.delete("timestamp")
   end
 
+  # Check what is the node origin for given API definition
   @spec check_node_origin(String.t, api_definition, atom, state_t) :: {atom, atom}
   defp check_node_origin(id, next_api, node_name, state) do
     if node_name != next_api["node_name"] do
@@ -306,6 +322,7 @@ defmodule Gateway.Proxy do
     end
   end
 
+  # Compares phx_ref values from current API and old API to avoid unintentional delete
   @spec check_phx_ref(nil, api_definition, true) :: {:ok, :untrack}
   defp check_phx_ref(nil, _next_api, true) do
     {:ok, :untrack}
