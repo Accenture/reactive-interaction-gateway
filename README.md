@@ -16,7 +16,109 @@ When debugging multi-node features, it's helpful to run the (named) nodes in `ie
 
 Todo: a picture of the supervisor tree.
 
-#### Kafka consumer
+## REST API
+
+### Proxy API management
+
+#### Create new API
+
+METHOD: `POST`
+
+ENDPOINT: `/apis`
+
+BODY:
+
+```
+{
+  "id": "new-service",
+  "name": "new-service",
+  "auth_type": "jwt",
+  "auth": {
+    "use_header": true,
+    "header_name": "Authorization",
+    "use_query": false,
+    "query_name": ""
+  },
+  "versioned": false,
+  "version_data": {
+    "default": {
+      "endpoints": [
+        {
+          "id": "get-auth-register",
+          "path": "/auth/register",
+          "method": "GET",
+          "not_secured": true
+        }
+      ]
+    }
+  },
+  "proxy": {
+    "use_env": true,
+    "target_url": "IS_HOST",
+    "port": 6666
+  }
+}
+```
+
+#### Read list of APIs
+
+METHOD: `GET`
+
+ENDPOINT: `/apis`
+
+#### Read detail of specific API
+
+METHOD: `GET`
+
+ENDPOINT: `/apis/:api_id`
+
+#### Update API
+
+METHOD: `PUT`
+
+ENDPOINT: `/apis/:api_id`
+
+BODY:
+
+```
+{
+  "id": "new-service",
+  "name": "new-service",
+  "auth_type": "jwt",
+  "auth": {
+    "use_header": true,
+    "header_name": "Authorization",
+    "use_query": false,
+    "query_name": ""
+  },
+  "versioned": false,
+  "version_data": {
+    "default": {
+      "endpoints": [
+        {
+          "id": "get-auth-register",
+          "path": "/auth/register",
+          "method": "GET",
+          "not_secured": true
+        }
+      ]
+    }
+  },
+  "proxy": {
+    "use_env": true,
+    "target_url": "IS_HOST",
+    "port": 6666
+  }
+}
+```
+
+#### Delete API
+
+METHOD: `DELETE`
+
+ENDPOINT: `/apis/:api_id`
+
+## Kafka consumer
 In order to scale horizontally, Kafka Consumer Group are used. Brod, which is the library used for communicating with Kafka, has its client supervised by `Gateway.Kafka.Sup`, which also takes care of the group subscriber. It uses delays between restarts, in order to delay reconnects in the case of connection errors.
 
 `Gateway.Kafka.Sup` is itself supervised by `Gateway.Kafka.SupWrapper`. The wrapper's sole purpose is to allow the application to come up even if there is not a single broker online. Without it, the failure to connect to any broker would propagate all the way to the Phoenix application, bringing it down in the process. Having the wrapper makes the application startup more reliable.
