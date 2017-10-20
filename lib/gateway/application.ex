@@ -13,6 +13,7 @@ defmodule Gateway.Application do
       supervisor(GatewayWeb.Presence, []),
       supervisor(Gateway.Blacklist.Sup, _args = []),
       supervisor(Gateway.RateLimit.Sup, _args = []),
+      supervisor(Gateway.ApiProxy.Sup, _args = []),
       worker(Gateway.Kafka.SupWrapper, _args = []),
     ]
     opts = [strategy: :one_for_one, name: Gateway.Supervisor]
