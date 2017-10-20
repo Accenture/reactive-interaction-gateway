@@ -51,14 +51,21 @@ defmodule Gateway.ApiProxy.Tracker do
   end
 
   @impl TrackerBehaviour
-  def list do
+  def list_all do
     Phoenix.Tracker.list(Presence, @topic)
   end
 
-  def find(id, node_name) do
-    list() |> Enum.find(fn({key, meta}) -> key == id && meta["node_name"] == node_name end)
+  def list_by_node(node_name) do
+    Presence
+    |> Phoenix.Tracker.list(@topic)
+    |> Enum.filter(fn({_key, meta}) -> meta["node_name"] == node_name end)
   end
+  
   def find_all(id) do
-    list() |> Enum.filter(fn({key, _meta}) -> key == id end)
+    list_all() |> Enum.filter(fn({key, _meta}) -> key == id end)
+  end
+
+  def find_by_node(id, node_name) do
+    list_by_node(node_name) |> Enum.find(fn({key, _meta}) -> key == id end)
   end
 end

@@ -50,14 +50,14 @@ defmodule Gateway.ProxyTest do
 
     assert proxy |> list_apis |> length == 2
     assert ctx.tracker |> Stubr.called_twice?(:track)
-    assert ctx.tracker |> Stubr.called_once?(:list)
+    assert ctx.tracker |> Stubr.called_once?(:list_by_node)
   end
 
   test "get_api should return nil for non-existent API definition", ctx do
     {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
   
     assert proxy |> get_api("random-service")
-    assert ctx.tracker |> Stubr.called_once?(:find)
+    assert ctx.tracker |> Stubr.called_once?(:find_by_node)
   end
 
   test "add_api should start tracking new API", ctx do
@@ -65,13 +65,13 @@ defmodule Gateway.ProxyTest do
   
     refute proxy |> get_api("new-service")
     assert ctx.tracker |> Stubr.called_twice?(:track)
-    assert ctx.tracker |> Stubr.called_once?(:find)
+    assert ctx.tracker |> Stubr.called_once?(:find_by_node)
   
     {:ok, _response} = proxy |> add_api("new-service", @mock_api)
   
     assert proxy |> get_api("new-service")
     assert ctx.tracker |> Stubr.called_thrice?(:track)
-    assert ctx.tracker |> Stubr.called_twice?(:find)
+    assert ctx.tracker |> Stubr.called_twice?(:find_by_node)
   end
 
   test "add_api with existing ID should return error", ctx do
@@ -427,13 +427,19 @@ defmodule Gateway.ProxyTest do
           end)
           {:ok, 'some_phx_ref'}
         end,
-        list: fn ->
+        list_all: fn ->
           Logger.debug "Tracker Stub :list"
           Agent.get(agent, fn
             list -> list
           end)
         end,
-        find: fn id, node_name -> # was _node_name
+        list_by_node: fn node_name ->
+          Logger.debug "Tracker Stub :list"
+          Agent.get(agent, fn
+            list -> list |> Enum.filter(fn {_key, meta} -> meta["node_name"] == node_name end)
+          end)
+        end,
+        find_by_node: fn id, node_name -> # was _node_name
           Logger.debug "Tracker Stub :find id=#{inspect id}"
           Agent.get(agent, fn
             list -> list |> Enum.find(fn {key, meta} ->

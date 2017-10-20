@@ -94,12 +94,10 @@ defmodule Gateway.Proxy do
 
   def handle_join_api(server, id, api) do
     GenServer.cast(server, {:handle_join_api, id, api})
-    # server  # allow for chaining calls
   end
 
   def handle_leave_api(server, id, api) do
     GenServer.cast(server, {:handle_leave_api, id, api})
-    # server  # allow for chaining calls
   end
 
   # callbacks
@@ -120,7 +118,7 @@ defmodule Gateway.Proxy do
     node_name = get_node_name()
     Logger.info("Handling JOIN differential for API definition with id=#{id} for node=#{node_name}")
 
-    prev_api = state.tracker_mod.find(id, node_name)
+    prev_api = state.tracker_mod.find_by_node(id, node_name)
     IO.puts "PREV API"
     IO.inspect prev_api
     IO.puts "NEXT API"
@@ -181,7 +179,6 @@ defmodule Gateway.Proxy do
 
   def handle_call({:update_api, id, api}, _from, state) do
     Logger.info("Updating API definition with id=#{id} in presence")
-    # TODO: should get by ID, merge and update ref + timestamp
 
     meta_info = %{"ref_number" => api["ref_number"] + 1, "timestamp" => Timex.now}
     api_with_meta_info = add_meta_info(api, meta_info)
@@ -199,13 +196,13 @@ defmodule Gateway.Proxy do
 
   @spec handle_call({:list_api}, any, state_t) :: {:reply, state_t}
   def handle_call({:list_api}, _from, state) do
-    list_of_apis = state.tracker_mod.list
+    list_of_apis = get_node_name() |> state.tracker_mod.list_by_node
     {:reply, list_of_apis, state}
   end
 
   def handle_call({:get_api, id}, _from, state) do
     node_name = get_node_name()
-    api = state.tracker_mod.find(id, node_name)
+    api = state.tracker_mod.find_by_node(id, node_name)
     {:reply, api, state}
   end
 
@@ -224,8 +221,6 @@ defmodule Gateway.Proxy do
   end
 
   defp eval_data_change(id, prev_api, next_api, state) do
-    # next_api_without_meta = next_api |> remove_meta_info
-
     if data_equal?(prev_api, next_api) do
       {:error, :exit}
     else
@@ -293,11 +288,11 @@ defmodule Gateway.Proxy do
   defp check_node_origin(id, next_api, node_name, state) do
     if node_name != next_api["node_name"] do
       IO.puts "DIFFERENT NODE"
-      state.tracker_mod.find(id, next_api["node_name"])
+      state.tracker_mod.find_by_node(id, next_api["node_name"])
       |> check_phx_ref(next_api, true)
     else
       IO.puts "SAME NODE"
-      state.tracker_mod.find(id, node_name)
+      state.tracker_mod.find_by_node(id, node_name)
       |> check_phx_ref(next_api, false)
     end
   end

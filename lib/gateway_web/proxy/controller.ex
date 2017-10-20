@@ -43,7 +43,7 @@ defmodule GatewayWeb.Proxy.Controller do
     %{"id" => id} = params
 
     with {_id, current_api} <- Proxy.get_api(Proxy, id),
-         {:ok, _phx_ref} <- merge_and_update(id, params, current_api)
+         {:ok, _phx_ref} <- merge_and_update(id, current_api, params)
     do
       send_response(conn, 200, %{message: "ok"})
     else
