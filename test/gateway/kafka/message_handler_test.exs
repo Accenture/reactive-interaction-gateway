@@ -72,7 +72,7 @@ defmodule Gateway.Kafka.MessageHandlerTest do
     # wait until the handler has sent an ack to what it thinks is the group subscriber:
     messages
     |> Stream.with_index(base_offset)
-    |> Enum.each(fn {_message_value, offset} ->
+    |> Enum.each(fn({_message_value, offset}) ->
       assert_receive {:"$gen_cast", {:ack, ^kafka_topic, ^partition, ^offset}}, 200
     end)
 
