@@ -11,7 +11,8 @@ defmodule GatewayWeb.Proxy.Controller do
     apis =
       Proxy
       |> Proxy.list_apis
-      |> Enum.map(&(elem(&1, 1)))
+      |> Enum.map(fn(api) -> elem(api, 1) end)
+      |> Enum.filter(fn(api) -> api["active"] == true end)
 
     send_response(conn, 200, apis)
   end
@@ -56,7 +57,7 @@ defmodule GatewayWeb.Proxy.Controller do
     %{"id" => id} = params
 
     with {_id, _current_api} <- Proxy.get_api(Proxy, id),
-         :ok <- Proxy.delete_api(Proxy, id)
+         {:ok, _phx_ref} <- Proxy.delete_api(Proxy, id)
     do
       send_response(conn, 204)
     else

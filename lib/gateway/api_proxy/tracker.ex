@@ -8,7 +8,7 @@ defmodule Gateway.ApiProxy.Tracker do
     @moduledoc false
     @callback track(id :: String.t, api :: Proxy.api_definition) :: {:ok, String.t}
     @callback update(id :: String.t, api :: Proxy.api_definition) :: {:ok, String.t}
-    @callback untrack(id :: String.t) :: :ok
+    # @callback untrack(id :: String.t) :: :ok
     @callback list_all() :: [{String.t, Proxy.api_definition}]
     @callback list_by_node(node_name :: atom) :: [{String.t, Proxy.api_definition}]
     @callback find_all(id :: String.t) :: [{String.t, Proxy.api_definition}]
@@ -45,15 +45,15 @@ defmodule Gateway.ApiProxy.Tracker do
       _meta = api)
   end
 
-  @impl TrackerBehaviour
-  def untrack(id) do
-    Logger.info("Untracked API definition with id=#{id}")
-    Phoenix.Tracker.untrack(
-      _tracker = Presence,
-      _pid = Process.whereis(Gateway.PubSub),
-      @topic,
-      _key = id)
-  end
+  # @impl TrackerBehaviour
+  # def untrack(id) do
+  #   Logger.info("Untracked API definition with id=#{id}")
+  #   Phoenix.Tracker.untrack(
+  #     _tracker = Presence,
+  #     _pid = Process.whereis(Gateway.PubSub),
+  #     @topic,
+  #     _key = id)
+  # end
 
   @impl TrackerBehaviour
   def list_all do

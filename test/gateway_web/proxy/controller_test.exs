@@ -33,17 +33,35 @@ defmodule GatewayWeb.Proxy.ControllerTest do
         ]
       }
     },
-    "versioned" => false
+    "versioned" => false,
+    "active" => true
   }
 
-  test "GET /apis should return list of APIs" do
-    with_mocks([
-      {Gateway.Proxy,
-       [],
-       [list_apis: fn(_server) -> [{@mock_api["id"], @mock_api}] end]},
-    ]) do
-      conn = build_conn() |> get("/apis")
-      assert json_response(conn, 200) |> length == 1
+  describe "GET /apis" do
+    test "should return list of APIs" do
+      with_mocks([
+        {Gateway.Proxy,
+         [],
+         [list_apis: fn(_server) -> [{@mock_api["id"], @mock_api}] end]},
+      ]) do
+        conn = build_conn() |> get("/apis")
+        assert json_response(conn, 200) |> length == 1
+      end
+    end
+
+    test "should filter deacivated APIs" do
+      with_mocks([
+        {Gateway.Proxy,
+         [],
+         [list_apis: fn(_server) ->
+           inactive_api = @mock_api |> Map.put("active", false)
+           [{@mock_api["id"], @mock_api}, {"new-service", inactive_api}]
+         end]},
+      ]) do
+        conn = build_conn() |> get("/apis")
+        IO.inspect json_response(conn, 200)
+        assert json_response(conn, 200) |> length == 1
+      end
     end
   end
 
@@ -183,7 +201,7 @@ defmodule GatewayWeb.Proxy.ControllerTest do
         {Gateway.Proxy,
          [],
          [get_api: fn(_server, _id) -> {@mock_api["id"], @mock_api} end,
-          delete_api: fn(_server, _id) -> :ok end]},
+          delete_api: fn(_server, _id) -> {:ok, "phx_ref"} end]},
       ]) do
         conn = build_conn() |> delete("/apis/new-service")
         response = json_response(conn, 204)

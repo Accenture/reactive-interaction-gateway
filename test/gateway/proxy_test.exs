@@ -10,7 +10,7 @@ defmodule Gateway.ProxyTest do
     update_api: 3,
     delete_api: 2,
     handle_join_api: 3,
-    handle_leave_api: 3,
+    # handle_leave_api: 3,
   ]
 
   @mock_api %{ # TODO: PLAY WITH DEFAULT VALUES
@@ -40,7 +40,8 @@ defmodule Gateway.ProxyTest do
         ]
       }
     },
-    "versioned" => false
+    "versioned" => false,
+    "active" => true
   }
 
   setup [:with_tracker_mock_proxy]
@@ -84,36 +85,29 @@ defmodule Gateway.ProxyTest do
   test "update_api should update existing API", ctx do
     {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
   
-    existing_api =
-      proxy
-      |> get_api("random-service")
-      |> elem(1)
-    
+    {_id, existing_api} = proxy |> get_api("random-service")
     assert existing_api["name"] == "random-service"
   
-    updated_existing_api =
-      existing_api
-      |> Map.put("name", "updated-service")
+    updated_existing_api = existing_api |> Map.put("name", "updated-service")
     proxy |> update_api("random-service", updated_existing_api)
   
-    new_api =
-      proxy
-      |> get_api("random-service")
-      |> elem(1)
+    {_id, new_api} = proxy |> get_api("random-service")
   
     assert new_api["name"] == "updated-service"
     assert ctx.tracker |> Stubr.called_once?(:update)
   end
 
-  test "delete_api should untrack API", ctx do
+  test "delete_api should deactivate API ", ctx do
     {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-    
-    assert proxy |> get_api("random-service")
-  
+
+    {_id, current_api} = proxy |> get_api("random-service")
+    assert current_api["active"] == true
+
     proxy |> delete_api("random-service")
-  
-    refute proxy |> get_api("random-service")
-    assert ctx.tracker |> Stubr.called_once?(:untrack)
+
+    {_id, deactivated_api} = proxy |> get_api("random-service")
+    assert deactivated_api["active"] == false
+    assert ctx.tracker |> Stubr.called_once?(:update)
   end
 
   test "handle_join_api should track new API", ctx do
@@ -140,10 +134,7 @@ defmodule Gateway.ProxyTest do
       assert ctx.tracker |> Stubr.called_twice?(:track)
       proxy |> handle_join_api("random-service", older_api)
 
-      current_api =
-        proxy
-        |> get_api("random-service")
-        |> elem(1)
+      {_id, current_api} = proxy |> get_api("random-service")
 
       :timer.sleep(50)
       assert current_api["ref_number"] == 0
@@ -163,10 +154,7 @@ defmodule Gateway.ProxyTest do
       assert ctx.tracker |> Stubr.called_twice?(:track)
       proxy |> handle_join_api("random-service", newer_api)
 
-      current_api =
-        proxy
-        |> get_api("random-service")
-        |> elem(1)
+      {_id, current_api} = proxy |> get_api("random-service")
 
       :timer.sleep(50)
       assert current_api["ref_number"] == 1
@@ -177,18 +165,12 @@ defmodule Gateway.ProxyTest do
     test "with same ref_number and equal data should skip API", ctx do
       {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
 
-      same_api =
-        proxy
-        |> get_api("random-service")
-        |> elem(1)
+      {_id, equal_api} = proxy |> get_api("random-service")
 
       assert ctx.tracker |> Stubr.called_twice?(:track)
-      proxy |> handle_join_api("random-service", same_api)
+      proxy |> handle_join_api("random-service", equal_api)
 
-      current_api =
-        proxy
-        |> get_api("random-service")
-        |> elem(1)
+      {_id, current_api} = proxy |> get_api("random-service")
 
       :timer.sleep(50)
       assert current_api["ref_number"] == 0
@@ -238,10 +220,7 @@ defmodule Gateway.ProxyTest do
 
       proxy |> handle_join_api("new-service", different_api)
 
-      current_api =
-        proxy
-        |> get_api("new-service")
-        |> elem(1)
+      {_id, current_api} = proxy |> get_api("new-service")
 
       :timer.sleep(50)
       assert current_api["ref_number"] == 0
@@ -295,96 +274,96 @@ defmodule Gateway.ProxyTest do
     end
   end
 
-  describe "handle_leave_api comparing APIs within same node" do
-    test "should skip untrack if API doesn't exist", ctx do
-      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-
-      origin_api = @mock_api |> Map.put("node_name", :nonode@nohost)
-      proxy |> handle_leave_api("new-service", origin_api)
-
-      :timer.sleep(50)
-      refute ctx.tracker |> Stubr.called?(:untrack)
-    end
-
-    test "should skip untrack if compared APIs have different phx_ref", ctx do
-      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-
-      different_origin_api =
-        proxy
-        |> get_api("random-service")
-        |> elem(1)
-        |> Map.put(:phx_ref, "ref2")
-
-      proxy |> handle_leave_api("random-service", different_origin_api)
-
-      :timer.sleep(50)
-      refute ctx.tracker |> Stubr.called?(:untrack)
-    end
-
-    test "should untrack if compared APIs have same phx_ref", ctx do
-      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-
-      origin_api =
-        proxy
-        |> get_api("random-service")
-        |> elem(1)
-
-      proxy |> handle_leave_api("random-service", origin_api)
-
-      :timer.sleep(50)
-      assert ctx.tracker |> Stubr.called_once?(:untrack)
-    end
-  end
-
-  describe "handle_leave_api comparing APIs from different node" do
-    test "should untrack origin API if foreign API doesn't exist", ctx do
-      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-
-      different_node_api =
-        proxy
-        |> get_api("random-service")
-        |> elem(1)
-        |> Map.put("node_name", :node2@node2)
-      proxy |> handle_leave_api("random-service", different_node_api)
-
-      :timer.sleep(50)
-      assert ctx.tracker |> Stubr.called_once?(:untrack)
-    end
-
-    test "should untrack origin API if compared APIs have same phx_ref", ctx do
-      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-
-      different_node_api =
-        proxy
-        |> get_api("random-service")
-        |> elem(1)
-        |> Map.put("node_name", :node2@node2)
-
-      proxy |> add_api("new-service", different_node_api)
-      proxy |> handle_leave_api("new-service", different_node_api)
-
-      :timer.sleep(50)
-      assert ctx.tracker |> Stubr.called_once?(:untrack)
-    end
-
-    test "should skip untrack if compared APIs have different phx_ref", ctx do
-      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-
-      different_node_api =
-        proxy
-        |> get_api("random-service")
-        |> elem(1)
-        |> Map.put("node_name", :node2@node2)
-
-      proxy |> add_api("new-service", different_node_api)
-
-      different_node_different_api = different_node_api |> Map.put(:phx_ref, "ref2")
-      proxy |> handle_leave_api("new-service", different_node_different_api)
-
-      :timer.sleep(50)  
-      refute ctx.tracker |> Stubr.called?(:untrack)
-    end
-  end
+  # describe "handle_leave_api comparing APIs within same node" do
+  #   test "should skip untrack if API doesn't exist", ctx do
+  #     {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+  # 
+  #     origin_api = @mock_api |> Map.put("node_name", :nonode@nohost)
+  #     proxy |> handle_leave_api("new-service", origin_api)
+  # 
+  #     :timer.sleep(50)
+  #     refute ctx.tracker |> Stubr.called?(:untrack)
+  #   end
+  # 
+  #   test "should skip untrack if compared APIs have different phx_ref", ctx do
+  #     {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+  # 
+  #     different_origin_api =
+  #       proxy
+  #       |> get_api("random-service")
+  #       |> elem(1)
+  #       |> Map.put(:phx_ref, "ref2")
+  # 
+  #     proxy |> handle_leave_api("random-service", different_origin_api)
+  # 
+  #     :timer.sleep(50)
+  #     refute ctx.tracker |> Stubr.called?(:untrack)
+  #   end
+  # 
+  #   test "should untrack if compared APIs have same phx_ref", ctx do
+  #     {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+  # 
+  #     origin_api =
+  #       proxy
+  #       |> get_api("random-service")
+  #       |> elem(1)
+  # 
+  #     proxy |> handle_leave_api("random-service", origin_api)
+  # 
+  #     :timer.sleep(50)
+  #     assert ctx.tracker |> Stubr.called_once?(:untrack)
+  #   end
+  # end
+  # 
+  # describe "handle_leave_api comparing APIs from different node" do
+  #   test "should untrack origin API if foreign API doesn't exist", ctx do
+  #     {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+  # 
+  #     different_node_api =
+  #       proxy
+  #       |> get_api("random-service")
+  #       |> elem(1)
+  #       |> Map.put("node_name", :node2@node2)
+  #     proxy |> handle_leave_api("random-service", different_node_api)
+  # 
+  #     :timer.sleep(50)
+  #     assert ctx.tracker |> Stubr.called_once?(:untrack)
+  #   end
+  # 
+  #   test "should untrack origin API if compared APIs have same phx_ref", ctx do
+  #     {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+  # 
+  #     different_node_api =
+  #       proxy
+  #       |> get_api("random-service")
+  #       |> elem(1)
+  #       |> Map.put("node_name", :node2@node2)
+  # 
+  #     proxy |> add_api("new-service", different_node_api)
+  #     proxy |> handle_leave_api("new-service", different_node_api)
+  # 
+  #     :timer.sleep(50)
+  #     assert ctx.tracker |> Stubr.called_once?(:untrack)
+  #   end
+  # 
+  #   test "should skip untrack if compared APIs have different phx_ref", ctx do
+  #     {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+  # 
+  #     different_node_api =
+  #       proxy
+  #       |> get_api("random-service")
+  #       |> elem(1)
+  #       |> Map.put("node_name", :node2@node2)
+  # 
+  #     proxy |> add_api("new-service", different_node_api)
+  # 
+  #     different_node_different_api = different_node_api |> Map.put(:phx_ref, "ref2")
+  #     proxy |> handle_leave_api("new-service", different_node_different_api)
+  # 
+  #     :timer.sleep(50)  
+  #     refute ctx.tracker |> Stubr.called?(:untrack)
+  #   end
+  # end
 
   defp with_tracker_mock_proxy(_ctx) do
     {:ok, agent} = Agent.start_link(fn -> [] end)
@@ -408,13 +387,13 @@ defmodule Gateway.ProxyTest do
             {:ok, 'some_phx_ref'}
           end
         end,
-        untrack: fn id ->
-          Logger.debug "Tracker Stub :untrack id=#{inspect id}"
-          Agent.update(agent, fn
-            list -> list |> Enum.filter(fn {key, _} -> key != id end)
-          end)
-          :ok
-        end,
+        # untrack: fn id ->
+        #   Logger.debug "Tracker Stub :untrack id=#{inspect id}"
+        #   Agent.update(agent, fn
+        #     list -> list |> Enum.filter(fn {key, _} -> key != id end)
+        #   end)
+        #   :ok
+        # end,
         update: fn id, api ->
           Logger.debug "Tracker Stub :update id=#{inspect id} api=#{inspect api}"
           Agent.update(agent, fn
