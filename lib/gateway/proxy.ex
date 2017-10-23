@@ -18,29 +18,29 @@ defmodule Gateway.Proxy do
   require Logger
 
   @type endpoint :: %{
+    optional(:not_secured) => boolean,
     id: String.t,
     path: String.t,
     method: String.t,
-    not_secured: boolean,
-  }
+}
   @type api_definition :: %{
+    optional(:auth_type) => String.t,
+    optional(:versioned) => boolean,
     id: String.t,
     name: String.t,
-    auth: String.t,
-    auth_type: %{
-      use_header: boolean,
-      header_name: String.t,
-      use_query: boolean,
-      query_name: String.t,
+    auth: %{
+      optional(:use_header) => boolean,
+      optional(:header_name) => String.t,
+      optional(:use_query) => boolean,
+      optional(:query_name) => String.t,
     },
-    versioned: boolean,
     version_data: %{
       optional(String.t) => %{
         endpoints: [endpoint]
       }
     },
     proxy: %{
-      use_env: boolean,
+      optional(:use_env) => boolean,
       target_url: String.t,
       port: integer,
     },
@@ -76,7 +76,7 @@ defmodule Gateway.Proxy do
 
   @spec list_apis(server_t) :: [api_definition, ...]
   def list_apis(server) do
-    GenServer.call(server, {:list_api})
+    GenServer.call(server, {:list_apis})
   end
 
   @spec get_api(server_t, String.t) :: api_definition
@@ -160,8 +160,8 @@ defmodule Gateway.Proxy do
     {:reply, response, state}
   end
 
-  @spec handle_call({:list_api}, any, state_t) :: {:reply, [api_definition, ...], state_t}
-  def handle_call({:list_api}, _from, state) do
+  @spec handle_call({:list_apis}, any, state_t) :: {:reply, [api_definition, ...], state_t}
+  def handle_call({:list_apis}, _from, state) do
     list_of_apis = get_node_name() |> state.tracker_mod.list_by_node
     {:reply, list_of_apis, state}
   end

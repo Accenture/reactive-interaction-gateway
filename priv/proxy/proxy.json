@@ -14,9 +14,9 @@
       "default": {
         "endpoints": [
           {
-            "id": "get-is-auth-register",
+            "id": "post-is-auth-register",
             "path": "/is/auth/register",
-            "method": "GET",
+            "method": "POST",
             "not_secured": true
           },
           {
