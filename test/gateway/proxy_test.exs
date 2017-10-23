@@ -215,8 +215,8 @@ defmodule Gateway.ProxyTest do
       node3_api = different_api |> Map.put("node_name", :node3@node3)
 
       proxy |> add_api("new-service", @mock_api)
-      proxy |> add_api("new-service", node2_api)
-      proxy |> add_api("new-service", node3_api)
+      ctx.tracker.track("new-service", node2_api)
+      ctx.tracker.track("new-service", node3_api)
       assert ctx.tracker |> Stubr.call_count(:track) == 5
 
       proxy |> handle_join_api("new-service", different_api)
@@ -264,7 +264,7 @@ defmodule Gateway.ProxyTest do
         |> Map.put("timestamp", new_timestamp)
 
       proxy |> add_api("new-service", @mock_api)
-      proxy |> add_api("new-service", different_api)
+      ctx.tracker.track("new-service", different_api)
       assert ctx.tracker |> Stubr.call_count(:track) == 4
 
       proxy |> handle_join_api("new-service", different_api)
