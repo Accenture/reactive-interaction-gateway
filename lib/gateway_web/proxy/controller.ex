@@ -61,7 +61,7 @@ defmodule GatewayWeb.Proxy.Controller do
   def deactivate_api(conn, params) do
     %{"id" => id} = params
 
-    with {_id, current_api} <- get_active_api(id),
+    with {_id, _current_api} <- get_active_api(id),
          {:ok, _phx_ref} <- Proxy.deactivate_api(Proxy, id)
     do
       send_response(conn, 204)

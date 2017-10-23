@@ -6,37 +6,6 @@ defmodule GatewayWeb.Proxy.ControllerTest do
 
   import Mock
 
-  @mock_api %{ # TODO: PLAY WITH DEFAULT VALUES
-    "auth" => %{
-      "header_name" => "",
-      "query_name" => "",
-      "use_header" => false,
-      "use_query" => false
-    },
-    "auth_type" => "none",
-    "id" => "new-service",
-    "name" => "new-service",
-    "proxy" => %{
-      "port" => 4444,
-      "target_url" => "API_HOST",
-      "use_env" => true
-    },
-    "version_data" => %{
-      "default" => %{
-        "endpoints" => [
-          %{
-            "id" => "get-movies",
-            "method" => "GET",
-            "not_secured" => true,
-            "path" => "/myapi/movies"
-          }
-        ]
-      }
-    },
-    "versioned" => false,
-    "active" => true
-  }
-
   describe "GET /apis" do
     test "should return list of APIs" do
       with_mocks([

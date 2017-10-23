@@ -26,6 +26,38 @@ defmodule GatewayWeb.ConnCase do
       # The default endpoint for testing
       @endpoint GatewayWeb.Endpoint
 
+      # Example mock API definition to ease testing
+      @mock_api %{
+        "auth" => %{
+          "header_name" => "",
+          "query_name" => "",
+          "use_header" => false,
+          "use_query" => false
+        },
+        "auth_type" => "none",
+        "id" => "new-service",
+        "name" => "new-service",
+        "proxy" => %{
+          "port" => 4444,
+          "target_url" => "API_HOST",
+          "use_env" => true
+        },
+        "version_data" => %{
+          "default" => %{
+            "endpoints" => [
+              %{
+                "id" => "get-movies",
+                "method" => "GET",
+                "not_secured" => true,
+                "path" => "/myapi/movies"
+              }
+            ]
+          }
+        },
+        "versioned" => false,
+        "active" => true
+      }
+
       # The key for signing JWTs:
       @jwt_key Application.fetch_env!(:gateway, :auth_jwt_key)
 

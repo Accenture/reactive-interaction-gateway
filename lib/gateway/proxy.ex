@@ -26,6 +26,10 @@ defmodule Gateway.Proxy do
   @type api_definition :: %{
     optional(:auth_type) => String.t,
     optional(:versioned) => boolean,
+    optional(:active) => boolean,
+    optional(:node_name) => atom,
+    optional(:ref_number) => integer,
+    optional(:timestamp) => DateTime,
     id: String.t,
     name: String.t,
     auth: %{
@@ -44,7 +48,7 @@ defmodule Gateway.Proxy do
       target_url: String.t,
       port: integer,
     },
-  } # TODO fields: active, node_name, ref_number, timestamp
+  }
 
   @typep state_t :: map
   @typep server_t :: pid | atom
@@ -67,9 +71,7 @@ defmodule Gateway.Proxy do
 
     read_init_apis()
     |> Enum.each(fn(api) ->
-      meta_info = %{"ref_number" => 0, "timestamp" => Timex.now, "active" => true}
-      api_with_meta_info = add_meta_info(api, meta_info)
-
+      api_with_meta_info = set_default_api_values(api)
       state.tracker_mod.track(api["id"], api_with_meta_info)
     end)
   end
@@ -122,12 +124,7 @@ defmodule Gateway.Proxy do
   def handle_call({:add_api, id, api}, _from, state) do
     Logger.info("Adding new API definition with id=#{id} to presence")
 
-    meta_info = %{"ref_number" => 0, "timestamp" => Timex.now}
-    api_with_meta_info =
-      api
-      |> Map.merge(meta_info)
-      |> Map.put("active", true) # TODO default values
-      |> Map.put_new("node_name", get_node_name())
+    api_with_meta_info = set_default_api_values(api)
 
     response = state.tracker_mod.track(id, api_with_meta_info)
     {:reply, response, state}
@@ -187,8 +184,7 @@ defmodule Gateway.Proxy do
         Logger.debug("There is already most recent API definition with id=#{id} in presence")
       {:ok, :track} ->
         Logger.debug("API definition with id=#{id} doesn't exist yet, starting tracking")
-        meta_info = %{"ref_number" => 0, "timestamp" => Timex.now, "active" => true}
-        api_with_meta_info = add_meta_info(api, meta_info)
+        api_with_meta_info = set_default_api_values(api)
 
         state.tracker_mod.track(id, api_with_meta_info)
       {:ok, :update_no_ref} ->
@@ -310,5 +306,36 @@ defmodule Gateway.Proxy do
     |> Path.join(@config_file)
     |> File.read!
     |> Poison.decode!
+  end
+
+  defp set_default_api_values(api) do
+    default_api_values = %{
+      "active" => true,
+      "auth_type" => "none",
+      "node_name" => get_node_name(),
+      "proxy" => %{
+        "use_env" => false
+      },
+      "ref_number" => 0,
+      "timestamp" => Timex.now,
+      "versioned" => false
+    }
+
+    api_with_default = default_api_values |> Map.merge(api)
+    auth_default_values = get_default_auth_values(api_with_default["auth_type"])
+
+    api_with_default |> Map.put("auth", auth_default_values)
+  end
+
+  defp get_default_auth_values(type) do
+    query_default_values = %{"use_query" => false, "query_name" => ""}
+
+    header_default_values =
+      case type do
+        "jwt" -> %{"use_header" => true, "header_name" => "Authorization"}
+        _ -> %{"use_header" => false, "header_name" => ""}
+      end
+
+    query_default_values |> Map.merge(header_default_values)
   end
 end

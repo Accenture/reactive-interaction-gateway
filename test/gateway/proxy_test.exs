@@ -3,6 +3,7 @@ defmodule Gateway.ProxyTest do
   use ExUnit.Case, async: true
   require Logger
   alias Gateway.Proxy
+  use GatewayWeb.ConnCase
   import Gateway.Proxy, only: [
     list_apis: 1,
     get_api: 2,
@@ -11,37 +12,6 @@ defmodule Gateway.ProxyTest do
     deactivate_api: 2,
     handle_join_api: 3,
   ]
-
-  @mock_api %{ # TODO: PLAY WITH DEFAULT VALUES
-    "auth" => %{
-      "header_name" => "",
-      "query_name" => "",
-      "use_header" => false,
-      "use_query" => false
-    },
-    "auth_type" => "none",
-    "id" => "new-service",
-    "name" => "new-service",
-    "proxy" => %{
-      "port" => 4444,
-      "target_url" => "API_HOST",
-      "use_env" => true
-    },
-    "version_data" => %{
-      "default" => %{
-        "endpoints" => [
-          %{
-            "id" => "get-movies",
-            "method" => "GET",
-            "not_secured" => true,
-            "path" => "/myapi/movies"
-          }
-        ]
-      }
-    },
-    "versioned" => false,
-    "active" => true
-  }
 
   setup [:with_tracker_mock_proxy]
 
@@ -60,7 +30,33 @@ defmodule Gateway.ProxyTest do
     assert ctx.tracker |> Stubr.called_once?(:find_by_node)
   end
 
-  test "add_api should start tracking new API", ctx do
+  test "add_api should start tracking new API and add default values for optional data", ctx do
+    {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+
+    refute proxy |> get_api("new-service")
+    assert ctx.tracker |> Stubr.called_twice?(:track)
+    assert ctx.tracker |> Stubr.called_once?(:find_by_node)
+
+    incomplete_api = %{
+      "id" => "incomplete-service",
+      "name" => "incomplete-service",
+      "proxy" => %{"port" => 7070, "target_url" => "API_HOST"},
+      "version_data" => %{},
+    }
+
+    {:ok, _response} = proxy |> add_api("incomplete-service", incomplete_api)
+
+    {_id, api} = proxy |> get_api("incomplete-service")
+    has_required_keys =
+      ["active", "auth_type", "auth", "node_name", "ref_number", "timestamp", "versioned"]
+      |> Enum.all?(fn(key) -> Map.has_key?(api, key) end)
+
+    assert has_required_keys
+    assert ctx.tracker |> Stubr.called_thrice?(:track)
+    assert ctx.tracker |> Stubr.called_twice?(:find_by_node)
+  end
+
+  test "add_api should start tracking new API and not override optional data if present", ctx do
     {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
   
     refute proxy |> get_api("new-service")
@@ -68,8 +64,14 @@ defmodule Gateway.ProxyTest do
     assert ctx.tracker |> Stubr.called_once?(:find_by_node)
   
     {:ok, _response} = proxy |> add_api("new-service", @mock_api)
-  
-    assert proxy |> get_api("new-service")
+    {_id, api} = proxy |> get_api("new-service")
+
+    has_equal_values =
+      @mock_api
+      |> Map.keys
+      |> Enum.all?(fn(key) -> @mock_api[key] == api[key] end)
+
+    assert has_equal_values
     assert ctx.tracker |> Stubr.called_thrice?(:track)
     assert ctx.tracker |> Stubr.called_twice?(:find_by_node)
   end
