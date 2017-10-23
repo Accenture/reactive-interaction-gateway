@@ -90,6 +90,18 @@ defmodule GatewayWeb.Proxy.ControllerTest do
       end
     end
 
+    test "should return 403 if API exists, but is deactivated" do
+      with_mocks([
+        {Gateway.Proxy,
+         [],
+         [get_api: fn(_server, _id) -> {"id", %{"active" => false}} end]},
+      ]) do
+        conn = build_conn() |> get("/apis/new-service")
+        response = json_response(conn, 403)
+        assert response["message"] == "Resource with id=new-service is forbidden."
+      end
+    end
+
     test "should return 500 if API wasn't read successfully" do
       with_mocks([
         {Gateway.Proxy,
@@ -108,7 +120,8 @@ defmodule GatewayWeb.Proxy.ControllerTest do
       with_mocks([
         {Gateway.Proxy,
          [],
-         [add_api: fn(_server, _id, _api) -> {:ok, "phx_ref"} end]},
+         [get_api: fn(_server, _id) -> nil end,
+          add_api: fn(_server, _id, _api) -> {:ok, "phx_ref"} end]},
       ]) do
         conn = build_conn() |> post("/apis", @mock_api)
         response = json_response(conn, 201)
@@ -121,14 +134,24 @@ defmodule GatewayWeb.Proxy.ControllerTest do
         {Gateway.Proxy,
          [],
          [get_api: fn(_server, _id) -> {@mock_api["id"], @mock_api} end,
-          add_api: fn(_server, _id, _api) -> {:error, {:already_tracked, nil, nil, nil}} end]},
+          add_api: fn(_server, _id, _api) -> {:ok, "phx_ref"} end]},
       ]) do
-        conn = build_conn() |> get("/apis/new-service")
-        api = json_response(conn, 200)
+        conn = build_conn() |> post("/apis", @mock_api)
+        response = json_response(conn, 409)
+        assert response["message"] == "API with id=new-service already exists."
+      end
+    end
 
-        duplicate_conn = build_conn() |> post("/apis", api)
-        duplicate_response = json_response(duplicate_conn, 409)
-        assert duplicate_response["message"] == "API with id=new-service already exists."
+    test "should return 403 if API exists, but is deactivated" do
+      with_mocks([
+        {Gateway.Proxy,
+         [],
+         [get_api: fn(_server, _id) -> {"id", %{"active" => false}} end,
+          add_api: fn(_server, _id, _api) -> {:ok, "phx_ref"} end]},
+      ]) do
+        conn = build_conn() |> post("/apis", @mock_api)
+        response = json_response(conn, 403)
+        assert response["message"] == "Resource with id=new-service is forbidden."
       end
     end
 
@@ -136,15 +159,12 @@ defmodule GatewayWeb.Proxy.ControllerTest do
       with_mocks([
         {Gateway.Proxy,
          [],
-         [get_api: fn(_server, _id) -> {@mock_api["id"], @mock_api} end,
-          add_api: fn(_server, _id, _api) -> {:error, :down} end]},
+         [get_api: fn(_server, _id) -> nil end,
+          add_api: fn(_server, _id, _api) -> :error end]},
       ]) do
-        conn = build_conn() |> get("/apis/new-service")
-        api = json_response(conn, 200)
-
-        error_conn = build_conn() |> post("/apis", api)
-        error_response = json_response(error_conn, 500)
-        assert error_response == %{}
+        conn = build_conn() |> post("/apis", @mock_api)
+        response = json_response(conn, 500)
+        assert response == %{}
       end
     end
   end
@@ -157,12 +177,9 @@ defmodule GatewayWeb.Proxy.ControllerTest do
          [get_api: fn(_server, _id) -> {@mock_api["id"], @mock_api} end,
           update_api: fn(_server, _id, _api) -> {:ok, "phx_ref"} end]},
       ]) do
-        conn = build_conn() |> get("/apis/new-service")
-        api = json_response(conn, 200)
-
-        put_conn = build_conn() |> put("/apis/new-service", api)
-        put_response = json_response(put_conn, 200)
-        assert put_response["message"] == "ok"
+        conn = build_conn() |> put("/apis/new-service", @mock_api)
+        response = json_response(conn, 200)
+        assert response["message"] == "ok"
       end
     end
 
@@ -178,6 +195,18 @@ defmodule GatewayWeb.Proxy.ControllerTest do
       end
     end
 
+    test "should return 403 if API exists, but is deactivated" do
+      with_mocks([
+        {Gateway.Proxy,
+         [],
+         [get_api: fn(_server, _id) -> {"id", %{"active" => false}} end]},
+      ]) do
+        conn = build_conn() |> put("/apis/new-service", @mock_api)
+        response = json_response(conn, 403)
+        assert response["message"] == "Resource with id=new-service is forbidden."
+      end
+    end
+
     test "should return 500 if API wasn't updated successfully" do
       with_mocks([
         {Gateway.Proxy,
@@ -185,12 +214,9 @@ defmodule GatewayWeb.Proxy.ControllerTest do
          [get_api: fn(_server, _id) -> {@mock_api["id"], @mock_api} end,
           update_api: fn(_server, _id, _api) -> {:error, :down} end]},
       ]) do
-        conn = build_conn() |> get("/apis/new-service")
-        api = json_response(conn, 200)
-
-        error_conn = build_conn() |> put("/apis/new-service", api)
-        error_response = json_response(error_conn, 500)
-        assert error_response == %{}
+        conn = build_conn() |> put("/apis/new-service", @mock_api)
+        response = json_response(conn, 500)
+        assert response == %{}
       end
     end
   end
@@ -201,7 +227,7 @@ defmodule GatewayWeb.Proxy.ControllerTest do
         {Gateway.Proxy,
          [],
          [get_api: fn(_server, _id) -> {@mock_api["id"], @mock_api} end,
-          delete_api: fn(_server, _id) -> {:ok, "phx_ref"} end]},
+          deactivate_api: fn(_server, _id) -> {:ok, "phx_ref"} end]},
       ]) do
         conn = build_conn() |> delete("/apis/new-service")
         response = json_response(conn, 204)
@@ -221,12 +247,24 @@ defmodule GatewayWeb.Proxy.ControllerTest do
       end
     end
 
+    test "should return 403 if API exists, but is deactivated" do
+      with_mocks([
+        {Gateway.Proxy,
+         [],
+         [get_api: fn(_server, _id) -> {"id", %{"active" => false}} end]},
+      ]) do
+        conn = build_conn() |> delete("/apis/new-service")
+        response = json_response(conn, 403)
+        assert response["message"] == "Resource with id=new-service is forbidden."
+      end
+    end
+
     test "should return 500 if API wasn't deleted successfully" do
       with_mocks([
         {Gateway.Proxy,
          [],
          [get_api: fn(_server, _id) -> {@mock_api["id"], @mock_api} end,
-          delete_api: fn(_server, _id) -> {:error, :down} end]},
+          deactivate_api: fn(_server, _id) -> {:error, :down} end]},
       ]) do
         conn = build_conn() |> delete("/apis/new-service")
         response = json_response(conn, 500)

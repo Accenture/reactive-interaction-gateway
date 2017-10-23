@@ -20,8 +20,9 @@ defmodule GatewayWeb.Proxy.Controller do
   def get_api_detail(conn, params) do
     %{"id" => id} = params
 
-    case Proxy.get_api(Proxy, id) do
+    case get_active_api(id) do
       nil -> send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
+      :inactive -> send_response(conn, 403, %{message: "Resource with id=#{id} is forbidden."})
       {_id, api} -> send_response(conn, 200, api)
       _ -> send_response(conn, 500)
     end
@@ -30,39 +31,56 @@ defmodule GatewayWeb.Proxy.Controller do
   def add_api(conn, params) do
     %{"id" => id} = params
 
-    case Proxy.add_api(Proxy, id, params) do
-      {:error, {:already_tracked, _pid, _server, _api_id}} ->
+    with nil <- Proxy.get_api(Proxy, id),
+         {:ok, _phx_ref} <- Proxy.add_api(Proxy, id, params)
+    do
+      send_response(conn, 201, %{message: "ok"})
+    else
+      {_id, %{"active" => true}} ->
         send_response(conn, 409, %{message: "API with id=#{id} already exists."})
-      {:ok, _phx_ref} ->
-        send_response(conn, 201, %{message: "ok"})
-      _ ->
-        send_response(conn, 500)
+      {_id, %{"active" => false}} ->
+        send_response(conn, 403, %{message: "Resource with id=#{id} is forbidden."})
+      _ -> send_response(conn, 500)
     end
   end
 
   def update_api(conn, params) do
     %{"id" => id} = params
 
-    with {_id, current_api} <- Proxy.get_api(Proxy, id),
+    with {_id, current_api} <- get_active_api(id),
          {:ok, _phx_ref} <- merge_and_update(id, current_api, params)
     do
       send_response(conn, 200, %{message: "ok"})
     else
       nil -> send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
+      :inactive -> send_response(conn, 403, %{message: "Resource with id=#{id} is forbidden."})
       _ -> send_response(conn, 500)
     end
   end
 
-  def delete_api(conn, params) do
+  def deactivate_api(conn, params) do
     %{"id" => id} = params
 
-    with {_id, _current_api} <- Proxy.get_api(Proxy, id),
-         {:ok, _phx_ref} <- Proxy.delete_api(Proxy, id)
+    with {_id, current_api} <- get_active_api(id),
+         {:ok, _phx_ref} <- Proxy.deactivate_api(Proxy, id)
     do
       send_response(conn, 204)
     else
       nil -> send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
+      :inactive -> send_response(conn, 403, %{message: "Resource with id=#{id} is forbidden."})
       _ -> send_response(conn, 500)
+    end
+  end
+
+  defp get_active_api(id) do
+    with {id, current_api} <- Proxy.get_api(Proxy, id),
+         true <- current_api["active"] == true
+    do
+      {id, current_api}
+    else
+      nil -> nil
+      false -> :inactive
+      _ -> :error
     end
   end
 

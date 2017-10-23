@@ -21,7 +21,7 @@ defmodule GatewayWeb.Router do
     post "/", Proxy.Controller, :add_api
     get "/:id", Proxy.Controller, :get_api_detail
     put "/:id", Proxy.Controller, :update_api
-    delete "/:id", Proxy.Controller, :delete_api
+    delete "/:id", Proxy.Controller, :deactivate_api
   end
 
   forward "/", Gateway.ApiProxy.Plug

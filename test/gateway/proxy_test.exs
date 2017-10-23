@@ -8,7 +8,7 @@ defmodule Gateway.ProxyTest do
     get_api: 2,
     add_api: 3,
     update_api: 3,
-    delete_api: 2,
+    deactivate_api: 2,
     handle_join_api: 3,
   ]
 
@@ -96,13 +96,13 @@ defmodule Gateway.ProxyTest do
     assert ctx.tracker |> Stubr.called_once?(:update)
   end
 
-  test "delete_api should deactivate API ", ctx do
+  test "deactivate_api should deactivate API ", ctx do
     {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
 
     {_id, current_api} = proxy |> get_api("random-service")
     assert current_api["active"] == true
 
-    proxy |> delete_api("random-service")
+    proxy |> deactivate_api("random-service")
 
     {_id, deactivated_api} = proxy |> get_api("random-service")
     assert deactivated_api["active"] == false

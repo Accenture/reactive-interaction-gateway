@@ -61,9 +61,10 @@ defmodule Gateway.Proxy do
       Keyword.merge([name: __MODULE__], opts))
   end
 
-  @spec init_presence(state_t) :: TODO
+  @spec init_presence(state_t) :: :ok
   def init_presence(state) do
     Logger.info("Initial loading of API definitions to presence")
+
     read_init_apis()
     |> Enum.each(fn(api) ->
       meta_info = %{"ref_number" => 0, "timestamp" => Timex.now, "active" => true}
@@ -93,19 +94,14 @@ defmodule Gateway.Proxy do
     GenServer.call(server, {:update_api, id, api})
   end
 
-  @spec delete_api(server_t, String.t) :: atom
-  def delete_api(server, id) do
+  @spec deactivate_api(server_t, String.t) :: atom
+  def deactivate_api(server, id) do
     GenServer.call(server, {:deactivate_api, id})
   end
 
   @spec handle_join_api(server_t, String.t, api_definition) :: server_t
   def handle_join_api(server, id, api) do
     GenServer.cast(server, {:handle_join_api, id, api})
-  end
-
-  @spec handle_leave_api(server_t, String.t, api_definition) :: server_t
-  def handle_leave_api(server, id, api) do
-    GenServer.cast(server, {:handle_leave_api, id, api})
   end
 
   # callbacks
@@ -120,6 +116,62 @@ defmodule Gateway.Proxy do
   def handle_info(:init_apis, state) do
     init_presence(state)
     {:noreply, state}
+  end
+
+  @spec handle_call({:add_api, String.t, api_definition}, any, state_t) :: {:reply, any, state_t}
+  def handle_call({:add_api, id, api}, _from, state) do
+    Logger.info("Adding new API definition with id=#{id} to presence")
+
+    meta_info = %{"ref_number" => 0, "timestamp" => Timex.now}
+    api_with_meta_info =
+      api
+      |> Map.merge(meta_info)
+      |> Map.put("active", true) # TODO default values
+      |> Map.put_new("node_name", get_node_name())
+
+    response = state.tracker_mod.track(id, api_with_meta_info)
+    {:reply, response, state}
+  end
+
+  @spec handle_call({:update_api, String.t, api_definition}, any, state_t) :: {:reply, any, state_t}
+  def handle_call({:update_api, id, api}, _from, state) do
+    Logger.info("Updating API definition with id=#{id} in presence")
+
+    meta_info = %{"ref_number" => api["ref_number"] + 1, "timestamp" => Timex.now}
+    api_with_meta_info = add_meta_info(api, meta_info)
+
+    response = state.tracker_mod.update(id, api_with_meta_info)
+    {:reply, response, state}
+  end
+
+  @spec handle_call({:deactivate_api, String.t, api_definition}, any, state_t) :: {:reply, atom, state_t}
+  def handle_call({:deactivate_api, id}, _from, state) do
+    node_name = get_node_name()
+    Logger.info("Deactivating API definition with id=#{id} in presence")
+
+    {_id, current_api} = state.tracker_mod.find_by_node(id, node_name)
+    api =
+      current_api
+      |> Map.put("ref_number", current_api["ref_number"] + 1)
+      |> Map.put("active", false)
+      |> Map.put("timestamp", Timex.now)
+
+    response = state.tracker_mod.update(id, api)
+    {:reply, response, state}
+  end
+
+  @spec handle_call({:list_api}, any, state_t) :: {:reply, [api_definition, ...], state_t}
+  def handle_call({:list_api}, _from, state) do
+    list_of_apis = get_node_name() |> state.tracker_mod.list_by_node
+    {:reply, list_of_apis, state}
+  end
+
+  @spec handle_call({:get_api}, any, state_t) :: {:reply, api_definition, state_t}
+  def handle_call({:get_api, id}, _from, state) do
+    node_name = get_node_name()
+    api = state.tracker_mod.find_by_node(id, node_name)
+
+    {:reply, api, state}
   end
 
   # Handle incoming JOIN events with new data from Presence
@@ -155,60 +207,6 @@ defmodule Gateway.Proxy do
     {:noreply, state}
   end
 
-  @spec handle_call({:add_api, String.t, api_definition}, any, state_t) :: {:reply, any, state_t}
-  def handle_call({:add_api, id, api}, _from, state) do
-    Logger.info("Adding new API definition with id=#{id} to presence")
-
-    meta_info = %{"ref_number" => 0, "timestamp" => Timex.now}
-    api_with_meta_info =
-      api
-      |> Map.merge(meta_info)
-      |> Map.put("active", true) # TODO default values
-      |> Map.put_new("node_name", get_node_name())
-
-    response = state.tracker_mod.track(id, api_with_meta_info)
-    {:reply, response, state}
-  end
-
-  @spec handle_call({:update_api, String.t, api_definition}, any, state_t) :: {:reply, any, state_t}
-  def handle_call({:update_api, id, api}, _from, state) do
-    Logger.info("Updating API definition with id=#{id} in presence")
-
-    meta_info = %{"ref_number" => api["ref_number"] + 1, "timestamp" => Timex.now}
-    api_with_meta_info = add_meta_info(api, meta_info)
-
-    response = state.tracker_mod.update(id, api_with_meta_info)
-    {:reply, response, state}
-  end
-
-  @spec handle_call({:deactivate_api, String.t, api_definition}, any, state_t) :: {:reply, atom, state_t}
-  def handle_call({:deactivate_api, id}, _from, state) do
-    node_name = get_node_name()
-    Logger.info("Deactivating API definition with id=#{id} in presence")
-
-    api =
-      state.tracker_mod.find_by_node(id, node_name)
-      |> elem(1)
-      |> Map.put("active", false)
-      |> Map.put("timestamp", Timex.now)
-
-    response = state.tracker_mod.update(id, api)
-    {:reply, response, state}
-  end
-
-  @spec handle_call({:list_api}, any, state_t) :: {:reply, [api_definition, ...], state_t}
-  def handle_call({:list_api}, _from, state) do
-    list_of_apis = get_node_name() |> state.tracker_mod.list_by_node
-    {:reply, list_of_apis, state}
-  end
-
-  @spec handle_call({:get_api}, any, state_t) :: {:reply, api_definition, state_t}
-  def handle_call({:get_api, id}, _from, state) do
-    node_name = get_node_name()
-    api = state.tracker_mod.find_by_node(id, node_name)
-    {:reply, api, state}
-  end
-
   # private functions
 
   # Compare current API and new API based by ID
@@ -222,9 +220,13 @@ defmodule Gateway.Proxy do
   @spec compare_api(String.t, {String.t, api_definition}, api_definition, state_t) :: {atom, atom}
   defp compare_api(id, {id, prev_api}, next_api, state) do
     cond do
-      next_api["ref_number"] < prev_api["ref_number"] -> {:error, :exit}
+      # Evaluate only active APIs with equal reference number
+      #   -> prevent deactivated API overriding on node start-up
+      # Freshly deactivated APIs have incremented reference number => not equal
+      next_api["ref_number"] == prev_api["ref_number"] && prev_api["active"] == true ->
+        eval_data_change(id, prev_api, next_api, state)
       next_api["ref_number"] > prev_api["ref_number"] -> {:ok, :update_with_ref}
-      true -> eval_data_change(id, prev_api, next_api, state)
+      true -> {:error, :exit}
     end
   end
 

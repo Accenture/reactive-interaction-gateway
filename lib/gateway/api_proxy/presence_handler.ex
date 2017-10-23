@@ -3,7 +3,7 @@ defmodule Gateway.ApiProxy.PresenceHandler do
   Handles Phoenix Presence events.
 
   Implemented as a Phoenix.Tracker, this module tracks all events it receives
-  from the given Phoenix PubSub server. Only join/leave/update events that refer
+  from the given Phoenix PubSub server. Only join events that refer
   to the `@proxy` topic are considered for inclusion into the PROXY.
 
   The PROXY server is started from, and linked against, this server.
@@ -43,7 +43,7 @@ defmodule Gateway.ApiProxy.PresenceHandler do
   Forwards joins on the "proxy" topic to the Proxy server.
 
   Leaves are not handled since we want to keep track of removed APIs and potentially
-  revive them.
+  renew them.
   """
   @impl Phoenix.Tracker
   def handle_diff(diff, state) do
