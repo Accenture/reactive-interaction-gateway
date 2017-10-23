@@ -155,23 +155,6 @@ defmodule Gateway.Proxy do
     {:noreply, state}
   end
 
-  # Handle incoming LEAVE events with old data from Presence
-  # @spec handle_cast({:handle_leave_api, String.t, api_definition}, state_t) :: {:noreply, state_t}
-  # def handle_cast({:handle_leave_api, id, api}, state) do
-  #   node_name = get_node_name()
-  #   Logger.info("Handling LEAVE differential for API definition with id=#{id} for node=#{node_name}")
-  # 
-  #   case check_node_origin(id, api, node_name, state) do
-  #     {:error, :exit} ->
-  #       Logger.debug("Skipped deletion of API definition with id=#{id} from presence")
-  #     {:ok, :untrack} ->
-  #       Logger.debug("Deleting API definition with id=#{id} from presence")
-  #       state.tracker_mod.untrack(id)
-  #   end
-  # 
-  #   {:noreply, state}
-  # end
-
   @spec handle_call({:add_api, String.t, api_definition}, any, state_t) :: {:reply, any, state_t}
   def handle_call({:add_api, id, api}, _from, state) do
     Logger.info("Adding new API definition with id=#{id} to presence")
@@ -317,36 +300,6 @@ defmodule Gateway.Proxy do
     |> Map.delete("node_name")
     |> Map.delete("timestamp")
   end
-
-  # Check what is the node origin for given API definition
-  # @spec check_node_origin(String.t, api_definition, atom, state_t) :: {atom, atom}
-  # defp check_node_origin(id, next_api, node_name, state) do
-  #   if node_name != next_api["node_name"] do
-  #     state.tracker_mod.find_by_node(id, next_api["node_name"])
-  #     |> check_phx_ref(next_api, true)
-  #   else
-  #     state.tracker_mod.find_by_node(id, node_name)
-  #     |> check_phx_ref(next_api, false)
-  #   end
-  # end
-
-  # Compares phx_ref values from current API and old API to avoid unintentional delete
-  # @spec check_phx_ref(nil, api_definition, true) :: {:ok, :untrack}
-  # defp check_phx_ref(nil, _next_api, true) do
-  #   {:ok, :untrack}
-  # end
-  # @spec check_phx_ref(nil, api_definition, false) :: {:error, :exit}
-  # defp check_phx_ref(nil, _next_api, false) do
-  #   {:error, :exit}
-  # end
-  # @spec check_phx_ref({String.t, api_definition}, api_definition, boolean) :: {atom, atom}
-  # defp check_phx_ref({_id, prev_api}, next_api, _different_node) do # TODO: MAYBE USE REF NUMBERS
-  #   if prev_api.phx_ref == next_api.phx_ref do
-  #     {:ok, :untrack}
-  #   else
-  #     {:error, :exit}
-  #   end
-  # end
 
   @spec read_init_apis() :: [api_definition, ...]
   defp read_init_apis do

@@ -58,11 +58,6 @@ defmodule Gateway.ApiProxy.PresenceHandler do
         Phoenix.PubSub.direct_broadcast!(state.node_name, state.pubsub_server, topic, msg)
       end
       for {key, meta} <- leaves do
-        # IO.puts "LEAVES #{key}"
-        # IO.inspect leaves
-        # if topic == @topic do
-        #   state.proxy |> Proxy.handle_leave_api(key, meta)
-        # end
         msg = {:leave, key, meta}
         Phoenix.PubSub.direct_broadcast!(state.node_name, state.pubsub_server, topic, msg)
       end
