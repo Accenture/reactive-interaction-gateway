@@ -314,7 +314,6 @@ defmodule Gateway.Proxy do
     default_api_values = %{
       "active" => true,
       "auth_type" => "none",
-      "node_name" => get_node_name(),
       "proxy" => %{
         "use_env" => false
       },
@@ -323,7 +322,10 @@ defmodule Gateway.Proxy do
       "versioned" => false
     }
 
-    api_with_default = default_api_values |> Map.merge(api)
+    api_with_default =
+      default_api_values
+      |> Map.merge(api)
+      |> Map.put("node_name", get_node_name()) # Make sure API has always origin node
     auth_default_values = get_default_auth_values(api_with_default["auth_type"])
 
     api_with_default |> Map.put("auth", auth_default_values)
