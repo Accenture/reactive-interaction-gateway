@@ -49,8 +49,6 @@ defmodule Gateway.ApiProxy.PresenceHandler do
   def handle_diff(diff, state) do
     for {topic, {joins, leaves}} <- diff do
       for {key, meta} <- joins do
-        IO.puts "JOINS #{key}"
-        IO.inspect joins
         if topic == @topic do
           state.proxy |> Proxy.handle_join_api(key, meta)
         end

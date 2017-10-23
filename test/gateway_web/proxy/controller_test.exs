@@ -28,7 +28,6 @@ defmodule GatewayWeb.Proxy.ControllerTest do
          end]},
       ]) do
         conn = build_conn() |> get("/apis")
-        IO.inspect json_response(conn, 200)
         assert json_response(conn, 200) |> length == 1
       end
     end

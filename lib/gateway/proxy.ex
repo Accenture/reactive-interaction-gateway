@@ -141,7 +141,8 @@ defmodule Gateway.Proxy do
     {:reply, response, state}
   end
 
-  @spec handle_call({:deactivate_api, String.t, api_definition}, any, state_t) :: {:reply, atom, state_t}
+  @spec handle_call({:deactivate_api, String.t, api_definition}, any, state_t)
+    :: {:reply, atom, state_t}
   def handle_call({:deactivate_api, id}, _from, state) do
     node_name = get_node_name()
     Logger.info("Deactivating API definition with id=#{id} in presence")
@@ -308,6 +309,7 @@ defmodule Gateway.Proxy do
     |> Poison.decode!
   end
 
+  @spec set_default_api_values(api_definition) :: api_definition
   defp set_default_api_values(api) do
     default_api_values = %{
       "active" => true,
@@ -327,6 +329,7 @@ defmodule Gateway.Proxy do
     api_with_default |> Map.put("auth", auth_default_values)
   end
 
+  @spec get_default_auth_values(String.t) :: map
   defp get_default_auth_values(type) do
     query_default_values = %{"use_query" => false, "query_name" => ""}
 
