@@ -57,5 +57,171 @@
       "target_url": "IS_HOST",
       "port": 7070
     }
+  },
+  {
+    "id": "process-service",
+    "name": "process-service",
+    "auth_type": "jwt",
+    "auth": {
+      "use_header": true,
+      "header_name": "Authorization",
+      "use_query": false,
+      "query_name": ""
+    },
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "get-ps-id-form-last",
+            "path": "/ps/{id}/form/last",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "get-ps-tasks",
+            "path": "/ps/tasks",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "post-ps-tasks",
+            "path": "/ps/tasks",
+            "method": "POST",
+            "not_secured": false
+          },
+          {
+            "id": "get-ps-tasks-id",
+            "path": "/ps/tasks/{id}",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "put-ps-tasks-id",
+            "path": "/ps/tasks/{id}",
+            "method": "PUT",
+            "not_secured": false
+          },
+          {
+            "id": "delete-ps-tasks-id",
+            "path": "/ps/tasks/{id}",
+            "method": "DELETE",
+            "not_secured": false
+          },
+          {
+            "id": "put-ps-tasks-id-submit",
+            "path": "/ps/tasks/{id}/submit",
+            "method": "PUT",
+            "not_secured": false
+          },
+          {
+            "id": "get-ps-forms",
+            "path": "/ps/forms",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "get-ps-forms-id",
+            "path": "/ps/forms/{id}",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "post-ps-tasks-id-attachments",
+            "path": "/ps/tasks/{id}/attachments",
+            "method": "POST",
+            "not_secured": false
+          },
+          {
+            "id": "get-ps-tasks-id-attachments-id",
+            "path": "/ps/tasks/{id}/attachments/{id}",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "delete-ps-tasks-id-attachments-id",
+            "path": "/ps/tasks/{id}/attachments/{id}",
+            "method": "DELETE",
+            "not_secured": false
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "PS_HOST",
+      "port": 8080
+    }
+  },
+  {
+    "id": "transaction-service",
+    "name": "transaction-service",
+    "auth_type": "jwt",
+    "auth": {
+      "use_header": true,
+      "header_name": "Authorization",
+      "use_query": false,
+      "query_name": ""
+    },
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "get-ts-transactions",
+            "path": "/ts/transactions",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "get-ts-transactions-id",
+            "path": "/ts/transactions/{id}",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "post-ts-transactions",
+            "path": "/ts/transactions",
+            "method": "POST",
+            "not_secured": false
+          },
+          {
+            "id": "get-ts-balance",
+            "path": "/ts/balance",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "get-ts-sum",
+            "path": "/ts/sum",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "get-ts-monthly_history",
+            "path": "/ts/monthly_history",
+            "method": "GET",
+            "not_secured": false
+          },
+          {
+            "id": "post-ts-users",
+            "path": "/ts/users",
+            "method": "POST",
+            "not_secured": false
+          },
+          {
+            "id": "post-ts-tokens",
+            "path": "/ts/tokens",
+            "method": "POST",
+            "not_secured": false
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "TS_HOST",
+      "port": 8889
+    }
   }
 ]

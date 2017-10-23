@@ -71,8 +71,8 @@ defmodule Gateway.Proxy do
 
     read_init_apis()
     |> Enum.each(fn(api) ->
-      api_with_meta_info = set_default_api_values(api)
-      state.tracker_mod.track(api["id"], api_with_meta_info)
+      api_with_default_values = set_default_api_values(api)
+      state.tracker_mod.track(api["id"], api_with_default_values)
     end)
   end
 
@@ -124,9 +124,9 @@ defmodule Gateway.Proxy do
   def handle_call({:add_api, id, api}, _from, state) do
     Logger.info("Adding new API definition with id=#{id} to presence")
 
-    api_with_meta_info = set_default_api_values(api)
+    api_with_default_values = set_default_api_values(api)
 
-    response = state.tracker_mod.track(id, api_with_meta_info)
+    response = state.tracker_mod.track(id, api_with_default_values)
     {:reply, response, state}
   end
 
@@ -185,9 +185,9 @@ defmodule Gateway.Proxy do
         Logger.debug("There is already most recent API definition with id=#{id} in presence")
       {:ok, :track} ->
         Logger.debug("API definition with id=#{id} doesn't exist yet, starting tracking")
-        api_with_meta_info = set_default_api_values(api)
+        api_with_default_values = set_default_api_values(api)
 
-        state.tracker_mod.track(id, api_with_meta_info)
+        state.tracker_mod.track(id, api_with_default_values)
       {:ok, :update_no_ref} ->
         Logger.debug("API definition with id=#{id} adopted new version with no ref_number update")
         state.tracker_mod.update(id, add_meta_info(api))
