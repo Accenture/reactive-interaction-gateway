@@ -184,15 +184,15 @@ defmodule Gateway.Proxy do
       {:error, :exit} ->
         Logger.debug("There is already most recent API definition with id=#{id} in presence")
       {:ok, :track} ->
-        Logger.debug("API definition with id=#{id} doesn't exist yet, starting tracking")
+        Logger.debug("API definition with id=#{id} doesn't exist yet, starting to track")
         api_with_default_values = set_default_api_values(api)
 
         state.tracker_mod.track(id, api_with_default_values)
       {:ok, :update_no_ref} ->
-        Logger.debug("API definition with id=#{id} adopted new version with no ref_number update")
+        Logger.debug("API definition with id=#{id} is adopting new version with no ref_number update")
         state.tracker_mod.update(id, add_meta_info(api))
       {:ok, :update_with_ref} ->
-        Logger.debug("API definition with id=#{id} adopted new version with ref_number update")
+        Logger.debug("API definition with id=#{id} is adopting new version with ref_number update")
 
         prev_api_data = elem(prev_api, 1)
         meta_info = %{"ref_number" => prev_api_data["ref_number"] + 1}

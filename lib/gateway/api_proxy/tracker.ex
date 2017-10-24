@@ -24,7 +24,7 @@ defmodule Gateway.ApiProxy.Tracker do
 
   @impl TrackerBehaviour
   def track(id, api) do
-    Logger.info("Started tracking for new API definition with id=#{id}")
+    Logger.info("Starting to track new API definition with id=#{id}")
     Phoenix.Tracker.track(
       _tracker = Presence,
       _pid = Process.whereis(Gateway.PubSub),
@@ -35,7 +35,7 @@ defmodule Gateway.ApiProxy.Tracker do
 
   @impl TrackerBehaviour
   def update(id, api) do
-    Logger.info("Updated API definition with id=#{id}")
+    Logger.info("Updating API definition with id=#{id}")
     Phoenix.Tracker.update(
       _tracker = Presence,
       _pid = Process.whereis(Gateway.PubSub),
