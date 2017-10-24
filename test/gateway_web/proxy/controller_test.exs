@@ -110,16 +110,16 @@ defmodule GatewayWeb.Proxy.ControllerTest do
       end
     end
 
-    test "should return 403 if API exists, but is deactivated" do
+    test "should replaced deactivated API with same ID" do
       with_mocks([
         {Gateway.Proxy,
          [],
          [get_api: fn(_server, _id) -> {"id", %{"active" => false}} end,
-          add_api: fn(_server, _id, _api) -> {:ok, "phx_ref"} end]},
+          update_api: fn(_server, _id, _api) -> {:ok, "phx_ref"} end]},
       ]) do
         conn = build_conn() |> post("/apis", @mock_api)
-        response = json_response(conn, 403)
-        assert response["message"] == "Resource with id=new-service is forbidden."
+        response = json_response(conn, 201)
+        assert response["message"] == "ok"
       end
     end
 
