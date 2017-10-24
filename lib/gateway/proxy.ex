@@ -241,17 +241,17 @@ defmodule Gateway.Proxy do
   # If exactly half of the nodes are different => compare timestamps
   @spec eval_all_nodes_data(String.t, api_definition, api_definition, state_t) :: {atom, atom}
   defp eval_all_nodes_data(id, prev_api, next_api, state) do
-    prev_apis = state.tracker_mod.find_all(id)
-    h_n_of_prev_apis = length(prev_apis) / 2
+    all_api_instances = state.tracker_mod.find_all(id)
+    n_api_instances_halved = length(all_api_instances) / 2
 
-    equal_apis = prev_apis |> Enum.filter(fn({_key, meta}) ->
+    matching_api_instances = all_api_instances |> Enum.filter(fn({_key, meta}) ->
       meta |> data_equal?(next_api)
     end)
-    n_of_equal_apis = length(equal_apis)
+    n_matching_api_instances = length(matching_api_instances)
 
     cond do
-      n_of_equal_apis < h_n_of_prev_apis -> {:error, :exit}
-      n_of_equal_apis > h_n_of_prev_apis -> {:ok, :update_no_ref}
+      n_matching_api_instances < n_api_instances_halved -> {:error, :exit}
+      n_matching_api_instances > n_api_instances_halved -> {:ok, :update_no_ref}
       true ->
         next_api["timestamp"]
         |> Timex.after?(prev_api["timestamp"])
