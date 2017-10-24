@@ -39,7 +39,7 @@ defmodule GatewayWeb.Proxy.Controller do
       {_id, %{"active" => true}} ->
         send_response(conn, 409, %{message: "API with id=#{id} already exists."})
       {_id, %{"active" => false}} ->
-        {:ok, _phx_ref} = Proxy |> Proxy.update_api(id, params)
+        {:ok, _phx_ref} = Proxy |> Proxy.replace_api(id, params)
         send_response(conn, 201, %{message: "ok"})
       _ -> send_response(conn, 500)
     end

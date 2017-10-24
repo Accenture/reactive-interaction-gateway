@@ -91,6 +91,11 @@ defmodule Gateway.Proxy do
     GenServer.call(server, {:add_api, id, api})
   end
 
+  @spec replace_api(server_t, String.t, api_definition) :: any
+  def replace_api(server, id, api) do
+    GenServer.call(server, {:replace_api, id, api})
+  end
+
   @spec update_api(server_t, String.t, api_definition) :: any
   def update_api(server, id, api) do
     GenServer.call(server, {:update_api, id, api})
@@ -122,7 +127,7 @@ defmodule Gateway.Proxy do
 
   @spec handle_call({:add_api, String.t, api_definition}, any, state_t) :: {:reply, any, state_t}
   def handle_call({:add_api, id, api}, _from, state) do
-    Logger.info("Adding new API definition with id=#{id} to presence")
+    Logger.info("Handling add of new API definition with id=#{id}")
 
     api_with_default_values = set_default_api_values(api)
 
@@ -130,9 +135,20 @@ defmodule Gateway.Proxy do
     {:reply, response, state}
   end
 
+  @spec handle_call({:replace_api, String.t, api_definition}, any, state_t)
+    :: {:reply, any, state_t}
+  def handle_call({:replace_api, id, api}, _from, state) do
+    Logger.info("Handling replace of deactivated API definition with id=#{id} with new API")
+
+    api_with_default_values = set_default_api_values(api)
+
+    response = state.tracker_mod.update(id, api_with_default_values)
+    {:reply, response, state}
+  end
+
   @spec handle_call({:update_api, String.t, api_definition}, any, state_t) :: {:reply, any, state_t}
   def handle_call({:update_api, id, api}, _from, state) do
-    Logger.info("Updating API definition with id=#{id} in presence")
+    Logger.info("Handling update of API definition with id=#{id}")
 
     meta_info = %{"ref_number" => api["ref_number"] + 1, "timestamp" => Timex.now}
     api_with_meta_info = add_meta_info(api, meta_info)
@@ -145,12 +161,13 @@ defmodule Gateway.Proxy do
     :: {:reply, atom, state_t}
   def handle_call({:deactivate_api, id}, _from, state) do
     node_name = get_node_name()
-    Logger.info("Deactivating API definition with id=#{id} in presence")
+    Logger.info("Handling deactivate of API definition with id=#{id} in presence")
 
     {_id, current_api} = state.tracker_mod.find_by_node(id, node_name)
     api =
       current_api
-      |> Map.put("ref_number", current_api["ref_number"] + 1)
+      # |> Map.put("ref_number", current_api["ref_number"] + 1)
+      |> Map.update("ref_number", 0, &(&1 + 1))
       |> Map.put("active", false)
       |> Map.put("timestamp", Timex.now)
 

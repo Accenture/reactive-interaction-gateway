@@ -115,7 +115,7 @@ defmodule GatewayWeb.Proxy.ControllerTest do
         {Gateway.Proxy,
          [],
          [get_api: fn(_server, _id) -> {"id", %{"active" => false}} end,
-          update_api: fn(_server, _id, _api) -> {:ok, "phx_ref"} end]},
+          replace_api: fn(_server, _id, _api) -> {:ok, "phx_ref"} end]},
       ]) do
         conn = build_conn() |> post("/apis", @mock_api)
         response = json_response(conn, 201)

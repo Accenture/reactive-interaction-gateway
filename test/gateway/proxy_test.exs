@@ -8,6 +8,7 @@ defmodule Gateway.ProxyTest do
     list_apis: 1,
     get_api: 2,
     add_api: 3,
+    replace_api: 3,
     update_api: 3,
     deactivate_api: 2,
     handle_join_api: 3,
@@ -81,6 +82,23 @@ defmodule Gateway.ProxyTest do
   
     {:error, :already_tracked} = proxy |> add_api("random-service", @mock_api)
     assert ctx.tracker |> Stubr.called_thrice?(:track)
+  end
+
+  test "replace_api should replace deactiavted API with new one", ctx do
+    {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+
+    proxy |> deactivate_api("random-service")
+
+    {_id, deactivated_api} = proxy |> get_api("random-service")
+    assert deactivated_api["active"] == false
+    assert ctx.tracker |> Stubr.called_once?(:update)
+
+    proxy |> replace_api("random-service", @mock_api)
+
+    {_id, replaced_api} = proxy |> get_api("random-service")
+    assert replaced_api["active"] == true
+
+    assert ctx.tracker |> Stubr.called_twice?(:update)
   end
 
   test "update_api should update existing API", ctx do
