@@ -8,7 +8,7 @@ defmodule Gateway.ProxyTest do
     list_apis: 1,
     get_api: 2,
     add_api: 3,
-    replace_api: 3,
+    replace_api: 4,
     update_api: 3,
     deactivate_api: 2,
     handle_join_api: 3,
@@ -93,7 +93,7 @@ defmodule Gateway.ProxyTest do
     assert deactivated_api["active"] == false
     assert ctx.tracker |> Stubr.called_once?(:update)
 
-    proxy |> replace_api("random-service", @mock_api)
+    proxy |> replace_api("random-service", deactivated_api, @mock_api)
 
     {_id, replaced_api} = proxy |> get_api("random-service")
     assert replaced_api["active"] == true

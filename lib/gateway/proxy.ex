@@ -53,6 +53,19 @@ defmodule Gateway.Proxy do
   @typep state_t :: map
   @typep server_t :: pid | atom
 
+  defmodule ProxyBehaviour do
+    @moduledoc false
+    @callback list_apis(server :: Proxy.server_t) :: [Proxy.api_definition, ...]
+    @callback get_api(id :: Proxy.server_t, id :: String.t) :: Proxy.api_definition
+    @callback add_api(id :: Proxy.server_t, id :: String.t, api :: Proxy.api_definition) :: any
+    @callback replace_api(id :: Proxy.server_t, id :: String.t, prev_api :: Proxy.api_definition,
+      next_api :: Proxy.api_definition) :: any
+    @callback update_api(id :: Proxy.server_t, id :: String.t, api :: Proxy.api_definition) :: any
+    @callback deactivate_api(id :: Proxy.server_t, id :: String.t) :: atom
+  end
+
+  @behaviour ProxyBehaviour
+
   @default_tracker_mod Gateway.ApiProxy.Tracker
   @config_file Application.fetch_env!(:gateway, :proxy_config_file)
 
@@ -76,32 +89,32 @@ defmodule Gateway.Proxy do
     end)
   end
 
-  @spec list_apis(server_t) :: [api_definition, ...]
+  @impl ProxyBehaviour
   def list_apis(server) do
     GenServer.call(server, {:list_apis})
   end
 
-  @spec get_api(server_t, String.t) :: api_definition
+  @impl ProxyBehaviour
   def get_api(server, id) do
     GenServer.call(server, {:get_api, id})
   end
 
-  @spec add_api(server_t, String.t, api_definition) :: any
+  @impl ProxyBehaviour
   def add_api(server, id, api) do
     GenServer.call(server, {:add_api, id, api})
   end
 
-  @spec replace_api(server_t, String.t, api_definition) :: any
-  def replace_api(server, id, api) do
-    GenServer.call(server, {:replace_api, id, api})
+  @impl ProxyBehaviour
+  def replace_api(server, id, prev_api, next_api) do
+    GenServer.call(server, {:replace_api, id, prev_api, next_api})
   end
 
-  @spec update_api(server_t, String.t, api_definition) :: any
+  @impl ProxyBehaviour
   def update_api(server, id, api) do
     GenServer.call(server, {:update_api, id, api})
   end
 
-  @spec deactivate_api(server_t, String.t) :: atom
+  @impl ProxyBehaviour
   def deactivate_api(server, id) do
     GenServer.call(server, {:deactivate_api, id})
   end
@@ -135,12 +148,14 @@ defmodule Gateway.Proxy do
     {:reply, response, state}
   end
 
-  @spec handle_call({:replace_api, String.t, api_definition}, any, state_t)
+  @spec handle_call({:replace_api, String.t, api_definition, api_definition}, any, state_t)
     :: {:reply, any, state_t}
-  def handle_call({:replace_api, id, api}, _from, state) do
+  def handle_call({:replace_api, id, prev_api, next_api}, _from, state) do
     Logger.info("Handling replace of deactivated API definition with id=#{id} with new API")
 
-    api_with_default_values = set_default_api_values(api)
+    api_with_default_values =
+      set_default_api_values(next_api)
+      |> Map.put("ref_number", prev_api["ref_number"] + 1)
 
     response = state.tracker_mod.update(id, api_with_default_values)
     {:reply, response, state}
@@ -166,7 +181,6 @@ defmodule Gateway.Proxy do
     {_id, current_api} = state.tracker_mod.find_by_node(id, node_name)
     api =
       current_api
-      # |> Map.put("ref_number", current_api["ref_number"] + 1)
       |> Map.update("ref_number", 0, &(&1 + 1))
       |> Map.put("active", false)
       |> Map.put("timestamp", Timex.now)
