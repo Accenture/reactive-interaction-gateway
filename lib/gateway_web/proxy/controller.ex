@@ -6,7 +6,6 @@ defmodule GatewayWeb.Proxy.Controller do
   require Logger
   use GatewayWeb, :controller
   @gateway_proxy Application.get_env(:gateway, :gateway_proxy)
-  # alias Gateway.Proxy
 
   def list_apis(conn, _params) do
     apis =
@@ -22,8 +21,8 @@ defmodule GatewayWeb.Proxy.Controller do
     %{"id" => id} = params
 
     case get_active_api(id) do
-      nil -> send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
-      :inactive -> send_response(conn, 403, %{message: "Resource with id=#{id} is forbidden."})
+      api when api == nil or api == :inactive ->
+        send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
       {_id, api} -> send_response(conn, 200, api)
     end
   end
@@ -52,8 +51,8 @@ defmodule GatewayWeb.Proxy.Controller do
     do
       send_response(conn, 200, %{message: "ok"})
     else
-      nil -> send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
-      :inactive -> send_response(conn, 403, %{message: "Resource with id=#{id} is forbidden."})
+      api when api == nil or api == :inactive ->
+        send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
     end
   end
 
@@ -65,8 +64,8 @@ defmodule GatewayWeb.Proxy.Controller do
     do
       send_response(conn, 204)
     else
-      nil -> send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
-      :inactive -> send_response(conn, 403, %{message: "Resource with id=#{id} is forbidden."})
+      api when api == nil or api == :inactive ->
+        send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
     end
   end
 

@@ -24,10 +24,10 @@ defmodule GatewayWeb.Proxy.ControllerTest do
       assert response["message"] == "API with id=fake-service doesn't exists."
     end
 
-    test "should return 403 if API exists, but is deactivated" do
+    test "should return 404 if API exists, but is deactivated" do
       conn = build_conn() |> get("/apis/another-service")
-      response = json_response(conn, 403)
-      assert response["message"] == "Resource with id=another-service is forbidden."
+      response = json_response(conn, 404)
+      assert response["message"] == "API with id=another-service doesn't exists."
     end
   end
 
@@ -66,10 +66,10 @@ defmodule GatewayWeb.Proxy.ControllerTest do
       assert response["message"] == "API with id=fake-service doesn't exists."
     end
 
-    test "should return 403 if API exists, but is deactivated" do
+    test "should return 404 if API exists, but is deactivated" do
       conn = build_conn() |> put("/apis/another-service", @mock_api)
-      response = json_response(conn, 403)
-      assert response["message"] == "Resource with id=another-service is forbidden."
+      response = json_response(conn, 404)
+      assert response["message"] == "API with id=another-service doesn't exists."
     end
   end
 
@@ -86,10 +86,10 @@ defmodule GatewayWeb.Proxy.ControllerTest do
       assert response["message"] == "API with id=fake-service doesn't exists."
     end
 
-    test "should return 403 if API exists, but is deactivated" do
+    test "should return 404 if API exists, but is deactivated" do
       conn = build_conn() |> delete("/apis/another-service")
-      response = json_response(conn, 403)
-      assert response["message"] == "Resource with id=another-service is forbidden."
+      response = json_response(conn, 404)
+      assert response["message"] == "API with id=another-service doesn't exists."
     end
   end
 end
