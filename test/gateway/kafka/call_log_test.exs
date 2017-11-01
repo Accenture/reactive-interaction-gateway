@@ -1,5 +1,6 @@
 defmodule Gateway.Kafka.CallLogTest do
   @moduledoc false
+  use Gateway.Config, [:jwt_secret_key]
   use ExUnit.Case, async: true
   import ExUnit.CaptureLog
   import Phoenix.ConnTest, only: [build_conn: 0]
@@ -58,11 +59,11 @@ defmodule Gateway.Kafka.CallLogTest do
 
   defp make_jwt(claims) do
     import Joken
-    jwt_key = Application.fetch_env!(:gateway, :auth_jwt_key)
+    conf = config()
     claims
     |> token
     |> with_exp
-    |> with_signer(jwt_key |> hs256)
+    |> with_signer(conf.jwt_secret_key |> hs256)
     |> sign
     |> get_compact
   end

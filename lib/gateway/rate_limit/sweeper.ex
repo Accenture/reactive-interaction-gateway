@@ -18,9 +18,11 @@ defmodule Gateway.RateLimit.Sweeper do
 
   """
   use GenServer
-  import Ex2ms
-  import Gateway.RateLimit.Common, only: [settings: 0, now_unix: 0, ensure_table: 1]
   require Logger
+  import Ex2ms
+  import Gateway.RateLimit.Common, only: [now_unix: 0, ensure_table: 1]
+
+  alias Gateway.RateLimit
 
   def start_link do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -28,24 +30,27 @@ defmodule Gateway.RateLimit.Sweeper do
 
   @impl GenServer
   def init(:ok) do
-    opts = settings()
-    if opts[:sweep_interval_ms] > 0 do
-      Logger.info("Rate-limit table-GC enabled (#{inspect opts})")
+    conf = RateLimit.config()
+    if conf.sweep_interval_ms > 0 do
+      Logger.info("Rate-limit table-GC enabled at a #{conf.sweep_interval_ms} ms interval")
       send(self(), :sweep)
     end
-    {:ok, _state = opts}
+    {:ok, :unused_state}
   end
 
   @impl GenServer
-  def handle_info(:sweep, %{sweep_interval_ms: interval_ms} = state) when interval_ms > 0 do
-    sweep()
-    Process.send_after(self(), :sweep, interval_ms)
-    {:noreply, state}
+  def handle_info(:sweep, :unused_state) do
+    conf = RateLimit.config()
+    if conf.sweep_interval_ms > 0 do
+      sweep()
+      Process.send_after(self(), :sweep, conf.sweep_interval_ms)
+    end
+    {:noreply, :unused_state}
   end
 
   @spec sweep([atom: any]) :: non_neg_integer()
   def sweep(opts \\ []) do
-    n_affected = do_sweep(Enum.into(opts, settings()))
+    n_affected = do_sweep(Enum.into(opts, RateLimit.config()))
     log_result(n_affected)
     n_affected
   end

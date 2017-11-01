@@ -18,13 +18,13 @@ defmodule Gateway.Blacklist do
     there is nothing to synchronize from -- the list is not stored on disk).
 
   """
+  use Gateway.Config, [:default_expiry_hours]
   require Logger
   alias Gateway.Blacklist.Serializer
 
   @typep state_t :: map
 
   @default_tracker_mod Gateway.Blacklist.Tracker
-  @default_expiry_hours Application.fetch_env!(:gateway, :auth_jwt_blacklist_default_expiry_hours)
 
   def start_link(tracker_mod \\ nil, opts \\ []) do
     tracker_mod = if tracker_mod, do: tracker_mod, else: @default_tracker_mod
@@ -38,7 +38,8 @@ defmodule Gateway.Blacklist do
   @spec add_jti(pid | atom, String.t, nil | String.t | Timex.DateTime.t, nil | pid) :: pid
   def add_jti(server, jti, expiry \\ nil, listener \\ nil)
   def add_jti(server, jti, _expiry = nil, listener) do
-    default_expiry = Timex.now() |> Timex.shift(hours: @default_expiry_hours)
+    conf = config()
+    default_expiry = Timex.now() |> Timex.shift(hours: conf.default_expiry_hours)
     add_jti(server, jti, default_expiry, listener)
   end
   def add_jti(server, jti, expiry, listener) do

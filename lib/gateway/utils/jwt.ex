@@ -2,11 +2,10 @@ defmodule Gateway.Utils.Jwt do
   @moduledoc """
   Provides utility functions over JWT using Joken
   """
+  use Gateway.Config, [:secret_key]
   import Joken
 
   @type claim_map :: %{required(String.t) => String.t}
-
-  @jwt_key Application.fetch_env!(:gateway, :auth_jwt_key)
 
   @spec valid?(String.t) :: boolean
   def valid?(jwt) do
@@ -33,10 +32,12 @@ defmodule Gateway.Utils.Jwt do
 
   @spec validate(String.t) :: map
   defp validate(jwt) do
+    conf = config()
+
     jwt
     |> token
     |> with_validation("exp", &(&1 > current_time()))
-    |> with_signer(@jwt_key |> hs256)
+    |> with_signer(conf.secret_key |> hs256)
     |> verify
   end
 

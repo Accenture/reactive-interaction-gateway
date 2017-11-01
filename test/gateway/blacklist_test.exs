@@ -110,7 +110,7 @@ defmodule Gateway.BlacklistTest do
         end,
       ],
       behaviour: Gateway.Blacklist.Tracker.TrackerBehaviour,
-      call_info: true,
+      call_info: true
     )
     [tracker: tracker]
   end

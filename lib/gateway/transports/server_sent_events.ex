@@ -11,7 +11,11 @@ defmodule Gateway.Transports.ServerSentEvents do
     transport :sse, Gateway.Transport.Sse, heartbeat_timeout_ms: 5_000
 
   """
+  #use Confex, otp_app: :gateway
+  use Gateway.Config, 
+    [:user_channel_name_fn, :role_channel_name_fn]
   require Logger
+
   alias Gateway.Transports.ServerSentEvents.Encoder
 
   defmodule ConnectionClosed do
@@ -37,7 +41,6 @@ defmodule Gateway.Transports.ServerSentEvents do
   import Plug.Conn
 
   alias Phoenix.Socket.Transport
-  alias GatewayWeb.Presence.Channel, as: PresenceChannel
 
   @doc false
   def init(opts), do: opts
@@ -84,8 +87,9 @@ defmodule Gateway.Transports.ServerSentEvents do
   #
   defp dispatch(%{method: "GET", params: %{"token" => _token} = params} = conn,
                 endpoint, handler, transport_name, opts) do
-    user_channels = Map.get(params, "users", []) |> Enum.map(&PresenceChannel.user_channel_name/1)
-    role_channels = Map.get(params, "roles", []) |> Enum.map(&PresenceChannel.role_channel_name/1)
+    conf = config()
+    user_channels = Map.get(params, "users", []) |> Enum.map(conf.user_channel_name_fn)
+    role_channels = Map.get(params, "roles", []) |> Enum.map(conf.role_channel_name_fn)
     channels = Enum.uniq(user_channels ++ role_channels)
     case channels do
       [] ->
