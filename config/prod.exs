@@ -16,8 +16,6 @@ config :gateway, GatewayWeb.Endpoint,
   env: :prod,
   cache_static_manifest: "priv/static/cache_manifest.json"
 
-config :gateway, :gateway_proxy, Gateway.Proxy
-
 # Do not print debug messages in production
 config :logger, level: :info
 

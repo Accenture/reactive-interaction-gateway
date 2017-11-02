@@ -28,6 +28,7 @@ config :gateway, proxy_rate_limit_per_ip?: true
 config :gateway, proxy_rate_limit_avg_rate_per_sec: 4
 config :gateway, proxy_rate_limit_burst_size: 10
 config :gateway, proxy_rate_limit_sweep_interval_ms: 5_000
+config :gateway, :gateway_proxy, Gateway.Proxy
 
 # Kafka:
 kafka_client_id = :gateway_brod_client

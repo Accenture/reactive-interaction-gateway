@@ -12,8 +12,6 @@ config :gateway, GatewayWeb.Endpoint,
   check_origin: false,
   watchers: []
 
-config :gateway, :gateway_proxy, Gateway.Proxy
-
 # Do not include metadata nor timestamps in development logs TODO why?
 #config :logger, :console, format: "[$level] $message\n"
 
