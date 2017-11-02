@@ -16,128 +16,142 @@ defmodule Gateway.ProxyTest do
 
   setup [:with_tracker_mock_proxy]
 
-  test "list_apis should return list with 2 API definitions", ctx do
-    {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+  describe "list_apis" do
+    test "should return list with 2 API definitions", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
 
-    assert proxy |> list_apis |> length == 2
-    assert ctx.tracker |> Stubr.called_twice?(:track)
-    assert ctx.tracker |> Stubr.called_once?(:list_by_node)
+      assert proxy |> list_apis |> length == 2
+      assert ctx.tracker |> Stubr.called_once?(:list_by_node)
+    end
   end
 
-  test "get_api should return nil for non-existent API definition", ctx do
-    {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-  
-    assert proxy |> get_api("random-service")
-    assert ctx.tracker |> Stubr.called_once?(:find_by_node)
+  describe "get_api" do
+    test "should return nil for non-existent API definition", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+    
+      assert proxy |> get_api("random-service")
+      assert ctx.tracker |> Stubr.called_once?(:find_by_node)
+    end
   end
 
-  test "add_api should start tracking new API and add default values for optional data", ctx do
-    {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+  describe "add_api" do
+    test "should start tracking new API and add default values for optional data", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
 
-    refute proxy |> get_api("new-service")
-    assert ctx.tracker |> Stubr.called_twice?(:track)
-    assert ctx.tracker |> Stubr.called_once?(:find_by_node)
+      refute proxy |> get_api("incomplete-service")
+      assert ctx.tracker |> Stubr.called_twice?(:track)
+      assert ctx.tracker |> Stubr.called_once?(:find_by_node)
 
-    incomplete_api = %{
-      "id" => "incomplete-service",
-      "name" => "incomplete-service",
-      "proxy" => %{"port" => 7070, "target_url" => "API_HOST"},
-      "version_data" => %{},
-    }
+      incomplete_api = %{
+        "id" => "incomplete-service",
+        "name" => "incomplete-service",
+        "proxy" => %{"port" => 7070, "target_url" => "API_HOST"},
+        "version_data" => %{},
+      }
 
-    {:ok, _response} = proxy |> add_api("incomplete-service", incomplete_api)
+      {:ok, _response} = proxy |> add_api("incomplete-service", incomplete_api)
 
-    {_id, api} = proxy |> get_api("incomplete-service")
-    has_required_keys =
-      ["active", "auth_type", "auth", "node_name", "ref_number", "timestamp", "versioned"]
-      |> Enum.all?(fn(key) -> Map.has_key?(api, key) end)
+      {_id, api} = proxy |> get_api("incomplete-service")
+      has_required_keys =
+        ["active", "auth_type", "auth", "node_name", "ref_number", "timestamp", "versioned"]
+        |> Enum.all?(fn(key) -> Map.has_key?(api, key) end)
 
-    assert has_required_keys
-    assert ctx.tracker |> Stubr.called_thrice?(:track)
-    assert ctx.tracker |> Stubr.called_twice?(:find_by_node)
+      assert has_required_keys
+      assert ctx.tracker |> Stubr.called_thrice?(:track)
+      assert ctx.tracker |> Stubr.called_twice?(:find_by_node)
+    end
+
+    test "should start tracking new API and not override optional data if present", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+
+      refute proxy |> get_api("new-service")
+      assert ctx.tracker |> Stubr.called_twice?(:track)
+      assert ctx.tracker |> Stubr.called_once?(:find_by_node)
+
+      {:ok, _response} = proxy |> add_api("new-service", @mock_api)
+      {_id, api} = proxy |> get_api("new-service")
+
+      has_equal_values =
+        @mock_api
+        |> Map.keys
+        |> Enum.all?(fn(key) -> @mock_api[key] == api[key] end)
+
+      assert has_equal_values
+      assert ctx.tracker |> Stubr.called_thrice?(:track)
+      assert ctx.tracker |> Stubr.called_twice?(:find_by_node)
+    end
+
+    test "with existing ID should return error", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+    
+      {:error, :already_tracked} = proxy |> add_api("random-service", @mock_api)
+      assert ctx.tracker |> Stubr.called_thrice?(:track)
+    end
   end
 
-  test "add_api should start tracking new API and not override optional data if present", ctx do
-    {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-  
-    refute proxy |> get_api("new-service")
-    assert ctx.tracker |> Stubr.called_twice?(:track)
-    assert ctx.tracker |> Stubr.called_once?(:find_by_node)
-  
-    {:ok, _response} = proxy |> add_api("new-service", @mock_api)
-    {_id, api} = proxy |> get_api("new-service")
+  describe "replace_api" do
+    test "should replace deactivated API with new one", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
 
-    has_equal_values =
-      @mock_api
-      |> Map.keys
-      |> Enum.all?(fn(key) -> @mock_api[key] == api[key] end)
+      proxy |> deactivate_api("random-service")
 
-    assert has_equal_values
-    assert ctx.tracker |> Stubr.called_thrice?(:track)
-    assert ctx.tracker |> Stubr.called_twice?(:find_by_node)
+      {_id, deactivated_api} = proxy |> get_api("random-service")
+      assert deactivated_api["active"] == false
+      assert ctx.tracker |> Stubr.called_once?(:update)
+
+      proxy |> replace_api("random-service", deactivated_api, @mock_api)
+
+      {_id, replaced_api} = proxy |> get_api("random-service")
+      assert replaced_api["active"] == true
+
+      assert ctx.tracker |> Stubr.called_twice?(:update)
+    end
   end
 
-  test "add_api with existing ID should return error", ctx do
-    {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-  
-    {:error, :already_tracked} = proxy |> add_api("random-service", @mock_api)
-    assert ctx.tracker |> Stubr.called_thrice?(:track)
+  describe "update_api" do
+    test "should update existing API", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+    
+      {_id, existing_api} = proxy |> get_api("random-service")
+      assert existing_api["name"] == "random-service"
+
+      refute ctx.tracker |> Stubr.called?(:update)
+      updated_existing_api = existing_api |> Map.put("name", "updated-service")
+      proxy |> update_api("random-service", updated_existing_api)
+    
+      {_id, new_api} = proxy |> get_api("random-service")
+    
+      assert new_api["name"] == "updated-service"
+      assert ctx.tracker |> Stubr.called_once?(:update)
+    end
   end
 
-  test "replace_api should replace deactiavted API with new one", ctx do
-    {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+  describe "deactivate_api" do
+    test "should deactivate API ", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
 
-    proxy |> deactivate_api("random-service")
+      {_id, current_api} = proxy |> get_api("random-service")
+      assert current_api["active"] == true
 
-    {_id, deactivated_api} = proxy |> get_api("random-service")
-    assert deactivated_api["active"] == false
-    assert ctx.tracker |> Stubr.called_once?(:update)
+      refute ctx.tracker |> Stubr.called?(:update)
+      proxy |> deactivate_api("random-service")
 
-    proxy |> replace_api("random-service", deactivated_api, @mock_api)
-
-    {_id, replaced_api} = proxy |> get_api("random-service")
-    assert replaced_api["active"] == true
-
-    assert ctx.tracker |> Stubr.called_twice?(:update)
+      {_id, deactivated_api} = proxy |> get_api("random-service")
+      assert deactivated_api["active"] == false
+      assert ctx.tracker |> Stubr.called_once?(:update)
+    end
   end
 
-  test "update_api should update existing API", ctx do
-    {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-  
-    {_id, existing_api} = proxy |> get_api("random-service")
-    assert existing_api["name"] == "random-service"
-  
-    updated_existing_api = existing_api |> Map.put("name", "updated-service")
-    proxy |> update_api("random-service", updated_existing_api)
-  
-    {_id, new_api} = proxy |> get_api("random-service")
-  
-    assert new_api["name"] == "updated-service"
-    assert ctx.tracker |> Stubr.called_once?(:update)
-  end
+  describe "handle_join_api" do
+    test "should track new API", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
 
-  test "deactivate_api should deactivate API ", ctx do
-    {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+      proxy |> handle_join_api("new-service", @mock_api)
 
-    {_id, current_api} = proxy |> get_api("random-service")
-    assert current_api["active"] == true
-
-    proxy |> deactivate_api("random-service")
-
-    {_id, deactivated_api} = proxy |> get_api("random-service")
-    assert deactivated_api["active"] == false
-    assert ctx.tracker |> Stubr.called_once?(:update)
-  end
-
-  test "handle_join_api should track new API", ctx do
-    {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-
-    proxy |> handle_join_api("new-service", @mock_api)
-
-    :timer.sleep(50)
-    assert proxy |> get_api("new-service")
-    assert ctx.tracker |> Stubr.called_thrice?(:track)
-    refute ctx.tracker |> Stubr.called?(:update)
+      :timer.sleep(25)
+      assert proxy |> get_api("new-service")
+      refute ctx.tracker |> Stubr.called?(:update)
+    end
   end
 
   describe "handle_join_api receiving existing API" do
@@ -150,15 +164,13 @@ defmodule Gateway.ProxyTest do
         |> elem(1)
         |> Map.put("ref_number", -1)
 
-      assert ctx.tracker |> Stubr.called_twice?(:track)
       proxy |> handle_join_api("random-service", older_api)
 
       {_id, current_api} = proxy |> get_api("random-service")
 
-      :timer.sleep(50)
+      :timer.sleep(25)
       assert current_api["ref_number"] == 0
       refute ctx.tracker |> Stubr.called?(:update)
-      assert ctx.tracker |> Stubr.called_twice?(:track)
     end
 
     test "should update API when it has more recent ref_number", ctx do
@@ -170,15 +182,14 @@ defmodule Gateway.ProxyTest do
         |> elem(1)
         |> Map.put("ref_number", 1)
 
-      assert ctx.tracker |> Stubr.called_twice?(:track)
+      refute ctx.tracker |> Stubr.called?(:update)
       proxy |> handle_join_api("random-service", newer_api)
 
       {_id, current_api} = proxy |> get_api("random-service")
 
-      :timer.sleep(50)
+      :timer.sleep(25)
       assert current_api["ref_number"] == 1
       assert ctx.tracker |> Stubr.called_once?(:update)
-      assert ctx.tracker |> Stubr.called_twice?(:track)
     end
 
     test "with same ref_number and equal data should skip API", ctx do
@@ -186,20 +197,17 @@ defmodule Gateway.ProxyTest do
 
       {_id, equal_api} = proxy |> get_api("random-service")
 
-      assert ctx.tracker |> Stubr.called_twice?(:track)
       proxy |> handle_join_api("random-service", equal_api)
 
       {_id, current_api} = proxy |> get_api("random-service")
 
-      :timer.sleep(50)
+      :timer.sleep(25)
       assert current_api["ref_number"] == 0
       refute ctx.tracker |> Stubr.called?(:update)
-      assert ctx.tracker |> Stubr.called_twice?(:track)
     end
   end
 
   describe "handle_join_api receiving existing API with same ref_number and different data" do
-
     test "on less than 1/2 nodes should skip API", ctx do
       {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
 
@@ -209,7 +217,6 @@ defmodule Gateway.ProxyTest do
       proxy |> add_api("new-service", @mock_api)
       proxy |> add_api("new-service", node2_api)
       proxy |> add_api("new-service", node3_api)
-      assert ctx.tracker |> Stubr.call_count(:track) == 5
 
       different_api =
         @mock_api
@@ -217,11 +224,10 @@ defmodule Gateway.ProxyTest do
         |> Map.put("name", "new_name")
       proxy |> handle_join_api("new-service", different_api)
 
-      :timer.sleep(50)
+      :timer.sleep(25)
       refute ctx.tracker |> Stubr.called?(:update)
-      assert ctx.tracker |> Stubr.call_count(:track) == 5
     end
-
+  
     test "on more than 1/2 nodes should update API", ctx do
       {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
 
@@ -235,17 +241,16 @@ defmodule Gateway.ProxyTest do
       proxy |> add_api("new-service", @mock_api)
       ctx.tracker.track("new-service", node2_api)
       ctx.tracker.track("new-service", node3_api)
-      assert ctx.tracker |> Stubr.call_count(:track) == 5
+      refute ctx.tracker |> Stubr.called?(:update)
 
       proxy |> handle_join_api("new-service", different_api)
 
       {_id, current_api} = proxy |> get_api("new-service")
 
-      :timer.sleep(50)
+      :timer.sleep(25)
       assert current_api["ref_number"] == 0
       assert current_api["name"] == "new_name"
       assert ctx.tracker |> Stubr.called_once?(:update)
-      assert ctx.tracker |> Stubr.call_count(:track) == 5
     end
 
     test "on exactly 1/2 nodes, but old timestamp should skip API", ctx do
@@ -261,13 +266,11 @@ defmodule Gateway.ProxyTest do
 
       proxy |> add_api("new-service", @mock_api)
       proxy |> add_api("new-service", different_api)
-      assert ctx.tracker |> Stubr.call_count(:track) == 4
 
       proxy |> handle_join_api("new-service", different_api)
 
-      :timer.sleep(50)
+      :timer.sleep(25)
       refute ctx.tracker |> Stubr.called?(:update)
-      assert ctx.tracker |> Stubr.call_count(:track) == 4
     end
 
     test "on exactly 1/2 nodes and newer timestamp should update API", ctx do
@@ -283,12 +286,11 @@ defmodule Gateway.ProxyTest do
 
       proxy |> add_api("new-service", @mock_api)
       ctx.tracker.track("new-service", different_api)
-      assert ctx.tracker |> Stubr.call_count(:track) == 4
+      refute ctx.tracker |> Stubr.called?(:update)
 
       proxy |> handle_join_api("new-service", different_api)
 
-      :timer.sleep(50)
-      assert ctx.tracker |> Stubr.call_count(:track) == 4
+      :timer.sleep(25)
       assert ctx.tracker |> Stubr.called_once?(:update)
     end
   end
