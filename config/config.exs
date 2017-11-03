@@ -5,9 +5,6 @@
 # is restricted to this project.
 use Mix.Config
 
-config :gateway, Test,
-  roles: {:system, :list, "ROLES", []}
-
 
 # --------------------------------------
 # Logger
