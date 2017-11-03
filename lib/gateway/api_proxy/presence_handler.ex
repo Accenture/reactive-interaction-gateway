@@ -3,7 +3,7 @@ defmodule Gateway.ApiProxy.PresenceHandler do
   Handles Phoenix Presence events.
 
   Implemented as a Phoenix.Tracker, this module tracks all events it receives
-  from the given Phoenix PubSub server. Only join/leave/update events that refer
+  from the given Phoenix PubSub server. Only join events that refer
   to the `@proxy` topic are considered for inclusion into the PROXY.
 
   The PROXY server is started from, and linked against, this server.
@@ -40,16 +40,17 @@ defmodule Gateway.ApiProxy.PresenceHandler do
   end
 
   @doc """
-  Forwards joins/leaves/updates on the "proxy" topic to the Proxy server.
+  Forwards joins on the "proxy" topic to the Proxy server.
 
+  Leaves are not handled since we want to keep track of removed APIs and potentially
+  renew them.
   """
   @impl Phoenix.Tracker
   def handle_diff(diff, state) do
     for {topic, {joins, leaves}} <- diff do
       for {key, meta} <- joins do
         if topic == @topic do
-          [id, api] = [key, Map.delete(meta, :phx_ref)]
-          state.proxy |> Proxy.add_api(id, api)
+          state.proxy |> Proxy.handle_join_api(key, meta)
         end
         msg = {:join, key, meta}
         Phoenix.PubSub.direct_broadcast!(state.node_name, state.pubsub_server, topic, msg)

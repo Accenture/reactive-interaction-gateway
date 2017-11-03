@@ -16,3 +16,5 @@ config :gateway, proxy_config_file: "proxy/proxy.test.json"
 config :gateway, proxy_rate_limit_enabled?: true
 config :gateway, proxy_rate_limit_sweep_interval_ms: 0
 config :gateway, kafka_enabled?: false
+
+config :gateway, :gateway_proxy, Gateway.ProxyMock
