@@ -36,21 +36,10 @@ Ready to run in production? Please [check our deployment guides](http://www.phoe
 ## Deployment
 
 ```
-# build environment
-docker build \
--t rge-build \
--f build.dockerfile \
-.
-
-# run build environment
-docker run \
---name rg-build \
--v "${PWD}"/fsa-reactive-gateway:/opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway \
-rge-build
-
 # build app
 docker build -t rge-app .
-
+```
+```
 # run app
 docker run \
 --name rg-app \
