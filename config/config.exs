@@ -36,6 +36,8 @@ config :gateway, GatewayWeb.Endpoint,
 
 config :gateway, Gateway.Proxy,
   config_file: {:system, "PROXY_CONFIG_FILE", nil}
+config :gateway, GatewayWeb.Proxy.Controller,
+  gateway_proxy: Gateway.Proxy
 
 config :gateway, Gateway.RateLimit,
   # Internal ETS table name (must be unique).

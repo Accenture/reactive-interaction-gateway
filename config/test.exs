@@ -44,3 +44,6 @@ config :gateway, GatewayWeb.ConnCase,
 
 config :gateway, Gateway.Proxy,
   config_file: "config/proxy/proxy.test.json"
+
+config :gateway, GatewayWeb.Proxy.Controller,
+  gateway_proxy: Gateway.ProxyMock

@@ -27,8 +27,10 @@ defmodule Gateway.ApiProxy.Router do
     %{method: request_method, request_path: request_path} = conn
 
     list_apis =
-      Proxy.list_apis
+      Proxy
+      |> Proxy.list_apis
       |> Enum.map(fn(api) -> elem(api, 1) end)
+      |> Enum.filter(fn(api) -> api["active"] == true end)
     {api_map, endpoint} = pick_api_and_endpoint(list_apis, request_path, request_method)
 
     case endpoint do
