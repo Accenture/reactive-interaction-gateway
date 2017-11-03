@@ -336,7 +336,9 @@ defmodule Gateway.Proxy do
   @spec read_init_apis(String.t | nil) :: [api_definition]
   defp read_init_apis(nil), do: []
   defp read_init_apis(config_file) do
-    config_file
+    :gateway
+    |> :code.priv_dir
+    |> Path.join(config_file)
     |> File.read!
     |> Poison.decode!
   end

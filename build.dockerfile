@@ -18,6 +18,7 @@ RUN mix deps.get
 # Copy application files
 COPY config /opt/sites/fsa-reactive-gateway/config
 COPY lib /opt/sites/fsa-reactive-gateway/lib
+COPY priv /opt/sites/fsa-reactive-gateway/priv
 
 # Initialize release & compile application
 RUN mix release.init

@@ -43,7 +43,7 @@ config :gateway, GatewayWeb.ConnCase,
   jwt_secret_key: jwt_secret_key
 
 config :gateway, Gateway.Proxy,
-  config_file: "config/proxy/proxy.test.json"
+  config_file: "proxy/proxy.test.json"
 
 config :gateway, GatewayWeb.Proxy.Controller,
   gateway_proxy: Gateway.ProxyMock
