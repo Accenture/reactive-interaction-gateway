@@ -8,19 +8,19 @@ ENV MIX_ENV=prod \
     PORT=6060 \
     ORIGIN=https://lwa.accenture.com
 
-WORKDIR /opt/sites/fsa-reactive-gateway
+WORKDIR /opt/sites/rig
 
 # Copy necessary files for dependencies
-COPY mix.exs /opt/sites/fsa-reactive-gateway
-COPY mix.lock /opt/sites/fsa-reactive-gateway
+COPY mix.exs /opt/sites/rig
+COPY mix.lock /opt/sites/rig
 
 # Install project dependencies
 RUN mix deps.get
 
 # Copy application files
-COPY config /opt/sites/fsa-reactive-gateway/config
-COPY lib /opt/sites/fsa-reactive-gateway/lib
-COPY priv /opt/sites/fsa-reactive-gateway/priv
+COPY config /opt/sites/rig/config
+COPY lib /opt/sites/rig/lib
+COPY priv /opt/sites/rig/priv
 
 # Initialize release & compile application
 RUN mix release.init
@@ -30,9 +30,9 @@ RUN mix release
 
 FROM erlang:20-slim
 
-WORKDIR /opt/sites/fsa-reactive-gateway
-COPY --from=build /opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway /opt/sites/fsa-reactive-gateway/
+WORKDIR /opt/sites/rig
+COPY --from=build /opt/sites/rig/_build/prod/rel/gateway /opt/sites/rig/
 
 EXPOSE 6060
 
-CMD ["/opt/sites/fsa-reactive-gateway/bin/gateway", "foreground"]
+CMD ["/opt/sites/rig/bin/gateway", "foreground"]
