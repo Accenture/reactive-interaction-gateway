@@ -23,7 +23,7 @@ config :gateway, Gateway.Kafka.SupWrapper,
   message_user_field: "username",
   enabled?: false
 
-jwt_secret_key = "supersecrettoken"
+jwt_secret_key = "mysecret"
 
 config :gateway, Gateway.Kafka.CallLogTest,
   jwt_secret_key: jwt_secret_key
