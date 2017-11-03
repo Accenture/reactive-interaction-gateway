@@ -1,4 +1,43 @@
 defmodule Gateway.Config do
+  @moduledoc """
+  Gateway module configuration that provides `settings/0`.
+
+  There are two ways to use this module
+
+  ### Specify a list of expected keys
+
+  ```
+  defmodule Gateway.MyExample do
+    use Gateway.Config, [:some_key, :other_key]
+  end
+  ```
+
+  `Gateway.Config` expects a config entry similar to this:
+  ```
+  config :gateway, Gateway.MyExample,
+    some_key: ...,
+    other_key: ...
+  ```
+  If one of the specified keys is not found, an error is thrown _at compile time_.
+  Otherwise, `Gateway.MyExample` gets a `config/0` function that returns the
+  configuration converted to a map.
+  If there are other keys present, they'll be added to that map as well.
+
+  ### Specify `:custom_validation` instead
+
+  ```
+  defmodule Gateway.MyExample do
+    use Gateway.Config, :custom_validation
+
+    defp validate_config!(config) do
+      ...
+    end
+  end
+  ```
+  If you use :custom_validation, you should deal with the raw keyword list
+  by implementing `validate_config!/1` in the module.
+  """
+
   defmacro __using__(:custom_validation) do
     Gateway.Config.__everything_but_validation__()
   end
