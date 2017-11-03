@@ -93,7 +93,7 @@ config :gateway, Gateway.Kafka.GroupSubscriber,
 
 config :gateway, Gateway.Kafka.MessageHandler,
   message_user_field: kafka_message_field_map.user,
-  target_channel_from_user: &GatewayWeb.Presence.Channel.user_channel_name/1
+  user_channel_name_mf: {GatewayWeb.Presence.Channel, :user_channel_name}
 
 config :gateway, Gateway.Kafka.SupWrapper,
   message_user_field: kafka_message_field_map.user,
@@ -128,8 +128,8 @@ config :gateway, Gateway.Blacklist,
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 config :gateway, Gateway.Transports.ServerSentEvents,
-  user_channel_name_fn: &GatewayWeb.Presence.Channel.user_channel_name/1,
-  role_channel_name_fn: &GatewayWeb.Presence.Channel.role_channel_name/1
+  user_channel_name_mf: {GatewayWeb.Presence.Channel, :user_channel_name},
+  role_channel_name_mf: {GatewayWeb.Presence.Channel, :role_channel_name}
 
 config :gateway, GatewayWeb.Presence.Channel,
   # See "JWT payload fields"
