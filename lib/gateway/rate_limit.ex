@@ -5,8 +5,7 @@ defmodule Gateway.RateLimit do
   For synchronizing the corresponding state between the short-lived request
   processes, an ETS table is used for optimal performance.
   """
-  #use Confex, otp_app: :gateway
-  use Gateway.Config, 
+  use Gateway.Config,
     [:table_name, :enabled?, :per_ip?, :avg_rate_per_sec, :burst_size, :sweep_interval_ms]
   import Ex2ms
   import Gateway.RateLimit.Common, only: [now_unix: 0, ensure_table: 1]

@@ -11,8 +11,7 @@ defmodule Gateway.Transports.ServerSentEvents do
     transport :sse, Gateway.Transport.Sse, heartbeat_timeout_ms: 5_000
 
   """
-  #use Confex, otp_app: :gateway
-  use Gateway.Config, 
+  use Gateway.Config,
     [:user_channel_name_fn, :role_channel_name_fn]
   require Logger
 
