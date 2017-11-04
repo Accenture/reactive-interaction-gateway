@@ -2,16 +2,25 @@ defmodule Gateway.Kafka.MessageHandler do
   @moduledoc """
   Handles messages consumed off a single topic-partition.
   """
+  use Gateway.Config, :custom_validation
   require Logger
   require Record
   import Record, only: [defrecord: 2, extract: 2]
   defrecord :kafka_message, extract(:kafka_message, from_lib: "brod/include/brod.hrl")
 
-  alias GatewayWeb.Presence.Channel
   alias Poison.Parser
 
   @broadcast &GatewayWeb.Endpoint.broadcast/3
   @type broadcast_t :: (String.t, String.t, String.t -> any)
+
+  defp validate_config!(nil), do: validate_config!([])
+  defp validate_config!(config) do
+    {target_mod, target_fun} = Keyword.fetch!(config, :user_channel_name_mf)
+    %{
+      message_user_field: Keyword.fetch!(config, :message_user_field),
+      user_channel_name: fn user -> apply(target_mod, target_fun, [user]) end
+    }
+  end
 
   @spec message_handler_loop(String.t, String.t | non_neg_integer, pid, broadcast_t) :: no_return
   def message_handler_loop(topic, partition, group_subscriber_pid, broadcast \\ @broadcast) do
@@ -32,21 +41,18 @@ defmodule Gateway.Kafka.MessageHandler do
 
   @spec act_on_message(String.t, broadcast_t) :: any
   defp act_on_message(value, broadcast) do
-    result =
-      with {:ok, parsed} <- Parser.parse(value),
-           {:ok, username} <- Map.fetch(parsed, "username")
-        do
-          broadcast_to_user(username, parsed, broadcast)
-          :ok
-        end
-    if result != :ok do
-      Logger.warn("failed to parse incoming message: #{inspect value}")
+    conf = config()
+    with {:ok, parsed} <- Parser.parse(value),
+         {:ok, username} <- Map.fetch(parsed, conf.message_user_field) do
+      broadcast_to_user(username, parsed, broadcast)
+    else
+      err -> Logger.warn("failed to parse incoming message: #{inspect value}: #{inspect err}")
     end
   end
 
   @spec broadcast_to_user(String.t, %{optional(any) => any}, broadcast_t) :: any
   defp broadcast_to_user(username, data, broadcast) do
-    room = Channel.user_channel_name(username)
+    room = config().user_channel_name.(username)
     Logger.debug("will broadcast to #{inspect room}: #{inspect data}")
     broadcast.(
       _topic = room,

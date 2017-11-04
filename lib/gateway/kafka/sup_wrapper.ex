@@ -15,6 +15,7 @@ defmodule Gateway.Kafka.SupWrapper do
   Also note that in case `:kafka_enabled?` is `false` in the env config, the
   GenServer doesn't start anything.
   """
+  use Gateway.Config, [:enabled?]
   use GenServer
   require Logger
 
@@ -25,8 +26,8 @@ defmodule Gateway.Kafka.SupWrapper do
   ## Client API
 
   def start_link do
-    kafka_enabled? = Application.get_env(:gateway, :kafka_enabled?, true)
-    GenServer.start_link(__MODULE__, _args = kafka_enabled?, name: __MODULE__)
+    conf = config()
+    GenServer.start_link(__MODULE__, _args = conf.enabled?, name: __MODULE__)
   end
 
   ## Server callbacks

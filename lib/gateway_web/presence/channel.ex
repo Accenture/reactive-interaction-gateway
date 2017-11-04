@@ -11,20 +11,40 @@ defmodule GatewayWeb.Presence.Channel do
   module, so it also works with distributed nodes.
   """
   use GatewayWeb, :channel
+  use Gateway.Config, :custom_validation
   require Logger
   alias GatewayWeb.Presence
 
-  @authorized_roles ["support"]
+  # Confex callback
+  defp validate_config!(config) do
+    %{
+      jwt_user_field: config |> Keyword.fetch!(:jwt_user_field),
+      jwt_roles_field: config |> Keyword.fetch!(:jwt_roles_field),
+      privileged_roles: MapSet.new(config |> Keyword.fetch!(:privileged_roles))
+    }
+  end
 
   @doc """
   The room name for a specific user.
   """
+  @spec user_channel_name(String.t) :: String.t
   def user_channel_name(username), do: "user:#{username}"
 
   @doc """
   The room name for a specific role.
   """
+  @spec role_channel_name(String.t) :: String.t
   def role_channel_name(role), do: "role:#{role}"
+
+  defp extract_username_and_roles(socket) do
+    user_info = socket.assigns.user_info
+    conf = config()
+
+    {
+      _username = Map.fetch!(user_info, conf.jwt_user_field),
+      _roles    = Map.fetch!(user_info, conf.jwt_roles_field)
+    }
+  end
 
   @doc """
   Join user specific channel. Only owner of given channel or user with authorized
@@ -32,8 +52,7 @@ defmodule GatewayWeb.Presence.Channel do
   """
   @spec join(String.t, map, map) :: {atom, map}
   def join(room = "user:" <> user_subtopic_name, _params, socket) do
-    %{"username" => username, "role" => roles} = socket.assigns.user_info
-
+    {username, roles} = extract_username_and_roles(socket)
     cond do
       username == user_subtopic_name ->
         send(self(), {:after_join, username, roles})
@@ -50,7 +69,7 @@ defmodule GatewayWeb.Presence.Channel do
   """
   @spec join(String.t, map, map) :: {atom, map}
   def join(room = "role:" <> _, _params, socket) do
-    %{"username" => username, "role" => roles} = socket.assigns.user_info
+    {username, roles} = extract_username_and_roles(socket)
     if has_authorized_role?(roles) do
       authorized_join(room, username, socket)
     else
@@ -117,12 +136,11 @@ defmodule GatewayWeb.Presence.Channel do
 
   @spec has_authorized_role?(list(String.t)) :: boolean
   defp has_authorized_role?(roles) do
-    valid_roles_length =
-      roles
-      |> Enum.into(MapSet.new)
-      |> MapSet.intersection(Enum.into(@authorized_roles, MapSet.new))
-      |> MapSet.size
-    valid_roles_length > 0
+    roles
+    |> MapSet.new
+    |> MapSet.intersection(config().privileged_roles)
+    |> MapSet.size
+    |> Kernel.>(0)
   end
 
   @spec authorized_join(String.t, String.t, map) :: {:ok, map}

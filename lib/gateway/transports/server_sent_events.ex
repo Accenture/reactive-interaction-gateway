@@ -11,11 +11,23 @@ defmodule Gateway.Transports.ServerSentEvents do
     transport :sse, Gateway.Transport.Sse, heartbeat_timeout_ms: 5_000
 
   """
+  use Gateway.Config, :custom_validation
   require Logger
+
   alias Gateway.Transports.ServerSentEvents.Encoder
 
   defmodule ConnectionClosed do
     defexception message: "connection closed"
+  end
+
+  defp validate_config!(nil), do: validate_config!([])
+  defp validate_config!(config) do
+    {user_target_mod, user_target_fun} = Keyword.fetch!(config, :user_channel_name_mf)
+    {role_target_mod, role_target_fun} = Keyword.fetch!(config, :role_channel_name_mf)
+    %{
+      user_channel_name: fn user -> apply(user_target_mod, user_target_fun, [user]) end,
+      role_channel_name: fn role -> apply(role_target_mod, role_target_fun, [role]) end,
+    }
   end
 
   ## Transport callbacks
@@ -37,7 +49,6 @@ defmodule Gateway.Transports.ServerSentEvents do
   import Plug.Conn
 
   alias Phoenix.Socket.Transport
-  alias GatewayWeb.Presence.Channel, as: PresenceChannel
 
   @doc false
   def init(opts), do: opts
@@ -84,8 +95,9 @@ defmodule Gateway.Transports.ServerSentEvents do
   #
   defp dispatch(%{method: "GET", params: %{"token" => _token} = params} = conn,
                 endpoint, handler, transport_name, opts) do
-    user_channels = Map.get(params, "users", []) |> Enum.map(&PresenceChannel.user_channel_name/1)
-    role_channels = Map.get(params, "roles", []) |> Enum.map(&PresenceChannel.role_channel_name/1)
+    conf = config()
+    user_channels = Map.get(params, "users", []) |> Enum.map(conf.user_channel_name)
+    role_channels = Map.get(params, "roles", []) |> Enum.map(conf.role_channel_name)
     channels = Enum.uniq(user_channels ++ role_channels)
     case channels do
       [] ->

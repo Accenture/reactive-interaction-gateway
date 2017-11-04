@@ -7,12 +7,14 @@ defmodule Gateway.ApiProxy.RouterTest do
   import ExUnit.CaptureLog
 
   alias GatewayWeb.Router
+  alias Gateway.RateLimit
   alias Gateway.RateLimit.Common
 
   setup do
     # Other tests might have filled the table, so we reset it:
-    Common.settings()
-    |> Map.fetch!(:table_name)
+    conf = RateLimit.config()
+
+    conf.table_name
     |> Common.ensure_table
     |> :ets.delete_all_objects
 

@@ -15,6 +15,7 @@ defmodule Gateway.Proxy do
     there is nothing to synchronize from -- changes are not stored on disk).
 
   """
+  use Gateway.Config, []  # config file is not required
   require Logger
 
   @type endpoint :: %{
@@ -67,7 +68,6 @@ defmodule Gateway.Proxy do
   @behaviour ProxyBehaviour
 
   @default_tracker_mod Gateway.ApiProxy.Tracker
-  @config_file Application.fetch_env!(:gateway, :proxy_config_file)
 
   def start_link(tracker_mod \\ nil, opts \\ []) do
     tracker_mod = if tracker_mod, do: tracker_mod, else: @default_tracker_mod
@@ -81,8 +81,10 @@ defmodule Gateway.Proxy do
   @spec init_presence(state_t) :: :ok
   def init_presence(state) do
     Logger.info("Initial loading of API definitions to presence")
+    conf = config()
 
-    read_init_apis()
+    conf.config_file
+    |> read_init_apis
     |> Enum.each(fn(api) ->
       api_with_default_values = set_default_api_values(api)
       state.tracker_mod.track(api["id"], api_with_default_values)
@@ -331,11 +333,12 @@ defmodule Gateway.Proxy do
     |> Map.delete("timestamp")
   end
 
-  @spec read_init_apis() :: [api_definition, ...]
-  defp read_init_apis do
+  @spec read_init_apis(String.t | nil) :: [api_definition]
+  defp read_init_apis(nil), do: []
+  defp read_init_apis(config_file) do
     :gateway
     |> :code.priv_dir
-    |> Path.join(@config_file)
+    |> Path.join(config_file)
     |> File.read!
     |> Poison.decode!
   end

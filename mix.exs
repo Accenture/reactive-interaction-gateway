@@ -69,7 +69,8 @@ defmodule Gateway.Mixfile do
       {:uuid, "~> 1.1"},
       {:ex2ms, "~> 1.0"},  # Elixir-compatible :ets.fun2ms/1
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
-      {:floki, "~> 0.18.1", runtime: false},
+      {:floki, "~> 0.18.1", runtime: false},  # HTML parser
+      {:confex, "~> 3.3"},  # Read and use application configuration from environment variables
     ]
   end
 

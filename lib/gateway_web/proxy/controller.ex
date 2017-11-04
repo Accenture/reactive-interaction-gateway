@@ -3,18 +3,15 @@ defmodule GatewayWeb.Proxy.Controller do
   HTTP-accessible API for managing PROXY APIs.
 
   """
-  require Logger
+  use Gateway.Config, [:gateway_proxy]
   use GatewayWeb, :controller
-  @gateway_proxy Application.get_env(:gateway, :gateway_proxy)
+  require Logger
 
   def list_apis(conn, _params) do
-    apis =
-      @gateway_proxy
-      |> @gateway_proxy.list_apis
-      |> Enum.map(fn(api) -> elem(api, 1) end)
-      |> Enum.filter(fn(api) -> api["active"] == true end)
-
-    send_response(conn, 200, apis)
+    %{gateway_proxy: proxy} = config()
+    api_defs = proxy.list_apis(proxy)
+    active_apis = for {_, api} <- api_defs, api["active"], do: api
+    send_response(conn, 200, active_apis)
   end
 
   def get_api_detail(conn, params) do
@@ -29,16 +26,17 @@ defmodule GatewayWeb.Proxy.Controller do
 
   def add_api(conn, params) do
     %{"id" => id} = params
+    %{gateway_proxy: proxy} = config()
 
-    with nil <- @gateway_proxy.get_api(@gateway_proxy, id),
-         {:ok, _phx_ref} <- @gateway_proxy.add_api(@gateway_proxy, id, params)
+    with nil <- proxy.get_api(proxy, id),
+         {:ok, _phx_ref} <- proxy.add_api(proxy, id, params)
     do
       send_response(conn, 201, %{message: "ok"})
     else
       {_id, %{"active" => true}} ->
         send_response(conn, 409, %{message: "API with id=#{id} already exists."})
       {_id, %{"active" => false} = prev_api} ->
-        {:ok, _phx_ref} = @gateway_proxy |> @gateway_proxy.replace_api(id, prev_api, params)
+        {:ok, _phx_ref} = proxy.replace_api(proxy, id, prev_api, params)
         send_response(conn, 201, %{message: "ok"})
     end
   end
@@ -58,9 +56,10 @@ defmodule GatewayWeb.Proxy.Controller do
 
   def deactivate_api(conn, params) do
     %{"id" => id} = params
+    %{gateway_proxy: proxy} = config()
 
     with {_id, _current_api} <- get_active_api(id),
-         {:ok, _phx_ref} <- @gateway_proxy.deactivate_api(@gateway_proxy, id)
+         {:ok, _phx_ref} <- proxy.deactivate_api(proxy, id)
     do
       send_response(conn, 204)
     else
@@ -70,7 +69,9 @@ defmodule GatewayWeb.Proxy.Controller do
   end
 
   defp get_active_api(id) do
-    with {id, current_api} <- @gateway_proxy.get_api(@gateway_proxy, id),
+    %{gateway_proxy: proxy} = config()
+
+    with {id, current_api} <- proxy.get_api(proxy, id),
          true <- current_api["active"] == true
     do
       {id, current_api}
@@ -82,8 +83,9 @@ defmodule GatewayWeb.Proxy.Controller do
   end
 
   defp merge_and_update(id, current_api, updated_api) do
+    %{gateway_proxy: proxy} = config()
     merged_api = current_api |> Map.merge(updated_api)
-    @gateway_proxy.update_api(@gateway_proxy, id, merged_api)
+    proxy.update_api(proxy, id, merged_api)
   end
 
   defp send_response(conn, status_code, body \\ %{}) do

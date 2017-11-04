@@ -3,6 +3,7 @@ defmodule GatewayWeb.Presence do
   Enables Phoenix Presence.
 
   """
-  use Phoenix.Presence, otp_app: :gateway,
-                        pubsub_server: Gateway.PubSub
+  use Phoenix.Presence,
+    otp_app: :gateway,
+    pubsub_server: Gateway.PubSub
 end

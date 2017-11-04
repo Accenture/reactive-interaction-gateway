@@ -3,16 +3,18 @@ defmodule GatewayWeb.Presence.Controller do
   HTTP-accessible API for client connections.
 
   """
-  require Logger
   use GatewayWeb, :controller
+  use Gateway.Config, [:session_role]
+  require Logger
   alias GatewayWeb.Presence.Channel
   alias GatewayWeb.Endpoint
   alias Gateway.Blacklist
   alias Gateway.Utils.Jwt
 
   def list_channels(conn, _params) do
+    conf = config()
     channels =
-      "role:customer"
+      "role:#{conf.session_role}"
       |> Channel.channels_list
       |> Map.keys
 

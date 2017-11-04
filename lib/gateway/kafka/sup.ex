@@ -5,9 +5,8 @@ defmodule Gateway.Kafka.Sup do
   Also see `Gateway.Kafka.SupWrapper`.
   """
   @behaviour :supervisor3
+  use Gateway.Config, :custom_validation
   require Logger
-
-  @brod_client_id Application.fetch_env!(:gateway, :kafka_client_id)
 
   def start_link do
     :supervisor3.start_link(
@@ -19,15 +18,15 @@ defmodule Gateway.Kafka.Sup do
 
   @impl :supervisor3
   def init(:ok) do
-    brokers = fetch_kafka_broker_list()
+    conf = config()
     client_conf = [
       auto_start_producers: true,
       default_producer_config: []
     ]
     Logger.debug("""
     Starting brod_client
-      id=#{inspect @brod_client_id}
-      brokers=#{inspect brokers}
+      id=#{inspect conf.brod_client_id}
+      brokers=#{inspect conf.brokers}
       config=#{inspect client_conf}
     """)
     {
@@ -39,7 +38,7 @@ defmodule Gateway.Kafka.Sup do
           _max_time = 1,
         },
         _children = [
-          child_spec(:brod_client, :worker, [brokers, @brod_client_id, client_conf]),
+          child_spec(:brod_client, :worker, [conf.brokers, conf.brod_client_id, client_conf]),
           child_spec(Gateway.Kafka.GroupSubscriber, :worker, []),
         ]
       }
@@ -51,20 +50,17 @@ defmodule Gateway.Kafka.Sup do
     :ignore
   end
 
-  @spec fetch_kafka_broker_list() :: keyword(pos_integer())
-  defp fetch_kafka_broker_list do
-    # Allow for defining the Kafka brokers using an environment variable:
-    case System.get_env("KAFKA_HOSTS") do
-      nil -> Application.fetch_env!(:gateway, :kafka_broker_csv_list)
-      csv -> csv
-    end
-    |> parse_broker_csv
+  # Confex callback
+  defp validate_config!(config) do
+    %{
+      brod_client_id: config |> Keyword.fetch!(:brod_client_id),
+      brokers: config |> Keyword.fetch!(:hosts) |> parse_hosts,
+    }
   end
 
-  @spec parse_broker_csv(String.t) :: keyword(pos_integer())
-  defp parse_broker_csv(brokers) do
-    brokers
-    |> String.split(",")
+  @spec parse_hosts([String.t, ...]) :: keyword(pos_integer())
+  defp parse_hosts(hosts) do
+    hosts
     |> Enum.map(fn(broker) ->
       [host, port] = String.split(broker, ":")
       {String.to_atom(host), String.to_integer(port)}
