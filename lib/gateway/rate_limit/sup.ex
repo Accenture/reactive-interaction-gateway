@@ -13,7 +13,6 @@ defmodule Gateway.RateLimit.Sup do
   """
   use Supervisor
   alias Gateway.RateLimit
-  import RateLimit.Common, only: [settings: 0]
 
   def start_link do
     Supervisor.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -21,10 +20,10 @@ defmodule Gateway.RateLimit.Sup do
 
   @impl Supervisor
   def init(:ok) do
-    enabled? = settings() |> Map.fetch!(:enabled?)
+    conf = RateLimit.config()
     specs = [
       {true, worker(RateLimit.TableOwner, _args = [])},
-      {enabled?, worker(RateLimit.Sweeper, _args = [])},
+      {conf.enabled?, worker(RateLimit.Sweeper, _args = [])},
     ]
     Supervisor.init(
       _children = (for {true, child} <- specs, do: child),

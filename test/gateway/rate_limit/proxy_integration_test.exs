@@ -2,6 +2,7 @@ defmodule Gateway.RateLimit.ProxyIntegrationTest do
   @moduledoc false
   use ExUnit.Case, async: false  # we rely on clearing the ETS table
   import ExUnit.CaptureLog
+  alias Gateway.RateLimit
   alias Gateway.RateLimit.Common
 
   test "integration with proxy" do
@@ -15,18 +16,20 @@ defmodule Gateway.RateLimit.ProxyIntegrationTest do
       conn.status
     end
 
-    %{burst_size: burst_size, table_name: table} = Common.settings()
+    conf = RateLimit.config()
+
     # Other tests might have filled the table, so we reset it:
-    table
+    conf.table_name
     |> Common.ensure_table
     |> :ets.delete_all_objects
-    for _ <- 1..burst_size do
+
+    for _ <- 1..conf.burst_size do
       assert call_endpoint.() == 200
     end
 
     fun = fn -> assert call_endpoint.() == 429 end
     assert capture_log(fun) =~ "Too many requests"
 
-    :ets.delete(table)
+    :ets.delete(conf.table_name)
   end
 end

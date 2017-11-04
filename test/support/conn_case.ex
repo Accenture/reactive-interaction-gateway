@@ -59,14 +59,15 @@ defmodule GatewayWeb.ConnCase do
       }
 
       # The key for signing JWTs:
-      @jwt_key Application.fetch_env!(:gateway, :auth_jwt_key)
+      @jwt_secret_key Confex.fetch_env!(:gateway, GatewayWeb.ConnCase)
+                      |> Keyword.fetch!(:jwt_secret_key)
 
       # Generation of JWT
       def generate_jwt(actions \\ []) do
         %{"scopes" => %{"rg" => %{"actions" => actions}}}
           |> token
           |> with_exp
-          |> with_signer(@jwt_key |> hs256)
+          |> with_signer(@jwt_secret_key |> hs256)
           |> sign
           |> get_compact
       end
@@ -82,7 +83,6 @@ defmodule GatewayWeb.ConnCase do
   end
 
   setup do
-
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

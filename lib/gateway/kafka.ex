@@ -2,14 +2,13 @@ defmodule Gateway.Kafka do
   @moduledoc """
   Produce/send Kafka messages.
   """
+  use Gateway.Config, [:brod_client_id, :log_topic]
   require Logger
   alias Gateway.Utils.Jwt
   alias Gateway.ApiProxy.Proxy
 
-  @brod_client_id Application.fetch_env!(:gateway, :kafka_client_id)
-  @call_log_topic Application.fetch_env!(:gateway, :kafka_call_log_topic)
-
-  @spec log_proxy_api_call(Proxy.route_map, %Plug.Conn{}) :: Jwt.claim_map
+  @type producer_sync_t :: (any, any, any, any, any -> :ok | {:error, any})
+  @spec log_proxy_api_call(Proxy.route_map, %Plug.Conn{}, producer_sync_t) :: :ok | {:error, any}
   def log_proxy_api_call(route, conn, produce_sync \\ &:brod.produce_sync/5) do
     claims = extract_claims!(conn)
     username = Map.fetch!(claims, "username")
@@ -40,9 +39,10 @@ defmodule Gateway.Kafka do
     # provided the server is configured that way. However,
     # this call then returns with {:error, :LeaderNotAvailable},
     # as at that point there won't be a partition leader yet.
+    conf = config()
     :ok = produce_sync.(
-      @brod_client_id,
-      @call_log_topic,
+      conf.brod_client_id,
+      conf.log_topic,
       _partition = &compute_kafka_partition/4,
       _key = username,
       _value = message_json

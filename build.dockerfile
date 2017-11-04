@@ -4,9 +4,7 @@ FROM elixir:1.5
 RUN mix local.hex --force
 RUN mix local.rebar --force
 
-ENV MIX_ENV=prod \
-    PORT=6060 \
-    ORIGIN=https://lwa.accenture.com
+ENV MIX_ENV=prod
 
 WORKDIR /opt/sites/fsa-reactive-gateway
 

@@ -30,24 +30,22 @@ defmodule Gateway.Kafka.GroupSubscriber do
    4. Send acknowledged offsets to group coordinator which will be committed
       to kafka periodically.
   """
+  use Gateway.Config, [:brod_client_id, :consumer_group, :source_topics]
   require Logger
 
   @behaviour :brod_group_subscriber
   @type handlers_t :: %{required(String.t) => nonempty_list(pid)}
   @type state_t :: %{handlers: handlers_t}
 
-  @brod_client_id Application.fetch_env!(:gateway, :kafka_client_id)
-  @consumer_group_id Application.fetch_env!(:gateway, :kafka_consumer_group_id)
-  @topics Application.fetch_env!(:gateway, :kafka_consumed_topics)
-
   @doc """
   Makes sure the Brod client is running and starts the group subscriber.
   """
   def start_link do
+    conf = config()
     :brod.start_link_group_subscriber(
-      @brod_client_id,
-      @consumer_group_id,
-      @topics,
+      conf.brod_client_id,
+      conf.consumer_group,
+      conf.source_topics,
       _group_config = [rejoin_delay_seconds: 5],
       _consumer_config = [begin_offset: :earliest],
       _callback_module = __MODULE__,
@@ -64,9 +62,10 @@ defmodule Gateway.Kafka.GroupSubscriber do
   """
   @impl :brod_group_subscriber
   @spec init(String.t, :no_args) :: {:ok, state_t}
-  def init(consumer_group_id, :no_args) do
-    Logger.info("Starting Kafka group subscriber (group=#{inspect consumer_group_id}, client=#{inspect @brod_client_id}, topics=#{inspect @topics})")
-    handlers = spawn_message_handlers(@brod_client_id, @topics)
+  def init(_consumer_group_id, :no_args) do
+    conf = config()
+    Logger.info("Starting Kafka group subscriber (config=#{inspect conf})")
+    handlers = spawn_message_handlers(conf.brod_client_id, conf.source_topics)
     {:ok, %{handlers: handlers}}
   end
 

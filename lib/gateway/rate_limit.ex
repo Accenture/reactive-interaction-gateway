@@ -5,8 +5,10 @@ defmodule Gateway.RateLimit do
   For synchronizing the corresponding state between the short-lived request
   processes, an ETS table is used for optimal performance.
   """
+  use Gateway.Config,
+    [:table_name, :enabled?, :per_ip?, :avg_rate_per_sec, :burst_size, :sweep_interval_ms]
   import Ex2ms
-  import Gateway.RateLimit.Common, only: [settings: 0, now_unix: 0, ensure_table: 1]
+  import Gateway.RateLimit.Common, only: [now_unix: 0, ensure_table: 1]
 
   @doc """
   Request passage to a specific endpoint, from a given IP.
@@ -22,7 +24,7 @@ defmodule Gateway.RateLimit do
   """
   @spec request_passage(String.t, String.t | nil, %{} | []) :: :ok | :passage_denied
   def request_passage(endpoint, ip \\ nil, opts \\ []) do
-    do_request_passage(endpoint, ip, Enum.into(opts, settings()))
+    do_request_passage(endpoint, ip, Enum.into(opts, config()))
   end
 
   defp do_request_passage(_endpoint, _ip, %{enabled?: false}) do
