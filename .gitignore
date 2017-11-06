@@ -2,7 +2,7 @@
 /_build
 /db
 /deps
-/fsa-reactive-gateway
+/_rig/
 /*.ez
 /cover
 /rel
@@ -23,5 +23,6 @@ erl_crash.dump
 /.vscode/
 /.elixir_ls/
 *~
+*.orig
 /doc.output/
 /doc/excoveralls.html

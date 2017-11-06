@@ -1,4 +1,4 @@
-defmodule Gateway.ProxyMock do
+defmodule Rig.ProxyMock do
 
   @mock_apis [{"new-service", %{
     "auth" => %{
@@ -30,7 +30,7 @@ defmodule Gateway.ProxyMock do
     "active" => false
   }}]
 
-  @behaviour Gateway.Proxy.ProxyBehaviour
+  @behaviour Rig.Proxy.ProxyBehaviour
 
   def list_apis(_server) do
     @mock_apis

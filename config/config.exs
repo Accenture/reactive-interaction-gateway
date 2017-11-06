@@ -19,27 +19,27 @@ config :logger, :console,
 # Phoenix
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-config :gateway, GatewayWeb.Endpoint,
+config :rig, RigWeb.Endpoint,
   url: [
     host: {:system, "HOST", "localhost"}
   ],
   http: [
     port: {:system, :integer, "PORT", 4000}
   ],
-  render_errors: [view: GatewayWeb.ErrorView, accepts: ~w(html json xml)],
-  pubsub: [name: Gateway.PubSub, adapter: Phoenix.PubSub.PG2]
+  render_errors: [view: RigWeb.ErrorView, accepts: ~w(html json xml)],
+  pubsub: [name: Rig.PubSub, adapter: Phoenix.PubSub.PG2]
 
 
 # --------------------------------------
 # API Gateway (Proxy)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-config :gateway, Gateway.Proxy,
+config :rig, Rig.Proxy,
   config_file: {:system, "PROXY_CONFIG_FILE", nil}
-config :gateway, GatewayWeb.Proxy.Controller,
-  gateway_proxy: Gateway.Proxy
+config :rig, RigWeb.Proxy.Controller,
+  rig_proxy: Rig.Proxy
 
-config :gateway, Gateway.RateLimit,
+config :rig, Rig.RateLimit,
   # Internal ETS table name (must be unique).
   table_name: :rate_limit_buckets,
   # Enables/disables rate limiting globally.
@@ -80,26 +80,26 @@ kafka_message_field_map = %{
   user: {:system, "KAFKA_USER_FIELD", "user"}
 }
 
-brod_client_id = :gateway_brod_client
+brod_client_id = :rig_brod_client
 
-config :gateway, Gateway.Kafka,
+config :rig, Rig.Kafka,
   brod_client_id: brod_client_id,
   log_topic: {:system, "KAFKA_LOG_TOPIC", "rig"}
 
-config :gateway, Gateway.Kafka.GroupSubscriber,
+config :rig, Rig.Kafka.GroupSubscriber,
   brod_client_id: brod_client_id,
   consumer_group: {:system, "KAFKA_CONSUMER_GROUP", "rig-consumer-group"},
   source_topics: {:system, :list, "KAFKA_SOURCE_TOPICS", ["rig"]}
 
-config :gateway, Gateway.Kafka.MessageHandler,
+config :rig, Rig.Kafka.MessageHandler,
   message_user_field: kafka_message_field_map.user,
-  user_channel_name_mf: {GatewayWeb.Presence.Channel, :user_channel_name}
+  user_channel_name_mf: {RigWeb.Presence.Channel, :user_channel_name}
 
-config :gateway, Gateway.Kafka.SupWrapper,
+config :rig, Rig.Kafka.SupWrapper,
   message_user_field: kafka_message_field_map.user,
   enabled?: {:system, :boolean, "KAFKA_ENABLED", true}
 
-config :gateway, Gateway.Kafka.Sup,
+config :rig, Rig.Kafka.Sup,
   brod_client_id: brod_client_id,
   hosts: {:system, :list, "KAFKA_HOSTS", ["localhost:9092"]}
 
@@ -116,10 +116,10 @@ jwt_payload_field_map = %{
   roles: {:system, "JWT_ROLES_FIELD", "roles"}
 }
 
-config :gateway, Gateway.Utils.Jwt,
+config :rig, Rig.Utils.Jwt,
   secret_key: {:system, "JWT_SECRET_KEY", ""}
 
-config :gateway, Gateway.Blacklist,
+config :rig, Rig.Blacklist,
   default_expiry_hours: {:system, :integer, "JWT_BLACKLIST_DEFAULT_EXPIRY_HOURS", 1}
 
 
@@ -127,11 +127,11 @@ config :gateway, Gateway.Blacklist,
 # Transports, Channels, etc
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-config :gateway, Gateway.Transports.ServerSentEvents,
-  user_channel_name_mf: {GatewayWeb.Presence.Channel, :user_channel_name},
-  role_channel_name_mf: {GatewayWeb.Presence.Channel, :role_channel_name}
+config :rig, Rig.Transports.ServerSentEvents,
+  user_channel_name_mf: {RigWeb.Presence.Channel, :user_channel_name},
+  role_channel_name_mf: {RigWeb.Presence.Channel, :role_channel_name}
 
-config :gateway, GatewayWeb.Presence.Channel,
+config :rig, RigWeb.Presence.Channel,
   # See "JWT payload fields"
   jwt_user_field: jwt_payload_field_map.user,
   # See "JWT payload fields"
@@ -139,7 +139,7 @@ config :gateway, GatewayWeb.Presence.Channel,
   # See "User Roles"
   privileged_roles: privileged_roles
 
-config :gateway, GatewayWeb.Presence.Controller,
+config :rig, RigWeb.Presence.Controller,
   # See "User Roles"
   session_role: session_role
 

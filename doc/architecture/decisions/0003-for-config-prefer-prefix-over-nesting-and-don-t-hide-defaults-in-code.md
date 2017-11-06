@@ -15,13 +15,13 @@ There no agreed-upon way of handling application configuration. There are two is
 In `config.exs`, configuration keys can be nested by using a Keyword as value. Unfortunately, there is no built-in support for this nesting. For example:
 
 ```
-Application.fetch_env!(:gateway, :required_key)
+Application.fetch_env!(:rig, :required_key)
 ```
 
 will show a nice error, while
 
 ```
-Application.fetch_env!(:gateway, :required_key)[:required_subkey]
+Application.fetch_env!(:rig, :required_key)[:required_subkey]
 ```
 
 will simply return nil in case `:required_key` is present but `:required_subkey` is not.
@@ -32,7 +32,7 @@ Some default values are defined where they are needed in the code, which is a pr
 
 ## Decision
 
-* We prefer not to nest configuration keys; instead, we prefix them where it makes sense. For example, instead of `config :gateway, :kafka, client_id: :gateway_brod_client` we write `config :gateway, kafka_client_id: :gateway_brod_client`. This allows us to leverage the built-in methods (e.g., `Application.fetch_env!`), which produce sensible error messages in case required values are not defined.
+* We prefer not to nest configuration keys; instead, we prefix them where it makes sense. For example, instead of `config :rig, :kafka, client_id: :rig_brod_client` we write `config :rig, kafka_client_id: :rig_brod_client`. This allows us to leverage the built-in methods (e.g., `Application.fetch_env!`), which produce sensible error messages in case required values are not defined.
 * We always set default values in config.exs (in turn this means that we prefer `Application.fetch_env!` over `Application.get_env`). This way, it is easy to reason about default values, and using a default value in more than one place is not an issue.
 
 ## Consequences
