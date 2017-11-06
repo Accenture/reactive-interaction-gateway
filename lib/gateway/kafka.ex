@@ -9,13 +9,13 @@ defmodule Gateway.Kafka do
   with Kafka, has its client supervised by `Gateway.Kafka.Sup`, which also takes care
   of the group subscriber. It uses delays between restarts, in order to delay
   reconnects in the case of connection errors.
-  
+
   `Gateway.Kafka.Sup` is itself supervised by `Gateway.Kafka.SupWrapper`. The
   wrapper's sole purpose is to allow the application to come up even if there is not a
   single broker online. Without it, the failure to connect to any broker would
   propagate all the way to the Phoenix application, bringing it down in the process.
   Having the wrapper makes the application startup more reliable.
-  
+
   The consumer setup is done in `Gateway.Kafka.GroupSubscriber`; take a look at its
   moduledoc for more information. Finally, `Gateway.Kafka.MessageHandler` hosts the
   code for the actual processing of incoming messages.
