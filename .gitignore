@@ -21,4 +21,7 @@ erl_crash.dump
 # Other
 .DS_Store
 /.vscode/
+/.elixir_ls/
 *~
+/doc.output/
+/doc/excoveralls.html

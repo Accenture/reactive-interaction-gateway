@@ -2,7 +2,7 @@ defmodule Gateway.Kafka.Sup do
   @moduledoc """
   Supervisor handling Kafka-related processes.
 
-  Also see Gateway.Kafka.SupWrapper.
+  Also see `Gateway.Kafka.SupWrapper`.
   """
   @behaviour :supervisor3
   use Gateway.Config, :custom_validation

@@ -21,11 +21,11 @@ defmodule Gateway.Kafka.GroupSubscriber do
 
   An overview of what it does behind the scene:
    1. Start a consumer group coordinator to manage the consumer group states,
-      @see brod_group_coordinator:start_link/4.
+      see `:brod_group_coordinator.start_link/4`.
    2. Start (if not already started) topic-consumers (pollers) and subscribe
       to the partition workers when group assignment is received from the
-      group leader, @see brod:start_consumer/3.
-   3. Call CallbackModule:handle_message/4 when messages are received from
+      group leader, see `:brod.start_consumer/3`.
+   3. Call `CallbackModule:handle_message/4` when messages are received from
       the partition consumers.
    4. Send acknowledged offsets to group coordinator which will be committed
       to kafka periodically.

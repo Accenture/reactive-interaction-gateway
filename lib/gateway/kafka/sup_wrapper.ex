@@ -2,17 +2,17 @@ defmodule Gateway.Kafka.SupWrapper do
   @moduledoc """
   Prevents the Kafka subsystem to crash the node on startup.
 
-  Normally, restarts due to connection loss are taken care off by
-  Gateway.Kafka.Sup. In case no Kafka broker is available at startup, however,
-  Gateway.Kafka.Sup fails to start, bringing down the application. This might
-  not be desirable, as the Gateway might be started before Kafka comes up. In
-  case a disaster happens, this makes booting up the overall system easier.
+  Normally, restarts due to connection loss are taken care off by `Gateway.Kafka.Sup`.
+  In case no Kafka broker is available at startup, `Gateway.Kafka.Sup` fails to start,
+  bringing down the application. This might not be desirable, as the Gateway might be
+  started before Kafka comes up. In case a disaster happens, this makes booting up the
+  overall system easier.
 
-  We trap only :failed_to_start_child here; all other errors will crash this
-  server, and thus propagate up.
+  We trap only `:failed_to_start_child` here; all other errors will crash this server,
+  and thus propagate up.
 
-  Also note that in case :kafka_enabled? is false in the env config, the
-  GenServer doesn't start anything.
+  Also note that in case `:kafka_enabled?` is `false` in the env config, the GenServer
+  doesn't start anything.
   """
   use Gateway.Config, [:enabled?]
   use GenServer
