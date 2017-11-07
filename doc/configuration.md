@@ -20,7 +20,7 @@ TODO: describe how to override at runtime
 
 ## API Gateway
 
-The API Gateway forwards requests to configured endpoints, then waits for the reply and finally
+The API gateway forwards requests to configured endpoints, then waits for the reply and finally
 sends the reply back to the client. The available endpoints can be configured using a static file, or at runtime, using a dedicated API.
 
 ### Using a static file
@@ -130,7 +130,7 @@ For example:
 
 ### Producing Logs
 For the format used for logging API calls to Kafka, see
-[`Rig.Kafka.log_proxy_api_call/3`](../lib/gateway/kafka.ex).
+[`Rig.Kafka.log_proxy_api_call/3`](../lib/rig/kafka.ex).
 
 ### Forwarding Events to Frontends
 The format of the events pushed to the frontends depends on the transport
