@@ -34,7 +34,7 @@ ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
 WORKDIR /opt/sites/rig
-COPY --from=build /opt/sites/rig/_build/prod/rel/gateway /opt/sites/rig/
+COPY --from=build /opt/sites/rig/_build/prod/rel/rig /opt/sites/rig/
 
 EXPOSE 6060
 
