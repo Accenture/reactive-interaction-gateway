@@ -1,4 +1,4 @@
-defmodule GatewayWeb.ConnCase do
+defmodule RigWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -20,11 +20,11 @@ defmodule GatewayWeb.ConnCase do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
 
-      import GatewayWeb.Router.Helpers
+      import RigWeb.Router.Helpers
       import Joken
 
       # The default endpoint for testing
-      @endpoint GatewayWeb.Endpoint
+      @endpoint RigWeb.Endpoint
 
       # Example mock API definition to ease testing
       @mock_api %{
@@ -59,7 +59,7 @@ defmodule GatewayWeb.ConnCase do
       }
 
       # The key for signing JWTs:
-      @jwt_secret_key Confex.fetch_env!(:gateway, GatewayWeb.ConnCase)
+      @jwt_secret_key Confex.fetch_env!(:rig, RigWeb.ConnCase)
                       |> Keyword.fetch!(:jwt_secret_key)
 
       # Generation of JWT

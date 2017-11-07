@@ -1,4 +1,4 @@
-defmodule Gateway.Mixfile do
+defmodule Rig.Mixfile do
   use Mix.Project
 
   # Must be a top-level folder in order not to break any relative links.
@@ -6,7 +6,7 @@ defmodule Gateway.Mixfile do
 
   def project do
     [
-      app: :gateway,
+      app: :rig,
       name: "Reactive Interaction Gateway",
       version: "0.9.9",
       description: description(),
@@ -36,7 +36,7 @@ defmodule Gateway.Mixfile do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {Gateway.Application, []},
+      mod: {Rig.Application, []},
     ]
   end
 

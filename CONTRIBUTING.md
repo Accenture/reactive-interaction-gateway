@@ -32,21 +32,21 @@ Before submitting a PR,
 - make sure you run all tests and check the linter (credo) for warnings.
 
 An overview of the directory structure:
-- `lib/gateway`
+- `lib/rig`
   Features are implemented here, unless they're web-related
-  - `lib/gateway/application.ex`
+  - `lib/rig/application.ex`
     Application entry point
-  - `lib/gateway/api_proxy/proxy.ex`
+  - `lib/rig/api_proxy/proxy.ex`
     Reverse proxy implementation
-  - `lib/gateway/blacklist*`
+  - `lib/rig/blacklist*`
     Blacklisting tokens allows for kicking out users immediately, ignoring token expiration
-  - `lib/gateway/kafka*`
+  - `lib/rig/kafka*`
     Integration with Kafka
-  - `lib/gateway/rate_limit*`
+  - `lib/rig/rate_limit*`
     The feature limits the amount of connections per second, per target-endpoint and source-IP
-- `lib/gateway_web`
+- `lib/rig_web`
   Web-related stuff, like controllers and socket-handlers
-  - `lib/gateway_web/presence*`
+  - `lib/rig_web/presence*`
     Code related to handling active frontend connections
 
 ### Design Decisions

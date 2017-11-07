@@ -74,28 +74,28 @@ TODO: should probably be simplified. For now, follow these steps:
 ```bash
 # build environment
 docker build \
--t rge-build \
+-t rig-build \
 -f build.dockerfile \
 .
 
 # run build environment
 docker run \
---name rg-build \
--v "$(pwd)/fsa-reactive-gateway":/opt/sites/fsa-reactive-gateway/_build/prod/rel/gateway \
-rge-build
+--name rig-build \
+-v "$(pwd)/_rig":/opt/sites/rig/_build/prod/rel/rig \
+rig-build
 
 # build app
-docker build -t rge-app .
+docker build -t rig-app .
 
 # run app
 docker run \
---name rg-app \
+--name rig-app \
 -p 6060:6060 \
 -e KAFKA_HOSTS=<host>:9092 \
 -e IS_HOST=<host> \
 -e PS_HOST=<host> \
 -e TS_HOST=<host> \
-rge-app
+rig-app
 ```
 
 ### Deployment using Erlang Releases
