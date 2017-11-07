@@ -80,7 +80,7 @@ docker build -t rig-app .
 # run app
 docker run \
 --name rig-app \
--p 6060:6060 \
+-p 4000:4000 \
 -e KAFKA_HOSTS=<host>:9092 \
 -e IS_HOST=<host> \
 -e PS_HOST=<host> \
