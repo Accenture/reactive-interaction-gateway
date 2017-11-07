@@ -1,4 +1,4 @@
-defmodule GatewayWeb.ConnCase do
+defmodule RigWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -20,21 +20,54 @@ defmodule GatewayWeb.ConnCase do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
 
-      import GatewayWeb.Router.Helpers
+      import RigWeb.Router.Helpers
       import Joken
 
       # The default endpoint for testing
-      @endpoint GatewayWeb.Endpoint
+      @endpoint RigWeb.Endpoint
+
+      # Example mock API definition to ease testing
+      @mock_api %{
+        "auth" => %{
+          "header_name" => "",
+          "query_name" => "",
+          "use_header" => false,
+          "use_query" => false
+        },
+        "auth_type" => "none",
+        "id" => "new-service",
+        "name" => "new-service",
+        "proxy" => %{
+          "port" => 4444,
+          "target_url" => "API_HOST",
+          "use_env" => true
+        },
+        "version_data" => %{
+          "default" => %{
+            "endpoints" => [
+              %{
+                "id" => "get-movies",
+                "method" => "GET",
+                "not_secured" => true,
+                "path" => "/myapi/movies"
+              }
+            ]
+          }
+        },
+        "versioned" => false,
+        "active" => true
+      }
 
       # The key for signing JWTs:
-      @jwt_key Application.fetch_env!(:gateway, :auth_jwt_key)
+      @jwt_secret_key Confex.fetch_env!(:rig, RigWeb.ConnCase)
+                      |> Keyword.fetch!(:jwt_secret_key)
 
       # Generation of JWT
       def generate_jwt(actions \\ []) do
         %{"scopes" => %{"rg" => %{"actions" => actions}}}
           |> token
           |> with_exp
-          |> with_signer(@jwt_key |> hs256)
+          |> with_signer(@jwt_secret_key |> hs256)
           |> sign
           |> get_compact
       end
@@ -50,7 +83,6 @@ defmodule GatewayWeb.ConnCase do
   end
 
   setup do
-
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end
