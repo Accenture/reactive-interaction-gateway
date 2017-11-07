@@ -4,9 +4,7 @@ FROM elixir:1.5 as build
 RUN mix local.hex --force
 RUN mix local.rebar --force
 
-ENV MIX_ENV=prod \
-    PORT=6060 \
-    ORIGIN=https://lwa.accenture.com
+ENV MIX_ENV=prod
 
 WORKDIR /opt/sites/rig
 
@@ -36,6 +34,6 @@ ENV LC_ALL C.UTF-8
 WORKDIR /opt/sites/rig
 COPY --from=build /opt/sites/rig/_build/prod/rel/rig /opt/sites/rig/
 
-EXPOSE 6060
+EXPOSE 4000
 
 CMD ["/opt/sites/rig/bin/rig", "foreground"]
