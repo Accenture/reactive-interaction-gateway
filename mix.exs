@@ -8,7 +8,7 @@ defmodule Rig.Mixfile do
     [
       app: :rig,
       name: "Reactive Interaction Gateway",
-      version: "0.9.9",
+      version: "1.0.0",
       description: description(),
       package: package(),
       source_url: "https://github.com/Accenture/reactive-interaction-gateway",
