@@ -1,11 +1,8 @@
 # RIG - Reactive Interaction Gateway
 
-> **Warning: not (quite) production ready yet!**
->
-> With the 1.0 release, the most important features are there, but we're still in the
-> process of running performance and security tests. Feel free to evaluate RIG for
-> your project, but make sure to test the setup thoroughly before thinking about running
-> it in production - you have been warned.
+> With the 1.0 release, the most important features are there. We're still in
+> the process of running performance and security tests, so we recommend RIG
+> mostly for smaller deployments at the moment.
 
 RIG is a scalable, open source gateway to your microservices. It solves the problem of
 connection state (which users are online currently, with which devices), which allows your
