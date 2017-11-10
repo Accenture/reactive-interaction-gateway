@@ -70,22 +70,17 @@ It should be easy to integrate RIG into your current architecture. Check out
 Currently we support two ways to deploy RIG: using Docker and using classical Erlang releases. Docker may be simpler for most use cases, but Erlang releases allow for hot code reloading.
 
 ### Deployment using Docker
-TODO: should probably be simplified. For now, follow these steps:
-```bash
-# build app
-docker build -t rig-app .
-```
 
 ```bash
-# run app
-docker run \
---name rig-app \
--p 4000:4000 \
--e KAFKA_HOSTS=<host>:9092 \
--e IS_HOST=<host> \
--e PS_HOST=<host> \
--e TS_HOST=<host> \
-rig-app
+# Build the image:
+docker build -t rig .
+
+# Run the container (with Kafka broker bound to the host's en0 IP):
+export HOST_IP="$(ifconfig en0 inet | grep 'inet ' | awk '{ print $2 }')"
+docker run --name rig1 -p 4000:4000 -e KAFKA_HOSTS="${HOST_IP}:9092" rig
+
+# Check that the proxy api is indeed available on port 4000 (returns an empty list by default):
+curl localhost:4000/apis
 ```
 
 ### Deployment using Erlang Releases
