@@ -1,5 +1,7 @@
 # RIG - Reactive Interaction Gateway
 
+[![Build Status](https://travis-ci.org/Accenture/reactive-interaction-gateway.svg?branch=master)](https://travis-ci.org/Accenture/reactive-interaction-gateway)
+
 RIG is a scalable, open source gateway to your microservices. It solves the problem of
 connection state (which users are online currently, with which devices), which allows your
 microservices to be stateless. Pushing arbitrary messages to all connected frontends of a
