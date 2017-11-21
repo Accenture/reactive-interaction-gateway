@@ -47,9 +47,9 @@ config :rig, Rig.RateLimit,
   # If true, the remote IP is taken into account; otherwise the limits are per endpoint only.
   per_ip?: {:system, :boolean, "RATE_LIMIT_PER_IP", true},
   # The permitted average amount of requests per second.
-  avg_rate_per_sec: {:system, :integer, "RATE_LIMIT_AVG_RATE_PER_SEC", 50},
+  avg_rate_per_sec: {:system, :integer, "RATE_LIMIT_AVG_RATE_PER_SEC", 10_000},
   # The permitted peak amount of requests.
-  burst_size: {:system, :integer, "RATE_LIMIT_BURST_SIZE", 100},
+  burst_size: {:system, :integer, "RATE_LIMIT_BURST_SIZE", 5_000},
   # GC interval. If set to zero, GC is disabled.
   sweep_interval_ms: {:system, :integer, "RATE_LIMIT_SWEEP_INTERVAL_MS", 5_000}
 
