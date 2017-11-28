@@ -84,7 +84,8 @@ brod_client_id = :rig_brod_client
 
 config :rig, Rig.Kafka,
   brod_client_id: brod_client_id,
-  log_topic: {:system, "KAFKA_LOG_TOPIC", "rig"}
+  # Logging API calls to Kafka is enabled if, and only if, this topic is set:
+  log_topic: {:system, "KAFKA_LOG_TOPIC", nil}
 
 config :rig, Rig.Kafka.GroupSubscriber,
   brod_client_id: brod_client_id,

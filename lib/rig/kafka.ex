@@ -26,15 +26,26 @@ defmodule Rig.Kafka do
   alias Rig.Utils.Jwt
   alias Rig.ApiProxy.Proxy
 
+  @type producer_sync_t :: (any, any, any, any, any -> :ok | {:error, any})
+
   @doc """
   Log proxied API calls to Kafka.
 
   Among other data, the log message includes the payload, the JWT jti and the current
   timestamp. Messages are produced to the Kafka broker synchronously.
   """
-  @type producer_sync_t :: (any, any, any, any, any -> :ok | {:error, any})
   @spec log_proxy_api_call(Proxy.route_map, %Plug.Conn{}, producer_sync_t) :: :ok | {:error, any}
   def log_proxy_api_call(route, conn, produce_sync \\ &:brod.produce_sync/5) do
+    topic = config().log_topic
+    if String.valid?(topic) and String.length(topic) > 0 do
+      do_log_proxy_api_call(route, conn, produce_sync)
+    else
+      :ok
+    end
+  end
+
+  @spec do_log_proxy_api_call(Proxy.route_map, %Plug.Conn{}, producer_sync_t) :: :ok | {:error, any}
+  defp do_log_proxy_api_call(route, conn, produce_sync) do
     claims = extract_claims!(conn)
     username = Map.fetch!(claims, "username")
     jti =
