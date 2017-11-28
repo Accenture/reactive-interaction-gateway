@@ -4,7 +4,7 @@ Date: 18/08/2017
 
 ## Status
 
-Accepted
+Superceded by [4. Use Rig.Config for global configuration](0004-use-rig-config-for-global-configuration.md)
 
 ## Context
 
