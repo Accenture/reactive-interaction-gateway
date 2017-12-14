@@ -16,6 +16,9 @@ config :rig, Rig.RateLimit,
   burst_size: 10,
   sweep_interval_ms: 0
 
+config :rig, Rig.Kafka,
+  log_topic: "rig"
+
 config :rig, Rig.Kafka.MessageHandler,
   message_user_field: "username"
 
@@ -26,6 +29,8 @@ config :rig, Rig.Kafka.SupWrapper,
 jwt_secret_key = "mysecret"
 
 config :rig, Rig.Kafka.CallLogTest,
+  jwt_secret_key: jwt_secret_key
+config :rig, Rig.Kafka.CallLogDisabledTest,
   jwt_secret_key: jwt_secret_key
 
 config :rig, Rig.Utils.Jwt,
