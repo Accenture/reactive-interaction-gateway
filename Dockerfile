@@ -9,16 +9,19 @@ ENV MIX_ENV=prod
 WORKDIR /opt/sites/rig
 
 # Copy necessary files for dependencies
-COPY mix.exs /opt/sites/rig
-COPY mix.lock /opt/sites/rig
+COPY mix.exs /opt/sites/rig/
+COPY mix.lock /opt/sites/rig/
+COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
+COPY apps/rig/mix.lock /opt/sites/rig/apps/rig/
 
 # Install project dependencies
 RUN mix deps.get
 
 # Copy application files
 COPY config /opt/sites/rig/config
-COPY lib /opt/sites/rig/lib
-COPY priv /opt/sites/rig/priv
+COPY apps/rig/config /opt/sites/rig/apps/rig/config
+COPY apps/rig/lib /opt/sites/rig/apps/rig/lib
+COPY apps/rig/priv /opt/sites/rig/apps/rig/priv
 
 # Initialize release & compile application
 RUN mix release.init

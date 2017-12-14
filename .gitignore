@@ -1,11 +1,7 @@
 # App artifacts
 /_build
-/db
-/deps
 /_rig/
 /*.ez
-/cover
-/rel
 
 # Generated on crash by the VM
 erl_crash.dump
@@ -24,5 +20,15 @@ erl_crash.dump
 /.elixir_ls/
 *~
 *.orig
-/doc.output/
-/doc/excoveralls.html
+
+/deps
+/apps/*/deps
+
+/doc/
+/apps/*/doc/
+
+/cover
+/apps/*/cover
+
+/rel
+/apps/*/rel
