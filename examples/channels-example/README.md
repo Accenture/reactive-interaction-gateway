@@ -10,7 +10,7 @@ Components involved:
 
 ## Quick start
 
-If you want to just quickly start the application and see what's going on run `sh ./run-compose.sh`. Script just builds docker image for each component, runs compose file and registers needed REST API. Feel free to reuse commands from this script if you find it useful.
+If you want to just quickly start the application and see what's going on run `sh ./run-compose.sh`. Script just builds docker image for each component, runs compose file and registers needed REST API. Once scrip is done you can visit `http://localhost:3000`.
 
 ## Manual start
 

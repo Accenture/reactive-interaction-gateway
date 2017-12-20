@@ -23,7 +23,7 @@ services:
 
   rig:
     container_name: rig
-    image: accenture/reactive-interaction-gateway
+    image: accenture/reactive-interaction-gateway:1.0.0
     environment:
       - PORT=7000
       - PRIVILEGED_ROLES=admin

@@ -5,7 +5,8 @@ docker-compose -f app.docker-compose.yml down
 
 # Build frontend docker image
 cd ./frontend
-npm run build --production
+npm i --production
+npm run build
 docker build -t channels-ui .
 
 # Build service docker image
