@@ -11,9 +11,22 @@ import_config "../apps/*/config/config.exs"
 # Logger
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+metadata = [
+  # phoenix_metadata
+  :request_id,
+  # kafka_metadata
+  :raw,
+  :topic,
+  :partition,
+  :offset,
+  # aws_sqs_metadata
+  :raw,
+  :queue,
+  :receipt_handle,
+]
 config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  format: "\n$time [$level] $levelpad$message\n$metadata\n",
+  metadata: metadata |> Enum.uniq()
 
 # --------------------------------------
 # User Roles

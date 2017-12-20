@@ -1,9 +1,9 @@
-defmodule RigCommon.MixProject do
+defmodule Rig.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :rig_common,
+      app: :rig,
       version: "0.1.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
