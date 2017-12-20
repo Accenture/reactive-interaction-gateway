@@ -10,7 +10,7 @@ Components involved:
 
 ## Quick start
 
-If you want to just quickly start the application and see what's going on run `sh ./run-compose.sh`. Script just builds docker image for each component, runs compose file and registers needed REST API. Once scrip is done you can visit `http://localhost:3000`.
+If you want to just quickly start the application and see what's going on run `sh ./run-compose.sh`. Script builds docker image for each component, runs compose file and registers needed REST API. Once script is done you can visit `http://localhost:3000`.
 
 ## Manual start
 
@@ -34,9 +34,7 @@ For RIG we could use default configuration values, but where's fun in that. Let'
 # JWT_ROLES_FIELD => Key in JWT claims/payload under which PRIVILEGED_ROLES are set for each user, by default roles
 # JWT_USER_FIELD => Key in JWT claims/payload that is used to construct topic name for Phoenix channel, by default user
 # KAFKA_USER_FIELD => Key in Kafka message, by which RIG knows where to broadcast, by default user
-# SESSION_ROLE => Type of channels we want make visible using REST API, by default user
 # KAFKA_SOURCE_TOPICS => Name of Kafka topic to which consumer will connect, by default rig
-# KAFKA_LOG_TOPIC => Name of Kafka topic to which producer will produce messages, by default rig
 # JWT_SECRET_KEY => Secret key by which JWTs are signed, by default empty string
 
 PORT=7000 \
@@ -45,13 +43,11 @@ JWT_ROLES_FIELD=levels \
 JWT_USER_FIELD=username \
 JWT_SECRET_KEY=mysecret \
 KAFKA_USER_FIELD=username \
-SESSION_ROLE=regularuser \
 KAFKA_SOURCE_TOPICS=example \
-KAFKA_LOG_TOPIC=example \
 mix phx.server
 ```
 
-**NOTE: These env values are by default set as well for Frontend and Service**
+RIG is now available on port `7000`.
 
 **Terminal 2:** Start Service (from service directory)
 
@@ -60,6 +56,8 @@ mix phx.server
 npm i
 npm start
 ```
+
+Service is now available on port `8000`.
 
 **Terminal 3:** Start Frontend (from frontend directory)
 
@@ -81,7 +79,7 @@ curl -X "POST" \
 
 ## Example scenarios to test
 
-Few examples you may try with this simple setup.
+Here are a few examples you may try with this simple setup.
 
 ### Subscribe to my own channel
 
@@ -95,14 +93,14 @@ Few examples you may try with this simple setup.
 1. First tab: Fill in `Event message` with e.g. (again username has to match) `{"username":"mike", "payload":"hello"}` (`username` is the only required field, rest of the message can be whatever)
 1. First tab: Press `Send event` => You should see messages on the right side in both browser tabs
 
-### Subscribe to some elses channel without privileged role
+### Subscribe to someone elses channel without privileged role
 
 Repeat steps 1 to 4.
 
 1. First tab: Fill in `Subscribe to topic` with e.g. josh (this has to be different from the `User Name`)
 1. First tab: Press `Connect` => You should see error message on the right side, that you are not authorized to subscribe to this channel. That's because you are not owner of the channel nor has privileged role to do so.
 
-### Subscribe to some elses channel with privileged role
+### Subscribe to someone elses channel with privileged role
 
 Repeat steps 1 to 3.
 
