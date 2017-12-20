@@ -101,9 +101,11 @@ defmodule Rig.Mixfile do
         "doc/configuration.md": [title: "Configuration"],
         "CODE_OF_CONDUCT.md": [title: "Code of Conduct"],
         "CONTRIBUTING.md": [title: "Contributing"],
+        "CHANGELOG.md": [title: "Changelog"],
         "doc/architecture/decisions/0001-record-architecture-decisions.md": [group: "Architecture Decisions"],
         "doc/architecture/decisions/0002-don-t-check-for-functionclauseerror-in-tests.md": [group: "Architecture Decisions"],
-        "doc/architecture/decisions/0003-for-config-prefer-prefix-over-nesting-and-don-t-hide-defaults-in-code.md": [group: "Architecture Decisions"],
+        "doc/architecture/decisions/0004-use-rig-config-for-global-configuration.md": [group: "Architecture Decisions"],
+        "doc/architecture/decisions/0005-maintain-changelog.md": [group: "Architecture Decisions"],
       ],
       main: "README",
     ]
