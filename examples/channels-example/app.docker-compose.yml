@@ -31,9 +31,7 @@ services:
       - JWT_USER_FIELD=username
       - JWT_SECRET_KEY=mysecret
       - KAFKA_USER_FIELD=username
-      - SESSION_ROLE=regularuser
       - KAFKA_SOURCE_TOPICS=example
-      - KAFKA_LOG_TOPIC=example
       - KAFKA_HOSTS=kafka:9092
     ports:
       - 7000:7000

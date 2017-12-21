@@ -5,7 +5,7 @@ docker-compose -f app.docker-compose.yml down
 
 # Build frontend docker image
 cd ./frontend
-npm i --production
+npm i
 npm run build
 docker build -t channels-ui .
 
@@ -24,3 +24,5 @@ curl -X "POST" \
 -d "{\"id\":\"kafka-service\",\"name\":\"kafka-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kafka-producer-endpoint\",\"path\":\"/produce\",\"method\":\"POST\",\"not_secured\":true}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"channels-external-service\",\"port\":8000}}" \
 --silent \
 "http://localhost:7000/apis"
+
+printf "\n===> Application is ready <===\n"
