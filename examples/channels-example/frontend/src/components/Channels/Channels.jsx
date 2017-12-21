@@ -18,14 +18,9 @@ class Channels extends PureComponent {
       response: '',
       messages: []
     };
-
-    this.connectToChannel = this.connectToChannel.bind(this);
-    this.disconnectFromChannel = this.disconnectFromChannel.bind(this);
-    this.clearEventLog = this.clearEventLog.bind(this);
-    this.handleInputChange = this.handleInputChange.bind(this);
   }
 
-  connectToChannel() {
+  connectToChannel = () => {
     const { type, username, levels, subscriberTopic, protocols } = this.state;
     // Choose one of the imported protocol types (ws, sse), controlled by radio buttons
     const channels = protocols[type];
@@ -42,7 +37,7 @@ class Channels extends PureComponent {
     });
   }
 
-  disconnectFromChannel() {
+  disconnectFromChannel = () => {
     const { type, protocols, subscriberTopic } = this.state;
     // Choose one of the imported protocol types (ws, sse), controlled by radio buttons
     const channels = protocols[type];
@@ -53,11 +48,11 @@ class Channels extends PureComponent {
     });
   }
 
-  clearEventLog() {
+  clearEventLog = () => {
     this.setState({ messages: [] });
   }
 
-  handleInputChange(ev) {
+  handleInputChange = (ev) => {
     const { name, value } = ev.target;
     const newState = Object.assign({}, this.state);;
     newState[name] = value;
@@ -72,7 +67,7 @@ class Channels extends PureComponent {
       <div className="columns">
         <div className="column is-two-fifths">
           <div className="field">
-              <label className="label" htmlFor="username">Transport protocol type</label>
+              <label className="label" htmlFor="type">Transport protocol type</label>
               <label className="radio" htmlFor="ws">
                 <input
                   type="radio"

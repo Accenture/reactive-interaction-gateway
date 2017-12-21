@@ -10,26 +10,20 @@ class Message extends PureComponent {
       message: '',
       callStatus: null
     };
-
-    this.handleProduceKafkaMessage = this.handleProduceKafkaMessage.bind(this);
-    this.handleInputChange = this.handleInputChange.bind(this);
   }
 
-  handleProduceKafkaMessage() {
+  handleProduceKafkaMessage = () => {
     const { message } = this.state;
     const messageJSON = JSON.parse(message);
     // Add timestamp to each message, just to have nicer format of messages in UI
     const updatedMessage = Object.assign(messageJSON, { timestamp: Date.now() } );
 
     produceKafkaMessageAsync(updatedMessage)
-    .then((res) => {
-      console.log(res);
-      this.setState({ callStatus: res })
-    })
+    .then((res) => this.setState({ callStatus: res }))
     .catch((res) => this.setState({ callStatus: res }));
   }
 
-  handleInputChange(ev) {
+  handleInputChange = (ev) => {
     const { value } = ev.target;
 
     this.setState({ message: value });

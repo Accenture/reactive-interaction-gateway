@@ -34,11 +34,12 @@ class Events extends PureComponent {
         {notification}
 
         <div className="box" style={{height: '435px', overflowY: 'auto'}}>
-          {events.map(({username, timestamp, payload}, index) => {
+          {events.map((ev, index) => {
+            const {username, timestamp} = ev;
             const time = new Date(timestamp).toISOString().slice(-13, -5);
             return (
               <div key={index}>
-                <div>{time}: {username} - {payload}</div>
+                <div>{time}: {username} - <code>{JSON.stringify(ev)}</code></div>
                 <hr />
               </div>
             );
