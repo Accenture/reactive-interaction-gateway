@@ -1,7 +1,9 @@
 use Mix.Config
 
-# We don't run a server during test. If one is required,
-# you can enable the server option below.
 config :rig_api, RigApi.Endpoint,
-  http: [port: 4001],
+  env: :test,
+  http: [port: System.get_env("PORT") || 4011],
   server: false
+
+config :rig, RigApi.ApisController,
+  rig_proxy: RigInboundGateway.ProxyMock

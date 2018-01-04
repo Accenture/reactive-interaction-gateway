@@ -1,4 +1,4 @@
-defmodule RigInboundGateway.Utils.Jwt do
+defmodule RigAuth.Jwt.Utils do
   @moduledoc """
   Provides utility functions over JWT using Joken
   """

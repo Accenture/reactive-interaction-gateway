@@ -24,7 +24,6 @@ defmodule RigInboundGateway.ApiProxy.Router do
   # Get all incoming HTTP requests, check if they are valid, provide authentication if needed
   match _ do
     %{method: request_method, request_path: request_path} = conn
-
     list_apis =
       Proxy
       |> Proxy.list_apis

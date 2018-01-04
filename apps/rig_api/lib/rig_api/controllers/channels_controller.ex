@@ -1,15 +1,15 @@
-defmodule RigInboundGatewayWeb.Presence.Controller do
+defmodule RigApi.ChannelsController do
   @moduledoc """
   HTTP-accessible API for client connections.
 
   """
-  use RigInboundGatewayWeb, :controller
+  use RigApi, :controller
   use Rig.Config, [:session_role]
   require Logger
   alias RigInboundGatewayWeb.Presence.Channel
   alias RigInboundGatewayWeb.Endpoint
   alias RigInboundGateway.Blacklist
-  alias RigInboundGateway.Utils.Jwt
+  alias RigAuth.Jwt.Utils
 
   def list_channels(conn, _params) do
     conf = config()
@@ -21,19 +21,17 @@ defmodule RigInboundGatewayWeb.Presence.Controller do
     json(conn, channels)
   end
 
-  def list_channel_connections(conn, params) do
-    %{"id" => id} = params
-
-    connections =
+  def list_channel_sessions(conn, %{"user" => id}) do
+    sessions =
       "user:#{id}"
       |> Channel.channels_list
       |> Enum.map(fn(user) -> elem(user, 1).metas end)
       |> List.flatten
 
-    json(conn, connections)
+    json(conn, sessions)
   end
 
-  def disconnect_channel_connection(conn, %{"jti" => jti}) do
+  def disconnect_channel_session(conn, %{"jti" => jti}) do
     Blacklist.add_jti(Blacklist, jti, jwt_expiry(conn))
     Endpoint.broadcast(jti, "disconnect", %{})
 
@@ -54,7 +52,7 @@ defmodule RigInboundGatewayWeb.Presence.Controller do
 
   defp jwt_expiry_from_tokens([]), do: nil
   defp jwt_expiry_from_tokens([token]) do
-    {:ok, %{"exp" => expiry}} = Jwt.decode(token)
+    {:ok, %{"exp" => expiry}} = Utils.decode(token)
     expiry
     |> Integer.to_string  # Comes as int, convert to string
     |> Timex.parse!("{s-epoch}")  # Parse as UTC epoch

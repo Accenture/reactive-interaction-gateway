@@ -2,7 +2,7 @@ defmodule RigInboundGatewayWeb.Presence.Socket do
   @moduledoc false
   use Phoenix.Socket
   require Logger
-  alias RigInboundGateway.Utils.Jwt
+  alias RigAuth.Jwt
   alias RigInboundGateway.Blacklist
 
   ## Channels
@@ -27,7 +27,7 @@ defmodule RigInboundGatewayWeb.Presence.Socket do
   # performing token verification on connect.
   def connect(params, socket) do
     with {:ok, raw_token} <- Map.fetch(params, "token"),
-         {:ok, token_map} <- Jwt.decode(raw_token),
+         {:ok, token_map} <- Jwt.Utils.decode(raw_token),
          :ok <- check_token_not_blacklisted(token_map)
     do
       {:ok, assign(socket, :user_info, token_map)}

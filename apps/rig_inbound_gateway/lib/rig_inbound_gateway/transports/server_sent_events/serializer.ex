@@ -16,7 +16,7 @@ defmodule RigInboundGateway.Transports.ServerSentEvents.Serializer do
   @doc """
   Translates a `Phoenix.Socket.Broadcast` into a `Phoenix.Socket.Message`.
   """
-  def fastlane!(msg = %Broadcast{}) do
+  def fastlane!(%Broadcast{} = msg) do
     %Message{topic: msg.topic,
              event: msg.event,
              payload: msg.payload}
@@ -27,7 +27,7 @@ defmodule RigInboundGateway.Transports.ServerSentEvents.Serializer do
 
   Encoding is handled downstream in the LongPoll controller.
   """
-  def encode!(reply = %Reply{}) do
+  def encode!(%Reply{} = reply) do
     %Message{
       topic: reply.topic,
       event: "phx_reply",
@@ -35,7 +35,7 @@ defmodule RigInboundGateway.Transports.ServerSentEvents.Serializer do
       payload: %{status: reply.status, response: reply.payload}
     }
   end
-  def encode!(msg = %Message{}), do: msg
+  def encode!(%Message{} = msg), do: msg
 
   @doc """
   Decodes JSON String into `Phoenix.Socket.Message` struct.

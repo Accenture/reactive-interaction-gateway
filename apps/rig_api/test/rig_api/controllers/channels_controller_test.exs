@@ -1,8 +1,10 @@
-defmodule RigInboundGatewayWeb.Presence.ControllerTest do
+defmodule RigApi.ChannelsControllerTest do
   @moduledoc false
   use ExUnit.Case, async: false
-  use RigInboundGatewayWeb.ConnCase
-  use RigInboundGatewayWeb.ChannelCase
+  use RigApi.ChannelCase
+  use RigApi.ConnCase
+
+  @endpoint_channels RigInboundGatewayWeb.Endpoint
 
   setup do
     {:ok, _response, sock} = subscribe_and_join_user(
@@ -13,19 +15,18 @@ defmodule RigInboundGatewayWeb.Presence.ControllerTest do
    {:ok, sock: sock}
   end
 
-  test "GET /rg/sessions should return list of channels", %{sock: sock} do
+  test "GET /v1/users should return list of channels", %{sock: sock} do
     conn =
       setup_conn(["getSessions"])
-      |> get("/rg/sessions")
-
+      |> get("/v1/users")
     assert response(conn, 200) =~ "[\"testuser\"]"
     leave sock
   end
 
-  test "GET /rg/sessions/testuser should return list of users in channel testuser", %{sock: sock} do
+  test "GET /v1/users/testuser/sessions should return list of users in channel testuser", %{sock: sock} do
     conn =
       setup_conn(["getSessionConnections"])
-      |> get("/rg/sessions/testuser")
+      |> get("/v1/users/testuser/sessions")
 
     username =
       json_response(conn, 200)
@@ -37,16 +38,16 @@ defmodule RigInboundGatewayWeb.Presence.ControllerTest do
     leave sock
   end
 
-  test "DELETE /rg/connections/abc123 should broadcast disconnect event to user with jti abc123", %{sock: sock} do
-    @endpoint.subscribe("abc123")
+  test "DELETE /v1/users/testuser/sessions/abc123 should broadcast disconnect event to user with jti abc123", %{sock: sock} do
+    @endpoint_channels.subscribe("abc123")
     conn =
       setup_conn(["deleteConnection"])
-      |> delete("/rg/connections/abc123")
+      |> delete("/v1/users/testuser/sessions/abc123")
 
     assert_broadcast("disconnect", %{})
     assert response(conn, 204) =~ "{}"
 
     leave sock
-    @endpoint.unsubscribe("abc123")
+    @endpoint_channels.unsubscribe("abc123")
   end
 end

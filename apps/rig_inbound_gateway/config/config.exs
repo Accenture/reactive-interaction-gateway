@@ -5,7 +5,6 @@
 # is restricted to this project.
 use Mix.Config
 
-
 # --------------------------------------
 # Logger
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -13,7 +12,6 @@ use Mix.Config
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:module, :request_id]
-
 
 # --------------------------------------
 # Phoenix
@@ -28,7 +26,6 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
   ],
   render_errors: [view: RigInboundGatewayWeb.ErrorView, accepts: ~w(html json xml)],
   pubsub: [name: RigMesh.PubSub]
-
 
 # --------------------------------------
 # API Gateway (Proxy)
@@ -53,7 +50,6 @@ config :rig, RigInboundGateway.RateLimit,
   # GC interval. If set to zero, GC is disabled.
   sweep_interval_ms: {:system, :integer, "RATE_LIMIT_SWEEP_INTERVAL_MS", 5_000}
 
-
 # --------------------------------------
 # User Roles
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -68,7 +64,6 @@ session_role = {:system, "SESSION_ROLE", "user"}
 # For example, to allow all users in the "admin" and "support" groups to subscribe to any
 # messages, you could use start RIG with `PRIVILEGED_ROLES=admin,support`.
 privileged_roles = {:system, :list, "PRIVILEGED_ROLES", []}
-
 
 # --------------------------------------
 # Kafka
@@ -104,7 +99,6 @@ config :rig, RigInboundGateway.Kafka.Sup,
   brod_client_id: brod_client_id,
   hosts: {:system, :list, "KAFKA_HOSTS", ["localhost:9092"]}
 
-
 # --------------------------------------
 # Authorization Token (JWT)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -117,12 +111,8 @@ jwt_payload_field_map = %{
   roles: {:system, "JWT_ROLES_FIELD", "roles"}
 }
 
-config :rig, RigInboundGateway.Utils.Jwt,
-  secret_key: {:system, "JWT_SECRET_KEY", ""}
-
 config :rig, RigInboundGateway.Blacklist,
   default_expiry_hours: {:system, :integer, "JWT_BLACKLIST_DEFAULT_EXPIRY_HOURS", 1}
-
 
 # --------------------------------------
 # Transports, Channels, etc
@@ -143,8 +133,6 @@ config :rig, RigInboundGatewayWeb.Presence.Channel,
 config :rig, RigInboundGatewayWeb.Presence.Controller,
   # See "User Roles"
   session_role: session_role
-
-
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

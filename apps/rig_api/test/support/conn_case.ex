@@ -20,12 +20,66 @@ defmodule RigApi.ConnCase do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
       import RigApi.Router.Helpers
+      import Joken
+
+      # Example mock API definition to ease testing
+      @mock_api %{
+        "auth" => %{
+          "header_name" => "",
+          "query_name" => "",
+          "use_header" => false,
+          "use_query" => false
+        },
+        "auth_type" => "none",
+        "id" => "new-service",
+        "name" => "new-service",
+        "proxy" => %{
+          "port" => 4444,
+          "target_url" => "API_HOST",
+          "use_env" => true
+        },
+        "version_data" => %{
+          "default" => %{
+            "endpoints" => [
+              %{
+                "id" => "get-movies",
+                "method" => "GET",
+                "not_secured" => true,
+                "path" => "/myapi/movies"
+              }
+            ]
+          }
+        },
+        "versioned" => false,
+        "active" => true
+      }
 
       # The default endpoint for testing
       @endpoint RigApi.Endpoint
+
+      # The key for signing JWTs:
+      @jwt_secret_key Confex.fetch_env!(:rig, RigApi.ConnCase)
+                      |> Keyword.fetch!(:jwt_secret_key)
+
+      # Generation of JWT
+      def generate_jwt(actions \\ []) do
+        %{"scopes" => %{"rg" => %{"actions" => actions}}}
+          |> token
+          |> with_exp
+          |> with_signer(@jwt_secret_key |> hs256)
+          |> sign
+          |> get_compact
+      end
+
+      # Setup for HTTP connection with JWT
+      def setup_conn(scopes \\ []) do
+        jwt = generate_jwt(scopes)
+        build_conn()
+        |> put_req_header("accept", "application/json")
+        |> put_req_header("authorization", jwt)
+      end
     end
   end
-
 
   setup _tags do
     {:ok, conn: Phoenix.ConnTest.build_conn()}

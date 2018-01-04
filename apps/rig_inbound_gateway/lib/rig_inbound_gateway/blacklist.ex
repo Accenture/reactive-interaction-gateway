@@ -37,7 +37,7 @@ defmodule RigInboundGateway.Blacklist do
 
   @spec add_jti(pid | atom, String.t, nil | String.t | Timex.DateTime.t, nil | pid) :: pid
   def add_jti(server, jti, expiry \\ nil, listener \\ nil)
-  def add_jti(server, jti, _expiry = nil, listener) do
+  def add_jti(server, jti, nil = _expiry, listener) do
     conf = config()
     default_expiry = Timex.now() |> Timex.shift(hours: conf.default_expiry_hours)
     add_jti(server, jti, default_expiry, listener)

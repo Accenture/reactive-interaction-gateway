@@ -14,7 +14,8 @@ defmodule RigInboundGateway.Mixfile do
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
       start_permanent: Mix.env == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -39,11 +40,12 @@ defmodule RigInboundGateway.Mixfile do
     [
       {:rig, in_umbrella: true},
       {:rig_mesh, in_umbrella: true},
+      {:rig_auth, in_umbrella: true},
       {:phoenix, "~> 1.3.0"},
       {:phoenix_pubsub, "~> 1.0"},
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 0.13.0"},
-      {:joken, "~> 1.4"},
+      # {:joken, "~> 1.4"},
       {:bypass, "~> 0.8.1", only: :test},
       {:poison, "~> 2.0 or ~> 3.0"},
       {:timex, "~> 3.1.22"},

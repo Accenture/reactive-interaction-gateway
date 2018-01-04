@@ -1,10 +1,10 @@
-defmodule RigInboundGatewayWeb.Proxy.Controller do
+defmodule RigApi.ApisController do
   @moduledoc """
   HTTP-accessible API for managing PROXY APIs.
 
   """
   use Rig.Config, [:rig_proxy]
-  use RigInboundGatewayWeb, :controller
+  use RigApi, :controller
   require Logger
 
   def list_apis(conn, _params) do

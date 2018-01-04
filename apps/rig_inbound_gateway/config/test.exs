@@ -26,26 +26,10 @@ config :rig, RigInboundGateway.Kafka.SupWrapper,
   message_user_field: "username",
   enabled?: false
 
-jwt_secret_key = "mysecret"
-
-config :rig, RigInboundGateway.Kafka.CallLogTest,
-  jwt_secret_key: jwt_secret_key
-config :rig, RigInboundGateway.Kafka.CallLogDisabledTest,
-  jwt_secret_key: jwt_secret_key
-
-config :rig, RigInboundGateway.Utils.Jwt,
-  secret_key: jwt_secret_key
-
 config :rig, RigInboundGatewayWeb.Presence.Channel,
   jwt_user_field: "username",
   jwt_roles_field: "role",
   privileged_roles: ["support"]
-
-config :rig, RigInboundGatewayWeb.Presence.Controller,
-  session_role: "customer"
-
-config :rig, RigInboundGatewayWeb.ConnCase,
-  jwt_secret_key: jwt_secret_key
 
 config :rig, RigInboundGateway.Proxy,
   config_file: "proxy/proxy.test.json"

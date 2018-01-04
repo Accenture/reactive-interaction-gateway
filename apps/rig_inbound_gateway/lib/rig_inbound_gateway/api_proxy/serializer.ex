@@ -15,12 +15,12 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
 
   # Builds URL where HTTP request should be proxied
   @spec build_url(Proxy.api_definition, String.t) :: String.t
-  def build_url(proxy = %{"use_env" => true}, request_path) do
+  def build_url(%{"use_env" => true} = proxy, request_path) do
     host = System.get_env(proxy["target_url"]) || "localhost"
     "#{host}:#{proxy["port"]}#{request_path}"
   end
   @spec build_url(Proxy.api_definition, String.t) :: String.t
-  def build_url(proxy = %{"use_env" => false}, request_path) do
+  def build_url(%{"use_env" => false} = proxy, request_path) do
     "#{proxy["target_url"]}:#{proxy["port"]}#{request_path}"
   end
 
