@@ -29,4 +29,4 @@ config :rig, RigApi.ChannelsController,
   session_role: session_role
 
 config :rig, RigInboundGatewayWeb.Presence.Controller,
-  session_role: "customer"
+  session_role: session_role

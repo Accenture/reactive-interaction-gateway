@@ -9,7 +9,7 @@ defmodule RigApi.ChannelsController do
   alias RigInboundGatewayWeb.Presence.Channel
   alias RigInboundGatewayWeb.Endpoint
   alias RigInboundGateway.Blacklist
-  alias RigAuth.Jwt.Utils
+  alias RigAuth.Jwt
 
   def list_channels(conn, _params) do
     conf = config()
@@ -52,7 +52,7 @@ defmodule RigApi.ChannelsController do
 
   defp jwt_expiry_from_tokens([]), do: nil
   defp jwt_expiry_from_tokens([token]) do
-    {:ok, %{"exp" => expiry}} = Utils.decode(token)
+    {:ok, %{"exp" => expiry}} = Jwt.Utils.decode(token)
     expiry
     |> Integer.to_string  # Comes as int, convert to string
     |> Timex.parse!("{s-epoch}")  # Parse as UTC epoch

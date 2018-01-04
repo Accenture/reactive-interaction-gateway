@@ -35,11 +35,6 @@ defmodule RigApi.Endpoint do
   configuration should be loaded from the system environment.
   """
   def init(_key, config) do
-    if config[:load_from_system_env] do
-      port = System.get_env("PORT") || raise "expected the PORT environment variable to be set"
-      {:ok, Keyword.put(config, :http, [:inet6, port: port])}
-    else
-      {:ok, config}
-    end
+    Confex.Resolver.resolve(config)
   end
 end

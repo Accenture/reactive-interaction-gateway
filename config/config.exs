@@ -43,6 +43,16 @@ session_role = {:system, "SESSION_ROLE", "user"}
 # messages, you could use start RIG with `PRIVILEGED_ROLES=admin,support`.
 privileged_roles = {:system, :list, "PRIVILEGED_ROLES", []}
 
+config :rig, RigApi.ChannelsController,
+  session_role: session_role
+
+# --------------------------------------
+# Authorization Token (JWT)
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+config :rig, RigAuth.Jwt.Utils,
+  secret_key: {:system, "JWT_SECRET_KEY", ""}
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"

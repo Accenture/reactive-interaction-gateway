@@ -28,7 +28,10 @@ config :rig_api, RigApi.Endpoint,
   http: [
     port: {:system, :integer, "PORT", 4010}
   ],
-  render_errors: [view: RigApi.ErrorView, accepts: ~w(html json xml)],
+  # render_errors: [view: RigApi.ErrorView, accepts: ~w(html json xml)],
   pubsub: [name: RigMesh.PubSub]
+
+config :rig, RigApi.ApisController,
+  rig_proxy: RigInboundGateway.Proxy
 
 import_config "#{Mix.env}.exs"
