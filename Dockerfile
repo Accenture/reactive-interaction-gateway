@@ -9,8 +9,7 @@ ENV MIX_ENV=prod
 WORKDIR /opt/sites/rig
 
 # Copy necessary files for dependencies
-COPY mix.exs /opt/sites/rig
-COPY mix.lock /opt/sites/rig
+COPY mix.exs mix.lock /opt/sites/rig/
 
 # Install project dependencies
 RUN mix deps.get
@@ -20,16 +19,17 @@ COPY config /opt/sites/rig/config
 COPY lib /opt/sites/rig/lib
 COPY priv /opt/sites/rig/priv
 
-# Initialize release & compile application
-RUN mix release.init
+COPY rel /opt/sites/rig/rel/
+COPY vm.args /opt/sites/rig/
+
 # Release application production code
 RUN mix release
-
 
 FROM erlang:20-slim
 
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
+ENV REPLACE_OS_VARS=true
 
 WORKDIR /opt/sites/rig
 COPY --from=build /opt/sites/rig/_build/prod/rel/rig /opt/sites/rig/

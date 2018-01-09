@@ -144,6 +144,12 @@ config :rig, RigWeb.Presence.Controller,
   # See "User Roles"
   session_role: session_role
 
+# --------------------------------------
+# Peerage
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+config :rig, Rig.Discovery,
+  discovery_type: nil
 
 
 # Import environment specific config. This must remain at the bottom

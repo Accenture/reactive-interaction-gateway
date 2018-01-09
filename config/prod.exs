@@ -18,6 +18,15 @@ config :rig, RigWeb.Endpoint,
 # Do not print debug messages in production
 config :logger, level: :info
 
+# --------------------------------------
+# Peerage
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+config :rig, Rig.Discovery,
+  discovery_type: {:system, "DISCOVERY_TYPE", nil},
+  dns_name: {:system, "DNS_NAME", "localhost"}
+
+
 # ## Using releases
 #
 # If you are doing OTP releases, you need to instruct Phoenix

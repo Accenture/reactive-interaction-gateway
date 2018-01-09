@@ -5,7 +5,6 @@
 /_rig/
 /*.ez
 /cover
-/rel
 
 # Generated on crash by the VM
 erl_crash.dump

@@ -8,6 +8,9 @@ defmodule Rig.Application do
   # for more information on OTP Applications
   def start(_type, _args) do
     import Supervisor.Spec
+
+    Rig.Discovery.start()
+
     children = [
       supervisor(RigWeb.Endpoint, _args = []),
       supervisor(RigWeb.Presence, []),

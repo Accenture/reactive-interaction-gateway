@@ -38,6 +38,7 @@ defmodule Rig.Mixfile do
   def application do
     [
       mod: {Rig.Application, []},
+      included_applications: [:peerage],
     ]
   end
 
@@ -64,7 +65,7 @@ defmodule Rig.Mixfile do
       {:credo, "~> 0.7", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test]},
       {:timex, "~> 3.1.22"},
-      {:distillery, "~> 1.4"},
+      {:distillery, "~> 1.4", runtime: false},
       {:stubr, "~> 1.5.0", only: :test},
       {:murmur, "~> 1.0"},  # for Kafka, partition from MurmurHash(key)
       {:uuid, "~> 1.1"},
@@ -72,6 +73,7 @@ defmodule Rig.Mixfile do
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
       {:floki, "~> 0.18.1", runtime: false},  # HTML parser
       {:confex, "~> 3.3"},  # Read and use application configuration from environment variables
+      {:peerage, "~> 1.0"},
     ]
   end
 

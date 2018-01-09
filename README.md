@@ -79,7 +79,13 @@ docker build -t rig .
 
 # Run the container (with Kafka broker bound to the host's en0 IP):
 export HOST_IP="$(ifconfig en0 inet | grep 'inet ' | awk '{ print $2 }')"
-docker run --name rig1 -p 4000:4000 -e KAFKA_HOSTS="${HOST_IP}:9092" rig
+docker run \
+--name rig \
+-p 4000:4000 \
+-e KAFKA_HOSTS="${HOST_IP}:9092" \
+-e NODE_HOST=localhost \
+-e NODE_COOKIE=magiccookie \
+rig
 
 # Check that the proxy api is indeed available on port 4000 (returns an empty list by default):
 curl localhost:4000/apis
