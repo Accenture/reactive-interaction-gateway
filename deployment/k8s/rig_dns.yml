@@ -42,7 +42,6 @@ spec:
       containers:
       - name: reactive-interaction-gateway
         image: accenture/reactive-interaction-gateway
-        imagePullPolicy: Never
         ports:
         - containerPort: 4000
         env:
