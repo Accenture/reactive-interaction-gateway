@@ -1,9 +1,10 @@
-defmodule RigInboundGateway.BlacklistTest do
+defmodule RigAuth.BlacklistTest do
   @moduledoc false
   use ExUnit.Case, async: true
   require Logger
-  alias RigInboundGateway.Blacklist
-  import RigInboundGateway.Blacklist, only: [add_jti: 4, contains_jti?: 2]
+  alias RigAuth.Blacklist
+  alias RigAuth.Blacklist.Tracker.TrackerBehaviour
+  import RigAuth.Blacklist, only: [add_jti: 4, contains_jti?: 2]
 
   describe "a blacklist" do
     setup [:with_tracker_mock]
@@ -109,7 +110,7 @@ defmodule RigInboundGateway.BlacklistTest do
             Agent.get(agent, fn list -> list |> Enum.find(fn {key, _} -> key == jti end) end)
           end
         ],
-        behaviour: RigInboundGateway.Blacklist.Tracker.TrackerBehaviour,
+        behaviour: TrackerBehaviour,
         call_info: true
       )
 

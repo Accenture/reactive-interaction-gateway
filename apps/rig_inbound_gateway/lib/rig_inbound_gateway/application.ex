@@ -12,7 +12,7 @@ defmodule RigInboundGateway.Application do
     children = [
       supervisor(RigInboundGatewayWeb.Endpoint, _args = []),
       supervisor(RigInboundGatewayWeb.Presence, []),
-      supervisor(RigInboundGateway.Blacklist.Sup, _args = []),
+      supervisor(RigAuth.Blacklist.Sup, _args = []),
       supervisor(RigInboundGateway.RateLimit.Sup, _args = []),
       supervisor(RigInboundGateway.ApiProxy.Sup, _args = [])
     ]

@@ -1,4 +1,4 @@
-defmodule RigInboundGateway.Blacklist.PresenceHandler do
+defmodule RigAuth.Blacklist.PresenceHandler do
   @moduledoc """
   Handles Phoenix Presence events.
 
@@ -13,7 +13,7 @@ defmodule RigInboundGateway.Blacklist.PresenceHandler do
   require Logger
   @behaviour Phoenix.Tracker
 
-  alias RigInboundGateway.Blacklist
+  alias RigAuth.Blacklist
 
   @blacklist_topic "blacklist"
 

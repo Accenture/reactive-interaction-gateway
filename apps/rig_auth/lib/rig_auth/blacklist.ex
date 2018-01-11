@@ -1,4 +1,4 @@
-defmodule RigInboundGateway.Blacklist do
+defmodule RigAuth.Blacklist do
   @moduledoc """
   Enables blacklisting of JWTs by their jti claim.
 
@@ -20,11 +20,11 @@ defmodule RigInboundGateway.Blacklist do
   """
   use Rig.Config, [:default_expiry_hours]
   require Logger
-  alias RigInboundGateway.Blacklist.Serializer
+  alias RigAuth.Blacklist.Serializer
 
   @typep state_t :: map
 
-  @default_tracker_mod RigInboundGateway.Blacklist.Tracker
+  @default_tracker_mod RigAuth.Blacklist.Tracker
 
   def start_link(tracker_mod \\ nil, opts \\ []) do
     tracker_mod = if tracker_mod, do: tracker_mod, else: @default_tracker_mod

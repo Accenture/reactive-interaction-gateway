@@ -1,4 +1,4 @@
-defmodule RigInboundGateway.Blacklist.Serializer do
+defmodule RigAuth.Blacklist.Serializer do
   @moduledoc """
   Serialization for types used in the Blacklist Presence struct.
 

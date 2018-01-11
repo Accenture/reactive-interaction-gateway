@@ -3,7 +3,7 @@ defmodule RigInboundGatewayWeb.Presence.Socket do
   use Phoenix.Socket
   require Logger
   alias RigAuth.Jwt
-  alias RigInboundGateway.Blacklist
+  alias RigAuth.Blacklist
 
   ## Channels
   channel "user:*", RigInboundGatewayWeb.Presence.Channel

@@ -1,4 +1,4 @@
-defmodule RigInboundGateway.Blacklist.Sup do
+defmodule RigAuth.Blacklist.Sup do
   @moduledoc """
   Supervisor for the global Blacklist.
 
@@ -6,7 +6,7 @@ defmodule RigInboundGateway.Blacklist.Sup do
 
   use Supervisor
 
-  alias RigInboundGateway.Blacklist.PresenceHandler
+  alias RigAuth.Blacklist.PresenceHandler
 
   def start_link do
     Supervisor.start_link(__MODULE__, :ok)

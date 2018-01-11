@@ -1,4 +1,4 @@
-defmodule RigInboundGateway.Blacklist.Tracker do
+defmodule RigAuth.Blacklist.Tracker do
   @moduledoc """
   Encapsulates Phoenix Presence, mainly to ease testing.
 
@@ -15,8 +15,8 @@ defmodule RigInboundGateway.Blacklist.Tracker do
   require Logger
   @behaviour TrackerBehaviour
 
-  alias RigInboundGateway.Blacklist.PresenceHandler, as: Presence
-  alias RigInboundGateway.Blacklist.Serializer
+  alias RigAuth.Blacklist.PresenceHandler, as: Presence
+  alias RigAuth.Blacklist.Serializer
 
   @topic "blacklist"
 

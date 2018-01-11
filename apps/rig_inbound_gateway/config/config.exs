@@ -111,9 +111,6 @@ jwt_payload_field_map = %{
   roles: {:system, "JWT_ROLES_FIELD", "roles"}
 }
 
-config :rig, RigInboundGateway.Blacklist,
-  default_expiry_hours: {:system, :integer, "JWT_BLACKLIST_DEFAULT_EXPIRY_HOURS", 1}
-
 # --------------------------------------
 # Transports, Channels, etc
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

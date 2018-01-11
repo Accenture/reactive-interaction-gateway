@@ -8,7 +8,7 @@ defmodule RigApi.ChannelsController do
   require Logger
   alias RigInboundGatewayWeb.Presence.Channel
   alias RigInboundGatewayWeb.Endpoint
-  alias RigInboundGateway.Blacklist
+  alias RigAuth.Blacklist
   alias RigAuth.Jwt
 
   def list_channels(conn, _params) do
