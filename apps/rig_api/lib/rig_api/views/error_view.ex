@@ -5,6 +5,14 @@ defmodule RigApi.ErrorView do
     %{errors: %{detail: "Not found"}}
   end
 
+  def render("401.json", _assigns) do
+    %{errors: %{detail: "Unauthorized"}}
+  end
+
+  def render("4" <> <<_::bytes-size(2)>> <> ".json", _assigns) do
+    %{errors: %{detail: "Bad request"}}
+  end
+
   def render("500.json", _assigns) do
     %{errors: %{detail: "Internal server error"}}
   end

@@ -2,7 +2,7 @@ defmodule RigApi.Router do
   use RigApi, :router
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug :put_format, :json
   end
 
   pipeline :scope_auth, do: plug RigAuth.Jwt.Plug

@@ -22,7 +22,7 @@ defmodule RigApi.ChannelCase do
       alias RigInboundGatewayWeb.Presence.Channel, as: PresenceChannel
 
       # The default endpoint for testing
-      @endpoint RigInboundGatewayWeb.Endpoint
+      @endpoint RigApi.Endpoint
 
       # Roles definitions
       @support_role "support"

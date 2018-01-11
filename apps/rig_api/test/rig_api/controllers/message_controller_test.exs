@@ -1,77 +1,34 @@
 defmodule RigApiWeb.MessageControllerTest do
-  # use RigApi.ConnCase
+  @moduledoc false
+  use RigApi.ConnCase
+  use RigApi.ChannelCase
 
-  # alias RigOutboundGateway.Outbound
-  # alias RigOutboundGateway.Outbound.Message
+  setup do
+    conn =
+      build_conn()
+      |> put_req_header("content-type", "application/json")
 
-  # @create_attrs %{}
-  # @update_attrs %{}
-  # @invalid_attrs %{}
+    {:ok, conn: conn}
+  end
 
-  # def fixture(:message) do
-  #   {:ok, message} = Outbound.create_message(@create_attrs)
-  #   message
-  # end
+  describe "posting a message" do
+    test "should return :accepted if successful", %{conn: conn} do
+      # Let's verify that the message actually gets delivered:
+      @endpoint.subscribe(_channel = "user:testuser")
 
-  # setup %{conn: conn} do
-  #   {:ok, conn: put_req_header(conn, "accept", "application/json")}
-  # end
+      body = ~s({"user":"testuser","foo":"bar"})
+      conn = post conn, "/v1/messages", body
+      assert conn.status == 202
 
-  # describe "index" do
-  #   test "lists all messages", %{conn: conn} do
-  #     conn = get conn, message_path(conn, :index)
-  #     assert json_response(conn, 200)["data"] == []
-  #   end
-  # end
+      expected_event = "message"
+      expected_payload = %{"user" => "testuser", "foo" => "bar"}
+      assert_broadcast ^expected_event, ^expected_payload
+    end
 
-  # describe "create message" do
-  #   test "renders message when data is valid", %{conn: conn} do
-  #     conn = post conn, message_path(conn, :create), message: @create_attrs
-  #     assert %{"id" => id} = json_response(conn, 201)["data"]
-
-  #     conn = get conn, message_path(conn, :show, id)
-  #     assert json_response(conn, 200)["data"] == %{
-  #       "id" => id}
-  #   end
-
-  #   test "renders errors when data is invalid", %{conn: conn} do
-  #     conn = post conn, message_path(conn, :create), message: @invalid_attrs
-  #     assert json_response(conn, 422)["errors"] != %{}
-  #   end
-  # end
-
-  # describe "update message" do
-  #   setup [:create_message]
-
-  #   test "renders message when data is valid", %{conn: conn, message: %Message{id: id} = message} do
-  #     conn = put conn, message_path(conn, :update, message), message: @update_attrs
-  #     assert %{"id" => ^id} = json_response(conn, 200)["data"]
-
-  #     conn = get conn, message_path(conn, :show, id)
-  #     assert json_response(conn, 200)["data"] == %{
-  #       "id" => id}
-  #   end
-
-  #   test "renders errors when data is invalid", %{conn: conn, message: message} do
-  #     conn = put conn, message_path(conn, :update, message), message: @invalid_attrs
-  #     assert json_response(conn, 422)["errors"] != %{}
-  #   end
-  # end
-
-  # describe "delete message" do
-  #   setup [:create_message]
-
-  #   test "deletes chosen message", %{conn: conn, message: message} do
-  #     conn = delete conn, message_path(conn, :delete, message)
-  #     assert response(conn, 204)
-  #     assert_error_sent 404, fn ->
-  #       get conn, message_path(conn, :show, message)
-  #     end
-  #   end
-  # end
-
-  # defp create_message(_) do
-  #   message = fixture(:message)
-  #   {:ok, message: message}
-  # end
+    test "should return :bad_request if missing user field", %{conn: conn} do
+      body = ~s({"foo":"bar"})
+      conn = post conn, "/v1/messages", body
+      assert conn.status == 400
+    end
+  end
 end
