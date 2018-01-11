@@ -30,6 +30,7 @@ We follow the [standard GitHub workflow](https://guides.github.com/introduction/
 Before submitting a PR,
 - please write tests,
 - make sure you run all tests and check the linter (credo) for warnings.
+- update `CHANGELOG.md` file with your current change in form of `[Type of change e.g. Config, Kafka, .etc] Short description what it is all about - [#PR-ID-NUMBER](link to pull request)`, please put your change under suitable section - changed, added, fixed, removed, deprecated
 
 An overview of the directory structure:
 - `lib/rig`

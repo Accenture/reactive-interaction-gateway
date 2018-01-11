@@ -1,0 +1,29 @@
+{
+  "name": "channels-ui",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": {
+    "/": {
+      "target": "http://localhost:7000",
+      "ws": true
+    }
+  },
+  "dependencies": {
+    "bulma": "^0.6.1",
+    "jsonwebtoken": "^8.1.0",
+    "phoenix": "~1.2.1",
+    "proptypes": "^1.1.0",
+    "react": "^16.1.1",
+    "react-dom": "^16.1.1",
+    "uuid": "^3.1.0"
+  },
+  "devDependencies": {
+    "react-scripts": "1.0.17"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}

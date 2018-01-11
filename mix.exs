@@ -70,6 +70,7 @@ defmodule Rig.Umbrella.Mixfile do
         "guides/architecture/decisions/0001-record-architecture-decisions.md": [group: "Architecture Decisions"],
         "guides/architecture/decisions/0002-don-t-check-for-functionclauseerror-in-tests.md": [group: "Architecture Decisions"],
         "guides/architecture/decisions/0004-use-rig-config-for-global-configuration.md": [group: "Architecture Decisions"],
+        "guides/architecture/decisions/0005-maintain-changelog.md": [group: "Architecture Decisions"],
       ],
     ]
   end
