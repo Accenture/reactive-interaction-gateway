@@ -50,7 +50,7 @@ spec:
         # in that case also set KAFKA_HOSTS env var to point to Kafka
         - name: KAFKA_ENABLED
           value: "false"
-        # Let's have ave some testing API endpoints
+        # Let's have some test-endpoints
         - name: PROXY_CONFIG_FILE
           value: "proxy/proxy.test.json"
         # Mandatory: distributed mode setup
