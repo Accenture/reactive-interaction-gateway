@@ -25,3 +25,29 @@ Path | Umbrella App | What's in there
 ---- | ------------ | ---------------
 `apps/rig_admin_frontend` | `:rig_admin_frontend` | An admin UI (again, a Phoenix app). For displaying and changing RIG's internal state, only `:rig_api` will be used. Ideas what could be offered: data about front-end connections, connections to other RIG nodes, message throughput, ..
 `apps/rig_monitor` | `:rig_monitor` | Provides statistics to external monitoring applications like Prometheus, relying on `:rig_api` to gather the data.
+
+### Adding/Removing an umbrella app
+
+In order to add a new umbrella app, go to the `apps/` directory and use one of the mix generators. Make sure that the name of your app starts with `rig_` to uphold consistency. For example:
+
+```bash
+cd apps
+mix new rig_my_new_app
+```
+
+Then go through the following:
+
+- In the app's `mix.exs`,
+  - set the project's `version` to `Rig.Umbrella.Mixfile.rig_version()`, and
+  - set the project's `elixir` to `Rig.Umbrella.Mixfile.elixir_version()`.
+- Update the table above with a description of what should go into the new app.
+- Add/remove your app to/from the applications set in `rel/config.exs`.
+- Add/remove your app to/from the `Dockerfile` with the relevant directories.
+
+## Incrementing the Elixir and OTP versions
+
+To have the project use a newer Elixir version, make sure to change the following locations:
+
+- `.travis.yml`
+- `Dockerfile` (the `FROM` image tag)
+- `mix.exs` (only the top-level one)
