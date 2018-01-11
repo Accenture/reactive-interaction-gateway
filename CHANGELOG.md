@@ -1,6 +1,6 @@
 # Changelog
 
-[Unreleased]
+## v1.1.0 (January 11, 2018)
 
 - Changed
   - [Config] Increase default rate limits - [#16](https://github.com/Accenture/reactive-interaction-gateway/pull/16)
