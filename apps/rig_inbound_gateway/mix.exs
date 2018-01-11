@@ -4,15 +4,15 @@ defmodule RigInboundGateway.Mixfile do
   def project do
     [
       app: :rig_inbound_gateway,
-      version: "0.0.1",
+      version: Rig.Umbrella.Mixfile.rig_version(),
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.5",
-      elixirc_paths: elixirc_paths(Mix.env),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers,
-      start_permanent: Mix.env == :prod,
+      elixir: Rig.Umbrella.Mixfile.elixir_version(),
+      elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls]
@@ -31,7 +31,7 @@ defmodule RigInboundGateway.Mixfile do
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
 
   # Specifies your project dependencies.
   #
@@ -50,8 +50,10 @@ defmodule RigInboundGateway.Mixfile do
       {:poison, "~> 2.0 or ~> 3.0"},
       {:timex, "~> 3.1.22"},
       {:stubr, "~> 1.5.0", only: :test},
-      {:ex2ms, "~> 1.0"},  # Elixir-compatible :ets.fun2ms/1
-      {:confex, "~> 3.3"},  # Read and use application configuration from environment variables
+      # Elixir-compatible :ets.fun2ms/1
+      {:ex2ms, "~> 1.0"},
+      # Read and use application configuration from environment variables
+      {:confex, "~> 3.3"}
     ]
   end
 

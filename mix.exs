@@ -2,24 +2,37 @@ defmodule Rig.Umbrella.Mixfile do
   @moduledoc false
   use Mix.Project
 
+  @doc """
+  Global version to be used in the umbrella-apps' Mix-files.
+  """
+  def rig_version,
+    do: "../../version" |> File.read!() |> String.trim()
+
+  @doc """
+  Elixir version to be used for all umbrella apps.
+  """
+  def elixir_version,
+    do: "~> 1.5"
+
   def project do
     [
       apps_path: "apps",
       description: description(),
       docs: docs(),
-      package: package(),  # hex.pm doesn't support umbrella projects
-      elixir: "~> 1.5",
-      compilers: [:phoenix] ++ Mix.compilers,
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
+      # hex.pm doesn't support umbrella projects
+      package: package(),
+      elixir: elixir_version(),
+      compilers: [:phoenix] ++ Mix.compilers(),
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
-        "coveralls": :test,
+        coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
-      ],
+      ]
     ]
   end
 
@@ -34,7 +47,7 @@ defmodule Rig.Umbrella.Mixfile do
       {:credo, "~> 0.7", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test]},
       {:distillery, "~> 1.4"},
-      {:ex_doc, "~> 0.16", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.16", only: :dev, runtime: false}
     ]
   end
 
@@ -50,7 +63,7 @@ defmodule Rig.Umbrella.Mixfile do
       name: "rig",
       maintainers: ["Kevin Bader", "Mario Macai", "Martin Lofaj"],
       licenses: ["Apache 2.0"],
-      links: %{"GitHub" => "https://github.com/Accenture/reactive-interaction-gateway"},
+      links: %{"GitHub" => "https://github.com/Accenture/reactive-interaction-gateway"}
     ]
   end
 
@@ -59,7 +72,7 @@ defmodule Rig.Umbrella.Mixfile do
       name: "Reactive Interaction Gateway",
       source_url: "https://github.com/Accenture/reactive-interaction-gateway",
       homepage_url: "https://github.com/Accenture/reactive-interaction-gateway",
-      #homepage_url: "https://accenture.github.io/reactive-interaction-gateway",
+      # homepage_url: "https://accenture.github.io/reactive-interaction-gateway",
       main: "motivation",
       extras: [
         "README.md": [title: "README"],
@@ -67,11 +80,19 @@ defmodule Rig.Umbrella.Mixfile do
         "guides/configuration.md": [title: "Configuration"],
         "CODE_OF_CONDUCT.md": [title: "Code of Conduct"],
         "CONTRIBUTING.md": [title: "Contributing"],
-        "guides/architecture/decisions/0001-record-architecture-decisions.md": [group: "Architecture Decisions"],
-        "guides/architecture/decisions/0002-don-t-check-for-functionclauseerror-in-tests.md": [group: "Architecture Decisions"],
-        "guides/architecture/decisions/0004-use-rig-config-for-global-configuration.md": [group: "Architecture Decisions"],
-        "guides/architecture/decisions/0005-maintain-changelog.md": [group: "Architecture Decisions"],
-      ],
+        "guides/architecture/decisions/0001-record-architecture-decisions.md": [
+          group: "Architecture Decisions"
+        ],
+        "guides/architecture/decisions/0002-don-t-check-for-functionclauseerror-in-tests.md": [
+          group: "Architecture Decisions"
+        ],
+        "guides/architecture/decisions/0004-use-rig-config-for-global-configuration.md": [
+          group: "Architecture Decisions"
+        ],
+        "guides/architecture/decisions/0005-maintain-changelog.md": [
+          group: "Architecture Decisions"
+        ]
+      ]
     ]
   end
 end

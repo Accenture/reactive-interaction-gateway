@@ -4,14 +4,14 @@ defmodule RigAuth.Mixfile do
   def project do
     [
       app: :rig_auth,
-      version: "0.1.0",
+      version: Rig.Umbrella.Mixfile.rig_version(),
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.5",
-      elixirc_paths: elixirc_paths(Mix.env),
-      start_permanent: Mix.env == :prod,
+      elixir: Rig.Umbrella.Mixfile.elixir_version(),
+      elixirc_paths: elixirc_paths(Mix.env()),
+      start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: [tool: ExCoveralls]
     ]
@@ -26,7 +26,7 @@ defmodule RigAuth.Mixfile do
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
@@ -39,7 +39,7 @@ defmodule RigAuth.Mixfile do
       {:phoenix, "~> 1.3.0"},
       {:plug, "~> 1.4"},
       {:poison, "~> 2.0 or ~> 3.0"},
-      {:stubr, "~> 1.5.0", only: :test},
+      {:stubr, "~> 1.5.0", only: :test}
     ]
   end
 end
