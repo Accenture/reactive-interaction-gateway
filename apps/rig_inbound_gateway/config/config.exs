@@ -25,7 +25,7 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
     port: {:system, :integer, "PORT", 4000}
   ],
   render_errors: [view: RigInboundGatewayWeb.ErrorView, accepts: ~w(html json xml)],
-  pubsub: [name: RigMesh.PubSub]
+  pubsub: [name: Rig.PubSub]
 
 # --------------------------------------
 # API Gateway (Proxy)

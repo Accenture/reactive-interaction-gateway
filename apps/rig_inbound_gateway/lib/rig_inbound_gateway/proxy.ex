@@ -313,7 +313,7 @@ defmodule RigInboundGateway.Proxy do
   end
 
   @spec get_node_name() :: atom
-  defp get_node_name, do: Phoenix.PubSub.node_name(RigMesh.PubSub)
+  defp get_node_name, do: Phoenix.PubSub.node_name(Rig.PubSub)
 
   # Enhance API definition with internal information
   @spec add_meta_info(api_definition, map) :: api_definition

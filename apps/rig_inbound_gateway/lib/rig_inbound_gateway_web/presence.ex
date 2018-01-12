@@ -5,5 +5,5 @@ defmodule RigInboundGatewayWeb.Presence do
   """
   use Phoenix.Presence,
     otp_app: :rig_inbound_gateway,
-    pubsub_server: RigMesh.PubSub
+    pubsub_server: Rig.PubSub
 end

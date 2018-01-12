@@ -45,7 +45,6 @@ defmodule RigInboundGateway.Mixfile do
   defp deps do
     [
       {:rig, in_umbrella: true},
-      {:rig_mesh, in_umbrella: true},
       {:rig_auth, in_umbrella: true},
       {:phoenix, "~> 1.3.0"},
       {:phoenix_pubsub, "~> 1.0"},

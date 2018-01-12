@@ -24,7 +24,7 @@ defmodule RigAuth.Blacklist.Tracker do
   def track(jti, expiry) do
     Phoenix.Tracker.track(
       _tracker = Presence,
-      _pid = Process.whereis(RigMesh.PubSub),
+      _pid = Process.whereis(Rig.PubSub),
       @topic,
       _key = jti,
       _meta = %{expiry: Serializer.serialize_datetime!(expiry)})
@@ -34,7 +34,7 @@ defmodule RigAuth.Blacklist.Tracker do
   def untrack(jti) do
     Phoenix.Tracker.untrack(
       _tracker = Presence,
-      _pid = Process.whereis(RigMesh.PubSub),
+      _pid = Process.whereis(Rig.PubSub),
       @topic,
       _key = jti)
   end

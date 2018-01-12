@@ -36,7 +36,7 @@ defmodule RigOutboundGateway.OutboundTest do
       assert Stubr.called_with_exactly?(stub, :channel_name, [["myUser"]])
 
       assert Stubr.called_with_exactly?(stub, :broadcast, [
-               [RigMesh.PubSub, "user:myUser", "message", value]
+               [Rig.PubSub, "user:myUser", "message", value]
              ])
     end
   end

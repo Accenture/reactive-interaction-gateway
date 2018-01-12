@@ -27,7 +27,7 @@ defmodule RigInboundGateway.ApiProxy.Tracker do
     Logger.info("Starting to track new API definition with id=#{id}")
     Phoenix.Tracker.track(
       _tracker = Presence,
-      _pid = Process.whereis(RigMesh.PubSub),
+      _pid = Process.whereis(Rig.PubSub),
       @topic,
       _key = id,
       _meta = api)
@@ -38,7 +38,7 @@ defmodule RigInboundGateway.ApiProxy.Tracker do
     Logger.info("Updating API definition with id=#{id}")
     Phoenix.Tracker.update(
       _tracker = Presence,
-      _pid = Process.whereis(RigMesh.PubSub),
+      _pid = Process.whereis(Rig.PubSub),
       @topic,
       _key = id,
       _meta = api)

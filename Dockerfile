@@ -15,7 +15,6 @@ COPY rel /opt/sites/rig/rel
 # Copy necessary files for dependencies
 COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
-COPY apps/rig_mesh/mix.exs /opt/sites/rig/apps/rig_mesh/
 COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
 COPY apps/rig_api/mix.exs /opt/sites/rig/apps/rig_api/
 COPY apps/rig_auth/mix.exs /opt/sites/rig/apps/rig_auth/
@@ -28,9 +27,6 @@ RUN mix deps.get
 # Copy application files
 
 COPY config /opt/sites/rig/config
-
-COPY apps/rig_mesh/config /opt/sites/rig/apps/rig_mesh/config
-COPY apps/rig_mesh/lib /opt/sites/rig/apps/rig_mesh/lib
 
 COPY apps/rig/config /opt/sites/rig/apps/rig/config
 COPY apps/rig/lib /opt/sites/rig/apps/rig/lib

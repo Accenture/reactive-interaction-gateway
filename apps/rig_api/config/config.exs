@@ -21,7 +21,7 @@ config :rig_api, RigApi.Endpoint,
     port: {:system, :integer, "PORT", 4010}
   ],
   render_errors: [view: RigApi.ErrorView, accepts: ~w(json)],
-  pubsub: [name: RigMesh.PubSub]
+  pubsub: [name: Rig.PubSub]
 
 config :rig, RigApi.ApisController,
   rig_proxy: RigInboundGateway.Proxy

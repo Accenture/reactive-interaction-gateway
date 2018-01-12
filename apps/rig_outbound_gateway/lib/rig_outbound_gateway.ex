@@ -7,7 +7,7 @@ defmodule RigOutboundGateway do
 
   alias Phoenix.Channel.Server, as: PhoenixChannelServer
 
-  @pubsub_server RigMesh.PubSub
+  @pubsub_server Rig.PubSub
 
   def handle_raw(raw, parse, send, ack) do
     case parse.(raw) do

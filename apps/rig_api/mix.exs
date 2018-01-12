@@ -45,7 +45,6 @@ defmodule RigApi.Mixfile do
   defp deps do
     [
       {:rig, in_umbrella: true},
-      {:rig_mesh, in_umbrella: true},
       {:rig_inbound_gateway, in_umbrella: true},
       {:rig_outbound_gateway, in_umbrella: true},
       {:rig_auth, in_umbrella: true},
