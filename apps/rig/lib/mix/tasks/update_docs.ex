@@ -22,9 +22,9 @@ defmodule Mix.Tasks.UpdateDocs do
 
   def resolve_filename do
     if Project.umbrella?() do
-      "./test.md"
+      "./guides/operator-guide.md"
     else
-      "../../test.md"
+      "../../guides/operator-guide.md"
     end
   end
 
