@@ -25,7 +25,7 @@ config :rig, RigOutboundGateway.Kafka.MessageHandler,
   user_channel_name_mf: {RigWeb.Presence.Channel, :user_channel_name}
 
 config :rig, RigOutboundGateway.Kafka.SupWrapper,
-  enabled?: {:system, :boolean, "KAFKA_ENABLED", true}
+  enabled?: {:system, :boolean, "KAFKA_ENABLED", false}
 
 config :rig, RigOutboundGateway.Kafka.Sup,
   brod_client_id: brod_client_id,
