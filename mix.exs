@@ -2,26 +2,15 @@ defmodule Rig.Umbrella.Mixfile do
   @moduledoc false
   use Mix.Project
 
-  @doc """
-  Global version to be used in the umbrella-apps' Mix-files.
-  """
-  def rig_version,
-    do: "../../version" |> File.read!() |> String.trim()
-
-  @doc """
-  Elixir version to be used for all umbrella apps.
-  """
-  def elixir_version,
-    do: "~> 1.5"
-
   def project do
+    %{elixir: elixir_version} = versions()
     [
       apps_path: "apps",
       description: description(),
       docs: docs(),
       # hex.pm doesn't support umbrella projects
       package: package(),
-      elixir: elixir_version(),
+      elixir: elixir_version,
       compilers: [:phoenix] ++ Mix.compilers(),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -34,6 +23,11 @@ defmodule Rig.Umbrella.Mixfile do
         "coveralls.html": :test
       ]
     ]
+  end
+
+  defp versions do
+    {map, []} = Code.eval_file("version", ".")
+    map
   end
 
   # Dependencies listed here are available only for this

@@ -2,14 +2,15 @@ defmodule RigAuth.Mixfile do
   use Mix.Project
 
   def project do
+    %{rig: rig_version, elixir: elixir_version} = versions()
     [
       app: :rig_auth,
-      version: Rig.Umbrella.Mixfile.rig_version(),
+      version: rig_version,
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: Rig.Umbrella.Mixfile.elixir_version(),
+      elixir: elixir_version,
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -22,6 +23,11 @@ defmodule RigAuth.Mixfile do
     [
       extra_applications: [:logger]
     ]
+  end
+
+  defp versions do
+    {map, []} = Code.eval_file("version", "../..")
+    map
   end
 
   # Specifies which paths to compile per environment.
