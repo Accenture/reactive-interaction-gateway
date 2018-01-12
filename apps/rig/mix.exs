@@ -36,6 +36,8 @@ defmodule Rig.MixProject do
   defp deps do
     [
       {:phoenix_pubsub, "~> 1.0"},
+      # for Kafka, partition from MurmurHash(key):
+      {:murmur, "~> 1.0"}
     ]
   end
 

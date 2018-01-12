@@ -6,6 +6,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   If endpoint needs authentication, it is automatically triggered.
   Valid HTTP requests are forwarded to given service and their response is sent back to client.
   """
+  use Rig.Config, [:logger_modules, :active_loggers]
   use Plug.Router
   require Logger
 
@@ -111,7 +112,8 @@ defmodule RigInboundGateway.ApiProxy.Router do
 
   @spec forward_request(Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
   defp forward_request(endpoint, api, conn) do
-    log_to_kafka(api, endpoint, conn)
+    log_request(endpoint, api, conn)
+
     %{
       method: method,
       request_path: request_path,
@@ -154,18 +156,18 @@ defmodule RigInboundGateway.ApiProxy.Router do
     Base.post!(url, Poison.encode!(params), headers)
   end
 
-  # Log API call to Kafka
-  @spec log_to_kafka(Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: :ok
-  defp log_to_kafka(%{"auth_type" => "jwt"}, %{"not_secured" => false} = _endpoint, _conn) do
-    # TODO we need a more general logging module that takes care of things like this.
-    # E.g., if logging to Kafka is disabled, a user could still want to log calls to
-    # a file-based logger (like a normal access.log of a webserver).
-    # Kafka.log_proxy_api_call(endpoint, conn)
-    :ok
-  end
-  defp log_to_kafka(_api, _endpoint, _conn) do
-    # no-op - we only log authenticated requests for now.
-    :ok
+  @spec log_request(Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: :ok
+  defp log_request(endpoint, api, conn) do
+    conf = config()
+
+    conf.active_loggers
+    |> Enum.each(fn
+      nil -> :ignore
+      "" -> :ignore
+      (name) ->
+        mod = Map.fetch!(conf.logger_modules, name)
+        mod.log_call(endpoint, api, conn)
+    end)
   end
 
   # Send error message with unsupported HTTP method
