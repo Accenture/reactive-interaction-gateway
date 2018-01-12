@@ -1,4 +1,4 @@
-# RIG Developer Guide
+# Developer's Guide to the Reactive Interaction Gateway
 
 TODO getting started
 
