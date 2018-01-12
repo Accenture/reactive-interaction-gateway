@@ -63,18 +63,17 @@ defmodule RigInboundGatewayWeb.ConnCase do
                       |> Keyword.fetch!(:jwt_secret_key)
 
       # Generation of JWT
-      def generate_jwt(actions \\ []) do
-        %{"scopes" => %{"rg" => %{"actions" => actions}}}
-          |> token
-          |> with_exp
-          |> with_signer(@jwt_secret_key |> hs256)
-          |> sign
-          |> get_compact
+      def generate_jwt() do
+        token()
+        |> with_exp
+        |> with_signer(@jwt_secret_key |> hs256)
+        |> sign
+        |> get_compact
       end
 
       # Setup for HTTP connection with JWT
-      def setup_conn(scopes \\ []) do
-        jwt = generate_jwt(scopes)
+      def setup_conn() do
+        jwt = generate_jwt()
         build_conn()
         |> put_req_header("accept", "application/json")
         |> put_req_header("authorization", jwt)

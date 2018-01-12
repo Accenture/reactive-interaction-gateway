@@ -5,18 +5,6 @@ defmodule RigAuth.Jwt.UtilsTest do
 
   alias RigAuth.Jwt.Utils
 
-  describe "valid_scope?/3" do
-    test "should return true with valid action" do
-      jwt = generate_jwt(["testAction"])
-      assert Utils.valid_scope?([jwt], "rg", "testAction")
-    end
-
-    test "should return false with invalid action" do
-      jwt = generate_jwt(["invalidAction"])
-      refute Utils.valid_scope?([jwt], "rg", "testAction")
-    end
-  end
-
   describe "decode/1" do
     test "should return decoded jwt payload with valid jwt" do
       jwt = generate_jwt()

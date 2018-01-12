@@ -21,15 +21,6 @@ defmodule RigAuth.Jwt.Utils do
     |> get_data
   end
 
-  @spec valid_scope?(String.t, String.t, String.t) :: boolean
-  def valid_scope?(jwt, namespace, action) do
-    jwt
-    |> List.first
-    |> validate
-    |> get_claims
-    |> has_valid_scope?(namespace, action)
-  end
-
   @spec validate(String.t) :: map
   defp validate(jwt) do
     conf = config()
@@ -39,16 +30,5 @@ defmodule RigAuth.Jwt.Utils do
     |> with_validation("exp", &(&1 > current_time()))
     |> with_signer(conf.secret_key |> hs256)
     |> verify
-  end
-
-  @spec has_valid_scope?(nil, String.t, String.t) :: false
-  defp has_valid_scope?(nil, _namespace, _action), do: false
-  @spec has_valid_scope?(claim_map, String.t, String.t) :: boolean
-  defp has_valid_scope?(claims, namespace, action) do
-    claims
-    |> Map.get("scopes")
-    |> Map.get(namespace)
-    |> Map.get("actions")
-    |> Enum.member?(action)
   end
 end

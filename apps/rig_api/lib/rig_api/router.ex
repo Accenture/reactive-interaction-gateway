@@ -5,8 +5,6 @@ defmodule RigApi.Router do
     plug :put_format, :json
   end
 
-  pipeline :scope_auth, do: plug RigAuth.Jwt.Plug
-
   scope "/v1", RigApi do
     pipe_through :api
     resources "/messages", MessageController, only: [:create]
@@ -14,7 +12,6 @@ defmodule RigApi.Router do
 
   scope "/v1/users", RigApi do
     pipe_through :api
-    pipe_through :scope_auth
     get "/", ChannelsController, :list_channels
     get "/:user/sessions", ChannelsController, :list_channel_sessions
     delete "/:user/sessions/:jti", ChannelsController, :disconnect_channel_session
