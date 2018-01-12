@@ -17,7 +17,7 @@ defmodule RigApi.ChannelsControllerTest do
 
   test "GET /v1/users should return list of channels", %{sock: sock} do
     conn =
-      setup_conn()
+      build_conn()
       |> get("/v1/users")
     assert response(conn, 200) =~ "[\"testuser\"]"
     leave sock
@@ -25,7 +25,7 @@ defmodule RigApi.ChannelsControllerTest do
 
   test "GET /v1/users/testuser/sessions should return list of users in channel testuser", %{sock: sock} do
     conn =
-      setup_conn()
+      build_conn()
       |> get("/v1/users/testuser/sessions")
 
     username =
@@ -41,7 +41,7 @@ defmodule RigApi.ChannelsControllerTest do
   test "DELETE /v1/users/testuser/sessions/abc123 should broadcast disconnect event to user with jti abc123", %{sock: sock} do
     @endpoint_channels.subscribe("abc123")
     conn =
-      setup_conn()
+      build_conn()
       |> delete("/v1/users/testuser/sessions/abc123")
 
     assert_broadcast("disconnect", %{})
