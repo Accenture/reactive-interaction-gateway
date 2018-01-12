@@ -27,20 +27,12 @@ defmodule RigAuth.ConnCase do
                       |> Keyword.fetch!(:jwt_secret_key)
 
       # Generation of JWT
-      def generate_jwt() do
+      def generate_jwt do
         token()
         |> with_exp
         |> with_signer(@jwt_secret_key |> hs256)
         |> sign
         |> get_compact
-      end
-
-      # Setup for HTTP connection with JWT
-      def setup_conn(method, path) do
-        jwt = generate_jwt()
-        Phoenix.ConnTest.build_conn(method, path)
-        |> put_req_header("accept", "application/json")
-        |> put_req_header("authorization", jwt)
       end
     end
   end

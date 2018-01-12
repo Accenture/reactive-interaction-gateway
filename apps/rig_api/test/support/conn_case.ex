@@ -20,7 +20,6 @@ defmodule RigApi.ConnCase do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
       import RigApi.Router.Helpers
-      import Joken
 
       # Example mock API definition to ease testing
       @mock_api %{
@@ -56,27 +55,6 @@ defmodule RigApi.ConnCase do
 
       # The default endpoint for testing
       @endpoint RigApi.Endpoint
-
-      # The key for signing JWTs:
-      @jwt_secret_key Confex.fetch_env!(:rig, RigApi.ConnCase)
-                      |> Keyword.fetch!(:jwt_secret_key)
-
-      # Generation of JWT
-      def generate_jwt() do
-        token()
-        |> with_exp
-        |> with_signer(@jwt_secret_key |> hs256)
-        |> sign
-        |> get_compact
-      end
-
-      # Setup for HTTP connection with JWT
-      def setup_conn() do
-        jwt = generate_jwt()
-        build_conn()
-        |> put_req_header("accept", "application/json")
-        |> put_req_header("authorization", jwt)
-      end
     end
   end
 
