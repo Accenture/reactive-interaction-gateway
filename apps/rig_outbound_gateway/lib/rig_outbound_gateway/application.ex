@@ -6,10 +6,8 @@ defmodule RigOutboundGateway.Application do
   alias RigOutboundGateway.Kafka
 
   def start(_type, _args) do
-    import Supervisor.Spec
-
     children = [
-      supervisor(Kafka.Sup, [])
+      Kafka.SupWrapper
     ]
 
     opts = [strategy: :one_for_one, name: RigOutboundGateway.Supervisor]
