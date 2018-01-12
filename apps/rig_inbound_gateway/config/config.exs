@@ -66,40 +66,6 @@ session_role = {:system, "SESSION_ROLE", "user"}
 privileged_roles = {:system, :list, "PRIVILEGED_ROLES", []}
 
 # --------------------------------------
-# Kafka
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-# Kafka JSON message fields:
-kafka_message_field_map = %{
-  # Name of the JSON property holding the user ID of the recipient:
-  user: {:system, "KAFKA_USER_FIELD", "user"}
-}
-
-brod_client_id = :rig_brod_client
-
-config :rig, RigInboundGateway.Kafka,
-  brod_client_id: brod_client_id,
-  # Logging API calls to Kafka is enabled if, and only if, this topic is set:
-  log_topic: {:system, "KAFKA_LOG_TOPIC", nil}
-
-config :rig, RigInboundGateway.Kafka.GroupSubscriber,
-  brod_client_id: brod_client_id,
-  consumer_group: {:system, "KAFKA_CONSUMER_GROUP", "rig-consumer-group"},
-  source_topics: {:system, :list, "KAFKA_SOURCE_TOPICS", ["rig"]}
-
-config :rig, RigInboundGateway.Kafka.MessageHandler,
-  message_user_field: kafka_message_field_map.user,
-  user_channel_name_mf: {RigInboundGatewayWeb.Presence.Channel, :user_channel_name}
-
-config :rig, RigInboundGateway.Kafka.SupWrapper,
-  message_user_field: kafka_message_field_map.user,
-  enabled?: {:system, :boolean, "KAFKA_ENABLED", true}
-
-config :rig, RigInboundGateway.Kafka.Sup,
-  brod_client_id: brod_client_id,
-  hosts: {:system, :list, "KAFKA_HOSTS", ["localhost:9092"]}
-
-# --------------------------------------
 # Authorization Token (JWT)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

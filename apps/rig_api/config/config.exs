@@ -10,14 +10,6 @@ config :rig_api, :generators,
   migration: false
 
 # --------------------------------------
-# Logger
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:module, :request_id]
-
-# --------------------------------------
 # Phoenix
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
