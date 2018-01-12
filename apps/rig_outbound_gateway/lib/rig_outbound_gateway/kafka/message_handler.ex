@@ -8,7 +8,8 @@ defmodule RigOutboundGateway.Kafka.MessageHandler do
   defrecord :kafka_message, extract(:kafka_message, from_lib: "brod/include/brod.hrl")
 
   alias RigOutboundGateway
-  alias Poison.Parser
+
+  alias Poison.Parser, as: JsonParser
 
   @default_send &RigOutboundGateway.send/1
 
@@ -19,56 +20,27 @@ defmodule RigOutboundGateway.Kafka.MessageHandler do
           RigOutboundGateway.send_t()
         ) :: no_return
   def message_handler_loop(topic, partition, group_subscriber_pid, send \\ @default_send) do
+    common_meta = [
+      topic: topic,
+      partition: partition
+    ]
+
     receive do
       msg ->
-        %{offset: offset, value: value} = Enum.into(kafka_message(msg), %{})
+        %{offset: offset, value: body} = Enum.into(kafka_message(msg), %{})
+        meta = Keyword.merge(common_meta, body_raw: body, offset: offset)
+        ack = fn -> ack_message(group_subscriber_pid, topic, partition, offset) end
 
-        case Parser.parse(value) do
-          {:ok, payload} ->
-            send.(payload)
-            log_success_message(payload, topic, partition, offset)
+        RigOutboundGateway.handle_raw(body, &JsonParser.parse/1, send, ack)
+        |> RigOutboundGateway.Logger.log(__MODULE__, meta)
 
-          err ->
-            log_error_message(err, value, topic, partition, offset)
-        end
-
-        # Send the async ack to group subscriber (the offset will be eventually
-        # committed to Kafka):
-        :brod_group_subscriber.ack(group_subscriber_pid, topic, partition, offset)
-        __MODULE__.message_handler_loop(topic, partition, group_subscriber_pid, send)
-    after
-      1000 ->
         __MODULE__.message_handler_loop(topic, partition, group_subscriber_pid, send)
     end
   end
 
-  defp log_success_message(message, topic, partition, offset) do
-    Logger.debug(fn ->
-      message_length = String.length(message)
-      message = format_message(message, 200)
-
-      "#{inspect(self())} #{topic}-#{partition} Offset:#{offset} Len:#{message_length} Val:#{
-        message
-      }"
-    end)
-  end
-
-  defp log_error_message(err, non_json, topic, partition, offset) do
-    Logger.warn(fn ->
-      length = String.length(non_json)
-      non_json = format_message(non_json, 200)
-
-      "#{inspect(self())} PARSE_ERROR:#{inspect err} #{topic}-#{partition} Offset:#{offset} Len:#{length} Val:#{non_json}"
-    end)
-  end
-
-  defp format_message(message, print_length) do
-    message_length = String.length(message)
-
-    if message_length < print_length do
-      message
-    else
-      String.slice(message, 0..(print_length - 2)) <> ".."
-    end
+  defp ack_message(group_subscriber_pid, topic, partition, offset) do
+    # Send the async ack to group subscriber (the offset will be eventually
+    # committed to Kafka):
+    :brod_group_subscriber.ack(group_subscriber_pid, topic, partition, offset)
   end
 end

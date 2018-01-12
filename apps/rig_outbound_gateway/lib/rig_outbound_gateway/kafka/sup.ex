@@ -45,12 +45,14 @@ defmodule RigOutboundGateway.Kafka.Sup do
       default_producer_config: []
     ]
 
-    Logger.info("""
-    Starting brod_client
-      id=#{inspect(conf.brod_client_id)}
-      brokers=#{inspect(conf.brokers)}
-      config=#{inspect(client_conf)}
-    """)
+    Logger.debug(fn ->
+      """
+      Starting brod_client
+        id=#{inspect(conf.brod_client_id)}
+        brokers=#{inspect(conf.brokers)}
+        config=#{inspect(client_conf)}
+      """
+    end)
 
     restart_strategy = {:rest_for_one, _max_restarts = 1, _max_time = 10}
 

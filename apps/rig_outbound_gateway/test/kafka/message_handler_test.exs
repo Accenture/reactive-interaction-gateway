@@ -41,7 +41,7 @@ defmodule RigOutboundGateway.Kafka.MessageHandlerTest do
     base_offset = 14
     group_subscriber_pid = self()
 
-    send_stub = Stubr.stub!([send: fn _ -> nil end], call_info: true)
+    send_stub = Stubr.stub!([send: fn _ -> :ok end], call_info: true)
 
     # run the message handler loop in its own process:
     handler =
@@ -58,15 +58,14 @@ defmodule RigOutboundGateway.Kafka.MessageHandlerTest do
     source_messages
     |> Stream.with_index(base_offset)
     |> Enum.each(fn {message_value, offset} ->
-         send(handler, create_kafka_message(offset, message_value))
-       end)
+      send(handler, create_kafka_message(offset, message_value))
+    end)
 
-    # wait until the handler has sent an ack to what it thinks is the group subscriber:
-    source_messages
-    |> Stream.with_index(base_offset)
-    |> Enum.each(fn {_message_value, offset} ->
-         assert_receive {:"$gen_cast", {:ack, ^kafka_topic, ^partition, ^offset}}, 200
-       end)
+    # wait until the handler has sent an ack to what it thinks is the group subscriber
+    # (for valid messages only):
+    Enum.each(expected, fn _ ->
+      assert_receive {:"$gen_cast", {:ack, ^kafka_topic, ^partition, _offset}}, 200
+    end)
 
     # kill the handler:
     Process.exit(handler, :kill)
