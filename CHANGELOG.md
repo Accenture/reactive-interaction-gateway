@@ -2,15 +2,10 @@
 
 ## v2.0.0-dev
 
-- TODO
-  - kafka message has user field but what about userfield in http post for POST /messages
-  - socket authentication can be commented out with all tests passing :/
-  - kafka.sup does not respect KAFKA_ENABLED=0 anymore
-  - logging to Kafka is gone... logger app with kafka module?
-
 - Changed
   - [Misc] Convert to umbrella project layout
   - [Docs] Move documentation from `doc/` to `guides/` as the former is the default for ex_doc output
+  - [Inbound] Revised request logging (currently Kafka and console as backends)
 
 - Added
   - [Misc] Use lazy logger calls for debug logs
