@@ -33,10 +33,10 @@ defmodule RigOutboundGateway.Kafka.SupWrapper do
   ## Server callbacks
 
   @impl GenServer
-  def init(_kafka_enabled? = false) do
+  def init(false = _kafka_enabled?) do
     :ignore
   end
-  def init(_kafka_enabled? = true) do
+  def init(true = _kafka_enabled?) do
     Process.flag :trap_exit, true
     send(self(), :start_sup)
     {:ok, %{n_attempts: 0}}

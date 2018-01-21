@@ -25,5 +25,4 @@ config :rig, RigOutboundGateway.Kafka.Sup,
   brod_client_id: brod_client_id,
   hosts: {:system, :list, "KAFKA_HOSTS", ["localhost:9092"]}
 
-
 import_config "#{Mix.env()}.exs"

@@ -8,7 +8,6 @@ defmodule Mix.Tasks.UpdateDocs do
 
   alias Mix.Project
 
-
   @header """
   Variable | Description | Default
   -------- | ----------- | -------
