@@ -3,20 +3,20 @@ defmodule Rig.Kafka do
   Producing messages to Kafka topics.
 
   """
-  use Rig.Config, [:enabled?, :brod_client_id, :produce_fn]
+  use Rig.Config, [:enabled?, :brod_client_id]
 
-  def produce(topic, key, plaintext) do
+  def produce(topic, key, plaintext, produce_fn \\ &:brod.produce_sync/5) do
     conf = config()
     if conf.enabled? do
-      do_produce(topic, key, plaintext)
+      do_produce(topic, key, plaintext, produce_fn)
     end
   end
 
-  defp do_produce(topic, key, plaintext) do
+  defp do_produce(topic, key, plaintext, produce_fn) do
     conf = config()
 
     :ok =
-      conf.produce_fn.(
+      produce_fn.(
         conf.brod_client_id,
         topic,
         _partition = &compute_kafka_partition/4,

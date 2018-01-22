@@ -29,6 +29,3 @@ erl_crash.dump
 
 /cover
 /apps/*/cover
-
-/rel
-/apps/*/rel

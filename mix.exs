@@ -41,7 +41,8 @@ defmodule Rig.Umbrella.Mixfile do
       {:credo, "~> 0.7", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test]},
       {:distillery, "~> 1.4"},
-      {:ex_doc, "~> 0.16", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.16", only: :dev, runtime: false},
+      {:mix_test_watch, "~> 0.5", only: :dev, runtime: false},
     ]
   end
 

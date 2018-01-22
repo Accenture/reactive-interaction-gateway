@@ -35,6 +35,7 @@ COPY apps/rig_api/config /opt/sites/rig/apps/rig_api/config
 COPY apps/rig_api/lib /opt/sites/rig/apps/rig_api/lib
 COPY apps/rig_api/priv /opt/sites/rig/apps/rig_api/priv
 
+COPY apps/rig_auth/config /opt/sites/rig/apps/rig_auth/config
 COPY apps/rig_auth/lib /opt/sites/rig/apps/rig_auth/lib
 
 COPY apps/rig_inbound_gateway/config /opt/sites/rig/apps/rig_inbound_gateway/config
