@@ -15,15 +15,9 @@ defmodule Mix.Tasks.UpdateDocs do
 
   @shortdoc "Uses actual configuration defaults for updating the operator's guide."
   def run(_) do
-    resolve_filename()
-    |> update_file()
-  end
-
-  def resolve_filename do
-    if Project.umbrella?() do
-      "./guides/operator-guide.md"
-    else
-      "../../guides/operator-guide.md"
+    # Only run when compiling the whole umbrella application in DEV:
+    if Project.umbrella?() and Mix.env() == :dev do
+      update_file("./guides/operator-guide.md")
     end
   end
 
