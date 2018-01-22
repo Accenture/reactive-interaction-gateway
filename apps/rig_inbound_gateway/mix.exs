@@ -57,7 +57,8 @@ defmodule RigInboundGateway.Mixfile do
       # Elixir-compatible :ets.fun2ms/1
       {:ex2ms, "~> 1.0"},
       # Read and use application configuration from environment variables
-      {:confex, "~> 3.3"}
+      {:confex, "~> 3.3"},
+      {:uuid, "~> 1.1"},
     ]
   end
 

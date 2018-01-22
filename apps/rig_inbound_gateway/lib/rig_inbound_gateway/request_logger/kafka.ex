@@ -7,6 +7,7 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
   require Logger
   alias Rig.Kafka, as: RigKafka
   alias RigAuth.Jwt.Utils, as: Jwt
+  alias UUID
 
   @behaviour RigInboundGateway.RequestLogger
 
