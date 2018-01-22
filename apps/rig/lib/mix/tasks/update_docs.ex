@@ -28,103 +28,133 @@ defmodule Mix.Tasks.UpdateDocs do
   end
 
   def update_file(filename, env \\ Application.get_all_env(:rig)) do
-    # Read the whole file:
-    all = read_file(filename)
+    defaults =
+      env_defaults(env)
+      |> log_duplicate_defaults()
+      |> Map.new()
 
-    # Look for the table:
-    [above_header, below_header] = String.split(all, @header, parts: 2)
-    [table, below_table] = String.split(below_header, "\n\n", parts: 2)
+    {above_table, table, below_table} =
+      filename
+      |> read_file()
+      |> find_table_in_text()
 
-    table = update_table(table, env_defaults(env))
+    table_list = text_to_list(table)
+
+    keysets = extract_keysets(table_list, defaults)
+    log_undocumented_vars(keysets)
+    log_documented_but_missing_vars(keysets)
+
+    {table_list, updated_keys} = set_defaults(table_list, defaults)
+    log_updated_vars(updated_keys)
 
     # Write back to disk:
-    content = above_header <> @header <> table <> "\n\n" <> below_table
+    table = list_to_text(table_list)
+    content = above_table <> table <> below_table
     write_file(filename, content)
   end
 
-  def update_table(table, {defaults, env_keys}) do
-    processed_keys = MapSet.new()
+  def find_table_in_text(text) do
+    [above_header, below_header] = String.split(text, @header, parts: 2)
+    [table, below_table] = String.split(below_header, "\n\n", parts: 2)
+    {above_header <> @header, table, "\n\n" <> below_table}
+  end
 
-    updated =
+  def text_to_list(table_text) do
+    table_text
+    |> String.split("\n")
+    |> Enum.map(fn line ->
+      line
+      |> String.split("|")
+      |> Enum.map(&String.trim/1)
+      |> Enum.map(&String.trim(&1, "`"))
+      |> List.to_tuple()
+    end)
+  end
+
+  def list_to_text(table_list) do
+    table_list
+    |> Enum.map(&Tuple.to_list/1)
+    |> Enum.map(&Enum.join(&1, " | "))
+    |> Enum.join("\n")
+  end
+
+  def log_duplicate_defaults(defaults) do
+    defaults
+    |> Enum.reduce(%{}, fn ({key, value}, acc) ->
+      case Map.fetch(acc, key) do
+        {:ok, ^value} ->
+          # Multiple definitions are okay if the same default is used
+          acc
+
+        {:ok, other_value} ->
+          Logger.warn("More than one default value found for environment variable #{key}: #{inspect value} and #{inspect other_value}")
+          acc
+
+        :error ->
+          Map.put(acc, key, value)
+      end
+    end)
+  end
+
+  def extract_keysets(table, defaults) do
+    table_keyset =
       table
-      |> String.split("\n")
-      |> Enum.map(fn line ->
-        line
-        |> String.split("|")
-        |> Enum.map(&String.trim/1)
-        |> Enum.map(&String.trim(&1, "`"))
-      end)
-      |> Enum.map(fn [key, desc, old_default] ->
-        env_keys =
-          if Enum.member?(env_keys, key) do
-            List.delete(env_keys, key)
-          else
-            Logger.warn(
-              "Encountered an unknown environment variable #{key} in the markdown table"
-            )
+      |> Enum.map(fn {key, _, _} -> key end)
+      |> MapSet.new()
+    env_keyset =
+      defaults
+      |> Enum.map(fn {key, _} -> key end)
+      |> MapSet.new()
+    {table_keyset, env_keyset}
+  end
 
-            env_keys
-          end
+  def log_undocumented_vars({table_keyset, env_keyset}) do
+    env_keyset |> MapSet.difference(table_keyset)
+    |> Enum.each(fn key ->
+      Logger.warn("Documentation for environment variable #{key} is missing")
+    end)
+  end
 
-        processed_keys = MapSet.put(processed_keys, key)
+  def log_documented_but_missing_vars({table_keyset, env_keyset}) do
+    table_keyset |> MapSet.difference(env_keyset)
+    |> Enum.each(fn key ->
+      Logger.warn("Documentation for environment variable #{key} is missing")
+    end)
+  end
 
-        default =
-          case get_default(defaults, key) do
-            {:ok, new_default} -> inspect(new_default)
-            :notfound -> old_default
-          end
+  def log_updated_vars(updated_keys) do
+    updated_keys
+    |> Enum.each(fn key ->
+      Logger.info("Default value for environment variable #{key} updated")
+    end)
+  end
 
-        ["`#{key}`", desc, default]
-      end)
-      |> Enum.map(&Enum.join(&1, " | "))
-      |> Enum.join("\n")
+  def set_defaults(table_list, defaults) do
+    {updated_table, updated_keys} =
+      table_list
+      |> Enum.reduce(
+        {_table = [], _keys = MapSet.new()},
+        fn ({key, desc, last_default}, {table, keys} = _acc) ->
+          cur_default_str = Map.fetch!(defaults, key) |> inspect()
+          keys = if last_default == cur_default_str, do: keys, else: MapSet.put(keys, key)
+          table = table ++ [{"`#{key}`", desc, cur_default_str}]
+          {table, keys}
+        end
+      )
 
-    case env_keys do
-      [] ->
-        :ok
-
-      _ ->
-        env_keys
-        |> Enum.each(fn key ->
-          if MapSet.member?(processed_keys, key) do
-            Logger.warn("More than one default value found for environment variable #{key}")
-          else
-            Logger.warn("Documentation for environment variable #{key} is missing")
-          end
-        end)
-    end
-
-    updated
+    {updated_table, updated_keys}
   end
 
   def env_defaults(env) do
-    defaults =
-      env
-      |> Stream.flat_map(fn {_mod, kwlist} -> kwlist end)
-      |> Stream.map(fn
-        {_, {:system, key, val}} -> {key, val}
-        {_, {:system, _, key, val}} -> {key, val}
-        _ -> nil
-      end)
-      |> Stream.reject(&is_nil/1)
-      |> Enum.to_list()
-
-    env_keys =
-      defaults
-      |> Enum.map(fn {key, _val} -> key end)
-
-    {Map.new(defaults), env_keys}
-  end
-
-  def get_default(defaults, key) do
-    case Map.fetch(defaults, key) do
-      {:ok, val} ->
-        {:ok, val}
-
-      :error ->
-        Logger.warn("No default value found for environment variable #{key}")
-        :notfound
-    end
+    env
+    |> Stream.flat_map(fn {_mod, kwlist} -> kwlist end)
+    |> Stream.map(fn
+      {_, {:system, key, val}} -> {key, val}
+      {_, {:system, _, key, val}} -> {key, val}
+      _ -> nil
+    end)
+    |> Stream.reject(&is_nil/1)
+    |> Enum.to_list()
   end
 
   def read_file(filename) do
