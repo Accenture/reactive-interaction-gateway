@@ -80,14 +80,19 @@ defmodule Mix.Tasks.UpdateDocs do
 
   def log_duplicate_defaults(defaults) do
     defaults
-    |> Enum.reduce(%{}, fn ({key, value}, acc) ->
+    |> Enum.reduce(%{}, fn {key, value}, acc ->
       case Map.fetch(acc, key) do
         {:ok, ^value} ->
           # Multiple definitions are okay if the same default is used
           acc
 
         {:ok, other_value} ->
-          Logger.warn("More than one default value found for environment variable #{key}: #{inspect value} and #{inspect other_value}")
+          Logger.warn(
+            "More than one default value found for environment variable #{key}: #{inspect(value)} and #{
+              inspect(other_value)
+            }"
+          )
+
           acc
 
         :error ->
@@ -101,10 +106,12 @@ defmodule Mix.Tasks.UpdateDocs do
       table
       |> Enum.map(fn {key, _, _} -> key end)
       |> MapSet.new()
+
     env_keyset =
       defaults
       |> Enum.map(fn {key, _} -> key end)
       |> MapSet.new()
+
     {table_keyset, env_keyset}
   end
 
@@ -132,15 +139,13 @@ defmodule Mix.Tasks.UpdateDocs do
   def set_defaults(table_list, defaults) do
     {updated_table, updated_keys} =
       table_list
-      |> Enum.reduce(
-        {_table = [], _keys = MapSet.new()},
-        fn ({key, desc, last_default}, {table, keys} = _acc) ->
-          cur_default_str = Map.fetch!(defaults, key) |> inspect()
-          keys = if last_default == cur_default_str, do: keys, else: MapSet.put(keys, key)
-          table = table ++ [{"`#{key}`", desc, cur_default_str}]
-          {table, keys}
-        end
-      )
+      |> Enum.reduce({_table = [], _keys = MapSet.new()}, fn {key, desc, last_default},
+                                                             {table, keys} = _acc ->
+        cur_default_str = Map.get(defaults, key, nil) |> inspect()
+        keys = if last_default == cur_default_str, do: keys, else: MapSet.put(keys, key)
+        table = table ++ [{"`#{key}`", desc, cur_default_str}]
+        {table, keys}
+      end)
 
     {updated_table, updated_keys}
   end
