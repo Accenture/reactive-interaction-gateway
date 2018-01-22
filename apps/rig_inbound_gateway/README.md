@@ -1,3 +1,3 @@
 # RigInboundGateway
 
-**TODO: Add description**
+See the [developer's guide](../../guides/developer-guide.md).

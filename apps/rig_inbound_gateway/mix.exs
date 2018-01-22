@@ -50,7 +50,6 @@ defmodule RigInboundGateway.Mixfile do
       {:phoenix_pubsub, "~> 1.0"},
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 0.13.0"},
-      # {:joken, "~> 1.4"},
       {:bypass, "~> 0.8.1", only: :test},
       {:poison, "~> 2.0 or ~> 3.0"},
       {:timex, "~> 3.1.22"},

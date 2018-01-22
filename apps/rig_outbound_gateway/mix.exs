@@ -38,10 +38,6 @@ defmodule RigOutboundGateway.MixProject do
       {:brod, "~> 3.3"},
       # JSON parser:
       {:poison, "~> 2.0 or ~> 3.0"},
-      # HTTP server:
-      # {:cowboy, "~> 2.1"},
-      # {:cowboy, "~> 1.0"},
-      # {:plug, "~> 1.4"},
       # Stubs and spies for tests:
       {:stubr, "~> 1.5"}
     ]

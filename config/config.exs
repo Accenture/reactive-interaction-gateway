@@ -19,10 +19,6 @@ metadata = [
   :topic,
   :partition,
   :offset,
-  # aws_sqs_metadata
-  :raw,
-  :queue,
-  :receipt_handle,
 ]
 config :logger, :console,
   format: "\n$time [$level] $levelpad$message\n$metadata\n",

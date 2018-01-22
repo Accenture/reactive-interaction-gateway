@@ -1,4 +1,3 @@
 # Rig
 
-Common code and services, including the Phoenix PubSub server that enables location-transparent
-publish-subscribe communication within and among nodes.
+See the [developer's guide](../../guides/developer-guide.md).
