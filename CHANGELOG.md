@@ -1,5 +1,23 @@
 # Changelog
 
+## v2.0.0-dev
+
+- Changed
+  - [Misc] Convert to umbrella project layout
+  - [Docs] Move documentation from `doc/` to `guides/` as the former is the default for ex_doc output
+  - [Inbound] Revised request logging (currently Kafka and console as backends)
+
+- Added
+  - [Misc] Use lazy logger calls for debug logs
+  - [Misc] Format (most files) using Elixir 1.6 formatter
+  - [API/Outbound] Add new endpoint `POST /messages` for sending messages (=> Kafka is no longer a hard dependency)
+  - [Docs] Add a dedicated developer guide
+
+- Fixed
+  - [Inbound] Make presence channel respect `JWT_USER_FIELD` setting (currently hardcoded to "username")
+
+- Deprecated
+
 ## v1.1.0 (January 11, 2018)
 
 - Changed

@@ -3,7 +3,6 @@ _build/
 cover/
 deps/
 doc/
-rel/
 .adr-dir
 .DS_Store
 .gitignore
