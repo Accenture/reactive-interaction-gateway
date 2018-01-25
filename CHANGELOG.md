@@ -1,21 +1,39 @@
 # Changelog
 
-[Unreleased]
+## v2.0.0-dev
+
+- Changed
+  - [Misc] Convert to umbrella project layout
+  - [Docs] Move documentation from `doc/` to `guides/` as the former is the default for ex_doc output
+  - [Inbound] Revised request logging (currently Kafka and console as backends)
+  - [Deploy] Dockerfile to use custom `vm.args` file & removed `mix release.init` step - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
+
+- Added
+  - [Misc] Use lazy logger calls for debug logs
+  - [Misc] Format (most files) using Elixir 1.6 formatter
+  - [API/Outbound] Add new endpoint `POST /messages` for sending messages (=> Kafka is no longer a hard dependency)
+  - [Docs] Add a dedicated developer guide
+  - [Deploy] Release configuration in `rel/config.exs` and custom `vm.args` (based on what distillery is using) - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
+  - [Deploy] Production configuration for peerage to use DNS discovery - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
+  - [Rig] Module for auto-discovery, using `Peerage` library - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
+  - [Deploy] Kubernetes deployment configuration file - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
+
+- Fixed
+  - [Inbound] Make presence channel respect `JWT_USER_FIELD` setting (currently hardcoded to "username")
+
+- Deprecated
+
+## v1.1.0 (January 11, 2018)
 
 - Changed
   - [Config] Increase default rate limits - [#16](https://github.com/Accenture/reactive-interaction-gateway/pull/16)
   - [Kafka] Make producing of Kafka messages in proxy optional (and turned off by default) - [#21](https://github.com/Accenture/reactive-interaction-gateway/pull/21)
-  - [Deploy] Dockerfile to use custom `vm.args` file & removed `mix release.init` step - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
 
 - Added
   - [Deploy] Basic Travis configuration - [#17](https://github.com/Accenture/reactive-interaction-gateway/pull/17)
   - [Docs] Configuration ADR document - [#19](https://github.com/Accenture/reactive-interaction-gateway/pull/19)
   - [Docs] Websocket and SSE channels example - [#22](https://github.com/Accenture/reactive-interaction-gateway/pull/22)
   - [Deploy] Maintain changelog file - [#25](https://github.com/Accenture/reactive-interaction-gateway/pull/25)
-  - [Deploy] Release configuration in `rel/config.exs` and custom `vm.args` (based on what distillery is using) - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
-  - [Deploy] Production configuration for peerage to use DNS discovery - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
-  - [Deploy] Module for auto-discovery, using `Peerage` library - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
-  - [Deploy] Kubernetes deployment configuration file - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
 
 - Fixed
   - [Config] Fix Travis by disabling credo rule `Design.AliasUsage` - [#18](https://github.com/Accenture/reactive-interaction-gateway/pull/18)

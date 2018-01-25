@@ -9,7 +9,11 @@ spec:
     - port: 4000
       targetPort: 4000
       protocol: TCP
-      name: http
+      name: proxy
+    - port: 4010
+      targetPort: 4010
+      protocol: TCP
+      name: internal
   selector:
     app: reactive-interaction-gateway-deployment
 ---
@@ -23,6 +27,9 @@ metadata:
 spec:
   ports:
   - port: 4000
+    name: proxy
+  - port: 4010
+    name: internal
   selector:
     app: reactive-interaction-gateway-deployment
   clusterIP: None
@@ -44,12 +51,11 @@ spec:
         image: accenture/reactive-interaction-gateway
         ports:
         - containerPort: 4000
+        - containerPort: 4010
         env:
-        # Optional:
-        # Disable Kafka by default, remove/comment out if you want to test with Kafka,
-        # in that case also set KAFKA_HOSTS env var to point to Kafka
-        - name: KAFKA_ENABLED
-          value: "false"
+        # Kafka is by default disabled
+        # If you want to test with Kafka set KAFKA_ENABLED env var to true and
+        # also KAFKA_HOSTS env var to point to Kafka
         # Let's have some test-endpoints
         - name: PROXY_CONFIG_FILE
           value: "proxy/proxy.test.json"
