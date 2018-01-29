@@ -8,7 +8,7 @@ Reactive Interaction Gateway (RIG) uses [Peerage library](https://github.com/mrl
 
 1. Node host - Every node in cluster needs to be discoverable by other nodes. For that Elixir/Erlang uses so called `long name` or `short name`. We are using `long name` which is formed in the following way `app_name@node_host`. `app_name` is in our case set to `rig`, but `node_host` is taken from environment variable `NODE_HOST`. This can be either IP or container alias or whatever that is routable in network by other nodes.
 
-1. Node cookie - Nodes in Erlang cluster use cookies as a form of authorization between them. Only nodes with the same cookie can communicate together. It can be either some plain string or ideally some generated hash, set it to `NODE_COOKIE` environment variable.
+1. Node cookie - Nodes in Erlang cluster use cookies as a form of authorization/authentication between them. Only nodes with the same cookie can communicate together. It should be ideally some generated hash, set it to `NODE_COOKIE` environment variable.
 
 ## DNS discovery
 
