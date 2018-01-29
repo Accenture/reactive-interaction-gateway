@@ -30,13 +30,13 @@ environment :dev do
   # dev mode.
   set dev_mode: true
   set include_erts: false
-  set cookie: :"mby8_WifcvH[I^0B0<)FSkUpadXF~hWXY`ct6=lY9kj5cotG*^KZAaz0u?RYY%%`"
+  set cookie: :"placeholder_cookie"
 end
 
 environment :prod do
   set include_erts: true
   set include_src: false
-  set cookie: :"=u/=]p:xszWx>R3BCu}Q2`2883}z:1Ln.Mts;amBWwLNf(jq!p8tvV&|ZUKf,]}T"
+  set cookie: :"placeholder_cookie"
 end
 
 # You may define one or more releases in this file.
@@ -54,5 +54,6 @@ release :rig do
     rig_inbound_gateway: :permanent,
     rig_outbound_gateway: :permanent,
   ]
+  set vm_args: "./vm.args"
 end
 

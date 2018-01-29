@@ -6,6 +6,8 @@ defmodule Rig.Application do
   def start(_type, _args) do
     alias Supervisor.Spec
 
+    Rig.Discovery.start()
+
     children = [
       Spec.supervisor(Phoenix.PubSub.PG2, [Rig.PubSub, []])
     ]

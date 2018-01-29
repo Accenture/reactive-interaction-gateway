@@ -7,6 +7,4 @@ doc/
 .DS_Store
 .gitignore
 Dockerfile
-Dockerfile_build
-Dockerfile_test
 README.md

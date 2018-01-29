@@ -23,7 +23,8 @@ defmodule Rig.MixProject do
   def application do
     [
       mod: {Rig.Application, []},
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      included_applications: [:peerage]
     ]
   end
 
@@ -37,7 +38,8 @@ defmodule Rig.MixProject do
     [
       {:phoenix_pubsub, "~> 1.0"},
       # for Kafka, partition from MurmurHash(key):
-      {:murmur, "~> 1.0"}
+      {:murmur, "~> 1.0"},
+      {:peerage, "~> 1.0"}
     ]
   end
 

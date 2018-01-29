@@ -49,6 +49,13 @@ config :rig, RigApi.ChannelsController,
 config :rig, RigAuth.Jwt.Utils,
   secret_key: {:system, "JWT_SECRET_KEY", ""}
 
+# --------------------------------------
+# Peerage
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+config :rig, Rig.Discovery,
+  discovery_type: nil
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"

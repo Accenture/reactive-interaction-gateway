@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: reactive-interaction-gateway-service
+  labels:
+    app: reactive-interaction-gateway-service
+spec:
+  ports:
+    - port: 4000
+      targetPort: 4000
+      protocol: TCP
+      name: proxy
+    - port: 4010
+      targetPort: 4010
+      protocol: TCP
+      name: internal
+  selector:
+    app: reactive-interaction-gateway-deployment
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: reactive-interaction-gateway-service-headless
+  labels:
+    app: reactive-interaction-gateway-service-headless
+spec:
+  ports:
+  - port: 4000
+    name: proxy
+  - port: 4010
+    name: internal
+  selector:
+    app: reactive-interaction-gateway-deployment
+  clusterIP: None
+---
+
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: reactive-interaction-gateway-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: reactive-interaction-gateway-deployment
+    spec:
+      containers:
+      - name: reactive-interaction-gateway
+        image: accenture/reactive-interaction-gateway
+        ports:
+        - containerPort: 4000
+        - containerPort: 4010
+        env:
+        # Kafka is by default disabled
+        # If you want to test with Kafka set KAFKA_ENABLED env var to true and
+        # also KAFKA_HOSTS env var to point to Kafka
+        # Let's have some test-endpoints
+        - name: PROXY_CONFIG_FILE
+          value: "proxy/proxy.test.json"
+        # Mandatory: distributed mode setup
+        - name: NODE_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: DISCOVERY_TYPE
+          value: "dns"
+        - name: DNS_NAME
+          value: "reactive-interaction-gateway-service-headless.default.svc.cluster.local"
+        - name: NODE_COOKIE
+          value: "magiccookie"
