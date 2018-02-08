@@ -59,6 +59,8 @@ defmodule RigInboundGateway.Mixfile do
       # Read and use application configuration from environment variables
       {:confex, "~> 3.3"},
       {:uuid, "~> 1.1"},
+      # Microbenchmarking tool
+      {:benchee, "~> 0.11", only: :test},
     ]
   end
 
