@@ -4,7 +4,7 @@ use Mix.Config
 # you can enable the server option below.
 config :rig, RigInboundGatewayWeb.Endpoint,
   env: :test,
-  http: [port: System.get_env("PORT") || 4001],
+  http: [port: System.get_env("PORT_INBOUND") || 4001],
   server: false
 
 # Print only warnings and errors during test

@@ -20,6 +20,8 @@
 
 - Fixed
   - [Inbound] Make presence channel respect `JWT_USER_FIELD` setting (currently hardcoded to "username")
+  - [Inbound] Set proper environment variable for Phoenix server `PORT_INBOUND` - [#]()
+  - [API] Set proper environment variable for Phoenix server `PORT_API` - [#]()
 
 - Deprecated
 
