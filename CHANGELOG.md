@@ -20,8 +20,8 @@
 
 - Fixed
   - [Inbound] Make presence channel respect `JWT_USER_FIELD` setting (currently hardcoded to "username")
-  - [Inbound] Set proper environment variable for Phoenix server `PORT_INBOUND` - [#]()
-  - [API] Set proper environment variable for Phoenix server `PORT_API` - [#]()
+  - [Inbound] Set proper environment variable for Phoenix server `PORT_INBOUND` - [#38](https://github.com/Accenture/reactive-interaction-gateway/pull/38)
+  - [API] Set proper environment variable for Phoenix server `PORT_API` - [#38](https://github.com/Accenture/reactive-interaction-gateway/pull/38)
 
 - Deprecated
 
