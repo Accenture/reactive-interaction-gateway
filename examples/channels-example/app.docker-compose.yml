@@ -33,8 +33,8 @@ services:
       - KAFKA_SOURCE_TOPICS=example
       - KAFKA_HOSTS=kafka:9092
       - KAFKA_ENABLED=true
-      - PORT_API=7010
-      - PORT_INBOUND=7000
+      - API_PORT=7010
+      - INBOUND_PORT=7000
       - NODE_HOST=127.0.0.1
       - NODE_COOKIE=dummycookie
     ports:

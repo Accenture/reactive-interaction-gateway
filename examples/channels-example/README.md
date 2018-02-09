@@ -36,8 +36,8 @@ For RIG we could use default configuration values, but where's fun in that. Let'
 # KAFKA_SOURCE_TOPICS => Name of Kafka topic to which consumer will connect, by default rig
 # JWT_SECRET_KEY => Secret key by which JWTs are signed, by default empty string
 # KAFKA_ENABLED => Turn on/off Kafka usage, by default turned off
-# PORT_API => Port at which we want to expose RIG's internal APIs, by default 4010
-# PORT_INBOUND => Port at which we want to expose RIG's proxy and websocket/sse communication, by default 4000
+# API_PORT => Port at which we want to expose RIG's internal APIs, by default 4010
+# INBOUND_PORT => Port at which we want to expose RIG's proxy and websocket/sse communication, by default 4000
 
 PRIVILEGED_ROLES=admin \
 JWT_ROLES_FIELD=levels \
@@ -46,8 +46,8 @@ JWT_SECRET_KEY=mysecret \
 MESSAGE_USER_FIELD=username \
 KAFKA_SOURCE_TOPICS=example \
 KAFKA_ENABLED=true \
-PORT_API=7010 \
-PORT_INBOUND=7000 \
+API_PORT=7010 \
+INBOUND_PORT=7000 \
 mix phx.server
 ```
 
