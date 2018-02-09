@@ -20,6 +20,7 @@
 
 - Fixed
   - [Inbound] Make presence channel respect `JWT_USER_FIELD` setting (currently hardcoded to "username")
+  - [Examples] Channels example fixed to be compatible with version 2.0.0 [#]()
 
 - Deprecated
 

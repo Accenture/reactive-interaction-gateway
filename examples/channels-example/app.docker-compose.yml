@@ -35,6 +35,8 @@ services:
       - KAFKA_ENABLED=true
       - PORT_API=7010
       - PORT_INBOUND=7000
+      - NODE_HOST=127.0.0.1
+      - NODE_COOKIE=dummycookie
     ports:
       - 7000:7000
       - 7010:7010
