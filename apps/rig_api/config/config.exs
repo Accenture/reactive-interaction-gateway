@@ -18,7 +18,7 @@ config :rig_api, RigApi.Endpoint,
     host: {:system, "HOST", "localhost"}
   ],
   http: [
-    port: {:system, :integer, "PORT", 4010}
+    port: {:system, :integer, "API_PORT", 4010}
   ],
   render_errors: [view: RigApi.ErrorView, accepts: ~w(json)],
   pubsub: [name: Rig.PubSub]
