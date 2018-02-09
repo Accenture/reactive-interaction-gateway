@@ -29,25 +29,29 @@ For RIG we could use default configuration values, but where's fun in that. Let'
 ```sh
 # Description of environment variables
 
-# PORT => Port at which we want to expose RIG, by default 4000
 # PRIVILEGED_ROLES => This is a string array of roles that can see also broadcasts from other people, not just it's own, by default empty array
 # JWT_ROLES_FIELD => Key in JWT claims/payload under which PRIVILEGED_ROLES are set for each user, by default roles
 # JWT_USER_FIELD => Key in JWT claims/payload that is used to construct topic name for Phoenix channel, by default user
-# KAFKA_USER_FIELD => Key in Kafka message, by which RIG knows where to broadcast, by default user
+# MESSAGE_USER_FIELD => Key in Kafka message, by which RIG knows where to broadcast, by default user
 # KAFKA_SOURCE_TOPICS => Name of Kafka topic to which consumer will connect, by default rig
 # JWT_SECRET_KEY => Secret key by which JWTs are signed, by default empty string
+# KAFKA_ENABLED => Turn on/off Kafka usage, by default turned off
+# PORT_API => Port at which we want to expose RIG's internal APIs, by default 4010
+# PORT_INBOUND => Port at which we want to expose RIG's proxy and websocket/sse communication, by default 4000
 
-PORT=7000 \
 PRIVILEGED_ROLES=admin \
 JWT_ROLES_FIELD=levels \
 JWT_USER_FIELD=username \
 JWT_SECRET_KEY=mysecret \
-KAFKA_USER_FIELD=username \
+MESSAGE_USER_FIELD=username \
 KAFKA_SOURCE_TOPICS=example \
+KAFKA_ENABLED=true \
+PORT_API=7010 \
+PORT_INBOUND=7000 \
 mix phx.server
 ```
 
-RIG is now available on port `7000`.
+RIG is now available on ports `7000` and `7010`.
 
 **Terminal 2:** Start Service (from service directory)
 
@@ -74,7 +78,7 @@ curl -X "POST" \
 -H "Content-Type: application/json" \
 -d "{\"id\":\"kafka-service\",\"name\":\"kafka-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kafka-producer-endpoint\",\"path\":\"/produce\",\"method\":\"POST\",\"not_secured\":true}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localhost\",\"port\":8000}}" \
 --silent \
-"http://localhost:7000/apis"
+"http://localhost:7010/apis"
 ```
 
 ## Example scenarios to test

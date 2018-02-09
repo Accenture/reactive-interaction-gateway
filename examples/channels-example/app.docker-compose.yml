@@ -23,18 +23,21 @@ services:
 
   rig:
     container_name: rig
-    image: accenture/reactive-interaction-gateway:1.0.0
+    image: accenture/reactive-interaction-gateway
     environment:
-      - PORT=7000
       - PRIVILEGED_ROLES=admin
       - JWT_ROLES_FIELD=levels
       - JWT_USER_FIELD=username
       - JWT_SECRET_KEY=mysecret
-      - KAFKA_USER_FIELD=username
+      - MESSAGE_USER_FIELD=username
       - KAFKA_SOURCE_TOPICS=example
       - KAFKA_HOSTS=kafka:9092
+      - KAFKA_ENABLED=true
+      - PORT_API=7010
+      - PORT_INBOUND=7000
     ports:
       - 7000:7000
+      - 7010:7010
     depends_on:
       - kafka
 
