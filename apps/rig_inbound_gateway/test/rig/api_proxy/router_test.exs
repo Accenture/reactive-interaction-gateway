@@ -225,6 +225,75 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
     assert conn.resp_body =~ "{\"status\":\"ok\"}"
   end
 
+  @tag :smoke
+  test "GET request should be correctly proxied to external service" do
+    conn = call(Router, build_conn(:get, "/api"))
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"msg\":\"GET\"}"
+  end
+
+  @tag :smoke
+  test "POST request should be correctly proxied to external service" do
+    conn = call(Router, build_conn(:post, "/api"))
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"msg\":\"POST\"}"
+  end
+
+  @tag :smoke
+  test "PUT request should be correctly proxied to external service" do
+    conn = call(Router, build_conn(:put, "/api"))
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"msg\":\"PUT\"}"
+  end
+
+  @tag :smoke
+  test "PATCH request should be correctly proxied to external service" do
+    conn = call(Router, build_conn(:patch, "/api"))
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"msg\":\"PATCH\"}"
+  end
+
+  @tag :smoke
+  test "DELETE request should be correctly proxied to external service" do
+    conn = call(Router, build_conn(:delete, "/api"))
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"msg\":\"DELETE\"}"
+  end
+
+  @tag :smoke
+  test "HEAD request should be correctly proxied to external service" do
+    conn = call(Router, build_conn(:head, "/api"))
+    assert conn.status == 200
+    assert conn.resp_body =~ ""
+  end
+
+  @tag :smoke
+  test "OPTIONS request should be correctly proxied to external service" do
+    conn = call(Router, build_conn(:options, "/api"))
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"msg\":\"OPTIONS\"}"
+  end
+
+  @tag :smoke
+  test "POST request with file body should be correctly proxied to external service" do
+    upload = %Plug.Upload{
+      path: __DIR__ <> "/upload_example.txt",
+      filename: "upload_example.txt",
+      content_type: "plain/text",
+    }
+
+    conn = call(Router, build_conn(:post, "/api", %{"qqfile" => upload}))
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"msg\":\"POST FILE\"}"
+  end
+
+  @tag :smoke
+  test "GET request with queries should be correctly proxied to external service" do
+    conn = call(Router, build_conn(:get, "/api", %{"foo" => %{"bar" => "baz"}}))
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"msg\":\"GET QUERY\"}"
+  end
+
   defp construct_request_with_jwt(method, url, query \\ %{}) do
     jwt = generate_jwt()
     build_conn(method, url, query)

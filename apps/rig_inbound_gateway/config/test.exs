@@ -32,7 +32,7 @@ config :rig, RigInboundGatewayWeb.Presence.Channel,
   privileged_roles: ["support"]
 
 config :rig, RigInboundGateway.Proxy,
-  config_file: "proxy/proxy.test.json"
+  config_file: {:system, "PROXY_CONFIG_FILE", "proxy/proxy.test.json"}
 
 config :rig, RigInboundGatewayWeb.Proxy.Controller,
   rig_proxy: RigInboundGateway.ProxyMock

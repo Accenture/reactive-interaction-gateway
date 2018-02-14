@@ -17,6 +17,7 @@
   - [Deploy] Production configuration for peerage to use DNS discovery - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
   - [Rig] Module for auto-discovery, using `Peerage` library - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
   - [Deploy] Kubernetes deployment configuration file - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
+  - [Misc] Smoke tests setup and test cases for API Proxy and Kafka + Phoenix messaging - [#42](https://github.com/Accenture/reactive-interaction-gateway/pull/42)
 
 - Fixed
   - [Inbound] Make presence channel respect `JWT_USER_FIELD` setting (currently hardcoded to "username")
