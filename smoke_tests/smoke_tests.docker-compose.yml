@@ -24,7 +24,7 @@ services:
   rig:
     container_name: rig
     build:
-      context: .
+      context: ../
       dockerfile: smoke_tests.dockerfile
     environment:
       - API_HOST=rest-api
@@ -34,13 +34,14 @@ services:
     ports:
       - 4000:4000
       - 4010:4010
-    command: mix test --only smoke
     depends_on:
       - kafka
 
   rest-api:
     container_name: rest-api
-    image: mariomacai/rest-api
+    build:
+      context: ./rest-api
+      dockerfile: Dockerfile
     environment:
       - KAFKA_HOSTS=kafka:9092
     ports:

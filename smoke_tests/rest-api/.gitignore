@@ -1,0 +1,7 @@
+node_modules
+uploads
+
+.idea
+*.iml
+*.log
+.DS_Store
