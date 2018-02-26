@@ -39,7 +39,9 @@ defmodule Rig.MixProject do
       {:phoenix_pubsub, "~> 1.0"},
       # for Kafka, partition from MurmurHash(key):
       {:murmur, "~> 1.0"},
-      {:peerage, "~> 1.0"}
+      {:peerage, "~> 1.0"},
+      # For running external commands in Mix tasks:
+      {:porcelain, "~> 2.0"}
     ]
   end
 
