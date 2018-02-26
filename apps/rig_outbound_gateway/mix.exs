@@ -39,7 +39,9 @@ defmodule RigOutboundGateway.MixProject do
       # JSON parser:
       {:poison, "~> 2.0 or ~> 3.0"},
       # Stubs and spies for tests:
-      {:stubr, "~> 1.5"}
+      {:stubr, "~> 1.5"},
+      # Run/manage the Kinesis Java client:
+      {:porcelain, "~> 2.0"},
     ]
   end
 end
