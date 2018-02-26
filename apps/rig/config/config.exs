@@ -5,4 +5,6 @@ config :rig, Rig.Kafka,
   brod_client_id: :rig_brod_client,
   enabled?: {:system, :boolean, "KAFKA_ENABLED", false}
 
+config :porcelain, driver: Porcelain.Driver.Basic
+
 import_config "#{Mix.env}.exs"
