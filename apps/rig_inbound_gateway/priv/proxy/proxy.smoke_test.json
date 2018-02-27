@@ -1,0 +1,73 @@
+[
+  {
+    "id": "smoke-service",
+    "name": "smoke-service",
+    "auth_type": "none",
+    "auth": {
+      "use_header": false,
+      "header_name": "",
+      "use_query": false,
+      "query_name": ""
+    },
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "get",
+            "path": "/api",
+            "method": "GET",
+            "not_secured": true
+          },
+          {
+            "id": "post",
+            "path": "/api",
+            "method": "POST",
+            "not_secured": true
+          },
+          {
+            "id": "put",
+            "path": "/api",
+            "method": "PUT",
+            "not_secured": true
+          },
+          {
+            "id": "patch",
+            "path": "/api",
+            "method": "PATCH",
+            "not_secured": true
+          },
+          {
+            "id": "delete",
+            "path": "/api",
+            "method": "DELETE",
+            "not_secured": true
+          },
+          {
+            "id": "head",
+            "path": "/api",
+            "method": "HEAD",
+            "not_secured": true
+          },
+          {
+            "id": "options",
+            "path": "/api",
+            "method": "OPTIONS",
+            "not_secured": true
+          },
+          {
+            "id": "post-kafka-produce",
+            "path": "/kafka/produce",
+            "method": "POST",
+            "not_secured": true
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "API_HOST",
+      "port": 8000
+    }
+  }
+]

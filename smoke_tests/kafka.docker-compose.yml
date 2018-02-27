@@ -13,7 +13,7 @@ services:
       - KAFKA_ADVERTISED_HOST_NAME=localhost
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_ADVERTISED_PORT=9092
-      - KAFKA_CREATE_TOPICS=example:1:1
+      - KAFKA_CREATE_TOPICS=rig:1:1
     ports:
       - 9092:9092
     volumes:

@@ -22,9 +22,12 @@ the community chimes in with helpful advice if you have questions.
 
 You can
 - generate documentation with `mix docs`,
-- run tests with `mix test` and see the test coverage with
+- run unit tests with `mix test` and see the test coverage with
   `mix coveralls.html`, which generates a file at `doc/excoveralls.html`,
 - run the linter with `mix credo --strict`.
+- run smoke tests with `docker-compose -f smoke_tests.docker-compose.yml up -d --build`
+  - to see smoke tests logs run `docker logs -f rig`
+  - to re-run smoke tests without re-creating entire environment run `docker-compose -f smoke_tests.docker-compose.yml up --no-deps --build rig`
 
 We follow the [standard GitHub workflow](https://guides.github.com/introduction/flow/).
 Before submitting a PR,
