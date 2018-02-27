@@ -115,12 +115,11 @@ defmodule RigOutboundGateway.Kafka.GroupSubscriber do
   soon as possible.
   """
   def wait_for_consumer_ready(topic, partition, timeout \\ 10_000)
-  @spec wait_for_consumer_ready(String.t(), integer, integer) :: {:error, String.t()}
+  @spec wait_for_consumer_ready(
+    String.t(), non_neg_integer, non_neg_integer) :: {:ok | :error, String.t()}
   def wait_for_consumer_ready(topic, partition, timeout) when timeout <= 0 do
     {:error, "Consumer ready check for topic: #{topic} and partition: #{partition} timeouted."}
   end
-
-  @spec wait_for_consumer_ready(String.t(), integer, integer) :: {:ok, String.t()}
   def wait_for_consumer_ready(topic, partition, timeout) do
     conf = config()
     case :brod.get_consumer(conf.brod_client_id, topic, partition) do
