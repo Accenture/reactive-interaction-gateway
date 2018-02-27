@@ -114,9 +114,9 @@ defmodule RigOutboundGateway.Kafka.GroupSubscriber do
   If it exceedes maximum timeout returns :error, otherwise stops and returns :ok as
   soon as possible.
   """
-  def wait_for_consumer_ready(topic, partition, timeout \\ 10_000)
   @spec wait_for_consumer_ready(
     String.t(), non_neg_integer, non_neg_integer) :: {:ok | :error, String.t()}
+  def wait_for_consumer_ready(topic, partition, timeout \\ 10_000)
   def wait_for_consumer_ready(topic, partition, timeout) when timeout <= 0 do
     {:error, "Consumer ready check for topic: #{topic} and partition: #{partition} timeouted."}
   end
