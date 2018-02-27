@@ -99,9 +99,9 @@ defmodule RigOutboundGateway.Kafka.GroupSubscriber do
 
     0..(n_partitions - 1)
     |> Enum.reduce(%{}, fn partition, acc ->
-         handler_pid = spawn_for_partition.(partition)
-         Map.put(acc, "#{topic}-#{partition}", handler_pid)
-       end)
+      handler_pid = spawn_for_partition.(partition)
+      Map.put(acc, "#{topic}-#{partition}", handler_pid)
+    end)
     |> Map.merge(spawn_message_handlers(brod_client_id, remaining_topics))
   end
 
@@ -117,14 +117,18 @@ defmodule RigOutboundGateway.Kafka.GroupSubscriber do
   @spec wait_for_consumer_ready(String.t(), non_neg_integer, non_neg_integer) ::
           {:ok | :error, String.t()}
   def wait_for_consumer_ready(topic, partition, timeout \\ 10_000)
+
   def wait_for_consumer_ready(topic, partition, timeout) when timeout <= 0 do
     {:error, "Consumer ready check for topic: #{topic} and partition: #{partition} timeouted."}
   end
+
   def wait_for_consumer_ready(topic, partition, timeout) do
     conf = config()
+
     case :brod.get_consumer(conf.brod_client_id, topic, partition) do
       {:ok, _pid} ->
         {:ok, "Consumer for topic: #{topic} and partition: #{partition} is ready."}
+
       _ ->
         :timer.sleep(1_000)
         wait_for_consumer_ready(topic, partition, timeout - 1_000)
