@@ -119,7 +119,7 @@ defmodule RigOutboundGateway.Kafka.GroupSubscriber do
   def wait_for_consumer_ready(topic, partition, timeout \\ 10_000)
 
   def wait_for_consumer_ready(topic, partition, timeout) when timeout <= 0 do
-    {:error, "Consumer ready check for topic: #{topic} and partition: #{partition} timeouted."}
+    {:error, "Consumer ready check for topic: #{topic} and partition: #{partition} timed out."}
   end
 
   def wait_for_consumer_ready(topic, partition, timeout) do
