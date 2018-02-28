@@ -13,6 +13,8 @@ defmodule Mix.Tasks.UpdateDocs do
   -------- | ----------- | -------
   """
 
+  @erlang_envs ["NODE_HOST", "NODE_COOKIE"]
+
   @shortdoc "Uses actual configuration defaults for updating the operator's guide."
   def run(_) do
     # Only run when compiling the whole umbrella application in DEV:
@@ -21,7 +23,13 @@ defmodule Mix.Tasks.UpdateDocs do
     end
   end
 
-  def update_file(filename, env \\ Application.get_all_env(:rig)) do
+  defp all_envs do
+    Application.get_all_env(:rig)
+    |> Enum.concat(Application.get_all_env(:rig_api))
+    |> Enum.concat(Application.get_all_env(:rig_inbound_gateway))
+  end
+
+  def update_file(filename, env \\ all_envs()) do
     defaults =
       env_defaults(env)
       |> log_duplicate_defaults()
@@ -117,7 +125,10 @@ defmodule Mix.Tasks.UpdateDocs do
   end
 
   def log_documented_but_missing_vars({table_keyset, env_keyset}) do
-    table_keyset |> MapSet.difference(env_keyset)
+    @erlang_envs
+    |> MapSet.new
+    |> MapSet.difference(table_keyset)
+    |> MapSet.difference(env_keyset)
     |> Enum.each(fn key ->
       Logger.warn("Documentation for environment variable #{key} is missing")
     end)
@@ -144,16 +155,32 @@ defmodule Mix.Tasks.UpdateDocs do
     {updated_table, updated_keys}
   end
 
+  defp nested_envs(envs) do
+    {flat_env, list_env} = Enum.split_with(envs, fn {_, _} -> true
+                                                    _ -> false
+    end)
+    list_env
+    |> List.flatten
+    |> Enum.concat(flat_env)
+    |> Enum.reject(&is_nil/1)
+  end
+
   def env_defaults(env) do
     env
     |> Stream.flat_map(fn {_mod, kwlist} -> kwlist end)
     |> Stream.map(fn
       {_, {:system, key, val}} -> {key, val}
       {_, {:system, _, key, val}} -> {key, val}
+      {_, list_env = [_ | _]} ->
+        Enum.map(list_env, fn {_, {:system, key, val}} -> {key, val}
+                              {_, {:system, _, key, val}} -> {key, val}
+                              _ -> nil
+        end)
       _ -> nil
     end)
     |> Stream.reject(&is_nil/1)
     |> Enum.to_list()
+    |> nested_envs
   end
 
   def read_file(filename) do
