@@ -1,7 +1,8 @@
 use Mix.Config
 
 # Print only warnings and errors during test
-config :logger, level: :warn
+config :rig, Rig.Application,
+  log_level: {:system, :atom, "LOG_LEVEL", :warn}
 
 jwt_secret_key = "mysecret"
 
