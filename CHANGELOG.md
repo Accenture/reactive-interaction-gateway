@@ -19,7 +19,7 @@
   - [Deploy] Kubernetes deployment configuration file - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
   - [Misc] Smoke tests setup and test cases for API Proxy and Kafka + Phoenix messaging - [#42](https://github.com/Accenture/reactive-interaction-gateway/pull/42)
   - [Outbound] Kafka consumer ready check utility function - [#42](https://github.com/Accenture/reactive-interaction-gateway/pull/42)
-  - [Rig] Possibility to set logging level with env var `LOG_LEVEL` globally for RIG - [#49](https://github.com/Accenture/reactive-interaction-gateway/pull/49)
+  - [Rig] Possibility to set logging level with env var `LOG_LEVEL` globally for RIG - [#50](https://github.com/Accenture/reactive-interaction-gateway/pull/50)
 
 - Fixed
   - [Inbound] Make presence channel respect `JWT_USER_FIELD` setting (currently hardcoded to "username")
