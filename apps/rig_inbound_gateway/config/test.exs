@@ -7,9 +7,6 @@ config :rig, RigInboundGatewayWeb.Endpoint,
   http: [port: System.get_env("INBOUND_PORT") || 4001],
   server: false
 
-# Print only warnings and errors during test
-config :logger, level: :warn
-
 config :rig, RigInboundGateway.RateLimit,
   enabled?: true,
   avg_rate_per_sec: 0,
