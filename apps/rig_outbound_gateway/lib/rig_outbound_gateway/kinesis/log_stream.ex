@@ -57,8 +57,8 @@ defmodule RigOutboundGateway.Kinesis.LogStream do
           Logger.error("failed to parse log level #{java_level}")
           Logger.error("#{@log_prefix}#{java_level}: #{msg}")
 
-        elixirLevel ->
-          Logger.log(elixirLevel, @log_prefix <> msg)
+        elixir_level ->
+          Logger.log(elixir_level, @log_prefix <> msg)
       end
     end
 
