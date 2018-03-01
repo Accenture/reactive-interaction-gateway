@@ -140,7 +140,7 @@ defmodule RigInboundGatewayWeb.Presence.Channel do
       username,
       Map.merge(socket.assigns.user_info,
         %{
-          time: System.system_time(:milli_seconds),
+          time: System.system_time(:millisecond),
           address: "192.168.0.1",
           device: "desktop",
           browser: "Chrome",
