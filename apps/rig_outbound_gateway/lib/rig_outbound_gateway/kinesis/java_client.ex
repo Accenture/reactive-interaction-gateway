@@ -39,7 +39,9 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
       log_level: Keyword.fetch!(config, :log_level) || "",
       kinesis_app_name: Keyword.fetch!(config, :kinesis_app_name),
       kinesis_aws_region: Keyword.fetch!(config, :kinesis_aws_region),
-      kinesis_stream: Keyword.fetch!(config, :kinesis_stream)
+      kinesis_stream: Keyword.fetch!(config, :kinesis_stream),
+      kinesis_endpoint: Keyword.fetch!(config, :kinesis_endpoint),
+      dynamodb_endpoint: Keyword.fetch!(config, :dynamodb_endpoint)
     }
   end
 
@@ -78,7 +80,9 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
       LOG_LEVEL: conf.log_level,
       KINESIS_APP_NAME: conf.kinesis_app_name,
       KINESIS_AWS_REGION: conf.kinesis_aws_region,
-      KINESIS_STREAM: conf.kinesis_stream
+      KINESIS_STREAM: conf.kinesis_stream,
+      KINESIS_ENDPOINT: conf.kinesis_endpoint,
+      KINESIS_DYNAMODB_ENDPOINT: conf.dynamodb_endpoint
     ]
 
     # LogStream is used to pipe the Java logging output to RIG's logging output.

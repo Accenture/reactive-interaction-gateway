@@ -21,5 +21,7 @@ Variable | Description | Default
 `KINESIS_APP_NAME` | From Amazon's documentation: "Name of the Amazon Kinesis application. This can assist with troubleshooting (e.g. distinguish requests made by separate applications). | "Reactive-Interaction-Gateway"
 `KINESIS_AWS_REGION` | The AWS region the Kinesis stream is located in. | "eu-west-1"
 `KINESIS_STREAM` | The name of the Kinesis stream to consume. | "RIG-outbound"
+`KINESIS_ENDPOINT` | A specific Kinesis endpoint instead of the default one - useful for testing. | ""
+`KINESIS_DYNAMODB_ENDPOINT` | A specific DynamoDB endpoint instead of the default one - useful for testing. | ""
 
 .

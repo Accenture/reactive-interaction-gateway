@@ -57,12 +57,24 @@ public final class RunnableKinesis implements Runnable {
     final String appName = fetchEnv("KINESIS_APP_NAME");
     final String awsRegion = fetchEnv("KINESIS_AWS_REGION");
     final String kinesisStream = fetchEnv("KINESIS_STREAM");
+    final Optional<String> kinesisEndpoint = getEnv("KINESIS_ENDPOINT");
+    final Optional<String> dynamoDbEndpoint = getEnv("KINESIS_DYNAMODB_ENDPOINT");
     LOG.info(String.format("Kinesis config: app-name=%s aws-region=%s stream-name=%s", appName, awsRegion, kinesisStream));
 
     final KinesisClientLibConfiguration config = new KinesisClientLibConfiguration(appName, kinesisStream,
         new DefaultAWSCredentialsProviderChain(), workerId);
     config.withRegionName(awsRegion);
     config.withInitialPositionInStream(InitialPositionInStream.LATEST);
+
+    if (kinesisEndpoint.isPresent()) {
+      LOG.info(String.format("Kinesis endpoint: %s", kinesisEndpoint.get()));
+      config.withKinesisEndpoint(kinesisEndpoint.get());
+    }
+
+    if (dynamoDbEndpoint.isPresent()) {
+      LOG.info(String.format("DynamoDB endpoint: %s", dynamoDbEndpoint.get()));
+      config.withDynamoDBEndpoint(dynamoDbEndpoint.get());
+    }
 
     final IRecordProcessorFactory recordProcessorFactory = new RecordProcessorFactory(erlInterface);
     final Worker worker = new Worker.Builder().recordProcessorFactory(recordProcessorFactory).config(config).build();
@@ -72,9 +84,16 @@ public final class RunnableKinesis implements Runnable {
     worker.run();
   }
 
+  private static Optional<String> getEnv(final String var) {
+    final String val = System.getenv(var);
+    if (val == null || val.isEmpty())
+      return Optional.empty();
+    else
+      return Optional.of(val);
+  }
+
   private static String fetchEnv(final String var) {
-    return Optional.ofNullable(System.getenv(var))
-        .orElseThrow(() -> new RuntimeException(String.format("%s not set", var)));
+    return getEnv(var).orElseThrow(() -> new RuntimeException(String.format("%s not set", var)));
   }
 
 }
