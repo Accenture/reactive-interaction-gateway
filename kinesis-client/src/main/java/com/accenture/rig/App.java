@@ -34,7 +34,7 @@ public final class App {
 
   private static Level getLogLevel() {
     final Level defaultLevel = Level.INFO;
-    final Optional<String> setting = Optional.ofNullable(System.getenv("LOGLEVEL"));
+    final Optional<String> setting = Optional.ofNullable(System.getenv("LOG_LEVEL"));
     if (setting.isPresent() && setting.get().length() > 0) {
       try {
         return Level.parse(setting.get());

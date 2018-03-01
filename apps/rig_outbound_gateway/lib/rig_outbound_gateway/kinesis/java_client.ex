@@ -75,7 +75,7 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
     env = [
       RIG_ERLANG_NAME: :erlang.node() |> Atom.to_string(),
       RIG_ERLANG_COOKIE: :erlang.get_cookie() |> Atom.to_string(),
-      LOGLEVEL: conf.log_level,
+      LOG_LEVEL: conf.log_level,
       KINESIS_APP_NAME: conf.kinesis_app_name,
       KINESIS_AWS_REGION: conf.kinesis_aws_region,
       KINESIS_STREAM: conf.kinesis_stream
