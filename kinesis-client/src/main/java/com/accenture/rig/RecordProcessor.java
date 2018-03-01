@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.amazonaws.services.kinesis.clientlibrary.exceptions.InvalidStateException;
+import com.amazonaws.services.kinesis.clientlibrary.exceptions.KinesisClientLibDependencyException;
+import com.amazonaws.services.kinesis.clientlibrary.exceptions.ShutdownException;
+import com.amazonaws.services.kinesis.clientlibrary.exceptions.ThrottlingException;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.v2.IRecordProcessor;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.ShutdownReason;
 import com.amazonaws.services.kinesis.clientlibrary.types.InitializationInput;
@@ -90,6 +94,16 @@ public class RecordProcessor implements IRecordProcessor {
    */
   @Override
   public void shutdown(final ShutdownInput shutdownInput) {
-    LOG.info("Shutting down record processor for shard: " + shardId);
+    LOG.info("Shutting down record processor for shard " + shardId);
+    if (shutdownInput.getShutdownReason().equals(ShutdownReason.TERMINATE)) {
+      LOG.info(String.format("Writing checkpoint for shard %s (shutdown reason 'terminate')", shardId));
+
+      try {
+        shutdownInput.getCheckpointer().checkpoint();
+      } catch (KinesisClientLibDependencyException | InvalidStateException | ThrottlingException
+          | ShutdownException e) {
+        LOG.error("Failed to checkpoing shard " + shardId, e);
+      }
+    }
   }
 }
