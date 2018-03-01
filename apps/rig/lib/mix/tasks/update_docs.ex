@@ -126,7 +126,7 @@ defmodule Mix.Tasks.UpdateDocs do
 
   def log_documented_but_missing_vars({table_keyset, env_keyset}) do
     @erlang_envs
-    |> MapSet.new
+    |> MapSet.new()
     |> MapSet.difference(table_keyset)
     |> MapSet.difference(env_keyset)
     |> Enum.each(fn key ->
@@ -156,11 +156,14 @@ defmodule Mix.Tasks.UpdateDocs do
   end
 
   defp nested_envs(envs) do
-    {flat_env, list_env} = Enum.split_with(envs, fn {_, _} -> true
-                                                    _ -> false
-    end)
+    {flat_env, list_env} =
+      Enum.split_with(envs, fn
+        {_, _} -> true
+        _ -> false
+      end)
+
     list_env
-    |> List.flatten
+    |> List.flatten()
     |> Enum.concat(flat_env)
     |> Enum.reject(&is_nil/1)
   end
@@ -169,14 +172,21 @@ defmodule Mix.Tasks.UpdateDocs do
     env
     |> Stream.flat_map(fn {_mod, kwlist} -> kwlist end)
     |> Stream.map(fn
-      {_, {:system, key, val}} -> {key, val}
-      {_, {:system, _, key, val}} -> {key, val}
+      {_, {:system, key, val}} ->
+        {key, val}
+
+      {_, {:system, _, key, val}} ->
+        {key, val}
+
       {_, list_env = [_ | _]} ->
-        Enum.map(list_env, fn {_, {:system, key, val}} -> {key, val}
-                              {_, {:system, _, key, val}} -> {key, val}
-                              _ -> nil
+        Enum.map(list_env, fn
+          {_, {:system, key, val}} -> {key, val}
+          {_, {:system, _, key, val}} -> {key, val}
+          _ -> nil
         end)
-      _ -> nil
+
+      _ ->
+        nil
     end)
     |> Stream.reject(&is_nil/1)
     |> Enum.to_list()

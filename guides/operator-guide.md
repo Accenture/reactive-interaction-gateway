@@ -26,7 +26,7 @@ Variable | Description | Default
 `KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will consume, delimited by comma. | ["rig"]
 `MESSAGE_USER_FIELD` | (Outbound) messages are expected to be in JSON format. For routing the message to a specific user, RIG expects the user's ID to be present in such a JSON message. The corresponding JSON field is defined by `MESSAGE_USER_FIELD`. | "user"
 `NODE_COOKIE` | Erlang cookie used in distributed mode, so nodes in cluster can communicate between each other. | nil
-`NODE_HOST` | Erlang hostname for given node thanks to which is routable by other nodes in cluster. | nil
+`NODE_HOST` | Erlang hostname for given node, used to build Erlang long-name `rig@NODE_HOST`. This value is used by Erlang's distributed mode, so nodes can see each other. | nil
 `PRIVILEGED_ROLES` | User roles that are able to subscribe to messages of any user. You can specify multiple roles delimited by comma. | []
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Expected path is `proxy/your_json_file.json`. | nil
 `RATE_LIMIT_AVG_RATE_PER_SEC` | The permitted average amount of requests per second. | 10000

@@ -19,7 +19,7 @@
   - [Deploy] Kubernetes deployment configuration file - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
   - [Misc] Smoke tests setup and test cases for API Proxy and Kafka + Phoenix messaging - [#42](https://github.com/Accenture/reactive-interaction-gateway/pull/42)
   - [Outbound] Kafka consumer ready check utility function - [#42](https://github.com/Accenture/reactive-interaction-gateway/pull/42)
-  - [Docs] List of all environment variables possible to set in `guides/operator-guide.md` - [#48](https://github.com/Accenture/reactive-interaction-gateway/pull/48)
+  - [Docs] List of all environment variables possible to set in `guides/operator-guide.md` - [#36](https://github.com/Accenture/reactive-interaction-gateway/pull/36)
 
 - Fixed
   - [Inbound] Make presence channel respect `JWT_USER_FIELD` setting (currently hardcoded to "username")
