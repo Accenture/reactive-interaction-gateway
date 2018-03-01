@@ -11,9 +11,9 @@ import java.util.logging.SimpleFormatter;
 
 /**
  * App entrypoint.
- * <p>
+ *
  * Credentials are expected at ~/.aws/credentials; template:
- * <p>
+ *
  * [default]
  * aws_access_key_id=
  * aws_secret_access_key=

@@ -51,7 +51,7 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
       # make sure the JInterface Jar file exists:
       true =
         File.exists?(conf.otp_jar) ||
-          "Could not find OtpErlang.jar for JInterface #{@jinterface_version} at #{conf.otp_jar}"
+          "Could not find OtpErlang.jar for JInterface #{@jinterface_version} at #{conf.otp_jar}. Does your Erlang distribution come with Java support enabled?"
 
       send(self(), :run_java_client)
     end
