@@ -14,7 +14,7 @@ defmodule RigOutboundGateway.Logger do
   end
 
   @spec log({:error, any()}, module(), keyword()) :: any
-  def log({:error, err}, mod, info) do
+  def log(err, mod, info) do
     Logger.warn(fn ->
       msg = "Message via #{inspect(mod)} not accepted: #{inspect(err)}"
       {msg, info |> trunc_body()}

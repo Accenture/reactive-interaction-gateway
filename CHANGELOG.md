@@ -9,6 +9,7 @@
   - [Deploy] Dockerfile to use custom `vm.args` file & removed `mix release.init` step - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
 
 - Added
+  - [Outbound] Amazon Kinesis integration [#27](https://github.com/Accenture/reactive-interaction-gateway/issues/27)
   - [Misc] Use lazy logger calls for debug logs
   - [Misc] Format (most files) using Elixir 1.6 formatter
   - [API/Outbound] Add new endpoint `POST /messages` for sending messages (=> Kafka is no longer a hard dependency)
