@@ -2,9 +2,13 @@ defmodule Rig.Application do
   @moduledoc false
 
   use Application
+  use Rig.Config, [:log_level]
 
   def start(_type, _args) do
     alias Supervisor.Spec
+
+    # Override application logging with environment variable
+    Logger.configure([{:level, config().log_level}])
 
     Rig.Discovery.start()
 

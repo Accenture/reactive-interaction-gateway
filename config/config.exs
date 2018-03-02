@@ -24,6 +24,9 @@ config :logger, :console,
   format: "\n$time [$level] $levelpad$message\n$metadata\n",
   metadata: metadata |> Enum.uniq()
 
+config :rig, Rig.Application,
+  log_level: {:system, :atom, "LOG_LEVEL", :debug}
+
 # --------------------------------------
 # User Roles
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
