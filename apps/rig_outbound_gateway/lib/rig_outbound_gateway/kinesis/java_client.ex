@@ -72,7 +72,7 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
   @impl GenServer
   def handle_info(:run_java_client, state) do
     conf = config()
-    Logger.info(fn -> "Starting Java-client for Kinesis.." end)
+    Logger.debug(fn -> "Starting Java-client for Kinesis.." end)
 
     env = [
       RIG_ERLANG_NAME: :erlang.node() |> Atom.to_string(),
@@ -89,7 +89,7 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
     %Porcelain.Result{status: status} =
       Porcelain.exec("java", java_args(), out: %LogStream{}, err: :out, env: env)
 
-    Logger.info(fn ->
+    Logger.warn(fn ->
       "Java-client for Kinesis is dead (exit code #{status}; restart in #{@restart_delay_ms} ms)."
     end)
 
