@@ -19,6 +19,7 @@
   - [Deploy] Kubernetes deployment configuration file - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
   - [Misc] Smoke tests setup and test cases for API Proxy and Kafka + Phoenix messaging - [#42](https://github.com/Accenture/reactive-interaction-gateway/pull/42)
   - [Outbound] Kafka consumer ready check utility function - [#42](https://github.com/Accenture/reactive-interaction-gateway/pull/42)
+  - [Docs] List of all environment variables possible to set in `guides/operator-guide.md` - [#36](https://github.com/Accenture/reactive-interaction-gateway/pull/36)
   - [Rig] Possibility to set logging level with env var `LOG_LEVEL` - [#49](https://github.com/Accenture/reactive-interaction-gateway/pull/49)
 
 - Fixed
