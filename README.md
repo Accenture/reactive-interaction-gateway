@@ -71,6 +71,8 @@ It should be easy to integrate RIG into your current architecture. Check out
 
 Currently we support two ways to deploy RIG: using Docker and using classical Erlang releases. Docker may be simpler for most use cases, but Erlang releases allow for hot code reloading.
 
+You can find list of all environment variables in [operator guide](guides/operator-guide.md).
+
 ### Deployment using Docker
 
 ```bash

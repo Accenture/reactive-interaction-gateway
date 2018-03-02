@@ -57,7 +57,8 @@ config :rig, RigAuth.Jwt.Utils,
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 config :rig, Rig.Discovery,
-  discovery_type: nil
+  discovery_type: {:system, "DISCOVERY_TYPE", nil},
+  dns_name: {:system, "DNS_NAME", "localhost"}
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
