@@ -1,0 +1,8 @@
+.settings
+target
+.classpath
+.editorconfig
+.gitignore
+.project
+dependency-reduced-pom.xml
+README.md

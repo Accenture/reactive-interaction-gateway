@@ -73,7 +73,23 @@ Currently we support two ways to deploy RIG: using Docker and using classical Er
 
 You can find list of all environment variables in [operator guide](guides/operator-guide.md).
 
-### Deployment using Docker
+### Deployment using Docker & Distillery
+
+We are using Distillery releases to be able to run production version of RIG correctly optimized and tuned. Distillery has multiple entrypoints that are used for release:
+
+* `rel/config.exs` - Includes configuration for different types of environment (e.g. dev, prod, staging, etc.). Here Distillery finds which umbrella applications to compile and to use custom `vm.args` config file.
+* `vm.args` - Specifies options for Erlang VM, including name of the node and it's cookie. **Note:** cookie is also set in `rel/config.exs`, however it's just a dummy value and real value for it comes from this file (reason behind is that Distillery needs cookie set in `rel/config.exs` and Erlang in `vm.args` file, skipping either of those leads to error in build/production phase).
+* `config/` - Configuration for RIG itself (most of it can be set by environment variables on runtime, see [operator guide](guides/operator-guide.md)).
+* `apps/` - RIG's source folders.
+
+All these files are compiled together with an external dependencies and released as a tarball.
+
+By running built Docker image in container, release is executed in a foreground.
+
+There are multiple Dockerfiles that can be build:
+
+* `Dockerfile` - Has everything tha RIG offers, no exclusions.
+* `slim.dockerfile` - Excludes Java, thus AWS Kinesis is not possible to use.
 
 ```bash
 # Build the image:
@@ -84,21 +100,20 @@ export HOST_IP="$(ifconfig en0 inet | grep 'inet ' | awk '{ print $2 }')"
 docker run \
 --name rig \
 -p 4000:4000 \
+-e KAFKA_ENABLED=true \
 -e KAFKA_HOSTS="${HOST_IP}:9092" \
 -e NODE_HOST=localhost \
 -e NODE_COOKIE=magiccookie \
 rig
 
 # Check that the proxy api is indeed available on port 4000 (returns an empty list by default):
-curl localhost:4000/apis
+curl localhost:4000/v1/apis
 ```
 
 ### Deployment using Erlang Releases
 Using Erlang releases (instead of Docker containers) allows for hot code reloading. At the same
 time, you have to take care of cross-compilation and
 [the hiccups of code hot-loading](http://learnyousomeerlang.com/relups#the-hiccups-of-appups-and-relups).
-
-TODO describe Distillery builds and perhaps hot code reloading.
 
 ## Contributing
 
