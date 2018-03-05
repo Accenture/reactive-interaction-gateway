@@ -1,4 +1,13 @@
-FROM elixir:1.6-alpine as build
+FROM maven:3-jdk-8-alpine as java-build
+
+COPY kinesis-client /opt/sites/rig/kinesis-client
+
+WORKDIR /opt/sites/rig/kinesis-client
+
+# Compile AWS Kinesis Java application
+RUN mvn package
+
+FROM elixir:1.6-alpine as elixir-build
 
 # Install Elixir & Erlang environment dependencies
 RUN mix local.hex --force
@@ -29,7 +38,6 @@ COPY apps/rig_outbound_gateway/mix.exs /opt/sites/rig/apps/rig_outbound_gateway/
 RUN mix deps.get
 
 # Copy application files
-
 COPY config /opt/sites/rig/config
 
 COPY apps/rig/config /opt/sites/rig/apps/rig/config
@@ -60,8 +68,28 @@ ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 ENV REPLACE_OS_VARS=true
 
+# Install Java
+RUN { \
+		echo '#!/bin/sh'; \
+		echo 'set -e'; \
+		echo; \
+		echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
+	} > /usr/local/bin/docker-java-home \
+	&& chmod +x /usr/local/bin/docker-java-home
+ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk/jre
+ENV PATH $PATH:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
+
+ENV JAVA_VERSION 8u111
+ENV JAVA_ALPINE_VERSION 8.151.12-r0
+
+RUN set -x \
+	&& apk add --no-cache \
+		openjdk8-jre="$JAVA_ALPINE_VERSION" \
+	&& [ "$JAVA_HOME" = "$(docker-java-home)" ]
+
 WORKDIR /opt/sites/rig
-COPY --from=build /opt/sites/rig/_build/prod/rel/rig /opt/sites/rig/
+COPY --from=elixir-build /opt/sites/rig/_build/prod/rel/rig /opt/sites/rig/
+COPY --from=java-build opt/sites/rig/kinesis-client /opt/sites/rig/kinesis-client
 
 # Proxy
 EXPOSE 4000

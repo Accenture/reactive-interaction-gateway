@@ -88,8 +88,8 @@ By running built Docker image in container, release is executed in a foreground.
 
 There are multiple Dockerfiles that can be build:
 
-* `Dockerfile` - Has everything tha RIG offers, no exclusions.
-* `slim.dockerfile` - Excludes Java, thus AWS Kinesis is not possible to use.
+* `Dockerfile` - Basic version, excludes Java, thus AWS Kinesis is not possible to use.
+* `aws.dockerfile` - Includes Java which is required for AWS Kinesis.
 
 ```bash
 # Build the image:
