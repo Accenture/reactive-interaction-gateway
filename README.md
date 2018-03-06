@@ -84,12 +84,12 @@ We are using Distillery releases to be able to run production version of RIG cor
 
 All these files are compiled together with an external dependencies and released as a tarball.
 
-By running built Docker image in container, release is executed in a foreground.
+When running built Docker image in a container, release is run in a foreground.
 
 There are multiple Dockerfiles that can be build:
 
-* `Dockerfile` - Basic version, excludes Java, thus AWS Kinesis is not possible to use.
-* `aws.dockerfile` - Includes Java which is required for AWS Kinesis.
+* `Dockerfile` - Standard image, suitable for on-premise use.
+* `aws.dockerfile` - AWS-flavored version that let's RIG integrate with AWS services like Amazon Kinesis.
 
 ```bash
 # Build the image:
