@@ -10,7 +10,7 @@ defmodule RigInboundGatewayWeb.Presence.Socket do
   channel "role:*", RigInboundGatewayWeb.Presence.Channel
 
   ## Transports
-  transport :websocket, Phoenix.Transports.WebSocket
+  transport :websocket, Phoenix.Transports.WebSocket, check_origin: false, timeout: :infinity
   transport :longpoll, Phoenix.Transports.LongPoll
   transport :sse, RigInboundGateway.Transports.ServerSentEvents
 

@@ -11,6 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 // plugins
+app.disable('etag');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(morgan('common'));

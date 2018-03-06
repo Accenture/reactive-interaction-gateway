@@ -7,6 +7,9 @@ use Mix.Config
 # back to each application for organization purposes.
 import_config "../apps/*/config/config.exs"
 
+config :rig, RigInboundGatewayWeb.Endpoint,
+  check_origin: false
+
 # --------------------------------------
 # Logger
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

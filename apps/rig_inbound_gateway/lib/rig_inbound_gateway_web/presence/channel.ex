@@ -42,7 +42,7 @@ defmodule RigInboundGatewayWeb.Presence.Channel do
 
     {
       _username = Map.fetch!(user_info, conf.jwt_user_field),
-      _roles    = Map.fetch!(user_info, conf.jwt_roles_field)
+      _roles    = Map.get(user_info, conf.jwt_roles_field, [])
     }
   end
 
@@ -97,7 +97,6 @@ defmodule RigInboundGatewayWeb.Presence.Channel do
   @spec handle_info({:after_join, String.t, [String.t]}, map) :: {:noreply, map}
   def handle_info({:after_join, username, roles}, socket) do
     # track global role channels
-    push(socket, "presence_state", Presence.list(socket))
     track_multiple_presences("role", roles, socket)
 
     # track user specific channel
