@@ -1,4 +1,13 @@
-FROM elixir:1.6-alpine as build
+FROM maven:3-jdk-8-alpine as java-build
+
+COPY kinesis-client /opt/sites/rig/kinesis-client
+
+WORKDIR /opt/sites/rig/kinesis-client
+
+# Compile AWS Kinesis Java application
+RUN mvn package
+
+FROM elixir:1.6-alpine as elixir-build
 
 # Install Elixir & Erlang environment dependencies
 RUN mix local.hex --force
@@ -29,7 +38,6 @@ COPY apps/rig_outbound_gateway/mix.exs /opt/sites/rig/apps/rig_outbound_gateway/
 RUN mix deps.get
 
 # Copy application files
-
 COPY config /opt/sites/rig/config
 
 COPY apps/rig/config /opt/sites/rig/apps/rig/config
@@ -59,9 +67,14 @@ RUN apk add --no-cache bash
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 ENV REPLACE_OS_VARS=true
+ENV KINESIS_OTP_JAR=/opt/sites/rig/kinesis-client/local-maven-repo/org/erlang/otp/jinterface/1.8.1/jinterface-1.8.1.jar
+
+# Install Java
+RUN apk add --no-cache openjdk8-jre
 
 WORKDIR /opt/sites/rig
-COPY --from=build /opt/sites/rig/_build/prod/rel/rig /opt/sites/rig/
+COPY --from=elixir-build /opt/sites/rig/_build/prod/rel/rig /opt/sites/rig/
+COPY --from=java-build opt/sites/rig/kinesis-client /opt/sites/rig/kinesis-client
 
 # Proxy
 EXPOSE 4000

@@ -16,7 +16,7 @@ For example, take a look at the [main config file](../config/config.exs), where 
 the options, along with their default values. The file should also be self-explanatory; if it
 isn't, feel free to create a PR to start the discussion.
 
-TODO: describe how to override at runtime
+Other way to change RIG's configuration is with environment on application start. See list of all environment variables in [operator guide](operator-guide.md).
 
 ## API Gateway
 
@@ -42,7 +42,7 @@ cluster, so all nodes share the same configuration without having to sync anythi
 #### Endpoints
 
 ##### Create new API
-`POST /apis`
+`POST /v1/apis`
 ```json
 {
   "id": "new-service",
@@ -76,13 +76,13 @@ cluster, so all nodes share the same configuration without having to sync anythi
 ```
 
 ##### Read list of APIs
-`GET /apis`
+`GET /v1/apis`
 
 ##### Read detail of specific API
-`GET /apis/:api_id`
+`GET /v1/apis/:api_id`
 
 ##### Update API
-`PUT /apis/:api_id`
+`PUT /v1/apis/:api_id`
 ```json
 {
   "id": "new-service",
@@ -116,7 +116,7 @@ cluster, so all nodes share the same configuration without having to sync anythi
 ```
 
 ##### Delete API
-`DELETE /apis/:api_id`
+`DELETE /v1/apis/:api_id`
 
 
 ## Message Formats
