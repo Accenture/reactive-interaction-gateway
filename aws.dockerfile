@@ -67,6 +67,7 @@ RUN apk add --no-cache bash
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 ENV REPLACE_OS_VARS=true
+ENV KINESIS_OTP_JAR=/opt/sites/rig/kinesis-client/local-maven-repo/org/erlang/otp/jinterface/1.8.1/jinterface-1.8.1.jar
 
 # Install Java
 RUN apk add --no-cache openjdk8-jre
