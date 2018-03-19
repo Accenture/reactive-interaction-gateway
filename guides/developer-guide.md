@@ -1,6 +1,24 @@
 # Developer's Guide to the Reactive Interaction Gateway
 
-TODO getting started
+Unless you use a Docker image, you'll need Elixir and the Mix build tool on your machine. You
+can either follow the
+[instructions on the Elixir website](https://elixir-lang.org/install.html), or use
+[kiex](https://github.com/taylor/kiex) to install and manage Elixir runtimes (kiex is
+recommended for development---it allows you to jump to definitions inside the Elixir source
+code, plus you can checkout upcoming Elixir versions easily).
+
+To get up and running:
+
+- Install dependencies with `mix deps.get`
+- Start Phoenix endpoint with `mix phx.server`
+
+Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+
+Additional notes:
+
+- You can run tests with `mix test`. See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+- When debugging multi-node features, it's helpful to run the (named) nodes in `iex` sessions
+  using `iex --sname nodename -S mix`.
 
 Our conventions are documented in [`guides/architecture/decisions/`](guides/architecture/decisions/). See [0001-record-architecture-decisions.md](guides/architecture/decisions/0001-record-architecture-decisions.md) for more details.
 
