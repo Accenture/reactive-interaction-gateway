@@ -48,7 +48,6 @@ release :rig do
   set version: current_version(:rig)
   set applications: [
     :runtime_tools,
-    :observer_cli,
     rig: :permanent,
     rig_api: :permanent,
     rig_auth: :permanent,

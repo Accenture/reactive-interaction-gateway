@@ -31,7 +31,7 @@ defmodule RigOutboundGateway.Kafka.MessageHandler do
         meta = Keyword.merge(common_meta, body_raw: body, offset: offset)
         ack = fn -> ack_message(group_subscriber_pid, topic, partition, offset) end
 
-        RigOutboundGateway.handle_raw(body, &Jason.decode/1, send, ack)
+        RigOutboundGateway.handle_raw(body, &JsonParser.parse/1, send, ack)
         |> RigOutboundGateway.Logger.log(__MODULE__, meta)
 
         __MODULE__.message_handler_loop(topic, partition, group_subscriber_pid, send)

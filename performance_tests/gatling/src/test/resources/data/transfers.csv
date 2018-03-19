@@ -1,5 +1,0 @@
-username,password,targetUser,amount
-first.user,user,second.user,2
-second.user,user,third.user,2
-third.user,user,fourth.user,2
-fourth.user,user,first.user,2

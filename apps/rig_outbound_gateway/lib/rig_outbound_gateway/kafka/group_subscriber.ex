@@ -50,7 +50,7 @@ defmodule RigOutboundGateway.Kafka.GroupSubscriber do
       conf.consumer_group,
       conf.source_topics,
       _group_config = [rejoin_delay_seconds: 5],
-      _consumer_config = [begin_offset: :latest], # , min_bytes: 1, max_bytes: 33554432, max_wait_time: 50
+      _consumer_config = [begin_offset: :latest],
       _callback_module = __MODULE__,
       _callback_init_args = :no_args
     )

@@ -22,9 +22,9 @@ defmodule Rig.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {Rig.Application, [:observer_cli, :runtime_tools]},
+      mod: {Rig.Application, []},
       extra_applications: [:logger],
-      included_applications: [:peerage, :runtime_tools]
+      included_applications: [:peerage]
     ]
   end
 
@@ -41,8 +41,7 @@ defmodule Rig.MixProject do
       {:murmur, "~> 1.0"},
       {:peerage, "~> 1.0"},
       # For running external commands in Mix tasks:
-      {:porcelain, "~> 2.0"},
-      {:observer_cli, "~> 1.2"}
+      {:porcelain, "~> 2.0"}
     ]
   end
 

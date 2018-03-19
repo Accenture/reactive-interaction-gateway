@@ -42,7 +42,6 @@ defmodule RigOutboundGateway.MixProject do
       {:stubr, "~> 1.5"},
       # Run/manage the Kinesis Java client:
       {:porcelain, "~> 2.0"},
-      {:jason, "~> 1.0"},
     ]
   end
 end
