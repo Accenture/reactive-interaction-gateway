@@ -3,7 +3,7 @@ FROM elixir:1.6-alpine as build
 # Install Elixir & Erlang environment dependencies
 RUN mix local.hex --force
 RUN mix local.rebar --force
-RUN apk update && apk add make \
+RUN apk add --no-cache make \
     gcc \
     g++
 
@@ -54,7 +54,7 @@ RUN mix release
 
 FROM erlang:20-alpine
 
-RUN apk update && apk add bash
+RUN apk add --no-cache bash
 
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
