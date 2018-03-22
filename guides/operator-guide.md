@@ -1,8 +1,6 @@
 # Operator's Guide to the Reactive Interaction Gateway
 
-TODO ToC
-
-TODO getting started
+Typically, we deploy RIG using Docker. You can either use the image on Docker Hub, or build one yourself (try `docker build -t rig .`).
 
 ## Configuration
 

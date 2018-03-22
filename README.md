@@ -1,20 +1,92 @@
 # RIG - Reactive Interaction Gateway
 
+_The missing link between back-end and front-end -- stop polling and go real-time!_
+
 [![Build Status](https://travis-ci.org/Accenture/reactive-interaction-gateway.svg?branch=master)](https://travis-ci.org/Accenture/reactive-interaction-gateway)
 
-RIG is a scalable, open source gateway to your microservices. It solves the problem of
-connection state (which users are online currently, with which devices), which allows your
-microservices to be stateless. Pushing arbitrary messages to all connected frontends of a
-specific user becomes as easy as publishing a message to a Kafka topic.
+## What does it solve?
 
-Additionally, RIG comes with a basic API gateway implementation. This way, RIG can be used to
-communicate both ways between your microservices and your frontends.
+In short: handling asynchronous events.
 
-![RIG Overview](doc/overview.svg)
+Slightly longer:
 
-Read more about why we built this [here](doc/motivation.md).
+You want UI updates without delay, "real time". However, handling connections to thousands of front-end instances concurrently is not only hard to implement in a scalable way---it also makes it very hard (impossible?) to upgrade your service without losing those connections. And in a microservice environment, which service should manage those connections?
 
-Other features:
+Instead, let RIG handle those connections for you. RIG is designed for scalability and allows you to concentrate on the actual business logic. Back-end (micro)services no longer have to care about connection state, which means they can be stateless, making it very easy to roll out updates to them. Sending notifications to all online devices of a certain user becomes as easy as POSTing a message to an HTTP endpoint.
+
+Additionally, RIG comes with a basic API gateway implementation, which allows you to communicate both ways between your microservices and your front-ends.
+
+## Getting Started
+
+RIG uses [JSON Web Tokens (JWT)](https://en.wikipedia.org/wiki/JSON_Web_Token) to figure out to which user a connection belongs to. In a real setup, an authentication service would create the JWT once a user has been authenticated (logged in). The service would also sign the token using a "secret" (a shared key) that is also known to RIG.
+
+> RIG currently supports symmetric hashing only (HS256, HS384, HS512). Please make sure to use keys of appropriate length, as described in [the spec](https://tools.ietf.org/html/rfc7518#section-3.2). For example, if you use HS256, your secret key should be at least 32 character (256 bit) in length.
+
+When a front-end creates a connection to (or through) RIG, the request must contain such a JWT. Before handling the request, RIG verifies the JWT signature, which ensures that the token hasn't been tampered with.
+
+In order to get started quickly, you don't need to implement an authentication service. Instead, you can either go to [jwt.io](https://jwt.io/) to create a new token, or use our helper script:
+
+```bash
+cd scripts/encode_jwt
+mix escript.build
+token=$(./encode_jwt --secret myJwtSecret --user alice --exp 1893456000)
+```
+
+In this example we use "myJwtSecret" as the secret key (not a suitable key for production!). The token contains the user ID and---since we're only playing around here---we also add an expiration date that is well in the future (exp is given in [seconds since the epoch](https://en.wikipedia.org/wiki/Unix_time)). The token then looks like this:
+
+```javascript
+// Header:
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+// Payload:
+{
+  "exp": 99999999,
+  "jti": "1521227425",
+  "roles": [],
+  "user": "alice"
+}
+```
+
+Next we start up RIG, with the JWT secret provided as an environment variable.
+
+> In case you wonder what those `NODE_HOST` and `NODE_COOKIE` variables mean: they are used to setup connections between RIG nodes (instances). They must be set, but can be ignored for now. See the [operator's guide](./guides/operator-guide.md) if you're curious about available settings.
+
+```bash
+docker run \
+  -p 4000:4000 \
+  -p 4010:4010 \
+  -e NODE_HOST=rig \
+  -e NODE_COOKIE=myNodeSecret \
+  -e JWT_SECRET_KEY=myJwtSecret \
+  accenture/reactive-interaction-gateway
+```
+
+RIG is now ready to accept front-end connections. Let's simulate a browser app that uses [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events) to subscribe to RIG, using curl:
+
+```bash
+curl "localhost:4000/socket/sse?users\[\]=alice&token=$token"
+```
+
+The username should match what's in the token, otherwise RIG won't allow you to connect.
+
+You should see some messages now, followed by incoming heartbeat events. Fire up another terminal window, where we can push a message through RIG:
+
+```bash
+curl -H 'content-type: application/json' -d '{"user":"alice","text":"Hi, Alice!"}' localhost:4010/v1/messages
+```
+
+After this you should see "Hi, Alice!" popping up in the other window! :tada:
+
+Note that for posting the message we've used another port---that's the _internal_ port running RIG's API. While the external port (4000) can be exposed to the internet, the internal one (4010) is meant to be used by your back-end services only.
+
+## Hacking
+
+See the [developer's guide](guides/developer-guide.md). You'd like to contribute? Awesome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+
+## Feature Summary
+
 - Massively scalable, thanks to
   - only using in-memory databases, along with eventually-consistent cluster synchronization
   - Erlang/OTP, the platform RIG is built on
@@ -23,6 +95,35 @@ Other features:
 - Supports privileged users that are able to subscribe to messages of other users
 - Supports JWT signature verification for APIs that need authentication
   - with blacklisting for immediate invalidation of tokens
+
+## Configuration, Integration, Deployment
+
+It should be easy to integrate RIG into your current architecture---if you have any problems, please open a Github issue. Check out
+[the operator's guide](guides/operator-guide.md) for details.
+
+## Versioning
+
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the
+[tags on this repository](https://github.com/Accenture/reactive-interaction-gateway/tags).
+
+## License
+
+The Reactive Interaction Gateway (patent pending) is licensed under the Apache License 2.0 - see
+[LICENSE](LICENSE) for details.
+
+RIG is sponsored by [Accenture](https://accenture.github.io/).
+
+## Acknowledgments
+
+Kudos to these awesome projects:
+
+- Elixir
+- Erlang/OTP
+- Phoenix Framework
+- Brod
+- Distillery
+
+## FAQ
 
 ### How is it different from other API gateways like [Tyk](https://tyk.io/) or [Kong](https://getkong.org/)?
 
@@ -38,105 +139,3 @@ horizontal scalability, while maintaining some of the characteristics of a tradi
 gateway. That said, if your architecture includes both, interactive UIs as frontends and
 serverless backends, perhaps even running in different cloud environments, then you might even
 benefit from running both gateways in a complementary way.
-
-## Getting Started
-
-Unless you use a Docker image, you'll need Elixir and the Mix build tool on your machine. You
-can either follow the
-[instructions on the Elixir website](https://elixir-lang.org/install.html), or use
-[kiex](https://github.com/taylor/kiex) to install and manage Elixir runtimes (kiex is
-recommended for development, as it allows you to jump to definitions inside the Elixir source
-code, plus you can checkout upcoming Elixir versions easily).
-
-### Start RIG in Development
-
-To get up and running:
-
-- Install dependencies with `mix deps.get`
-- Start Phoenix endpoint with `mix phx.server`
-
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Additional notes:
-- You can run tests with `mix test`. See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
-- When debugging multi-node features, it's helpful to run the (named) nodes in `iex` sessions
-  using `iex --sname nodename -S mix`.
-
-## Configuration and Integration
-
-It should be easy to integrate RIG into your current architecture. Check out
-[the configuration guide](doc/configuration.md) for details.
-
-## Deploy RIG to production
-
-Currently we support two ways to deploy RIG: using Docker and using classical Erlang releases. Docker may be simpler for most use cases, but Erlang releases allow for hot code reloading.
-
-You can find list of all environment variables in [operator guide](guides/operator-guide.md).
-
-### Deployment using Docker & Distillery
-
-We are using Distillery releases to be able to run production version of RIG correctly optimized and tuned. Distillery has multiple entrypoints that are used for release:
-
-* `rel/config.exs` - Includes configuration for different types of environment (e.g. dev, prod, staging, etc.). Here Distillery finds which umbrella applications to compile and to use custom `vm.args` config file.
-* `vm.args` - Specifies options for Erlang VM, including name of the node and it's cookie. **Note:** cookie is also set in `rel/config.exs`, however it's just a dummy value and real value for it comes from this file (reason behind is that Distillery needs cookie set in `rel/config.exs` and Erlang in `vm.args` file, skipping either of those leads to error in build/production phase).
-* `config/` - Configuration for RIG itself (most of it can be set by environment variables on runtime, see [operator guide](guides/operator-guide.md)).
-* `apps/` - RIG's source folders.
-
-All these files are compiled together with an external dependencies and released as a tarball.
-
-When running built Docker image in a container, release is run in a foreground.
-
-There are multiple Dockerfiles that can be build:
-
-* `Dockerfile` - Standard image, suitable for on-premise use.
-* `aws.dockerfile` - AWS-flavored version that let's RIG integrate with AWS services like Amazon Kinesis.
-
-```bash
-# Build the image:
-docker build -t rig .
-
-# Run the container (with Kafka broker bound to the host's en0 IP):
-export HOST_IP="$(ifconfig en0 inet | grep 'inet ' | awk '{ print $2 }')"
-docker run \
---name rig \
--p 4000:4000 \
--e KAFKA_ENABLED=true \
--e KAFKA_HOSTS="${HOST_IP}:9092" \
--e NODE_HOST=localhost \
--e NODE_COOKIE=magiccookie \
-rig
-
-# Check that the proxy api is indeed available on port 4000 (returns an empty list by default):
-curl localhost:4000/v1/apis
-```
-
-### Deployment using Erlang Releases
-Using Erlang releases (instead of Docker containers) allows for hot code reloading. At the same
-time, you have to take care of cross-compilation and
-[the hiccups of code hot-loading](http://learnyousomeerlang.com/relups#the-hiccups-of-appups-and-relups).
-
-## Contributing
-
-Your help is welcome - please read [CONTRIBUTING.md](CONTRIBUTING.md) for details!
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the
-[tags on this repository](https://github.com/Accenture/reactive-interaction-gateway/tags).
-
-## License
-
-The Reactive Interaction Gateway (patent pending) is licensed under the Apache License 2.0 - see
-[LICENSE](LICENSE) for details.
-
-The work is sponsored by [Accenture](https://accenture.github.io/).
-
-## Acknowledgments
-
-RIG is built on the shoulders of giants. The most important ones, without dependencies:
-
-- Elixir
-- Erlang
-- Phoenix Framework
-- Brod
-- Distillery

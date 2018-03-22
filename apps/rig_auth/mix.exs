@@ -1,8 +1,10 @@
 defmodule RigAuth.Mixfile do
+  @moduledoc false
   use Mix.Project
 
   def project do
     %{rig: rig_version, elixir: elixir_version} = versions()
+
     [
       app: :rig_auth,
       version: rig_version,
