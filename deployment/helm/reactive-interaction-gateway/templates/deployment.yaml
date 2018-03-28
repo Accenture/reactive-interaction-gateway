@@ -1,7 +1,7 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ template "reactive-interaction-gateway.fullname" . }}
+  name: {{ template "reactive-interaction-gateway.name" . }}
   labels:
     app: {{ template "reactive-interaction-gateway.name" . }}
     chart: {{ template "reactive-interaction-gateway.chart" . }}
