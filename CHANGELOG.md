@@ -23,6 +23,7 @@
   - [Docs] List of all environment variables possible to set in `guides/operator-guide.md` - [#36](https://github.com/Accenture/reactive-interaction-gateway/pull/36)
   - [Rig] Possibility to set logging level with env var `LOG_LEVEL` - [#49](https://github.com/Accenture/reactive-interaction-gateway/pull/49)
   - [Deploy] Variations of Dockerfiles - basic version and AWS version - [#44](https://github.com/Accenture/reactive-interaction-gateway/pull/44)
+  - [Deploy] Helm deployment chart - [#59](https://github.com/Accenture/reactive-interaction-gateway/pull/59)
 
 - Fixed
   - [Inbound] Make presence channel respect `JWT_USER_FIELD` setting (currently hardcoded to "username")
