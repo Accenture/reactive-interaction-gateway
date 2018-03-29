@@ -20,41 +20,33 @@ the community chimes in with helpful advice if you have questions.
 
 ## What should I know before I get started?
 
-You can
-- generate documentation with `mix docs`,
-- run unit tests with `mix test` and see the test coverage with
-  `mix coveralls.html`, which generates a file at `doc/excoveralls.html`,
-- run the linter with `mix credo --strict`.
-- run smoke tests with `mix smoke_test`.
+Since this is a standard mix project, typical mix commands work as expected:
+
+- Generate documentation with `mix docs`.
+- Run unit tests with `mix test` and see the test coverage with
+  `mix coveralls.html`, which generates a file at `doc/excoveralls.html`.
+
+For static analysis, we use [credo](https://github.com/rrrene/credo):
+
+- Run the linter with `mix credo --strict`.
+
+There is a smoke-test test-suite that can be started with a mix task as well:
+
+- Run smoke tests with `mix smoke_test`.
   - Alternatively, you can run the tests directly with `docker-compose -f smoke_tests.docker-compose.yml up -d --build`.
   - To see smoke tests logs run `docker logs -f rig`.
   - To re-run smoke tests without re-creating entire environment run `docker-compose -f smoke_tests.docker-compose.yml up --no-deps --build rig`.
 
 We follow the [standard GitHub workflow](https://guides.github.com/introduction/flow/).
-Before submitting a PR,
-- please write tests,
-- make sure you run all tests and check the linter (credo) for warnings.
-- update `CHANGELOG.md` file with your current change in form of `[Type of change e.g. Config, Kafka, .etc] Short description what it is all about - [#PR-ID-NUMBER](link to pull request)`, please put your change under suitable section - changed, added, fixed, removed, deprecated
+Before submitting a PR:
 
-An overview of the directory structure:
-- `lib/rig`
-  Features are implemented here, unless they're web-related
-  - `lib/rig/application.ex`
-    Application entry point
-  - `lib/rig/api_proxy/proxy.ex`
-    Reverse proxy implementation
-  - `lib/rig/blacklist*`
-    Blacklisting tokens allows for kicking out users immediately, ignoring token expiration
-  - `lib/rig/kafka*`
-    Integration with Kafka
-  - `lib/rig/rate_limit*`
-    The feature limits the amount of connections per second, per target-endpoint and source-IP
-- `lib/rig_web`
-  Web-related stuff, like controllers and socket-handlers
-  - `lib/rig_web/presence*`
-    Code related to handling active frontend connections
+- Please write tests.
+- Make sure you run all tests and check the linter (credo) for warnings.
+- Think about whether it makes sense to document the change in some way. For smaller, internal changes, inline documentation might be sufficient (moduledoc), while more visible ones might warrant a change to the [developer's guide](guides/developer-guide.md), the [operator's guide](guides/operator-guide.md) or the [README](./README.md).
+- Update `CHANGELOG.md` file with your current change in form of `[Type of change e.g. Config, Kafka, .etc] Short description what it is all about - [#NUMBER](link to issue or pull request)`, and choose a suitable section (i.e., changed, added, fixed, removed, deprecated).
 
 ### Design Decisions
+
 When we make a significant decision in how to write code, or how to maintain the project and
 what we can or cannot support, we will document it using
 [Architecture Decision Records (ADR)](http://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions).
