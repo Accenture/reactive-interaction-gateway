@@ -45,7 +45,7 @@ If you want to use local image (either original RIG or your own based on origina
 
 ## Start RIG on Kubernetes
 1.  Make sure a tiller pod is running in the kube-system namespace ```kubectl get pods -n=kube-system```
-1. `helm install reactive-interaction-gateway` (assuming you are in root directory)
+1. `helm install deployment/helm/reactive-interaction-gateway` (assuming you are in root directory)
 1. `kubectl get pod,svc` should list a running RIG pod and two services
 
 **Note:** Services should communicate with `reactive-interaction-gateway-service` which is reachable within Kubernetes cluster (but not outside of server) on port 4000 (by default). This service will load balance requests amongst replicas.
