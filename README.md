@@ -81,10 +81,6 @@ After this you should see "Hi, Alice!" popping up in the other window! :tada:
 
 Note that for posting the message we've used another port---that's the _internal_ port running RIG's API. While the external port (4000) can be exposed to the internet, the internal one (4010) is meant to be used by your back-end services only.
 
-## Hacking
-
-See the [developer's guide](guides/developer-guide.md). You'd like to contribute? Awesome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
-
 ## Feature Summary
 
 - Massively scalable, thanks to
@@ -101,19 +97,33 @@ See the [developer's guide](guides/developer-guide.md). You'd like to contribute
 It should be easy to integrate RIG into your current architecture---if you have any problems, please open a Github issue. Check out
 [the operator's guide](guides/operator-guide.md) for details.
 
-## Versioning
+We use [SemVer](http://semver.org/) for versioning. For the versions available, take a look at the
+[list of tags](https://github.com/Accenture/reactive-interaction-gateway/tags).
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the
-[tags on this repository](https://github.com/Accenture/reactive-interaction-gateway/tags).
+## Contribute
+
+- **Use issues for everything.**
+- For a small change, just send a PR.
+- For bigger changes open an issue for discussion before sending a PR.
+- PR should have:
+  - Test case
+  - Documentation (e.g., moduledoc, developer's guide, operator's guide)
+  - Changelog entry
+- You can also contribute by:
+  - Reporting issues
+  - Suggesting new features or enhancements
+  - Improve/fix documentation
+
+See the [developer's guide](guides/developer-guide.md) and [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
 
 ## License
 
 The Reactive Interaction Gateway (patent pending) is licensed under the Apache License 2.0 - see
 [LICENSE](LICENSE) for details.
 
-RIG is sponsored by [Accenture](https://accenture.github.io/).
-
 ## Acknowledgments
+
+The Reactive Interaction Gateway is sponsored and maintained by [Accenture](https://accenture.github.io/).
 
 Kudos to these awesome projects:
 
