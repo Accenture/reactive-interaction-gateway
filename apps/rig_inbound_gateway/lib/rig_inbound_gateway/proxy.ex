@@ -367,7 +367,7 @@ defmodule RigInboundGateway.Proxy do
       |> Map.merge(api)
       |> Map.put("node_name", get_node_name()) # Make sure API has always origin node
 
-    default_auth_values = 
+    default_auth_values =
       api_with_default
       |> Map.get("auth")
       |> Map.merge(auth_type_based_values(api_with_default["auth_type"]))
