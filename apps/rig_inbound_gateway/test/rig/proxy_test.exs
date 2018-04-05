@@ -181,6 +181,10 @@ defmodule RigInboundGateway.ProxyTest do
       assert api["auth"]["use_query"]
       assert api["auth"]["query_name"] == "token"
 
+      # auth type set to jwt should still set the appropiate auth values
+      assert api["auth"]["use_header"]
+      assert api["auth"]["header_name"] == "Authorization"
+
       assert ctx.tracker |> Stubr.called_thrice?(:track)
       assert ctx.tracker |> Stubr.called_twice?(:find_by_node)
     end
