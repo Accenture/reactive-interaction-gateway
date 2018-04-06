@@ -24,6 +24,11 @@ docker-compose -f kafka.docker-compose.yml up -d
 
 **Terminal 1:** Start RIG (from root directory)
 
+Make sure that all required dependencies are fetched.
+```sh
+mix deps.get
+```
+
 For RIG we could use default configuration values, but where's fun in that. Let's change them so we can also see how to configure certain things to our needs.
 
 ```sh
