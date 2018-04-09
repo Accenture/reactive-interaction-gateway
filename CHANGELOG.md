@@ -3,7 +3,6 @@
 ## v2.0.0-dev
 
 - Changed
-  - [Inbound] User defined query auth values are no longer overridden by `JWT `auth type
   - [Misc] Convert to umbrella project layout
   - [Docs] Move documentation from `doc/` to `guides/` as the former is the default for ex_doc output
   - [Inbound] Revised request logging (currently Kafka and console as backends)
@@ -32,6 +31,7 @@
   - [Inbound] Set proper environment variable for Phoenix server `INBOUND_PORT` - [#38](https://github.com/Accenture/reactive-interaction-gateway/pull/38)
   - [API] Set proper environment variable for Phoenix server `API_PORT` - [#38](https://github.com/Accenture/reactive-interaction-gateway/pull/38)
   - [Examples] Channels example fixed to be compatible with version 2.0.0 [#40](https://github.com/Accenture/reactive-interaction-gateway/pull/40)
+  - [Inbound] User defined query auth values are no longer overridden by `JWT` auth type
 
 - Deprecated
 
