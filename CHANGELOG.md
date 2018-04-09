@@ -3,6 +3,7 @@
 ## v2.0.0-dev
 
 - Changed
+  - [Inbound] `JWT` auth type no longer overrides used defined query auth values
   - [Misc] Convert to umbrella project layout
   - [Docs] Move documentation from `doc/` to `guides/` as the former is the default for ex_doc output
   - [Inbound] Revised request logging (currently Kafka and console as backends)
