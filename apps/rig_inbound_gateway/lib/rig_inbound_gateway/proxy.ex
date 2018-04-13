@@ -348,6 +348,12 @@ defmodule RigInboundGateway.Proxy do
     default_api_values = %{
       "active" => true,
       "auth_type" => "none",
+      "auth" => %{
+        "use_header" => false,
+        "header_name" => "",
+        "use_query" => false,
+        "query_name" => ""
+      },
       "proxy" => %{
         "use_env" => false
       },
@@ -360,21 +366,18 @@ defmodule RigInboundGateway.Proxy do
       default_api_values
       |> Map.merge(api)
       |> Map.put("node_name", get_node_name()) # Make sure API has always origin node
-    auth_default_values = get_default_auth_values(api_with_default["auth_type"])
 
-    api_with_default |> Map.put("auth", auth_default_values)
+    default_auth_values =
+      api_with_default
+      |> Map.get("auth")
+      |> Map.merge(auth_type_based_values(api_with_default["auth_type"]))
+
+    Map.put(api_with_default, "auth", default_auth_values)
   end
 
-  @spec get_default_auth_values(String.t) :: map
-  defp get_default_auth_values(type) do
-    query_default_values = %{"use_query" => false, "query_name" => ""}
-
-    header_default_values =
-      case type do
-        "jwt" -> %{"use_header" => true, "header_name" => "Authorization"}
-        _ -> %{"use_header" => false, "header_name" => ""}
-      end
-
-    query_default_values |> Map.merge(header_default_values)
+  @spec auth_type_based_values(String.t) :: map
+  defp auth_type_based_values("jwt") do
+    %{"use_header" => true, "header_name" => "Authorization"}
   end
+  defp auth_type_based_values(_), do: %{}
 end

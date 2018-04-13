@@ -90,6 +90,104 @@ defmodule RigInboundGateway.ProxyTest do
       {:error, :already_tracked} = proxy |> add_api("random-service", @mock_api)
       assert ctx.tracker |> Stubr.called_thrice?(:track)
     end
+
+    test "should set default auth values for service", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+
+      refute proxy |> get_api("incomplete-service")
+      assert ctx.tracker |> Stubr.called_twice?(:track)
+      assert ctx.tracker |> Stubr.called_once?(:find_by_node)
+
+      api_config = %{
+        "id" => "incomplete-service",
+        "name" => "incomplete-service",
+        "proxy" => %{"port" => 7070, "target_url" => "API_HOST"},
+        "version_data" => %{},
+        "auth_type" => "none"
+      }
+
+      expected_auth_values = %{
+        "use_header" => false,
+        "header_name" => "",
+        "use_query" => false,
+        "query_name" => ""
+      }
+
+      {:ok, _response} = proxy |> add_api("incomplete-service", api_config)
+
+      {_id, api} = proxy |> get_api("incomplete-service")
+
+      assert api["auth"] == expected_auth_values
+
+      assert ctx.tracker |> Stubr.called_thrice?(:track)
+      assert ctx.tracker |> Stubr.called_twice?(:find_by_node)
+    end
+
+    test "should set header auth values if auth_type is jwt", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+
+      refute proxy |> get_api("incomplete-service")
+      assert ctx.tracker |> Stubr.called_twice?(:track)
+      assert ctx.tracker |> Stubr.called_once?(:find_by_node)
+
+      api_config = %{
+        "id" => "incomplete-service",
+        "name" => "incomplete-service",
+        "proxy" => %{"port" => 7070, "target_url" => "API_HOST"},
+        "version_data" => %{},
+        "auth_type" => "jwt"
+      }
+
+      expected_auth_values = %{
+        "use_header" => true,
+        "header_name" => "Authorization",
+        "use_query" => false,
+        "query_name" => ""
+      }
+
+      {:ok, _response} = proxy |> add_api("incomplete-service", api_config)
+
+      {_id, api} = proxy |> get_api("incomplete-service")
+
+      assert api["auth"] == expected_auth_values
+
+      assert ctx.tracker |> Stubr.called_thrice?(:track)
+      assert ctx.tracker |> Stubr.called_twice?(:find_by_node)
+    end
+
+    test "should not override user defined query auth values when auth_type is jwt", ctx do
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+
+      refute proxy |> get_api("incomplete-service")
+      assert ctx.tracker |> Stubr.called_twice?(:track)
+      assert ctx.tracker |> Stubr.called_once?(:find_by_node)
+
+      api_config = %{
+        "id" => "incomplete-service",
+        "name" => "incomplete-service",
+        "proxy" => %{"port" => 7070, "target_url" => "API_HOST"},
+        "version_data" => %{},
+        "auth_type" => "jwt",
+        "auth" => %{
+          "use_query" => true,
+          "query_name" => "token"
+        }
+      }
+
+      {:ok, _response} = proxy |> add_api("incomplete-service", api_config)
+
+      {_id, api} = proxy |> get_api("incomplete-service")
+
+      assert api["auth"]["use_query"]
+      assert api["auth"]["query_name"] == "token"
+
+      # auth type set to jwt should still set the appropiate auth values
+      assert api["auth"]["use_header"]
+      assert api["auth"]["header_name"] == "Authorization"
+
+      assert ctx.tracker |> Stubr.called_thrice?(:track)
+      assert ctx.tracker |> Stubr.called_twice?(:find_by_node)
+    end
   end
 
   describe "replace_api" do
