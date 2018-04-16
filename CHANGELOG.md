@@ -7,6 +7,7 @@
   - [Docs] Move documentation from `doc/` to `guides/` as the former is the default for ex_doc output
   - [Inbound] Revised request logging (currently Kafka and console as backends)
   - [Inbound] Disable WebSocket timeout - [#58](https://github.com/Accenture/reactive-interaction-gateway/pull/58)
+  - [Inbound] The Server-Sent Events endpoint no longer accepts any query parameters. Instead it expects the JWT to be set as the authorization bearer token in the HTTP header, where it extracts the user ID from. The connection is then subscribed to the users channel automatically. Previously, it was also possible to subscribe to other users' channels, but going forward, this is only possible using the (non-public) API. - [#65](https://github.com/Accenture/reactive-interaction-gateway/issues/65)
   - [Deploy] Dockerfile to use custom `vm.args` file & removed `mix release.init` step - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
 
 - Added

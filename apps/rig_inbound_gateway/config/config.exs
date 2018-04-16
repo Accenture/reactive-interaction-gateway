@@ -97,8 +97,7 @@ jwt_payload_field_map = %{
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 config :rig, RigInboundGateway.Transports.ServerSentEvents,
-  user_channel_name_mf: {RigInboundGatewayWeb.Presence.Channel, :user_channel_name},
-  role_channel_name_mf: {RigInboundGatewayWeb.Presence.Channel, :role_channel_name}
+  user_channel_name_mf: {RigInboundGatewayWeb.Presence.Channel, :user_channel_name}
 
 config :rig, RigInboundGatewayWeb.Presence.Channel,
   # See "JWT payload fields"

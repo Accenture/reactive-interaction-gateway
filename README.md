@@ -66,12 +66,10 @@ docker run \
 RIG is now ready to accept front-end connections. Let's simulate a browser app that uses [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events) to subscribe to RIG, using curl:
 
 ```bash
-curl "localhost:4000/socket/sse?users\[\]=alice&token=$token"
+curl -H "Authorization: Bearer $token" localhost:4000/socket/sse
 ```
 
-The username should match what's in the token, otherwise RIG won't allow you to connect.
-
-You should see some messages now, followed by incoming heartbeat events. Fire up another terminal window, where we can push a message through RIG:
+This hooks you up to alice' event stream, and you should see now "event: connection established", followed by "heartbeat" events. Fire up another terminal window to push a message through RIG:
 
 ```bash
 curl -H 'content-type: application/json' -d '{"user":"alice","text":"Hi, Alice!"}' localhost:4010/v1/messages
@@ -79,7 +77,7 @@ curl -H 'content-type: application/json' -d '{"user":"alice","text":"Hi, Alice!"
 
 After this you should see "Hi, Alice!" popping up in the other window! :tada:
 
-Note that for posting the message we've used another port---that's the _internal_ port running RIG's API. While the external port (4000) can be exposed to the internet, the internal one (4010) is meant to be used by your back-end services only.
+Note that for posting the message we've used a different port---that's the _internal_ port running RIG's API. While the external port (4000) can be exposed to the internet, the internal one (4010) is meant to be used by your back-end services only.
 
 ## Feature Summary
 

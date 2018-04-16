@@ -11,6 +11,7 @@ defmodule RigInboundGateway.Transports.ServerSentEvents.Encoder do
     <> format_data(msg)
     <> "\n"
   end
+  def format(:hello), do: "event: connection established\n\n"
   def format(:heartbeat), do: "event: heartbeat\n\n"
   def format(:bye), do: "event: closing connection\n\n"
   # For handling HTTP status codes:

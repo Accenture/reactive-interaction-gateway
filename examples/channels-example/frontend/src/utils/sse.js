@@ -17,12 +17,11 @@ export class Sse {
         const token = getJwtToken(username, levelsArray);
 
         // Creates SSE connection and subscribes to user's Phoenix channel
-        this.socket = new EventSource(`/socket/sse?users[]=${subscriberTopic}&token=${token}`);
+        this.socket = new EventSource(`/socket/sse?auth_token=${token}`);
 
         // Wait for RIG's Phoenix channel reply and executes callback
-        this.socket.addEventListener('phx_reply', ({ data }) => {
-            const { status, response } = JSON.parse(data).payload;
-            cb({ status, response });
+        this.socket.addEventListener('connection established', () => {
+            cb({ status: "ok", response: "connection established" });
         });
 
         return this;
