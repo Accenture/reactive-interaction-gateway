@@ -24,8 +24,14 @@ const kafkaProducer = (message) => {
             return producer.send(data);
         })
         .then((result) => {
-            console.log(`Message successfully produced to Kafka ${JSON.stringify(result)}`);
             producer.end();
+
+            const error = result[0].error;
+            if (error) {
+                return error;
+            }
+
+            console.log(`Message successfully produced to Kafka ${JSON.stringify(result)}`);
             return result;
         })
         .catch((e) => {
@@ -37,11 +43,11 @@ const kafkaProducer = (message) => {
 };
 
 exports.produce = {
-    handler: (request, reply) => {
+    handler: (request) => {
         const msg = request.payload;
 
-        kafkaProducer(msg)
-        .then(message => reply({ status: 'ok', message }))
-        .catch(message => reply({ status: 'error', message }));
+        return kafkaProducer(msg)
+        .then(message => ({ status: 'ok', message }))
+        .catch(message => ({ status: 'error', message }));
     },
 };
