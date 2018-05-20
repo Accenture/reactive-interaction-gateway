@@ -179,11 +179,13 @@ defmodule RigInboundGateway.ApiProxy.Router do
   # Send fulfilled response back to client
   @spec send_response({:ok, %Plug.Conn{}, map}) :: %Plug.Conn{}
   defp send_response({:ok, conn, %{headers: headers, status_code: status_code, body: body}}) do
-    conn = %{conn | resp_headers: headers}
-    if Serializer.header_value?(conn, "transfer-encoding", "chunked") do
-      send_chunked_response(conn, headers, status_code, body)
+    down_cased_headers = headers |> Serializer.downcase_headers
+    conn = %{conn | resp_headers: down_cased_headers}
+
+    if Serializer.header_value?(down_cased_headers, "transfer-encoding", "chunked") do
+      send_chunked_response(conn, down_cased_headers, status_code, body)
     else
-      %{conn | resp_headers: headers} |> send_resp(status_code, body)
+      %{conn | resp_headers: down_cased_headers} |> send_resp(status_code, body)
     end
   end
 

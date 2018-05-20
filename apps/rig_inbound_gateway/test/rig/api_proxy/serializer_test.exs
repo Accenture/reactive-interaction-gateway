@@ -28,22 +28,15 @@ defmodule RigInboundGateway.ApiProxy.SerializerTest do
   end
 
   test "header_value? should return true if headers have key with given value" do
-    conn = conn_with_header("a", "b")
-    assert Serializer.header_value?(conn, "a", "b") == true
-  end
-
-  test "header_value? should handle capital letters" do
-    conn = conn_with_header("A", "b")
-    assert Serializer.header_value?(conn, "a", "b") == true
+    assert Serializer.header_value?([{"a", "b"}, {"d", "d"}], "a", "b") == true
   end
 
   test "header_value? should return false if headers don'\t have key with given value" do
-    conn = conn_with_header("a", "b")
-    assert Serializer.header_value?(conn, "a", "bb") == false
+    assert Serializer.header_value?([{"a", "b"}, {"d", "d"}], "a", "bb") == false
   end
 
-  defp conn_with_header(key, value) do
-    %Plug.Conn{} |> put_resp_header(key, value)
+  test "down_case_headers should down case keys for all headers" do
+    assert Serializer.downcase_headers([{"A", "b"}, {"C", "d"}]) == [{"a", "b"}, {"c", "d"}]
   end
 
 end
