@@ -54,4 +54,16 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
       {key_downcase, value}
     end)
   end
+
+  # Add new headers and update existing ones
+  @spec add_headers(headers_list, headers_list) :: headers_list
+  def add_headers(new_headers, old_headers) do
+    old_headers
+    |> Enum.filter(fn({old_key, _}) ->
+      new_headers
+      |> Enum.find(nil, fn({new_key, _}) -> old_key == new_key end)
+      |> is_nil
+    end)
+    |> Enum.concat(new_headers)
+  end
 end

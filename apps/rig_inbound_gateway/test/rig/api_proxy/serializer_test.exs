@@ -39,4 +39,19 @@ defmodule RigInboundGateway.ApiProxy.SerializerTest do
     assert Serializer.downcase_headers([{"A", "b"}, {"C", "d"}]) == [{"a", "b"}, {"c", "d"}]
   end
 
+  test "add_headers should add non-existing headers" do
+    assert Serializer.add_headers([{"c", "d"}, {"e", "f"}], [{"a", "b"}]) == [
+             {"a", "b"},
+             {"c", "d"},
+             {"e", "f"}
+           ]
+  end
+
+  test "add_headers should replace existing headers" do
+    assert Serializer.add_headers([{"c", "d"}, {"e", "f"}], [{"a", "b"}, {"c", "X"}]) == [
+             {"a", "b"},
+             {"c", "d"},
+             {"e", "f"}
+           ]
+  end
 end

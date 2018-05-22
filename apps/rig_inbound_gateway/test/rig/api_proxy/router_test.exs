@@ -225,6 +225,36 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
     assert conn.resp_body =~ "{\"status\":\"ok\"}"
   end
 
+  test "transform_req_headers should update existing and add new request headers, if requested",
+  %{first_service: first_service} do
+    Bypass.expect first_service, "POST", "/myapi/transform-headers", fn conn ->
+      Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
+    end
+
+    request = build_conn(:post, "/myapi/transform-headers") |> put_req_header("host", "original")
+    conn = call(Router, request)
+
+    assert get_req_header(conn, "host") == ["different"]
+    assert get_req_header(conn, "john") == ["doe"]
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"status\":\"ok\"}"
+  end
+
+  test "transform_req_headers shouldn\'t update existing and add new request headers, if not requested",
+  %{first_service: first_service} do
+    Bypass.expect first_service, "POST", "/myapi/no-transform-headers", fn conn ->
+      Plug.Conn.resp(conn, 200, ~s<{"status":"ok"}>)
+    end
+
+    request = build_conn(:post, "/myapi/no-transform-headers") |> put_req_header("host", "original")
+    conn = call(Router, request)
+
+    assert get_req_header(conn, "host") == ["original"]
+    assert get_req_header(conn, "john") == []
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"status\":\"ok\"}"
+  end
+
   @tag :smoke
   test "GET request should be correctly proxied to external service" do
     conn = call(Router, build_conn(:get, "/api"))

@@ -91,13 +91,13 @@ defmodule RigInboundGateway.ApiProxy.Router do
   @spec check_auth_and_forward_request(
     Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
   defp check_auth_and_forward_request(%{"not_secured" => true} = endpoint, api, conn) do
-    forward_request(endpoint, api, conn)
+    transform_req_headers(endpoint, api, conn)
   end
   # Skip authentication if no auth type is set
   @spec check_auth_and_forward_request(
     Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
   defp check_auth_and_forward_request(endpoint, %{"auth_type" => "none"} = api, conn) do
-    forward_request(endpoint, api, conn)
+    transform_req_headers(endpoint, api, conn)
   end
   # Authentication with JWT
   @spec check_auth_and_forward_request(
@@ -105,10 +105,32 @@ defmodule RigInboundGateway.ApiProxy.Router do
   defp check_auth_and_forward_request(%{"not_secured" => false} = endpoint, %{"auth_type" => "jwt"} = api, conn) do
     tokens = Enum.concat(Auth.pick_query_token(conn, api), Auth.pick_header_token(conn, api))
     case Auth.any_token_valid?(tokens) do
-      true -> forward_request(endpoint, api, conn)
+      true -> transform_req_headers(endpoint, api, conn)
       false -> send_resp(conn, 401, Serializer.encode_error_message("Missing or invalid token"))
     end
   end
+
+  # Transform request headers
+  @spec transform_req_headers(Proxy.endpoint(), Proxy.api_definition(), %Plug.Conn{}) ::
+          %Plug.Conn{}
+  defp transform_req_headers(
+         %{"transform_request_headers" => true} = endpoint,
+         %{"versioned" => false} = api,
+         %{req_headers: req_headers} = conn
+       ) do
+    %{"add_headers" => add_headers} =
+      Kernel.get_in(api, ["version_data", "default", "transform_request_headers"])
+
+    new_req_headers =
+      add_headers
+      |> Enum.to_list()
+      |> Serializer.add_headers(req_headers)
+
+    new_conn = conn |> Map.put(:req_headers, new_req_headers)
+    forward_request(endpoint, api, new_conn)
+  end
+
+  defp transform_req_headers(endpoint, api, conn), do: forward_request(endpoint, api, conn)
 
   @spec forward_request(Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
   defp forward_request(endpoint, api, conn) do
