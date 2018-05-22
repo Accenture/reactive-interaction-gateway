@@ -80,7 +80,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   defp match_path(path, request_path) do
     # Replace wildcards with actual params
     full_path = String.replace(path, "{id}", "[^/]+")
-    String.match?(request_path, ~r/#{full_path}$/)
+    String.match?(request_path, ~r/^#{full_path}$/)
   end
 
   # Match endpoint method against requested method

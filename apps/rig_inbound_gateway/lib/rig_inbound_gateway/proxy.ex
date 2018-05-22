@@ -20,6 +20,7 @@ defmodule RigInboundGateway.Proxy do
 
   @type endpoint :: %{
     optional(:not_secured) => boolean,
+    optional(:transform_request_headers) => boolean,
     id: String.t,
     path: String.t,
     method: String.t,
@@ -31,6 +32,11 @@ defmodule RigInboundGateway.Proxy do
     optional(:node_name) => atom,
     optional(:ref_number) => integer,
     optional(:timestamp) => DateTime,
+    optional(:transform_request_headers) => %{
+      optional(:add_headers) => %{
+        optional(String.t) => String.t
+      }
+    },
     id: String.t,
     name: String.t,
     auth: %{
