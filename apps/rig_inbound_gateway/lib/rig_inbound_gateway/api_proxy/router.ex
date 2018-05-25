@@ -205,17 +205,17 @@ defmodule RigInboundGateway.ApiProxy.Router do
     conn = %{conn | resp_headers: downcased_headers}
 
     if Serializer.header_value?(downcased_headers, "transfer-encoding", "chunked") do
-      send_chunked_response(conn, downcased_headers, status_code, body)
+      send_chunked_response(conn, status_code, body)
     else
       send_resp(conn, status_code, body)
     end
   end
 
   # Send chunked response to client with body and set transfer-encoding
-  @spec send_chunked_response(Plug.Conn.t, headers, integer, String.t) :: Plug.Conn.t
-  defp send_chunked_response(conn, headers, status_code, body) do
-    conn = %{conn | resp_headers: headers} |> send_chunked(status_code)
-    conn |> chunk(body)
-    conn
+  @spec send_chunked_response(Plug.Conn.t, integer, String.t) :: Plug.Conn.t
+  defp send_chunked_response(conn, status_code, body) do
+    chunked_conn = send_chunked(conn, status_code)
+    chunked_conn |> chunk(body)
+    chunked_conn
   end
 end
