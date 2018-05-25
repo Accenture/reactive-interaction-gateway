@@ -38,11 +38,11 @@ defmodule RigApi.ChannelsControllerTest do
     leave sock
   end
 
-  test "DELETE /v1/users/testuser/sessions/abc123 should broadcast disconnect event to user with jti abc123", %{sock: sock} do
+  test "DELETE /v1/sessions/abc123 should broadcast disconnect event to user with jti abc123", %{sock: sock} do
     @endpoint_channels.subscribe("abc123")
     conn =
       build_conn()
-      |> delete("/v1/users/testuser/sessions/abc123")
+      |> delete("/v1/sessions/abc123")
 
     assert_broadcast("disconnect", %{})
     assert response(conn, 204) =~ "{}"

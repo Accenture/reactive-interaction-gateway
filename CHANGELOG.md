@@ -3,6 +3,7 @@
 ## v2.0.0-dev
 
 - Changed
+  - [Api] Endpoint for terminating a session no longer contains user id in path
   - [Misc] Convert to umbrella project layout
   - [Docs] Move documentation from `doc/` to `guides/` as the former is the default for ex_doc output
   - [Inbound] Revised request logging (currently Kafka and console as backends)

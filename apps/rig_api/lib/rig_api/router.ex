@@ -14,7 +14,11 @@ defmodule RigApi.Router do
     pipe_through :api
     get "/", ChannelsController, :list_channels
     get "/:user/sessions", ChannelsController, :list_channel_sessions
-    delete "/:user/sessions/:jti", ChannelsController, :disconnect_channel_session
+  end
+
+  scope "/v1/sessions", RigApi do
+    pipe_through :api
+    delete "/:jti", ChannelsController, :disconnect_channel_session
   end
 
   scope "/v1/apis", RigApi do
