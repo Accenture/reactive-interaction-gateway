@@ -130,6 +130,13 @@ defmodule RigInboundGateway.ApiProxy.Router do
     forward_request(endpoint, api, new_conn)
   end
 
+  defp transform_req_headers(
+         %{"transform_request_headers" => true} = _endpoint,
+         %{"versioned" => true} = _api,
+         _conn
+       ),
+       do: raise("Not implemented - to be done when API versioning has landed.")
+
   defp transform_req_headers(endpoint, api, conn), do: forward_request(endpoint, api, conn)
 
   @spec forward_request(Proxy.endpoint, Proxy.api_definition, Plug.Conn.t) :: Plug.Conn.t
