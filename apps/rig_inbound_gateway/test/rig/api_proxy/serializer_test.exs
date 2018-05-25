@@ -35,6 +35,10 @@ defmodule RigInboundGateway.ApiProxy.SerializerTest do
     assert Serializer.header_value?([{"a", "b"}, {"d", "d"}], "a", "bb") == false
   end
 
+  test "header_value? should not mix up searched key and value" do
+    assert Serializer.header_value?([{"a", "b"}], "a", "a") == false
+  end
+
   test "down_case_headers should down case keys for all headers" do
     assert Serializer.downcase_headers([{"A", "b"}, {"C", "d"}]) == [{"a", "b"}, {"c", "d"}]
   end

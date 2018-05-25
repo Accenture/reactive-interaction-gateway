@@ -38,32 +38,27 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
   @spec header_value?(headers, String.t, String.t) :: boolean
   def header_value?(headers, key, value) do
     headers
-    |> Enum.find({}, fn({header_key, _}) -> header_key == key end)
-    |> Tuple.to_list
-    |> Enum.member?(value)
+    |> Enum.find(fn
+      {^key, ^value} -> true
+      _ -> false
+    end)
+    |> case do
+      nil -> false
+      _ -> true
+    end
   end
 
   # Transform keys for headers to lower-case
   @spec downcase_headers(headers) :: headers
   def downcase_headers(headers) do
     headers
-    |> Enum.map(fn({key, value}) ->
-      key_downcase =
-        key
-        |> String.downcase
-      {key_downcase, value}
-    end)
+    |> Enum.map(fn({key, value}) -> {String.downcase(key), value} end)
   end
 
   # Add new headers and update existing ones
   @spec add_headers(headers, headers) :: headers
   def add_headers(new_headers, old_headers) do
-    old_headers
-    |> Enum.filter(fn({old_key, _}) ->
-      new_headers
-      |> Enum.find(nil, fn({new_key, _}) -> old_key == new_key end)
-      |> is_nil
-    end)
-    |> Enum.concat(new_headers)
+    Map.merge(Map.new(old_headers), Map.new(new_headers))
+    |> Enum.to_list()
   end
 end
