@@ -207,7 +207,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
     if Serializer.header_value?(downcased_headers, "transfer-encoding", "chunked") do
       send_chunked_response(conn, downcased_headers, status_code, body)
     else
-      %{conn | resp_headers: downcased_headers} |> send_resp(status_code, body)
+      send_resp(conn, status_code, body)
     end
   end
 
