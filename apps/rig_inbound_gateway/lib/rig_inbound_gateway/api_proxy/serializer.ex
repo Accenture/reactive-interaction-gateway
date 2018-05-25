@@ -7,7 +7,7 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
   alias Plug.Conn.Query
   alias RigInboundGateway.Proxy
 
-  @typep headers_list :: [{String.t, String.t}, ...]
+  @typep headers :: [{String.t, String.t}, ...]
 
   # Encode error message to JSON
   @spec encode_error_message(String.t) :: %{message: String.t}
@@ -35,7 +35,7 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
   end
 
   # Search if header has key with given value
-  @spec header_value?(headers_list, String.t, String.t) :: boolean
+  @spec header_value?(headers, String.t, String.t) :: boolean
   def header_value?(headers, key, value) do
     headers
     |> Enum.find({}, fn({header_key, _}) -> header_key == key end)
@@ -44,7 +44,7 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
   end
 
   # Transform keys for headers to lower-case
-  @spec downcase_headers(headers_list) :: headers_list
+  @spec downcase_headers(headers) :: headers
   def downcase_headers(headers) do
     headers
     |> Enum.map(fn({key, value}) ->
@@ -56,7 +56,7 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
   end
 
   # Add new headers and update existing ones
-  @spec add_headers(headers_list, headers_list) :: headers_list
+  @spec add_headers(headers, headers) :: headers
   def add_headers(new_headers, old_headers) do
     old_headers
     |> Enum.filter(fn({old_key, _}) ->
