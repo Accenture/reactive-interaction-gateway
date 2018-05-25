@@ -16,7 +16,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   alias RigInboundGateway.RateLimit
   alias RigInboundGateway.Proxy
 
-  @typep headers :: [{String.t, String.t}, ...]
+  @typep headers :: [{String.t, String.t}]
   @typep map_string_upload :: %{required(String.t) => %Plug.Upload{}}
 
   plug :match

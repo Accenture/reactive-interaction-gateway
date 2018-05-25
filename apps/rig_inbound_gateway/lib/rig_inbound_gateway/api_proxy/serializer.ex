@@ -7,7 +7,7 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
   alias Plug.Conn.Query
   alias RigInboundGateway.Proxy
 
-  @typep headers :: [{String.t, String.t}, ...]
+  @typep headers :: [{String.t, String.t}]
 
   # Encode error message to JSON
   @spec encode_error_message(String.t) :: %{message: String.t}
