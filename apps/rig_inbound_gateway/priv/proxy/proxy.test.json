@@ -12,6 +12,12 @@
     "versioned": false,
     "version_data": {
       "default": {
+        "transform_request_headers": {
+          "add_headers": {
+            "host": "different",
+            "john": "doe"
+          }
+        },
         "endpoints": [
           {
             "id": "get-myapi-detail-id",
@@ -72,6 +78,19 @@
             "path": "/myapi/books",
             "method": "GET",
             "not_secured": false
+          },
+          {
+            "id": "post-myapi-transform-headers",
+            "path": "/myapi/transform-headers",
+            "method": "POST",
+            "not_secured": true,
+            "transform_request_headers": true
+          },
+          {
+            "id": "post-myapi-no-transform-headers",
+            "path": "/myapi/no-transform-headers",
+            "method": "POST",
+            "not_secured": true
           }
         ]
       }

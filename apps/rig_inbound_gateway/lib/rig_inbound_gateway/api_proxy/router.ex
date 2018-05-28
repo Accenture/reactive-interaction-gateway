@@ -16,7 +16,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   alias RigInboundGateway.RateLimit
   alias RigInboundGateway.Proxy
 
-  @typep headers_list :: [{String.t, String.t}, ...]
+  @typep headers :: [{String.t, String.t}]
   @typep map_string_upload :: %{required(String.t) => %Plug.Upload{}}
 
   plug :match
@@ -80,7 +80,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   defp match_path(path, request_path) do
     # Replace wildcards with actual params
     full_path = String.replace(path, "{id}", "[^/]+")
-    String.match?(request_path, ~r/#{full_path}$/)
+    String.match?(request_path, ~r/^#{full_path}$/)
   end
 
   # Match endpoint method against requested method
@@ -89,28 +89,57 @@ defmodule RigInboundGateway.ApiProxy.Router do
 
   # Skip authentication if turned off
   @spec check_auth_and_forward_request(
-    Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
+    Proxy.endpoint, Proxy.api_definition, Plug.Conn.t) :: Plug.Conn.t
   defp check_auth_and_forward_request(%{"not_secured" => true} = endpoint, api, conn) do
-    forward_request(endpoint, api, conn)
+    transform_req_headers(endpoint, api, conn)
   end
   # Skip authentication if no auth type is set
   @spec check_auth_and_forward_request(
-    Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
+    Proxy.endpoint, Proxy.api_definition, Plug.Conn.t) :: Plug.Conn.t
   defp check_auth_and_forward_request(endpoint, %{"auth_type" => "none"} = api, conn) do
-    forward_request(endpoint, api, conn)
+    transform_req_headers(endpoint, api, conn)
   end
   # Authentication with JWT
   @spec check_auth_and_forward_request(
-    Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
+    Proxy.endpoint, Proxy.api_definition, Plug.Conn.t) :: Plug.Conn.t
   defp check_auth_and_forward_request(%{"not_secured" => false} = endpoint, %{"auth_type" => "jwt"} = api, conn) do
     tokens = Enum.concat(Auth.pick_query_token(conn, api), Auth.pick_header_token(conn, api))
     case Auth.any_token_valid?(tokens) do
-      true -> forward_request(endpoint, api, conn)
+      true -> transform_req_headers(endpoint, api, conn)
       false -> send_resp(conn, 401, Serializer.encode_error_message("Missing or invalid token"))
     end
   end
 
-  @spec forward_request(Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: %Plug.Conn{}
+  # Transform request headers
+  @spec transform_req_headers(Proxy.endpoint(), Proxy.api_definition(), Plug.Conn.t) ::
+          Plug.Conn.t
+  defp transform_req_headers(
+         %{"transform_request_headers" => true} = endpoint,
+         %{"versioned" => false} = api,
+         %{req_headers: req_headers} = conn
+       ) do
+    %{"add_headers" => add_headers} =
+      Kernel.get_in(api, ["version_data", "default", "transform_request_headers"])
+
+    new_req_headers =
+      add_headers
+      |> Enum.to_list()
+      |> Serializer.add_headers(req_headers)
+
+    new_conn = conn |> Map.put(:req_headers, new_req_headers)
+    forward_request(endpoint, api, new_conn)
+  end
+
+  defp transform_req_headers(
+         %{"transform_request_headers" => true} = _endpoint,
+         %{"versioned" => true} = _api,
+         _conn
+       ),
+       do: raise("Not implemented - to be done when API versioning has landed.")
+
+  defp transform_req_headers(endpoint, api, conn), do: forward_request(endpoint, api, conn)
+
+  @spec forward_request(Proxy.endpoint, Proxy.api_definition, Plug.Conn.t) :: Plug.Conn.t
   defp forward_request(endpoint, api, conn) do
     log_request(endpoint, api, conn)
 
@@ -139,7 +168,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   end
 
   # Format multipart body and set as POST HTTP method
-  @spec format_post_request(String.t, map_string_upload, headers_list) :: %Plug.Conn{}
+  @spec format_post_request(String.t, map_string_upload, headers) :: Plug.Conn.t
   defp format_post_request(url, %{"qqfile" => %Plug.Upload{}} = params, headers) do
     %{"qqfile" => file} = params
     optional_params = params |> Map.delete("qqfile")
@@ -151,12 +180,12 @@ defmodule RigInboundGateway.ApiProxy.Router do
     Base.post!(url, {:multipart, params_merged}, headers)
   end
 
-  @spec format_post_request(String.t, map, headers_list) :: %Plug.Conn{}
+  @spec format_post_request(String.t, map, headers) :: Plug.Conn.t
   defp format_post_request(url, params, headers) do
     Base.post!(url, Poison.encode!(params), headers)
   end
 
-  @spec log_request(Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: :ok
+  @spec log_request(Proxy.endpoint, Proxy.api_definition, Plug.Conn.t) :: :ok
   defp log_request(endpoint, api, conn) do
     conf = config()
 
@@ -171,27 +200,29 @@ defmodule RigInboundGateway.ApiProxy.Router do
   end
 
   # Send error message with unsupported HTTP method
-  @spec send_response({:ok, %Plug.Conn{}, nil}) :: %Plug.Conn{}
+  @spec send_response({:ok, Plug.Conn.t, nil}) :: Plug.Conn.t
   defp send_response({:ok, conn, nil}) do
     send_resp(conn, 405, Serializer.encode_error_message("Method is not supported"))
   end
 
   # Send fulfilled response back to client
-  @spec send_response({:ok, %Plug.Conn{}, map}) :: %Plug.Conn{}
+  @spec send_response({:ok, Plug.Conn.t, map}) :: Plug.Conn.t
   defp send_response({:ok, conn, %{headers: headers, status_code: status_code, body: body}}) do
-    conn = %{conn | resp_headers: headers}
-    if Serializer.header_value?(conn, "transfer-encoding", "chunked") do
-      send_chunked_response(conn, headers, status_code, body)
+    downcased_headers = headers |> Serializer.downcase_headers
+    conn = %{conn | resp_headers: downcased_headers}
+
+    if Serializer.header_value?(downcased_headers, "transfer-encoding", "chunked") do
+      send_chunked_response(conn, status_code, body)
     else
-      %{conn | resp_headers: headers} |> send_resp(status_code, body)
+      send_resp(conn, status_code, body)
     end
   end
 
   # Send chunked response to client with body and set transfer-encoding
-  @spec send_chunked_response(%Plug.Conn{}, headers_list, integer, String.t) :: %Plug.Conn{}
-  defp send_chunked_response(conn, headers, status_code, body) do
-    conn = %{conn | resp_headers: headers} |> send_chunked(status_code)
-    conn |> chunk(body)
-    conn
+  @spec send_chunked_response(Plug.Conn.t, integer, String.t) :: Plug.Conn.t
+  defp send_chunked_response(conn, status_code, body) do
+    chunked_conn = send_chunked(conn, status_code)
+    chunked_conn |> chunk(body)
+    chunked_conn
   end
 end

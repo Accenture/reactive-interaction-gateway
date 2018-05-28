@@ -7,6 +7,8 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
   alias Plug.Conn.Query
   alias RigInboundGateway.Proxy
 
+  @typep headers :: [{String.t, String.t}]
+
   # Encode error message to JSON
   @spec encode_error_message(String.t) :: %{message: String.t}
   def encode_error_message(message) do
@@ -33,18 +35,30 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
   end
 
   # Search if header has key with given value
-  @spec header_value?(%Plug.Conn{}, String.t, String.t) :: boolean
-  def header_value?(conn, key, value) do
-    conn
-    |> Map.get(:resp_headers)
-    |> Enum.find({}, fn(headers_tuple) ->
-      key_downcase =
-        headers_tuple
-        |> elem(0)
-        |> String.downcase
-      key_downcase == key
+  @spec header_value?(headers, String.t, String.t) :: boolean
+  def header_value?(headers, key, value) do
+    headers
+    |> Enum.find(fn
+      {^key, ^value} -> true
+      _ -> false
     end)
-    |> Tuple.to_list
-    |> Enum.member?(value)
+    |> case do
+      nil -> false
+      _ -> true
+    end
+  end
+
+  # Transform keys for headers to lower-case
+  @spec downcase_headers(headers) :: headers
+  def downcase_headers(headers) do
+    headers
+    |> Enum.map(fn({key, value}) -> {String.downcase(key), value} end)
+  end
+
+  # Add new headers and update existing ones
+  @spec add_headers(headers, headers) :: headers
+  def add_headers(new_headers, old_headers) do
+    Map.merge(Map.new(old_headers), Map.new(new_headers))
+    |> Enum.to_list()
   end
 end
