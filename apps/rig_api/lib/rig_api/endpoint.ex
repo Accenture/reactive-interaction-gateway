@@ -12,7 +12,8 @@ defmodule RigApi.Endpoint do
 
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
-    pass: ["*/*"],
+    # return "415 Unsupported Media Type" if not handled by any parser
+    pass: [],
     json_decoder: Poison
 
   plug Plug.MethodOverride

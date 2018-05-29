@@ -33,6 +33,7 @@
   - [API] Set proper environment variable for Phoenix server `API_PORT` - [#38](https://github.com/Accenture/reactive-interaction-gateway/pull/38)
   - [Examples] Channels example fixed to be compatible with version 2.0.0 [#40](https://github.com/Accenture/reactive-interaction-gateway/pull/40)
   - [Inbound] User defined query auth values are no longer overridden by `JWT` auth type
+  - [Outbound] Handle content-type correctly - [#61](https://github.com/Accenture/reactive-interaction-gateway/pull/61)
   - [Inbound] More strict regex match for routes in proxy - [#76](https://github.com/Accenture/reactive-interaction-gateway/pull/76)
   - [Inbound] Downcased response headers to avoid duplicates in proxy - [#76](https://github.com/Accenture/reactive-interaction-gateway/pull/76)
 
