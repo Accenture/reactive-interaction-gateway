@@ -25,6 +25,7 @@
   - [Rig] Possibility to set logging level with env var `LOG_LEVEL` - [#49](https://github.com/Accenture/reactive-interaction-gateway/pull/49)
   - [Deploy] Variations of Dockerfiles - basic version and AWS version - [#44](https://github.com/Accenture/reactive-interaction-gateway/pull/44)
   - [Deploy] Helm deployment chart - [#59](https://github.com/Accenture/reactive-interaction-gateway/pull/59)
+  - [Inbound] Proxy is now able to do request header transformations - [#76](https://github.com/Accenture/reactive-interaction-gateway/pull/76)
 
 - Fixed
   - [Inbound] Make presence channel respect `JWT_USER_FIELD` setting (currently hardcoded to "username")
@@ -33,6 +34,8 @@
   - [Examples] Channels example fixed to be compatible with version 2.0.0 [#40](https://github.com/Accenture/reactive-interaction-gateway/pull/40)
   - [Inbound] User defined query auth values are no longer overridden by `JWT` auth type
   - [Outbound] Handle content-type correctly - [#61](https://github.com/Accenture/reactive-interaction-gateway/pull/61)
+  - [Inbound] More strict regex match for routes in proxy - [#76](https://github.com/Accenture/reactive-interaction-gateway/pull/76)
+  - [Inbound] Downcased response headers to avoid duplicates in proxy - [#76](https://github.com/Accenture/reactive-interaction-gateway/pull/76)
 
 - Deprecated
 
