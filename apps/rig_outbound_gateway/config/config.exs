@@ -12,6 +12,10 @@ config :rig, RigOutboundGateway,
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 brod_client_id = :rig_brod_client
+restart_delay_ms = {:system, :integer, "KAFKA_RESTART_DELAY_MS", 20_000}
+
+config :rig, RigOutboundGateway.Kafka.Readiness,
+  brod_client_id: brod_client_id
 
 config :rig, RigOutboundGateway.Kafka.GroupSubscriber,
   brod_client_id: brod_client_id,
@@ -19,11 +23,21 @@ config :rig, RigOutboundGateway.Kafka.GroupSubscriber,
   source_topics: {:system, :list, "KAFKA_SOURCE_TOPICS", ["rig"]}
 
 config :rig, RigOutboundGateway.Kafka.SupWrapper,
-  enabled?: {:system, :boolean, "KAFKA_ENABLED", false}
+  enabled?: {:system, :boolean, "KAFKA_ENABLED", false},
+  restart_delay_ms: restart_delay_ms
 
 config :rig, RigOutboundGateway.Kafka.Sup,
+  restart_delay_ms: restart_delay_ms,
   brod_client_id: brod_client_id,
-  hosts: {:system, :list, "KAFKA_HOSTS", ["localhost:9092"]}
+  hosts: {:system, :list, "KAFKA_HOSTS", ["localhost:9092"]},
+  # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored, otherwise required.
+  ssl_enabled?: {:system, :boolean, "KAFKA_SSL_ENABLED", false},
+  # If use_ssl?, the following paths are expected (relative to the `priv` directory):
+  ssl_ca_certfile: {:system, "KAFKA_SSL_CA_CERTFILE", "ca.crt"},
+  ssl_certfile: {:system, "KAFKA_SSL_CERTFILE", "client.crt"},
+  ssl_keyfile: {:system, "KAFKA_SSL_KEYFILE", "client.key"},
+  # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
+  sasl: {:system, "KAFKA_SASL", nil}
 
 config :rig, RigOutboundGateway.Kinesis.JavaClient,
   enabled?: {:system, :boolean, "KINESIS_ENABLED", false},

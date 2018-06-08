@@ -2,38 +2,30 @@
 
 Test used to check correct integration between Reactive Interaction Gateway (RIG) and external backend services.
 
-## Run fresh environment
+## Smoke-test a Docker build
 
-Runs fresh environemnt, builds RIG image and runs smoke tests.
+Run the following script:
 
-`docker-compose -f smoke_tests.docker-compose.yml up -d --build`
+```bash
+./run_smoke_tests.sh
+```
 
-Show output of tests:
+Subsequent runs will be a bit faster, as the script does not tear down additional services.
 
-`docker logs -f rig`
+## Smoke-test during development
 
-## Re-run only tests
+The `run_smoke_tests.sh` scripts leaves Kafka and the fake REST-API service running, so you can easily run tests against them during development. For example, run this when in the project root directory:
 
-Keeps existing compose environment, restarts and rebuilds only RIG.
-
-`docker-compose -f smoke_tests.docker-compose.yml up --no-deps --build rig`
-
-## Local development testing
-
-If you want to add new smoke tests or update existing ones, best way is to follow these steps:
-
-```sh
-# Start Kafka & Zookeeper
-docker-compose -f kafka.docker-compose.yml up -d
-
-# Start REST API, terminal 1
-cd rest-api
-npm i
-npm start
-
-# Run smoke tests, terminal 2
-# from smoke_tests folder
-cd ../
-# make sure you are running it from project's root directory
+```bash
 KAFKA_ENABLED=true PROXY_CONFIG_FILE=proxy/proxy.smoke_test.json mix test --only smoke
+```
+
+The default setting for the Kafka broker location is `localhost:9092`, so it'll pick up the running Kafka Docker container.
+
+## Clean up
+
+When you're done:
+
+```bash
+docker-compose -f smoke_tests.docker-compose.yml down
 ```

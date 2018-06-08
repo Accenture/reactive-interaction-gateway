@@ -32,4 +32,7 @@ EXPOSE 4000
 # Internal APIs
 EXPOSE 4010
 
+# Precompile
+RUN MIX_ENV=test mix compile
+
 CMD ["mix", "test", "--only", "smoke"]

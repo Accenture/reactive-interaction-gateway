@@ -26,6 +26,7 @@
   - [Deploy] Variations of Dockerfiles - basic version and AWS version - [#44](https://github.com/Accenture/reactive-interaction-gateway/pull/44)
   - [Deploy] Helm deployment chart - [#59](https://github.com/Accenture/reactive-interaction-gateway/pull/59)
   - [Inbound] Proxy is now able to do request header transformations - [#76](https://github.com/Accenture/reactive-interaction-gateway/pull/76)
+  - [Outbound] Support Kafka SSL and SASL/Plain authentication - [#79](https://github.com/Accenture/reactive-interaction-gateway/issues/79)
 
 - Fixed
   - [Inbound] Make presence channel respect `JWT_USER_FIELD` setting (currently hardcoded to "username")
