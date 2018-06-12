@@ -25,9 +25,9 @@ Variable | Description | Default
 `KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will consume, delimited by comma. | ["rig"]
 `KAFKA_SASL` | If set, SASL is used to authenticate RIG against the Kafka brokers. Use the following format for SASL/Plain authentication: "plain:myusername:mypassword". Note that setting `KAFKA_SASL` does *not* enable SSL (see `KAFKA_SSL_ENABLED` and related settings). | nil
 `KAFKA_SSL_ENABLED` | Enables encrypted communication to Kafka brokers. | false
-`KAFKA_SSL_CA_CERTFILE` | Path to the CA certificate that was used to sign the server and client certificates. Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "ca.crt"
-`KAFKA_SSL_CERTFILE` | Path to the (signed) client certificate. Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "client.crt"
-`KAFKA_SSL_KEYFILE` | Path to the private key of the client certificate. Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "client.key"
+`KAFKA_SSL_CA_CERTFILE` | Path to the CA certificate (PEM format) that was used to sign the server and client certificates. Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "ca.crt"
+`KAFKA_SSL_CERTFILE` | Path to the (signed) client certificate (PEM format). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "client.crt"
+`KAFKA_SSL_KEYFILE` | Path to the private key of the client certificate (PEM format). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "client.key"
 `KINESIS_APP_NAME` | From Amazon's documentation: "Name of the Amazon Kinesis application. This can assist with troubleshooting (e.g. distinguish requests made by separate applications). | "Reactive-Interaction-Gateway"
 `KINESIS_AWS_REGION` | The AWS region the Kinesis stream is located in. | "eu-west-1"
 `KINESIS_CLIENT_JAR` | Path to the kinesis-client jar file. | "./kinesis-client/target/rig-kinesis-client-1.0-SNAPSHOT.jar"

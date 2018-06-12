@@ -17,10 +17,10 @@ services:
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_CREATE_TOPICS=rig:1:1
       - KAFKA_SSL_TRUSTSTORE_LOCATION=/certs/truststore.jks
-      - KAFKA_SSL_TRUSTSTORE_PASSWORD=test1234
-      - KAFKA_SSL_KEYSTORE_LOCATION=/certs/server.jks
-      - KAFKA_SSL_KEYSTORE_PASSWORD=test1234
-      - KAFKA_SSL_KEY_PASSWORD=test1234
+      - KAFKA_SSL_TRUSTSTORE_PASSWORD=abcdefgh
+      - KAFKA_SSL_KEYSTORE_LOCATION=/certs/server.keystore.jks
+      - KAFKA_SSL_KEYSTORE_PASSWORD=abcdefgh
+      - KAFKA_SSL_KEY_PASSWORD=abcdefgh
       - KAFKA_SSL_CLIENT_AUTH=required
     ports:
       - 9092:9092

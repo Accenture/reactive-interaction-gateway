@@ -92,11 +92,15 @@ defmodule RigOutboundGateway.Kafka.Sup do
 
     ssl =
       if ssl_enabled? do
-        [
+        opts = [
           certfile: config |> Keyword.fetch!(:ssl_certfile) |> resolve_path,
           keyfile: config |> Keyword.fetch!(:ssl_keyfile) |> resolve_path,
-          cacertfile: config |> Keyword.fetch!(:ssl_ca_certfile) |> resolve_path
+          cacertfile: config |> Keyword.fetch!(:ssl_ca_certfile) |> resolve_path,
         ]
+        case Keyword.fetch!(config, :ssl_keyfile_pass) do
+          "" -> opts
+          pass -> Keyword.put(opts, :password, String.to_charlist(pass))
+        end
       else
         false
       end
