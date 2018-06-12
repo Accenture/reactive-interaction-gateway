@@ -31,28 +31,32 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
           jti
       end
 
-    message = %{
-      id: UUID.uuid4(),
-      username: username,
-      jti: jti,
-      type: "PROXY_API_CALL",
-      version: "1.0",
-      timestamp: Timex.now() |> Timex.to_unix(),
-      level: 0,
-      payload: %{
-        endpoint: inspect(endpoint),
-        api_definition: inspect(api_definition),
-        request_path: conn.request_path,
-        remote_ip: conn.remote_ip |> format_ip
-      }
+    event = %{
+      "username" => username,
+      "jti" => jti,
+      "endpoint" => inspect(endpoint),
+      "apiDefinition" => inspect(api_definition),
+      "requestPath" => conn.request_path,
+      "remoteIP" => conn.remote_ip |> format_ip
     }
 
-    message_json = message |> Poison.encode!()
-    conf = config()
+    # See https://github.com/cloudevents/spec/blob/v0.1/spec.md
+    cloud_event = %{
+      "cloudEventsVersion" => "0.1",
+      "eventType" => "com.accenture.rig.inboundRequest",
+      "eventTypeVersion" => "1.0",
+      "source" => "rig",
+      "eventID" => UUID.uuid4(),
+      "eventTime" => Timex.now() |> Timex.format!("{ISO:Extended:Z}"),
+      "contentType" => "application/json",
+      "data" => Poison.encode!(event)
+    }
+
     # If topic does not exist, it will be created automatically, provided the server is
-    # configured that way. However, this call then returns with {:error, :LeaderNotAvailable},
-    # as at that point there won't be a partition leader yet.
-    RigKafka.produce(conf.log_topic, _key = username, _plaintext = message_json)
+    # configured that way. Nevertheless, in that case this call returns
+    # {:error, :LeaderNotAvailable} (there won't be a partition leader yet).
+    conf = config()
+    RigKafka.produce(conf.log_topic, _key = username, _plaintext = Poison.encode!(cloud_event))
   rescue
     err ->
       case err do
