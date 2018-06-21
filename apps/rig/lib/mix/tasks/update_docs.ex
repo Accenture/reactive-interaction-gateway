@@ -9,7 +9,6 @@ defmodule Mix.Tasks.UpdateDocs do
   alias Mix.Project
 
   @header """
-  Variable | Description | Default
   -------- | ----------- | -------
   """
 
@@ -19,7 +18,7 @@ defmodule Mix.Tasks.UpdateDocs do
   def run(_) do
     # Only run when compiling the whole umbrella application in DEV:
     if Project.umbrella?() and Mix.env() == :dev do
-      update_file("./guides/operator-guide.md")
+      update_file("./docs/rig-ops-guide.md")
     end
   end
 

@@ -29,3 +29,8 @@ erl_crash.dump
 
 /cover
 /apps/*/cover
+
+# Docusaurus
+/website/node_modules
+/website/translated_docs
+/website/build/
