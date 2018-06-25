@@ -8,8 +8,7 @@ Setting up your dev environment is easier than you think! We're trying hard to m
 
 ## Setting up your development environment
 
-> NOTE: This does not quite work like that, but we're getting there..
-> What's missing:
+> WIP:
 > - The local-development Docker image is not there yet. [#73](https://github.com/Accenture/reactive-interaction-gateway/issues/73)
 > - The SSE endpoint requires the JWT set up in advance and supplied when connecting. [#66](https://github.com/Accenture/reactive-interaction-gateway/pull/66)
 > - The subscriptions endpoint.
