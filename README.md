@@ -4,6 +4,8 @@ _The missing link between back-end and front-end -- stop polling and go real-tim
 
 [![Build Status](https://travis-ci.org/Accenture/reactive-interaction-gateway.svg?branch=master)](https://travis-ci.org/Accenture/reactive-interaction-gateway)
 
+Take a look at the [documentation](https://accenture.github.io/reactive-interaction-gateway/) and get in touch with us on [Slack](https://rig-opensource.slack.com)!
+
 ## What does it solve?
 
 In short: handling asynchronous events.

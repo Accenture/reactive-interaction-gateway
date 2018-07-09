@@ -1,13 +1,17 @@
-# Operator's Guide to the Reactive Interaction Gateway
+---
+id: rig-ops-guide
+title: Operator's Guide to the Reactive Interaction Gateway
+sidebar_label: Operator's Guide
+---
 
-Typically, we deploy RIG using Docker. You can either use the image on Docker Hub, or build one yourself (try `docker build -t rig .`).
+Typically, RIG is deployed using Docker. You can either use the image on Docker Hub, or build one yourself using `docker build -t rig .`.
 
 ## Configuration
 
-RIG uses environment variables for most of its configuration -- they're listed in the following table.
+RIG uses environment variables for most of its configuration, listed in the following table.
 
-Variable | Description | Default
--------- | ----------- | -------
+Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description | Default
+-------------- | ----------- | -------
 `API_PORT` | Port at which RIG exposes internal APIs such as API Proxy management or user connections management. | 4010
 `DISCOVERY_TYPE` | Type of discovery used in distributed mode. If not set discovery is not used. Available options: `dns`. | nil
 `DNS_NAME` | Address where RIG will do DNS discovery for Node host addresses. | "localhost"
