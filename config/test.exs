@@ -5,12 +5,14 @@ config :rig, Rig.Application,
   log_level: {:system, :atom, "LOG_LEVEL", :warn}
 
 jwt_secret_key = "mysecret"
+jwt_alg = "HS256"
 
 config :rig, RigAuth.Jwt.Utils,
-  secret_key: jwt_secret_key
+  secret_key: {:system, "JWT_SECRET_KEY", jwt_secret_key}
 
 config :rig, RigAuth.ConnCase,
-  jwt_secret_key: jwt_secret_key
+  jwt_secret_key: {:system, "JWT_SECRET_KEY", jwt_secret_key},
+  jwt_alg: {:system, "JWT_ALG", jwt_alg}
 
 config :rig, RigApi.ConnCase,
   jwt_secret_key: jwt_secret_key

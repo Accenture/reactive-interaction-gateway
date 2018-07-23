@@ -20,6 +20,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `JWT_BLACKLIST_DEFAULT_EXPIRY_HOURS` | Default expiration time in hours for blacklisted JWTs. Used if JWT doesn't have an expiration time in claims. | 1
 `JWT_ROLES_FIELD` | Key in JWT claims under which roles are set for each user. | "roles"
 `JWT_SECRET_KEY` | The secret key used to sign and verify the JSON web tokens. | ""
+`JWT_ALG` | Algorithm used to sign and verify JSON web tokens. | "HS256"
 `JWT_USER_FIELD` | The JSON web token as sent by the front-ends should contain the user ID, in the same format used by the back-ends in the messages they send towards the user. `JWT_USER_FIELD` is the name of that user ID field in the JWT. For the corresponding field used in outbound messages, see `MESSAGE_USER_FIELD`. | "user"
 `KAFKA_CONSUMER_GROUP` | Consumer group name for Kafka. | "rig-consumer-group"
 `KAFKA_ENABLED` | If enabled, RIG will consume messages from a Kafka broker using the configured broker and topic(s). | false

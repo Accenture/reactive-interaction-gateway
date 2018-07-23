@@ -25,10 +25,17 @@ defmodule RigAuth.Jwt.Utils do
   defp validate(jwt) do
     conf = config()
 
+    signer =
+      conf.alg
+      |> case do
+        "HS" <> _ = alg -> Joken.Signer.hs(alg, conf.secret_key)
+        "RS" <> _ = alg -> Joken.Signer.rs(alg, JOSE.JWK.from_pem(conf.secret_key))
+      end
+
     jwt
     |> token
     |> with_validation("exp", &(&1 > current_time()))
-    |> with_signer(conf.secret_key |> hs256)
+    |> with_signer(signer)
     |> verify
   end
 end
