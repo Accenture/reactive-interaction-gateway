@@ -5,8 +5,19 @@ defmodule Rig.Kafka do
   """
   use Rig.Config, [:enabled?, :brod_client_id]
 
+  @type produce_fn ::
+          (:brod.client(),
+           :brod.topic(),
+           :brod.partition()
+           | :brod.partition_fun(),
+           :brod.key(),
+           :brod.value() ->
+             :ok | {:error, any()})
+  @spec produce(:brod.topic(), :brod.key(), plaintext :: :brod.value(), produce_fn()) ::
+          :ok | false
   def produce(topic, key, plaintext, produce_fn \\ &:brod.produce_sync/5) do
     conf = config()
+
     if conf.enabled? do
       do_produce(topic, key, plaintext, produce_fn)
     end
