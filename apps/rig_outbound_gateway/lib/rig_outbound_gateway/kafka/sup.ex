@@ -58,12 +58,10 @@ defmodule RigOutboundGateway.Kafka.Sup do
       |> add_sasl_option.()
 
     Logger.debug(fn ->
-      """
-      Starting brod_client
-        id=#{inspect(conf.brod_client_id)}
-        brokers=#{inspect(conf.brokers)}
-        config=#{inspect(client_conf)}
-      """
+      "Setting up Kafka connection:\n" <>
+        (client_conf
+         |> Keyword.update(:ssl, nil, &Keyword.put(&1, :password, "<REDACTED>"))
+         |> inspect(pretty: true))
     end)
 
     parent_restart_strategy = {:rest_for_one, _max_restarts = 1, _max_time = 10}
@@ -95,8 +93,9 @@ defmodule RigOutboundGateway.Kafka.Sup do
         opts = [
           certfile: config |> Keyword.fetch!(:ssl_certfile) |> resolve_path,
           keyfile: config |> Keyword.fetch!(:ssl_keyfile) |> resolve_path,
-          cacertfile: config |> Keyword.fetch!(:ssl_ca_certfile) |> resolve_path,
+          cacertfile: config |> Keyword.fetch!(:ssl_ca_certfile) |> resolve_path
         ]
+
         case Keyword.fetch!(config, :ssl_keyfile_pass) do
           "" -> opts
           pass -> Keyword.put(opts, :password, String.to_charlist(pass))

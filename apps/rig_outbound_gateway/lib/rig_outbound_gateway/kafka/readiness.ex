@@ -6,9 +6,9 @@ defmodule RigOutboundGateway.Kafka.Readiness do
 
   @check_delay_ms 1_000
 
-  @spec ready?(Kafka.topic(), Kafka.partition(), timeout :: non_neg_integer()) :: boolean
+  @spec ready?(Kafka.topic(), Kafka.partition(), timeout_ms :: non_neg_integer()) :: boolean
 
-  def ready?(_topic, _partition, timeout) when timeout < 0, do: false
+  def ready?(_topic, _partition, timeout_ms) when timeout_ms < 0, do: false
 
   def ready?(topic, partition, timeout_ms) do
     %{brod_client_id: brod_client_id} = config()
