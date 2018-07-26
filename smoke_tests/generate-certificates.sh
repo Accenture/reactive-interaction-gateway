@@ -71,7 +71,11 @@ keytool -importkeystore -alias "$SERVER_CN" \
 # Note: Erlang's ssl module doesn't like private keys created by req's -newkey parameter
 # (using it causes this: {:failed_to_upgrade_to_ssl, {:keyfile, :function_clause}})
 #openssl genrsa -des3 -passout "pass:$CLIENT_PASS" -out client.key.pem 2048
-openssl genpkey -algorithm RSA -out client.key.pem -pass "pass:$CLIENT_PASS" -pkeyopt rsa_keygen_bits:2048
+openssl genpkey -algorithm RSA \
+                -out client.key.pem \
+                -des3 \
+                -pass "pass:$CLIENT_PASS" \
+                -pkeyopt rsa_keygen_bits:2048
 openssl req -new -subj "/C=AT/CN=client.$DOMAIN" \
                  -key client.key.pem -passin "pass:$CLIENT_PASS" -passout "pass:$CLIENT_PASS" \
                  -out client.req.pem \

@@ -53,4 +53,4 @@ services:
     environment:
       - KAFKA_HOSTS=kafka:9292
     ports:
-      - 8000
+      - 8000:8000

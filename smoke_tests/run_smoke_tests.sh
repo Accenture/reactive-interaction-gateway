@@ -27,7 +27,7 @@ $COMPOSE run --rm \
   -e KAFKA_ENABLED=1 \
   -e KAFKA_SSL_ENABLED=1 \
   -e KAFKA_HOSTS=kafka:9393 \
-  -e KAFKA_SSL_KEYFILE_PASS=abcdef \
+  -e KAFKA_SSL_KEYFILE_PASS=abcdefgh \
   rig
 
 section_header "All tests passed."
