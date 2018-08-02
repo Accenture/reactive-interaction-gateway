@@ -1,4 +1,4 @@
-FROM elixir:1.6-alpine as build
+FROM elixir:1.7-alpine as build
 
 # Install Elixir & Erlang environment dependencies
 RUN mix local.hex --force
@@ -52,7 +52,7 @@ COPY apps/rig_outbound_gateway/lib /opt/sites/rig/apps/rig_outbound_gateway/lib
 # Compile and release application production code
 RUN mix release
 
-FROM erlang:20-alpine
+FROM erlang:21-alpine
 
 RUN apk add --no-cache bash
 

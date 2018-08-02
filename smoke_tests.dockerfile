@@ -1,4 +1,4 @@
-FROM elixir:1.6
+FROM elixir:1.7
 
 # Install Elixir & Erlang environment dependencies
 RUN mix local.hex --force
