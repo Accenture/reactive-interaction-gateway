@@ -67,10 +67,14 @@ docker run \
   accenture/reactive-interaction-gateway
 ```
 
-RIG is now ready to accept front-end connections. Let's simulate a browser app that uses [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events) to subscribe to RIG, using curl:
+RIG is now ready to accept front-end connections. Let's simulate a browser app that uses [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events) to subscribe to RIG:
 
 ```bash
+# Using curl:
 curl "localhost:4000/socket/sse?users\[\]=alice&token=$token"
+
+# Or in case you prefer HTTPie:
+http --stream "localhost:4000/socket/sse?users[]=alice&token=$token"
 ```
 
 The username should match what's in the token, otherwise RIG won't allow you to connect.
