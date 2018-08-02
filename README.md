@@ -34,7 +34,9 @@ mix escript.build
 token=$(./encode_jwt --secret myJwtSecret --user alice --exp 1893456000)
 ```
 
-In this example we use "myJwtSecret" as the secret key (not a suitable key for production!). The token contains the user ID and---since we're only playing around here---we also add an expiration date that is well in the future (exp is given in [seconds since the epoch](https://en.wikipedia.org/wiki/Unix_time)). The token then looks like this:
+In this example we use "myJwtSecret" as the secret key (not a suitable key for production!). The token contains the user ID and---since we're only playing around here---we also add an expiration date that is well in the future (exp is given in [seconds since the epoch](https://en.wikipedia.org/wiki/Unix_time)).
+
+RIG expects the following fields to be present in the token: [`exp`](https://tools.ietf.org/html/rfc7519#section-4.1.4), [`jti`](https://tools.ietf.org/html/rfc7519#section-4.1.7) (e.g., used when blacklisting tokens), `roles` (a list of roles, may be empty), and `user` (basically used as a routing key). Our token should now look similar to this:
 
 ```javascript
 // Header:
