@@ -44,7 +44,7 @@ In this example we use "myJwtSecret" as the secret key (not a suitable key for p
 }
 // Payload:
 {
-  "exp": 99999999,
+  "exp": 1893456000,
   "jti": "1521227425",
   "roles": [],
   "user": "alice"
