@@ -1,5 +1,5 @@
 ## Name of the node
--name rig@${NODE_HOST}
+-name <%= release_name %>@${NODE_HOST}
 
 ## Cookie for distributed erlang
 -setcookie ${NODE_COOKIE}

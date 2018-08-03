@@ -58,7 +58,6 @@ RUN apk add --no-cache bash
 
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
-ENV REPLACE_OS_VARS=true
 
 WORKDIR /opt/sites/rig
 COPY --from=build /opt/sites/rig/_build/prod/rel/rig /opt/sites/rig/
