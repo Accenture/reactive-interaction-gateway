@@ -7,8 +7,8 @@ defmodule Rig.PubSubTest do
 
   test "the PubSub server is running" do
     assert :ok = PubSub.subscribe(SUT, "user:123")
-    assert [] = Process.info(self())[:messages]
+    assert {:messages, []} = Process.info(self(), :messages)
     assert :ok = PubSub.broadcast(SUT, "user:123", {:hi})
-    assert [{:hi}] = Process.info(self())[:messages]
+    assert {:messages, [{:hi}]} = Process.info(self(), :messages)
   end
 end
