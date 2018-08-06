@@ -55,14 +55,10 @@ RIG expects the following fields to be present in the token: [`exp`](https://too
 
 Next we start up RIG, with the JWT secret provided as an environment variable.
 
-> In case you wonder what those `NODE_HOST` and `NODE_COOKIE` variables mean: they are used to setup connections between RIG nodes (instances). They must be set, but can be ignored for now. See the [operator's guide](./guides/operator-guide.md) if you're curious about available settings.
-
 ```bash
 docker run \
   -p 4000:4000 \
   -p 4010:4010 \
-  -e NODE_HOST=rig \
-  -e NODE_COOKIE=myNodeSecret \
   -e JWT_SECRET_KEY=myJwtSecret \
   accenture/reactive-interaction-gateway
 ```
