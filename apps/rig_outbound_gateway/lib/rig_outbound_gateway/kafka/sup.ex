@@ -57,12 +57,7 @@ defmodule RigOutboundGateway.Kafka.Sup do
       ]
       |> add_sasl_option.()
 
-    Logger.debug(fn ->
-      "Setting up Kafka connection:\n" <>
-        (client_conf
-         |> Keyword.update(:ssl, nil, &Keyword.put(&1, :password, "<REDACTED>"))
-         |> inspect(pretty: true))
-    end)
+    Logger.debug(fn -> format_client_conf(client_conf) end)
 
     parent_restart_strategy = {:rest_for_one, _max_restarts = 1, _max_time = 10}
 
@@ -77,6 +72,21 @@ defmodule RigOutboundGateway.Kafka.Sup do
     ]
 
     {:ok, {parent_restart_strategy, children}}
+  end
+
+  defp format_client_conf(client_conf) do
+    redact_password = fn
+      nil -> nil
+      ssl -> case ssl[:password] do
+        nil -> ssl
+        _ -> Keyword.put(ssl, :password, "<REDACTED>")
+      end
+    end
+
+    "Setting up Kafka connection:\n" <>
+      (client_conf
+        |> Keyword.update(:ssl, nil, redact_password)
+        |> inspect(pretty: true))
   end
 
   @impl :supervisor3
