@@ -76,17 +76,20 @@ defmodule RigOutboundGateway.Kafka.Sup do
 
   defp format_client_conf(client_conf) do
     redact_password = fn
-      nil -> nil
-      ssl -> case ssl[:password] do
-        nil -> ssl
-        _ -> Keyword.put(ssl, :password, "<REDACTED>")
-      end
+      ssl when is_list(ssl) ->
+        case ssl[:password] do
+          nil -> ssl
+          _ -> Keyword.put(ssl, :password, "<REDACTED>")
+        end
+
+      no_ssl_config ->
+        no_ssl_config
     end
 
     "Setting up Kafka connection:\n" <>
       (client_conf
-        |> Keyword.update(:ssl, nil, redact_password)
-        |> inspect(pretty: true))
+       |> Keyword.update(:ssl, nil, redact_password)
+       |> inspect(pretty: true))
   end
 
   @impl :supervisor3
