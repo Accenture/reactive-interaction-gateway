@@ -32,6 +32,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            - name: API_PORT
+              value: {{ .Values.apiPort | quote }}
+            - name: INBOUND_PORT
+              value: {{ .Values.inboundPort | quote }}
           ports:
             - name: api-port
               containerPort: {{ .Values.apiPort }}
