@@ -24,6 +24,6 @@ deployment:
   env:
     PROXY_CONFIG_FILE: proxy/proxy.test.json
     DISCOVERY_TYPE: dns
-    DNS_NAME: reactive-interaction-gateway-service-headless.default.svc.cluster.local
+    DNS_NAME: reactive-interaction-gateway-headless.default.svc.cluster.local
     NODE_COOKIE: magiccookie
     JWT_SECRET_KEY: asdf
