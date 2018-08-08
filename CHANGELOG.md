@@ -3,6 +3,7 @@
 ## v2.0.0-beta.1
 
 - Added
+  - [Auth] JWT now supports RS256 algorithm in addition to HS256 - [#84](https://github.com/Accenture/reactive-interaction-gateway/issues/84)
   - [Outbound] Support Kafka SSL and SASL/Plain authentication - [#79](https://github.com/Accenture/reactive-interaction-gateway/issues/79)
 
 ## v2.0.0-dev

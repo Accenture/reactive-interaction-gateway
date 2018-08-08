@@ -50,7 +50,8 @@ config :rig, RigApi.ChannelsController,
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 config :rig, RigAuth.Jwt.Utils,
-  secret_key: {:system, "JWT_SECRET_KEY", ""}
+  secret_key: {:system, "JWT_SECRET_KEY", ""},
+  alg: {:system, "JWT_ALG", "HS256"}
 
 # --------------------------------------
 # Peerage

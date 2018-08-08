@@ -22,15 +22,21 @@ defmodule RigAuth.ConnCase do
 
       import Joken
 
-      # The key for signing JWTs:
-      @jwt_secret_key Confex.fetch_env!(:rig, RigAuth.ConnCase)
-                      |> Keyword.fetch!(:jwt_secret_key)
-
       # Generation of JWT
-      def generate_jwt do
+      def generate_jwt(priv_key \\ nil) do
+        jwt_secret_key = System.get_env("JWT_SECRET_KEY")
+        jwt_alg = System.get_env("JWT_ALG")
+
+        signer =
+          jwt_alg
+          |> case do
+            "HS" <> _ = alg -> Joken.Signer.hs(alg, jwt_secret_key)
+            "RS" <> _ = alg -> Joken.Signer.rs(alg, JOSE.JWK.from_pem(priv_key))
+          end
+
         token()
         |> with_exp
-        |> with_signer(@jwt_secret_key |> hs256)
+        |> with_signer(signer)
         |> sign
         |> get_compact
       end
