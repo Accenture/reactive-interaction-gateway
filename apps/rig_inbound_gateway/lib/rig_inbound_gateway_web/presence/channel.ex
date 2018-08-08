@@ -47,8 +47,13 @@ defmodule RigInboundGatewayWeb.Presence.Channel do
   end
 
   @doc """
-  Join user specific channel. Only owner of given channel or user with authorized
-  role is able to join.
+  Join a channel.
+
+  For `user:*` channels, joining is only allowed for the owner of the channel (e.g.,
+  alice for `user:alice`) or for a person that has elevated privileges (= has
+  authorized role). The same applies to `role:*` channels, except that they have no
+  owner, so only users with an authorized role are permitted.
+
   """
   @spec join(String.t, map, map) :: {atom, map}
   def join("user:" <> user_subtopic_name = room, _params, socket) do
@@ -64,9 +69,6 @@ defmodule RigInboundGatewayWeb.Presence.Channel do
     end
   end
 
-  @doc """
-  Join common role based channel. Only user with authorized role is able to join.
-  """
   @spec join(String.t, map, map) :: {atom, map}
   def join("role:" <> _ = room, _params, socket) do
     {username, roles} = extract_username_and_roles(socket)
@@ -92,7 +94,8 @@ defmodule RigInboundGatewayWeb.Presence.Channel do
   end
 
   @doc """
-  Start tracking of user in global role baes channels and also in his specific channel.
+  Start tracking presences.
+
   """
   @spec handle_info({:after_join, String.t, [String.t]}, map) :: {:noreply, map}
   def handle_info({:after_join, username, roles}, socket) do
@@ -106,9 +109,6 @@ defmodule RigInboundGatewayWeb.Presence.Channel do
     {:noreply, socket}
   end
 
-  @doc """
-  Start tracking of user in his specific channel.
-  """
   @spec handle_info({:after_join, String.t}, map) :: {:noreply, map}
   def handle_info({:after_join, username}, socket) do
     # track user specific channel
@@ -166,7 +166,8 @@ defmodule RigInboundGatewayWeb.Presence.Channel do
 
   @spec unauthorized_join(String.t, String.t) :: {:error, String.t}
   defp unauthorized_join(room, username) do
-    Logger.warn(msg = "unauthorized user with id #{inspect username} tried to join #{inspect room}!")
+    msg = "unauthorized user with id #{inspect username} tried to join #{inspect room}!"
+    Logger.warn(msg)
     {:error, msg}
   end
 end

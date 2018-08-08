@@ -8,34 +8,42 @@ services:
 
   kafka:
     container_name: kafka
-    image: wurstmeister/kafka:1.0.0
+    image: wurstmeister/kafka:1.1.0
     environment:
-      - KAFKA_ADVERTISED_HOST_NAME=kafka
+      - KAFKA_LISTENERS=HOSTPLAIN://:9092,HOSTSSL://:9193,DOCKERPLAIN://:9292,DOCKERSSL://:9393
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=HOSTPLAIN:PLAINTEXT,HOSTSSL:SSL,DOCKERPLAIN:PLAINTEXT,DOCKERSSL:SSL
+      - KAFKA_ADVERTISED_LISTENERS=HOSTPLAIN://localhost:9092,HOSTSSL://localhost:9193,DOCKERPLAIN://kafka:9292,DOCKERSSL://kafka:9393
+      - KAFKA_INTER_BROKER_LISTENER_NAME=DOCKERPLAIN
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_ADVERTISED_PORT=9092
       - KAFKA_CREATE_TOPICS=rig:1:1
+      - KAFKA_SSL_TRUSTSTORE_LOCATION=/certs/truststore.jks
+      - KAFKA_SSL_TRUSTSTORE_PASSWORD=abcdefgh
+      - KAFKA_SSL_KEYSTORE_LOCATION=/certs/server.keystore.jks
+      - KAFKA_SSL_KEYSTORE_PASSWORD=abcdefgh
+      - KAFKA_SSL_KEY_PASSWORD=abcdefgh
+      - KAFKA_SSL_CLIENT_AUTH=required
     ports:
       - 9092:9092
+      - 9193:9193
+      - 9292
+      - 9393
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./certs:/certs
     depends_on:
       - zookeeper
 
   rig:
     container_name: rig
-    build:
-      context: ../
-      dockerfile: smoke_tests.dockerfile
+    image: rig:smoke_test
     environment:
       - API_HOST=rest-api
-      - KAFKA_ENABLED=true
-      - KAFKA_HOSTS=kafka:9092
       - PROXY_CONFIG_FILE=proxy/proxy.smoke_test.json
     ports:
-      - 4000:4000
-      - 4010:4010
+      - 4000
+      - 4010
     depends_on:
       - kafka
+      - rest-api
 
   rest-api:
     container_name: rest-api
@@ -43,6 +51,6 @@ services:
       context: ./rest-api
       dockerfile: Dockerfile
     environment:
-      - KAFKA_HOSTS=kafka:9092
+      - KAFKA_HOSTS=kafka:9292
     ports:
       - 8000:8000

@@ -15,7 +15,6 @@ use Mix.Releases.Config,
 # For a full list of config options for both releases
 # and environments, visit https://hexdocs.pm/distillery/configuration.html
 
-
 # You may define one or more environments in this file,
 # an environment's settings will override those of a release
 # when building in that environment, this combination of release
@@ -30,13 +29,17 @@ environment :dev do
   # dev mode.
   set dev_mode: true
   set include_erts: false
-  set cookie: :"placeholder_cookie"
+  set cookie: :placeholder_cookie
+  set pre_configure_hooks: "rel/pre_configure_hooks"
+  set post_start_hooks: "rel/post_start_hooks"
 end
 
 environment :prod do
   set include_erts: true
   set include_src: false
-  set cookie: :"placeholder_cookie"
+  set cookie: :placeholder_cookie
+  set pre_configure_hooks: "rel/pre_configure_hooks"
+  set post_start_hooks: "rel/post_start_hooks"
 end
 
 # You may define one or more releases in this file.

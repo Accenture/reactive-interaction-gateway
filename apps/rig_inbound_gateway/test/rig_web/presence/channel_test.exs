@@ -64,7 +64,7 @@ defmodule RigInboundGatewayWeb.Presence.ChannelTest do
 
   @tag :smoke
   test "subscribed user should receive message", %{conn: conn} do
-    {:ok, _msg} = RigOutboundGateway.Kafka.GroupSubscriber.wait_for_consumer_ready("rig", 0)
+    true = RigOutboundGateway.Kafka.ready?("rig", 0, 10_000)
     assert {:ok, _response, sock} = subscribe_and_join_user(
       "testuser",
       [@customer_role],
@@ -83,7 +83,7 @@ defmodule RigInboundGatewayWeb.Presence.ChannelTest do
 
   @tag :smoke
   test "not subscribed user shouldn't receive message", %{conn: conn} do
-    {:ok, _msg} = RigOutboundGateway.Kafka.GroupSubscriber.wait_for_consumer_ready("rig", 0)
+    true = RigOutboundGateway.Kafka.ready?("rig", 0, 10_000)
     body = ~s({"user":"testuser","foo":"bar"})
     produce_kafka_message(conn, body)
 

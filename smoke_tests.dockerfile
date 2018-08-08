@@ -1,4 +1,4 @@
-FROM elixir:1.6
+FROM elixir:1.7
 
 # Install Elixir & Erlang environment dependencies
 RUN mix local.hex --force
@@ -31,5 +31,8 @@ COPY guides /opt/sites/rig/guides
 EXPOSE 4000
 # Internal APIs
 EXPOSE 4010
+
+# Precompile
+RUN MIX_ENV=test mix compile
 
 CMD ["mix", "test", "--only", "smoke"]

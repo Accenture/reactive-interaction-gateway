@@ -108,30 +108,4 @@ defmodule RigOutboundGateway.Kafka.GroupSubscriber do
   defp spawn_message_handlers(_brod_client_id, []) do
     %{}
   end
-
-  @doc """
-  Periodically checks if Kafka consumer is ready for given topic and partition.
-  If it exceedes maximum timeout returns :error, otherwise stops and returns :ok as
-  soon as possible.
-  """
-  @spec wait_for_consumer_ready(String.t(), non_neg_integer, non_neg_integer) ::
-          {:ok | :error, String.t()}
-  def wait_for_consumer_ready(topic, partition, timeout \\ 10_000)
-
-  def wait_for_consumer_ready(topic, partition, timeout) when timeout <= 0 do
-    {:error, "Consumer ready check for topic: #{topic} and partition: #{partition} timed out."}
-  end
-
-  def wait_for_consumer_ready(topic, partition, timeout) do
-    conf = config()
-
-    case :brod.get_consumer(conf.brod_client_id, topic, partition) do
-      {:ok, _pid} ->
-        {:ok, "Consumer for topic: #{topic} and partition: #{partition} is ready."}
-
-      _ ->
-        :timer.sleep(1_000)
-        wait_for_consumer_ready(topic, partition, timeout - 1_000)
-    end
-  end
 end

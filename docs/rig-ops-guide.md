@@ -22,10 +22,17 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `JWT_SECRET_KEY` | The secret key used to sign and verify the JSON web tokens. | ""
 `JWT_USER_FIELD` | The JSON web token as sent by the front-ends should contain the user ID, in the same format used by the back-ends in the messages they send towards the user. `JWT_USER_FIELD` is the name of that user ID field in the JWT. For the corresponding field used in outbound messages, see `MESSAGE_USER_FIELD`. | "user"
 `KAFKA_CONSUMER_GROUP` | Consumer group name for Kafka. | "rig-consumer-group"
-`KAFKA_ENABLED` | If enabled, RIG will consume messages from a Kafka broker using the configured broker and topic(s). | false
+`KAFKA_ENABLED` | If set to true, RIG will consume messages from a Kafka broker using the configured broker and topic(s). | false
 `KAFKA_HOSTS` | List of Kafka brokers RIG should connect to, delimited by comma. Usually it's enough to specify one broker and RIG will auto-discover rest of the Kafka cluster. | ["localhost:9092"]
 `KAFKA_LOG_TOPIC` | Kafka topic for producer used to log HTTP requests going through RIG's API Proxy. | "rig-request-log"
+`KAFKA_RESTART_DELAY_MS` | If the connection to Kafka fails or cannot be established, RIG retries setting up the connection after `KAFKA_RESTART_DELAY_MS` milliseconds. | 20000
 `KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will consume, delimited by comma. | ["rig"]
+`KAFKA_SASL` | If set, SASL is used to authenticate RIG against the Kafka brokers. Use the following format for SASL/Plain authentication: "plain:myusername:mypassword". Note that setting `KAFKA_SASL` does *not* enable SSL (see `KAFKA_SSL_ENABLED` and related settings). | nil
+`KAFKA_SSL_ENABLED` | Enables encrypted communication to Kafka brokers. | false
+`KAFKA_SSL_CA_CERTFILE` | Path to the CA certificate (PEM format) that was used to sign the server and client certificates. Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "ca.crt.pem"
+`KAFKA_SSL_CERTFILE` | Path to the (signed) client certificate (PEM format). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "client.crt.pem"
+`KAFKA_SSL_KEYFILE` | Path to the private key of the client certificate (PEM format). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "client.key.pem"
+`KAFKA_SSL_KEYFILE_PASS` | Passphrase in case the private key is password-protected. | ""
 `KINESIS_APP_NAME` | From Amazon's documentation: "Name of the Amazon Kinesis application. This can assist with troubleshooting (e.g. distinguish requests made by separate applications). | "Reactive-Interaction-Gateway"
 `KINESIS_AWS_REGION` | The AWS region the Kinesis stream is located in. | "eu-west-1"
 `KINESIS_CLIENT_JAR` | Path to the kinesis-client jar file. | "./kinesis-client/target/rig-kinesis-client-1.0-SNAPSHOT.jar"

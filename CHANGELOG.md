@@ -2,6 +2,9 @@
 
 ## v2.0.0-beta.1
 
+- Added
+  - [Outbound] Support Kafka SSL and SASL/Plain authentication - [#79](https://github.com/Accenture/reactive-interaction-gateway/issues/79)
+
 ## v2.0.0-dev
 
 - Changed
