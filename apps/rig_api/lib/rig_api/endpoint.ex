@@ -29,12 +29,6 @@ defmodule RigApi.Endpoint do
 
   plug RigApi.Router
 
-  @doc """
-  Callback invoked for dynamically configuring the endpoint.
-
-  It receives the endpoint configuration and checks if
-  configuration should be loaded from the system environment.
-  """
   def init(_key, config) do
     Confex.Resolver.resolve(config)
   end

@@ -34,7 +34,7 @@ defmodule RigAuth.Jwt.Utils do
 
     jwt
     |> token
-    |> with_validation("exp", &(&1 > current_time()))
+    |> with_validation("exp", &(&1 > current_time()), "token expired")
     |> with_signer(signer)
     |> verify
   end

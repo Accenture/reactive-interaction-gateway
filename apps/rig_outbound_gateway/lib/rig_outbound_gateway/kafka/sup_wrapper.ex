@@ -14,13 +14,11 @@ defmodule RigOutboundGateway.Kafka.SupWrapper do
   Also note that in case `:kafka_enabled?` is `false` in the env config, the GenServer
   doesn't start anything.
   """
-  use Rig.Config, [:enabled?]
+  use Rig.Config, [:enabled?, :restart_delay_ms]
   use GenServer
   require Logger
 
   alias RigOutboundGateway.Kafka.Sup, as: KafkaSupervisor
-
-  @restart_delay_ms 20_000
 
   ## Client API
 
@@ -64,11 +62,12 @@ defmodule RigOutboundGateway.Kafka.SupWrapper do
     },
     old_state
   ) do
+    %{restart_delay_ms: restart_delay_ms} = config()
     Logger.warn("""
     Supervisor startup failed (attempt #{cur_attempt_no(old_state)}, #{inspect module}): #{inspect err}
-    Attempt #{next_attempt_no(old_state)} commences in #{@restart_delay_ms / 1000} seconds..
+    Attempt #{next_attempt_no(old_state)} commences in #{restart_delay_ms / 1000} seconds..
     """)
-    :timer.sleep @restart_delay_ms
+    :timer.sleep restart_delay_ms
     send(self(), :start_sup)
     {:noreply, old_state}
   end

@@ -1,5 +1,6 @@
 defmodule Rig.KafkaTest do
   @moduledoc false
+  use Rig.Config, [:topic]
   use ExUnit.Case, async: true
 
   alias Rig.Kafka, as: SUT
@@ -13,7 +14,13 @@ defmodule Rig.KafkaTest do
     end
   end
 
-  test "publishing" do
+  test "publishing using the stub" do
     assert :ok = SUT.produce("some-topic", "some-key", "some-value", &ProducerStub.produce_sync/5)
+  end
+
+  @tag :smoke
+  test "publishing using an actual connection" do
+    conf = config()
+    assert :ok = SUT.produce(conf.topic, "test-key", "test-value")
   end
 end

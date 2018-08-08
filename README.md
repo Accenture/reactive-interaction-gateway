@@ -34,7 +34,9 @@ mix escript.build
 token=$(./encode_jwt --secret myJwtSecret --user alice --exp 1893456000)
 ```
 
-In this example we use "myJwtSecret" as the secret key (not a suitable key for production!). The token contains the user ID and---since we're only playing around here---we also add an expiration date that is well in the future (exp is given in [seconds since the epoch](https://en.wikipedia.org/wiki/Unix_time)). The token then looks like this:
+In this example we use "myJwtSecret" as the secret key (not a suitable key for production!). The token contains the user ID and---since we're only playing around here---we also add an expiration date that is well in the future (exp is given in [seconds since the epoch](https://en.wikipedia.org/wiki/Unix_time)).
+
+RIG expects the following fields to be present in the token: [`exp`](https://tools.ietf.org/html/rfc7519#section-4.1.4), [`jti`](https://tools.ietf.org/html/rfc7519#section-4.1.7) (e.g., used when blacklisting tokens), `roles` (a list of roles, may be empty), and `user` (basically used as a routing key). Our token should now look similar to this:
 
 ```javascript
 // Header:
@@ -44,7 +46,7 @@ In this example we use "myJwtSecret" as the secret key (not a suitable key for p
 }
 // Payload:
 {
-  "exp": 99999999,
+  "exp": 1893456000,
   "jti": "1521227425",
   "roles": [],
   "user": "alice"
@@ -53,22 +55,22 @@ In this example we use "myJwtSecret" as the secret key (not a suitable key for p
 
 Next we start up RIG, with the JWT secret provided as an environment variable.
 
-> In case you wonder what those `NODE_HOST` and `NODE_COOKIE` variables mean: they are used to setup connections between RIG nodes (instances). They must be set, but can be ignored for now. See the [operator's guide](./guides/operator-guide.md) if you're curious about available settings.
-
 ```bash
 docker run \
   -p 4000:4000 \
   -p 4010:4010 \
-  -e NODE_HOST=rig \
-  -e NODE_COOKIE=myNodeSecret \
   -e JWT_SECRET_KEY=myJwtSecret \
   accenture/reactive-interaction-gateway
 ```
 
-RIG is now ready to accept front-end connections. Let's simulate a browser app that uses [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events) to subscribe to RIG, using curl:
+RIG is now ready to accept front-end connections. Let's simulate a browser app that uses [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events) to subscribe to RIG:
 
 ```bash
+# Using curl:
 curl "localhost:4000/socket/sse?users\[\]=alice&token=$token"
+
+# Or in case you prefer HTTPie:
+http --stream "localhost:4000/socket/sse?users[]=alice&token=$token"
 ```
 
 The username should match what's in the token, otherwise RIG won't allow you to connect.
