@@ -99,7 +99,7 @@ Note that for posting the message we've used another port---that's the _internal
 ## Configuration, Integration, Deployment
 
 It should be easy to integrate RIG into your current architecture---if you have any problems, please open a Github issue. Check out
-[the operator's guide](guides/operator-guide.md) for details.
+[the operator's guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html) for details.
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available, take a look at the
 [list of tags](https://github.com/Accenture/reactive-interaction-gateway/tags).
