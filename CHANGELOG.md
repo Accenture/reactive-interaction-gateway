@@ -14,6 +14,7 @@
   - [Docs] Move documentation from `doc/` to `guides/` as the former is the default for ex_doc output
   - [Inbound] Revised request logging (currently Kafka and console as backends)
   - [Inbound] Disable WebSocket timeout - [#58](https://github.com/Accenture/reactive-interaction-gateway/pull/58)
+  - [Inbound] SSE heartbeats are now sent as comments rather than events, and events without data carry an empty data line to improve cross-browser compatability. - [#64]
   - [Deploy] Dockerfile to use custom `vm.args` file & removed `mix release.init` step - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
 
 - Added

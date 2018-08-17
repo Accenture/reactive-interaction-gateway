@@ -11,8 +11,9 @@ defmodule RigInboundGateway.Transports.ServerSentEvents.Encoder do
     <> format_data(msg)
     <> "\n"
   end
-  def format(:heartbeat), do: "event: heartbeat\n\n"
-  def format(:bye), do: "event: closing connection\n\n"
+  def format(:hello), do: "event: connection established\ndata:\n\n"
+  def format(:heartbeat), do: ": heartbeat\n\n"
+  def format(:bye), do: "event: closing connection\ndata:\n\n"
   # For handling HTTP status codes:
   def format(status) when is_atom(status), do: "event: #{Atom.to_string(status)}\n\n"
 
@@ -29,7 +30,7 @@ defmodule RigInboundGateway.Transports.ServerSentEvents.Encoder do
   defp format_data(%Phoenix.Socket.Message{event: "phx_reply"} = msg), do:
     "data: #{msg |> Poison.encode!}\n"
   defp format_data(%Phoenix.Socket.Message{payload: nil}), do:
-    ""
+    "data:"
   defp format_data(%Phoenix.Socket.Message{payload: payload}), do:
     "data: #{payload |> Poison.encode!}\n"
 end
