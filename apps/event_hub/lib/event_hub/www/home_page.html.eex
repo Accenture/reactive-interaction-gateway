@@ -1,0 +1,10 @@
+<main class="centered">
+  <section class="accent">
+    <h1>Raxx.Kit</h1>
+    <h2>Simply cloud native</h2>
+    <nav>
+      <a href="https://github.com/CrowdHailer/raxx">SOURCE CODE</a>
+      <a href="https://elixir-lang.slack.com/messages/C56H3TBH8/">CHAT</a>
+    </nav>
+  </section>
+</main>

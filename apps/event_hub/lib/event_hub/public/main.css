@@ -1,0 +1,60 @@
+/* Reset */
+body {
+  margin: 0;
+}
+
+/* Make everything a border-box, because why not? */
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-size: 1.6em // Currently ems cause chrome bug misinterpreting rems on body element;
+  font-weight: 300;
+  letter-spacing: .01em;
+  line-height: 1.6;
+  color: white;
+
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#45484d+0,000000+100 */
+  background: rgb(69,72,77); /* Old browsers */
+  background: -moz-linear-gradient(right ,  rgba(69,72,77,1) 0%, rgba(0,0,0,1) 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(right,  rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to left,  rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+
+}
+
+h1 {
+  margin: 0;
+  font-size: 6.6rem;
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.centered {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 80rem;
+}
+
+.accent {
+  border-left: #00ff9c 2px solid;
+  margin: 50px;
+  padding: 30px;
+}
+
+nav {
+  letter-spacing: 3.5em
+}
+nav a {
+  color: #00ff9c;
+  letter-spacing: 0.05em
+}

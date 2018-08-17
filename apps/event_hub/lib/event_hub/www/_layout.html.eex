@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>event_hub </title>
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="/main.css">
+    <link rel="icon" href="/favicon.ico">
+  </head>
+  <body>
+  <%= content %>
+  <script type="text/javascript" src="/main.js"> </script>
+  </body>
+</html>

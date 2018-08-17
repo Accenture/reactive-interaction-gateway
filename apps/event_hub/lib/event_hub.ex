@@ -1,0 +1,2 @@
+defmodule EventHub do
+end
