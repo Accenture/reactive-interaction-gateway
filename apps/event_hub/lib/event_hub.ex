@@ -1,2 +1,0 @@
-defmodule EventHub do
-end

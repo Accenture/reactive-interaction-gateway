@@ -2,8 +2,19 @@ defmodule RigInboundGatewayWeb.Router do
   use RigInboundGatewayWeb, :router
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug(:accepts, ["json"])
   end
 
-  forward "/", RigInboundGateway.ApiProxy.Plug
+  scope "/_rig", RigInboundGatewayWeb do
+    pipe_through(:api)
+
+    scope "/v1", V1 do
+      scope "/connection/sse", SSE do
+        get("/", Controller, :create_and_attach)
+        put("/:connection_id/subscriptions/:event_type", SubscriptionController, :set)
+      end
+    end
+  end
+
+  forward("/", RigInboundGateway.ApiProxy.Plug)
 end

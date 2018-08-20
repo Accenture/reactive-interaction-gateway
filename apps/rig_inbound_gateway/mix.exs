@@ -3,6 +3,7 @@ defmodule RigInboundGateway.Mixfile do
 
   def project do
     %{rig: rig_version, elixir: elixir_version} = versions()
+
     [
       app: :rig_inbound_gateway,
       version: rig_version,
@@ -59,6 +60,8 @@ defmodule RigInboundGateway.Mixfile do
       # Read and use application configuration from environment variables
       {:confex, "~> 3.3"},
       {:uuid, "~> 1.1"},
+      # SSE serialization:
+      {:server_sent_event, "~> 0.3.1"}
     ]
   end
 
