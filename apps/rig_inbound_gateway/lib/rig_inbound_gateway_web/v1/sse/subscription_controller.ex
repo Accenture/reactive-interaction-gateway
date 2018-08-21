@@ -2,15 +2,15 @@ defmodule RigInboundGatewayWeb.V1.SSE.SubscriptionController do
   require Logger
   use RigInboundGatewayWeb, :controller
 
+  alias Rig.EventHub
+  alias RigAuth.Session
   alias RigInboundGateway.SubscriptionCheck
   alias RigInboundGatewayWeb.V1.SSE.Connection
-  alias Rig.EventHub
 
   @doc """
   Ensures there's a subscription for the given topic.
 
-  If there is no such subscription yet, it will be created. Otherwise, nothing
-  happens.
+  If there is no such subscription yet, it will be created.
 
   Note that if your event types happen to include slash characters, you need to escape
   them in the URL using `%2F`. For example:
@@ -32,6 +32,9 @@ defmodule RigInboundGatewayWeb.V1.SSE.SubscriptionController do
     with :ok <- SubscriptionCheck.check_authorization(conn, event_type, recursive?),
          {:ok, sse_pid} <- Connection.deserialize(connection_id),
          :ok <- connection_alive!(sse_pid) do
+      # Updating the session allows blacklisting it later on:
+      Session.update(conn, sse_pid)
+
       EventHub.subscribe(sse_pid, event_type, recursive?)
 
       Logger.debug(fn ->

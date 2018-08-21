@@ -22,6 +22,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `JWT_SECRET_KEY` | The secret key used to sign and verify the JSON web tokens. | ""
 `JWT_ALG` | Algorithm used to sign and verify JSON web tokens. | "HS256"
 `JWT_USER_FIELD` | The JSON web token as sent by the front-ends should contain the user ID, in the same format used by the back-ends in the messages they send towards the user. `JWT_USER_FIELD` is the name of that user ID field in the JWT. For the corresponding field used in outbound messages, see `MESSAGE_USER_FIELD`. | "user"
+`JWT_SESSION_FIELD` | The JWT field that defines a "session", which is used for blacklisting sessions. What a session is depends on your application. For example, one might set `JWT_SESSION_FIELD` to `userId` to define all connections that belong to the same user as a session; in this context, blacklisting a session means killing all connections for a single user. | nil
 `KAFKA_CONSUMER_GROUP` | Consumer group name for Kafka. | "rig-consumer-group"
 `KAFKA_ENABLED` | If set to true, RIG will consume messages from a Kafka broker using the configured broker and topic(s). | false
 `KAFKA_HOSTS` | List of Kafka brokers RIG should connect to, delimited by comma. Usually it's enough to specify one broker and RIG will auto-discover rest of the Kafka cluster. | ["localhost:9092"]

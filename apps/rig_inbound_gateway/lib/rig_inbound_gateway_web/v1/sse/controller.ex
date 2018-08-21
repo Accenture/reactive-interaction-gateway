@@ -31,8 +31,6 @@ defmodule RigInboundGatewayWeb.V1.SSE.Controller do
   rescue
     ex in ConnectionClosed ->
       Logger.warn(inspect(ex))
-      # This just prevents a Plug.Conn.NotSentError:
-      text(conn, "closed")
   end
 
   defp with_chunked_transfer(conn) do
@@ -68,6 +66,10 @@ defmodule RigInboundGatewayWeb.V1.SSE.Controller do
         conn
         |> send_chunk(cloud_event)
         |> wait_for_events(next_heartbeat)
+
+      {:rig_session_killed, group} ->
+        Logger.info("[SSE controller] session killed: #{inspect(group)}")
+        send_chunk(conn, "Session killed.")
     after
       heartbeat_remaining_ms ->
         # If the connection is down, the (second) heartbeat will trigger ConnectionClosed

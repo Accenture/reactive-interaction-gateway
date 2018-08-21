@@ -92,6 +92,9 @@ jwt_payload_field_map = %{
   roles: {:system, "JWT_ROLES_FIELD", "roles"}
 }
 
+config :rig, RigAuth.Session,
+  jwt_session_field: {:system, "JWT_SESSION_FIELD", nil}
+
 # --------------------------------------
 # Transports, Channels, etc
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
