@@ -3,6 +3,7 @@ defmodule RigInboundGatewayWeb.Router do
 
   pipeline :api do
     plug(:accepts, ["json"])
+    plug(Rig.Plug.AuthHeader)
   end
 
   scope "/_rig", RigInboundGatewayWeb do

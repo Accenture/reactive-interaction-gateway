@@ -3,6 +3,7 @@ defmodule Rig.Plug.AuthHeader do
   Plug to deal with multiple tokens in the authorization header.
   """
   @behaviour Plug
+  alias Plug.Conn
 
   @impl Plug
   def init(opts), do: opts
@@ -18,6 +19,6 @@ defmodule Rig.Plug.AuthHeader do
       end
       |> Enum.concat()
 
-    Plug.Conn.assign(conn, :authorization_tokens, authorization_tokens)
+    Conn.assign(conn, :authorization_tokens, authorization_tokens)
   end
 end
