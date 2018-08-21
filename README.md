@@ -26,7 +26,7 @@ In this tutorial we use [HTTPie](https://httpie.org/) for HTTP requests, but of 
 
 ### 1. Start RIG
 
-The easiest way to start RIG is using Docker. For a production setup you should really take a look at the [RIG operator guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html), but for now all you need to do is this:
+The easiest way to start RIG is using Docker. Before running a production setup please read the [RIG operator guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html), but for now all you need to do is this:
 
 ```bash
 docker run -d -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
@@ -34,7 +34,7 @@ docker run -d -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
 
 ### 2. Create a connection
 
-Let's connect to RIG using [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events), which is our recommended approach (open standard, firewall friendly, plays nice with HTTP/2).
+Let's connect to RIG using [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events), which is our recommended approach (open standard, firewall friendly, plays nice with HTTP/2):
 
 ```bash
 $ http --stream :4000/_rig/v1/connection/sse
@@ -49,17 +49,17 @@ data: {"connection_token":"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"}
 id: 0
 ```
 
-Please take note of the connection token you get in response - you need it in the next step.
+Please take note of the connection token you get in response - you will need it in the next step.
 
 ### 3. Subscribe to a topic
 
-With the connection established, you can create _subscriptions_ - that is, you can tell RIG which events your app is interested in. RIG needs to know which connection you're talking about, so you need to use the connection token you've noted down in the last step:
+With the connection established, you can create _subscriptions_ - that is, you can tell RIG which events your app is interested in. RIG needs to know which connection you are referring to, so you need to use the connection token you have noted down in the last step:
 
 ```bash
 $ CONN_TOKEN="g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"
 $ EVENT_TYPE="greeting"
 $ http PUT ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions/${EVENT_TYPE}"
-HTTP/1.1 200 OK
+HTTP/1.1 201 Created
 content-type: application/json; charset=utf-8
 ...
 

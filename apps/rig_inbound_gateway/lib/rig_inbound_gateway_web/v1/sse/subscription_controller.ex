@@ -40,13 +40,14 @@ defmodule RigInboundGatewayWeb.V1.SSE.SubscriptionController do
         end)
 
         conn
+        |> put_status(:created)
         |> json(%{
           "connection" => connection_status,
           "eventType" => event_type,
           "recursive" => recursive?
         })
 
-      {:error, :not_base64} ->
+      {:error, _} ->
         conn |> put_status(:bad_request) |> text("Invalid connection token.")
     end
   end
