@@ -22,12 +22,14 @@ Additionally, RIG comes with a basic API gateway implementation, which allows yo
 
 This is a small tutorial for getting started quickly. For a more in-depth introduction, see the [documentation](https://accenture.github.io/reactive-interaction-gateway/).
 
+In this tutorial we use [HTTPie](https://httpie.org/) for HTTP requests, but of course you can also use curl or any other HTTP client. Please note that HTTPie sets the content type to `application/json` automatically, whereas for curl you need to use `-H "Content-Type: application/json"` for all but `GET` requests.
+
 ### 1. Start RIG
 
 The easiest way to start RIG is using Docker. For a production setup you should really take a look at the [RIG operator guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html), but for now all you need to do is this:
 
 ```bash
-docker run -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
+docker run -d -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
 ```
 
 ### 2. Create a connection
@@ -35,49 +37,74 @@ docker run -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
 Let's connect to RIG using [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events), which is our recommended approach (open standard, firewall friendly, plays nice with HTTP/2).
 
 ```bash
-# Using HTTPie:
-http --stream :4000/_rig/v1/socket/sse
+$ http --stream :4000/_rig/v1/connection/sse
+HTTP/1.1 200 OK
+connection: keep-alive
+content-type: text/event-stream
+transfer-encoding: chunked
+...
 
-# Using curl:
-curl localhost:4000/_rig/v1/socket/sse
+event: rig.connection_established
+data: {"connection_token":"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"}
+id: 0
 ```
 
-Please take note of the ID you get in response - you need it in the next step.
+Please take note of the connection token you get in response - you need it in the next step.
 
 ### 3. Subscribe to a topic
 
-With the connection established, you can create _subscriptions_ - that is, you can tell RIG which events your app is interested in. RIG needs to know which connection you're talking about, so you need to pass the ID you've noted down in the last step:
+With the connection established, you can create _subscriptions_ - that is, you can tell RIG which events your app is interested in. RIG needs to know which connection you're talking about, so you need to use the connection token you've noted down in the last step:
 
 ```bash
-# Using HTTPie:
-http POST :4000/_rig/v1/subscriptions \
-  connectionId="$CONNECTION_ID" \
-  eventType=greeting
+$ CONN_TOKEN="g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"
+$ EVENT_TYPE="greeting"
+$ http PUT ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions/${EVENT_TYPE}"
+HTTP/1.1 200 OK
+content-type: application/json; charset=utf-8
+...
 
-# Using curl:
-curl -X POST localhost:4000/_rig/v1/subscriptions \
-  -H 'Content-Type: application/json' \
-  -d "{\"connectionId\": \"$CONNECTION_ID\", \"eventType\": \"greeting\"}"
+{
+    "connection": "alive",
+    "eventType": "greeting",
+    "recursive": false
+}
+
 ```
 
 With that you're ready to receive all "greeting" events.
 
+> If you're also interested in sub-events of `greeting`, like `greeting.create`, try adding `recursive:=true` to the request.
+
 ### 4. Create a new "greeting" event
 
-To create some events fire up another terminal window. Note that RIG expects events to be in the [CloudEvents format](https://github.com/cloudevents/spec/blob/v0.1/spec.md); specifically, it relies on the `eventType` field in reverse-DNS syntax. Let's send a basic "greeting" event:
+RIG expects [CloudEvents](https://github.com/cloudevents/spec/blob/v0.1/spec.md). The following fields are required:
+
+- `cloudEventsVersion`: must be set to "0.1".
+- `eventType`: the event type in reverse-DNS notation, which basically means that an event looks like `com.github.pull.create` and that `com.github.pull.create` is a sub-event of `com.github.pull`.
+- `eventID`: a unique ID for an event (may be used for deduplication).
+- `source`: describes the event producer.
+
+For now, let's send a simple `greeting` event:
 
 ```bash
-# A CloudEvent of type "greeting":
-event='{ "cloudEventsVersion": "0.1", "eventType": "greeting", "source": "test", "eventID": "test1" }'
+$ http post :4000/_rig/v1/events cloudEventsVersion="0.1" eventType=greeting eventID=first-event source=tutorial
+HTTP/1.1 202 Accepted
+content-type: application/json; charset=utf-8
+...
 
-# For posting events we need to use RIG's _internal_ port (4010, by default):
-echo http POST :4010/v1/messages <<<"$event"
+{
+    "cloudEventsVersion": "0.1",
+    "eventID": "first-event",
+    "eventTime": "2018-08-21T09:11:27.614970+00:00",
+    "eventType": "greeting",
+    "source": "tutorial"
+}
 
-# ..or use curl instead:
-curl -X POST localhost:4010/v1/messages \
-  -H 'Content-Type: application/json' \
-  -d "$event"
 ```
+
+RIG responds with `202 Accepted`, along with the CloudEvent as sent to subscribers.
+
+> RIG will always accept events. If there are currently no subscribers for it, the event will be dropped.
 
 ### 5. The event has been delivered to our subscriber
 
@@ -85,7 +112,7 @@ Going back to the first terminal window, you should now see the event you've jus
 
 ### 6. Next: connect your app
 
-You can easily build an event listener right into your frontend:
+You can easily add an event listener to your frontend:
 
 ```javascript
 const url = "http://localhost:4000/_rig/v1/socket/sse";
