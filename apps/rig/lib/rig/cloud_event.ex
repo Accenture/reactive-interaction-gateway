@@ -96,8 +96,8 @@ defmodule Rig.CloudEvent do
     {:error, "#{reason} (#{hint})"}
   end
 
-  @spec serialize(event :: t()) :: String.t()
-  def serialize(%__MODULE__{} = event) do
+  @spec to_json_map(event :: t()) :: map
+  def to_json_map(%__MODULE__{} = event) do
     cloud_events_version = @cloud_events_version
     ^cloud_events_version = event.cloud_events_version
 
@@ -114,6 +114,12 @@ defmodule Rig.CloudEvent do
     ]
     |> Enum.filter(fn {_, v} -> not is_nil(v) end)
     |> Enum.into(%{})
+  end
+
+  @spec serialize(event :: t()) :: String.t()
+  def serialize(%__MODULE__{} = event) do
+    event
+    |> to_json_map()
     |> Poison.encode!()
   end
 end

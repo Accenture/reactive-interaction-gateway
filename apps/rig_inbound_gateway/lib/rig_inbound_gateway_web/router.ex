@@ -15,8 +15,6 @@ defmodule RigInboundGatewayWeb.Router do
       end
 
       post("/events", EventController, :publish)
-
-      # get("/foo", EventController, :wait)
     end
   end
 

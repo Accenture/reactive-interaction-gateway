@@ -16,7 +16,8 @@ defmodule RigInboundGatewayWeb.V1.EventController do
         EventHub.publish(cloud_event)
 
         conn
-        |> json(cloud_event |> CloudEvent.serialize())
+        |> put_status(:accepted)
+        |> json(cloud_event |> CloudEvent.to_json_map())
 
       {:error, reason} ->
         conn
@@ -24,9 +25,4 @@ defmodule RigInboundGatewayWeb.V1.EventController do
         |> text("Failed to parse request body: #{inspect(reason)}")
     end
   end
-
-  # def wait(conn, _params) do
-  #   :timer.sleep(6000)
-  #   text(conn, "Good morning!")
-  # end
 end
