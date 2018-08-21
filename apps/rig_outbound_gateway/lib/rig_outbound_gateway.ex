@@ -5,6 +5,9 @@ defmodule RigOutboundGateway do
   use Rig.Config, [:message_user_field]
   require Logger
 
+  alias Rig.EventHub
+  alias Rig.CloudEvent
+
   alias Phoenix.Channel.Server, as: PhoenixChannelServer
 
   @pubsub_server Rig.PubSub
@@ -40,6 +43,9 @@ defmodule RigOutboundGateway do
     event = "message"
     broadcast.(@pubsub_server, channel_topic, event, payload)
 
+    # TODO this is to replace the phoenix-pubsub broadcast:
+    maybe_publish_to_event_hub(payload)
+
     Logger.debug(fn ->
       meta =
         [user_id: user_id, channel: channel_topic, body_raw: inspect(payload)]
@@ -52,5 +58,16 @@ defmodule RigOutboundGateway do
   rescue
     err ->
       {:error, err}
+  end
+
+  defp maybe_publish_to_event_hub(payload) do
+    case CloudEvent.parse(payload) do
+      {:ok, cloud_event} ->
+        Logger.debug(fn -> "Publishing CloudEvent: #{inspect(cloud_event)}" end)
+        EventHub.publish(cloud_event)
+
+      {:error, _} ->
+        Logger.debug(fn -> "Not a CloudEvent: #{inspect(payload)}" end)
+    end
   end
 end

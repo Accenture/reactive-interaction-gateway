@@ -1,4 +1,6 @@
 defmodule Rig.EventHub do
+  require Logger
+
   alias Rig.CloudEvent
 
   @group_prefix "rig::event::"
@@ -43,6 +45,7 @@ defmodule Rig.EventHub do
 
       for client <- :pg2.get_members(group) do
         send_event(client, group, cloud_event)
+        Logger.trace(fn -> "sent #{event_type} to #{group}/#{inspect(client)}" end)
       end
     end
 

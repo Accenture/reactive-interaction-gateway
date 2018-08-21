@@ -32,6 +32,18 @@ defmodule Rig.CloudEvent do
             content_type: nil,
             data: nil
 
+  defimpl String.Chars do
+    def to_string(%Rig.CloudEvent{} = event) do
+      age =
+        case Timex.parse(event.event_time, "{RFC3339}") do
+          {:ok, dt} -> " created " <> Timex.from_now(dt)
+          _ -> ""
+        end
+
+      "Event type=#{event.event_type} id=#{event.event_id} source=#{event.source}#{age}"
+    end
+  end
+
   @spec new(event_type :: String.t(), source :: String.t(), event_id :: String.t()) ::
           %__MODULE__{}
   def new(event_type, source, event_id \\ nil) do
@@ -54,8 +66,34 @@ defmodule Rig.CloudEvent do
   end
 
   @spec get_current_timestamp() :: String.t()
-  defp get_current_timestamp do
+  def get_current_timestamp do
     Timex.now() |> Timex.format!("{RFC3339}")
+  end
+
+  @spec parse(map :: %{required(String.t()) => nil | String.t()}) ::
+          {:ok, %__MODULE__{}} | {:error, String.t() | %KeyError{}}
+  def parse(%{"cloudEventsVersion" => "0.1"} = input) do
+    event = %__MODULE__{
+      cloud_events_version: "0.1",
+      event_type: Map.fetch!(input, "eventType"),
+      event_id: Map.fetch!(input, "eventID"),
+      source: Map.fetch!(input, "source"),
+      event_time: Map.get_lazy(input, "eventTime", &get_current_timestamp/0),
+      extensions: Map.get(input, "extensions"),
+      schema_url: Map.get(input, "schemaURL"),
+      content_type: Map.get(input, "contentType"),
+      data: Map.get(input, "data")
+    }
+
+    {:ok, event}
+  rescue
+    err in KeyError -> {:error, err}
+  end
+
+  def parse(_input) do
+    reason = "unsupported cloud events version"
+    hint = "try cloudEventsVersion=#{@cloud_events_version}"
+    {:error, "#{reason} (#{hint})"}
   end
 
   @spec serialize(event :: t()) :: String.t()
