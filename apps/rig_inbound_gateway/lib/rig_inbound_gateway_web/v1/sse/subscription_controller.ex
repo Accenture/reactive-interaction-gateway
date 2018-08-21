@@ -2,6 +2,7 @@ defmodule RigInboundGatewayWeb.V1.SSE.SubscriptionController do
   require Logger
   use RigInboundGatewayWeb, :controller
 
+  alias RigInboundGateway.SubscriptionCheck
   alias RigInboundGatewayWeb.V1.SSE.Connection
   alias Rig.EventHub
 
@@ -23,32 +24,42 @@ defmodule RigInboundGatewayWeb.V1.SSE.SubscriptionController do
     %{body_params: body_params} = conn
 
     recursive? =
-      case Map.get(body_params, "recursive", false) do
+      case Map.get(body_params, "recursive") do
         true -> true
         _ -> false
       end
 
-    case Connection.deserialize(connection_id) do
-      {:ok, sse_pid} ->
-        EventHub.subscribe(sse_pid, event_type, recursive?)
+    with :ok <- SubscriptionCheck.check_authorization(conn, event_type, recursive?),
+         {:ok, sse_pid} <- Connection.deserialize(connection_id),
+         :ok <- connection_alive!(sse_pid) do
+      EventHub.subscribe(sse_pid, event_type, recursive?)
 
-        connection_status = if Process.alive?(sse_pid), do: "alive", else: "dead"
+      Logger.debug(fn ->
+        "Subscribed #{inspect(sse_pid)} to #{event_type} (recursive=#{recursive?})"
+      end)
 
-        Logger.debug(fn ->
-          "Subscribed #{inspect(sse_pid)} (#{connection_status})" <>
-            " to #{event_type} (recursive=#{recursive?})"
-        end)
+      conn
+      |> put_status(:created)
+      |> json(%{
+        "eventType" => event_type,
+        "recursive" => recursive?
+      })
+    else
+      {:error, :not_authorized} ->
+        conn |> put_status(:forbidden) |> text("Subscription denied.")
 
-        conn
-        |> put_status(:created)
-        |> json(%{
-          "connection" => connection_status,
-          "eventType" => event_type,
-          "recursive" => recursive?
-        })
-
-      {:error, _} ->
+      {:error, :not_base64} ->
         conn |> put_status(:bad_request) |> text("Invalid connection token.")
+
+      {:error, :invalid_term} ->
+        conn |> put_status(:bad_request) |> text("Invalid connection token.")
+
+      {:error, :process_dead} ->
+        conn |> put_status(:gone) |> text("Connection no longer exists.")
     end
+  end
+
+  defp connection_alive!(pid) do
+    if Process.alive?(pid), do: :ok, else: {:error, :process_dead}
   end
 end

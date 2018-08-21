@@ -60,7 +60,10 @@ defmodule RigInboundGatewayWeb.V1.SSE.Controller do
 
     receive do
       {:rig_event, subscriber_group, cloud_event} ->
-        Logger.debug(fn -> "event via #{inspect(subscriber_group)}: #{inspect(cloud_event)}" end)
+        Logger.debug(fn ->
+          via = if is_nil(subscriber_group), do: "rig", else: inspect(subscriber_group)
+          "[SSE controller] #{via}: #{inspect(cloud_event)}"
+        end)
 
         conn
         |> send_chunk(cloud_event)

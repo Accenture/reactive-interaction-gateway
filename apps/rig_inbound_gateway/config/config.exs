@@ -112,6 +112,9 @@ config :rig, RigInboundGatewayWeb.Presence.Controller,
   # See "User Roles"
   session_role: session_role
 
+config :rig, RigInboundGateway.SubscriptionCheck,
+  validation_type: {:system, "SUBSCRIPTION_CHECK", "NO_CHECK"}
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"

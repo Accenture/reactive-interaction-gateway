@@ -55,6 +55,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `RATE_LIMIT_PER_IP` | If true, the remote IP is taken into account, otherwise the limits are per endpoint only. | true
 `RATE_LIMIT_SWEEP_INTERVAL_MS` | Garbage collector interval. If set to zero, Garbage collector is disabled. | 5000
 `REQUEST_LOG` | Type of loggers to use to log requests processed by API Proxy, delimited by comma. | []
+`SUBSCRIPTION_CHECK` | Select if and how creating subscriptions should be denied. Can be either `no_check` (subscriptions are always allowed), `jwt_validation` (subscription are allowed if at least one authorization token is valid (using JWT_SECRET_KEY) and not blacklisted), or an URL that points to an external service that decides whether to allow or deny the subscription. The URL is expected to accept a GET request with `event_type` and `recursive` as query parameters. The original request's `Authorization` headers are reused for this request. The subscription is allowed if the service returns 200 and denied otherwise. | "NO_CHECK"
 `SESSION_ROLE` | Type of users that are visible to the outside world (possible to list). Only users with these roles will be listed. Possible roles are listed in `JWT_ROLES_FIELD`. Define as strings, separated by comma. | "user"
 
 .
