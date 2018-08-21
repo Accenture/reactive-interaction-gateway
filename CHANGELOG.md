@@ -1,12 +1,14 @@
 # Changelog
 
-## v2.0.0-beta.1
+## v2.0.0-dev
 
 - Added
-  - [Auth] JWT now supports RS256 algorithm in addition to HS256 - [#84](https://github.com/Accenture/reactive-interaction-gateway/issues/84)
-  - [Outbound] Support Kafka SSL and SASL/Plain authentication - [#79](https://github.com/Accenture/reactive-interaction-gateway/issues/79)
+  - [Auth] JWT now supports RS256 algorithm in addition to HS256. [#84](https://github.com/Accenture/reactive-interaction-gateway/issues/84)
+  - [Outbound] Support Kafka SSL and SASL/Plain authentication. [#79](https://github.com/Accenture/reactive-interaction-gateway/issues/79)
+  - [Inbound] SSE heartbeats are now sent as comments rather than events, and events without data carry an empty data line to improve cross-browser compatability. [#64](https://github.com/Accenture/reactive-interaction-gateway/issues/64)
+  - [Inbound] Add new endpoints at `/_rig/v1/` for subscribing to CloudEvents using SSE, for creating subscriptions to specific event types, and for publishing CloudEvents. [#90](https://github.com/Accenture/reactive-interaction-gateway/issues/90)
 
-## v2.0.0-dev
+## v2.0.0-beta.1
 
 - Changed
   - [Api] Endpoint for terminating a session no longer contains user id in path
@@ -14,7 +16,6 @@
   - [Docs] Move documentation from `doc/` to `guides/` as the former is the default for ex_doc output
   - [Inbound] Revised request logging (currently Kafka and console as backends)
   - [Inbound] Disable WebSocket timeout - [#58](https://github.com/Accenture/reactive-interaction-gateway/pull/58)
-  - [Inbound] SSE heartbeats are now sent as comments rather than events, and events without data carry an empty data line to improve cross-browser compatability. - [#64]
   - [Deploy] Dockerfile to use custom `vm.args` file & removed `mix release.init` step - [#29](https://github.com/Accenture/reactive-interaction-gateway/pull/29)
 
 - Added
