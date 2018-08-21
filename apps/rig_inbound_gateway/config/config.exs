@@ -35,6 +35,9 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
 config :rig, RigInboundGateway.Proxy,
   config_file: {:system, "PROXY_CONFIG_FILE", nil}
 
+config :rig, RigInboundGateway.ApiProxy.Base,
+  recv_timeout: {:system, :integer, "PROXY_RECV_TIMEOUT", 5_000}
+
 config :rig, RigInboundGateway.ApiProxy.Router,
   # E.g., to enable both console and kafka loggers, use ["console", "kafka"], which
   # corresponds to REQUEST_LOG=console,kafka. Note that for the Kafka logger to actually

@@ -49,6 +49,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `NODE_HOST` | Erlang hostname for given node, used to build Erlang long-name `rig@NODE_HOST`. This value is used by Erlang's distributed mode, so nodes can see each other. | nil
 `PRIVILEGED_ROLES` | User roles that are able to subscribe to messages of any user. You can specify multiple roles delimited by comma. | []
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Expected path is `proxy/your_json_file.json`. | nil
+`PROXY_RECV_TIMEOUT` | Timeout used when receiving a response for a forwarded/proxied request. | 5000
 `RATE_LIMIT_AVG_RATE_PER_SEC` | The permitted average amount of requests per second. | 10000
 `RATE_LIMIT_BURST_SIZE` | The permitted peak amount of requests. | 5000
 `RATE_LIMIT_ENABLED` | Enables/disables rate limiting globally. | false
