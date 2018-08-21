@@ -6,6 +6,7 @@ defmodule RigInboundGateway.SubscriptionCheck do
   use Rig.Config, :custom_validation
 
   alias HTTPoison
+  alias RigAuth.Jwt.Utils, as: Jwt
 
   # Confex callback
   defp validate_config!(config) do
@@ -34,8 +35,17 @@ defmodule RigInboundGateway.SubscriptionCheck do
 
   defp do_check_authorization(:no_check, _, _, _), do: :ok
 
-  defp do_check_authorization(:jwt_validation, _conn, _, _) do
-    raise "jwt_validation not implemented"
+  defp do_check_authorization(:jwt_validation, conn, _, _) do
+    tokens = Map.get(conn.assigns, :authorization_tokens, [])
+
+    for "Bearer " <> token <- tokens do
+      Jwt.valid?(token)
+    end
+    |> Enum.any?()
+    |> case do
+      true -> :ok
+      false -> {:error, :not_authorized}
+    end
   end
 
   defp do_check_authorization({:url, base_url}, conn, event_type, recursive?) do
