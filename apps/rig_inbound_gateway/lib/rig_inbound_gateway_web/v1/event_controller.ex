@@ -8,16 +8,20 @@ defmodule RigInboundGatewayWeb.V1.EventController do
 
   alias Rig.CloudEvent
   alias Rig.EventHub
+  alias RigAuth.AuthorizationCheck.Submission
 
   @doc "Plug action to send a CloudEvent to subscribers."
   def publish(conn, _params) do
-    case CloudEvent.parse(conn.body_params) do
-      {:ok, cloud_event} ->
-        EventHub.publish(cloud_event)
+    with {:ok, cloud_event} <- CloudEvent.parse(conn.body_params),
+         :ok <- Submission.check_authorization(conn, cloud_event) do
+      EventHub.publish(cloud_event)
 
-        conn
-        |> put_status(:accepted)
-        |> json(cloud_event |> CloudEvent.to_json_map())
+      conn
+      |> put_status(:accepted)
+      |> json(cloud_event |> CloudEvent.to_json_map())
+    else
+      {:error, :not_authorized} ->
+        conn |> put_status(:forbidden) |> text("Submission denied.")
 
       {:error, reason} ->
         conn

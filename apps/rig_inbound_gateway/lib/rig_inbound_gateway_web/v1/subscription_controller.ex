@@ -4,7 +4,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
   alias Rig.EventHub
   alias RigAuth.Session
-  alias RigInboundGateway.SubscriptionCheck
+  alias RigAuth.AuthorizationCheck.Subscription
   alias RigInboundGateway.Connection
 
   @doc """
@@ -29,7 +29,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
         _ -> false
       end
 
-    with :ok <- SubscriptionCheck.check_authorization(conn, event_type, recursive?),
+    with :ok <- Subscription.check_authorization(conn, event_type, recursive?),
          {:ok, sse_pid} <- Connection.deserialize(connection_id),
          :ok <- connection_alive!(sse_pid) do
       # Updating the session allows blacklisting it later on:

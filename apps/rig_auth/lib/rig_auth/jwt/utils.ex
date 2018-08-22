@@ -6,25 +6,26 @@ defmodule RigAuth.Jwt.Utils do
 
   import Joken
 
+  alias Plug
   alias RigAuth.Blacklist
 
-  @type claim_map :: %{required(String.t) => String.t}
+  @type claim_map :: %{required(String.t()) => String.t()}
 
-  @spec valid?(String.t) :: boolean
+  @spec valid?(String.t()) :: boolean
   def valid?(jwt) do
     jwt
     |> validate
     |> get_error == nil
   end
 
-  @spec decode(String.t) :: {:ok, map} | {:error, String.t}
+  @spec decode(String.t()) :: {:ok, map} | {:error, String.t()}
   def decode(jwt) do
     jwt
     |> validate
     |> get_data
   end
 
-  @spec validate(String.t) :: Joken.Token.t
+  @spec validate(String.t()) :: Joken.Token.t()
   defp validate(jwt) do
     conf = config()
 
@@ -43,12 +44,13 @@ defmodule RigAuth.Jwt.Utils do
     |> check_blacklist
   end
 
-  @spec check_blacklist(token :: Joken.Token.t) :: Joken.Token.t
+  @spec check_blacklist(token :: Joken.Token.t()) :: Joken.Token.t()
   defp check_blacklist(%{error: nil, claims: %{"jti" => jti}} = token) do
     case Blacklist.contains_jti?(Blacklist, jti) do
       true -> %{token | error: "JWT with JTI=#{jti} is blacklisted"}
       false -> token
     end
   end
+
   defp check_blacklist(token), do: token
 end
