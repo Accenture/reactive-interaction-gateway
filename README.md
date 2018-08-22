@@ -45,11 +45,11 @@ transfer-encoding: chunked
 ...
 
 event: rig.connection.create
-data: {"source":"rig","eventType":"rig.connection.create","eventTime":"2018-08-22T10:06:04.730484+00:00","eventID":"2b0a4f05-9032-4617-8d1e-92d97fb870dd","data":"{\"connection_token\":\"g2dkAA1ub25vZGVAbm9ob3N0AAACowAAAAAA\"}","contentType":"application/json; charset=utf-8","cloudEventsVersion":"0.1"}
+data: {"source":"rig","eventType":"rig.connection.create","eventTime":"2018-08-22T10:06:04.730484+00:00","eventID":"2b0a4f05-9032-4617-8d1e-92d97fb870dd","data":"{\"connection_token\":\"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA\"}","contentType":"application/json; charset=utf-8","cloudEventsVersion":"0.1"}
 id: 2b0a4f05-9032-4617-8d1e-92d97fb870dd
 ```
 
-After the connection has been established, RIG sends out a first event with type `rig.connection.create`.
+After the connection has been established, RIG sends out a [CloudEvent](https://github.com/cloudevents/spec/blob/v0.1/spec.md) of type `rig.connection.create`.
 
 > You can see that ID and event type of the outer event (= SSE event) match ID and event type of the inner event (= CloudEvent). The cloud event is serialized to the `data` field.
 
@@ -81,10 +81,10 @@ With that you're ready to receive all "greeting" events.
 
 ### 4. Create a new "greeting" event
 
-RIG expects [CloudEvents](https://github.com/cloudevents/spec/blob/v0.1/spec.md). The following fields are required:
+RIG expects to receive [CloudEvents](https://github.com/cloudevents/spec/blob/v0.1/spec.md), so the following fields are required:
 
 - `cloudEventsVersion`: must be set to "0.1".
-- `eventType`: the event type in reverse-DNS notation, which basically means that an event looks like `com.github.pull.create` and that `com.github.pull.create` is a sub-event of `com.github.pull`.
+- `eventType`: the event type in reverse-DNS notation, which basically means that an event looks like `com.github.pull.create`, and that `com.github.pull.create` is a sub-event of `com.github.pull`.
 - `eventID`: a unique ID for an event (may be used for deduplication).
 - `source`: describes the event producer.
 
@@ -106,20 +106,20 @@ content-type: application/json; charset=utf-8
 
 ```
 
-RIG responds with `202 Accepted`, along with the CloudEvent as sent to subscribers.
+RIG responds with `202 Accepted`, followed by the CloudEvent as sent to subscribers.
 
-> RIG will always accept events. If there are currently no subscribers for it, the event will be dropped.
+> If there are no subscribers for a received event, the response will still be `202 Accepted` and the event will be silently dropped.
 
 ### 5. The event has been delivered to our subscriber
 
-Going back to the first terminal window, you should now see the event you've just sent :tada:
+Going back to the first terminal window you should now see your greeting event :tada:
 
 ### 6. Next: connect your app
 
-You can easily add an event listener to your frontend:
+Simply add an event listener to your frontend:
 
 ```javascript
-const url = "http://localhost:4000/_rig/v1/socket/sse";
+const url = "http://localhost:4000/_rig/v1/connection/sse";
 const source = new EventSource(url);
 
 source.addEventListener("open", function (e) {
@@ -160,12 +160,16 @@ source.addEventListener("error", function (e) {
   - Connection multiplexing with HTTP/2 out of the box.
   - SSE implementation (browser) keeps track of connection drops and restores the connection automatically.
   - Polyfills available for older browsers.
-- Implements the state-of-the-art [**CloudEvents** specification](https://github.com/cloudevents/spec) and a flexible event subscription model.
-- Does _not_ contain or handle business logic.
+- WebSocket connections are supported, too.
+- Uses the upcoming [**CloudEvents** specification](https://github.com/cloudevents/spec).
+- Flexible event subscription model:
+  - Subscription based on event types.
+  - Supports "recursive" subscriptions that include sub-events.
+- _No_ business logic inside.
   - Use RIG for a public website, or
   - Use your existing services for authentication and authorization of users and subscriptions.
-- Supports JWT signature verification for APIs as a simple authentication check.
-  - Allows for blacklisting tokens for immediate session invalidation.
+- JWT signature verification for APIs as a simple authentication check.
+- Session blacklist with immediate session invalidation.
 
 ## Configuration, Integration, Deployment
 
