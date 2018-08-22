@@ -10,8 +10,13 @@ defmodule RigInboundGatewayWeb.Router do
     pipe_through(:api)
 
     scope "/v1", V1 do
-      scope "/connection/sse", SSE do
-        get("/", Controller, :create_and_attach)
+      scope "/connection/sse" do
+        get("/", SSE, :create_and_attach)
+        put("/:connection_id/subscriptions/:event_type", SubscriptionController, :set)
+      end
+
+      scope "/connection/ws" do
+        # /connection/ws is configured in the Phoenix/Cowboy dispatch configuration
         put("/:connection_id/subscriptions/:event_type", SubscriptionController, :set)
       end
 

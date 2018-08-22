@@ -1,4 +1,4 @@
-defmodule RigInboundGatewayWeb.V1.SSE.Connection do
+defmodule RigInboundGateway.Connection do
   @moduledoc """
   Connection token for correlating subscriptions with connections.
 

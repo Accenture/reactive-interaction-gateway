@@ -32,7 +32,7 @@ defmodule Rig.SessionHub do
         :ok
 
       members ->
-        for pid <- members, do: send(pid, {:rig_session_killed, group})
+        for pid <- members, do: send(pid, {:session_killed, group})
         :ok = :pg2.delete(group)
     end
   end

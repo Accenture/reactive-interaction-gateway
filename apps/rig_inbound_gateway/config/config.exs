@@ -22,7 +22,14 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
     host: {:system, "HOST", "localhost"}
   ],
   http: [
-    port: {:system, :integer, "INBOUND_PORT", 4000}
+    port: {:system, :integer, "INBOUND_PORT", 4000},
+    dispatch: [
+      {:_,
+       [
+         {"/_rig/v1/connection/ws", RigInboundGatewayWeb.V1.Websocket, []},
+         {:_, Plug.Adapters.Cowboy.Handler, {RigInboundGatewayWeb.Endpoint, []}}
+       ]}
+    ]
   ],
   render_errors: [view: RigInboundGatewayWeb.ErrorView, accepts: ~w(html json xml)],
   pubsub: [name: Rig.PubSub],
@@ -32,8 +39,7 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
 # API Gateway (Proxy)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-config :rig, RigInboundGateway.Proxy,
-  config_file: {:system, "PROXY_CONFIG_FILE", nil}
+config :rig, RigInboundGateway.Proxy, config_file: {:system, "PROXY_CONFIG_FILE", nil}
 
 config :rig, RigInboundGateway.ApiProxy.Router,
   # E.g., to enable both console and kafka loggers, use ["console", "kafka"], which
@@ -48,8 +54,7 @@ config :rig, RigInboundGateway.ApiProxy.Router,
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"}
 
-config :rig, RigInboundGatewayWeb.Proxy.Controller,
-  rig_proxy: RigInboundGateway.Proxy
+config :rig, RigInboundGatewayWeb.Proxy.Controller, rig_proxy: RigInboundGateway.Proxy
 
 config :rig, RigInboundGateway.RateLimit,
   # Internal ETS table name (must be unique).
@@ -92,8 +97,7 @@ jwt_payload_field_map = %{
   roles: {:system, "JWT_ROLES_FIELD", "roles"}
 }
 
-config :rig, RigAuth.Session,
-  jwt_session_field: {:system, "JWT_SESSION_FIELD", nil}
+config :rig, RigAuth.Session, jwt_session_field: {:system, "JWT_SESSION_FIELD", nil}
 
 # --------------------------------------
 # Transports, Channels, etc
@@ -120,4 +124,4 @@ config :rig, RigInboundGateway.SubscriptionCheck,
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

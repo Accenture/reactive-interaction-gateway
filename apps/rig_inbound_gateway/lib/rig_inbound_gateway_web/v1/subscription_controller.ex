@@ -1,11 +1,11 @@
-defmodule RigInboundGatewayWeb.V1.SSE.SubscriptionController do
+defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   require Logger
   use RigInboundGatewayWeb, :controller
 
   alias Rig.EventHub
   alias RigAuth.Session
   alias RigInboundGateway.SubscriptionCheck
-  alias RigInboundGatewayWeb.V1.SSE.Connection
+  alias RigInboundGateway.Connection
 
   @doc """
   Ensures there's a subscription for the given topic.

@@ -44,7 +44,7 @@ defmodule Rig.CloudEvent do
     end
   end
 
-  @spec new(event_type :: String.t(), source :: String.t(), event_id :: String.t()) ::
+  @spec new(event_type :: String.t(), source :: String.t(), event_id :: nil | String.t()) ::
           %__MODULE__{}
   def new(event_type, source, event_id \\ nil) do
     event_id = if is_nil(event_id), do: UUID.uuid4(), else: event_id

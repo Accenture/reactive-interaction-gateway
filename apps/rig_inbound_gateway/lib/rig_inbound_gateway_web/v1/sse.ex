@@ -1,4 +1,4 @@
-defmodule RigInboundGatewayWeb.V1.SSE.Controller do
+defmodule RigInboundGatewayWeb.V1.SSE do
   @moduledoc """
   Create a Server-Sent Events connection and wait for events/messages.
   """
@@ -6,7 +6,7 @@ defmodule RigInboundGatewayWeb.V1.SSE.Controller do
 
   use RigInboundGatewayWeb, :controller
 
-  alias RigInboundGatewayWeb.V1.SSE.Connection
+  alias RigInboundGateway.Events
   alias Rig.CloudEvent
   alias ServerSentEvent
 
@@ -19,14 +19,9 @@ defmodule RigInboundGatewayWeb.V1.SSE.Controller do
 
   @doc "Plug action to create a new SSE connection and wait for messages."
   def create_and_attach(conn, _params) do
-    welcome_message =
-      %{connection_token: Connection.serialize(self())}
-      |> Poison.encode!()
-      |> ServerSentEvent.new(id: "0", type: "rig.connection_established")
-
     conn
     |> with_chunked_transfer()
-    |> send_chunk(welcome_message)
+    |> send_chunk(Events.welcome_event())
     |> wait_for_events()
   rescue
     ex in ConnectionClosed ->
@@ -60,16 +55,16 @@ defmodule RigInboundGatewayWeb.V1.SSE.Controller do
       {:rig_event, subscriber_group, cloud_event} ->
         Logger.debug(fn ->
           via = if is_nil(subscriber_group), do: "rig", else: inspect(subscriber_group)
-          "[SSE controller] #{via}: #{inspect(cloud_event)}"
+          "[SSE] #{via}: #{inspect(cloud_event)}"
         end)
 
         conn
         |> send_chunk(cloud_event)
         |> wait_for_events(next_heartbeat)
 
-      {:rig_session_killed, group} ->
-        Logger.info("[SSE controller] session killed: #{inspect(group)}")
-        send_chunk(conn, "Session killed.")
+      {:session_killed, group} ->
+        Logger.info("[SSE] session killed: #{inspect(group)}")
+        send_chunk(conn, %ServerSentEvent{comments: ["Session killed."]})
     after
       heartbeat_remaining_ms ->
         # If the connection is down, the (second) heartbeat will trigger ConnectionClosed

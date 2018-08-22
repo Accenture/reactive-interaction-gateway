@@ -44,12 +44,16 @@ content-type: text/event-stream
 transfer-encoding: chunked
 ...
 
-event: rig.connection_established
-data: {"connection_token":"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"}
-id: 0
+event: rig.connection.create
+data: {"source":"rig","eventType":"rig.connection.create","eventTime":"2018-08-22T10:06:04.730484+00:00","eventID":"2b0a4f05-9032-4617-8d1e-92d97fb870dd","data":"{\"connection_token\":\"g2dkAA1ub25vZGVAbm9ob3N0AAACowAAAAAA\"}","contentType":"application/json; charset=utf-8","cloudEventsVersion":"0.1"}
+id: 2b0a4f05-9032-4617-8d1e-92d97fb870dd
 ```
 
-Please take note of the connection token you get in response - you will need it in the next step.
+After the connection has been established, RIG sends out a first event with type `rig.connection.create`.
+
+> You can see that ID and event type of the outer event (= SSE event) match ID and event type of the inner event (= CloudEvent). The cloud event is serialized to the `data` field.
+
+Please take note of the `connection_token` in the CloudEvent's `data` field - you need it in the next step.
 
 ### 3. Subscribe to a topic
 
