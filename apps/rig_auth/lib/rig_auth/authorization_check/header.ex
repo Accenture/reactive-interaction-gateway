@@ -6,11 +6,9 @@ defmodule RigAuth.AuthorizationCheck.Header do
 
   @spec any_valid_bearer_token?(Conn.t()) :: boolean
   def any_valid_bearer_token?(conn) do
-    tokens = Map.get(conn.assigns, :authorization_tokens, [])
+    tokens = Map.get(conn.assigns, :auth_tokens, [])
 
-    for "Bearer " <> token <- tokens do
-      Jwt.valid?(token)
-    end
+    for({"bearer", token} <- tokens, do: Jwt.valid?(token))
     |> Enum.any?()
   end
 end

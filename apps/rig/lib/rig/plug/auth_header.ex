@@ -10,15 +10,17 @@ defmodule Rig.Plug.AuthHeader do
 
   @impl Plug
   def call(conn, opts) do
-    authorization_tokens =
+    auth_tokens =
       for {"authorization", val} <- conn.req_headers do
-        # Multiple tokens might be given as a comma-separated list:
-        val
-        |> String.split(",")
-        |> Enum.map(&String.trim/1)
+        Conn.Utils.list(val)
+        |> String.split(" ", parts: 2)
+        |> case do
+          [token, []] -> {"bearer", token}
+          [scheme, token] -> {String.downcase(scheme), token}
+        end
       end
       |> Enum.concat()
 
-    Conn.assign(conn, :authorization_tokens, authorization_tokens)
+    Conn.assign(conn, :auth_tokens, auth_tokens)
   end
 end
