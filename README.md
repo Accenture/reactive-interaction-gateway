@@ -1,6 +1,6 @@
 # RIG - Reactive Interaction Gateway
 
-_The missing link between back-end and front-end -- stop polling and go real-time!_
+_The missing link between backend and frontend -- stop polling and go real-time!_
 
 [![Build Status](https://travis-ci.org/Accenture/reactive-interaction-gateway.svg?branch=master)](https://travis-ci.org/Accenture/reactive-interaction-gateway)
 
@@ -12,11 +12,13 @@ In short: handling asynchronous events.
 
 Slightly longer:
 
-You want UI updates without delay, "real time". However, handling connections to thousands of front-end instances concurrently is not only hard to implement in a scalable way---it also makes it very hard (impossible?) to upgrade your service without losing those connections. And in a microservice environment, which service should manage those connections?
+You want UI updates without delay, "real time". However, handling connections to thousands of frontend instances concurrently is not only hard to implement in a scalable way – it also makes it very hard (impossible?) to upgrade your service without losing those connections. And in a microservice environment, which service should manage those connections?
 
-Instead, let RIG handle those connections for you. RIG is designed for scalability and allows you to concentrate on the actual business logic. Back-end (micro)services no longer have to care about connection state, which means they can be stateless, making it very easy to roll out updates to them. Sending notifications to all online devices of a certain user becomes as easy as POSTing a message to an HTTP endpoint.
+Instead, let the Reactive Interaction Gateway (RIG) handle those connections for you. RIG is designed for scalability and allows you to focus on more important things. Backend (micro)services no longer have to care about connection state, which allows them to be stateless. Having stateless services enables many things, including DevOps practices, rolling updates and auto-scaling. RIG is built for consuming events from message brokers like Kafka and Kinesis, but it also supports submitting events using HTTP POST, which is great for testing and low-traffic scenarios.
 
-Additionally, RIG comes with a basic API gateway implementation, which allows you to communicate both ways between your microservices and your front-ends.
+Built on open standards, RIG is very easy to integrate – and easy to _replace_ – which means low-cost, low-risk adoption. Unlike other solutions, RIG does not leak into your application – no libraries or SDKs required.
+
+RIG also comes with a basic API gateway implementation, enabling effective two-way communication between your services and your frontends.
 
 ## Getting Started
 
