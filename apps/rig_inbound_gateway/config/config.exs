@@ -35,6 +35,10 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
   pubsub: [name: Rig.PubSub],
   check_origin: false
 
+config :mime, :types, %{
+  "text/event-stream" => ["event-stream"]
+}
+
 # --------------------------------------
 # API Gateway (Proxy)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -124,6 +128,12 @@ config :rig, RigInboundGatewayWeb.Presence.Channel,
 config :rig, RigInboundGatewayWeb.Presence.Controller,
   # See "User Roles"
   session_role: session_role
+
+cors = {:system, "CORS", "*"}
+
+config :rig, RigInboundGatewayWeb.V1.EventController, cors: cors
+config :rig, RigInboundGatewayWeb.V1.SubscriptionController, cors: cors
+config :rig, RigInboundGatewayWeb.V1.SSE, cors: cors
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

@@ -13,6 +13,7 @@ RIG uses environment variables for most of its configuration, listed in the foll
 Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description | Default
 -------------- | ----------- | -------
 `API_PORT` | Port at which RIG exposes internal APIs such as API Proxy management or user connections management. | 4010
+`CORS` | The "Access-Control-Allow-Origin" setting for the inbound port. It is usually a good idea to set this to your domain. | "*"
 `DISCOVERY_TYPE` | Type of discovery used in distributed mode. If not set discovery is not used. Available options: `dns`. | nil
 `DNS_NAME` | Address where RIG will do DNS discovery for Node host addresses. | "localhost"
 `HOST` | Hostname for Phoenix endpoints (HTTP communication). | "localhost"

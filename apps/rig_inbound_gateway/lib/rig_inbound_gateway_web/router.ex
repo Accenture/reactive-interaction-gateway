@@ -2,7 +2,8 @@ defmodule RigInboundGatewayWeb.Router do
   use RigInboundGatewayWeb, :router
 
   pipeline :api do
-    plug(:accepts, ["json"])
+    plug(Plug.Logger, log: :debug)
+    plug(:accepts, ~w(json event-stream))
     plug(Rig.Plug.AuthHeader)
   end
 
@@ -11,15 +12,22 @@ defmodule RigInboundGatewayWeb.Router do
 
     scope "/v1", V1 do
       scope "/connection/sse" do
+        subscription_url = "/:connection_id/subscriptions/:event_type"
+        options(subscription_url, SubscriptionController, :handle_preflight)
+        put(subscription_url, SubscriptionController, :set)
+
         get("/", SSE, :create_and_attach)
-        put("/:connection_id/subscriptions/:event_type", SubscriptionController, :set)
       end
 
       scope "/connection/ws" do
         # /connection/ws is configured in the Phoenix/Cowboy dispatch configuration
-        put("/:connection_id/subscriptions/:event_type", SubscriptionController, :set)
+
+        subscription_url = "/:connection_id/subscriptions/:event_type"
+        options(subscription_url, SubscriptionController, :handle_preflight)
+        put(subscription_url, SubscriptionController, :set)
       end
 
+      options("/events", EventController, :handle_preflight)
       post("/events", EventController, :publish)
     end
   end

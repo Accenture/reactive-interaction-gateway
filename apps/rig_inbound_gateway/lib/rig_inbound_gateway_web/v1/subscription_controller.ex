@@ -1,11 +1,26 @@
 defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   require Logger
+  use Rig.Config, [:cors]
   use RigInboundGatewayWeb, :controller
 
   alias Rig.EventHub
   alias RigAuth.Session
   alias RigAuth.AuthorizationCheck.Subscription
   alias RigInboundGateway.Connection
+
+  @doc false
+  def handle_preflight(%{method: "OPTIONS"} = conn, _params) do
+    conn
+    |> with_allow_origin()
+    |> put_resp_header("access-control-allow-methods", "PUT")
+    |> put_resp_header("access-control-allow-headers", "content-type")
+    |> send_resp(:no_content, "")
+  end
+
+  defp with_allow_origin(conn) do
+    %{cors: origins} = config()
+    put_resp_header(conn, "access-control-allow-origin", origins)
+  end
 
   @doc """
   Ensures there's a subscription for the given topic.
@@ -17,10 +32,12 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   `.../subscriptions/my%2Fnon-standard%2Fevent-type`
   """
   @spec set(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
-  def set(conn, %{
+  def set(%{method: "PUT"} = conn, %{
         "connection_id" => connection_id,
         "event_type" => event_type
       }) do
+    conn = with_allow_origin(conn)
+
     %{body_params: body_params} = conn
 
     recursive? =

@@ -3,6 +3,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   Create a Server-Sent Events connection and wait for events/messages.
   """
   require Logger
+  use Rig.Config, [:cors]
 
   use RigInboundGatewayWeb, :controller
 
@@ -18,14 +19,26 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   @heartbeat_interval_ms 15_000
 
   @doc "Plug action to create a new SSE connection and wait for messages."
-  def create_and_attach(conn, _params) do
+  def create_and_attach(%{method: "GET"} = conn, _params) do
     conn
+    |> with_allow_origin()
     |> with_chunked_transfer()
+    |> do_create_and_attach()
+  end
+
+  defp do_create_and_attach(conn) do
+    conn
     |> send_chunk(Events.welcome_event())
     |> wait_for_events()
   rescue
     ex in ConnectionClosed ->
       Logger.warn(inspect(ex))
+      conn
+  end
+
+  defp with_allow_origin(conn) do
+    %{cors: origins} = config()
+    put_resp_header(conn, "access-control-allow-origin", origins)
   end
 
   defp with_chunked_transfer(conn) do
