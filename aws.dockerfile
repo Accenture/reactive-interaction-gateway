@@ -13,8 +13,8 @@ FROM elixir:1.7-alpine as elixir-build
 RUN mix local.hex --force
 RUN mix local.rebar --force
 RUN apk add --no-cache make \
-    gcc \
-    g++
+  gcc \
+  g++
 
 ENV MIX_ENV=prod
 
@@ -81,4 +81,4 @@ EXPOSE 4000
 # Internal APIs
 EXPOSE 4010
 
-CMD ["/opt/sites/rig/bin/rig", "foreground"]
+CMD trap exit INT; trap exit TERM; /opt/sites/rig/bin/rig foreground & wait

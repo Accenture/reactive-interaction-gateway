@@ -72,5 +72,4 @@ EXPOSE 4000
 # Internal APIs
 EXPOSE 4010
 
-ENTRYPOINT ["/opt/sites/rig/bin/rig"]
-CMD ["foreground"]
+CMD trap exit INT; trap exit TERM; /opt/sites/rig/bin/rig foreground & wait
