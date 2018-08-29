@@ -1,4 +1,4 @@
-defmodule RigAuth.Session.DistributedSet do
+defmodule Rig.DistributedSet do
   @moduledoc """
   Distributed grow-only set with per key time-to-live support.
   """
@@ -295,7 +295,7 @@ defmodule RigAuth.Session.DistributedSet do
     record
   end
 
-  defp pg2_group_name(name) when is_atom(name), do: {:rig, :set, name}
+  defp pg2_group_name(name) when is_atom(name), do: {:distributed_set, name}
 
   defp ets_table_name(pid),
     do: "distributed_set_#{:erlang.pid_to_list(pid)}" |> String.to_atom()
@@ -304,9 +304,4 @@ defmodule RigAuth.Session.DistributedSet do
   defp serialize_datetime!(dt) do
     Timex.format!(dt, "{s-epoch}")
   end
-
-  # @spec deserialize_datetime!(String.t()) :: Timex.DateTime.t()
-  # defp deserialize_datetime!(dt) do
-  #   Timex.parse!(dt, "{s-epoch}")
-  # end
 end

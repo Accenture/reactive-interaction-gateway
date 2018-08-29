@@ -36,12 +36,25 @@ defmodule Rig.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      # Read and use application configuration from environment variables:
+      {:confex, "~> 3.3"},
+      # For providing the global Phx PubSub server:
       {:phoenix_pubsub, "~> 1.0"},
       # for Kafka, partition from MurmurHash(key):
       {:murmur, "~> 1.0"},
       {:peerage, "~> 1.0"},
       # For running external commands in Mix tasks:
-      {:porcelain, "~> 2.0"}
+      {:porcelain, "~> 2.0"},
+      # HTTP request handling (wraps Cowboy):
+      {:plug, "~> 1.4"},
+      # JSON parser, for cloud_event and event_hub:
+      {:poison, "~> 2.0 or ~> 3.0"},
+      # Apache Kafka Erlang client library:
+      {:brod, "~> 3.3"},
+      # For distributed_set:
+      {:timex, "~> 3.1.22"},
+      {:ex2ms, "~> 1.5"},
+      {:uuid, "~> 1.1"}
     ]
   end
 

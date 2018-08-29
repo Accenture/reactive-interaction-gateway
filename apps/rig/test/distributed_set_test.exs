@@ -1,9 +1,9 @@
-defmodule RigAuth.Session.DistributedSetTest do
+defmodule Rig.DistributedSetTest do
   @moduledoc false
   use ExUnit.Case, async: true
-  doctest RigAuth.Session.DistributedSet
+  doctest Rig.DistributedSet
 
-  alias RigAuth.Session.DistributedSet
+  alias Rig.DistributedSet
 
   test "starting a set with no OTP name set" do
     {:ok, pid} = DistributedSet.start_link(MySet)
