@@ -48,7 +48,9 @@ defmodule RigAuth.Mixfile do
       {:plug, "~> 1.4"},
       {:poison, "~> 2.0 or ~> 3.0"},
       {:stubr, "~> 1.5.0", only: :test},
-      {:timex, "~> 3.1.22"}
+      {:timex, "~> 3.1.22"},
+      {:ex2ms, "~> 1.5"},
+      {:uuid, "~> 1.1"}
     ]
   end
 end
