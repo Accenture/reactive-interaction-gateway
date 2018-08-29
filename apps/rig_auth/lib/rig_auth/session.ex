@@ -6,18 +6,23 @@ defmodule RigAuth.Session do
 
   alias Rig.SessionHub
   alias RigAuth.Jwt.Utils, as: Jwt
+  alias Rig.DistributedSet
 
   @type session_name_t :: String.t()
   @type validity_period_t :: pos_integer()
 
+  @blacklist_server SessionBlacklist
+
+  @doc "Disallow sessions with the given name for a specific amount of time."
   @spec blacklist(session_name_t, validity_period_t) :: nil
-  def blacklist(session_name, validity_period_h) do
-    "TODO"
+  def blacklist(session_name, validity_period_s) do
+    DistributedSet.add(@blacklist_server, session_name, validity_period_s)
   end
 
+  @doc "Check whether a session name has been disallowed."
   @spec blacklisted?(session_name_t) :: boolean
   def blacklisted?(session_name) do
-    "TODO"
+    DistributedSet.has?(@blacklist_server, session_name)
   end
 
   @spec update(Plug.Conn.t(), pid()) :: nil
