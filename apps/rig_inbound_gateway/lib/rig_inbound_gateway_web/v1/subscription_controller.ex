@@ -3,16 +3,16 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   use Rig.Config, [:cors]
   use RigInboundGatewayWeb, :controller
 
-  alias Rig.EventHub
+  alias Rig.Connection
+  alias Rig.Subscription
+  alias RigAuth.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
   alias RigAuth.Session
-  alias RigAuth.AuthorizationCheck.Subscription
-  alias RigInboundGateway.Connection
 
   @doc false
   def handle_preflight(%{method: "OPTIONS"} = conn, _params) do
     conn
     |> with_allow_origin()
-    |> put_resp_header("access-control-allow-methods", "PUT")
+    |> put_resp_header("access-control-allow-methods", "POST")
     |> put_resp_header("access-control-allow-headers", "content-type")
     |> send_resp(:no_content, "")
   end
@@ -23,47 +23,51 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   end
 
   @doc """
-  Ensures there's a subscription for the given topic.
+  Adds subscriptions to an existing connection.
 
-  If there is no such subscription yet, it will be created.
+  There may be multiple subscriptions contained in the request body. Each subscription
+  refers to a single event type and may optionally include a constraint list
+  (conjunctive normal form).
 
-  Note that if your event types happen to include slash characters, you need to escape
-  them in the URL using `%2F`. For example:
-  `.../subscriptions/my%2Fnon-standard%2Fevent-type`
+  For example, setting up a single subscription with a constraint that says "either
+  head_repo equals `octocat/Hello-World`, or `base_repo` equals `octocat/Hello-World`
+  (or both)":
+
+      {
+        "subscriptions": [
+          {
+            "eventType": "com.github.pull.create",
+            "oneOf": [
+              { "head_repo": "octocat/Hello-World" },
+              { "base_repo": "octocat/Hello-World" }
+            ]
+          }
+        ]
+      }
   """
-  @spec set(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
-  def set(%{method: "PUT"} = conn, %{
-        "connection_id" => connection_id,
-        "event_type" => event_type
-      }) do
+  @spec create_subscription(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
+  def create_subscription(
+        %{method: "POST", body_params: %{"subscriptions" => subscriptions}} = conn,
+        %{
+          "connection_id" => connection_id
+        }
+      )
+      when is_list(subscriptions) do
     conn = with_allow_origin(conn)
 
-    %{body_params: body_params} = conn
+    # TODO if bearer token, set up implicit subscriptions
 
-    recursive? =
-      case Map.get(body_params, "recursive") do
-        true -> true
-        _ -> false
-      end
-
-    with :ok <- Subscription.check_authorization(conn, event_type, recursive?),
-         {:ok, sse_pid} <- Connection.deserialize(connection_id),
-         :ok <- connection_alive!(sse_pid) do
+    with :ok <- SubscriptionAuthZ.check_authorization(conn),
+         {:ok, socket_pid} <- Connection.Codec.deserialize(connection_id),
+         :ok <- connection_alive!(socket_pid) do
       # Updating the session allows blacklisting it later on:
-      Session.update(conn, sse_pid)
+      Session.update(conn, socket_pid)
 
-      EventHub.subscribe(sse_pid, event_type, recursive?)
+      n_subscriptions =
+        create_subscriptions(socket_pid, subscriptions)
+        |> Enum.count()
 
-      Logger.debug(fn ->
-        "Subscribed #{inspect(sse_pid)} to #{event_type} (recursive=#{recursive?})"
-      end)
-
-      conn
-      |> put_status(:created)
-      |> json(%{
-        "eventType" => event_type,
-        "recursive" => recursive?
-      })
+      send_resp(conn, :created, "Subscriptions created: #{n_subscriptions}")
     else
       {:error, :not_authorized} ->
         conn |> put_status(:forbidden) |> text("Subscription denied.")
@@ -81,5 +85,27 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
   defp connection_alive!(pid) do
     if Process.alive?(pid), do: :ok, else: {:error, :process_dead}
+  end
+
+  defp create_subscriptions(socket_pid, subscriptions) do
+    log_parse_error = fn reason, params ->
+      Logger.warn(fn ->
+        params = Jason.encode!(params)
+        "Error creating subscription for #{socket_pid}: #{reason} (params: #{params})"
+      end)
+    end
+
+    subscribe = fn
+      %Subscription{} = sub ->
+        :ok = Connection.Api.register_subscription(socket_pid, sub)
+        sub
+
+      {:error, reason, params} ->
+        log_parse_error.(reason, params)
+    end
+
+    subscriptions
+    |> Enum.map(&Subscription.new/1)
+    |> Enum.map(subscribe)
   end
 end

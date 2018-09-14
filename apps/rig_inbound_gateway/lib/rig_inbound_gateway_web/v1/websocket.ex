@@ -7,8 +7,10 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   """
 
   require Logger
+
+  alias Jason
+
   alias RigInboundGateway.Events
-  alias Rig.CloudEvent
 
   @behaviour :cowboy_websocket_handler
 
@@ -73,7 +75,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
     :ok
   end
 
-  defp frame(%CloudEvent{} = cloud_event) do
-    {:text, CloudEvent.serialize(cloud_event)}
+  defp frame(%{} = cloud_event) do
+    {:text, Jason.encode!(cloud_event)}
   end
 end

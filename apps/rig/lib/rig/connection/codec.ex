@@ -1,6 +1,6 @@
-defmodule RigInboundGateway.Connection do
+defmodule Rig.Connection.Codec do
   @moduledoc """
-  Connection token for correlating subscriptions with connections.
+  Encode and decode a connection token, e.g., for correlation.
 
   TODO: sign the token - using binary_to_term without signature verification is a threat.
   """

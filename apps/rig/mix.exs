@@ -49,6 +49,10 @@ defmodule Rig.MixProject do
       {:plug, "~> 1.4"},
       # JSON parser, for cloud_event and event_hub:
       {:poison, "~> 2.0 or ~> 3.0"},
+      # JSON parser that's supposedly faster than poison:
+      {:jason, "~> 1.1"},
+      # JSON Pointer (RFC 6901) implementation for subscriptions:
+      {:odgn_json_pointer, "~> 2.3"},
       # Apache Kafka Erlang client library:
       {:brod, "~> 3.3"},
       # For distributed_set:

@@ -18,10 +18,7 @@ defmodule RigInboundGateway.ApiProxy.PresenceHandler do
 
   def start_link(opts) do
     opts = Keyword.merge([name: __MODULE__], opts)
-    GenServer.start_link(
-      Phoenix.Tracker,
-      [__MODULE__, opts, opts],
-      name: __MODULE__)
+    Phoenix.Tracker.start_link(__MODULE__, opts, opts)
   end
 
   # callbacks
@@ -31,12 +28,12 @@ defmodule RigInboundGateway.ApiProxy.PresenceHandler do
     {:ok, proxy} = Proxy.start_link()
     pubsub = Keyword.fetch!(opts, :pubsub_server)
 
-    {:ok, %{
-      pubsub_server: pubsub,
-      node_name: Phoenix.PubSub.node_name(pubsub),
-      proxy: proxy,
-      }
-    }
+    {:ok,
+     %{
+       pubsub_server: pubsub,
+       node_name: Phoenix.PubSub.node_name(pubsub),
+       proxy: proxy
+     }}
   end
 
   @doc """
@@ -52,14 +49,17 @@ defmodule RigInboundGateway.ApiProxy.PresenceHandler do
         if topic == @topic do
           state.proxy |> Proxy.handle_join_api(key, meta)
         end
+
         msg = {:join, key, meta}
         Phoenix.PubSub.direct_broadcast!(state.node_name, state.pubsub_server, topic, msg)
       end
+
       for {key, meta} <- leaves do
         msg = {:leave, key, meta}
         Phoenix.PubSub.direct_broadcast!(state.node_name, state.pubsub_server, topic, msg)
       end
     end
+
     {:ok, state}
   end
 end

@@ -7,119 +7,92 @@ defmodule Rig.CloudEvent do
   Spec: https://github.com/cloudevents/spec/blob/v0.1/spec.md
   """
 
+  @type t :: %{required(String.t()) => any}
+
   @cloud_events_version "0.1"
+  @template %{
+    "cloudEventsVersion" => @cloud_events_version,
+    "eventTime" => nil,
+    "extensions" => nil,
+    "schemaURL" => nil,
+    "contentType" => nil,
+    "data" => nil
+  }
 
-  @type t :: %__MODULE__{
-          event_type: String.t(),
-          cloud_events_version: String.t(),
-          source: String.t(),
-          event_id: String.t(),
-          event_time: nil | String.t(),
-          extensions: nil | map(),
-          schema_url: nil | String.t(),
-          content_type: nil | String.t(),
-          data: any()
-        }
+  def valid?(event), do: do_valid?(Map.merge(@template, event))
 
-  @enforce_keys [:event_type, :source, :event_id]
-  defstruct event_type: nil,
-            cloud_events_version: @cloud_events_version,
-            source: nil,
-            event_id: nil,
-            event_time: nil,
-            extensions: nil,
-            schema_url: nil,
-            content_type: nil,
-            data: nil
-
-  defimpl String.Chars do
-    def to_string(%Rig.CloudEvent{} = event) do
-      age =
-        case Timex.parse(event.event_time, "{RFC3339}") do
-          {:ok, dt} -> " created " <> Timex.from_now(dt)
-          _ -> ""
-        end
-
-      "Event type=#{event.event_type} id=#{event.event_id} source=#{event.source}#{age}"
-    end
+  defp do_valid?(%{
+         "eventType" => event_type,
+         "cloudEventsVersion" => cloud_events_version,
+         "source" => source,
+         "eventID" => event_id,
+         "eventTime" => event_time,
+         "extensions" => extensions,
+         "schemaURL" => schema_url,
+         "contentType" => content_type,
+         "data" => _data
+       })
+       when is_binary(event_type) and cloud_events_version == @cloud_events_version and
+              is_binary(source) and is_binary(event_id) and
+              (is_nil(event_time) or is_binary(event_time)) and
+              (is_nil(extensions) or is_map(extensions)) and
+              (is_nil(schema_url) or is_binary(schema_url)) and
+              (is_nil(content_type) or is_binary(content_type)) do
+    true
   end
 
-  @spec new(event_type :: String.t(), source :: String.t(), event_id :: nil | String.t()) ::
-          %__MODULE__{}
-  def new(event_type, source, event_id \\ nil) do
-    event_id = if is_nil(event_id), do: UUID.uuid4(), else: event_id
+  defp do_valid?(_), do: false
 
-    %__MODULE__{event_id: event_id, event_type: event_type, source: source}
-    |> with_current_timestamp()
+  def event_type(e), do: Map.fetch!(e, "eventType")
+  def cloud_events_version(e), do: Map.fetch!(e, "cloudEventsVersion")
+  def source(e), do: Map.fetch!(e, "source")
+  def event_id(e), do: Map.fetch!(e, "eventID")
+  def event_time(e), do: Map.get(e, "eventTime")
+  def extensions(e), do: Map.get(e, "extensions")
+  def schema_url(e), do: Map.get(e, "schemaURL")
+  def content_type(e), do: Map.get(e, "contentType")
+  def data(e), do: Map.get(e, "data")
+
+  @spec new(t) :: {:ok, t} | {:error, :parse_error}
+  def new(event) do
+    event =
+      event
+      |> Map.to_list()
+      |> Enum.filter(fn {_, v} -> not is_nil(v) end)
+      |> Enum.into(%{})
+      |> Map.put_new("eventID", UUID.uuid4())
+      |> Map.put_new("eventTime", Timex.now() |> Timex.format!("{RFC3339}"))
+
+    if valid?(event), do: {:ok, event}, else: {:error, :parse_error}
+  end
+
+  @spec new!(t) :: t
+  def new!(event) do
+    {:ok, event} = new(event)
+    event
   end
 
   @spec with_data(t(), content_type :: String.t(), data :: binary()) :: t()
-  def with_data(%__MODULE__{} = event, content_type, data) do
+  def with_data(event, content_type, data) do
     event
-    |> Map.replace!(:content_type, content_type)
-    |> Map.replace!(:data, data)
+    |> Map.put("contentType", content_type)
+    |> Map.put("data", data)
   end
 
-  @spec with_current_timestamp(event :: t()) :: t()
-  def with_current_timestamp(%__MODULE__{} = event) do
-    Map.replace!(event, :event_time, get_current_timestamp())
-  end
+  @spec with_data(t(), data :: any) :: t()
+  def with_data(event, data)
 
-  @spec get_current_timestamp() :: String.t()
-  def get_current_timestamp do
-    Timex.now() |> Timex.format!("{RFC3339}")
-  end
-
-  @spec parse(map :: %{required(String.t()) => nil | String.t()}) ::
-          {:ok, %__MODULE__{}} | {:error, String.t() | %KeyError{}}
-  def parse(%{"cloudEventsVersion" => "0.1"} = input) do
-    event = %__MODULE__{
-      cloud_events_version: "0.1",
-      event_type: Map.fetch!(input, "eventType"),
-      event_id: Map.fetch!(input, "eventID"),
-      source: Map.fetch!(input, "source"),
-      event_time: Map.get_lazy(input, "eventTime", &get_current_timestamp/0),
-      extensions: Map.get(input, "extensions"),
-      schema_url: Map.get(input, "schemaURL"),
-      content_type: Map.get(input, "contentType"),
-      data: Map.get(input, "data")
-    }
-
-    {:ok, event}
-  rescue
-    err in KeyError -> {:error, err}
-  end
-
-  def parse(_input) do
-    reason = "unsupported cloud events version"
-    hint = "try cloudEventsVersion=#{@cloud_events_version}"
-    {:error, "#{reason} (#{hint})"}
-  end
-
-  @spec to_json_map(event :: t()) :: map
-  def to_json_map(%__MODULE__{} = event) do
-    cloud_events_version = @cloud_events_version
-    ^cloud_events_version = event.cloud_events_version
-
-    [
-      {"eventType", event.event_type},
-      {"cloudEventsVersion", cloud_events_version},
-      {"source", event.source},
-      {"eventID", event.event_id},
-      {"eventTime", event.event_time},
-      {"schemaURL", event.schema_url},
-      {"contentType", event.content_type},
-      {"extensions", event.extensions},
-      {"data", event.data}
-    ]
-    |> Enum.filter(fn {_, v} -> not is_nil(v) end)
-    |> Enum.into(%{})
-  end
-
-  @spec serialize(event :: t()) :: String.t()
-  def serialize(%__MODULE__{} = event) do
+  def with_data(event, nil) do
+    # If data is nil, we need neither data nor contentType:
     event
-    |> to_json_map()
-    |> Poison.encode!()
+    |> Map.delete("contentType")
+    |> Map.delete("data")
+  end
+
+  def with_data(event, data) do
+    # If there is no content-type set, the data is added as-is:
+    event
+    |> Map.delete("contentType")
+    |> Map.put("data", data)
   end
 end

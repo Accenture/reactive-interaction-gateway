@@ -8,8 +8,9 @@ defmodule RigInboundGatewayWeb.V1.EventController do
   use RigInboundGatewayWeb, :controller
 
   alias Rig.CloudEvent
-  alias Rig.EventHub
+  alias Rig.EventFilter
   alias RigAuth.AuthorizationCheck.Submission
+  alias RigOutboundGateway
 
   @doc false
   def handle_preflight(%{method: "OPTIONS"} = conn, _params) do
@@ -29,13 +30,13 @@ defmodule RigInboundGatewayWeb.V1.EventController do
   def publish(%{method: "POST"} = conn, _params) do
     conn = with_allow_origin(conn)
 
-    with {:ok, cloud_event} <- CloudEvent.parse(conn.body_params),
+    with {:ok, cloud_event} <- CloudEvent.new(conn.body_params),
          :ok <- Submission.check_authorization(conn, cloud_event) do
-      EventHub.publish(cloud_event)
+      EventFilter.forward_event(cloud_event)
 
       conn
       |> put_status(:accepted)
-      |> json(cloud_event |> CloudEvent.to_json_map())
+      |> json(cloud_event)
     else
       {:error, :not_authorized} ->
         conn |> put_status(:forbidden) |> text("Submission denied.")

@@ -5,8 +5,8 @@ defmodule RigAuth.AuthorizationCheck.Subscription do
   use Rig.Config, :custom_validation
 
   alias Plug.Conn
-  alias RigAuth.AuthorizationCheck.Header
   alias RigAuth.AuthorizationCheck.External
+  alias RigAuth.AuthorizationCheck.Header
 
   # Confex callback
   defp validate_config!(config) do
@@ -26,9 +26,8 @@ defmodule RigAuth.AuthorizationCheck.Subscription do
     }
   end
 
-  @spec check_authorization(Conn.t(), event_type :: String.t(), recursive? :: boolean) ::
-          :ok | {:error, :not_authorized}
-  def check_authorization(conn, event_type, recursive?) do
+  @spec check_authorization(Conn.t()) :: :ok | {:error, :not_authorized}
+  def check_authorization(conn) do
     %{validation_type: validation_type} = config()
 
     case validation_type do
@@ -43,8 +42,7 @@ defmodule RigAuth.AuthorizationCheck.Subscription do
         end
 
       {:url, base_url} ->
-        params = %{event_type: event_type, recursive: recursive?}
-        External.check_or_log(base_url, conn.req_headers, params)
+        External.check_or_log(base_url, conn.req_headers, conn.body_params)
     end
   end
 end

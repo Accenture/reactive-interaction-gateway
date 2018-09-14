@@ -15,7 +15,7 @@ defmodule Rig.DistributedSet do
   @type expiration_ts :: non_neg_integer()
   @type record :: {key(), uuid(), creation_ts(), expiration_ts()}
 
-  @default_ttl_s 86400
+  @default_ttl_s 86_400
   @sync_interval_s 50
   @cleanup_interval_s 60
 

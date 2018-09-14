@@ -12,9 +12,9 @@ defmodule RigInboundGatewayWeb.Router do
 
     scope "/v1", V1 do
       scope "/connection/sse" do
-        subscription_url = "/:connection_id/subscriptions/:event_type"
+        subscription_url = "/:connection_id/subscriptions"
         options(subscription_url, SubscriptionController, :handle_preflight)
-        put(subscription_url, SubscriptionController, :set)
+        post(subscription_url, SubscriptionController, :create_subscription)
 
         get("/", SSE, :create_and_attach)
       end
@@ -22,9 +22,9 @@ defmodule RigInboundGatewayWeb.Router do
       scope "/connection/ws" do
         # /connection/ws is configured in the Phoenix/Cowboy dispatch configuration
 
-        subscription_url = "/:connection_id/subscriptions/:event_type"
+        subscription_url = "/:connection_id/subscriptions"
         options(subscription_url, SubscriptionController, :handle_preflight)
-        put(subscription_url, SubscriptionController, :set)
+        post(subscription_url, SubscriptionController, :create_subscription)
       end
 
       options("/events", EventController, :handle_preflight)

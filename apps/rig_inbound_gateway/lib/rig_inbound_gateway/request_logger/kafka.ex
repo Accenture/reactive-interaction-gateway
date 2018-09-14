@@ -78,7 +78,7 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
     :ok
   end
 
-  @spec extract_claims!(%Plug.Conn{}) :: Jwt.claim_map()
+  @spec extract_claims!(%Plug.Conn{}) :: Jwt.claims()
   defp extract_claims!(conn) do
     # we assume there is exactly one valid token:
     [token] =

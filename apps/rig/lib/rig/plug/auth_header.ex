@@ -9,7 +9,7 @@ defmodule Rig.Plug.AuthHeader do
   def init(opts), do: opts
 
   @impl Plug
-  def call(conn, opts) do
+  def call(conn, _opts) do
     auth_tokens =
       for {"authorization", val} <- conn.req_headers do
         Conn.Utils.list(val)

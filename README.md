@@ -47,7 +47,7 @@ transfer-encoding: chunked
 ...
 
 event: rig.connection.create
-data: {"source":"rig","eventType":"rig.connection.create","eventTime":"2018-08-22T10:06:04.730484+00:00","eventID":"2b0a4f05-9032-4617-8d1e-92d97fb870dd","data":"{\"connection_token\":\"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA\"}","contentType":"application/json; charset=utf-8","cloudEventsVersion":"0.1"}
+data: {"cloudEventsVersion":"0.1","source":"rig","eventType":"rig.connection.create","eventTime":"2018-08-22T10:06:04.730484+00:00","eventID":"2b0a4f05-9032-4617-8d1e-92d97fb870dd","data":{"connection_token":"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"}}
 id: 2b0a4f05-9032-4617-8d1e-92d97fb870dd
 ```
 
@@ -63,23 +63,14 @@ With the connection established, you can create _subscriptions_ - that is, you c
 
 ```bash
 $ CONN_TOKEN="g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"
-$ EVENT_TYPE="greeting"
-$ http PUT ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions/${EVENT_TYPE}"
+$ SUBSCRIPTIONS="{ "subscriptions": [ { "eventType": "greeting" } ] }"
+$ http PUT ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions" <<<"$SUBSCRIPTIONS"
 HTTP/1.1 201 Created
 content-type: application/json; charset=utf-8
 ...
-
-{
-    "connection": "alive",
-    "eventType": "greeting",
-    "recursive": false
-}
-
 ```
 
 With that you're ready to receive all "greeting" events.
-
-> If you're also interested in sub-events of `greeting`, like `greeting.create`, try adding `recursive:=true` to the request.
 
 ### 4. Create a new "greeting" event
 
@@ -93,7 +84,7 @@ RIG expects to receive [CloudEvents](https://github.com/cloudevents/spec/blob/v0
 For now, let's send a simple `greeting` event:
 
 ```bash
-$ http post :4000/_rig/v1/events cloudEventsVersion="0.1" eventType=greeting eventID=first-event source=tutorial
+$ http post :4000/_rig/v1/events cloudEventsVersion=0.1 eventType=greeting eventID=first-event source=tutorial
 HTTP/1.1 202 Accepted
 content-type: application/json; charset=utf-8
 ...
@@ -121,32 +112,22 @@ Going back to the first terminal window you should now see your greeting event :
 Simply add an event listener to your frontend:
 
 ```javascript
-const url = "http://localhost:4000/_rig/v1/connection/sse";
-const source = new EventSource(url);
+const url = "http://localhost:4000/_rig/v1/connection/sse"
+const source = new EventSource(url)
 
-source.addEventListener("open", function (e) {
-  console.log("Connection opened.")
-}, false);
+source.onopen = e => console.log("SSE connection open", e)
+source.onerror = e => console.log("SSE connection error", e)
 
-source.addEventListener("connection established", function (e) {
-  console.log("RIG is now forwarding events.")
-}, false);
+source.addEventListener("rig.connection.create", function (e) {
+  cloudEvent = JSON.parse(e.data)
+  payload = JSON.parse(cloudEvent.data)
+  connectionToken = payload["connection_token"]
+  createSubscriptions(connectionToken)
+}, false)
 
-source.addEventListener("message", function (e) {
-  console.log("Forwarded message:", e.data);
-}, false);
-
-source.addEventListener("error", function (e) {
-  if (e.readyState == EventSource.CLOSED) {
-    console.log("Connection was closed.")
-  } else {
-    console.log("Connection error:", e)
-  }
-}, false);
-
-// source.onmessage = function (e) {
-//   console.log("This would be invoked for any message type:", e.data)
-// };
+source.addEventListener("greeting", function (e) {
+  console.log("Got a greeting!")
+}, false)
 ```
 
 ## Feature Summary

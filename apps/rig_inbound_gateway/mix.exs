@@ -47,13 +47,17 @@ defmodule RigInboundGateway.Mixfile do
     [
       {:rig, in_umbrella: true},
       {:rig_auth, in_umbrella: true},
-      {:phoenix, "~> 1.3.0"},
+      {:phoenix, "1.3.0"},
       {:phoenix_pubsub, "~> 1.0"},
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 1.0.0"},
       {:bypass, "~> 0.8.1", only: :test},
+      # JSON libs:
       {:poison, "~> 2.0 or ~> 3.0"},
+      {:jason, "~> 1.1"},
+      # Date and time handling:
       {:timex, "~> 3.1.22"},
+      # Helper to make writing stubs and mocks easier:
       {:stubr, "~> 1.5.0", only: :test},
       # Elixir-compatible :ets.fun2ms/1
       {:ex2ms, "~> 1.0"},

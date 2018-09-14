@@ -19,10 +19,7 @@ defmodule RigAuth.Blacklist.PresenceHandler do
 
   def start_link(opts) do
     opts = Keyword.merge([name: __MODULE__], opts)
-    GenServer.start_link(
-      Phoenix.Tracker,
-      [__MODULE__, opts, opts],
-      name: __MODULE__)
+    Phoenix.Tracker.start_link(__MODULE__, opts, opts)
   end
 
   # callbacks
@@ -31,12 +28,13 @@ defmodule RigAuth.Blacklist.PresenceHandler do
   def init(opts) do
     {:ok, blacklist} = Blacklist.start_link()
     pubsub = Keyword.fetch!(opts, :pubsub_server)
-    {:ok, %{
-      pubsub_server: pubsub,
-      node_name: Phoenix.PubSub.node_name(pubsub),
-      blacklist: blacklist,
-      }
-    }
+
+    {:ok,
+     %{
+       pubsub_server: pubsub,
+       node_name: Phoenix.PubSub.node_name(pubsub),
+       blacklist: blacklist
+     }}
   end
 
   @doc """
@@ -54,14 +52,17 @@ defmodule RigAuth.Blacklist.PresenceHandler do
           [jti, expiry] = [key, Map.get(meta, :expiry)]
           state.blacklist |> Blacklist.add_jti(jti, expiry)
         end
+
         msg = {:join, key, meta}
         Phoenix.PubSub.direct_broadcast!(state.node_name, state.pubsub_server, topic, msg)
       end
+
       for {key, meta} <- leaves do
         msg = {:leave, key, meta}
         Phoenix.PubSub.direct_broadcast!(state.node_name, state.pubsub_server, topic, msg)
       end
     end
+
     {:ok, state}
   end
 end

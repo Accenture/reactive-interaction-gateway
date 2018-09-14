@@ -13,7 +13,8 @@ defmodule Rig.Application do
     Rig.Discovery.start()
 
     children = [
-      Spec.supervisor(Phoenix.PubSub.PG2, [Rig.PubSub, []])
+      Spec.supervisor(Phoenix.PubSub.PG2, [Rig.PubSub, []]),
+      Rig.EventFilter.Sup
     ]
 
     opts = [strategy: :one_for_one, name: Rig.Supervisor]
