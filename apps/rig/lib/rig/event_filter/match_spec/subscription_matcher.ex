@@ -1,5 +1,7 @@
-defmodule Rig.EventFilter.Server.SubscriberMatchSpec do
+defmodule Rig.EventFilter.MatchSpec.SubscriptionMatcher do
   @moduledoc false
+
+  @n_non_constraint_fields 2
 
   @type sorted_fields :: list(atom)
   @type value_func :: (atom -> String.t())
@@ -20,7 +22,7 @@ defmodule Rig.EventFilter.Server.SubscriberMatchSpec do
   def match_head(n_fields) do
     pid_field = :"$1"
     ignored_expiration_ts_field = :_
-    field_no_seq = Stream.iterate(2, &(&1 + 1))
+    field_no_seq = Stream.iterate(@n_non_constraint_fields, &(&1 + 1))
 
     ([pid_field, ignored_expiration_ts_field] ++
        (field_no_seq
@@ -34,7 +36,7 @@ defmodule Rig.EventFilter.Server.SubscriberMatchSpec do
 
   def match_conditions(fields, get_value_in_event) do
     {_, conditions} =
-      Enum.reduce(fields, {2, nil}, fn field, {idx, acc} ->
+      Enum.reduce(fields, {@n_non_constraint_fields, nil}, fn field, {idx, acc} ->
         match_field = :"$#{idx}"
 
         clause =

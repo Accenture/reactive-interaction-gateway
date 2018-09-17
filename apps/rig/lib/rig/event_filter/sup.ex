@@ -6,41 +6,60 @@ defmodule Rig.EventFilter.Sup do
   """
   require Logger
   use GenServer
+  use Rig.Config, [:extractor_config_path_or_json]
 
+  alias Rig.EventFilter.Config
   alias Rig.EventFilter.Server, as: Filter
   alias Rig.Subscription
 
   @pg2_group "#{__MODULE__}"
+
+  # ---
 
   def processes do
     :ok = :pg2.create(@pg2_group)
     :pg2.get_members(@pg2_group)
   end
 
+  # ---
+
   def start_link(opts \\ []) do
-    state = %{}
     opts = Keyword.merge([name: __MODULE__], opts)
-    GenServer.start_link(__MODULE__, state, opts)
+    GenServer.start_link(__MODULE__, :ok, opts)
   end
 
+  # ---
+
   @impl GenServer
-  def init(state) do
+  def init(:ok) do
     :ok = :pg2.create(@pg2_group)
     :ok = :pg2.join(@pg2_group, self())
+
+    state = %{extractor_map: %{}}
+    send(self(), :reload_config)
+
     {:ok, state}
   end
 
+  # ---
+
   @impl GenServer
-  def handle_call({:refresh_subscriptions, subscriptions}, {from, _}, state)
+  def handle_call(
+        {:refresh_subscriptions, subscriptions},
+        {from, _},
+        %{extractor_map: extractor_map} = state
+      )
       when is_list(subscriptions) do
     for %Subscription{event_type: event_type} = sub <- subscriptions do
-      event_type
-      |> find_or_start_filter_process()
-      |> GenServer.call({:refresh_subscription, from, sub})
+      filter_config = Config.for_event_type(extractor_map, event_type)
+      filter = find_or_start_filter_process(event_type, filter_config)
+      GenServer.call(filter, {:refresh_subscription, from, sub})
     end
 
     {:reply, :ok, state}
   end
+
+  # ---
 
   @impl GenServer
   def handle_info({:DOWN, ref, :process, object, reason}, state) do
@@ -48,20 +67,63 @@ defmodule Rig.EventFilter.Sup do
     {:noreply, state}
   end
 
-  defp find_or_start_filter_process(event_type) do
+  # ---
+
+  @impl GenServer
+  def handle_info(:reload_config, state) do
+    %{extractor_config_path_or_json: extractor_config_path_or_json} = config()
+
+    Logger.debug(fn ->
+      "Reloading extractor config from #{inspect(extractor_config_path_or_json)}"
+    end)
+
+    {:ok, extractor_map} = Config.new(extractor_config_path_or_json)
+
+    for {event_type, filter_config} <- extractor_map do
+      # The config should be checked regardless of whether the filter is alive or not:
+      :ok = if Filter.config_valid?(filter_config), do: :ok, else: :invalid_config
+
+      event_type
+      |> get_filter_pid()
+      |> reload_filter_config(filter_config)
+    end
+
+    {:noreply, %{state | extractor_map: extractor_map}}
+  rescue
+    err ->
+      Logger.error("Failed to reload extractor config: #{inspect(err)}")
+      {:noreply, state}
+  end
+
+  # ---
+
+  defp reload_filter_config(nil, _), do: nil
+
+  defp reload_filter_config(filter_pid, filter_config) do
+    send(filter_pid, {:reload_configuration, filter_config})
+  end
+
+  # ---
+
+  defp find_or_start_filter_process(event_type, filter_config) do
     event_type
-    |> Filter.process()
-    |> Process.whereis()
+    |> get_filter_pid()
     |> case do
       nil ->
-        # TODO read config from disk?
-        config = %{}
-        {:ok, pid} = Filter.start(event_type, config)
+        {:ok, pid} = Filter.start(event_type, filter_config)
         _ref = Process.monitor(pid)
         pid
 
       pid ->
         pid
     end
+  end
+
+  # ---
+
+  defp get_filter_pid(event_type) do
+    event_type
+    |> Filter.process()
+    |> Process.whereis()
   end
 end

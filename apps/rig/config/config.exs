@@ -5,6 +5,8 @@ config :rig, Rig.Kafka,
   brod_client_id: :rig_brod_client,
   enabled?: {:system, :boolean, "KAFKA_ENABLED", false}
 
+config :rig, Rig.EventFilter.Sup, extractor_config_path_or_json: {:system, "EXTRACTORS", nil}
+
 config :porcelain, driver: Porcelain.Driver.Basic
 
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

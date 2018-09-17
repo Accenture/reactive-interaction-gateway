@@ -12,12 +12,14 @@ defmodule Rig.EventFilter.Server do
   alias JSONPointer
   alias Timex
 
-  alias Rig.EventFilter.FilterConfig
-  alias Rig.EventFilter.Server.SubscriberMatchSpec
+  alias Rig.EventFilter.Config
+  alias Rig.EventFilter.MatchSpec.ConfigUpdater
+  alias Rig.EventFilter.MatchSpec.SubscriptionMatcher
   alias Rig.Subscription
 
   @default_subscription_ttl_s 60
   @cleanup_interval_ms 90_000
+  @index_field "stable_field_index"
 
   # ---
 
@@ -29,25 +31,22 @@ defmodule Rig.EventFilter.Server do
 
   @type event_type :: String.t()
 
-  @spec start(event_type, FilterConfig.t(), list) :: {:ok, pid}
+  @spec start(event_type, Config.event_type_config(), list) :: {:ok, pid}
   def start(event_type, config, opts \\ []),
     do: do_start(event_type, config, opts, &GenServer.start/3)
 
-  @spec start_link(event_type, FilterConfig.t(), list) :: {:ok, pid}
+  @spec start_link(event_type, Config.event_type_config(), list) :: {:ok, pid}
   def start_link(event_type, config, opts \\ []),
     do: do_start(event_type, config, opts, &GenServer.start_link/3)
 
   defp do_start(event_type, config, opts, start_fun) do
-    fields =
-      config
-      |> Map.keys()
-      |> Enum.sort_by(&get_in(config, [&1, :stable_field_index]))
+    true = config_valid?(config)
 
     state = %{
       event_type: event_type,
       subscription_ttl_s: opts[:subscription_ttl_s] || @default_subscription_ttl_s,
       config: config,
-      fields: fields,
+      fields: fields_from_config(config),
       debug?: opts[:debug?] || false
     }
 
@@ -63,7 +62,7 @@ defmodule Rig.EventFilter.Server do
 
     # The ETS table is owned by self and destroyed automatically when self dies.
     table_name = "subscriptions_for_#{event_type}" |> String.to_atom()
-    ets_access_type = if debug?, do: :public, else: :private
+    ets_access_type = if debug?, do: :public, else: :protected
     subscription_table = :ets.new(table_name, [:bag, ets_access_type])
 
     # Schedule periodic ETS cleanup:
@@ -104,20 +103,11 @@ defmodule Rig.EventFilter.Server do
         %{
           subscription_table: subscription_table,
           config: config,
-          fields: fields,
-          event_type: event_type
+          fields: fields
         } = state
       ) do
-    get_value_in_event = fn field ->
-      json_pointer = get_in(config, [field, :event, :json_pointer])
-
-      case JSONPointer.get(event, json_pointer) do
-        {:ok, value} -> value
-        err -> nil
-      end
-    end
-
-    match_spec = SubscriberMatchSpec.match_spec(fields, get_value_in_event)
+    get_value_in_event = get_extractor(config, event)
+    match_spec = SubscriptionMatcher.match_spec(fields, get_value_in_event)
 
     conn_pid_set =
       subscription_table
@@ -140,9 +130,73 @@ defmodule Rig.EventFilter.Server do
     {:noreply, state}
   end
 
-  #
-  # private
-  #
+  # ---
+
+  @impl GenServer
+  def handle_info(
+        {:reload_configuration, new_config},
+        %{subscription_table: subscription_table, fields: cur_fields} = state
+      ) do
+    new_fields = fields_from_config(new_config)
+
+    if config_valid?(new_config) do
+      # Any new fields are added to the table as nil (= wildcard) constraint:
+      add_wildcards_to_table(subscription_table, length(cur_fields), length(new_fields))
+      {:noreply, %{state | config: new_config, fields: new_fields}}
+    else
+      Logger.error("Not loading invalid config: #{inspect(new_config)}")
+      {:noreply, state}
+    end
+  end
+
+  # ---
+
+  def config_valid?(config) do
+    indices =
+      for {_field_name, field_config} <- config, do: Map.fetch!(field_config, @index_field)
+
+    index_set = MapSet.new(indices)
+
+    valid? =
+      length(indices) == MapSet.size(index_set) and Enum.all?(indices, &(&1 >= 0)) and
+        Enum.all?(for {_, field_config} <- config, do: field_config_valid?(field_config))
+
+    valid?
+  rescue
+    _ in KeyError -> false
+  end
+
+  defp field_config_valid?(field_config) do
+    valid_stable_field_index?(get_in(field_config, [@index_field])) and
+      valid_json_pointer?(get_in(field_config, ["event", "json_pointer"]))
+  end
+
+  defp valid_stable_field_index?(idx) when is_integer(idx) and idx >= 0, do: true
+  defp valid_stable_field_index?(_), do: false
+
+  defp valid_json_pointer?(""), do: false
+  defp valid_json_pointer?(ptr) when is_binary(ptr), do: true
+  defp valid_json_pointer?(_), do: false
+
+  # ---
+
+  defp fields_from_config(config) do
+    config
+    |> Map.keys()
+    |> Enum.sort_by(&get_in(config, [&1, @index_field]))
+  end
+
+  # ---
+
+  defp add_wildcards_to_table(table, n_cur_fields, n_new_fields)
+       when n_new_fields > n_cur_fields do
+    match_spec = ConfigUpdater.match_spec(n_cur_fields, n_new_fields)
+    :ets.select_replace(table, match_spec)
+  end
+
+  defp add_wildcards_to_table(_, _, _), do: nil
+
+  # ---
 
   defp add_to_table(table, conn_pid, expiration_ts, fields, constraints)
 
@@ -178,8 +232,7 @@ defmodule Rig.EventFilter.Server do
 
   def remove_expired_records(%{
         subscription_table: ets_table,
-        fields: fields,
-        event_type: event_type
+        fields: fields
       }) do
     now = Timex.now() |> as_epoch()
 
@@ -204,5 +257,28 @@ defmodule Rig.EventFilter.Server do
     dt
     |> Timex.format!("{s-epoch}")
     |> String.to_integer()
+  end
+
+  # ---
+
+  # Creates a closure for obtaining field values from a given event.
+  defp get_extractor(config, event) do
+    fn field ->
+      json_pointer = get_in(config, [field, "event", "json_pointer"])
+      extract_value(event, json_pointer)
+    end
+  end
+
+  # ---
+
+  defp extract_value(event, json_pointer) do
+    case JSONPointer.get(event, json_pointer) do
+      {:ok, value} ->
+        value
+
+      err ->
+        Logger.warn(fn -> "#{inspect(err)} at #{json_pointer}: #{inspect(event)}" end)
+        nil
+    end
   end
 end
