@@ -7,8 +7,8 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   use RigInboundGatewayWeb, :controller
 
+  alias Rig.EventFilter
   alias RigInboundGateway.Events
-  alias Rig.CloudEvent
   alias ServerSentEvent
 
   defmodule ConnectionClosed do
@@ -17,6 +17,10 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   # As recommended at https://html.spec.whatwg.org/multipage/server-sent-events.html#authoring-notes
   @heartbeat_interval_ms 15_000
+  @subscription_refresh_interval_ms 60_000
+  @initial_state %{
+    subscriptions: []
+  }
 
   @doc "Plug action to create a new SSE connection and wait for messages."
   def create_and_attach(%{method: "GET"} = conn, _params) do
@@ -51,29 +55,50 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     |> send_chunked(_status = 200)
   end
 
-  defp wait_for_events(conn, next_heartbeat_timeout \\ nil)
+  defp wait_for_events(conn, state \\ @initial_state, next_heartbeat_timeout \\ nil)
 
-  defp wait_for_events(conn, nil) do
+  defp wait_for_events(conn, state, nil) do
     next_heartbeat = Timex.now() |> Timex.shift(milliseconds: @heartbeat_interval_ms)
-    wait_for_events(conn, next_heartbeat)
+    wait_for_events(conn, state, next_heartbeat)
   end
 
-  defp wait_for_events(conn, next_heartbeat) do
+  defp wait_for_events(conn, state, next_heartbeat) do
     heartbeat_remaining_ms =
       next_heartbeat
       |> Timex.diff(Timex.now(), :milliseconds)
       |> max(0)
 
     receive do
-      {:rig_event, subscriber_group, cloud_event} ->
-        Logger.debug(fn ->
-          via = if is_nil(subscriber_group), do: "rig", else: inspect(subscriber_group)
-          "[SSE] #{via}: #{inspect(cloud_event)}"
-        end)
+      {:cloud_event, cloud_event} ->
+        Logger.debug(fn -> "[SSE] #{inspect(cloud_event)}" end)
 
         conn
         |> send_chunk(cloud_event)
-        |> wait_for_events(next_heartbeat)
+        |> wait_for_events(state, next_heartbeat)
+
+      {:register_subscription, subscription} ->
+        Logger.debug(fn ->
+          event_type = "eventType=#{inspect(subscription.event_type)}"
+          constraints = "constraints=#{inspect(subscription.constraints)}"
+          "[SSE] registered subscription: #{event_type} #{constraints}"
+        end)
+
+        send(self(), :refresh_subscriptions)
+        state = update_in(state.subscriptions, &[subscription | &1])
+
+        conn
+        |> send_chunk(Events.subscription_create(subscription))
+        |> wait_for_events(state, next_heartbeat)
+
+      :refresh_subscriptions ->
+        Logger.debug(fn ->
+          "[SSE] refreshing #{length(state.subscriptions)} subscriptions"
+        end)
+
+        EventFilter.refresh_subscriptions(state.subscriptions)
+
+        Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
+        wait_for_events(conn, state, next_heartbeat)
 
       {:session_killed, group} ->
         Logger.info("[SSE] session killed: #{inspect(group)}")
@@ -83,7 +108,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
         # If the connection is down, the (second) heartbeat will trigger ConnectionClosed
         conn
         |> send_chunk(:heartbeat)
-        |> wait_for_events(nil)
+        |> wait_for_events(state, nil)
     end
   end
 
@@ -91,11 +116,11 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     send_chunk(conn, %ServerSentEvent{comments: ["heartbeat"]})
   end
 
-  defp send_chunk(conn, %CloudEvent{} = cloud_event) do
+  defp send_chunk(conn, %{"eventID" => event_id, "eventType" => event_type} = cloud_event) do
     server_sent_event =
       cloud_event
-      |> CloudEvent.serialize()
-      |> ServerSentEvent.new(id: cloud_event.event_id, type: cloud_event.event_type)
+      |> Jason.encode!()
+      |> ServerSentEvent.new(id: event_id, type: event_type)
 
     send_chunk(conn, server_sent_event)
   end

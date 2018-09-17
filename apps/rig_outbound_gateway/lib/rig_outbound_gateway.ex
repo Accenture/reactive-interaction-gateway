@@ -5,8 +5,8 @@ defmodule RigOutboundGateway do
   use Rig.Config, [:message_user_field]
   require Logger
 
-  alias Rig.EventHub
   alias Rig.CloudEvent
+  alias Rig.EventFilter
 
   alias Phoenix.Channel.Server, as: PhoenixChannelServer
 
@@ -61,12 +61,12 @@ defmodule RigOutboundGateway do
   end
 
   defp maybe_publish_to_event_hub(payload) do
-    case CloudEvent.parse(payload) do
+    case CloudEvent.new(payload) do
       {:ok, cloud_event} ->
-        Logger.debug(fn -> "Publishing CloudEvent: #{inspect(cloud_event)}" end)
-        EventHub.publish(cloud_event)
+        Logger.debug(fn -> "[outbound] Forwarding: #{cloud_event}" end)
+        EventFilter.forward_event(cloud_event)
 
-      {:error, _} ->
+      {:error, :parse_error} ->
         Logger.debug(fn -> "Not a CloudEvent: #{inspect(payload)}" end)
     end
   end

@@ -6,8 +6,8 @@ defmodule RigAuth.AuthorizationCheck.Submission do
 
   alias Plug.Conn
   alias Rig.CloudEvent
-  alias RigAuth.AuthorizationCheck.Header
   alias RigAuth.AuthorizationCheck.External
+  alias RigAuth.AuthorizationCheck.Header
 
   # Confex callback
   defp validate_config!(config) do
@@ -44,8 +44,7 @@ defmodule RigAuth.AuthorizationCheck.Submission do
         end
 
       {:url, base_url} ->
-        params = Map.from_struct(cloud_event)
-        External.check_or_log(base_url, conn.req_headers, params)
+        External.check_or_log(base_url, conn.req_headers, cloud_event)
     end
   end
 end

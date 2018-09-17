@@ -9,7 +9,7 @@ defmodule RigAuth.Jwt.Utils do
   alias Plug
   alias RigAuth.Blacklist
 
-  @type claim_map :: %{required(String.t()) => String.t()}
+  @type claims :: %{required(String.t()) => String.t()}
 
   @spec valid?(String.t()) :: boolean
   def valid?(jwt) do
@@ -18,7 +18,7 @@ defmodule RigAuth.Jwt.Utils do
     |> get_error == nil
   end
 
-  @spec decode(String.t()) :: {:ok, map} | {:error, String.t()}
+  @spec decode(String.t()) :: {:ok, claims} | {:error, String.t()}
   def decode(jwt) do
     jwt
     |> validate

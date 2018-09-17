@@ -3,18 +3,31 @@ defmodule RigInboundGateway.Events do
   Utility functions used in more than one controller.
   """
   alias Rig.CloudEvent
-  alias RigInboundGateway.Connection
-
-  @json_mimetype "application/json; charset=utf-8"
+  alias Rig.Connection
+  alias Rig.Subscription
 
   @spec welcome_event() :: CloudEvent.t()
   def welcome_event do
     connection_pid = self()
-    connection_token = Connection.serialize(connection_pid)
+    connection_token = Connection.Codec.serialize(connection_pid)
     data = %{connection_token: connection_token}
-    encoded_data = data |> Poison.encode!()
 
-    CloudEvent.new("rig.connection.create", "rig")
-    |> CloudEvent.with_data(@json_mimetype, encoded_data)
+    CloudEvent.new!(%{
+      "eventType" => "rig.connection.create",
+      "source" => "rig"
+    })
+    |> CloudEvent.with_data(data)
+  end
+
+  @spec subscription_create(Subscription.t()) :: CloudEvent.t()
+  def subscription_create(%Subscription{} = subscription) do
+    CloudEvent.new!(%{
+      "eventType" => "rig.subscription.create",
+      "source" => "rig"
+    })
+    |> CloudEvent.with_data(%{
+      "eventType" => subscription.event_type,
+      "constraints" => subscription.constraints
+    })
   end
 end
