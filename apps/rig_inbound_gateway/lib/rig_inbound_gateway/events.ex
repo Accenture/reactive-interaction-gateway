@@ -25,6 +25,9 @@ defmodule RigInboundGateway.Events do
       "eventType" => "rig.subscription.create",
       "source" => "rig"
     })
-    |> CloudEvent.with_data(subscription)
+    |> CloudEvent.with_data(%{
+      "eventType" => subscription.event_type,
+      "constraints" => subscription.constraints
+    })
   end
 end

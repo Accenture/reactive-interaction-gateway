@@ -63,8 +63,8 @@ With the connection established, you can create _subscriptions_ - that is, you c
 
 ```bash
 $ CONN_TOKEN="g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"
-$ SUBSCRIPTIONS="{ "subscriptions": [ { "eventType": "greeting" } ] }"
-$ http PUT ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions" <<<"$SUBSCRIPTIONS"
+$ SUBSCRIPTIONS='{"subscriptions":[{"eventType":"greeting"}]}'
+$ http post ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions" <<<"$SUBSCRIPTIONS"
 HTTP/1.1 201 Created
 content-type: application/json; charset=utf-8
 ...
@@ -120,9 +120,14 @@ source.onerror = e => console.log("SSE connection error", e)
 
 source.addEventListener("rig.connection.create", function (e) {
   cloudEvent = JSON.parse(e.data)
-  payload = JSON.parse(cloudEvent.data)
-  connectionToken = payload["connection_token"]
+  const { connectionToken } = cloudEvent.data
   createSubscriptions(connectionToken)
+}, false)
+
+source.addEventListener("rig.subscription.create", function (e) {
+  cloudEvent = JSON.parse(e.data)
+  const { eventType } = cloudEvent.data
+  console.log(`Now subscribed to ${eventType}`)
 }, false)
 
 source.addEventListener("greeting", function (e) {
