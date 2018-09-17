@@ -20,7 +20,8 @@ config :rig, RigOutboundGateway.Kafka.Readiness,
 config :rig, RigOutboundGateway.Kafka.GroupSubscriber,
   brod_client_id: brod_client_id,
   consumer_group: {:system, "KAFKA_CONSUMER_GROUP", "rig-consumer-group"},
-  source_topics: {:system, :list, "KAFKA_SOURCE_TOPICS", ["rig"]}
+  source_topics: {:system, :list, "KAFKA_SOURCE_TOPICS", ["rig"]},
+  kafka_response_topic: {:system, "PROXY_KAFKA_RESPONSE_TOPIC", nil}
 
 config :rig, RigOutboundGateway.Kafka.SupWrapper,
   enabled?: {:system, :boolean, "KAFKA_ENABLED", false},

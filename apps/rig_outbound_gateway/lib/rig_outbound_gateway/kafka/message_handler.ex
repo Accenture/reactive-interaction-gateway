@@ -38,6 +38,36 @@ defmodule RigOutboundGateway.Kafka.MessageHandler do
     end
   end
 
+  @spec proxy_message_handler_loop(binary(), binary() | non_neg_integer(), pid(), any()) ::
+          no_return()
+  def proxy_message_handler_loop(topic, partition, group_subscriber_pid, send \\ @default_send) do
+    # common_meta = [
+    #   topic: topic,
+    #   partition: partition
+    # ]
+
+    receive do
+      msg ->
+        %{offset: offset, value: body} = Enum.into(kafka_message(msg), %{})
+        # meta = Keyword.merge(common_meta, body_raw: body, offset: offset)
+
+        parsed_body = Poison.decode!(body)
+
+        "#PID" <> id = Map.get(parsed_body, "corellation_id") # TODO fix async
+        pid =
+          id
+          |> :erlang.binary_to_list
+          |> :erlang.list_to_pid
+
+        send pid, {:ok, "Sync event acknowledged"}
+
+        ack_message(group_subscriber_pid, topic, partition, offset)
+        Logger.debug("Event acknowledged and message sent to HTTP process") # TODO
+
+        __MODULE__.proxy_message_handler_loop(topic, partition, group_subscriber_pid, send)
+    end
+  end
+
   defp ack_message(group_subscriber_pid, topic, partition, offset) do
     # Send the async ack to group subscriber (the offset will be eventually
     # committed to Kafka):

@@ -20,6 +20,29 @@
         },
         "endpoints": [
           {
+            "id": "get-myapi-publish-async",
+            "path": "/myapi/publish-async",
+            "method": "POST",
+            "type": "async",
+            "target": "kafka",
+            "not_secured": true
+          },
+          {
+            "id": "get-myapi-publish-sync",
+            "path": "/myapi/publish-sync",
+            "method": "POST",
+            "type": "sync",
+            "target": "kafka",
+            "not_secured": true
+          },
+          {
+            "id": "get-myapi-test-id",
+            "path": "/myapi/test/{id}",
+            "method": "GET",
+            "type": "http",
+            "not_secured": false
+          },
+          {
             "id": "get-myapi-detail-id",
             "path": "/myapi/detail/{id}",
             "method": "GET",

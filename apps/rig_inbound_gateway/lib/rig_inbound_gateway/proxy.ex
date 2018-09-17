@@ -21,6 +21,8 @@ defmodule RigInboundGateway.Proxy do
   @type endpoint :: %{
     optional(:not_secured) => boolean,
     optional(:transform_request_headers) => boolean,
+    optional(:type) => String.t,
+    optional(:target) => String.t,
     id: String.t,
     path: String.t,
     method: String.t,

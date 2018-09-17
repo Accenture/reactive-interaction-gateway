@@ -53,7 +53,9 @@ config :rig, RigInboundGateway.ApiProxy.Router,
   logger_modules: %{
     "console" => RigInboundGateway.RequestLogger.Console,
     "kafka" => RigInboundGateway.RequestLogger.Kafka
-  }
+  },
+  kafka_request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", nil},
+  kafka_request_timeout: {:system, :integer, "PROXY_KAFKA_REQUEST_TIMEOUT", 5_000}
 
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"}

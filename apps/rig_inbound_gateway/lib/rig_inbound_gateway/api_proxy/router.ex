@@ -15,6 +15,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   alias RigInboundGateway.ApiProxy.Serializer
   alias RigInboundGateway.RateLimit
   alias RigInboundGateway.Proxy
+  alias Rig.Kafka
 
   @typep headers :: [{String.t, String.t}]
   @typep map_string_upload :: %{required(String.t) => %Plug.Upload{}}
@@ -91,13 +92,13 @@ defmodule RigInboundGateway.ApiProxy.Router do
   @spec check_auth_and_forward_request(
     Proxy.endpoint, Proxy.api_definition, Plug.Conn.t) :: Plug.Conn.t
   defp check_auth_and_forward_request(%{"not_secured" => true} = endpoint, api, conn) do
-    transform_req_headers(endpoint, api, conn)
+    check_request_type(endpoint, api, conn)
   end
   # Skip authentication if no auth type is set
   @spec check_auth_and_forward_request(
     Proxy.endpoint, Proxy.api_definition, Plug.Conn.t) :: Plug.Conn.t
   defp check_auth_and_forward_request(endpoint, %{"auth_type" => "none"} = api, conn) do
-    transform_req_headers(endpoint, api, conn)
+    check_request_type(endpoint, api, conn)
   end
   # Authentication with JWT
   @spec check_auth_and_forward_request(
@@ -105,9 +106,45 @@ defmodule RigInboundGateway.ApiProxy.Router do
   defp check_auth_and_forward_request(%{"not_secured" => false} = endpoint, %{"auth_type" => "jwt"} = api, conn) do
     tokens = Enum.concat(Auth.pick_query_token(conn, api), Auth.pick_header_token(conn, api))
     case Auth.any_token_valid?(tokens) do
-      true -> transform_req_headers(endpoint, api, conn)
+      true -> check_request_type(endpoint, api, conn)
       false -> send_resp(conn, 401, Serializer.encode_error_message("Missing or invalid token"))
     end
+  end
+
+  defp check_request_type(%{"type" => "async", "target" => "kafka"}, _api, %{params: %{"partition_key" => partition_key,
+  "data" => data}} = conn) do
+    conf = config()
+    message_json = data |> Poison.encode!()
+    response_json = %{"msg" => "Asyc event successfully published."} |> Poison.encode!()
+
+    Kafka.produce(conf.kafka_request_topic, _partition_key = partition_key, _plaintext = message_json)
+    send_response({:ok, conn, %{body: response_json, status_code: 200, headers: [{"content-type", "application/json"}]}})
+  end
+
+  defp check_request_type(%{"type" => "sync", "target" => "kafka"}, _api, %{params: %{"partition_key" => partition_key,
+  "data" => data}} = conn) do
+    conf = config()
+    pid = self() |> Kernel.inspect
+    message_json =
+      data
+      |> Map.put("corellation_id", pid)
+      |> Poison.encode!()
+
+    Kafka.produce(conf.kafka_request_topic, _partition_key = partition_key, _plaintext = message_json)
+
+    receive do
+      {:ok, _msg} ->
+        response_json = %{"msg" => "Sync event successfully published."} |> Poison.encode!()
+        send_response({:ok, conn, %{body: response_json, status_code: 200, headers: [{"content-type", "application/json"}]}})
+    after
+      conf.kafka_request_timeout ->
+        response_json = %{"msg" => "Sync event not acknowledged."} |> Poison.encode!()
+        send_response({:ok, conn, %{body: response_json, status_code: 500, headers: [{"content-type", "application/json"}]}})
+    end
+  end
+
+  defp check_request_type(endpoint, api, conn) do
+    transform_req_headers(endpoint, api, conn)
   end
 
   # Transform request headers

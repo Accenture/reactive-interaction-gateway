@@ -48,7 +48,7 @@ defmodule RigOutboundGateway.Kafka.GroupSubscriber do
     :brod.start_link_group_subscriber(
       conf.brod_client_id,
       conf.consumer_group,
-      conf.source_topics,
+      conf.source_topics ++ [conf.kafka_response_topic],
       _group_config = [rejoin_delay_seconds: 5],
       _consumer_config = [begin_offset: :latest],
       _callback_module = __MODULE__,
@@ -69,7 +69,9 @@ defmodule RigOutboundGateway.Kafka.GroupSubscriber do
     conf = config()
     Logger.info("Starting Kafka group subscriber (config=#{inspect(conf)})")
     handlers = spawn_message_handlers(conf.brod_client_id, conf.source_topics)
-    {:ok, %{handlers: handlers}}
+    proxy_sync_handler = spawn_proxy_message_handler(conf.brod_client_id, conf.kafka_response_topic)
+    # merged_handlers = handlers ++ [sync_handler]
+    {:ok, %{handlers: Map.merge(handlers, proxy_sync_handler)}}
   end
 
   @doc """
@@ -106,6 +108,27 @@ defmodule RigOutboundGateway.Kafka.GroupSubscriber do
   end
 
   defp spawn_message_handlers(_brod_client_id, []) do
+    %{}
+  end
+
+  defp spawn_proxy_message_handler(brod_client_id, topic) do
+    {:ok, n_partitions} = :brod.get_partitions_count(brod_client_id, topic)
+    spawn_for_partition =
+      &spawn_link(MessageHandler, :proxy_message_handler_loop, [
+        topic,
+        _partition = &1,
+        _group_subscriber_pid = self()
+      ])
+
+    0..(n_partitions - 1)
+    |> Enum.reduce(%{}, fn partition, acc ->
+      handler_pid = spawn_for_partition.(partition)
+      Map.put(acc, "#{topic}-#{partition}", handler_pid)
+    end)
+    # |> Map.merge(%{})
+  end
+
+  defp spawn_proxy_message_handler(_brod_client_id, nil) do
     %{}
   end
 end
