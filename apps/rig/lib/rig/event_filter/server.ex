@@ -40,7 +40,7 @@ defmodule Rig.EventFilter.Server do
     do: do_start(event_type, config, opts, &GenServer.start_link/3)
 
   defp do_start(event_type, config, opts, start_fun) do
-    true = config_valid?(config)
+    :ok = Config.check_filter_config(config)
 
     state = %{
       event_type: event_type,
@@ -139,44 +139,17 @@ defmodule Rig.EventFilter.Server do
       ) do
     new_fields = fields_from_config(new_config)
 
-    if config_valid?(new_config) do
-      # Any new fields are added to the table as nil (= wildcard) constraint:
-      add_wildcards_to_table(subscription_table, length(cur_fields), length(new_fields))
-      {:noreply, %{state | config: new_config, fields: new_fields}}
-    else
-      Logger.error("Not loading invalid config: #{inspect(new_config)}")
-      {:noreply, state}
+    case Config.check_filter_config(new_config) do
+      :ok ->
+        # Any new fields are added to the table as nil (= wildcard) constraint:
+        add_wildcards_to_table(subscription_table, length(cur_fields), length(new_fields))
+        {:noreply, %{state | config: new_config, fields: new_fields}}
+
+      err ->
+        Logger.error("Not loading invalid config '#{inspect(new_config)}' due to #{inspect(err)}")
+        {:noreply, state}
     end
   end
-
-  # ---
-
-  def config_valid?(config) do
-    indices =
-      for {_field_name, field_config} <- config, do: Map.fetch!(field_config, @index_field)
-
-    index_set = MapSet.new(indices)
-
-    valid? =
-      length(indices) == MapSet.size(index_set) and Enum.all?(indices, &(&1 >= 0)) and
-        Enum.all?(for {_, field_config} <- config, do: field_config_valid?(field_config))
-
-    valid?
-  rescue
-    _ in KeyError -> false
-  end
-
-  defp field_config_valid?(field_config) do
-    valid_stable_field_index?(get_in(field_config, [@index_field])) and
-      valid_json_pointer?(get_in(field_config, ["event", "json_pointer"]))
-  end
-
-  defp valid_stable_field_index?(idx) when is_integer(idx) and idx >= 0, do: true
-  defp valid_stable_field_index?(_), do: false
-
-  defp valid_json_pointer?(""), do: false
-  defp valid_json_pointer?(ptr) when is_binary(ptr), do: true
-  defp valid_json_pointer?(_), do: false
 
   # ---
 
