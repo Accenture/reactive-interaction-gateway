@@ -81,7 +81,7 @@ defmodule Rig.EventFilter.Sup do
 
     for {event_type, filter_config} <- extractor_map do
       # The config should be checked regardless of whether the filter is alive or not:
-      :ok = if Filter.config_valid?(filter_config), do: :ok, else: :invalid_config
+      :ok = Config.check_filter_config(filter_config)
 
       event_type
       |> get_filter_pid()
