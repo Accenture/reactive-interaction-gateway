@@ -16,6 +16,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   alias RigInboundGateway.RateLimit
   alias RigInboundGateway.Proxy
   alias Rig.Kafka
+  alias Rig.Connection.Codec
 
   @typep headers :: [{String.t, String.t}]
   @typep map_string_upload :: %{required(String.t) => %Plug.Upload{}}
@@ -124,10 +125,10 @@ defmodule RigInboundGateway.ApiProxy.Router do
   defp check_request_type(%{"type" => "sync", "target" => "kafka"}, _api, %{params: %{"partition_key" => partition_key,
   "data" => data}} = conn) do
     conf = config()
-    pid = self() |> Kernel.inspect
+    serialized_pid = self() |> Codec.serialize()
     message_json =
       data
-      |> Map.put("corellation_id", pid)
+      |> Map.put("corellation_id", serialized_pid)
       |> Poison.encode!()
 
     Kafka.produce(conf.kafka_request_topic, _partition_key = partition_key, _plaintext = message_json)

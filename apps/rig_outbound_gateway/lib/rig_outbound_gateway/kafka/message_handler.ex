@@ -8,6 +8,7 @@ defmodule RigOutboundGateway.Kafka.MessageHandler do
   defrecord :kafka_message, extract(:kafka_message, from_lib: "brod/include/brod.hrl")
 
   alias RigOutboundGateway
+  alias Rig.Connection.Codec
 
   alias Poison.Parser, as: JsonParser
 
@@ -52,14 +53,12 @@ defmodule RigOutboundGateway.Kafka.MessageHandler do
         # meta = Keyword.merge(common_meta, body_raw: body, offset: offset)
 
         parsed_body = Poison.decode!(body)
+        IO.inspect parsed_body
 
-        "#PID" <> id = Map.get(parsed_body, "corellation_id") # TODO fix async
-        pid =
-          id
-          |> :erlang.binary_to_list
-          |> :erlang.list_to_pid
+        # "#PID" <> id = Map.get(parsed_body, "corellation_id") # TODO fix async
+        deserialized_pid = Map.get(parsed_body, "corellation_id") |> Codec.deserialize
 
-        send pid, {:ok, "Sync event acknowledged"}
+        send deserialized_pid, {:ok, "Sync event acknowledged"}
 
         ack_message(group_subscriber_pid, topic, partition, offset)
         Logger.debug("Event acknowledged and message sent to HTTP process") # TODO
