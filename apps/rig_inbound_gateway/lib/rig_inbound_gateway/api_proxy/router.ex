@@ -116,7 +116,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   "data" => data}} = conn) do
     conf = config()
     message_json = data |> Poison.encode!()
-    response_json = %{"msg" => "Asyc event successfully published."} |> Poison.encode!()
+    response_json = %{"msg" => "Async event successfully published."} |> Poison.encode!()
 
     Kafka.produce(conf.kafka_request_topic, _partition_key = partition_key, _plaintext = message_json)
     send_response({:ok, conn, %{body: response_json, status_code: 200, headers: [{"content-type", "application/json"}]}})
@@ -128,7 +128,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
     serialized_pid = self() |> Codec.serialize()
     message_json =
       data
-      |> Map.put("corellation_id", serialized_pid)
+      |> Map.put("correlation_id", serialized_pid)
       |> Poison.encode!()
 
     Kafka.produce(conf.kafka_request_topic, _partition_key = partition_key, _plaintext = message_json)

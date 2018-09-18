@@ -139,7 +139,7 @@ defmodule RigOutboundGateway.Kafka.Sup do
     hosts
     |> Enum.map(fn broker ->
       [host, port] = String.split(broker, ":")
-      {String.to_atom(host), String.to_integer(port)}
+      {host, String.to_integer(port)}
     end)
   end
 

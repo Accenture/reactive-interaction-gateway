@@ -42,27 +42,20 @@ defmodule RigOutboundGateway.Kafka.MessageHandler do
   @spec proxy_message_handler_loop(binary(), binary() | non_neg_integer(), pid(), any()) ::
           no_return()
   def proxy_message_handler_loop(topic, partition, group_subscriber_pid, send \\ @default_send) do
-    # common_meta = [
-    #   topic: topic,
-    #   partition: partition
-    # ]
-
     receive do
       msg ->
         %{offset: offset, value: body} = Enum.into(kafka_message(msg), %{})
-        # meta = Keyword.merge(common_meta, body_raw: body, offset: offset)
-
         parsed_body = Poison.decode!(body)
-        IO.inspect parsed_body
 
-        # "#PID" <> id = Map.get(parsed_body, "corellation_id") # TODO fix async
-        deserialized_pid = Map.get(parsed_body, "corellation_id") |> Codec.deserialize
-
-        send deserialized_pid, {:ok, "Sync event acknowledged"}
+        case Map.get(parsed_body, "correlation_id") do
+          nil -> Logger.warn("Correlation ID not present in event, can't send message to HTTP process.")
+          correlation_id ->
+            {:ok, deserialized_pid} = correlation_id |> Codec.deserialize
+            send deserialized_pid, {:ok, "Sync event acknowledged"}
+            Logger.debug("Event acknowledged and message sent to HTTP process")
+        end
 
         ack_message(group_subscriber_pid, topic, partition, offset)
-        Logger.debug("Event acknowledged and message sent to HTTP process") # TODO
-
         __MODULE__.proxy_message_handler_loop(topic, partition, group_subscriber_pid, send)
     end
   end
