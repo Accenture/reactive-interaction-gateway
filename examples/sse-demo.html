@@ -66,17 +66,14 @@
 
     function createSubscription(connectionToken) {
       const eventType = "greeting"
-      return fetch(`${baseUrl}/connection/sse/${connectionToken}/subscriptions/${eventType}`, {
-          method: "PUT",
+      return fetch(`${baseUrl}/connection/sse/${connectionToken}/subscriptions`, {
+          method: "POST",
           mode: "cors",
           headers: {
             "Content-Type": "application/json; charset=utf-8"
           },
-          body: JSON.stringify({
-            recursive: true
-          })
+          body: JSON.stringify({"subscriptions":[{"eventType": eventType}]})
         })
-        .then(response => response.json())
         .then(json => {
           console.log("Subscription created:", json)
           return json
@@ -94,7 +91,7 @@
 
     source.addEventListener("rig.connection.create", function (e) {
       cloudEvent = JSON.parse(e.data)
-      payload = JSON.parse(cloudEvent.data)
+      payload = cloudEvent.data
       connectionToken = payload["connection_token"]
       createSubscription(connectionToken)
     }, false);
