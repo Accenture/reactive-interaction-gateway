@@ -48,7 +48,7 @@ defmodule RigOutboundGateway.Kafka.GroupSubscriber do
     :brod.start_link_group_subscriber(
       conf.brod_client_id,
       conf.consumer_group,
-      conf.source_topics ++ [conf.kafka_response_topic],
+      conf.source_topics ++ [conf.kafka_response_topic] |> Enum.reject(&is_nil/1),
       _group_config = [rejoin_delay_seconds: 5],
       _consumer_config = [begin_offset: :latest],
       _callback_module = __MODULE__,
