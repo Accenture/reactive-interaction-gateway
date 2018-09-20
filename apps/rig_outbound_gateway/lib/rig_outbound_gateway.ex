@@ -38,21 +38,21 @@ defmodule RigOutboundGateway do
         channel_name \\ &RigInboundGatewayWeb.Presence.Channel.user_channel_name/1,
         broadcast \\ &PhoenixChannelServer.broadcast/4
       ) do
-    user_id = Map.fetch!(payload, config().message_user_field)
-    channel_topic = channel_name.(user_id)
-    event = "message"
-    broadcast.(@pubsub_server, channel_topic, event, payload)
+    # user_id = Map.fetch!(payload, config().message_user_field)
+    # channel_topic = channel_name.(user_id)
+    # event = "message"
+    # broadcast.(@pubsub_server, channel_topic, event, payload)
 
     # TODO this is to replace the phoenix-pubsub broadcast:
     maybe_publish_to_event_hub(payload)
 
-    Logger.debug(fn ->
-      meta =
-        [user_id: user_id, channel: channel_topic, body_raw: inspect(payload)]
-        |> RigOutboundGateway.Logger.trunc_body()
+    # Logger.debug(fn ->
+    #   meta =
+    #     [user_id: user_id, channel: channel_topic, body_raw: inspect(payload)]
+    #     |> RigOutboundGateway.Logger.trunc_body()
 
-      {"Forwarded outbound message", meta}
-    end)
+    #   {"Forwarded outbound message", meta}
+    # end)
 
     :ok
   rescue
@@ -63,7 +63,7 @@ defmodule RigOutboundGateway do
   defp maybe_publish_to_event_hub(payload) do
     case CloudEvent.new(payload) do
       {:ok, cloud_event} ->
-        Logger.debug(fn -> "[outbound] Forwarding: #{cloud_event}" end)
+        Logger.debug(fn -> "[outbound] Forwarding: #{inspect cloud_event}" end)
         EventFilter.forward_event(cloud_event)
 
       {:error, :parse_error} ->
