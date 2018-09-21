@@ -29,7 +29,7 @@
       eventList.appendChild(li)
     }
 
-    const baseUrl = "http://localhost:4000/_rig/v1"
+    const baseUrl = "http://localhost:6060/_rig/v1"
 
     function randomString() {
       return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
@@ -65,7 +65,7 @@
     }
 
     function createSubscription(connectionToken) {
-      const eventType = "greeting"
+      const eventType = "com.red.flight.information.service.updated"
       return fetch(`${baseUrl}/connection/sse/${connectionToken}/subscriptions`, {
           method: "POST",
           mode: "cors",
@@ -96,7 +96,7 @@
       createSubscription(connectionToken)
     }, false);
 
-    source.addEventListener("greeting", function (e) {
+    source.addEventListener("com.red.flight.information.service.updated", function (e) {
       cloudEvent = JSON.parse(e.data)
       addEvent(cloudEvent)
     })
