@@ -35,36 +35,8 @@ defmodule Rig.EventFilter.Config do
   # ---
 
   @spec new(String.t() | nil) :: {:ok, t} | :error
-
   def new(nil), do: {:ok, %{}}
-
-  def new(path_or_encoded) do
-    with {:error, reason1} <- from_file(path_or_encoded),
-         {:error, reason2} <- from_encoded(path_or_encoded) do
-      {:error, :syntax_error, [reason1, reason2]}
-    else
-      {:ok, config} -> {:ok, config}
-    end
-  end
-
-  # ---
-
-  @spec from_file(String.t()) :: {:ok, t} | {:error, reason :: any}
-  defp from_file(path) do
-    with {:ok, content} <- File.read(path),
-         {:ok, config} <- from_encoded(content) do
-      {:ok, config}
-    else
-      {:error, _reason} = err -> err
-    end
-  end
-
-  # ---
-
-  @spec from_encoded(String.t()) :: {:ok, t} | {:error, Jason.DecodeError.t()}
-  defp from_encoded(encoded) do
-    Jason.decode(encoded)
-  end
+  def new(path_or_encoded), do: Rig.Config.parse_json_env(path_or_encoded)
 
   # ---
 
