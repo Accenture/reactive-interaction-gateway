@@ -23,12 +23,11 @@ defmodule RigOutboundGateway.Firehose.MessageHandler do
       msg ->
         %{offset: offset, value: body} = Enum.into(kafka_message(msg), %{})
 
-        parsed_body = Poison.encode!(body)
-        Enum.each(targets, fn(target) -> HTTPoison.post(target, parsed_body) end)
-        Logger.debug("Event sent to HTTP endpoint")
+        Enum.each(targets, fn(target) -> HTTPoison.post(target, body) end)
+        Logger.debug("Event sent to HTTP endpoint(s)")
 
         ack_message(group_subscriber_pid, topic, partition, offset)
-        __MODULE__.message_handler_loop(topic, partition, group_subscriber_pid, send)
+        __MODULE__.message_handler_loop(topic, partition, group_subscriber_pid, targets, send)
     end
   end
 

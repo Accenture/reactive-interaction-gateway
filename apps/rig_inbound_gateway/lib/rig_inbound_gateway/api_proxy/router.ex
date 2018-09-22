@@ -144,6 +144,18 @@ defmodule RigInboundGateway.ApiProxy.Router do
     end
   end
 
+  defp check_request_type(%{"type" => "async", "target" => "kinesis"}, _api, conn) do
+    Logger.warn("Functionality for Kinesis not implemented.")
+    response_json = %{"msg" => "Functionality for Kinesis not implemented."} |> Poison.encode!()
+    send_response({:ok, conn, %{body: response_json, status_code: 500, headers: [{"content-type", "application/json"}]}})
+  end
+
+  defp check_request_type(%{"type" => "sync", "target" => "kinesis"}, _api, conn) do
+    Logger.warn("Functionality for Kinesis not implemented.")
+    response_json = %{"msg" => "Functionality for Kinesis not implemented."} |> Poison.encode!()
+    send_response({:ok, conn, %{body: response_json, status_code: 500, headers: [{"content-type", "application/json"}]}})
+  end
+
   defp check_request_type(endpoint, api, conn) do
     transform_req_headers(endpoint, api, conn)
   end

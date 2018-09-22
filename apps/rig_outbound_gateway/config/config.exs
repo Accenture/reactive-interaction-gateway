@@ -50,7 +50,7 @@ config :rig, RigOutboundGateway.Kafka.Sup,
     brod_client_id: firehose_brod_client_id,
     consumer_group: {:system, "FIREHOSE_KAFKA_CONSUMER_GROUP", "rig-firehose-consumer-group"},
     source_topics: {:system, :list, "FIREHOSE_KAFKA_SOURCE_TOPICS", ["rig-firehose"]},
-    targets: {:system, :list, "FIREHOSE_KAFKA_HTTP_TARGETS", ["http://localhost:2020/todo"]}
+    targets: {:system, :list, "FIREHOSE_KAFKA_HTTP_TARGETS", ["http://localhost:4040/todo"]}
 
   config :rig, RigOutboundGateway.Firehose.SupWrapper,
     enabled?: {:system, :boolean, "KAFKA_ENABLED", false},
