@@ -19,13 +19,22 @@ metadata = [
   :topic,
   :partition,
   :offset,
+  #
+  :application,
+  :module,
+  :function,
+  :file,
+  :line,
+  :pid,
+  :registered_name,
+  :crash_reason
 ]
+
 config :logger, :console,
   format: "\n$time [$level] $levelpad$message\n$metadata\n",
   metadata: metadata |> Enum.uniq()
 
-config :rig, Rig.Application,
-  log_level: {:system, :atom, "LOG_LEVEL", :debug}
+config :rig, Rig.Application, log_level: {:system, :atom, "LOG_LEVEL", :debug}
 
 # --------------------------------------
 # User Roles
@@ -42,8 +51,7 @@ session_role = {:system, "SESSION_ROLE", "user"}
 # messages, you could use start RIG with `PRIVILEGED_ROLES=admin,support`.
 privileged_roles = {:system, :list, "PRIVILEGED_ROLES", []}
 
-config :rig, RigApi.ChannelsController,
-  session_role: session_role
+config :rig, RigApi.ChannelsController, session_role: session_role
 
 # --------------------------------------
 # Authorization Token (JWT)
