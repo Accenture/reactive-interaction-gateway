@@ -21,6 +21,7 @@ defmodule Rig.CloudEvent do
 
   def valid?(event), do: do_valid?(Map.merge(@template, event))
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp do_valid?(%{
          "eventType" => event_type,
          "cloudEventsVersion" => cloud_events_version,
