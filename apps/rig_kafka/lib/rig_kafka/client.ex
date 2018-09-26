@@ -29,15 +29,16 @@ defmodule RigKafka.Client do
     end
 
     @impl :brod_group_subscriber
-    def handle_message(_topic, _partition, message, %{callback: callback} = state) do
-      %{offset: _offset, value: body} = Enum.into(kafka_message(message), %{})
+    def handle_message(topic, partition, message, %{callback: callback} = state) do
+      %{offset: offset, value: body} = Enum.into(kafka_message(message), %{})
 
       case callback.(body) do
         :ok ->
           {:ok, :ack, state}
 
         err ->
-          Logger.error("Callback failed to handle message: #{inspect(err)}")
+          info = %{error: err, topic: topic, partition: partition, offset: offset}
+          Logger.error("Callback failed to handle message: #{inspect(info)}")
           {:ok, :ack_no_commit, state}
       end
     end
@@ -119,15 +120,39 @@ defmodule RigKafka.Client do
       |> add_ssl_conf(ssl)
       |> add_sasl_conf(sasl)
 
-    Logger.debug(fn -> format_client_conf(client_id, brod_client_conf) end)
-
     :brod_client.start_link(brokers, client_id, brod_client_conf)
   end
 
   # ---
 
   defp add_ssl_conf(brod_client_conf, nil), do: brod_client_conf
-  defp add_ssl_conf(brod_client_conf, ssl), do: Keyword.put(brod_client_conf, :ssl, ssl)
+
+  defp add_ssl_conf(brod_client_conf, config) do
+    opts = [
+      keyfile: config.path_to_key_pem |> resolve_path,
+      certfile: config.path_to_cert_pem |> resolve_path,
+      cacertfile: config.path_to_ca_cert_pem |> resolve_path
+    ]
+
+    # The Erlang SSL module requires the password to be passed as a charlist:
+    opts =
+      case config.key_password do
+        "" -> opts
+        pass -> Keyword.put(opts, :password, String.to_charlist(pass))
+      end
+
+    Keyword.put(brod_client_conf, :ssl, opts)
+  end
+
+  # ---
+
+  @spec resolve_path(path :: String.t()) :: String.t()
+  defp resolve_path(path) do
+    working_dir = :code.priv_dir(:rig_outbound_gateway)
+    expanded_path = Path.expand(path, working_dir)
+    true = File.regular?(expanded_path) || "#{path} is not a file"
+    expanded_path
+  end
 
   # ---
 
@@ -139,26 +164,6 @@ defmodule RigKafka.Client do
     end
 
     Keyword.put(brod_client_conf, :sasl, sasl)
-  end
-
-  # ---
-
-  defp format_client_conf(client_id, client_conf) do
-    redact_password = fn
-      ssl when is_list(ssl) ->
-        case ssl[:password] do
-          nil -> ssl
-          _ -> Keyword.put(ssl, :password, "<REDACTED>")
-        end
-
-      no_ssl_config ->
-        no_ssl_config
-    end
-
-    "Setting up Kafka connection #{client_id}:\n" <>
-      (client_conf
-       |> Keyword.update(:ssl, nil, redact_password)
-       |> inspect(pretty: true))
   end
 
   # ---

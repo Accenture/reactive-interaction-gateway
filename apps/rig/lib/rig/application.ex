@@ -14,7 +14,9 @@ defmodule Rig.Application do
 
     children = [
       Spec.supervisor(Phoenix.PubSub.PG2, [Rig.PubSub, []]),
-      Rig.EventFilter.Sup
+      Rig.EventFilter.Sup,
+      Rig.EventStream.KafkaToFilter,
+      Rig.EventStream.KafkaToHttp
     ]
 
     opts = [strategy: :one_for_one, name: Rig.Supervisor]

@@ -41,6 +41,8 @@ defmodule RigKafka.Config do
             ssl: nil,
             sasl: nil
 
+  # ---
+
   def new(config) do
     uuid = UUID.uuid4()
 
@@ -54,6 +56,8 @@ defmodule RigKafka.Config do
       sasl: Map.get(config, :sasl)
     }
   end
+
+  # ---
 
   def valid?(%{brokers: brokers}) do
     # TODO we could do a lot more here

@@ -10,13 +10,13 @@ defmodule RigInboundGateway.ApiProxy.Router do
   use Plug.Router
   require Logger
 
-  alias RigInboundGateway.ApiProxy.Base
-  alias RigInboundGateway.ApiProxy.Auth
-  alias RigInboundGateway.ApiProxy.Serializer
-  alias RigInboundGateway.RateLimit
-  alias RigInboundGateway.Proxy
-  alias Rig.Kafka
   alias Rig.Connection.Codec
+  alias RigInboundGateway.ApiProxy.Auth
+  alias RigInboundGateway.ApiProxy.Base
+  alias RigInboundGateway.ApiProxy.BrokerBackend.Kafka
+  alias RigInboundGateway.ApiProxy.Serializer
+  alias RigInboundGateway.Proxy
+  alias RigInboundGateway.RateLimit
 
   @typep headers :: [{String.t(), String.t()}]
   @typep map_string_upload :: %{required(String.t()) => %Plug.Upload{}}
@@ -139,7 +139,6 @@ defmodule RigInboundGateway.ApiProxy.Router do
          _api,
          %{params: %{"partition_key" => partition_key, "data" => data}} = conn
        ) do
-    conf = config()
     message_json = data |> Poison.encode!()
 
     response_json =
@@ -147,7 +146,6 @@ defmodule RigInboundGateway.ApiProxy.Router do
       |> Poison.encode!()
 
     Kafka.produce(
-      conf.kafka_request_topic,
       _partition_key = partition_key,
       _plaintext = message_json
     )
@@ -172,35 +170,20 @@ defmodule RigInboundGateway.ApiProxy.Router do
       |> Poison.encode!()
 
     Kafka.produce(
-      conf.kafka_request_topic,
       _partition_key = partition_key,
       _plaintext = message_json
     )
 
     receive do
-      {:ok, _msg} ->
-        response_json = %{"msg" => "Sync event successfully published."} |> Poison.encode!()
-
-        send_response(
-          {:ok, conn,
-           %{
-             body: response_json,
-             status_code: 200,
-             headers: [{"content-type", "application/json"}]
-           }}
-        )
+      {:response_received, response} ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(:ok, response)
     after
       conf.kafka_request_timeout ->
-        response_json = %{"msg" => "Sync event not acknowledged."} |> Poison.encode!()
-
-        send_response(
-          {:ok, conn,
-           %{
-             body: response_json,
-             status_code: 500,
-             headers: [{"content-type", "application/json"}]
-           }}
-        )
+        conn
+        |> put_status(:gateway_timeout)
+        |> send_resp()
     end
   end
 

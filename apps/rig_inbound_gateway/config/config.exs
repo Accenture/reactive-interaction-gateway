@@ -54,10 +54,26 @@ config :rig, RigInboundGateway.ApiProxy.Router,
     "console" => RigInboundGateway.RequestLogger.Console,
     "kafka" => RigInboundGateway.RequestLogger.Kafka
   },
-  kafka_request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", nil},
   kafka_request_timeout: {:system, :integer, "PROXY_KAFKA_REQUEST_TIMEOUT", 5_000},
   kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},
   kinesis_request_region: {:system, "PROXY_KINESIS_REQUEST_REGION", "eu-west-1"}
+
+config :rig, RigInboundGateway.ApiProxy.BrokerBackend.Kafka,
+  # The list of brokers, given by a comma-separated list of host:port items:
+  brokers: {:system, :list, "KAFKA_BROKERS", []},
+  # The list of topics to consume messages from:
+  consumer_topics: {:system, :list, "PROXY_KAFKA_RESPONSE_TOPICS", ["rig-proxy-response"]},
+  # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored; otherwise, they're required.
+  ssl_enabled?: {:system, :boolean, "KAFKA_SSL_ENABLED", false},
+  # If use_enabled?, the following paths are expected (relative to the `priv` directory):
+  ssl_ca_certfile: {:system, "KAFKA_SSL_CA_CERTFILE", "ca.crt.pem"},
+  ssl_certfile: {:system, "KAFKA_SSL_CERTFILE", "client.crt.pem"},
+  ssl_keyfile: {:system, "KAFKA_SSL_KEYFILE", "client.key.pem"},
+  # In case the private key is password protected:
+  ssl_keyfile_pass: {:system, "KAFKA_SSL_KEYFILE_PASS", ""},
+  # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
+  sasl: {:system, "KAFKA_SASL", nil},
+  request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", nil}
 
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"}

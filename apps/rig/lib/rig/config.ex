@@ -117,4 +117,15 @@ defmodule Rig.Config do
   defp from_encoded(encoded) do
     Jason.decode(encoded)
   end
+
+  # ---
+
+  @spec parse_socket_list([String.t(), ...]) :: [{String.t(), pos_integer()}, ...]
+  def parse_socket_list(socket_list) do
+    socket_list
+    |> Enum.map(fn broker ->
+      [host, port] = for part <- String.split(broker, ":"), do: String.trim(part)
+      {host, String.to_integer(port)}
+    end)
+  end
 end

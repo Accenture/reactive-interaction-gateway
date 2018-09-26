@@ -5,13 +5,11 @@ defmodule RigOutboundGateway.Application do
 
   alias RigOutboundGateway.Kafka
   alias RigOutboundGateway.Kinesis
-  alias RigOutboundGateway.Firehose
 
   def start(_type, _args) do
     children = [
       Kafka.SupWrapper,
-      Kinesis.JavaClient,
-      Firehose.SupWrapper
+      Kinesis.JavaClient
     ]
 
     opts = [strategy: :one_for_one, name: RigOutboundGateway.Supervisor]
