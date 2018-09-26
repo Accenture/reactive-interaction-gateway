@@ -10,8 +10,8 @@ defmodule RigInboundGateway.ApiProxy.Router do
   use Plug.Router
   require Logger
 
-  alias RigInboundGateway.ApiProxy.Base
   alias RigInboundGateway.ApiProxy.Auth
+  alias RigInboundGateway.ApiProxy.Base
   alias RigInboundGateway.ApiProxy.Serializer
   alias RigInboundGateway.RateLimit
   alias RigInboundGateway.Proxy
@@ -132,7 +132,25 @@ defmodule RigInboundGateway.ApiProxy.Router do
   end
 
   # ---
+
+  defp handle_preflight(conn) do
+    conn
+    |> put_resp_header("access-control-allow-origin", config().cors)
+    |> put_resp_header("access-control-allow-methods", "POST")
+    |> put_resp_header("access-control-allow-headers", "content-type")
+    |> send_resp(:no_content, "")
+  end
+
+  # ---
   # Checking for request type, request can be either published to Kafka/Kinesis or forwarded as an HTTP to service
+
+  defp check_request_type(
+         %{"target" => "kafka", "method" => "OPTIONS"},
+         _api,
+         conn
+       ) do
+    handle_preflight(conn)
+  end
 
   defp check_request_type(
          %{"type" => "async", "target" => "kafka"},
@@ -140,22 +158,19 @@ defmodule RigInboundGateway.ApiProxy.Router do
          %{params: %{"partition_key" => partition_key, "data" => data}} = conn
        ) do
     conf = config()
-    message_json = data |> Poison.encode!()
-
-    response_json =
-      %{"msg" => "Async event successfully published.", "data" => message_json}
-      |> Poison.encode!()
+    data_json = data |> Poison.encode!()
 
     Kafka.produce(
       conf.kafka_request_topic,
       _partition_key = partition_key,
-      _plaintext = message_json
+      _plaintext = data_json
     )
 
-    send_response(
-      {:ok, conn,
-       %{body: response_json, status_code: 200, headers: [{"content-type", "application/json"}]}}
-    )
+    conn
+    |> put_resp_header("access-control-allow-origin", conf.cors)
+    |> put_resp_header("content-type", "application/json")
+    |> put_status(:accepted)
+    |> send_resp(200, data_json)
   end
 
   defp check_request_type(
@@ -166,7 +181,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
     conf = config()
     serialized_pid = self() |> Codec.serialize()
 
-    message_json =
+    data_json =
       data
       |> Map.put("correlation_id", serialized_pid)
       |> Poison.encode!()
@@ -174,34 +189,36 @@ defmodule RigInboundGateway.ApiProxy.Router do
     Kafka.produce(
       conf.kafka_request_topic,
       _partition_key = partition_key,
-      _plaintext = message_json
+      _plaintext = data_json
     )
 
     receive do
       {:ok, _msg} ->
         response_json = %{"msg" => "Sync event successfully published."} |> Poison.encode!()
 
-        send_response(
-          {:ok, conn,
-           %{
-             body: response_json,
-             status_code: 200,
-             headers: [{"content-type", "application/json"}]
-           }}
-        )
+        conn
+        |> put_resp_header("access-control-allow-origin", conf.cors)
+        |> put_resp_header("content-type", "application/json")
+        |> put_status(:accepted)
+        |> send_resp(200, response_json)
     after
       conf.kafka_request_timeout ->
         response_json = %{"msg" => "Sync event not acknowledged."} |> Poison.encode!()
 
-        send_response(
-          {:ok, conn,
-           %{
-             body: response_json,
-             status_code: 500,
-             headers: [{"content-type", "application/json"}]
-           }}
-        )
+        conn
+        |> put_resp_header("access-control-allow-origin", conf.cors)
+        |> put_resp_header("content-type", "application/json")
+        |> put_status(:accepted)
+        |> send_resp(500, response_json)
     end
+  end
+
+  defp check_request_type(
+         %{"target" => "kinesis", "method" => "OPTIONS"},
+         _api,
+         conn
+       ) do
+    handle_preflight(conn)
   end
 
   defp check_request_type(
@@ -210,23 +227,20 @@ defmodule RigInboundGateway.ApiProxy.Router do
          %{params: %{"partition_key" => partition_key, "data" => data}} = conn
        ) do
     conf = config()
-    message_json = data |> Poison.encode!()
-
-    response_json =
-      %{"msg" => "Async event successfully published.", "data" => message_json}
-      |> Poison.encode!()
+    data_json = data |> Poison.encode!()
 
     ExAws.Kinesis.put_record(
       _stream_name = conf.kinesis_request_stream,
       _partition_key = partition_key,
-      _data = message_json
+      _data = data_json
     )
     |> ExAws.request(region: conf.kinesis_request_region)
 
-    send_response(
-      {:ok, conn,
-       %{body: response_json, status_code: 200, headers: [{"content-type", "application/json"}]}}
-    )
+    conn
+    |> put_resp_header("access-control-allow-origin", conf.cors)
+    |> put_resp_header("content-type", "application/json")
+    |> put_status(:accepted)
+    |> send_resp(200, data_json)
   end
 
   defp check_request_type(%{"type" => "sync", "target" => "kinesis"}, _api, conn) do

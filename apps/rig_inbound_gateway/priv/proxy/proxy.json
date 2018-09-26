@@ -20,15 +20,33 @@
             "not_secured": true
           },
           {
+            "id": "options-flights",
+            "path": "/api/v1/fis/flights",
+            "method": "OPTIONS",
+            "not_secured": true
+          },
+          {
             "id": "put-flights",
             "path": "/api/v1/fis/flights",
             "method": "PUT",
             "not_secured": true
           },
           {
+            "id": "options-flights",
+            "path": "/api/v1/fis/flights",
+            "method": "OPTIONS",
+            "not_secured": true
+          },
+          {
             "id": "get-flight-id",
             "path": "/api/v1/fis/flights/{id}",
             "method": "GET",
+            "not_secured": true
+          },
+          {
+            "id": "options-flight-id",
+            "path": "/api/v1/fis/flights/{id}",
+            "method": "OPTIONS",
             "not_secured": true
           }
         ]
@@ -59,6 +77,12 @@
             "path": "/api/v1/aos/queue",
             "method": "GET",
             "not_secured": true
+          },
+          {
+            "id": "options-queue",
+            "path": "/api/v1/aos/queue",
+            "method": "OPTIONS",
+            "not_secured": true
           }
         ]
       }
@@ -88,6 +112,12 @@
             "path": "/api/v1/produce",
             "method": "POST",
             "not_secured": true
+          },
+          {
+            "id": "options-produce",
+            "path": "/api/v1/produce",
+            "method": "OPTIONS",
+            "not_secured": true
           }
         ]
       }
@@ -113,9 +143,17 @@
       "default": {
         "endpoints": [
           {
-            "id": "async-publish",
+            "id": "post-async-publish",
             "path": "/api/v1/async-publish",
             "method": "POST",
+            "type": "async",
+            "target": "kafka",
+            "not_secured": true
+          },
+          {
+            "id": "options-async-publish",
+            "path": "/api/v1/async-publish",
+            "method": "OPTIONS",
             "type": "async",
             "target": "kafka",
             "not_secured": true
