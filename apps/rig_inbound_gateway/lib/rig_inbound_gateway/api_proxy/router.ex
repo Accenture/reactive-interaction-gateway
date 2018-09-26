@@ -135,6 +135,18 @@ defmodule RigInboundGateway.ApiProxy.Router do
   # Checking for request type, request can be either published to Kafka/Kinesis or forwarded as an HTTP to service
 
   defp check_request_type(
+         %{"target" => "kafka", "method" => "OPTIONS"},
+         _api,
+         conn
+       ) do
+
+    send_response(
+      {:ok, conn,
+       %{body: %{}, status_code: 200, headers: [{"content-type", "application/json"}]}}
+    )
+  end
+
+  defp check_request_type(
          %{"type" => "async", "target" => "kafka"},
          _api,
          %{params: %{"partition_key" => partition_key, "data" => data}} = conn
