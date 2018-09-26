@@ -16,6 +16,9 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `CORS` | The "Access-Control-Allow-Origin" setting for the inbound port. It is usually a good idea to set this to your domain. | "*"
 `DISCOVERY_TYPE` | Type of discovery used in distributed mode. If not set discovery is not used. Available options: `dns`. | nil
 `DNS_NAME` | Address where RIG will do DNS discovery for Node host addresses. | "localhost"
+`FIREHOSE_KAFKA_CONSUMER_GROUP` | Consumer group name for Kafka firehose. | "rig-firehose-consumer-group"
+`FIREHOSE_KAFKA_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KAFKA_SOURCE_TOPICS | ["http://localhost:4040/todo"]
+`FIREHOSE_KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will use as a firehose consumer, delimited by comma. Events will be sent to `FIREHOSE_KAFKA_HTTP_TARGETS | ["rig-firehose"]
 `HOST` | Hostname for Phoenix endpoints (HTTP communication). | "localhost"
 `INBOUND_PORT` | Port at which RIG exposes proxy and websocket/sse communication. | 4000
 `JWT_BLACKLIST_DEFAULT_EXPIRY_HOURS` | DEPRECATED. Default expiration time in hours for blacklisted JWTs. Used if JWT doesn't have an expiration time in claims. | 1
@@ -54,6 +57,8 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `PROXY_KAFKA_RESPONSE_TOPIC` | Kafka topic for acknowlidging Kafka sync events from proxy by corellation ID | nil
 `PROXY_KAFKA_REQUEST_TIMEOUT` | Maximum timeout for proxy Kafka sync events to acknowledge corellation ID in consumer. | 5000
 `PROXY_KAFKA_REQUEST_TOPIC` | Kafka topic for publishing sync/async events from proxy. | nil
+`PROXY_KINESIS_REQUEST_REGION` | AWS region for Kinesis stream publishing events from proxy. | "eu-west-1"
+`PROXY_KINESIS_REQUEST_STREAM` | Kinesis stream for publishing sync/async events from proxy. | nil
 `RATE_LIMIT_AVG_RATE_PER_SEC` | DEPRECATED. The permitted average amount of requests per second. | 10000
 `RATE_LIMIT_BURST_SIZE` | DEPRECATED. The permitted peak amount of requests. | 5000
 `RATE_LIMIT_ENABLED` | DEPRECATED. Enables/disables rate limiting globally. | false

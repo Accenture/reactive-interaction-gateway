@@ -20,7 +20,7 @@
         },
         "endpoints": [
           {
-            "id": "get-myapi-publish-async",
+            "id": "post-myapi-publish-async",
             "path": "/myapi/publish-async",
             "method": "POST",
             "type": "async",
@@ -28,7 +28,15 @@
             "not_secured": true
           },
           {
-            "id": "get-myapi-publish-sync",
+            "id": "post-myapi-publish-async",
+            "path": "/myapi/publish-kinesis-async",
+            "method": "POST",
+            "type": "async",
+            "target": "kinesis",
+            "not_secured": true
+          },
+          {
+            "id": "post-myapi-publish-sync",
             "path": "/myapi/publish-sync",
             "method": "POST",
             "type": "sync",

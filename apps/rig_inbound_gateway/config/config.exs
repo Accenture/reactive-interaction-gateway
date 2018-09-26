@@ -55,7 +55,9 @@ config :rig, RigInboundGateway.ApiProxy.Router,
     "kafka" => RigInboundGateway.RequestLogger.Kafka
   },
   kafka_request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", nil},
-  kafka_request_timeout: {:system, :integer, "PROXY_KAFKA_REQUEST_TIMEOUT", 5_000}
+  kafka_request_timeout: {:system, :integer, "PROXY_KAFKA_REQUEST_TIMEOUT", 5_000},
+  kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},
+  kinesis_request_region: {:system, "PROXY_KINESIS_REQUEST_REGION", "eu-west-1"}
 
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"}
