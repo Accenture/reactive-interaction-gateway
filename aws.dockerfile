@@ -30,6 +30,7 @@ COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
 COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
 COPY apps/rig_api/mix.exs /opt/sites/rig/apps/rig_api/
+COPY apps/rig_kafka/mix.exs /opt/sites/rig/apps/rig_kafka/
 COPY apps/rig_auth/mix.exs /opt/sites/rig/apps/rig_auth/
 COPY apps/rig_inbound_gateway/mix.exs /opt/sites/rig/apps/rig_inbound_gateway/
 COPY apps/rig_outbound_gateway/mix.exs /opt/sites/rig/apps/rig_outbound_gateway/

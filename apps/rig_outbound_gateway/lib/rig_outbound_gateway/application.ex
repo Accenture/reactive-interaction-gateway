@@ -4,10 +4,12 @@ defmodule RigOutboundGateway.Application do
   use Application
 
   alias RigOutboundGateway.Kinesis
+  alias RigOutboundGateway.KinesisFirehose
 
   def start(_type, _args) do
     children = [
-      Kinesis.JavaClient
+      RigOutboundGateway.Kinesis,
+      RigOutboundGateway.KinesisFirehose
     ]
 
     opts = [strategy: :one_for_one, name: RigOutboundGateway.Supervisor]

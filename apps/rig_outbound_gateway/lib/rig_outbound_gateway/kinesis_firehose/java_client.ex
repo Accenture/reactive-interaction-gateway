@@ -1,4 +1,4 @@
-defmodule RigOutboundGateway.Kinesis.JavaClient do
+defmodule RigOutboundGateway.KinesisFirehose.JavaClient do
   @moduledoc """
   Manages the external Java-based Kinesis client application.
 
@@ -8,12 +8,10 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
   use GenServer
   require Logger
 
-  alias Poison.Parser, as: JsonParser
-  alias RigOutboundGateway.Kinesis.LogStream
+  alias RigOutboundGateway.KinesisFirehose.LogStream
 
   @jinterface_version "1.8.1"
   @restart_delay_ms 20_000
-  @default_send &RigOutboundGateway.send/1
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, :ok, opts)
@@ -41,7 +39,8 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
       kinesis_aws_region: Keyword.fetch!(config, :kinesis_aws_region),
       kinesis_stream: Keyword.fetch!(config, :kinesis_stream),
       kinesis_endpoint: Keyword.fetch!(config, :kinesis_endpoint),
-      dynamodb_endpoint: Keyword.fetch!(config, :dynamodb_endpoint)
+      dynamodb_endpoint: Keyword.fetch!(config, :dynamodb_endpoint),
+      targets: Keyword.fetch!(config, :targets)
     }
   end
 
@@ -72,7 +71,7 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
   @impl GenServer
   def handle_info(:run_java_client, state) do
     conf = config()
-    Logger.debug(fn -> "Starting Java-client for Kinesis.." end)
+    Logger.debug(fn -> "Starting Java-client for Kinesis firehose.." end)
 
     env = [
       RIG_ERLANG_NAME: :erlang.node() |> Atom.to_string(),
@@ -90,7 +89,9 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
       Porcelain.exec("java", java_args(), out: %LogStream{}, err: :out, env: env)
 
     Logger.warn(fn ->
-      "Java-client for Kinesis is dead (exit code #{status}; restart in #{@restart_delay_ms} ms)."
+      "Java-client for Kinesis firehose is dead (exit code #{status}; restart in #{
+        @restart_delay_ms
+      } ms)."
     end)
 
     Process.send_after(self(), :run_java_client, @restart_delay_ms)
@@ -103,8 +104,8 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
 
     args = [
       "-Djava.util.logging.SimpleFormatter.format=%4$s: %5$s%n",
-      "-Dexecutor=Elixir.RigOutboundGateway.Kinesis.JavaClient",
-      "-Dclient_name=kinesis-client",
+      "-Dexecutor=Elixir.RigOutboundGateway.KinesisFirehose.JavaClient",
+      "-Dclient_name=kinesis-firehose-client",
       "-cp",
       "#{conf.client_jar}:#{conf.otp_jar}",
       "com.accenture.rig.App"
@@ -114,15 +115,13 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
     args
   end
 
-  @spec java_client_callback(data :: [{atom(), String.t()}, ...], RigOutboundGateway.send_t()) ::
-          :ok
-  def java_client_callback(data, send \\ @default_send) do
+  @spec java_client_callback(data :: [{atom(), String.t()}, ...]) :: :ok
+  def java_client_callback(data) do
     body = data[:body]
-    meta = Keyword.merge(data, body_raw: body)
-    ack = fn -> :ok end
+    conf = config()
 
-    RigOutboundGateway.handle_raw(body, &JsonParser.parse/1, send, ack)
-    |> RigOutboundGateway.Logger.log(__MODULE__, meta)
+    Enum.each(conf.targets, fn target -> HTTPoison.post(target, body) end)
+    Logger.debug("Event sent to HTTP endpoint(s)")
 
     :ok
   end

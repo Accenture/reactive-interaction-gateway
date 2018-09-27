@@ -7,10 +7,10 @@ Path.join(["rel", "plugins", "*.exs"])
 |> Enum.map(&Code.eval_file(&1))
 
 use Mix.Releases.Config,
-    # This sets the default release built by `mix release`
-    default_release: :rig,
-    # This sets the default environment used by `mix release`
-    default_environment: Mix.env()
+  # This sets the default release built by `mix release`
+  default_release: :rig,
+  # This sets the default environment used by `mix release`
+  default_environment: Mix.env()
 
 # For a full list of config options for both releases
 # and environments, visit https://hexdocs.pm/distillery/configuration.html
@@ -27,19 +27,19 @@ environment :dev do
   # It is recommended that you build with MIX_ENV=prod and pass
   # the --env flag to Distillery explicitly if you want to use
   # dev mode.
-  set dev_mode: true
-  set include_erts: false
-  set cookie: :placeholder_cookie
-  set pre_configure_hooks: "rel/pre_configure_hooks"
-  set post_start_hooks: "rel/post_start_hooks"
+  set(dev_mode: true)
+  set(include_erts: false)
+  set(cookie: :placeholder_cookie)
+  set(pre_configure_hooks: "rel/pre_configure_hooks")
+  set(post_start_hooks: "rel/post_start_hooks")
 end
 
 environment :prod do
-  set include_erts: true
-  set include_src: false
-  set cookie: :placeholder_cookie
-  set pre_configure_hooks: "rel/pre_configure_hooks"
-  set post_start_hooks: "rel/post_start_hooks"
+  set(include_erts: true)
+  set(include_src: false)
+  set(cookie: :placeholder_cookie)
+  set(pre_configure_hooks: "rel/pre_configure_hooks")
+  set(post_start_hooks: "rel/post_start_hooks")
 end
 
 # You may define one or more releases in this file.
@@ -48,15 +48,19 @@ end
 # will be used by default
 
 release :rig do
-  set version: current_version(:rig)
-  set applications: [
-    :runtime_tools,
-    rig: :permanent,
-    rig_api: :permanent,
-    rig_auth: :permanent,
-    rig_inbound_gateway: :permanent,
-    rig_outbound_gateway: :permanent,
-  ]
-  set vm_args: "./vm.args"
-end
+  set(version: current_version(:rig))
 
+  set(
+    applications: [
+      :runtime_tools,
+      rig: :permanent,
+      rig_api: :permanent,
+      rig_auth: :permanent,
+      rig_kafka: :permanent,
+      rig_inbound_gateway: :permanent,
+      rig_outbound_gateway: :permanent
+    ]
+  )
+
+  set(vm_args: "./vm.args")
+end

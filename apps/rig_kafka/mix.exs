@@ -3,6 +3,8 @@ defmodule RigKafka.MixProject do
   use Mix.Project
 
   def project do
+    %{rig: rig_version, elixir: elixir_version} = versions()
+
     [
       app: :rig_kafka,
       version: "0.1.0",
@@ -22,6 +24,11 @@ defmodule RigKafka.MixProject do
       extra_applications: [:logger],
       mod: {RigKafka.Application, []}
     ]
+  end
+
+  defp versions do
+    {map, []} = Code.eval_file("version", "../..")
+    map
   end
 
   # Run "mix help deps" to learn about dependencies.
