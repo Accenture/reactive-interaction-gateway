@@ -7,12 +7,12 @@ defmodule RigKafka.MixProject do
 
     [
       app: :rig_kafka,
-      version: "0.1.0",
+      version: rig_version,
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.7",
+      elixir: elixir_version,
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]

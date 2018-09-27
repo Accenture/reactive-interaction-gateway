@@ -7,6 +7,8 @@ defmodule Rig.EventStream.KafkaToHttp do
 
   alias Rig.CloudEvent
 
+  alias HTTPoison
+
   # ---
 
   def validate(%{targets: []}), do: :abort
