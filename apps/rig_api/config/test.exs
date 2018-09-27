@@ -7,4 +7,4 @@ config :rig_api, RigApi.Endpoint,
 
 config :rig, RigApi.ApisController, rig_proxy: RigInboundGateway.ProxyMock
 
-config :rig, :event_filter, RigApi.MessageController.TestEventFilter
+config :rig, :event_filter, Rig.EventFilterMock

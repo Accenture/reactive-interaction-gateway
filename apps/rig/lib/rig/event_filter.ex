@@ -12,6 +12,7 @@ defmodule Rig.EventFilter do
   process group to find them.
 
   """
+  @callback refresh_subscriptions([Subscription.t()]) :: :ok
   @spec refresh_subscriptions([Subscription.t()]) :: :ok
   def refresh_subscriptions(subscriptions) do
     # There is one Filter Supervisor per node. Each of those supervisors forwards the
@@ -23,6 +24,7 @@ defmodule Rig.EventFilter do
     :ok
   end
 
+  @callback forward_event(CloudEvent.t()) :: :ok
   @spec forward_event(CloudEvent.t()) :: :ok
   def forward_event(%{"eventType" => event_type} = event) do
     # On any node, there is only one Filter process for a given event type, or none, if
