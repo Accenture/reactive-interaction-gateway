@@ -12,6 +12,8 @@ defmodule RigKafka.Client do
 
   @supervisor RigKafka.DynamicSupervisor
 
+  @type callback :: (any -> :ok | any)
+
   defmodule GroupSubscriber do
     @moduledoc """
     The group subscriber process handles messages from none or many partitions.
@@ -46,6 +48,7 @@ defmodule RigKafka.Client do
 
   # ---
 
+  @spec start_supervised(Config.t(), callback()) :: {:ok, pid} | :ignore | {:error, any}
   def start_supervised(config, callback) do
     %{server_id: server_id} = config
     opts = Keyword.merge([config: config, callback: callback], name: server_id)
@@ -55,7 +58,7 @@ defmodule RigKafka.Client do
 
   # ---
 
-  @spec start_link(list) :: {:ok, name :: atom} | :ignore | {:error, any}
+  @spec start_link(list) :: {:ok, pid} | :ignore | {:error, any}
   def start_link(opts) do
     config = Keyword.fetch!(opts, :config)
 
