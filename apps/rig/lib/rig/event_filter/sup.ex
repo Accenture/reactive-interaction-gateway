@@ -74,7 +74,7 @@ defmodule Rig.EventFilter.Sup do
     %{extractor_config_path_or_json: extractor_config_path_or_json} = config()
 
     Logger.debug(fn ->
-      "Reloading extractor config from #{inspect(extractor_config_path_or_json)}"
+      "Reloading extractor config from #{String.replace(extractor_config_path_or_json, "\n", "")}"
     end)
 
     {:ok, extractor_map} = Config.new(extractor_config_path_or_json)

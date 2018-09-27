@@ -47,6 +47,7 @@ defmodule RigInboundGateway.Mixfile do
     [
       {:rig, in_umbrella: true},
       {:rig_auth, in_umbrella: true},
+      {:rig_kafka, in_umbrella: true},
       {:phoenix, "1.3.0"},
       {:phoenix_pubsub, "~> 1.0"},
       {:cowboy, "~> 1.0"},

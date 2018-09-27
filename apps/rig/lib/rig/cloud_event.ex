@@ -21,6 +21,7 @@ defmodule Rig.CloudEvent do
 
   def valid?(event), do: do_valid?(Map.merge(@template, event))
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp do_valid?(%{
          "eventType" => event_type,
          "cloudEventsVersion" => cloud_events_version,
@@ -53,8 +54,17 @@ defmodule Rig.CloudEvent do
   def content_type(e), do: Map.get(e, "contentType")
   def data(e), do: Map.get(e, "data")
 
+  # ---
+
   @spec new(t) :: {:ok, t} | {:error, :parse_error}
-  def new(event) do
+
+  def new(event) when is_binary(event) do
+    event
+    |> Jason.decode!()
+    |> new()
+  end
+
+  def new(event) when is_map(event) do
     event =
       event
       |> Map.to_list()
@@ -66,11 +76,15 @@ defmodule Rig.CloudEvent do
     if valid?(event), do: {:ok, event}, else: {:error, :parse_error}
   end
 
+  # ---
+
   @spec new!(t) :: t
   def new!(event) do
     {:ok, event} = new(event)
     event
   end
+
+  # ---
 
   @spec with_data(t(), content_type :: String.t(), data :: binary()) :: t()
   def with_data(event, content_type, data) do
@@ -79,7 +93,10 @@ defmodule Rig.CloudEvent do
     |> Map.put("data", data)
   end
 
+  # ---
+
   @spec with_data(t(), data :: any) :: t()
+
   def with_data(event, data)
 
   def with_data(event, nil) do

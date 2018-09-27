@@ -58,7 +58,7 @@ defmodule Rig.EventFilter.Server do
 
   @impl GenServer
   def init(%{event_type: event_type, debug?: debug?} = state) do
-    Logger.debug("New Filter #{inspect(self())} for #{inspect(state.event_type)}")
+    Logger.debug(fn -> "New Filter #{inspect(self())} for #{inspect(state.event_type)}" end)
 
     # The ETS table is owned by self and destroyed automatically when self dies.
     table_name = "subscriptions_for_#{event_type}" |> String.to_atom()

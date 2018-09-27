@@ -14,7 +14,8 @@ defmodule RigInboundGateway.Application do
       supervisor(RigInboundGatewayWeb.Presence, []),
       supervisor(RigAuth.Blacklist.Sup, _args = []),
       supervisor(RigInboundGateway.RateLimit.Sup, _args = []),
-      supervisor(RigInboundGateway.ApiProxy.Sup, _args = [])
+      supervisor(RigInboundGateway.ApiProxy.Sup, _args = []),
+      supervisor(RigInboundGateway.ApiProxy.BrokerBackend.Kafka, _args = [])
     ]
 
     opts = [strategy: :one_for_one, name: RigInboundGateway.Supervisor]

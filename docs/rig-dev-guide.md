@@ -72,3 +72,11 @@ To have the project use a newer Elixir version, make sure to change the followin
 - `.travis.yml`
 - `Dockerfile` (the `FROM` image tag)
 - `version`
+
+## Test Tags
+
+We use `tag`s to group tests together. Often, it makes sense to assign more than one tag to a test case.
+
+`@tag` | When to use it?
+------ | ---------------
+`:smoke` | Quick integration test that is designed to catch obvious integration problems.
