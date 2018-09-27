@@ -14,15 +14,12 @@ defmodule RigInboundGateway.ApiProxy.BrokerBackend.Kafka do
   # ---
 
   def kafka_handler(message) do
-    body = Jason.decode!(message)
-
-    case Map.fetch(body, "correlation_id") do
-      {:ok, correlation_id} ->
-        {:ok, deserialized_pid} = correlation_id |> Codec.deserialize()
-        send(deserialized_pid, {:response_received, message})
-
-      _ ->
-        nil
+    with {:ok, body} <- Jason.decode(message),
+         {:ok, correlation_id} <- Map.fetch(body, "correlation_id"),
+         {:ok, deserialized_pid} <- correlation_id |> Codec.deserialize() do
+      send(deserialized_pid, {:response_received, message})
+    else
+      _ -> :ignore
     end
 
     :ok

@@ -38,7 +38,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
 
     case endpoint do
       nil ->
-        send_resp(conn, 404, Serializer.encode_error_message("Route is not available"))
+        send_resp(conn, :not_found, Serializer.encode_error_message(:not_found))
 
       _ ->
         source_ip = conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
@@ -53,7 +53,12 @@ defmodule RigInboundGateway.ApiProxy.Router do
 
           :passage_denied ->
             Logger.warn("Too many requests (429) from #{source_ip} to #{endpoint_socket}.")
-            send_resp(conn, 429, Serializer.encode_error_message("Too many requests."))
+
+            send_resp(
+              conn,
+              :too_many_requests,
+              Serializer.encode_error_message(:too_many_requests)
+            )
         end
     end
   end
@@ -126,8 +131,15 @@ defmodule RigInboundGateway.ApiProxy.Router do
     tokens = Enum.concat(Auth.pick_query_token(conn, api), Auth.pick_header_token(conn, api))
 
     case Auth.any_token_valid?(tokens) do
-      true -> check_request_type(endpoint, api, conn)
-      false -> send_resp(conn, 401, Serializer.encode_error_message("Missing or invalid token"))
+      true ->
+        check_request_type(endpoint, api, conn)
+
+      false ->
+        send_resp(
+          conn,
+          :unauthorized,
+          Serializer.encode_error_message("Missing or invalid token")
+        )
     end
   end
 
@@ -168,8 +180,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
     conn
     |> put_resp_header("access-control-allow-origin", conf.cors)
     |> put_resp_header("content-type", "application/json")
-    |> put_status(:accepted)
-    |> send_resp(200, data_json)
+    |> send_resp(:accepted, data_json)
   end
 
   defp check_request_type(
@@ -200,8 +211,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
       conf.kafka_request_timeout ->
         conn
         |> put_resp_header("access-control-allow-origin", conf.cors)
-        |> put_status(:gateway_timeout)
-        |> send_resp(504, "")
+        |> send_resp(:gateway_timeout, "")
     end
   end
 
@@ -231,7 +241,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
     conn
     |> put_resp_header("access-control-allow-origin", conf.cors)
     |> put_resp_content_type("application/json")
-    |> send_resp(200, data_json)
+    |> send_resp(:ok, data_json)
   end
 
   defp check_request_type(%{"type" => "sync", "target" => "kinesis"}, _api, conn) do
@@ -357,7 +367,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   # Send error message with unsupported HTTP method
   @spec send_response({:ok, Plug.Conn.t(), nil}) :: Plug.Conn.t()
   defp send_response({:ok, conn, nil}) do
-    send_resp(conn, 405, Serializer.encode_error_message("Method is not supported"))
+    send_resp(conn, :method_not_allowed, Serializer.encode_error_message(:method_not_allowed))
   end
 
   # Send fulfilled response back to client
