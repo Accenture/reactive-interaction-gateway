@@ -51,6 +51,9 @@ COPY apps/rig_api/priv /opt/sites/rig/apps/rig_api/priv
 COPY apps/rig_auth/config /opt/sites/rig/apps/rig_auth/config
 COPY apps/rig_auth/lib /opt/sites/rig/apps/rig_auth/lib
 
+COPY apps/rig_kafka/config /opt/sites/rig/apps/rig_kafka/config
+COPY apps/rig_kafka/lib /opt/sites/rig/apps/rig_kafka/lib
+
 COPY apps/rig_inbound_gateway/config /opt/sites/rig/apps/rig_inbound_gateway/config
 COPY apps/rig_inbound_gateway/lib /opt/sites/rig/apps/rig_inbound_gateway/lib
 COPY apps/rig_inbound_gateway/priv /opt/sites/rig/apps/rig_inbound_gateway/priv
