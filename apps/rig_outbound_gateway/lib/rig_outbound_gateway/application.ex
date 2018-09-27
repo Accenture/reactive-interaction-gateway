@@ -8,8 +8,8 @@ defmodule RigOutboundGateway.Application do
 
   def start(_type, _args) do
     children = [
-      RigOutboundGateway.Kinesis,
-      RigOutboundGateway.KinesisFirehose
+      Kinesis.JavaClient,
+      KinesisFirehose.JavaClient
     ]
 
     opts = [strategy: :one_for_one, name: RigOutboundGateway.Supervisor]
