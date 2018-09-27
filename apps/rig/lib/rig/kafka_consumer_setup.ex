@@ -38,7 +38,7 @@ defmodule Rig.KafkaConsumerSetup do
 
       # ---
 
-      def start_link(opts) do
+      def start_link(opts \\ []) do
         conf = config()
         opts = Keyword.merge([name: __MODULE__], opts)
 

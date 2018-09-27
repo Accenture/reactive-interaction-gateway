@@ -56,7 +56,8 @@ config :rig, RigInboundGateway.ApiProxy.Router,
   },
   kafka_request_timeout: {:system, :integer, "PROXY_KAFKA_REQUEST_TIMEOUT", 5_000},
   kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},
-  kinesis_request_region: {:system, "PROXY_KINESIS_REQUEST_REGION", "eu-west-1"}
+  kinesis_request_region: {:system, "PROXY_KINESIS_REQUEST_REGION", "eu-west-1"},
+  cors: {:system, "CORS", "*"}
 
 config :rig, RigInboundGateway.ApiProxy.BrokerBackend.Kafka,
   # The list of brokers, given by a comma-separated list of host:port items:
@@ -73,7 +74,7 @@ config :rig, RigInboundGateway.ApiProxy.BrokerBackend.Kafka,
   ssl_keyfile_pass: {:system, "KAFKA_SSL_KEYFILE_PASS", ""},
   # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
   sasl: {:system, "KAFKA_SASL", nil},
-  request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", nil}
+  request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", ""}
 
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"}

@@ -17,7 +17,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `DISCOVERY_TYPE` | Type of discovery used in distributed mode. If not set discovery is not used. Available options: `dns`. | nil
 `DNS_NAME` | Address where RIG will do DNS discovery for Node host addresses. | "localhost"
 `FIREHOSE_KAFKA_CONSUMER_GROUP` | Consumer group name for Kafka firehose. | "rig-firehose-consumer-group"
-`FIREHOSE_KAFKA_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KAFKA_SOURCE_TOPICS | ["http://localhost:4040/todo"]
+`FIREHOSE_KAFKA_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KAFKA_SOURCE_TOPICS | []
 `FIREHOSE_KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will use as a firehose consumer, delimited by comma. Events will be sent to `FIREHOSE_KAFKA_HTTP_TARGETS | ["rig-firehose"]
 `HOST` | Hostname for Phoenix endpoints (HTTP communication). | "localhost"
 `INBOUND_PORT` | Port at which RIG exposes proxy and websocket/sse communication. | 4000
@@ -27,7 +27,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `JWT_ALG` | Algorithm used to sign and verify JSON web tokens. | "HS256"
 `JWT_USER_FIELD` | DEPRECATED. The JSON web token as sent by the front-ends should contain the user ID, in the same format used by the back-ends in the messages they send towards the user. `JWT_USER_FIELD` is the name of that user ID field in the JWT. For the corresponding field used in outbound messages, see `MESSAGE_USER_FIELD`. | "user"
 `JWT_SESSION_FIELD` | The JWT field that defines a "session", which is used for listing and killing/blacklisting sessions. What a session is depends on your application. For example, one might set `JWT_SESSION_FIELD` to the users' ID field, which would group all connections that belong to the same user to a single session - this way, blacklisting a session would mean killing all connections of a single user. The `JWT_SESSION_FIELD` is specified using the [JSON Pointer](https://tools.ietf.org/html/rfc6901) notation. Given that events contain a user ID in their "data" field, the configuration for the previous example could look like this: `JWT_SESSION_FIELD=/data/userId`. | nil
-`KAFKA_CONSUMER_GROUP` | Consumer group name for Kafka. | "rig-consumer-group"
+`KAFKA_CONSUMER_GROUP` | Consumer group name for Kafka. | nil
 `KAFKA_ENABLED` | DEPRECATED. If set to true, RIG will consume messages from a Kafka broker using the configured broker and topic(s). | false
 `KAFKA_HOSTS` | List of Kafka brokers RIG should connect to, delimited by comma. Usually it's enough to specify one broker and RIG will auto-discover rest of the Kafka cluster. | ["localhost:9092"]
 `KAFKA_LOG_TOPIC` | Kafka topic for producer used to log HTTP requests going through RIG's API Proxy. | "rig-request-log"
@@ -56,7 +56,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Expected path is `proxy/your_json_file.json`. | nil
 `PROXY_KAFKA_RESPONSE_TOPIC` | Kafka topic for acknowlidging Kafka sync events from proxy by corellation ID | nil
 `PROXY_KAFKA_REQUEST_TIMEOUT` | Maximum timeout for proxy Kafka sync events to acknowledge corellation ID in consumer. | 5000
-`PROXY_KAFKA_REQUEST_TOPIC` | Kafka topic for publishing sync/async events from proxy. | nil
+`PROXY_KAFKA_REQUEST_TOPIC` | Kafka topic for publishing sync/async events from proxy. | ""
 `PROXY_KINESIS_REQUEST_REGION` | AWS region for Kinesis stream publishing events from proxy. | "eu-west-1"
 `PROXY_KINESIS_REQUEST_STREAM` | Kinesis stream for publishing sync/async events from proxy. | nil
 `RATE_LIMIT_AVG_RATE_PER_SEC` | DEPRECATED. The permitted average amount of requests per second. | 10000

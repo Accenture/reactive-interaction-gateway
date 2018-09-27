@@ -25,6 +25,7 @@
             "method": "POST",
             "type": "async",
             "target": "kafka",
+            "topic": "test-topic",
             "not_secured": true
           },
           {
@@ -33,6 +34,7 @@
             "method": "POST",
             "type": "async",
             "target": "kinesis",
+            "stream": "test-topic",
             "not_secured": true
           },
           {
@@ -41,6 +43,7 @@
             "method": "POST",
             "type": "sync",
             "target": "kafka",
+            "topic": "test-topic",
             "not_secured": true
           },
           {

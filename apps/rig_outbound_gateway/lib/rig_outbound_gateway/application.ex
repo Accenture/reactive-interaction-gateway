@@ -3,12 +3,10 @@ defmodule RigOutboundGateway.Application do
 
   use Application
 
-  alias RigOutboundGateway.Kafka
   alias RigOutboundGateway.Kinesis
 
   def start(_type, _args) do
     children = [
-      Kafka.SupWrapper,
       Kinesis.JavaClient
     ]
 
