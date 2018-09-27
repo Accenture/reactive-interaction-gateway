@@ -23,7 +23,8 @@ config :rig_api, RigApi.Endpoint,
   render_errors: [view: RigApi.ErrorView, accepts: ~w(json)],
   pubsub: [name: Rig.PubSub]
 
-config :rig, RigApi.ApisController,
-  rig_proxy: RigInboundGateway.Proxy
+config :rig, RigApi.ApisController, rig_proxy: RigInboundGateway.Proxy
 
-import_config "#{Mix.env}.exs"
+config :rig, :event_filter, Rig.EventFilter
+
+import_config "#{Mix.env()}.exs"

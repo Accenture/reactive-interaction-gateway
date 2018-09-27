@@ -1,70 +1,68 @@
-defmodule RigApiWeb.MessageControllerTest do
+defmodule RigApi.MessageControllerTest do
   @moduledoc false
   use RigApi.ConnCase
   use RigApi.ChannelCase
+
+  alias Plug.Conn.Status
+
+  @cloud_event_json ~s({"cloudEventsVersion":"0.1","source":"test","eventType":"test.event","eventID":"1"})
+  @cloud_event_urlencoded "cloudEventsVersion=0.1&source=test&eventType=test.event&eventID=1"
+  @non_cloud_event ~s({"source":"test","eventType":"test.event","eventID":"1"})
+  @random_json_string ~s("some random string")
 
   defp new_conn(content_type) do
     build_conn()
     |> put_req_header("content-type", content_type)
   end
 
-  describe "The messages endpoint, when posting a message," do
-    test "returns :accepted if successful" do
-      # Let's verify that the message actually gets delivered:
-      @endpoint.subscribe(_channel = "user:testuser")
-
-      conn =
-        new_conn("application/json")
-        |> post("/v1/messages", ~s({"user":"testuser","foo":"bar"}))
-
-      assert conn.status == 202
-      expected_event = "message"
-      expected_payload = %{"user" => "testuser", "foo" => "bar"}
-      assert_broadcast(^expected_event, ^expected_payload)
-    end
-
-    test "returns :bad_request if passed a string instead of a map" do
-      conn = new_conn("application/json")
-
-      # exception would be translated to conn.status == 400
-      assert_raise Plug.Parsers.ParseError, ~r/malformed request/, fn ->
-        post(conn, "/v1/messages", ~s("{\"foo\":\"bar\"}"))
-      end
-    end
-
-    test "returns :bad_request if missing user field" do
-      conn =
-        new_conn("application/json")
-        |> post("/v1/messages", ~s({"foo":"bar"}))
-
-      assert conn.status == 400
-    end
-
-    test "handles application/json with charset parameter set" do
+  describe "A Cloud Event v0.1 is" do
+    test "accepted if content-type is application/json." do
       conn =
         new_conn("application/json;charset=utf-8")
-        |> post("/v1/messages", ~s({"user":"testuser","foo":"bar"}))
+        |> post("/v1/messages", @cloud_event_json)
 
-      assert conn.status == 202
+      assert conn.status == Status.code(:accepted)
+      assert_received {:cloud_event_sent, _}
     end
 
-    test "handles application/x-www-form-urlencoded with charset parameter set" do
+    test "accepted if content-type is application/x-www-form-urlencoded." do
       conn =
         new_conn("application/x-www-form-urlencoded;charset=utf-8")
-        |> post("/v1/messages", "user=testuser&foo=bar")
+        |> post("/v1/messages", @cloud_event_urlencoded)
 
-      assert conn.status == 202
+      assert conn.status == Status.code(:accepted)
+      assert_received {:cloud_event_sent, _}
     end
 
-    test "declines unknown content-types (e.g., text/plain)" do
+    test "denied for any other content-type." do
       conn = new_conn("text/plain")
 
-      # exception would be translated to conn.status == 415
+      # Exception would be translated to conn.status == 415
       assert_raise Plug.Parsers.UnsupportedMediaTypeError,
                    "unsupported media type text/plain",
                    fn ->
-                     post(conn, "/v1/messages", "user=testuser&foo=bar")
+                     post(conn, "/v1/messages", @cloud_event_json)
                    end
+
+      refute_received {:cloud_event_sent, _}
     end
+  end
+
+  test "A JSON that is not a valid Cloud Event is not accepted." do
+    conn =
+      new_conn("application/json;charset=utf-8")
+      |> post("/v1/messages", @non_cloud_event)
+
+    assert conn.status == Status.code(:bad_request)
+    refute_received {:cloud_event_sent, _}
+  end
+
+  test "A string is not accepted." do
+    conn =
+      new_conn("application/json;charset=utf-8")
+      |> post("/v1/messages", @random_json_string)
+
+    assert conn.status == Status.code(:bad_request)
+    refute_received {:cloud_event_sent, _}
   end
 end
