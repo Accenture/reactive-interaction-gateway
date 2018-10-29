@@ -52,6 +52,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `NODE_HOST` | Erlang hostname for given node, used to build Erlang long-name `rig@NODE_HOST`. This value is used by Erlang's distributed mode, so nodes can see each other. | nil
 `PRIVILEGED_ROLES` | DEPRECATED. User roles that are able to subscribe to messages of any user. You can specify multiple roles delimited by comma. | []
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Expected path is `proxy/your_json_file.json`. | nil
+`PROXY_RECV_TIMEOUT` | Timeout used when receiving a response for a forwarded/proxied request. | 5000
 `PROXY_KAFKA_RESPONSE_TOPICS` | Kafka topic for acknowlidging Kafka sync events from proxy by corellation ID | ["rig-proxy-response"]
 `PROXY_KAFKA_REQUEST_TIMEOUT` | Maximum timeout for proxy Kafka sync events to acknowledge corellation ID in consumer. | 5000
 `PROXY_KAFKA_REQUEST_TOPIC` | Kafka topic for publishing sync/async events from proxy. | ""

@@ -181,7 +181,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
   - Suggesting new features or enhancements
   - Improve/fix documentation
 
-See the [developer's guide](guides/developer-guide.md) and [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+See the [developer's guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-dev-guide.html) and [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
 
 ## License
 

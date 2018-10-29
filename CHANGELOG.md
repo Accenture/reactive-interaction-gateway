@@ -7,6 +7,7 @@
   - [Outbound] Support Kafka SSL and SASL/Plain authentication. [#79](https://github.com/Accenture/reactive-interaction-gateway/issues/79)
   - [Inbound] SSE heartbeats are now sent as comments rather than events, and events without data carry an empty data line to improve cross-browser compatability. [#64](https://github.com/Accenture/reactive-interaction-gateway/issues/64)
   - [Inbound] Add new endpoints at `/_rig/v1/` for subscribing to CloudEvents using SSE, for creating subscriptions to specific event types, and for publishing CloudEvents. [#90](https://github.com/Accenture/reactive-interaction-gateway/issues/90)
+  - [Inbound] Expose setting for proxy response timeout. [#91](https://github.com/Accenture/reactive-interaction-gateway/issues/91)
 
 ## v2.0.0-beta.1
 
