@@ -117,7 +117,8 @@ defmodule Mix.Tasks.UpdateDocs do
   end
 
   def log_undocumented_vars({table_keyset, env_keyset}) do
-    env_keyset |> MapSet.difference(table_keyset)
+    env_keyset
+    |> MapSet.difference(table_keyset)
     |> Enum.each(fn key ->
       Logger.warn("Documentation for environment variable #{key} is missing")
     end)
@@ -169,7 +170,7 @@ defmodule Mix.Tasks.UpdateDocs do
 
   def env_defaults(env) do
     env
-    |> Stream.flat_map(fn {_mod, kwlist} -> kwlist end)
+    |> Stream.flat_map(fn {_mod, kwlist} -> List.wrap(kwlist) end)
     |> Stream.map(fn
       {_, {:system, key, val}} ->
         {key, val}

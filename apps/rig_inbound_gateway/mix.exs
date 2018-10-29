@@ -1,4 +1,5 @@
 defmodule RigInboundGateway.Mixfile do
+  @moduledoc false
   use Mix.Project
 
   def project do
@@ -69,7 +70,9 @@ defmodule RigInboundGateway.Mixfile do
       {:server_sent_event, "~> 0.3.1"},
       # AWS SDK
       {:ex_aws, "~> 2.0"},
-      {:ex_aws_kinesis, "~> 2.0"}
+      {:ex_aws_kinesis, "~> 2.0"},
+      # For backend service mocks:
+      {:fake_server, "~> 1.4", only: :test}
     ]
   end
 
