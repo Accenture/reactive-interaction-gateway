@@ -32,17 +32,35 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
 
   # ---
 
-  # Builds URL where HTTP request should be proxied
-  @spec build_url(Proxy.api_definition(), String.t()) :: String.t()
-  def build_url(%{"use_env" => true} = proxy, request_path) do
-    host = System.get_env(proxy["target_url"]) || "localhost"
-    "#{host}:#{proxy["port"]}#{request_path}"
+  @spec build_url(Proxy.api_definition() | %URI{}, String.t()) :: String.t()
+
+  def build_url(%URI{} = proxy_uri, request_path) do
+    proxy_uri
+    |> URI.merge(request_path)
+    |> URI.to_string()
   end
 
-  @spec build_url(Proxy.api_definition(), String.t()) :: String.t()
-  def build_url(%{"use_env" => false} = proxy, request_path) do
-    "#{proxy["target_url"]}:#{proxy["port"]}#{request_path}"
+  def build_url(%{"use_env" => true, "target_url" => target_url} = proxy, request_path) do
+    host = System.get_env(target_url) || "localhost"
+    build_url(%{proxy | "target_url" => host, "use_env" => false}, request_path)
   end
+
+  def build_url(%{"target_url" => target_url, "port" => port} = proxy, request_path)
+      when is_integer(port) do
+    default_scheme = "http"
+
+    {scheme, host} =
+      case URI.parse(target_url) do
+        %{scheme: nil, host: nil, path: host} -> {default_scheme, host}
+        %{scheme: scheme, host: host} -> {scheme, host}
+      end
+
+    "#{scheme}://#{host}:#{port}"
+    |> URI.parse()
+    |> build_url(request_path)
+  end
+
+  # ---
 
   # Workaround for HTTPoison/URI.encode not supporting nested query params
   @spec attach_query_params(String.t(), %{}) :: String.t()

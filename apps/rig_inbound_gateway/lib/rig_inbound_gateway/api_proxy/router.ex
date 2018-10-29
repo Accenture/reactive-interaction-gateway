@@ -305,19 +305,20 @@ defmodule RigInboundGateway.ApiProxy.Router do
     url = Serializer.build_url(api["proxy"], request_path)
 
     # Match URL against HTTP method to forward it to specific service
-    res =
-      case method do
-        "GET" -> Base.get!(Serializer.attach_query_params(url, params), req_headers)
-        "POST" -> format_post_request(url, params, req_headers)
-        "PUT" -> Base.put!(url, Poison.encode!(params), req_headers)
-        "PATCH" -> Base.patch!(url, Poison.encode!(params), req_headers)
-        "DELETE" -> Base.delete!(url, req_headers)
-        "HEAD" -> Base.head!(url, req_headers)
-        "OPTIONS" -> Base.options!(url, req_headers)
-        _ -> nil
-      end
-
-    send_response({:ok, conn, res})
+    case method do
+      "GET" -> Base.get(Serializer.attach_query_params(url, params), req_headers)
+      "POST" -> format_post_request(url, params, req_headers)
+      "PUT" -> Base.put(url, Poison.encode!(params), req_headers)
+      "PATCH" -> Base.patch(url, Poison.encode!(params), req_headers)
+      "DELETE" -> Base.delete(url, req_headers)
+      "HEAD" -> Base.head(url, req_headers)
+      "OPTIONS" -> Base.options(url, req_headers)
+      _ -> {:ok, nil}
+    end
+    |> case do
+      {:ok, res} -> send_response({:ok, conn, res})
+      {:error, err} -> send_response({:error, conn, err})
+    end
   end
 
   # ---
@@ -334,12 +335,12 @@ defmodule RigInboundGateway.ApiProxy.Router do
         [{:file, file.path}, {"content-type", file.content_type}, {"filename", file.filename}]
       )
 
-    Base.post!(url, {:multipart, params_merged}, headers)
+    Base.post(url, {:multipart, params_merged}, headers)
   end
 
   @spec format_post_request(String.t(), map, headers) :: Plug.Conn.t()
   defp format_post_request(url, params, headers) do
-    Base.post!(url, Poison.encode!(params), headers)
+    Base.post(url, Poison.encode!(params), headers)
   end
 
   # ---
@@ -364,14 +365,12 @@ defmodule RigInboundGateway.ApiProxy.Router do
 
   # ---
 
-  # Send error message with unsupported HTTP method
-  @spec send_response({:ok, Plug.Conn.t(), nil}) :: Plug.Conn.t()
+  @spec send_response({:ok, Plug.Conn.t(), any}) :: Plug.Conn.t()
+
   defp send_response({:ok, conn, nil}) do
     send_resp(conn, :method_not_allowed, Serializer.encode_error_message(:method_not_allowed))
   end
 
-  # Send fulfilled response back to client
-  @spec send_response({:ok, Plug.Conn.t(), map}) :: Plug.Conn.t()
   defp send_response({:ok, conn, %{headers: headers, status_code: status_code, body: body}}) do
     downcased_headers = headers |> Serializer.downcase_headers()
     conn = %{conn | resp_headers: downcased_headers}
@@ -381,6 +380,11 @@ defmodule RigInboundGateway.ApiProxy.Router do
     else
       send_resp(conn, status_code, body)
     end
+  end
+
+  defp send_response({:error, %{method: method, request_path: request_path} = conn, err}) do
+    Logger.warn(fn -> "Failed to proxy '#{method} #{request_path}': #{inspect(err)}" end)
+    send_resp(conn, :bad_gateway, "Bad gateway.")
   end
 
   # ---

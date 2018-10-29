@@ -9,14 +9,16 @@ defmodule RigInboundGateway.ApiProxy.SerializerTest do
     assert Serializer.encode_error_message("OK") =~ "{\"message\":\"OK\"}"
   end
 
-  test "build_url should build URL from env var if API wants it" do
-    proxy = %{"use_env" => true, "target_url" => "SOME_HOST", "port" => 8080}
-    assert Serializer.build_url(proxy, "/something") == "localhost:8080/something"
-  end
+  describe "build_url" do
+    test "uses target_url as-is if use_env is false." do
+      proxy = %{"use_env" => false, "target_url" => "https://example.com", "port" => 81}
+      assert Serializer.build_url(proxy, "/something") == "https://example.com:81/something"
+    end
 
-  test "build_url should build URL without env var if API don'\t want it" do
-    proxy = %{"use_env" => false, "target_url" => "http://example.com", "port" => 80}
-    assert Serializer.build_url(proxy, "/something") == "http://example.com:80/something"
+    test "interpolates the target_url using env vars if use_env is true." do
+      proxy = %{"use_env" => true, "target_url" => "SOME_HOST", "port" => 8080}
+      assert Serializer.build_url(proxy, "/something") == "http://localhost:8080/something"
+    end
   end
 
   test "attach_query_params should not attach query params if not present" do
@@ -24,7 +26,8 @@ defmodule RigInboundGateway.ApiProxy.SerializerTest do
   end
 
   test "attach_query_params should attach query params if present" do
-    assert Serializer.attach_query_params("http://example.com", %{"a" => "b"}) == "http://example.com?a=b"
+    assert Serializer.attach_query_params("http://example.com", %{"a" => "b"}) ==
+             "http://example.com?a=b"
   end
 
   test "header_value? should return true if headers have key with given value" do

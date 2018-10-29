@@ -23,6 +23,9 @@ config :rig_api, RigApi.Endpoint,
   render_errors: [view: RigApi.ErrorView, accepts: ~w(json)],
   pubsub: [name: Rig.PubSub]
 
+# Always start the HTTP endpoints on application startup:
+config :phoenix, :serve_endpoints, true
+
 config :rig, RigApi.ApisController, rig_proxy: RigInboundGateway.Proxy
 
 config :rig, :event_filter, Rig.EventFilter
