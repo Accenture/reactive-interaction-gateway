@@ -20,5 +20,5 @@ erl_crash.dump
 *.ez
 
 # Ignore package tarball (built via "mix hex.build").
-rig_system_tests-*.tar
+rig_tests-*.tar
 

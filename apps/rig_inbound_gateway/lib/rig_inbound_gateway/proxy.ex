@@ -19,64 +19,23 @@ defmodule RigInboundGateway.Proxy do
   use Rig.Config, []
   require Logger
 
-  @type endpoint :: %{
-          optional(:not_secured) => boolean,
-          optional(:transform_request_headers) => boolean,
-          optional(:type) => String.t(),
-          optional(:target) => String.t(),
-          id: String.t(),
-          path: String.t(),
-          method: String.t()
-        }
-  @type api_definition :: %{
-          optional(:auth_type) => String.t(),
-          optional(:versioned) => boolean,
-          optional(:active) => boolean,
-          optional(:node_name) => atom,
-          optional(:ref_number) => integer,
-          optional(:timestamp) => DateTime,
-          optional(:transform_request_headers) => %{
-            optional(:add_headers) => %{
-              optional(String.t()) => String.t()
-            }
-          },
-          id: String.t(),
-          name: String.t(),
-          auth: %{
-            optional(:use_header) => boolean,
-            optional(:header_name) => String.t(),
-            optional(:use_query) => boolean,
-            optional(:query_name) => String.t()
-          },
-          version_data: %{
-            optional(String.t()) => %{
-              endpoints: [endpoint]
-            }
-          },
-          proxy: %{
-            optional(:use_env) => boolean,
-            target_url: String.t(),
-            port: integer
-          }
-        }
+  alias RigInboundGateway.ApiProxy.Api
 
   @typep state_t :: map
   @typep server_t :: pid | atom
 
   defmodule ProxyBehaviour do
     @moduledoc false
-    @callback list_apis(server :: Proxy.server_t()) :: [Proxy.api_definition(), ...]
-    @callback get_api(id :: Proxy.server_t(), id :: String.t()) :: Proxy.api_definition()
-    @callback add_api(id :: Proxy.server_t(), id :: String.t(), api :: Proxy.api_definition()) ::
-                any
+    @callback list_apis(server :: Proxy.server_t()) :: [Api.t(), ...]
+    @callback get_api(id :: Proxy.server_t(), id :: String.t()) :: Api.t()
+    @callback add_api(id :: Proxy.server_t(), id :: String.t(), api :: Api.t()) :: any
     @callback replace_api(
                 id :: Proxy.server_t(),
                 id :: String.t(),
-                prev_api :: Proxy.api_definition(),
-                next_api :: Proxy.api_definition()
+                prev_api :: Api.t(),
+                next_api :: Api.t()
               ) :: any
-    @callback update_api(id :: Proxy.server_t(), id :: String.t(), api :: Proxy.api_definition()) ::
-                any
+    @callback update_api(id :: Proxy.server_t(), id :: String.t(), api :: Api.t()) :: any
     @callback deactivate_api(id :: Proxy.server_t(), id :: String.t()) :: atom
   end
 
@@ -138,7 +97,7 @@ defmodule RigInboundGateway.Proxy do
     GenServer.call(server, {:deactivate_api, id})
   end
 
-  @spec handle_join_api(server_t, String.t(), api_definition) :: server_t
+  @spec handle_join_api(server_t, String.t(), Api.t()) :: server_t
   def handle_join_api(server, id, api) do
     GenServer.cast(server, {:handle_join_api, id, api})
   end
@@ -157,8 +116,7 @@ defmodule RigInboundGateway.Proxy do
     {:noreply, state}
   end
 
-  @spec handle_call({:add_api, String.t(), api_definition}, any, state_t) ::
-          {:reply, any, state_t}
+  @spec handle_call({:add_api, String.t(), Api.t()}, any, state_t) :: {:reply, any, state_t}
   def handle_call({:add_api, id, api}, _from, state) do
     Logger.info("Handling add of new API definition with id=#{id}")
 
@@ -168,7 +126,7 @@ defmodule RigInboundGateway.Proxy do
     {:reply, response, state}
   end
 
-  @spec handle_call({:replace_api, String.t(), api_definition, api_definition}, any, state_t) ::
+  @spec handle_call({:replace_api, String.t(), Api.t(), Api.t()}, any, state_t) ::
           {:reply, any, state_t}
   def handle_call({:replace_api, id, prev_api, next_api}, _from, state) do
     Logger.info("Handling replace of deactivated API definition with id=#{id} with new API")
@@ -181,8 +139,7 @@ defmodule RigInboundGateway.Proxy do
     {:reply, response, state}
   end
 
-  @spec handle_call({:update_api, String.t(), api_definition}, any, state_t) ::
-          {:reply, any, state_t}
+  @spec handle_call({:update_api, String.t(), Api.t()}, any, state_t) :: {:reply, any, state_t}
   def handle_call({:update_api, id, api}, _from, state) do
     Logger.info("Handling update of API definition with id=#{id}")
 
@@ -193,7 +150,7 @@ defmodule RigInboundGateway.Proxy do
     {:reply, response, state}
   end
 
-  @spec handle_call({:deactivate_api, String.t(), api_definition}, any, state_t) ::
+  @spec handle_call({:deactivate_api, String.t(), Api.t()}, any, state_t) ::
           {:reply, atom, state_t}
   def handle_call({:deactivate_api, id}, _from, state) do
     node_name = get_node_name()
@@ -211,13 +168,13 @@ defmodule RigInboundGateway.Proxy do
     {:reply, response, state}
   end
 
-  @spec handle_call({:list_apis}, any, state_t) :: {:reply, [api_definition, ...], state_t}
+  @spec handle_call({:list_apis}, any, state_t) :: {:reply, [Api.t(), ...], state_t}
   def handle_call({:list_apis}, _from, state) do
     list_of_apis = get_node_name() |> state.tracker_mod.list_by_node
     {:reply, list_of_apis, state}
   end
 
-  @spec handle_call({:get_api}, any, state_t) :: {:reply, api_definition, state_t}
+  @spec handle_call({:get_api}, any, state_t) :: {:reply, Api.t(), state_t}
   def handle_call({:get_api, id}, _from, state) do
     node_name = get_node_name()
     api = state.tracker_mod.find_by_node(id, node_name)
@@ -226,8 +183,7 @@ defmodule RigInboundGateway.Proxy do
   end
 
   # Handle incoming JOIN events with new data from Presence
-  @spec handle_cast({:handle_join_api, String.t(), api_definition}, state_t) ::
-          {:noreply, state_t}
+  @spec handle_cast({:handle_join_api, String.t(), Api.t()}, state_t) :: {:noreply, state_t}
   def handle_cast({:handle_join_api, id, api}, state) do
     node_name = get_node_name()
 
@@ -280,11 +236,10 @@ defmodule RigInboundGateway.Proxy do
   #   - Data equality (without internal information like phx_ref, node_name, timestamp, etc.)
   #   - Data equality across nodes in cluster (without internal information ...)
   #   - Timestamp
-  @spec compare_api(String.t(), nil, api_definition, state_t) :: {:ok, :track}
+  @spec compare_api(String.t(), nil, Api.t(), state_t) :: {:ok, :track}
   defp compare_api(_id, nil, _next_api, _state), do: {:ok, :track}
 
-  @spec compare_api(String.t(), {String.t(), api_definition}, api_definition, state_t) ::
-          {atom, atom}
+  @spec compare_api(String.t(), {String.t(), Api.t()}, Api.t(), state_t) :: {atom, atom}
   defp compare_api(id, {id, prev_api}, next_api, state) do
     cond do
       # Evaluate only active APIs with equal reference number
@@ -302,7 +257,7 @@ defmodule RigInboundGateway.Proxy do
   end
 
   # Evaluate if current API and new API are the same or not => data wise
-  @spec eval_data_change(String.t(), api_definition, api_definition, state_t) :: {atom, atom}
+  @spec eval_data_change(String.t(), Api.t(), Api.t(), state_t) :: {atom, atom}
   defp eval_data_change(id, prev_api, next_api, state) do
     if data_equal?(prev_api, next_api) do
       {:error, :exit}
@@ -313,7 +268,7 @@ defmodule RigInboundGateway.Proxy do
 
   # Evaluate how many nodes have data from new API
   # If exactly half of the nodes are different => compare timestamps
-  @spec eval_all_nodes_data(String.t(), api_definition, api_definition, state_t) :: {atom, atom}
+  @spec eval_all_nodes_data(String.t(), Api.t(), Api.t(), state_t) :: {atom, atom}
   defp eval_all_nodes_data(id, prev_api, next_api, state) do
     all_api_instances = state.tracker_mod.find_all(id)
     n_api_instances_halved = length(all_api_instances) / 2
@@ -342,7 +297,7 @@ defmodule RigInboundGateway.Proxy do
 
   # Checks if current API and new API are equal => data wise
   # Strips internal information such as timestamp, phx_ref, node_name, ...
-  @spec data_equal?(api_definition, api_definition) :: boolean
+  @spec data_equal?(Api.t(), Api.t()) :: boolean
   defp data_equal?(prev_api, next_api) do
     next_api_without_meta = next_api |> remove_meta_info
 
@@ -365,7 +320,7 @@ defmodule RigInboundGateway.Proxy do
   defp get_node_name, do: Phoenix.PubSub.node_name(Rig.PubSub)
 
   # Enhance API definition with internal information
-  @spec add_meta_info(api_definition, map) :: api_definition
+  @spec add_meta_info(Api.t(), map) :: Api.t()
   defp add_meta_info(api, meta_info \\ %{}) do
     api
     |> Map.merge(meta_info)
@@ -373,7 +328,7 @@ defmodule RigInboundGateway.Proxy do
   end
 
   # Remove internal information from API definition => to have just raw data
-  @spec remove_meta_info(api_definition) :: api_definition
+  @spec remove_meta_info(Api.t()) :: Api.t()
   defp remove_meta_info(api) do
     api
     |> Map.delete(:phx_ref)
@@ -382,7 +337,7 @@ defmodule RigInboundGateway.Proxy do
     |> Map.delete("timestamp")
   end
 
-  @spec read_init_apis(String.t() | nil) :: [api_definition]
+  @spec read_init_apis(String.t() | nil) :: [Api.t()]
   defp read_init_apis(nil), do: []
 
   defp read_init_apis(config_file) do
@@ -393,7 +348,7 @@ defmodule RigInboundGateway.Proxy do
     |> Poison.decode!()
   end
 
-  @spec set_default_api_values(api_definition) :: api_definition
+  @spec set_default_api_values(Api.t()) :: Api.t()
   defp set_default_api_values(api) do
     default_api_values = %{
       "active" => true,

@@ -48,12 +48,19 @@ defmodule RigKafka.Client do
 
   # ---
 
-  @spec start_supervised(Config.t(), callback()) :: {:ok, pid} | :ignore | {:error, any}
-  def start_supervised(config, callback) do
+  @spec start_supervised(Config.t(), callback() | nil) :: {:ok, pid} | :ignore | {:error, any}
+  def start_supervised(config, callback \\ nil) do
     %{server_id: server_id} = config
     opts = Keyword.merge([config: config, callback: callback], name: server_id)
 
     DynamicSupervisor.start_child(@supervisor, {__MODULE__, opts})
+  end
+
+  # ---
+
+  @spec stop_supervised(pid) :: :ok | {:error, :not_found}
+  def stop_supervised(client_pid) do
+    DynamicSupervisor.terminate_child(@supervisor, client_pid)
   end
 
   # ---
@@ -201,16 +208,8 @@ defmodule RigKafka.Client do
 
   @impl GenServer
   def handle_call({:produce, topic, key, plaintext}, _from, %{brod_client: brod_client} = state) do
-    :ok =
-      :brod.produce_sync(
-        brod_client,
-        topic,
-        &compute_kafka_partition/4,
-        key,
-        plaintext
-      )
-
-    {:reply, :ok, state}
+    result = try_producing_message(brod_client, topic, key, plaintext)
+    {:reply, result, state}
   end
 
   # ---
@@ -226,6 +225,37 @@ defmodule RigKafka.Client do
     Process.sleep(@reconnect_timeout_ms)
     {:stop, :shutdown, state}
   end
+
+  # ---
+
+  defp try_producing_message(brod_client, topic, key, plaintext, n_retries_remaining \\ 3)
+
+  defp try_producing_message(brod_client, topic, key, plaintext, n_retries_remaining)
+       when n_retries_remaining > 0 do
+    case :brod.produce_sync(
+           brod_client,
+           topic,
+           &compute_kafka_partition/4,
+           key,
+           plaintext
+         ) do
+      :ok ->
+        :ok
+
+      {:error, :leader_not_available} ->
+        Logger.debug(fn ->
+          "Leader not available for Kafka topic #{topic} (#{n_retries_remaining} retries remaining)"
+        end)
+
+        :timer.sleep(1_000)
+        try_producing_message(brod_client, topic, key, plaintext, n_retries_remaining - 1)
+
+      err ->
+        err
+    end
+  end
+
+  defp try_producing_message(_, _, _, _, _), do: {:error, :leader_not_available}
 
   # ---
 

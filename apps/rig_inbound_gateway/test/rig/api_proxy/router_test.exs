@@ -7,17 +7,8 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
   import Joken
 
   alias RigInboundGatewayWeb.Router
-  alias RigInboundGateway.RateLimit
-  alias RigInboundGateway.RateLimit.Common
 
   setup do
-    # Other tests might have filled the table, so we reset it:
-    conf = RateLimit.config()
-
-    conf.table_name
-    |> Common.ensure_table()
-    |> :ets.delete_all_objects()
-
     boot_service(Bypass.open(port: 7070))
   end
 
@@ -37,7 +28,6 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
   test "protected endpoint with invalid JWT should return 401" do
     conn = call(Router, build_conn(:get, "/myapi/books"))
     assert conn.status == 401
-    assert conn.resp_body =~ "{\"message\":\"Missing or invalid token\"}"
   end
 
   test "protected endpoint with valid JWT should return response",

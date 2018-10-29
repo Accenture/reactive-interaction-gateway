@@ -56,13 +56,14 @@ config :rig, RigInboundGateway.ApiProxy.Router,
   logger_modules: %{
     "console" => RigInboundGateway.RequestLogger.Console,
     "kafka" => RigInboundGateway.RequestLogger.Kafka
-  },
-  kafka_request_timeout: {:system, :integer, "PROXY_KAFKA_REQUEST_TIMEOUT", 5_000},
-  kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},
-  kinesis_request_region: {:system, "PROXY_KINESIS_REQUEST_REGION", "eu-west-1"},
-  cors: {:system, "CORS", "*"}
+  }
 
-config :rig, RigInboundGateway.ApiProxy.BrokerBackend.Kafka,
+config :rig, RigInboundGateway.ApiProxy.Handler.Http,
+  cors: {:system, "CORS", "*"},
+  kafka_response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000},
+  kinesis_response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000}
+
+config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
   # The list of topics to consume messages from:
@@ -77,7 +78,14 @@ config :rig, RigInboundGateway.ApiProxy.BrokerBackend.Kafka,
   ssl_keyfile_pass: {:system, "KAFKA_SSL_KEYFILE_PASS", ""},
   # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
   sasl: {:system, "KAFKA_SASL", nil},
-  request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", ""}
+  request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", ""},
+  cors: {:system, "CORS", "*"},
+  response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000}
+
+config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
+  kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},
+  kinesis_request_region: {:system, "PROXY_KINESIS_REQUEST_REGION", "eu-west-1"},
+  response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000}
 
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"}

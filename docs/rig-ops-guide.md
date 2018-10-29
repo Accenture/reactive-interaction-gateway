@@ -54,8 +54,9 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Expected path is `proxy/your_json_file.json`. | nil
 `PROXY_RECV_TIMEOUT` | Timeout used when receiving a response for a forwarded/proxied request. | 5000
 `PROXY_KAFKA_RESPONSE_TOPICS` | Kafka topic for acknowlidging Kafka sync events from proxy by corellation ID | ["rig-proxy-response"]
-`PROXY_KAFKA_REQUEST_TIMEOUT` | Maximum timeout for proxy Kafka sync events to acknowledge corellation ID in consumer. | 5000
 `PROXY_KAFKA_REQUEST_TOPIC` | Kafka topic for publishing sync/async events from proxy. | ""
+`PROXY_KAFKA_RESPONSE_TIMEOUT` | In case an endpoint has `target` set to `http` and `response_from` set to `kafka`, this is the maximum delay between an HTTP request and the corresponding Kafka response message. | 5000
+`PROXY_KINESIS_RESPONSE_TIMEOUT` | In case an endpoint has `target` set to `http` and `response_from` set to `kinesis`, this is the maximum delay between an HTTP request and the corresponding Kinesis response message. | 5000
 `PROXY_KINESIS_REQUEST_REGION` | AWS region for Kinesis stream publishing events from proxy. | "eu-west-1"
 `PROXY_KINESIS_REQUEST_STREAM` | Kinesis stream for publishing sync/async events from proxy. | nil
 `RATE_LIMIT_AVG_RATE_PER_SEC` | DEPRECATED. The permitted average amount of requests per second. | 10000

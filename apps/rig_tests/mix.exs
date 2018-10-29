@@ -1,10 +1,10 @@
-defmodule RigSystemTests.MixProject do
+defmodule RigTests.MixProject do
   @moduledoc false
   use Mix.Project
 
   def project do
     [
-      app: :rig_system_tests,
+      app: :rig_tests,
       version: "0.1.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
