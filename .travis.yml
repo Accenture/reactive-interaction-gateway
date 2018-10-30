@@ -13,7 +13,7 @@ jobs:
         - MIX_ENV=test
       script:
         - mix test
-        - mix credo --strict
+        - mix credo --ignore-checks Design
     - stage: website
       language: node_js
       node_js:
