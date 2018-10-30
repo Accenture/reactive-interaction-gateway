@@ -1,21 +1,25 @@
-matrix:
+stages:
+  - build
+  - name: website
+    if: branch = master
+
+jobs:
   include:
-  - language: elixir
-    elixir: '1.7'
-    otp_release: '21.0'
-    script:
-    - mix test
-    - mix credo --strict
-  - language: node_js
-    node_js:
-      - '8'
-    branches:
-      only:
-        - master
-    cache:
-      yarn: true
-    script:
-      - git config --global user.name "${GH_NAME}"
-      - git config --global user.email "${GH_EMAIL}"
-      - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
-      - cd website && yarn install && GIT_USER="${GH_NAME}" yarn run publish-gh-pages
+    - stage: test
+      language: elixir
+      elixir: "1.7"
+      otp_release: "21.0"
+      script:
+        - mix test
+        - mix credo --strict
+    - stage: website
+      language: node_js
+      node_js:
+        - "8"
+      cache:
+        yarn: true
+      script:
+        - git config --global user.name "${GH_NAME}"
+        - git config --global user.email "${GH_EMAIL}"
+        - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
+        - cd website && yarn install && GIT_USER="${GH_NAME}" yarn run publish-gh-pages
