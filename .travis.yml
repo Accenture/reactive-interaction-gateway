@@ -1,5 +1,5 @@
 stages:
-  - build
+  - test
   - name: website
     if: branch = master
 
