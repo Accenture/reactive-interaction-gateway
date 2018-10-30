@@ -1,4 +1,9 @@
 defmodule RigInboundGateway.ApiProxy.Api do
+  @moduledoc """
+  Service definitions for the proxy.
+
+  """
+
   @type endpoint :: %{
           optional(:not_secured) => boolean,
           optional(:transform_request_headers) => boolean,

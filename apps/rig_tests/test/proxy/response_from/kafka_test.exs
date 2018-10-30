@@ -41,13 +41,8 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     async_response = %{"this is the async response" => "that reaches the client instead"}
 
     route(endpoint_path, fn _ ->
-      with :ok <- RigKafka.produce(@kafka_config, kafka_topic, "response", async_response) do
-        Response.ok(sync_response, %{"content-type" => "application/json"})
-      else
-        e ->
-          IO.inspect(e, label: "Failed to produce response to Kafka")
-          raise e
-      end
+      assert :ok = RigKafka.produce(@kafka_config, kafka_topic, "response", async_response)
+      Response.ok(sync_response, %{"content-type" => "application/json"})
     end)
 
     # We register the endpoint with the proxy:

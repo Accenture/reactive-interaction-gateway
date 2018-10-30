@@ -6,8 +6,6 @@ defmodule RigKafka.Client do
   @reconnect_timeout_ms 20_000
   use GenServer, shutdown: @reconnect_timeout_ms + 5_000
 
-  import RigKafka.Types
-
   alias RigKafka.Config
 
   @supervisor RigKafka.DynamicSupervisor
