@@ -53,7 +53,6 @@ defmodule RigInboundGateway.Mixfile do
       {:phoenix_pubsub, "~> 1.0"},
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 1.3"},
-      {:bypass, "~> 0.8.1", only: :test},
       # JSON libs:
       {:poison, "~> 2.0 or ~> 3.0"},
       {:jason, "~> 1.1"},
