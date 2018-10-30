@@ -12,7 +12,7 @@ jobs:
       env:
         - MIX_ENV=test
       script:
-        - mix deps.compile && mix compile --warnings-as-errors && mix test
+        - mix test
         - mix credo --strict
     - stage: website
       language: node_js
