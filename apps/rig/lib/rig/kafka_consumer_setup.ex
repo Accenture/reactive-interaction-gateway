@@ -34,6 +34,7 @@ defmodule Rig.KafkaConsumerSetup do
 
       use Rig.Config, unquote(config_keys)
 
+      alias Rig.KafkaConfig, as: RigKafkaConfig
       alias RigKafka
 
       # ---
@@ -55,25 +56,7 @@ defmodule Rig.KafkaConsumerSetup do
       # ---
 
       defp do_start_link(conf, opts) do
-        ssl_config =
-          if conf.ssl_enabled? do
-            %{
-              path_to_key_pem: conf.ssl_keyfile,
-              key_password: conf.ssl_keyfile_pass,
-              path_to_cert_pem: conf.ssl_certfile,
-              path_to_ca_cert_pem: conf.ssl_ca_certfile
-            }
-          else
-            nil
-          end
-
-        kafka_config =
-          RigKafka.Config.new(%{
-            brokers: Rig.Config.parse_socket_list(conf.brokers),
-            consumer_topics: conf.consumer_topics,
-            ssl: ssl_config,
-            sasl: parse_sasl_config(conf.sasl)
-          })
+        kafka_config = RigKafkaConfig.parse(conf)
 
         case RigKafka.start(kafka_config, &__MODULE__.kafka_handler/1) do
           {:ok, _pid} ->
@@ -90,17 +73,6 @@ defmodule Rig.KafkaConsumerSetup do
 
       @impl GenServer
       def init(state), do: {:ok, state}
-
-      # ---
-
-      @spec parse_sasl_config(String.t() | nil) :: nil | {:plain, String.t(), String.t()}
-
-      defp parse_sasl_config(nil), do: nil
-
-      defp parse_sasl_config("plain:" <> plain) do
-        [username | password] = String.split(plain, ":", parts: 2)
-        {:plain, username, password}
-      end
     end
   end
 end

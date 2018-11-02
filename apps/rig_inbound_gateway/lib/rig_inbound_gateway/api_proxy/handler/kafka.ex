@@ -22,9 +22,15 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     with {:ok, body} <- Jason.decode(message),
          {:ok, correlation_id} <- Map.fetch(body, "correlation_id"),
          {:ok, deserialized_pid} <- Codec.deserialize(correlation_id) do
+      Logger.debug(fn ->
+        "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
+      end)
+
       send(deserialized_pid, {:response_received, message})
     else
-      _ -> :ignore
+      err ->
+        Logger.debug(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)
+        :ignore
     end
 
     :ok

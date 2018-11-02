@@ -8,19 +8,33 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
   Note that `test_with_server` sets up an HTTP server mock, which is then configured
   using the `route` macro.
   """
-  use Rig.Config, [:response_topic]
+  use Rig.Config, [
+    :brokers,
+    :consumer_topics,
+    :ssl_enabled?,
+    :ssl_ca_certfile,
+    :ssl_certfile,
+    :ssl_keyfile,
+    :ssl_keyfile_pass,
+    :sasl,
+    :response_topic
+  ]
+
   use ExUnit.Case, async: false
   import FakeServer
   alias FakeServer.HTTP.Response
 
+  alias Rig.KafkaConfig, as: RigKafkaConfig
   alias RigKafka
 
   @api_port Confex.fetch_env!(:rig_api, RigApi.Endpoint)[:http][:port]
   @proxy_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][:port]
-  @kafka_config RigKafka.Config.new(Application.fetch_env!(:rig, :systest_kafka_config))
+
+  defp kafka_config, do: RigKafkaConfig.parse(config())
 
   setup do
-    {:ok, kafka_client} = RigKafka.start(@kafka_config)
+    kafka_config = kafka_config()
+    {:ok, kafka_client} = RigKafka.start(kafka_config)
 
     on_exit(fn ->
       RigKafka.Client.stop_supervised(kafka_client)
@@ -37,11 +51,22 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     endpoint_id = "mock-#{test_name}-endpoint"
     %{response_topic: kafka_topic} = config()
     endpoint_path = "/#{endpoint_id}"
-    sync_response = %{"the client" => "never sees this response"}
-    async_response = %{"this is the async response" => "that reaches the client instead"}
+    sync_response = %{"message" => "the client never sees this response"}
+    async_response = %{"message" => "this is the async response that reaches the client instead"}
 
-    route(endpoint_path, fn _ ->
-      assert :ok = RigKafka.produce(@kafka_config, kafka_topic, "response", async_response)
+    route(endpoint_path, fn %{query: query} ->
+      correlation_id =
+        query
+        |> Map.fetch!("correlation_id")
+        |> URI.decode_www_form()
+
+      message =
+        async_response
+        |> Map.put("correlation_id", correlation_id)
+        |> Jason.encode!()
+
+      kafka_config = kafka_config()
+      assert :ok == RigKafka.produce(kafka_config, kafka_topic, "response", message)
       Response.ok(sync_response, %{"content-type" => "application/json"})
     end)
 
@@ -88,6 +113,6 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     # ...the client never saw the http response:
     assert Jason.decode!(res_body) != sync_response
     # ...but the client got the response sent to the Kafka topic:
-    assert Jason.decode!(res_body) == async_response
+    assert Jason.decode!(res_body)["message"] == Map.fetch!(async_response, "message")
   end
 end

@@ -1,0 +1,31 @@
+version: "3"
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - 2181
+
+  kafka:
+    image: wurstmeister/kafka:2.11-2.0.0
+    environment:
+      - KAFKA_LISTENERS=HOSTPLAIN://:${KAFKA_PORT_PLAIN},HOSTSSL://:${KAFKA_PORT_SSL},DOCKERPLAIN://:9292,DOCKERSSL://:9393
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=HOSTPLAIN:PLAINTEXT,HOSTSSL:SSL,DOCKERPLAIN:PLAINTEXT,DOCKERSSL:SSL
+      - KAFKA_ADVERTISED_LISTENERS=HOSTPLAIN://${HOST}:${KAFKA_PORT_PLAIN},HOSTSSL://${HOST}:${KAFKA_PORT_SSL},DOCKERPLAIN://kafka:9292,DOCKERSSL://kafka:9393
+      - KAFKA_INTER_BROKER_LISTENER_NAME=DOCKERPLAIN
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CREATE_TOPICS=rig:1:1,rig-proxy-response:1:1
+      - KAFKA_SSL_TRUSTSTORE_LOCATION=/certs/truststore.jks
+      - KAFKA_SSL_TRUSTSTORE_PASSWORD=abcdefgh
+      - KAFKA_SSL_KEYSTORE_LOCATION=/certs/server.keystore.jks
+      - KAFKA_SSL_KEYSTORE_PASSWORD=abcdefgh
+      - KAFKA_SSL_KEY_PASSWORD=abcdefgh
+      - KAFKA_SSL_CLIENT_AUTH=required
+    ports:
+      - ${KAFKA_PORT_PLAIN}:${KAFKA_PORT_PLAIN}
+      - ${KAFKA_PORT_SSL}:${KAFKA_PORT_SSL}
+      - 9292
+      - 9393
+    volumes:
+      - ./certs:/certs
+    depends_on:
+      - zookeeper

@@ -82,7 +82,8 @@ defmodule RigKafka.Client do
 
   # ---
 
-  def produce(%{server_id: server_id}, topic, key, plaintext) do
+  def produce(%{server_id: server_id}, topic, key, plaintext)
+      when is_binary(topic) and is_binary(key) and is_binary(plaintext) do
     GenServer.call(server_id, {:produce, topic, key, plaintext})
   end
 

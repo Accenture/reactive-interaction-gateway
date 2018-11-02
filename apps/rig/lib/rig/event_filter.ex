@@ -246,12 +246,12 @@ defmodule Rig.EventFilter do
   - Connection processes
     - are tied to the connection itself
   - Subscription entries in the filters' ETS table..
-    - ..are created and refreshed periodically by the connection process, which sends
+    - are created and refreshed periodically by the connection process, which sends
       the request to all filter processes in the event-type group. The HTTP call that
       creates the subscription does not directly call a filter process, but instead
       informs the connection process itself of the new subscription, which in turn
       registers with the respective filter processes.
-    - ..have a per record time-to-live, used to keep the data current. If a connection
+    - have a per record time-to-live, used to keep the data current. If a connection
       process dies, the subscription records will no longer be refreshed and get
       removed eventually.
 
