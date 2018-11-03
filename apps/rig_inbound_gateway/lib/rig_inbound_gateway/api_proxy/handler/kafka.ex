@@ -29,7 +29,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
       send(deserialized_pid, {:response_received, message})
     else
       err ->
-        Logger.debug(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)
+        Logger.warn(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)
         :ignore
     end
 
