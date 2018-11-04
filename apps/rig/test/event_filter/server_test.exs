@@ -23,7 +23,7 @@ defmodule Rig.EventFilter.ServerTest do
     opts = [debug?: true, subscription_ttl_s: 0]
     {:ok, filter_pid} = Server.start_link(event_type, field_config, opts)
 
-    EventFilter.refresh_subscriptions([subscription])
+    EventFilter.refresh_subscriptions([subscription], [])
     EventFilter.forward_event(event)
     EventFilter.forward_event(event)
 
@@ -93,7 +93,7 @@ defmodule Rig.EventFilter.ServerTest do
 
     for {subscription, event, match_expectation} <- specs do
       {:ok, filter_pid} = Server.start_link(event_type, field_config)
-      EventFilter.refresh_subscriptions([subscription])
+      EventFilter.refresh_subscriptions([subscription], [])
       EventFilter.forward_event(event)
 
       case match_expectation do

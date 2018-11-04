@@ -8,6 +8,8 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   alias RigAuth.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
   alias RigAuth.Session
 
+  # ---
+
   @doc false
   def handle_preflight(%{method: "OPTIONS"} = conn, _params) do
     conn
@@ -17,21 +19,27 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
     |> send_resp(:no_content, "")
   end
 
+  # ---
+
   defp with_allow_origin(conn) do
     %{cors: origins} = config()
     put_resp_header(conn, "access-control-allow-origin", origins)
   end
 
+  # ---
+
   @doc """
-  Adds subscriptions to an existing connection.
+  Sets subscriptions for an existing connection, replacing previous subscriptions.
 
   There may be multiple subscriptions contained in the request body. Each subscription
   refers to a single event type and may optionally include a constraint list
-  (conjunctive normal form).
+  (conjunctive normal form). Subscriptions that were present in a previous request but
+  are no longer present in this one will be removed.
 
-  For example, setting up a single subscription with a constraint that says "either
-  head_repo equals `octocat/Hello-World`, or `base_repo` equals `octocat/Hello-World`
-  (or both)":
+  ## Example
+
+  Single subscription with a constraint that says "either head_repo equals
+  `octocat/Hello-World`, or `base_repo` equals `octocat/Hello-World` (or both)":
 
       {
         "subscriptions": [
@@ -44,10 +52,11 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
           }
         ]
       }
+
   """
-  @spec create_subscription(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
-  def create_subscription(
-        %{method: "POST", body_params: %{"subscriptions" => subscriptions}} = conn,
+  @spec set_subscriptions(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
+  def set_subscriptions(
+        %{method: "PUT", body_params: %{"subscriptions" => subscriptions}} = conn,
         %{
           "connection_id" => connection_id
         }
@@ -59,15 +68,11 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
     with :ok <- SubscriptionAuthZ.check_authorization(conn),
          {:ok, socket_pid} <- Connection.Codec.deserialize(connection_id),
-         :ok <- connection_alive!(socket_pid) do
-      # Updating the session allows blacklisting it later on:
-      Session.update(conn, socket_pid)
-
-      n_subscriptions =
-        create_subscriptions(socket_pid, subscriptions)
-        |> Enum.count()
-
-      send_resp(conn, :created, "Subscriptions created: #{n_subscriptions}")
+         :ok <- connection_alive!(socket_pid),
+         # Updating the session allows blacklisting it later on:
+         Session.update(conn, socket_pid),
+         :ok <- check_and_forward_subscriptions(socket_pid, subscriptions) do
+      send_resp(conn, :no_content, "")
     else
       {:error, :not_authorized} ->
         conn |> put_status(:forbidden) |> text("Subscription denied.")
@@ -80,32 +85,40 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
       {:error, :process_dead} ->
         conn |> put_status(:gone) |> text("Connection no longer exists.")
+
+      {:error, :could_not_parse_subscriptions, bad_subscriptions} ->
+        conn
+        |> put_status(:bad_request)
+        |> text("Could not parse subscriptions: #{inspect(bad_subscriptions)}")
     end
   end
+
+  # ---
 
   defp connection_alive!(pid) do
     if Process.alive?(pid), do: :ok, else: {:error, :process_dead}
   end
 
-  defp create_subscriptions(socket_pid, subscriptions) do
-    log_parse_error = fn reason, params ->
-      Logger.warn(fn ->
-        params = Jason.encode!(params)
-        "Error creating subscription for #{socket_pid}: #{reason} (params: #{params})"
-      end)
-    end
+  # ---
 
-    subscribe = fn
-      %Subscription{} = sub ->
-        :ok = Connection.Api.register_subscription(socket_pid, sub)
-        sub
-
-      {:error, reason, params} ->
-        log_parse_error.(reason, params)
-    end
-
+  defp check_and_forward_subscriptions(socket_pid, subscriptions) do
     subscriptions
     |> Enum.map(&Subscription.new/1)
-    |> Enum.map(subscribe)
+    |> Enum.group_by(fn
+      %Subscription{} -> :good
+      _ -> :bad
+    end)
+    |> case do
+      %{bad: bad} ->
+        {:error, :could_not_parse_subscriptions, bad}
+
+      %{good: good} ->
+        send(socket_pid, {:set_subscriptions, good})
+        :ok
+
+      %{} ->
+        send(socket_pid, {:set_subscriptions, []})
+        :ok
+    end
   end
 end

@@ -269,17 +269,19 @@ defmodule Rig.EventFilter do
   process group to find them.
 
   """
-  @callback refresh_subscriptions([Subscription.t()]) :: :ok
-  @spec refresh_subscriptions([Subscription.t()]) :: :ok
-  def refresh_subscriptions(subscriptions) do
+  @callback refresh_subscriptions([Subscription.t()], [Subscription.t()]) :: :ok
+  @spec refresh_subscriptions([Subscription.t()], [Subscription.t()]) :: :ok
+  def refresh_subscriptions(subscriptions, prev_subscriptions) do
     # There is one Filter Supervisor per node. Each of those supervisors forwards the
     # subscriptions to the right Filter processes on the node they're located on.
     for pid <- FilterSup.processes() do
-      GenServer.call(pid, {:refresh_subscriptions, subscriptions})
+      GenServer.call(pid, {:refresh_subscriptions, subscriptions, prev_subscriptions})
     end
 
     :ok
   end
+
+  # ---
 
   @callback forward_event(CloudEvent.t()) :: :ok
   @spec forward_event(CloudEvent.t()) :: :ok

@@ -13,21 +13,20 @@ defmodule RigInboundGateway.Events do
     data = %{connection_token: connection_token}
 
     CloudEvent.new!(%{
+      "cloudEventsVersion" => "0.1",
       "eventType" => "rig.connection.create",
       "source" => "rig"
     })
     |> CloudEvent.with_data(data)
   end
 
-  @spec subscription_create(Subscription.t()) :: CloudEvent.t()
-  def subscription_create(%Subscription{} = subscription) do
+  @spec subscriptions_set([Subscription.t()]) :: CloudEvent.t()
+  def subscriptions_set(subscriptions) do
     CloudEvent.new!(%{
-      "eventType" => "rig.subscription.create",
+      "cloudEventsVersion" => "0.1",
+      "eventType" => "rig.subscriptions_set",
       "source" => "rig"
     })
-    |> CloudEvent.with_data(%{
-      "eventType" => subscription.event_type,
-      "constraints" => subscription.constraints
-    })
+    |> CloudEvent.with_data(subscriptions)
   end
 end

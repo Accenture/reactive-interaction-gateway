@@ -9,9 +9,33 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
 
   import Joken
 
+  alias RigInboundGatewayWeb.Net
   alias RigInboundGatewayWeb.Router
 
   @env [port: 7070]
+  @tcp_port_wait_ms 500
+  @tcp_port_retries 50
+
+  setup do
+    api_port = @env[:port]
+    wait_until_tcp_port_is_free(api_port, @tcp_port_retries)
+    :ok
+  end
+
+  defp wait_until_tcp_port_is_free(api_port, 0), do: raise("TCP port #{api_port} in use")
+
+  defp wait_until_tcp_port_is_free(api_port, n_retry) do
+    if not Net.tcp_port_free?(api_port) do
+      IO.puts(
+        "TCP port #{api_port} in use (waiting for #{@tcp_port_wait_ms} ms, retries left: #{
+          n_retry
+        })"
+      )
+
+      :timer.sleep(@tcp_port_wait_ms)
+      wait_until_tcp_port_is_free(api_port, n_retry - 1)
+    end
+  end
 
   test "not defined endpoint should return 404" do
     conn = call(Router, build_conn(:get, "/random/route"))

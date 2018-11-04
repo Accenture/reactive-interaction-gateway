@@ -69,39 +69,37 @@ defmodule RigInboundGatewayWeb.V1.SSE do
       |> max(0)
 
     receive do
+      # Cloud Events are forwarded to the client:
       {:cloud_event, cloud_event} ->
-        Logger.debug(fn -> "[SSE] #{inspect(cloud_event)}" end)
-
-        conn
-        |> send_chunk(cloud_event)
-        |> wait_for_events(state, next_heartbeat)
-
-      {:register_subscription, subscription} ->
-        Logger.debug(fn ->
-          event_type = "eventType=#{inspect(subscription.event_type)}"
-          constraints = "constraints=#{inspect(subscription.constraints)}"
-          "[SSE] registered subscription: #{event_type} #{constraints}"
-        end)
-
-        send(self(), :refresh_subscriptions)
-        state = update_in(state.subscriptions, &[subscription | &1])
-
-        conn
-        |> send_chunk(Events.subscription_create(subscription))
-        |> wait_for_events(state, next_heartbeat)
-
-      :refresh_subscriptions ->
-        Logger.debug(fn ->
-          "[SSE] refreshing #{length(state.subscriptions)} subscriptions"
-        end)
-
-        EventFilter.refresh_subscriptions(state.subscriptions)
-
-        Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
+        Logger.debug(fn -> inspect(cloud_event) end)
+        # Forward the event:
+        send_chunk(conn, cloud_event)
+        # Keep the connection open:
         wait_for_events(conn, state, next_heartbeat)
 
+      # (Re-)Set subscriptions for this connection:
+      {:set_subscriptions, subscriptions} ->
+        Logger.debug(fn -> inspect(subscriptions) end)
+        # Trigger immediate refresh:
+        EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
+        # Replace current subscriptions:
+        state = Map.put(state, :subscriptions, subscriptions)
+        # Notify the client:
+        send_chunk(conn, Events.subscriptions_set(subscriptions))
+        # Keep the connection open:
+        wait_for_events(conn, state, next_heartbeat)
+
+      # Subscriptions need to be refreshed periodically:
+      :refresh_subscriptions ->
+        EventFilter.refresh_subscriptions(state.subscriptions, [])
+        Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
+        # Keep the connection open:
+        wait_for_events(conn, state, next_heartbeat)
+
+      # In case the connection belongs to a session and that session is killed,
+      # exit the loop and close the connection:
       {:session_killed, group} ->
-        Logger.info("[SSE] session killed: #{inspect(group)}")
+        Logger.info("session killed: #{inspect(group)}")
         send_chunk(conn, %ServerSentEvent{comments: ["Session killed."]})
     after
       heartbeat_remaining_ms ->
