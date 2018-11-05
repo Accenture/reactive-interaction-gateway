@@ -25,7 +25,7 @@
       } = cloudEvent
 
       const li = document.createElement("li")
-      li.textContent = `[${new Date(eventTime).toLocaleTimeString()}] ${data}`
+      li.textContent = `[${new Date(eventTime).toLocaleTimeString()}] ${JSON.stringify(data)}`
       eventList.appendChild(li)
     }
 
@@ -51,7 +51,9 @@
           eventType: "greeting",
           source: "sse-demo-ui",
           contentType: "text/plain",
-          data: greeting
+          data: {
+            name: greeting
+          }
         })
       })
         .then(response => response.json())
@@ -64,6 +66,17 @@
         })
     }
 
+    /**
+      {
+        "eventType": eventType,
+        "oneOf": [
+          {
+            "name": "first.user.sk"
+          }
+        ]
+      }
+    */
+
     function createSubscription(connectionToken) {
       const eventType = "greeting"
       return fetch(`${baseUrl}/connection/sse/${connectionToken}/subscriptions`, {
@@ -72,7 +85,18 @@
         headers: {
           "Content-Type": "application/json; charset=utf-8"
         },
-        body: JSON.stringify({ "subscriptions": [{ "eventType": eventType }] })
+        body: JSON.stringify({
+          "subscriptions": [
+            {
+              "eventType": "example",
+              "oneOf": [
+                {
+                  "name": "yolo"
+                }
+              ]
+            }
+          ]
+        })
       })
         .then(json => {
           console.log("Subscription created:", json)
@@ -83,7 +107,8 @@
         })
     }
 
-    const source = new EventSource(`${baseUrl}/connection/sse`)
+    const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbImN1c3RvbWVyIl0sInVzZXJuYW1lIjoiZmlyc3QudXNlci5zayIsImZ1bGxuYW1lIjoiRmlyc3QgVXNlciBTSyIsImVtYWlsIjoiRWx5c2U0MEB5YWhvby5jb20iLCJhdmF0YXIiOiJodHRwczovL3MzLmFtYXpvbmF3cy5jb20vdWlmYWNlcy9mYWNlcy90d2l0dGVyL2Rvcm9ubWFsa2kvMTI4LmpwZyIsImliYW4iOiJTSzEyQVJFUzAwU0swMDAwMSIsInVzZXJUeXBlIjoiaW5kaXZpZHVhbCIsImJ1c2luZXNzQXJlYSI6IiIsImNvdW50cnkiOiJTbG92YWtpYSIsInNjb3BlcyI6e30sImlhdCI6MTU0MTQxMzA4MiwiZXhwIjoxNTQxNDE2NjgyLCJqdGkiOiI5NzMwMGIzMi05OWRkLTRhMzUtOWQ2OC1mYWE1ZDVkZTMzMzMifQ.iGPfYIXlvaA4O1bBImRvYzKMXYDH7WpfzBIazMCoY5c";
+    const source = new EventSource(`${baseUrl}/connection/sse?token=${jwt}`)
 
     source.onopen = (e) => console.log("open", e)
     source.onmessage = (e) => console.log("message", e)
@@ -93,7 +118,7 @@
       cloudEvent = JSON.parse(e.data)
       payload = cloudEvent.data
       connectionToken = payload["connection_token"]
-      createSubscription(connectionToken)
+      // createSubscription(connectionToken)
     }, false);
 
     source.addEventListener("greeting", function (e) {

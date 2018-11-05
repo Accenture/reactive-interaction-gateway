@@ -4,9 +4,10 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   use RigInboundGatewayWeb, :controller
 
   alias Rig.Connection
-  alias Rig.Subscription
   alias RigAuth.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
   alias RigAuth.Session
+  alias RigInboundGateway.ImplicitSubscriptions.Jwt, as: JwtSubscriptions
+  alias RigInboundGateway.Subscriptions
 
   # ---
 
@@ -14,8 +15,8 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   def handle_preflight(%{method: "OPTIONS"} = conn, _params) do
     conn
     |> with_allow_origin()
-    |> put_resp_header("access-control-allow-methods", "POST")
-    |> put_resp_header("access-control-allow-headers", "content-type")
+    |> put_resp_header("access-control-allow-methods", "PUT")
+    |> put_resp_header("access-control-allow-headers", "content-type,authorization")
     |> send_resp(:no_content, "")
   end
 
@@ -64,14 +65,13 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
       when is_list(subscriptions) do
     conn = with_allow_origin(conn)
 
-    # TODO if bearer token, set up implicit subscriptions
-
     with :ok <- SubscriptionAuthZ.check_authorization(conn),
          {:ok, socket_pid} <- Connection.Codec.deserialize(connection_id),
          :ok <- connection_alive!(socket_pid),
          # Updating the session allows blacklisting it later on:
          Session.update(conn, socket_pid),
-         :ok <- check_and_forward_subscriptions(socket_pid, subscriptions) do
+         all_subscriptions <- collect_subscriptions(conn, subscriptions),
+         :ok <- Subscriptions.check_and_forward_subscriptions(socket_pid, all_subscriptions) do
       send_resp(conn, :no_content, "")
     else
       {:error, :not_authorized} ->
@@ -95,30 +95,14 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
   # ---
 
-  defp connection_alive!(pid) do
-    if Process.alive?(pid), do: :ok, else: {:error, :process_dead}
+  defp collect_subscriptions(conn, subscriptions) do
+    jwts = Plug.Conn.get_req_header(conn, "authorization")
+    subscriptions ++ JwtSubscriptions.check_subscriptions(jwts)
   end
 
   # ---
 
-  defp check_and_forward_subscriptions(socket_pid, subscriptions) do
-    subscriptions
-    |> Enum.map(&Subscription.new/1)
-    |> Enum.group_by(fn
-      %Subscription{} -> :good
-      _ -> :bad
-    end)
-    |> case do
-      %{bad: bad} ->
-        {:error, :could_not_parse_subscriptions, bad}
-
-      %{good: good} ->
-        send(socket_pid, {:set_subscriptions, good})
-        :ok
-
-      %{} ->
-        send(socket_pid, {:set_subscriptions, []})
-        :ok
-    end
+  defp connection_alive!(pid) do
+    if Process.alive?(pid), do: :ok, else: {:error, :process_dead}
   end
 end

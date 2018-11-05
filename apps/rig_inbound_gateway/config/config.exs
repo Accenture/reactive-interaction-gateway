@@ -141,6 +141,9 @@ config :rig, RigAuth.AuthorizationCheck.Subscription,
 config :rig, RigAuth.AuthorizationCheck.Submission,
   validation_type: {:system, "SUBMISSION_CHECK", "NO_CHECK"}
 
+config :rig, RigInboundGateway.ImplicitSubscriptions.Jwt,
+  extractor_config_path_or_json: {:system, "EXTRACTORS", nil}
+
 # --------------------------------------
 # Transports, Channels, etc
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -66,11 +66,13 @@
 
     function createSubscription(connectionToken) {
       const eventType = "greeting"
+      const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbImN1c3RvbWVyIl0sInVzZXJuYW1lIjoiZmlyc3QudXNlci5zayIsImZ1bGxuYW1lIjoiRmlyc3QgVXNlciBTSyIsImVtYWlsIjoiRWx5c2U0MEB5YWhvby5jb20iLCJhdmF0YXIiOiJodHRwczovL3MzLmFtYXpvbmF3cy5jb20vdWlmYWNlcy9mYWNlcy90d2l0dGVyL2Rvcm9ubWFsa2kvMTI4LmpwZyIsImliYW4iOiJTSzEyQVJFUzAwU0swMDAwMSIsInVzZXJUeXBlIjoiaW5kaXZpZHVhbCIsImJ1c2luZXNzQXJlYSI6IiIsImNvdW50cnkiOiJTbG92YWtpYSIsInNjb3BlcyI6e30sImlhdCI6MTU0MTE2MTkxMywiZXhwIjoxNTQxMTY1NTEzLCJqdGkiOiJhMDgxMWQzZS05NGJlLTRjNTUtYWZiZi1iN2QzMzc0N2NjZGYifQ.9JOOST3TvZL7EFevT4qrwgaqmU5ulQOLBnI7plP8J-w";
       return fetch(`${baseUrl}/connection/sse/${connectionToken}/subscriptions`, {
         method: "PUT",
         mode: "cors",
         headers: {
-          "Content-Type": "application/json; charset=utf-8"
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: jwt
         },
         body: JSON.stringify({ "subscriptions": [{ "eventType": eventType }] })
       })
