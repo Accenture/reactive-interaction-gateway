@@ -10,12 +10,12 @@ defmodule RigInboundGateway.ImplicitSubscriptions.Jwt do
   alias Rig.EventFilter.Config
   alias RigAuth.Jwt.Utils
 
-  def check_subscriptions([]) do
+  def infer_subscriptions([]) do
     Logger.debug("JWT not present in request > no implicit JWT subscriptions will be added")
     []
   end
 
-  def check_subscriptions(jwts) do
+  def infer_subscriptions(jwts) do
     %{extractor_config_path_or_json: extractor_config_path_or_json} = config()
     {:ok, extractor_map} = Config.new(extractor_config_path_or_json)
     claims = extract_token_claims(jwts)
@@ -67,7 +67,7 @@ defmodule RigInboundGateway.ImplicitSubscriptions.Jwt do
 
   defp get_pointer_values(_jwt_claims, constraint, _name) do
     Logger.warn(fn ->
-      "Constraint=#{inspect(constraint)} doesn\'t include key=jwt > skipping implicit subscription creation"
+      "Constraint=#{inspect(constraint)} doesn't include key=jwt > skipping implicit subscription creation"
     end)
 
     nil

@@ -30,8 +30,3 @@ config :rig, RigInboundGateway.Proxy,
   config_file: {:system, "PROXY_CONFIG_FILE", "proxy/proxy.test.json"}
 
 config :rig, RigInboundGatewayWeb.Proxy.Controller, rig_proxy: RigInboundGateway.ProxyMock
-
-config :rig, RigInboundGateway.ImplicitSubscriptions.Jwt,
-  extractor_config_path_or_json:
-    {:system, "EXTRACTORS",
-     "{\"event_one\":{\"name\":{\"stable_field_index\":1,\"jwt\":{\"json_pointer\":\"\/username\"},\"event\":{\"json_pointer\":\"\/data\/name\"}}},\"event_two\":{\"fullname\":{\"stable_field_index\":1,\"jwt\":{\"json_pointer\":\"\/fullname\"},\"event\":{\"json_pointer\":\"\/data\/fullname\"}},\"name\":{\"stable_field_index\":1,\"jwt\":{\"json_pointer\":\"\/username\"},\"event\":{\"json_pointer\":\"\/data\/name\"}}},\"example\":{\"email\":{\"stable_field_index\":1,\"event\":{\"json_pointer\":\"\/data\/email\"}}}}"}

@@ -35,7 +35,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   defp do_create_and_attach(conn) do
     if conn.query_params |> Map.has_key?("token") do
       %{"token" => token} = conn.query_params
-      jwt_subscriptions = JwtSubscriptions.check_subscriptions([token])
+      jwt_subscriptions = JwtSubscriptions.infer_subscriptions([token])
       Subscriptions.check_and_forward_subscriptions(self(), jwt_subscriptions)
     end
 

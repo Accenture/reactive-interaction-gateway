@@ -70,7 +70,11 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
          :ok <- connection_alive!(socket_pid),
          # Updating the session allows blacklisting it later on:
          Session.update(conn, socket_pid),
-         all_subscriptions <- collect_subscriptions(conn, subscriptions),
+         all_subscriptions <-
+           conn
+           |> Plug.Conn.get_req_header("authorization")
+           |> JwtSubscriptions.infer_subscriptions()
+           |> Enum.concat(subscriptions),
          :ok <- Subscriptions.check_and_forward_subscriptions(socket_pid, all_subscriptions) do
       send_resp(conn, :no_content, "")
     else
@@ -91,13 +95,6 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
         |> put_status(:bad_request)
         |> text("Could not parse subscriptions: #{inspect(bad_subscriptions)}")
     end
-  end
-
-  # ---
-
-  defp collect_subscriptions(conn, subscriptions) do
-    jwts = Plug.Conn.get_req_header(conn, "authorization")
-    subscriptions ++ JwtSubscriptions.check_subscriptions(jwts)
   end
 
   # ---
