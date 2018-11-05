@@ -13,11 +13,14 @@ defmodule Rig.Plug.AuthHeader do
     auth_tokens =
       for {"authorization", val} <- conn.req_headers do
         Conn.Utils.list(val)
-        |> String.split(" ", parts: 2)
-        |> case do
-          [token, []] -> {"bearer", token}
-          [scheme, token] -> {String.downcase(scheme), token}
-        end
+        |> Enum.map(fn token ->
+          token
+          |> String.split(" ", parts: 2)
+          |> case do
+            [token] -> {"bearer", token}
+            [scheme, token] -> {String.downcase(scheme), token}
+          end
+        end)
       end
       |> Enum.concat()
 

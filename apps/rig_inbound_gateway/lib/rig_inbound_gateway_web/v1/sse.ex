@@ -9,6 +9,8 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   alias Rig.EventFilter
   alias RigInboundGateway.Events
+  alias RigInboundGateway.ImplicitSubscriptions.Jwt, as: JwtSubscriptions
+  alias RigInboundGateway.Subscriptions
   alias ServerSentEvent
 
   defmodule ConnectionClosed do
@@ -31,6 +33,10 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   end
 
   defp do_create_and_attach(conn) do
+    %{"token" => token} = conn.query_params
+    jwt_subscriptions = JwtSubscriptions.check_subscriptions([token])
+    Subscriptions.create_subscriptions(self(), jwt_subscriptions)
+
     conn
     |> send_chunk(Events.welcome_event())
     |> wait_for_events()

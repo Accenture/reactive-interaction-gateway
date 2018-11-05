@@ -13,11 +13,9 @@ config :rig, RigInboundGateway.RateLimit,
   burst_size: 10,
   sweep_interval_ms: 0
 
-config :rig, RigInboundGateway.Kafka,
-  log_topic: "rig"
+config :rig, RigInboundGateway.Kafka, log_topic: "rig"
 
-config :rig, RigInboundGateway.Kafka.MessageHandler,
-  message_user_field: "username"
+config :rig, RigInboundGateway.Kafka.MessageHandler, message_user_field: "username"
 
 config :rig, RigInboundGateway.Kafka.SupWrapper,
   message_user_field: "username",
@@ -31,5 +29,9 @@ config :rig, RigInboundGatewayWeb.Presence.Channel,
 config :rig, RigInboundGateway.Proxy,
   config_file: {:system, "PROXY_CONFIG_FILE", "proxy/proxy.test.json"}
 
-config :rig, RigInboundGatewayWeb.Proxy.Controller,
-  rig_proxy: RigInboundGateway.ProxyMock
+config :rig, RigInboundGatewayWeb.Proxy.Controller, rig_proxy: RigInboundGateway.ProxyMock
+
+config :rig, RigInboundGateway.ImplicitSubscriptions.Jwt,
+  extractor_config_path_or_json:
+    {:system, "EXTRACTORS",
+     "{\"event_one\":{\"name\":{\"stable_field_index\":1,\"jwt\":{\"json_pointer\":\"\/username\"},\"event\":{\"json_pointer\":\"\/data\/name\"}}},\"event_two\":{\"fullname\":{\"stable_field_index\":1,\"jwt\":{\"json_pointer\":\"\/fullname\"},\"event\":{\"json_pointer\":\"\/data\/fullname\"}},\"name\":{\"stable_field_index\":1,\"jwt\":{\"json_pointer\":\"\/username\"},\"event\":{\"json_pointer\":\"\/data\/name\"}}},\"example\":{\"email\":{\"stable_field_index\":1,\"event\":{\"json_pointer\":\"\/data\/email\"}}}}"}

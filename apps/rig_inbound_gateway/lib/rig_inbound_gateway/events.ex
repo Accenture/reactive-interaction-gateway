@@ -14,7 +14,8 @@ defmodule RigInboundGateway.Events do
 
     CloudEvent.new!(%{
       "eventType" => "rig.connection.create",
-      "source" => "rig"
+      "source" => "rig",
+      "cloudEventsVersion" => "0.1"
     })
     |> CloudEvent.with_data(data)
   end
@@ -23,7 +24,8 @@ defmodule RigInboundGateway.Events do
   def subscription_create(%Subscription{} = subscription) do
     CloudEvent.new!(%{
       "eventType" => "rig.subscription.create",
-      "source" => "rig"
+      "source" => "rig",
+      "cloudEventsVersion" => "0.1"
     })
     |> CloudEvent.with_data(%{
       "eventType" => subscription.event_type,
