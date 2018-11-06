@@ -12,6 +12,8 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   alias Rig.EventFilter
   alias RigInboundGateway.Events
+  alias RigInboundGateway.ImplicitSubscriptions.Jwt, as: JwtSubscriptions
+  alias RigInboundGateway.Subscriptions
 
   @behaviour :cowboy_websocket_handler
 
@@ -28,6 +30,17 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   @impl :cowboy_websocket_handler
   def websocket_init(_type, req, _opts) do
     send(self(), :send_connection_token)
+
+    token_param =
+      Tuple.to_list(req)
+      |> Enum.find(fn val -> is_binary(val) && String.starts_with?(val, "token=") end)
+
+    if token_param do
+      "token=" <> token = token_param
+      jwt_subscriptions = JwtSubscriptions.infer_subscriptions([token])
+      Subscriptions.check_and_forward_subscriptions(self(), jwt_subscriptions)
+    end
+
     Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
     {:ok, req, @initial_state}
   end
