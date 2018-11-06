@@ -47,8 +47,9 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   end
 
   @impl :cowboy_websocket_handler
-  def websocket_info({:rig_event, subscriber_group, cloud_event}, req, state) do
-    Logger.debug(fn -> "[#{inspect(subscriber_group)}] inspect(cloud_event)" end)
+  def websocket_info({:cloud_event, cloud_event}, req, state) do
+    Logger.debug(fn -> inspect(cloud_event) end)
+    # Forward the event:
     {:reply, frame(cloud_event), req, state}
   end
 
