@@ -7,6 +7,7 @@ defmodule RigInboundGateway.ImplicitSubscriptions.JwtTest do
   alias RigInboundGateway.ImplicitSubscriptions.Jwt
 
   @jwt_secret_key "mysecret"
+  @extractors System.get_env("EXTRACTORS")
 
   setup do
     System.put_env(
@@ -15,7 +16,7 @@ defmodule RigInboundGateway.ImplicitSubscriptions.JwtTest do
     )
 
     on_exit(fn ->
-      System.put_env("EXTRACTORS", nil)
+      System.put_env("EXTRACTORS", @extractors)
     end)
 
     :ok
