@@ -72,6 +72,7 @@ defmodule RigInboundGateway.Mixfile do
       {:ex_aws_kinesis, "~> 2.0"},
       # For backend service mocks:
       {:fake_server, "~> 1.4", only: :test},
+      {:socket, "~> 0.3", only: :test},
       {:joken, "~> 1.5"}
     ]
   end
