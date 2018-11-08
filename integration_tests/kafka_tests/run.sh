@@ -31,4 +31,4 @@ export KAFKA_SSL_KEYFILE_PASS=abcdefgh
 export LOG_LEVEL=debug
 
 cd "${RIG_DIR}"
-mix test --only kafka #--trace
+mix test --only kafka "$@"
