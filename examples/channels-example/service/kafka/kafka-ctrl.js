@@ -26,7 +26,7 @@ const kafkaProducer = (message) => {
         .then((result) => {
             producer.end();
 
-            const error = result[0].error;
+            const { error } = result[0];
             if (error) {
                 return error;
             }
@@ -47,7 +47,7 @@ exports.produce = {
         const msg = request.payload;
 
         return kafkaProducer(msg)
-        .then(message => ({ status: 'ok', message }))
-        .catch(message => ({ status: 'error', message }));
+            .then(message => ({ status: 'ok', message }))
+            .catch(message => ({ status: 'error', message }));
     },
 };
