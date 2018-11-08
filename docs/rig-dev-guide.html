@@ -59,6 +59,7 @@ using <code>iex --sname nodename -S mix</code>.</li>
 <tr><td>apps/rig_inbound_gateway</td><td><code>:rig_inbound_gateway</code></td><td>The externally facing HTTP server, built as a Phoenix app. It includes the reverse proxy, which forwards requests to back-end services as configured, as well as the Phoenix transports (e.g., WebSocket and SSE endpoints).</td></tr>
 <tr><td>apps/rig_kafka</td><td><code>:rig_kafka</code></td><td>Kafka group consumer and producer.</td></tr>
 <tr><td>apps/rig_outbound_gateway</td><td><code>:rig_outbound_gateway</code></td><td>Messages that are to be distributed to connected front-ends go through the outbound gateway.</td></tr>
+<tr><td>apps/rig_tests</td><td><code>:rig_tests</code></td><td>Tests using multiple components and don't belong to certain sub-app.</td></tr>
 </tbody>
 </table>
 <p>While all apps share the same config, the convention is to put an app's config in its own config file and use the umbrella config file only for things that concern multiple apps.</p>

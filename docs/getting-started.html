@@ -29,49 +29,32 @@
             });
         </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Getting started</h1></header><article><div><span><p>Setting up your dev environment is easier than you think! We're trying hard to make the developer experience as frictionless as possible. If you still think it's too complicated, please open a Github issue!</p>
 <h2><a class="anchor" aria-hidden="true" id="setting-up-your-development-environment"></a><a href="#setting-up-your-development-environment" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setting up your development environment</h2>
-<blockquote>
-<p>WIP:</p>
-<ul>
-<li>The local-development Docker image is not there yet. <a href="https://github.com/Accenture/reactive-interaction-gateway/issues/73">#73</a></li>
-<li>The SSE endpoint requires the JWT set up in advance and supplied when connecting. <a href="https://github.com/Accenture/reactive-interaction-gateway/pull/66">#66</a></li>
-<li>The subscriptions endpoint.</li>
-</ul>
-</blockquote>
 <p>The easiest and recommended way to get started is using <a href="https://www.docker.com">Docker</a>:</p>
-<pre><code class="hljs css language-bash">$ docker run -d -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway:latest-local-development-only
+<pre><code class="hljs css language-bash">$ docker run -d -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
 </code></pre>
 <p>This runs an instance of RIG in its <em>local-development</em> mode. The local-development mode makes it easy to get started, but please, <strong>don't run this in production</strong>.</p>
 <p>RIG is now ready to accept frontend connections. Let's connect to RIG using <a href="https://en.wikipedia.org/wiki/Server-sent_events">Server-Sent Events</a>, which is our recommended approach (open standard, firewall friendly, plays nice with HTTP/2). Add this code to your frontend:</p>
-<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> source = <span class="hljs-keyword">new</span> EventSource(<span class="hljs-string">"http://localhost:4000/socket/sse"</span>);
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> url = <span class="hljs-string">"http://localhost:4000/_rig/v1/connection/sse"</span>
+<span class="hljs-keyword">const</span> source = <span class="hljs-keyword">new</span> EventSource(url)
 
-source.addEventListener(<span class="hljs-string">"open"</span>, event =&gt; {
-  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Connection opened."</span>)
-}, <span class="hljs-literal">false</span>);
+source.onopen = <span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"SSE connection open"</span>, e)
+source.onerror = <span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"SSE connection error"</span>, e)
 
-source.addEventListener(<span class="hljs-string">"connection established"</span>, event =&gt; {
-  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"RIG is now forwarding events."</span>)
-}, <span class="hljs-literal">false</span>);
+source.addEventListener(<span class="hljs-string">"rig.connection.create"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
+  cloudEvent = <span class="hljs-built_in">JSON</span>.parse(e.data)
+  <span class="hljs-keyword">const</span> { connectionToken } = cloudEvent.data
+  createSubscriptions(connectionToken)
+}, <span class="hljs-literal">false</span>)
 
-source.addEventListener(<span class="hljs-string">"message"</span>, event =&gt; {
-  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Forwarded message:"</span>, event.data);
-}, <span class="hljs-literal">false</span>);
+source.addEventListener(<span class="hljs-string">"rig.subscriptions_set"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
+  cloudEvent = <span class="hljs-built_in">JSON</span>.parse(e.data)
+  <span class="hljs-keyword">const</span> { eventType } = cloudEvent.data
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Now subscribed to <span class="hljs-subst">${eventType}</span>`</span>)
+}, <span class="hljs-literal">false</span>)
 
-source.addEventListener(<span class="hljs-string">"error"</span>, event =&gt; {
-  <span class="hljs-keyword">if</span> (event.readyState == EventSource.CLOSED) {
-    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Connection was closed."</span>)
-  } <span class="hljs-keyword">else</span> {
-    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Connection error:"</span>, e)
-  }
-}, <span class="hljs-literal">false</span>);
-
-<span class="hljs-comment">// source.onmessage = event =&gt; {</span>
-<span class="hljs-comment">//   console.log("This would be invoked for any message type:", event.data)</span>
-<span class="hljs-comment">// };</span>
-</code></pre>
-<p>This hooks you up the the event stream, but there are no subscriptions yet. Let's change this (using <a href="https://github.com/axios/axios">axios</a> for making the request):</p>
-<pre><code class="hljs css language-javascript">axios.post(<span class="hljs-string">"http://localhost:4000/socket/subscriptions"</span>, {
-  <span class="hljs-attr">topic</span>: <span class="hljs-string">"public:lobby"</span>
-})
+source.addEventListener(<span class="hljs-string">"greeting"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Got a greeting!"</span>)
+}, <span class="hljs-literal">false</span>)
 </code></pre>
 <p>Since we don't send an authorization token yet (we're not logged in or anything), we're only allowed to subscribe to &quot;public&quot; topics. RIG doesn't know anything about which topic is used for what purpose, but by convention it will deny access to any topic that doesn't start with &quot;public:&quot;, unless the request carries an authorization token. To learn more about this token and what it's used for, take a look at the next section.</p>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/intro.html"><span class="arrow-prev">← </span><span>What is RIG?</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/user-authentication.html"><span>User authentication</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#setting-up-your-development-environment">Setting up your development environment</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2018 Accenture</section></footer></div></body></html>
