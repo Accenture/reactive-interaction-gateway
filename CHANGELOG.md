@@ -5,9 +5,23 @@
 - Added
   - [Auth] JWT now supports RS256 algorithm in addition to HS256. [#84](https://github.com/Accenture/reactive-interaction-gateway/issues/84)
   - [Outbound] Support Kafka SSL and SASL/Plain authentication. [#79](https://github.com/Accenture/reactive-interaction-gateway/issues/79)
-  - [Inbound] SSE heartbeats are now sent as comments rather than events, and events without data carry an empty data line to improve cross-browser compatability. [#64](https://github.com/Accenture/reactive-interaction-gateway/issues/64)
-  - [Inbound] Add new endpoints at `/_rig/v1/` for subscribing to CloudEvents using SSE, for creating subscriptions to specific event types, and for publishing CloudEvents. [#90](https://github.com/Accenture/reactive-interaction-gateway/issues/90)
+  - [Inbound] SSE heartbeats are now sent as comments rather than events, and events without data carry an empty data line to improve cross-browser compatibility. [#64](https://github.com/Accenture/reactive-interaction-gateway/issues/64)
+  - [Inbound] Add new endpoints at `/_rig/v1/` for subscribing to CloudEvents using SSE/WS, for creating subscriptions to specific event types, and for publishing CloudEvents. [#90](https://github.com/Accenture/reactive-interaction-gateway/issues/90)
   - [Inbound] Expose setting for proxy response timeout. [#91](https://github.com/Accenture/reactive-interaction-gateway/issues/91)
+  - [Inbound] Subscriptions inferring from JWT on SSE/WS connection creation and subscription creation. [#90](https://github.com/Accenture/reactive-interaction-gateway/issues/90)
+  - [Inbound] Add possibility to publish event to Kafka/Kinesis via reverse-proxy HTTP call - possible to publish in "fire&forget" style or wait for response with same correlation ID.
+  - [Docs] Simple event subscription examples for SSE and WS
+  - [Outbound] Kafka/Kinesis firehose - possibility to set topic/stream to consume and invoke HTTP request when event is consumed
+
+- Fixed
+  - [Inbound] Flaky tests in `router_test.exs` -- switching from `Bypass` to `Fakeserver`. [#74](https://github.com/Accenture/reactive-interaction-gateway/issues/74)
+  - [Docs] Channels example [#64]https://github.com/Accenture/reactive-interaction-gateway/issues/64
+
+- Changed
+  - [Docs] General documentation and outdated info
+
+- Deprecated
+  - [Inbound] Previous SSE/WS communication via Phoenix channels
 
 ## v2.0.0-beta.1
 

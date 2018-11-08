@@ -4,7 +4,7 @@ title: API Gateway
 sidebar_label: API Gateway
 ---
 
-RIG includes a basic API Gateway implemention (a configurable, distributed HTTP reverse proxy). In a nutshell, this means that RIG will forward a given HTTP request to another service, wait for the reply and forward that reply to the original caller.
+RIG includes a basic API Gateway implementation (a configurable, distributed HTTP reverse proxy). In a nutshell, this means that RIG will forward a given HTTP request to another service, wait for the reply and forward that reply to the original caller.
 
 Initial configuration of available endpoints can be done using a static file. There is also an API that can be used to add/change/remove routes at runtime.
 

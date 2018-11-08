@@ -40,6 +40,7 @@ apps/rig_auth | `:rig_auth` | Code concerned with handling JWTs (or authenticati
 apps/rig_inbound_gateway | `:rig_inbound_gateway` | The externally facing HTTP server, built as a Phoenix app. It includes the reverse proxy, which forwards requests to back-end services as configured, as well as the Phoenix transports (e.g., WebSocket and SSE endpoints).
 apps/rig_kafka | `:rig_kafka` | Kafka group consumer and producer.
 apps/rig_outbound_gateway | `:rig_outbound_gateway` | Messages that are to be distributed to connected front-ends go through the outbound gateway.
+apps/rig_tests | `:rig_tests` | Tests using multiple components and don't belong to certain sub-app.
 
 While all apps share the same config, the convention is to put an app's config in its own config file and use the umbrella config file only for things that concern multiple apps.
 
