@@ -1,3 +1,5 @@
+![Logo](./logo/Reactive-Interaction-Gateway-logo-cropped.png)
+
 # RIG - Reactive Interaction Gateway
 
 _The missing link between backend and frontend -- stop polling and go real-time!_
