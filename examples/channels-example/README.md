@@ -40,7 +40,7 @@ For RIG we could use default configuration values, but where's fun in that. Let'
 # JWT_SECRET_KEY => Secret key by which JWTs are signed, by default empty string
 # API_PORT => Port at which we want to expose RIG's internal APIs, by default 4010
 # INBOUND_PORT => Port at which we want to expose RIG's proxy and websocket/sse communication, by default 4000
-# EXTRACTORS => set's constraints for given subscriptions - based on this RIG can use private event communication and decide where to route events
+# EXTRACTORS => sets constraints for given subscriptions - based on this RIG can use private event communication and decide where to route events
 
 JWT_SECRET_KEY=mysecret \
 KAFKA_SOURCE_TOPICS=example \
