@@ -227,10 +227,9 @@ defmodule RigKafka.Client do
 
   # ---
 
-  defp try_producing_message(brod_client, topic, key, plaintext, n_retries_remaining \\ 3)
+  defp try_producing_message(brod_client, topic, key, plaintext, retry_delay_divisor \\ 64)
 
-  defp try_producing_message(brod_client, topic, key, plaintext, n_retries_remaining)
-       when n_retries_remaining > 0 do
+  defp try_producing_message(brod_client, topic, key, plaintext, retry_delay_divisor) do
     case :brod.produce_sync(
            brod_client,
            topic,
@@ -242,19 +241,25 @@ defmodule RigKafka.Client do
         :ok
 
       {:error, :leader_not_available} ->
-        Logger.debug(fn ->
-          "Leader not available for Kafka topic #{topic} (#{n_retries_remaining} retries remaining)"
-        end)
+        try_again? = retry_delay_divisor >= 1
 
-        :timer.sleep(1_000)
-        try_producing_message(brod_client, topic, key, plaintext, n_retries_remaining - 1)
+        if try_again? do
+          retry_delay_ms = trunc(1_920 / retry_delay_divisor)
+
+          Logger.debug(fn ->
+            "Leader not available for Kafka topic #{topic} (retry in #{retry_delay_ms} ms)"
+          end)
+
+          :timer.sleep(retry_delay_ms)
+          try_producing_message(brod_client, topic, key, plaintext, retry_delay_divisor / 2)
+        else
+          {:error, :leader_not_available}
+        end
 
       err ->
         err
     end
   end
-
-  defp try_producing_message(_, _, _, _, _), do: {:error, :leader_not_available}
 
   # ---
 

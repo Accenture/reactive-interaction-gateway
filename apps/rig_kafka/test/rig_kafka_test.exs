@@ -17,47 +17,48 @@ defmodule RigKafkaTest do
 
   @sup RigKafka.DynamicSupervisor
 
-  describe "Starting a new RigKafka client" do
-    test "succeeds when given a valid config." do
-      # There are no clients:
-      assert %{active: 0} = DynamicSupervisor.count_children(@sup)
+  defp kafka_config(consumer_topics) do
+    broker_env = System.get_env("KAFKA_BROKERS")
+    assert not is_nil(broker_env), "KAFKA_BROKERS needs to be set for Kafka test to work"
 
-      # Start a new client using valid config:
-      config = Config.new(%{brokers: [{"localhost", 9092}], consumer_topics: ["rig"]})
-      dummy_callback = fn _ -> :ok end
-      {:ok, pid} = RigKafka.start(config, dummy_callback)
+    brokers =
+      broker_env
+      |> String.split(",")
+      |> Enum.map(fn socket ->
+        [host, port] = for part <- String.split(socket, ":"), do: String.trim(part)
+        {host, String.to_integer(port)}
+      end)
 
-      # Now there's one client (even though the connection is probably down):
-      assert %{active: 1} = DynamicSupervisor.count_children(@sup)
-
-      DynamicSupervisor.terminate_child(@sup, pid)
-    end
+    Config.new(%{
+      brokers: brokers,
+      consumer_topics: consumer_topics
+    })
   end
 
-  @tag :smoke
-  describe "Given a started RigKafka client," do
-    test "messages can be produced and consumed." do
-      topic = "rig"
+  @tag :kafka
+  test "Given a started RigKafka client, messages can be produced and consumed." do
+    topic = "rig_kafka_test_simple_topic"
 
-      config = Config.new(%{brokers: [{"localhost", 9092}], consumer_topics: [topic]})
+    config = kafka_config([topic])
 
-      expected_msg = "this is a test message"
-      test_pid = self()
+    expected_msg = "this is a test message"
+    test_pid = self()
 
-      callback = fn
-        ^expected_msg ->
-          send(test_pid, :test_message_received)
-          :ok
-      end
-
-      {:ok, pid} = RigKafka.start(config, callback)
-
-      Process.sleep(1_000)
-      RigKafka.produce(config, topic, "test", expected_msg)
-
-      assert_receive :test_message_received
-
-      DynamicSupervisor.terminate_child(@sup, pid)
+    callback = fn
+      ^expected_msg ->
+        send(test_pid, :test_message_received)
+        :ok
     end
+
+    {:ok, pid} = RigKafka.start(config, callback)
+
+    RigKafka.produce(config, topic, "test", expected_msg)
+
+    assert_receive :test_message_received, 10_000
+
+    RigKafka.produce(config, topic, "test", expected_msg)
+    assert_receive :test_message_received, 10_000
+
+    DynamicSupervisor.terminate_child(@sup, pid)
   end
 end
