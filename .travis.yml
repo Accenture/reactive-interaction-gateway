@@ -9,9 +9,11 @@ jobs:
       language: elixir
       elixir: "1.7"
       otp_release: "21.0"
+      env:
+        - MIX_ENV=test
       script:
         - mix test
-        - mix credo --strict
+        - mix credo --ignore-checks Design
     - stage: website
       language: node_js
       node_js:

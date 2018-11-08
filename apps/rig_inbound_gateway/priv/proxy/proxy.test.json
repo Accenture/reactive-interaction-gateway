@@ -20,6 +20,40 @@
         },
         "endpoints": [
           {
+            "id": "post-myapi-publish-async",
+            "path": "/myapi/publish-async",
+            "method": "POST",
+            "type": "async",
+            "target": "kafka",
+            "topic": "test-topic",
+            "not_secured": true
+          },
+          {
+            "id": "post-myapi-publish-async",
+            "path": "/myapi/publish-kinesis-async",
+            "method": "POST",
+            "type": "async",
+            "target": "kinesis",
+            "stream": "test-topic",
+            "not_secured": true
+          },
+          {
+            "id": "post-myapi-publish-sync",
+            "path": "/myapi/publish-sync",
+            "method": "POST",
+            "type": "sync",
+            "target": "kafka",
+            "topic": "test-topic",
+            "not_secured": true
+          },
+          {
+            "id": "get-myapi-test-id",
+            "path": "/myapi/test/{id}",
+            "method": "GET",
+            "type": "http",
+            "not_secured": false
+          },
+          {
             "id": "get-myapi-detail-id",
             "path": "/myapi/detail/{id}",
             "method": "GET",

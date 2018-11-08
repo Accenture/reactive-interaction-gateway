@@ -4,7 +4,7 @@ title: API Gateway
 sidebar_label: API Gateway
 ---
 
-RIG includes a basic API Gateway implemention (a configurable, distributed HTTP reverse proxy). In a nutshell, this means that RIG will forward a given HTTP request to another service, wait for the reply and forward that reply to the original caller.
+RIG includes a basic API Gateway implementation (a configurable, distributed HTTP reverse proxy). In a nutshell, this means that RIG will forward a given HTTP request to another service, wait for the reply and forward that reply to the original caller.
 
 Initial configuration of available endpoints can be done using a static file. There is also an API that can be used to add/change/remove routes at runtime.
 
@@ -22,4 +22,4 @@ The file contains a list of API definitions. The definitions are expected in the
 
 ## Proxy HTTP API
 
-RIG also offers an API for creating, changing, and removing API endpoint definitions at runtime. If you're running multiple RIG instances, changes done on one instance will be synchronized to the other instances automatically. Check out the TODO API documentation to learn more.
+RIG also offers an API for creating, changing, and removing API endpoint definitions at runtime. If you're running multiple RIG instances, changes done on one instance will be synchronized to the other instances automatically. Check out the [API documentation](../guides/configuration.md#api-gateway) to learn more.

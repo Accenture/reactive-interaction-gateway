@@ -34,11 +34,13 @@ Since 2.0, RIG uses the [umbrella project layout](https://elixir-lang.org/gettin
 
 Path | Umbrella&nbsp;App&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | What's in there
 ---- | ------------ | ---------------
+apps/rig | `:rig` | The main application logic, including event filtering and distribution.
 apps/rig_api | `:rig_api` | The internal API, built as a Phoenix app. The actual code triggered by a call to this API would typically be implemented in another umbrella app (for example, see `RigApi.MessageController`, which uses `RigOutboundGateway.send/1` underneath).
-apps/rig_inbound_gateway | `:rig_inbound_gateway` | The externally facing HTTP server, built as a Phoenix app. It includes the reverse proxy, which forwards requests to back-end services as configured, as well as the Phoenix transports (e.g., WebSocket and SSE endpoints). Other responsibilities include connection-related things like managing and enforcing the JWT blacklist, and rate limiting would also go in here.
-apps/rig_outbound_gateway | `:rig_outbound_gateway` | Messages that are to be distributed to connected front-ends go through the outbound gateway. Even handlers in other apps (e.g., `:rig_api`) use the outbound-gateway's `send/1` to deliver messages.
-apps/rig | `:rig` | Cross-cutting helpers, like `Rig.Config`. Owns the Phoenix PubSub server. (Communication) services used by multiple umbrella apps would go in there.
 apps/rig_auth | `:rig_auth` | Code concerned with handling JWTs (or authentication, in general).
+apps/rig_inbound_gateway | `:rig_inbound_gateway` | The externally facing HTTP server, built as a Phoenix app. It includes the reverse proxy, which forwards requests to back-end services as configured, as well as the Phoenix transports (e.g., WebSocket and SSE endpoints).
+apps/rig_kafka | `:rig_kafka` | Kafka group consumer and producer.
+apps/rig_outbound_gateway | `:rig_outbound_gateway` | Messages that are to be distributed to connected front-ends go through the outbound gateway.
+apps/rig_tests | `:rig_tests` | Tests using multiple components and don't belong to certain sub-app.
 
 While all apps share the same config, the convention is to put an app's config in its own config file and use the umbrella config file only for things that concern multiple apps.
 
@@ -72,3 +74,11 @@ To have the project use a newer Elixir version, make sure to change the followin
 - `.travis.yml`
 - `Dockerfile` (the `FROM` image tag)
 - `version`
+
+## Test Tags
+
+We use `tag`s to group tests together. Often, it makes sense to assign more than one tag to a test case.
+
+`@tag` | When to use it?
+------ | ---------------
+`:smoke` | Quick integration test that is designed to catch obvious integration problems.

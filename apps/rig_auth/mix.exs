@@ -23,6 +23,7 @@ defmodule RigAuth.Mixfile do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      mod: {RigAuth.Application, []},
       extra_applications: [:logger]
     ]
   end
@@ -42,13 +43,15 @@ defmodule RigAuth.Mixfile do
       {:rig, in_umbrella: true},
       {:confex, "~> 3.3"},
       {:cowboy, "~> 1.0"},
-      {:httpoison, "~> 1.0.0"},
+      {:httpoison, "~> 1.3"},
       {:joken, "~> 1.5"},
       {:phoenix, "~> 1.3.0"},
       {:plug, "~> 1.4"},
       {:poison, "~> 2.0 or ~> 3.0"},
       {:stubr, "~> 1.5.0", only: :test},
-      {:timex, "~> 3.1.22"}
+      {:timex, "~> 3.1.22"},
+      # JSON Pointer (RFC 6901) implementation for extracting the session name from JWTs:
+      {:odgn_json_pointer, "~> 2.3"}
     ]
   end
 end

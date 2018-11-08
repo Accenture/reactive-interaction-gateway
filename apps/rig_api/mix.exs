@@ -3,6 +3,7 @@ defmodule RigApi.Mixfile do
 
   def project do
     %{rig: rig_version, elixir: elixir_version} = versions()
+
     [
       app: :rig_api,
       version: rig_version,
@@ -48,10 +49,11 @@ defmodule RigApi.Mixfile do
       {:rig_inbound_gateway, in_umbrella: true},
       {:rig_outbound_gateway, in_umbrella: true},
       {:rig_auth, in_umbrella: true},
-      {:phoenix, "~> 1.3.0"},
+      {:phoenix, "~> 1.3"},
       {:phoenix_pubsub, "~> 1.0"},
       {:gettext, "~> 0.11"},
-      {:cowboy, "~> 1.0"}
+      {:cowboy, "~> 1.0"},
+      {:mox, "~> 0.4", only: :test}
     ]
   end
 

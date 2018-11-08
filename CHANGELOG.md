@@ -1,13 +1,29 @@
 # Changelog
 
-## v2.0.0-beta.1
+## v2.0.0-dev
 
 - Added
-  - [Auth] JWT now supports RS256 algorithm in addition to HS256 - [#84](https://github.com/Accenture/reactive-interaction-gateway/issues/84)
-  - [Outbound] Support Kafka SSL and SASL/Plain authentication - [#79](https://github.com/Accenture/reactive-interaction-gateway/issues/79)
-  - [Inbound] Expose setting for proxy response timeout - [#91](https://github.com/Accenture/reactive-interaction-gateway/issues/91)
+  - [Auth] JWT now supports RS256 algorithm in addition to HS256. [#84](https://github.com/Accenture/reactive-interaction-gateway/issues/84)
+  - [Outbound] Support Kafka SSL and SASL/Plain authentication. [#79](https://github.com/Accenture/reactive-interaction-gateway/issues/79)
+  - [Inbound] SSE heartbeats are now sent as comments rather than events, and events without data carry an empty data line to improve cross-browser compatibility. [#64](https://github.com/Accenture/reactive-interaction-gateway/issues/64)
+  - [Inbound] Add new endpoints at `/_rig/v1/` for subscribing to CloudEvents using SSE/WS, for creating subscriptions to specific event types, and for publishing CloudEvents. [#90](https://github.com/Accenture/reactive-interaction-gateway/issues/90)
+  - [Inbound] Expose setting for proxy response timeout. [#91](https://github.com/Accenture/reactive-interaction-gateway/issues/91)
+  - [Inbound] Subscriptions inference using JWT on SSE/WS connection and subscription creation. [#90](https://github.com/Accenture/reactive-interaction-gateway/issues/90)
+  - [Inbound] Allow publishing events to Kafka and Kinesis via reverse-proxy HTTP calls. Optionally, a response can be waited for (using a correlation ID).
+  - [Docs] Simple event subscription examples for SSE and WS.
+  - [Outbound] Kafka/Kinesis firehose - set topic/stream to consume and invoke HTTP request when event is consumed.
 
-## v2.0.0-dev
+- Fixed
+  - [Inbound] Flaky tests in `router_test.exs` -- switching from `Bypass` to `Fakeserver`. [#74](https://github.com/Accenture/reactive-interaction-gateway/issues/74)
+  - [Docs] Channels example. [#64]https://github.com/Accenture/reactive-interaction-gateway/issues/64
+
+- Changed
+  - [Docs] General documentation and outdated info.
+
+- Deprecated
+  - [Inbound] Previous SSE/WS communication via Phoenix channels.
+
+## v2.0.0-beta.1
 
 - Changed
   - [Api] Endpoint for terminating a session no longer contains user id in path

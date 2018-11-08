@@ -8,12 +8,11 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
   use GenServer
   require Logger
 
-  alias Poison.Parser, as: JsonParser
+  alias Rig.EventFilter
   alias RigOutboundGateway.Kinesis.LogStream
 
   @jinterface_version "1.8.1"
   @restart_delay_ms 20_000
-  @default_send &RigOutboundGateway.send/1
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, :ok, opts)
@@ -103,6 +102,8 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
 
     args = [
       "-Djava.util.logging.SimpleFormatter.format=%4$s: %5$s%n",
+      "-Dexecutor=Elixir.RigOutboundGateway.Kinesis.JavaClient",
+      "-Dclient_name=kinesis-client",
       "-cp",
       "#{conf.client_jar}:#{conf.otp_jar}",
       "com.accenture.rig.App"
@@ -112,15 +113,12 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
     args
   end
 
-  @spec java_client_callback(data :: [{atom(), String.t()}, ...], RigOutboundGateway.send_t()) ::
+  @spec java_client_callback(data :: [{atom(), String.t()}, ...]) ::
           :ok
-  def java_client_callback(data, send \\ @default_send) do
-    body = data[:body]
-    meta = Keyword.merge(data, body_raw: body)
-    ack = fn -> :ok end
-
-    RigOutboundGateway.handle_raw(body, &JsonParser.parse/1, send, ack)
-    |> RigOutboundGateway.Logger.log(__MODULE__, meta)
+  def java_client_callback(data) do
+    data[:body]
+    |> Poison.decode!()
+    |> EventFilter.forward_event()
 
     :ok
   end

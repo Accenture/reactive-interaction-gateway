@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 services:
   zookeeper:
     container_name: zookeeper
@@ -25,18 +25,13 @@ services:
     container_name: rig
     image: accenture/reactive-interaction-gateway
     environment:
-      - PRIVILEGED_ROLES=admin
-      - JWT_ROLES_FIELD=levels
-      - JWT_USER_FIELD=username
       - JWT_SECRET_KEY=mysecret
-      - MESSAGE_USER_FIELD=username
+      - LOG_LEVEL=debug
       - KAFKA_SOURCE_TOPICS=example
-      - KAFKA_HOSTS=kafka:9092
-      - KAFKA_ENABLED=true
+      - KAFKA_BROKERS=kafka:9092
       - API_PORT=7010
       - INBOUND_PORT=7000
-      - NODE_HOST=127.0.0.1
-      - NODE_COOKIE=dummycookie
+      - EXTRACTORS={"message":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}}}
     ports:
       - 7000:7000
       - 7010:7010

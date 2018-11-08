@@ -29,9 +29,6 @@ RIG expects very few fields to be present in a token. Here's an example of a val
 // Payload:
 {
   "exp": 99999999,
-  "jti": "1521227425",
-  "user": "alice"
+  "jti": "1521227425"
 }
 ```
-
-Ignoring the standard fields, the only field relevant for RIG is "user", which is used to associate the connection with a user ID. If needed, the name of that field can be changed easily, using an environment variable.

@@ -37,10 +37,12 @@ defmodule Rig.Config do
   If you use :custom_validation, you should deal with the raw keyword list
   by implementing `validate_config!/1` in the module.
   """
+  alias Jason
 
   defmacro __using__(:custom_validation) do
     __MODULE__.__everything_but_validation__()
   end
+
   defmacro __using__(required_keys) do
     quote do
       unquote(__MODULE__.__everything_but_validation__())
@@ -64,6 +66,7 @@ defmodule Rig.Config do
   def __only_validation__(required_keys) do
     quote do
       defp validate_config!(nil), do: validate_config!([])
+
       defp validate_config!(config) do
         # Convert to map and make sure all required keys are present
         config = Enum.into(config, %{})
@@ -72,10 +75,57 @@ defmodule Rig.Config do
         missing_keys = for k <- required_keys, not Map.has_key?(config, k), do: k
 
         case missing_keys do
-          [] -> config
-          _ -> raise "Missing required settings for module #{inspect __ENV__.module}: #{inspect missing_keys}"
+          [] ->
+            config
+
+          _ ->
+            raise "Missing required settings for module #{inspect(__ENV__.module)}: #{
+                    inspect(missing_keys)
+                  }"
         end
       end
     end
+  end
+
+  # ---
+
+  @spec parse_json_env(String.t()) :: {:ok, any} | {:error, :syntax_error, any}
+  def parse_json_env(path_or_encoded) do
+    with {:error, reason1} <- from_file(path_or_encoded),
+         {:error, reason2} <- from_encoded(path_or_encoded) do
+      {:error, :syntax_error, [reason1, reason2]}
+    else
+      {:ok, config} -> {:ok, config}
+    end
+  end
+
+  # ---
+
+  @spec from_file(String.t()) :: {:ok, any} | {:error, reason :: any}
+  defp from_file(path) do
+    with {:ok, content} <- File.read(path),
+         {:ok, config} <- from_encoded(content) do
+      {:ok, config}
+    else
+      {:error, _reason} = err -> err
+    end
+  end
+
+  # ---
+
+  @spec from_encoded(String.t()) :: {:ok, any} | {:error, Jason.DecodeError.t()}
+  defp from_encoded(encoded) do
+    Jason.decode(encoded)
+  end
+
+  # ---
+
+  @spec parse_socket_list([String.t(), ...]) :: [{String.t(), pos_integer()}, ...]
+  def parse_socket_list(socket_list) do
+    socket_list
+    |> Enum.map(fn broker ->
+      [host, port] = for part <- String.split(broker, ":"), do: String.trim(part)
+      {host, String.to_integer(port)}
+    end)
   end
 end

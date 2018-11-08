@@ -26,7 +26,8 @@ public class ErlangInterface {
 
   public ErlangInterface(final String remote, final String cookie)
       throws UnknownHostException, OtpAuthException, IOException {
-    final OtpSelf client = new OtpSelf("kinesis-client", cookie);
+    final String client_name = System.getProperty("client_name");
+    final OtpSelf client = new OtpSelf(client_name, cookie);
     final OtpPeer rig = new OtpPeer(remote);
     conn = client.connect(rig);
   }
@@ -34,7 +35,8 @@ public class ErlangInterface {
   public void forward(final Map<String, Object> map)
       throws IOException, OtpErlangDecodeException, OtpErlangExit, OtpAuthException {
     final OtpErlangObject[] args = new OtpErlangObject[] { asErlangDict(map) };
-    conn.sendRPC("Elixir.RigOutboundGateway.Kinesis.JavaClient", "java_client_callback", args);
+    final String executor = System.getProperty("executor");
+    conn.sendRPC(executor, "java_client_callback", args);
     final OtpErlangObject response = conn.receiveMsg().getMsg();
     if (!isExpectedResponse(response)) {
       throw new IOException(String.format("Invalid response when forwarding message: %s", response));
@@ -54,12 +56,12 @@ public class ErlangInterface {
       else if (javaObject instanceof ByteBuffer)
         erlangObject = new OtpErlangBinary(((ByteBuffer) javaObject).array());
       else if (javaObject instanceof java.util.Date)
-        erlangObject = new OtpErlangBinary(formatTimestamp((java.util.Date) javaObject).getBytes(StandardCharsets.UTF_8));
+        erlangObject = new OtpErlangBinary(
+            formatTimestamp((java.util.Date) javaObject).getBytes(StandardCharsets.UTF_8));
       else
         throw new RuntimeException("cannot convert " + javaObject.getClass().getCanonicalName());
 
-      items[i] = new OtpErlangTuple(
-          new OtpErlangObject[] { new OtpErlangAtom(entry.getKey()), erlangObject });
+      items[i] = new OtpErlangTuple(new OtpErlangObject[] { new OtpErlangAtom(entry.getKey()), erlangObject });
 
       ++i;
     }

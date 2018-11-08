@@ -9,13 +9,12 @@
     }
   },
   "dependencies": {
-    "bulma": "^0.6.1",
-    "jsonwebtoken": "^8.1.0",
-    "phoenix": "~1.2.1",
+    "bulma": "^0.7.2",
+    "jsonwebtoken": "^8.3.0",
     "proptypes": "^1.1.0",
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
-    "uuid": "^3.1.0"
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "react-scripts": "1.0.17"

@@ -3,25 +3,29 @@ defmodule RigAuth.Jwt.Utils do
   Provides utility functions over JWT using Joken
   """
   use Rig.Config, [:secret_key]
+
   import Joken
 
-  @type claim_map :: %{required(String.t) => String.t}
+  alias Plug
+  alias RigAuth.Blacklist
 
-  @spec valid?(String.t) :: boolean
+  @type claims :: %{required(String.t()) => String.t()}
+
+  @spec valid?(String.t()) :: boolean
   def valid?(jwt) do
     jwt
     |> validate
     |> get_error == nil
   end
 
-  @spec decode(String.t) :: {:ok, map} | {:error, String.t}
+  @spec decode(String.t()) :: {:ok, claims} | {:error, String.t()}
   def decode(jwt) do
     jwt
     |> validate
     |> get_data
   end
 
-  @spec validate(String.t) :: map
+  @spec validate(String.t()) :: Joken.Token.t()
   defp validate(jwt) do
     conf = config()
 
@@ -37,5 +41,16 @@ defmodule RigAuth.Jwt.Utils do
     |> with_validation("exp", &(&1 > current_time()), "token expired")
     |> with_signer(signer)
     |> verify
+    |> check_blacklist
   end
+
+  @spec check_blacklist(token :: Joken.Token.t()) :: Joken.Token.t()
+  defp check_blacklist(%{error: nil, claims: %{"jti" => jti}} = token) do
+    case Blacklist.contains_jti?(Blacklist, jti) do
+      true -> %{token | error: "JWT with JTI=#{jti} is blacklisted"}
+      false -> token
+    end
+  end
+
+  defp check_blacklist(token), do: token
 end

@@ -1,0 +1,10 @@
+{
+  "greeting": {
+    "name": {
+      "stable_field_index": 1,
+      "event": {
+        "json_pointer": "/data/name"
+      }
+    }
+  }
+}

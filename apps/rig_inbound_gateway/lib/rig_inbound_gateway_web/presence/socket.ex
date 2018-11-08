@@ -2,17 +2,17 @@ defmodule RigInboundGatewayWeb.Presence.Socket do
   @moduledoc false
   use Phoenix.Socket
   require Logger
-  alias RigAuth.Jwt
   alias RigAuth.Blacklist
+  alias RigAuth.Jwt
 
   ## Channels
-  channel "user:*", RigInboundGatewayWeb.Presence.Channel
-  channel "role:*", RigInboundGatewayWeb.Presence.Channel
+  channel("user:*", RigInboundGatewayWeb.Presence.Channel)
+  channel("role:*", RigInboundGatewayWeb.Presence.Channel)
 
   ## Transports
-  transport :websocket, Phoenix.Transports.WebSocket, timeout: :infinity
-  transport :longpoll, Phoenix.Transports.LongPoll
-  transport :sse, RigInboundGateway.Transports.ServerSentEvents
+  transport(:websocket, Phoenix.Transports.WebSocket, timeout: :infinity)
+  transport(:longpoll, Phoenix.Transports.LongPoll)
+  transport(:sse, RigInboundGateway.Transports.ServerSentEvents)
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
@@ -28,12 +28,11 @@ defmodule RigInboundGatewayWeb.Presence.Socket do
   def connect(params, socket) do
     with {:ok, raw_token} <- Map.fetch(params, "token"),
          {:ok, token_map} <- Jwt.Utils.decode(raw_token),
-         :ok <- check_token_not_blacklisted(token_map)
-    do
+         :ok <- check_token_not_blacklisted(token_map) do
       {:ok, assign(socket, :user_info, token_map)}
     else
       err ->
-        Logger.error("Denied UserSocket connect: #{inspect err}")
+        Logger.error("Denied UserSocket connect: #{inspect(err)}")
         :error
     end
   end

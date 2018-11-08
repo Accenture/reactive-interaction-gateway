@@ -1,39 +1,27 @@
 defmodule RigInboundGateway.ApiProxy.Auth do
   @moduledoc """
-  Provides functions for authentication and authorization of API endpoints.
-  Abstracts auth based logic from router logic.
+  Authentication check for proxied requests.
   """
 
-  import Plug.Conn, only: [get_req_header: 2]
+  alias RigInboundGateway.ApiProxy.Api
+  alias RigInboundGateway.ApiProxy.Auth.Jwt
 
-  alias RigAuth.Jwt
-  alias RigInboundGateway.Proxy
+  # ---
 
-  # Pick JWT from query parameters
-  @spec pick_query_token(%Plug.Conn{}, Proxy.api_definition) :: [String.t, ...]
-  def pick_query_token(conn, %{"auth" => %{"use_query" => true}} = api) do
-    conn
-    |> Map.get(:query_params)
-    |> Map.get(Kernel.get_in(api, ["auth", "query_name"]), "")
-    |> String.split
-  end
-  @spec pick_query_token(%Plug.Conn{}, Proxy.api_definition) :: []
-  def pick_query_token(_conn, %{"auth" => %{"use_query" => false}}), do: [""]
+  @spec check(Plug.Conn.t(), Api.t(), Api.endpoint()) :: :ok | {:error, :authentication_failed}
+  def check(conn, api, endpoint)
 
-  # Pick JWT from headers
-  @spec pick_header_token(%Plug.Conn{}, Proxy.api_definition) :: [String.t, ...]
-  def pick_header_token(conn, %{"auth" => %{"use_header" => true}} = api) do
-    header_key = Kernel.get_in(api, ["auth", "header_name"]) |> String.downcase
-    get_req_header(conn, header_key)
-  end
-  @spec pick_header_token(%Plug.Conn{}, Proxy.api_definition) :: []
-  def pick_header_token(_conn, %{"auth" => %{"use_header" => false}}), do: [""]
+  # Skip authentication if auth type is not set:
+  def check(_, %{"auth_type" => "none"}, _), do: :ok
 
-  # Validate if any of JWT are valid
-  @spec any_token_valid?([]) :: false
-  def any_token_valid?([]), do: false
-  @spec any_token_valid?([String.t, ...]) :: boolean
-  def any_token_valid?(tokens) do
-    tokens |> Enum.any?(&Jwt.Utils.valid?/1)
-  end
+  # Skip authentication if turned off:
+  def check(_, _, %{"not_secured" => true}), do: :ok
+
+  # Authenticate by JWT:
+  def check(
+        conn,
+        %{"auth_type" => "jwt"} = api,
+        %{"not_secured" => false}
+      ),
+      do: Jwt.check(conn, api)
 end

@@ -1,8 +1,10 @@
 defmodule RigInboundGateway.Mixfile do
+  @moduledoc false
   use Mix.Project
 
   def project do
     %{rig: rig_version, elixir: elixir_version} = versions()
+
     [
       app: :rig_inbound_gateway,
       version: rig_version,
@@ -46,19 +48,32 @@ defmodule RigInboundGateway.Mixfile do
     [
       {:rig, in_umbrella: true},
       {:rig_auth, in_umbrella: true},
-      {:phoenix, "~> 1.3.0"},
+      {:rig_kafka, in_umbrella: true},
+      {:phoenix, "1.3.0"},
       {:phoenix_pubsub, "~> 1.0"},
       {:cowboy, "~> 1.0"},
-      {:httpoison, "~> 1.0.0"},
-      {:bypass, "~> 0.8.1", only: :test},
+      {:httpoison, "~> 1.3"},
+      # JSON libs:
       {:poison, "~> 2.0 or ~> 3.0"},
+      {:jason, "~> 1.1"},
+      # Date and time handling:
       {:timex, "~> 3.1.22"},
+      # Helper to make writing stubs and mocks easier:
       {:stubr, "~> 1.5.0", only: :test},
       # Elixir-compatible :ets.fun2ms/1
       {:ex2ms, "~> 1.0"},
       # Read and use application configuration from environment variables
       {:confex, "~> 3.3"},
       {:uuid, "~> 1.1"},
+      # SSE serialization:
+      {:server_sent_event, "~> 0.3.1"},
+      # AWS SDK
+      {:ex_aws, "~> 2.0"},
+      {:ex_aws_kinesis, "~> 2.0"},
+      # For backend service mocks:
+      {:fake_server, "~> 1.4", only: :test},
+      {:socket, "~> 0.3", only: :test},
+      {:joken, "~> 1.5"}
     ]
   end
 

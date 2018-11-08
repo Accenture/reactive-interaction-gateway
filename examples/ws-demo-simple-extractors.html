@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>RIG-WS-Demo</title>
+</head>
+
+<body>
+  <form onsubmit="sendGreeting(); return false;">
+    <input type="text" id="greeting" placeholder="Your greeting here" autofocus>
+    <input type="submit">
+  </form>
+  <ul id="eventList" style="list-style:none;padding-left:0">
+
+  </ul>
+  <script>
+    const eventList = document.getElementById("eventList")
+
+    function addEvent(cloudEvent) {
+      const {
+        eventTime,
+        data
+      } = cloudEvent
+
+      const li = document.createElement("li")
+      li.textContent = `[${new Date(eventTime).toLocaleTimeString()}] ${data}`
+      eventList.appendChild(li)
+    }
+
+    const baseUrl = "http://localhost:4000/_rig/v1"
+    const wsUrl = "ws://localhost:4000/_rig/v1"
+
+    function randomString() {
+      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    }
+
+    function sendGreeting() {
+      const input = document.getElementById("greeting")
+      const greeting = input.value
+      input.value = ""
+      return fetch(`${baseUrl}/events`, {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify({
+          cloudEventsVersion: "0.1",
+          eventID: randomString(),
+          eventType: "greeting",
+          source: "sse-demo-ui",
+          contentType: "text/plain",
+          data: {
+            name: greeting
+          }
+        })
+      })
+        .then(response => response.json())
+        .then(json => {
+          console.log("CloudEvent sent:", json)
+          return json
+        })
+        .catch(err => {
+          console.log("Failed to send CloudEvent:", err)
+        })
+    }
+
+    function createSubscription(connectionToken) {
+      const eventType = "greeting"
+      return fetch(`${baseUrl}/connection/ws/${connectionToken}/subscriptions`, {
+        method: "PUT",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify({
+          "subscriptions": [
+            {
+              "eventType": eventType,
+              "oneOf": [
+                {
+                  "name": "john"
+                }
+              ]
+            }
+          ]
+        })
+      })
+        .then(json => {
+          console.log("Subscription created:", json)
+          return json
+        })
+        .catch(err => {
+          console.log("Failed to create subscription:", err)
+        })
+    }
+
+    const source = new WebSocket(`${wsUrl}/connection/ws`)
+
+    source.onopen = (e) => console.log("open", e)
+    source.onmessage = (e) => {
+      console.log("message", e)
+      const cloudEvent = JSON.parse(e.data)
+      if (cloudEvent.eventType === 'rig.connection.create') {
+        payload = cloudEvent.data
+        connectionToken = payload["connection_token"]
+        createSubscription(connectionToken)
+      } else if (cloudEvent.eventType === 'greeting') {
+        addEvent(cloudEvent)
+      }
+    }
+    source.onerror = (e) => console.log("error", e)
+
+  </script>
+</body>
+
+</html>

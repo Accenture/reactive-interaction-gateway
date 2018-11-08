@@ -25,7 +25,7 @@ RUN mix deps.get
 
 COPY config /opt/sites/rig/config
 COPY apps /opt/sites/rig/apps
-COPY guides /opt/sites/rig/guides
+# COPY guides /opt/sites/rig/guides
 
 # Proxy
 EXPOSE 4000

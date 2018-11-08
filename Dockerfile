@@ -4,8 +4,8 @@ FROM elixir:1.7-alpine as build
 RUN mix local.hex --force
 RUN mix local.rebar --force
 RUN apk add --no-cache make \
-    gcc \
-    g++
+  gcc \
+  g++
 
 ENV MIX_ENV=prod
 
@@ -21,6 +21,7 @@ COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
 COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
 COPY apps/rig_api/mix.exs /opt/sites/rig/apps/rig_api/
+COPY apps/rig_kafka/mix.exs /opt/sites/rig/apps/rig_kafka/
 COPY apps/rig_auth/mix.exs /opt/sites/rig/apps/rig_auth/
 COPY apps/rig_inbound_gateway/mix.exs /opt/sites/rig/apps/rig_inbound_gateway/
 COPY apps/rig_outbound_gateway/mix.exs /opt/sites/rig/apps/rig_outbound_gateway/
@@ -42,6 +43,9 @@ COPY apps/rig_api/priv /opt/sites/rig/apps/rig_api/priv
 COPY apps/rig_auth/config /opt/sites/rig/apps/rig_auth/config
 COPY apps/rig_auth/lib /opt/sites/rig/apps/rig_auth/lib
 
+COPY apps/rig_kafka/config /opt/sites/rig/apps/rig_kafka/config
+COPY apps/rig_kafka/lib /opt/sites/rig/apps/rig_kafka/lib
+
 COPY apps/rig_inbound_gateway/config /opt/sites/rig/apps/rig_inbound_gateway/config
 COPY apps/rig_inbound_gateway/lib /opt/sites/rig/apps/rig_inbound_gateway/lib
 COPY apps/rig_inbound_gateway/priv /opt/sites/rig/apps/rig_inbound_gateway/priv
@@ -53,6 +57,11 @@ COPY apps/rig_outbound_gateway/lib /opt/sites/rig/apps/rig_outbound_gateway/lib
 RUN mix release
 
 FROM erlang:21-alpine
+
+LABEL org.label-schema.name="Reactive Interaction Gateway"
+LABEL org.label-schema.description="Asynchronous API gateway and event hub"
+LABEL org.label-schema.url="https://accenture.github.io/reactive-interaction-gateway/"
+LABEL org.label-schema.vcs-url="https://github.com/Accenture/reactive-interaction-gateway"
 
 RUN apk add --no-cache bash
 
@@ -67,4 +76,4 @@ EXPOSE 4000
 # Internal APIs
 EXPOSE 4010
 
-CMD ["/opt/sites/rig/bin/rig", "foreground"]
+CMD trap exit INT; trap exit TERM; /opt/sites/rig/bin/rig foreground & wait

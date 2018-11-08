@@ -6,7 +6,7 @@ defmodule RigInboundGateway.ApiProxy.Base do
   use Rig.Config, [:recv_timeout]
   use HTTPoison.Base
 
-  defp process_request_options(options) do
+  def process_request_options(options) do
     conf = config()
     Keyword.put(options, :recv_timeout, conf.recv_timeout)
   end

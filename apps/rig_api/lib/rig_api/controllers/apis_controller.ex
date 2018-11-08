@@ -20,7 +20,9 @@ defmodule RigApi.ApisController do
     case get_active_api(id) do
       api when api == nil or api == :inactive ->
         send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
-      {_id, api} -> send_response(conn, 200, api)
+
+      {_id, api} ->
+        send_response(conn, 200, api)
     end
   end
 
@@ -29,12 +31,12 @@ defmodule RigApi.ApisController do
     %{rig_proxy: proxy} = config()
 
     with nil <- proxy.get_api(proxy, id),
-         {:ok, _phx_ref} <- proxy.add_api(proxy, id, params)
-    do
+         {:ok, _phx_ref} <- proxy.add_api(proxy, id, params) do
       send_response(conn, 201, %{message: "ok"})
     else
       {_id, %{"active" => true}} ->
         send_response(conn, 409, %{message: "API with id=#{id} already exists."})
+
       {_id, %{"active" => false} = prev_api} ->
         {:ok, _phx_ref} = proxy.replace_api(proxy, id, prev_api, params)
         send_response(conn, 201, %{message: "ok"})
@@ -45,8 +47,7 @@ defmodule RigApi.ApisController do
     %{"id" => id} = params
 
     with {_id, current_api} <- get_active_api(id),
-         {:ok, _phx_ref} <- merge_and_update(id, current_api, params)
-    do
+         {:ok, _phx_ref} <- merge_and_update(id, current_api, params) do
       send_response(conn, 200, %{message: "ok"})
     else
       api when api == nil or api == :inactive ->
@@ -59,8 +60,7 @@ defmodule RigApi.ApisController do
     %{rig_proxy: proxy} = config()
 
     with {_id, _current_api} <- get_active_api(id),
-         {:ok, _phx_ref} <- proxy.deactivate_api(proxy, id)
-    do
+         {:ok, _phx_ref} <- proxy.deactivate_api(proxy, id) do
       send_response(conn, 204)
     else
       api when api == nil or api == :inactive ->
@@ -72,8 +72,7 @@ defmodule RigApi.ApisController do
     %{rig_proxy: proxy} = config()
 
     with {id, current_api} <- proxy.get_api(proxy, id),
-         true <- current_api["active"] == true
-    do
+         true <- current_api["active"] == true do
       {id, current_api}
     else
       nil -> nil
