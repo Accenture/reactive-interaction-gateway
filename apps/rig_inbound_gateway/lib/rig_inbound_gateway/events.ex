@@ -15,8 +15,7 @@ defmodule RigInboundGateway.Events do
     CloudEvent.new!(%{
       "cloudEventsVersion" => "0.1",
       "eventType" => "rig.connection.create",
-      "source" => "rig",
-      "cloudEventsVersion" => "0.1"
+      "source" => "rig"
     })
     |> CloudEvent.with_data(data)
   end
