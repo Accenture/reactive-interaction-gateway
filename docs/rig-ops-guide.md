@@ -16,8 +16,12 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `CORS` | The "Access-Control-Allow-Origin" setting for the inbound port. It is usually a good idea to set this to your domain. | "*"
 `DISCOVERY_TYPE` | Type of discovery used in distributed mode. If not set discovery is not used. Available options: `dns`. | nil
 `DNS_NAME` | Address where RIG will do DNS discovery for Node host addresses. | "localhost"
+`EXTRACTORS` | Extractor configuration, given either as path to a JSON file, or directly as JSON. The extractor configuration contains information about events' fields per event type, used to _extract_ information. For example, the following setting allows clients to specify a constraint on the `name` field of `greeting` events: `EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/name"}}}}'`. Note that `stable_field_index` and `event/json_pointer` are required for all configured fields. | nil
 `FIREHOSE_KAFKA_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KAFKA_SOURCE_TOPICS | []
 `FIREHOSE_KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will use as a firehose consumer, delimited by comma. Events will be sent to `FIREHOSE_KAFKA_HTTP_TARGETS | ["rig-firehose"]
+`FIREHOSE_KINESIS_APP_NAME` | Name for Firehose Kinesis consumer group -- DynamoDB table | "Reactive-Interaction-Gateway-Firehose"
+`FIREHOSE_KINESIS_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KINESIS_STREAM | ["http://localhost:4040/todo"]
+`FIREHOSE_KINESIS_STREAM` | Kinesis stream RIG will use as a firehose consumer. Events will be sent to `FIREHOSE_KINESIS_HTTP_TARGETS | "RIG-firehose"
 `HOST` | Hostname for Phoenix endpoints (HTTP communication). | "localhost"
 `INBOUND_PORT` | Port at which RIG exposes proxy and websocket/sse communication. | 4000
 `JWT_BLACKLIST_DEFAULT_EXPIRY_HOURS` | DEPRECATED. Default expiration time in hours for blacklisted JWTs. Used if JWT doesn't have an expiration time in claims. | 1
@@ -53,7 +57,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `PRIVILEGED_ROLES` | DEPRECATED. User roles that are able to subscribe to messages of any user. You can specify multiple roles delimited by comma. | []
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Expected path is `proxy/your_json_file.json`. | nil
 `PROXY_RECV_TIMEOUT` | Timeout used when receiving a response for a forwarded/proxied request. | 5000
-`PROXY_KAFKA_RESPONSE_TOPICS` | Kafka topic for acknowlidging Kafka sync events from proxy by corellation ID | ["rig-proxy-response"]
+`PROXY_KAFKA_RESPONSE_TOPICS` | Kafka topic for acknowledging Kafka sync events from proxy by correlation ID | ["rig-proxy-response"]
 `PROXY_KAFKA_REQUEST_TOPIC` | Kafka topic for publishing sync/async events from proxy. | ""
 `PROXY_KAFKA_RESPONSE_TIMEOUT` | In case an endpoint has `target` set to `http` and `response_from` set to `kafka`, this is the maximum delay between an HTTP request and the corresponding Kafka response message. | 5000
 `PROXY_KINESIS_RESPONSE_TIMEOUT` | In case an endpoint has `target` set to `http` and `response_from` set to `kinesis`, this is the maximum delay between an HTTP request and the corresponding Kinesis response message. | 5000
@@ -65,9 +69,8 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `RATE_LIMIT_PER_IP` | DEPRECATED. If true, the remote IP is taken into account, otherwise the limits are per endpoint only. | true
 `RATE_LIMIT_SWEEP_INTERVAL_MS` | DEPRECATED. Garbage collector interval. If set to zero, Garbage collector is disabled. | 5000
 `REQUEST_LOG` | Type of loggers to use to log requests processed by API Proxy, delimited by comma. | []
+`SESSION_ROLE` | DEPRECATED. Type of users that are visible to the outside world (possible to list). Only users with these roles will be listed. Possible roles are listed in `JWT_ROLES_FIELD`. Define as strings, separated by comma. | "user"
 `SUBMISSION_CHECK` | Select if and how submitting/publishing events should be denied. Can be either `no_check` (submissions are always allowed), `jwt_validation` (submissions are allowed if at least one authorization token is valid - using JWT_SECRET_KEY - and not blacklisted), or an URL that points to an external service that decides whether to allow or deny the submissions. Such an external service is expected to accept POST requests. The CloudEvent is passed as a JSON map in the body. The original request's `Authorization` headers are reused for this request. The subscription is allowed if the service returns 2xx and denied otherwise. | "NO_CHECK"
 `SUBSCRIPTION_CHECK` | Select if and how creating subscriptions should be denied. Can be either `no_check` (subscriptions are always allowed), `jwt_validation` (subscription are allowed if at least one authorization token is valid - using JWT_SECRET_KEY - and not blacklisted), or an URL that points to an external service that decides whether to allow or deny the subscription. Such an external service is expected to accept POST requests. The subscription parameters are passed in the body. The original request's `Authorization` headers are reused for this request. The subscription is allowed if the service returns 2xx and denied otherwise. | "NO_CHECK"
-`SESSION_ROLE` | DEPRECATED. Type of users that are visible to the outside world (possible to list). Only users with these roles will be listed. Possible roles are listed in `JWT_ROLES_FIELD`. Define as strings, separated by comma. | "user"
-`EXTRACTORS` | Extractor configuration, given either as path to a JSON file, or directly as JSON. The extractor configuration contains information about events' fields per event type, used to _extract_ information. For example, the following setting allows clients to specify a constraint on the `name` field of `greeting` events: `EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/name"}}}}'`. Note that `stable_field_index` and `event/json_pointer` are required for all configured fields. | nil
 
 .
