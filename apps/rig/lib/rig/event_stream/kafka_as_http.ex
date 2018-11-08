@@ -35,7 +35,7 @@ defmodule Rig.EventStream.KafkaToHttp do
     %{targets: targets} = config()
 
     for url <- targets do
-      case HTTPoison.post(url, cloud_event) do
+      case HTTPoison.post(url, cloud_event |> Poison.encode!()) do
         {:ok, %HTTPoison.Response{status_code: status}}
         when status >= 200 and status < 300 ->
           :ok

@@ -1,6 +1,17 @@
 import { sign } from 'jsonwebtoken';
 import { v4 } from 'uuid';
-import { JWT_SECRET_KEY, JWT_ROLES_FIELD, JWT_USER_FIELD } from '../constants';
+import { JWT_SECRET_KEY } from '../constants';
+
+const randomString = () => {
+  return (
+    Math.random()
+      .toString(36)
+      .substring(2, 15) +
+    Math.random()
+      .toString(36)
+      .substring(2, 15)
+  );
+};
 
 /**
  * Generates JWT with required fields
@@ -8,25 +19,29 @@ import { JWT_SECRET_KEY, JWT_ROLES_FIELD, JWT_USER_FIELD } from '../constants';
  * @param   {array} levels
  * @returns {string} generated JWT
  */
-export const getJwtToken = (username, levels) => {
-    // Populates claims with required fields
-    const claims = {};
-    claims[JWT_USER_FIELD] = username;
-    claims[JWT_ROLES_FIELD] = levels;
+export const getJwtToken = username => {
+  // Populates claims with required fields
+  const claims = { username };
 
-    return sign(claims, JWT_SECRET_KEY, { expiresIn: '60m', jwtid: v4() });
+  return sign(claims, JWT_SECRET_KEY, { expiresIn: '60m', jwtid: v4() });
 };
 
 /**
  * Calls external service which produces message to Kafka
- * @param   {object} message
+ * @param   {object} data
  * @returns {promise}
  */
-export const produceKafkaMessageAsync = (message) => {
-    return fetch('/produce', {
-        method: 'POST',
-        body: JSON.stringify(message),
-        headers: { 'Content-Type': 'application/json' },
-    })
-    .then((response) => response.json());
+export const produceKafkaMessageAsync = (subscriberEvent, data) => {
+  return fetch('/produce', {
+    method: 'POST',
+    body: JSON.stringify({
+      cloudEventsVersion: '0.1',
+      eventID: randomString(),
+      eventType: subscriberEvent,
+      source: 'events-example-ui',
+      contentType: 'text/plain',
+      data
+    }),
+    headers: { 'Content-Type': 'application/json' }
+  }).then(response => response.json());
 };

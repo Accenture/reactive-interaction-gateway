@@ -124,7 +124,7 @@ source.addEventListener("rig.connection.create", function (e) {
   createSubscriptions(connectionToken)
 }, false)
 
-source.addEventListener("rig.subscription.create", function (e) {
+source.addEventListener("rig.subscriptions_set", function (e) {
   cloudEvent = JSON.parse(e.data)
   const { eventType } = cloudEvent.data
   console.log(`Now subscribed to ${eventType}`)
@@ -152,7 +152,6 @@ source.addEventListener("greeting", function (e) {
 - Uses the upcoming [**CloudEvents** specification](https://github.com/cloudevents/spec).
 - Flexible event subscription model:
   - Subscription based on event types.
-  - Supports "recursive" subscriptions that include sub-events.
 - _No_ business logic inside.
   - Use RIG for a public website, or
   - Use your existing services for authentication and authorization of users and subscriptions.
