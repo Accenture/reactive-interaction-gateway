@@ -54,8 +54,7 @@ spec:
         - containerPort: 4010
         env:
         # Kafka is by default disabled
-        # If you want to test with Kafka set KAFKA_ENABLED env var to true and
-        # also KAFKA_HOSTS env var to point to Kafka
+        # If you want to test with Kafka set KAFKA_BROKERS env var to point to Kafka
         # Let's have some test-endpoints
         - name: PROXY_CONFIG_FILE
           value: "proxy/proxy.test.json"

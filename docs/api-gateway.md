@@ -22,4 +22,4 @@ The file contains a list of API definitions. The definitions are expected in the
 
 ## Proxy HTTP API
 
-RIG also offers an API for creating, changing, and removing API endpoint definitions at runtime. If you're running multiple RIG instances, changes done on one instance will be synchronized to the other instances automatically. Check out the TODO API documentation to learn more.
+RIG also offers an API for creating, changing, and removing API endpoint definitions at runtime. If you're running multiple RIG instances, changes done on one instance will be synchronized to the other instances automatically. Check out the [API documentation](../guides/configuration.md#api-gateway) to learn more.
