@@ -3,7 +3,7 @@ defmodule RigApi.MessageController do
 
   use RigApi, :controller
 
-  alias Rig.CloudEvent
+  alias CloudEvent
 
   action_fallback(RigApi.FallbackController)
 

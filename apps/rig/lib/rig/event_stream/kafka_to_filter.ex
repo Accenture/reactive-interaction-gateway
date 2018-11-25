@@ -5,7 +5,8 @@ defmodule Rig.EventStream.KafkaToFilter do
   """
   use Rig.KafkaConsumerSetup
 
-  alias Rig.CloudEvent
+  alias CloudEvent
+
   alias Rig.EventFilter
 
   # ---

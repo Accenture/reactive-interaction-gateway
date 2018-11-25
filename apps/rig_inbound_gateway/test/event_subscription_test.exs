@@ -7,7 +7,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
   import Joken
 
-  alias Rig.CloudEvent
+  alias CloudEvent
   alias Rig.EventFilter.Sup, as: EventFilterSup
 
   @external_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][
