@@ -39,6 +39,9 @@ defmodule RigInboundGatewayWeb.V1.SSE do
       Subscriptions.check_and_forward_subscriptions(self(), jwt_subscriptions)
     end
 
+    # Schedule the first subscription refresh:
+    Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
+
     conn
     |> send_chunk(Events.welcome_event())
     |> wait_for_events()
@@ -63,14 +66,10 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     |> send_chunked(_status = 200)
   end
 
-  defp wait_for_events(conn, state \\ @initial_state, next_heartbeat_timeout \\ nil)
+  defp wait_for_events(conn, state \\ @initial_state, next_heartbeat \\ nil) do
+    next_heartbeat =
+      next_heartbeat || Timex.now() |> Timex.shift(milliseconds: @heartbeat_interval_ms)
 
-  defp wait_for_events(conn, state, nil) do
-    next_heartbeat = Timex.now() |> Timex.shift(milliseconds: @heartbeat_interval_ms)
-    wait_for_events(conn, state, next_heartbeat)
-  end
-
-  defp wait_for_events(conn, state, next_heartbeat) do
     heartbeat_remaining_ms =
       next_heartbeat
       |> Timex.diff(Timex.now(), :milliseconds)
@@ -80,10 +79,12 @@ defmodule RigInboundGatewayWeb.V1.SSE do
       # Cloud Events are forwarded to the client:
       {:cloud_event, cloud_event} ->
         Logger.debug(fn -> inspect(cloud_event) end)
+
+        conn
         # Forward the event:
-        send_chunk(conn, cloud_event)
+        |> send_chunk(cloud_event)
         # Keep the connection open:
-        wait_for_events(conn, state, next_heartbeat)
+        |> wait_for_events(state, next_heartbeat)
 
       # (Re-)Set subscriptions for this connection:
       {:set_subscriptions, subscriptions} ->
@@ -92,10 +93,12 @@ defmodule RigInboundGatewayWeb.V1.SSE do
         EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
         # Replace current subscriptions:
         state = Map.put(state, :subscriptions, subscriptions)
+
+        conn
         # Notify the client:
-        send_chunk(conn, Events.subscriptions_set(subscriptions))
+        |> send_chunk(Events.subscriptions_set(subscriptions))
         # Keep the connection open:
-        wait_for_events(conn, state, next_heartbeat)
+        |> wait_for_events(state, next_heartbeat)
 
       # Subscriptions need to be refreshed periodically:
       :refresh_subscriptions ->
@@ -114,7 +117,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
         # If the connection is down, the (second) heartbeat will trigger ConnectionClosed
         conn
         |> send_chunk(:heartbeat)
-        |> wait_for_events(state, nil)
+        |> wait_for_events(state)
     end
   end
 
