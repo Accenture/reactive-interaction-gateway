@@ -4,44 +4,24 @@
     "next": "Next",
     "previous": "Previous",
     "tagline": "Your UI deserves an API, too!",
-    "docs": {
-      "api-gateway": {
-        "title": "API Gateway",
-        "sidebar_label": "API Gateway"
-      },
-      "faq": {
-        "title": "Frequently Asked Questions",
-        "sidebar_label": "FAQ"
-      },
-      "getting-started": {
-        "title": "Getting started",
-        "sidebar_label": "Getting started"
-      },
-      "intro": {
-        "title": "What is RIG?",
-        "sidebar_label": "What is RIG?"
-      },
-      "rig-dev-guide": {
-        "title": "Developer's Guide to the Reactive Interaction Gateway",
-        "sidebar_label": "Developer's Guide"
-      },
-      "rig-ops-guide": {
-        "title": "Operator's Guide to the Reactive Interaction Gateway",
-        "sidebar_label": "Operator's Guide"
-      },
-      "user-authentication": {
-        "title": "User authentication",
-        "sidebar_label": "User authentication"
-      }
-    },
-    "links": {
-      "Docs": "Docs"
-    },
-    "categories": {
-      "For Developers": "For Developers",
-      "RIG in Production": "RIG in Production",
-      "Hacking the Source": "Hacking the Source"
-    }
+    "api-gateway": "API Gateway",
+    "API Gateway": "API Gateway",
+    "faq": "Frequently Asked Questions",
+    "FAQ": "FAQ",
+    "getting-started": "Getting started",
+    "Getting started": "Getting started",
+    "intro": "What is RIG?",
+    "What is RIG?": "What is RIG?",
+    "rig-dev-guide": "Developer's Guide to the Reactive Interaction Gateway",
+    "Developer's Guide": "Developer's Guide",
+    "rig-ops-guide": "Operator's Guide to the Reactive Interaction Gateway",
+    "Operator's Guide": "Operator's Guide",
+    "user-authentication": "User authentication",
+    "User authentication": "User authentication",
+    "Docs": "Docs",
+    "For Developers": "For Developers",
+    "RIG in Production": "RIG in Production",
+    "Hacking the Source": "Hacking the Source"
   },
   "pages-strings": {
     "Help Translate|recruit community translators for your project": "Help Translate",
