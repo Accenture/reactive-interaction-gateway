@@ -73,7 +73,7 @@ To have the project use a newer Elixir version, make sure to change the followin
 
 - `.travis.yml`
 - `Dockerfile` (the `FROM` image tag)
-- `version`
+- `mix.exs` (root level)
 
 ## Test Tags
 

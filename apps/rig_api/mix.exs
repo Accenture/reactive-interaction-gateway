@@ -1,17 +1,17 @@
 defmodule RigApi.Mixfile do
   use Mix.Project
 
-  def project do
-    %{rig: rig_version, elixir: elixir_version} = versions()
+  alias Rig.Umbrella.Mixfile, as: Umbrella
 
+  def project do
     [
       app: :rig_api,
-      version: rig_version,
+      version: Umbrella.release_version(),
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: elixir_version,
+      elixir: Umbrella.elixir_version(),
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -29,11 +29,6 @@ defmodule RigApi.Mixfile do
       mod: {RigApi.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
-  end
-
-  defp versions do
-    {map, []} = Code.eval_file("version", "../..")
-    map
   end
 
   # Specifies which paths to compile per environment.
