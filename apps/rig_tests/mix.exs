@@ -2,15 +2,17 @@ defmodule RigTests.MixProject do
   @moduledoc false
   use Mix.Project
 
+  alias Rig.Umbrella.Mixfile, as: Umbrella
+
   def project do
     [
       app: :rig_tests,
-      version: "0.1.0",
+      version: Umbrella.release_version(),
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.7",
+      elixir: Umbrella.elixir_version(),
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
