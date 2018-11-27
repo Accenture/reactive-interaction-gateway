@@ -4,6 +4,7 @@ defmodule Rig.Umbrella.Mixfile do
 
   def project do
     %{elixir: elixir_version} = versions()
+
     [
       apps_path: "apps",
       description: description(),
@@ -38,11 +39,11 @@ defmodule Rig.Umbrella.Mixfile do
   defp deps do
     [
       {:excoveralls, "~> 0.8", only: [:dev, :test]},
-      {:credo, "~> 0.7", only: [:dev, :test]},
+      {:credo, "~> 1.0", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test]},
       {:distillery, "~> 2.0.0-rc.6"},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
-      {:mix_test_watch, "~> 0.5", only: :dev, runtime: false},
+      {:mix_test_watch, "~> 0.5", only: :dev, runtime: false}
     ]
   end
 
