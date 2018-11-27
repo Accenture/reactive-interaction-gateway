@@ -10,6 +10,7 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
 
   alias Poison.Parser, as: JsonParser
   alias RigOutboundGateway.Kinesis.LogStream
+  alias Rig.EventFilter
 
   @jinterface_version "1.8.1"
   @restart_delay_ms 20_000
@@ -117,12 +118,18 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
   @spec java_client_callback(data :: [{atom(), String.t()}, ...], RigOutboundGateway.send_t()) ::
           :ok
   def java_client_callback(data, send \\ @default_send) do
-    body = data[:body]
-    meta = Keyword.merge(data, body_raw: body)
-    ack = fn -> :ok end
+    IO.inspect(data)
+    IO.inspect(data[:body])
 
-    RigOutboundGateway.handle_raw(body, &JsonParser.parse/1, send, ack)
-    |> RigOutboundGateway.Logger.log(__MODULE__, meta)
+    m =
+      data[:body]
+      |> Poison.decode!()
+
+    IO.inspect(m)
+
+    mm = m |> EventFilter.forward_event()
+
+    IO.inspect(mm)
 
     :ok
   end
