@@ -42,7 +42,7 @@ defmodule RigAuth.Mixfile do
     [
       {:rig, in_umbrella: true},
       {:confex, "~> 3.3"},
-      {:cowboy, "~> 1.0"},
+      {:cowboy, "~> 2.0"},
       {:httpoison, "~> 1.3"},
       {:joken, "~> 1.5"},
       {:phoenix, "~> 1.4.0"},
