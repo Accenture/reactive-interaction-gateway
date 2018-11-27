@@ -50,7 +50,7 @@ defmodule RigApi.Mixfile do
       {:rig_inbound_gateway, in_umbrella: true},
       {:rig_outbound_gateway, in_umbrella: true},
       {:rig_auth, in_umbrella: true},
-      {:phoenix, "~> 1.3"},
+      {:phoenix, "~> 1.4.0"},
       {:phoenix_pubsub, "~> 1.0"},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},

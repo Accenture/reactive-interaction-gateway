@@ -45,7 +45,7 @@ defmodule RigAuth.Mixfile do
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 1.3"},
       {:joken, "~> 1.5"},
-      {:phoenix, "~> 1.3.0"},
+      {:phoenix, "~> 1.4.0"},
       {:plug, "~> 1.4"},
       {:poison, "~> 2.0 or ~> 3.0"},
       {:stubr, "~> 1.5.0", only: :test},
