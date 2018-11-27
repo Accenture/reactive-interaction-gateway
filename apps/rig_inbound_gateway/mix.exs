@@ -67,7 +67,7 @@ defmodule RigInboundGateway.Mixfile do
       {:confex, "~> 3.3"},
       {:uuid, "~> 1.1"},
       # SSE serialization:
-      {:server_sent_event, "~> 0.3.1"},
+      {:server_sent_event, "~> 0.4.6"},
       # AWS SDK
       {:ex_aws, "~> 2.0"},
       {:ex_aws_kinesis, "~> 2.0"},
