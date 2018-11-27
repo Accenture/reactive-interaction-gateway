@@ -12,6 +12,7 @@ ENV MIX_ENV=prod
 WORKDIR /opt/sites/rig
 
 # Copy release config
+COPY version /opt/sites/rig/
 COPY rel /opt/sites/rig/rel/
 COPY vm.args /opt/sites/rig/
 
