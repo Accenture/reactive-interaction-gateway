@@ -2,17 +2,15 @@ defmodule Rig.Umbrella.Mixfile do
   @moduledoc false
   use Mix.Project
 
-  def release_version, do: "2.0.0-beta.2"
-  def elixir_version, do: "~> 1.7"
-
   def project do
+    %{elixir: elixir_version} = versions()
     [
       apps_path: "apps",
       description: description(),
       docs: docs(),
       # hex.pm doesn't support umbrella projects
       package: package(),
-      elixir: elixir_version(),
+      elixir: elixir_version,
       compilers: [:phoenix] ++ Mix.compilers(),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -27,6 +25,11 @@ defmodule Rig.Umbrella.Mixfile do
     ]
   end
 
+  defp versions do
+    {map, []} = Code.eval_file("version", ".")
+    map
+  end
+
   # Dependencies listed here are available only for this
   # project and cannot be accessed from applications inside
   # the apps folder.
@@ -39,7 +42,7 @@ defmodule Rig.Umbrella.Mixfile do
       {:dialyxir, "~> 0.5", only: [:dev, :test]},
       {:distillery, "~> 2.0.0-rc.6"},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
-      {:mix_test_watch, "~> 0.5", only: :dev, runtime: false}
+      {:mix_test_watch, "~> 0.5", only: :dev, runtime: false},
     ]
   end
 
@@ -53,7 +56,7 @@ defmodule Rig.Umbrella.Mixfile do
   defp package do
     [
       name: "rig",
-      maintainers: ["Kevin Bader", "Mario Macai"],
+      maintainers: ["Kevin Bader", "Mario Macai", "Martin Lofaj"],
       licenses: ["Apache 2.0"],
       links: %{"GitHub" => "https://github.com/Accenture/reactive-interaction-gateway"}
     ]

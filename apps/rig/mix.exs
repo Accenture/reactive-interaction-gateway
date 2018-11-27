@@ -2,17 +2,17 @@ defmodule Rig.MixProject do
   @moduledoc false
   use Mix.Project
 
-  alias Rig.Umbrella.Mixfile, as: Umbrella
-
   def project do
+    %{rig: rig_version, elixir: elixir_version} = versions()
+
     [
       app: :rig,
-      version: Umbrella.release_version(),
+      version: rig_version,
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: Umbrella.elixir_version(),
+      elixir: elixir_version,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases()
@@ -26,6 +26,11 @@ defmodule Rig.MixProject do
       extra_applications: [:logger],
       included_applications: [:peerage]
     ]
+  end
+
+  defp versions do
+    {map, []} = Code.eval_file("version", "../..")
+    map
   end
 
   # Run "mix help deps" to learn about dependencies.
