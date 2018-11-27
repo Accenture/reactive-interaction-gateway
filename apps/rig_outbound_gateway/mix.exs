@@ -3,6 +3,7 @@ defmodule RigOutboundGateway.MixProject do
 
   def project do
     %{rig: rig_version, elixir: elixir_version} = versions()
+
     [
       app: :rig_outbound_gateway,
       version: rig_version,
@@ -37,11 +38,11 @@ defmodule RigOutboundGateway.MixProject do
       # Apache Kafka Erlang client library:
       {:brod, "~> 3.3"},
       # JSON parser:
-      {:poison, "~> 2.0 or ~> 3.0"},
+      {:poison, "~> 3.0 or ~> 4.0"},
       # Stubs and spies for tests:
       {:stubr, "~> 1.5"},
       # Run/manage the Kinesis Java client:
-      {:porcelain, "~> 2.0"},
+      {:porcelain, "~> 2.0"}
     ]
   end
 end

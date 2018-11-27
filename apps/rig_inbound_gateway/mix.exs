@@ -55,7 +55,7 @@ defmodule RigInboundGateway.Mixfile do
       {:cowboy, "~> 2.0"},
       {:httpoison, "~> 1.3"},
       # JSON libs:
-      {:poison, "~> 2.0 or ~> 3.0"},
+      {:poison, "~> 3.0 or ~> 4.0"},
       {:jason, "~> 1.1"},
       # Date and time handling:
       {:timex, "~> 3.4"},
