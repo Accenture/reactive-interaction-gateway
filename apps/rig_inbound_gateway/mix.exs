@@ -58,7 +58,7 @@ defmodule RigInboundGateway.Mixfile do
       {:poison, "~> 2.0 or ~> 3.0"},
       {:jason, "~> 1.1"},
       # Date and time handling:
-      {:timex, "~> 3.1.22"},
+      {:timex, "~> 3.4"},
       # Helper to make writing stubs and mocks easier:
       {:stubr, "~> 1.5.0", only: :test},
       # Elixir-compatible :ets.fun2ms/1

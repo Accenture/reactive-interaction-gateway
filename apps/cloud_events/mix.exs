@@ -29,7 +29,7 @@ defmodule CloudEvents.MixProject do
       # Encode/decode to/from JSON:
       {:jason, "~> 1.1"},
       # Auto-fill eventTime:
-      {:timex, "~> 3.1.22"},
+      {:timex, "~> 3.4"},
       # Auto-fill eventID:
       {:uuid, "~> 1.1"}
     ]

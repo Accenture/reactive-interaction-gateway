@@ -49,7 +49,7 @@ defmodule RigAuth.Mixfile do
       {:plug, "~> 1.4"},
       {:poison, "~> 2.0 or ~> 3.0"},
       {:stubr, "~> 1.5.0", only: :test},
-      {:timex, "~> 3.1.22"},
+      {:timex, "~> 3.4"},
       # JSON Pointer (RFC 6901) implementation for extracting the session name from JWTs:
       {:odgn_json_pointer, "~> 2.3"}
     ]
