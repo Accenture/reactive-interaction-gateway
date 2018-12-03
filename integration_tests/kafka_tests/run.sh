@@ -28,7 +28,9 @@ is_kafka_ready || exit 1
 export KAFKA_BROKERS="${HOST}:${KAFKA_PORT_PLAIN}"
 export KAFKA_SSL_ENABLED=0
 export KAFKA_SSL_KEYFILE_PASS=abcdefgh
-export LOG_LEVEL=debug
+export LOG_LEVEL=warn
+export PROXY_KAFKA_REQUEST_TOPIC=rig_test
+export KAFKA_SOURCE_TOPICS=rig_test
 
 cd "${RIG_DIR}"
 mix test --only kafka "$@"

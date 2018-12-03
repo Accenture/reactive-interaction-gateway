@@ -11,7 +11,10 @@ defmodule RigInboundGateway.ApiProxy.Auth.Jwt do
   # ---
 
   def check(conn, api) do
-    tokens = Enum.concat(pick_query_token(conn, api), pick_header_token(conn, api))
+    tokens =
+      pick_query_token(conn, api)
+      |> Enum.concat(pick_header_token(conn, api))
+      |> Enum.reject(&(&1 == ""))
 
     if Enum.any?(tokens, &Jwt.Utils.valid?/1) do
       :ok

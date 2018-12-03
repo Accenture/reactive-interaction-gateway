@@ -12,11 +12,17 @@ defmodule RigAuth.Jwt.Utils do
   @type claims :: %{required(String.t()) => String.t()}
 
   @spec valid?(String.t()) :: boolean
-  def valid?(jwt) do
+  def valid?("Bearer " <> jwt) do
     jwt
     |> validate
     |> get_error == nil
   end
+
+  def valid?(jwt) do
+    %{error: "JWT=#{jwt} has incorrect form. Required form is: \"Bearer token\""}
+  end
+
+  # ---
 
   @spec decode(String.t()) :: {:ok, claims} | {:error, String.t()}
   def decode(jwt) do
@@ -24,6 +30,8 @@ defmodule RigAuth.Jwt.Utils do
     |> validate
     |> get_data
   end
+
+  # ---
 
   @spec validate(String.t()) :: Joken.Token.t()
   defp validate(jwt) do
@@ -43,6 +51,8 @@ defmodule RigAuth.Jwt.Utils do
     |> verify
     |> check_blacklist
   end
+
+  # ---
 
   @spec check_blacklist(token :: Joken.Token.t()) :: Joken.Token.t()
   defp check_blacklist(%{error: nil, claims: %{"jti" => jti}} = token) do

@@ -313,7 +313,7 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
     jwt = generate_jwt()
 
     build_conn(method, url, query)
-    |> put_req_header("authorization", jwt)
+    |> put_req_header("authorization", "Bearer #{jwt}")
   end
 
   defp call(mod, conn) do

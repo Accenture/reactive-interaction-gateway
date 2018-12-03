@@ -9,13 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Added -->
 
-<!-- ### Changed -->
+### Changed
+
+- [Auth] JWT now expects proper format -- `Bearer ...`.
 
 <!-- ### Deprecated -->
 
 <!-- ### Removed -->
 
-<!-- ### Fixed -->
+### Fixed
+
+- [Inbound] Wrong parsing and place in cloud events for API proxy publish to Kafka/Kinesis
 
 <!-- ### Security -->
 

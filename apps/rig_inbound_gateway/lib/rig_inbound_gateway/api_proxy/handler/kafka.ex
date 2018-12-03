@@ -20,7 +20,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
   def kafka_handler(message) do
     with {:ok, body} <- Jason.decode(message),
-         {:ok, correlation_id} <- Map.fetch(body, "correlation_id"),
+         {:ok, rig_metadata} <- Map.fetch(body, "rig"),
+         {:ok, correlation_id} <- Map.fetch(rig_metadata, "correlationID"),
          {:ok, deserialized_pid} <- Codec.deserialize(correlation_id) do
       Logger.debug(fn ->
         "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
@@ -44,7 +45,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   def handle_http_request(conn, api, endpoint)
 
   @doc "CORS response for preflight request."
-  def handle_http_request(%{"method" => "OPTIONS"} = conn, _, %{"target" => "kafka"}) do
+  def handle_http_request(%{method: "OPTIONS"} = conn, _, %{"target" => "kafka"}) do
     conn
     |> with_cors()
     |> Conn.send_resp(:no_content, "")
@@ -55,18 +56,19 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     %{params: %{"partition_key" => partition_key, "data" => data}} = conn
 
     kafka_message =
-      Poison.encode!(%{
-        correlation_id: Codec.serialize(self()),
-        data: data,
+      data
+      |> Map.put("rig", %{
+        correlationID: Codec.serialize(self()),
         host: conn.host,
         method: conn.method,
-        request_path: conn.request_path,
+        requestPath: conn.request_path,
         port: conn.port,
-        remote_ip: conn.remote_ip,
-        req_headers: conn.req_headers,
+        remoteIP: to_string(:inet_parse.ntoa(conn.remote_ip)),
+        reqHeaders: Enum.map(conn.req_headers, &Tuple.to_list(&1)),
         scheme: conn.scheme,
-        query_string: conn.query_string
+        queryString: conn.query_string
       })
+      |> Poison.encode!()
 
     produce(
       _partition_key = partition_key,
@@ -126,6 +128,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     conn
     |> Conn.put_resp_header("access-control-allow-origin", config().cors)
     |> Conn.put_resp_header("access-control-allow-methods", "*")
-    |> Conn.put_resp_header("access-control-allow-headers", "content-type")
+    |> Conn.put_resp_header("access-control-allow-headers", "content-type,authorization")
   end
 end

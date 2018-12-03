@@ -85,7 +85,8 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
 config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
   kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},
   kinesis_request_region: {:system, "PROXY_KINESIS_REQUEST_REGION", "eu-west-1"},
-  response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000}
+  response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000},
+  cors: {:system, "CORS", "*"}
 
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"}

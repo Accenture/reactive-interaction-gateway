@@ -114,19 +114,10 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
   end
 
   @spec java_client_callback(data :: [{atom(), String.t()}, ...]) :: :ok
-  def java_client_callback(data, send \\ @default_send) do
-    IO.inspect(data)
-    IO.inspect(data[:body])
-
-    m =
-      data[:body]
-      |> Poison.decode!()
-
-    IO.inspect(m)
-
-    mm = m |> EventFilter.forward_event()
-
-    IO.inspect(mm)
+  def java_client_callback(data) do
+    data[:body]
+    |> Poison.decode!()
+    |> EventFilter.forward_event()
 
     :ok
   end
