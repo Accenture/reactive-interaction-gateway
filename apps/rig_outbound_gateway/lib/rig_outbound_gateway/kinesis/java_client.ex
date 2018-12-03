@@ -10,7 +10,6 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
 
   alias Rig.EventFilter
   alias RigOutboundGateway.Kinesis.LogStream
-  alias Rig.EventFilter
 
   @jinterface_version "1.8.1"
   @restart_delay_ms 20_000
