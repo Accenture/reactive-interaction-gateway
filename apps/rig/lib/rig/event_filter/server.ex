@@ -79,7 +79,7 @@ defmodule Rig.EventFilter.Server do
 
   @impl GenServer
   def handle_call(
-        {:refresh_subscription, conn_pid, %Subscription{} = subscription},
+        {:refresh_subscriptions, socket_pid, subscriptions},
         _from,
         %{
           event_type: event_type,
@@ -88,10 +88,17 @@ defmodule Rig.EventFilter.Server do
           fields: fields
         } = state
       ) do
-    # Only handle subscriptions for event types we're responsible for (not supposed to happen):
-    ^event_type = subscription.event_type
-    expiration_ts = Timex.now() |> Timex.shift(seconds: ttl_s) |> as_epoch()
-    add_to_table(subscription_table, conn_pid, expiration_ts, fields, subscription.constraints)
+    # Only handle subscriptions that target the filter's event type:
+    subscriptions = Enum.filter(subscriptions, fn sub -> sub.event_type == event_type end)
+
+    refresh_subscriptions(
+      subscription_table,
+      socket_pid,
+      subscriptions,
+      fields,
+      ttl_s
+    )
+
     {:reply, :ok, state}
   end
 
@@ -100,22 +107,18 @@ defmodule Rig.EventFilter.Server do
   @impl GenServer
   def handle_cast(
         {:cloud_event, event},
-        %{
-          subscription_table: subscription_table,
-          config: config,
-          fields: fields
-        } = state
+        %{subscription_table: subscription_table, config: config, fields: fields} = state
       ) do
     get_value_in_event = get_extractor(config, event)
     match_spec = SubscriptionMatcher.match_spec(fields, get_value_in_event)
 
-    conn_pid_set =
+    socket_pid_set =
       subscription_table
       |> :ets.select(match_spec)
       |> MapSet.new()
 
-    for pid <- conn_pid_set do
-      send(pid, {:cloud_event, event})
+    for socket_pid <- socket_pid_set do
+      send(socket_pid, {:cloud_event, event})
     end
 
     {:noreply, state}
@@ -168,6 +171,26 @@ defmodule Rig.EventFilter.Server do
   end
 
   defp add_wildcards_to_table(_, _, _), do: nil
+
+  # ---
+
+  defp refresh_subscriptions(
+         subscription_table,
+         socket_pid,
+         subscriptions,
+         fields,
+         subscription_ttl_s
+       ) do
+    # Start with clearing all previous subscriptions (prevents duplicates and removes
+    # subscriptions that are not being refreshed immediately):
+    :ets.delete(subscription_table, socket_pid)
+
+    expiration_ts = Timex.now() |> Timex.shift(seconds: subscription_ttl_s) |> as_epoch()
+
+    for %Subscription{constraints: constraints} <- subscriptions do
+      add_to_table(subscription_table, socket_pid, expiration_ts, fields, constraints)
+    end
+  end
 
   # ---
 

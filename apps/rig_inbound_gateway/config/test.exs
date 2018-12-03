@@ -13,11 +13,9 @@ config :rig, RigInboundGateway.RateLimit,
   burst_size: 10,
   sweep_interval_ms: 0
 
-config :rig, RigInboundGateway.Kafka,
-  log_topic: "rig"
+config :rig, RigInboundGateway.Kafka, log_topic: "rig"
 
-config :rig, RigInboundGateway.Kafka.MessageHandler,
-  message_user_field: "username"
+config :rig, RigInboundGateway.Kafka.MessageHandler, message_user_field: "username"
 
 config :rig, RigInboundGateway.Kafka.SupWrapper,
   message_user_field: "username",
@@ -31,5 +29,4 @@ config :rig, RigInboundGatewayWeb.Presence.Channel,
 config :rig, RigInboundGateway.Proxy,
   config_file: {:system, "PROXY_CONFIG_FILE", "proxy/proxy.test.json"}
 
-config :rig, RigInboundGatewayWeb.Proxy.Controller,
-  rig_proxy: RigInboundGateway.ProxyMock
+config :rig, RigInboundGatewayWeb.Proxy.Controller, rig_proxy: RigInboundGateway.ProxyMock

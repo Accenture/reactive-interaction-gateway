@@ -1,45 +1,75 @@
 import { getJwtToken } from './services';
 
 export class Sse {
+  /**
+   * Create SSE connection
+   * @param  {string} username
+   * @param  {string} subscriberEvent
+   * @param  {function} cb
+   */
+  connect(username, subscriberEvent, cb) {
+    // Generate JWT using required fields
+    const token = getJwtToken(username);
 
-    /**
-     * Creates SSE connection, subscribes to user's Phoenix channel
-     * @param  {string} username
-     * @param  {string} levels
-     * @param  {string} subscriberTopic
-     * @param  {function} cb
-     */
-    connect(username, levels, subscriberTopic, cb) {
+    // Create SSE connection
+    this.socket = new EventSource(
+      `http://localhost:7000/_rig/v1/connection/sse?token=${token}`
+    );
 
-        // Transforms comma separated string to array of strings
-        const levelsArray = levels.split(',');
-        // Generates JWT using required fields
-        const token = getJwtToken(username, levelsArray);
+    // Wait for RIG's reply and execute callback
+    this.socket.addEventListener('rig.connection.create', e => {
+      const cloudEvent = JSON.parse(e.data);
+      const payload = cloudEvent.data;
+      const connectionToken = payload['connection_token'];
+      this.createSubscription(connectionToken, subscriberEvent, token);
+      cb({ status: 'ok', response: 'connection established' });
+    });
 
-        // Creates SSE connection and subscribes to user's Phoenix channel
-        this.socket = new EventSource(`/socket/sse?auth_token=${token}`);
+    return this;
+  }
 
-        // Wait for RIG's Phoenix channel reply and executes callback
-        this.socket.addEventListener('connection established', () => {
-            cb({ status: "ok", response: "connection established" });
-        });
+  createSubscription(connectionToken, subscriberEvent, token) {
+    return fetch(
+      `http://localhost:7000/_rig/v1/connection/sse/${connectionToken}/subscriptions`,
+      {
+        method: 'PUT',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          Authorization: token
+        },
+        body: JSON.stringify({
+          subscriptions: [{ eventType: subscriberEvent }]
+        })
+      }
+    )
+      .then(json => {
+        console.log('Subscriptions created:', json);
+        return json;
+      })
+      .catch(err => {
+        console.log('Failed to create subscription:', err);
+      });
+  }
 
-        return this;
-    }
+  listenForUserMessage(subscriberEvent, cb) {
+    // Listener for all messages
+    this.socket.onmessage = ({ data }) => {
+      const message = JSON.parse(data);
+      cb(message);
+    };
 
-    listenForUserMessage(cb) {
-        // Listener for all messages on given Phoenix channel
-        this.socket.onmessage = ({ data }) => {
-            const message = JSON.parse(data);
-            cb(message);
-        };
-    }
+    this.socket.addEventListener(subscriberEvent, ({ data }) => {
+      const message = JSON.parse(data);
+      cb(message);
+    });
+  }
 
-    disconnect(subscriberTopic, cb) {
-        // Unsubscribe from Phoenix channel and remove SSE connection
-        this.socket.close();
-        cb('None');
-    }
+  disconnect(cb) {
+    // Close SSE connection
+    this.socket.close();
+    cb('None');
+  }
 }
 
 export default new Sse();

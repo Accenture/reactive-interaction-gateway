@@ -11,7 +11,7 @@ class App extends Component {
           <div className="hero-body">
             <div className="container">
               <h1 className="title">
-                Reactive Interaction Gateway Channels Example
+                Reactive Interaction Gateway Events Example
               </h1>
             </div>
           </div>

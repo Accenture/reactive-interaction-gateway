@@ -12,12 +12,18 @@ defmodule Rig.EventFilter.ServerTest do
     event_type = "test.event"
     field_config = %{}
     subscription = Subscription.new(%{event_type: event_type})
-    event = CloudEvent.new!(%{"eventType" => event_type, "source" => "test"})
+
+    event =
+      CloudEvent.new!(%{
+        "cloudEventsVersion" => "0.1",
+        "eventType" => event_type,
+        "source" => "test"
+      })
 
     opts = [debug?: true, subscription_ttl_s: 0]
     {:ok, filter_pid} = Server.start_link(event_type, field_config, opts)
 
-    EventFilter.refresh_subscriptions([subscription])
+    EventFilter.refresh_subscriptions([subscription], [])
     EventFilter.forward_event(event)
     EventFilter.forward_event(event)
 
@@ -60,7 +66,12 @@ defmodule Rig.EventFilter.ServerTest do
     joe_and_30_subscription =
       Subscription.new(%{event_type: event_type, constraints: [Map.merge(name_is_joe, age_is_30)]})
 
-    base_event = CloudEvent.new!(%{"eventType" => event_type, "source" => "test"})
+    base_event =
+      CloudEvent.new!(%{
+        "cloudEventsVersion" => "0.1",
+        "eventType" => event_type,
+        "source" => "test"
+      })
 
     joe_20_event = CloudEvent.with_data(base_event, %{"name" => "joe", "age" => 20, "x" => "x"})
     joe_30_event = CloudEvent.with_data(base_event, %{"name" => "joe", "age" => 30, "x" => "x"})
@@ -82,7 +93,7 @@ defmodule Rig.EventFilter.ServerTest do
 
     for {subscription, event, match_expectation} <- specs do
       {:ok, filter_pid} = Server.start_link(event_type, field_config)
-      EventFilter.refresh_subscriptions([subscription])
+      EventFilter.refresh_subscriptions([subscription], [])
       EventFilter.forward_event(event)
 
       case match_expectation do

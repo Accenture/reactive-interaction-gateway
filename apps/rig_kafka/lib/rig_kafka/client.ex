@@ -6,11 +6,11 @@ defmodule RigKafka.Client do
   @reconnect_timeout_ms 20_000
   use GenServer, shutdown: @reconnect_timeout_ms + 5_000
 
-  import RigKafka.Types
-
   alias RigKafka.Config
 
   @supervisor RigKafka.DynamicSupervisor
+
+  @type callback :: (any -> :ok | any)
 
   defmodule GroupSubscriber do
     @moduledoc """
@@ -46,7 +46,8 @@ defmodule RigKafka.Client do
 
   # ---
 
-  def start_supervised(config, callback) do
+  @spec start_supervised(Config.t(), callback() | nil) :: {:ok, pid} | :ignore | {:error, any}
+  def start_supervised(config, callback \\ nil) do
     %{server_id: server_id} = config
     opts = Keyword.merge([config: config, callback: callback], name: server_id)
 
@@ -55,7 +56,14 @@ defmodule RigKafka.Client do
 
   # ---
 
-  @spec start_link(list) :: {:ok, name :: atom} | :ignore | {:error, any}
+  @spec stop_supervised(pid) :: :ok | {:error, :not_found}
+  def stop_supervised(client_pid) do
+    DynamicSupervisor.terminate_child(@supervisor, client_pid)
+  end
+
+  # ---
+
+  @spec start_link(list) :: {:ok, pid} | :ignore | {:error, any}
   def start_link(opts) do
     config = Keyword.fetch!(opts, :config)
 
@@ -74,7 +82,8 @@ defmodule RigKafka.Client do
 
   # ---
 
-  def produce(%{server_id: server_id}, topic, key, plaintext) do
+  def produce(%{server_id: server_id}, topic, key, plaintext)
+      when is_binary(topic) and is_binary(key) and is_binary(plaintext) do
     GenServer.call(server_id, {:produce, topic, key, plaintext})
   end
 
@@ -198,16 +207,8 @@ defmodule RigKafka.Client do
 
   @impl GenServer
   def handle_call({:produce, topic, key, plaintext}, _from, %{brod_client: brod_client} = state) do
-    :ok =
-      :brod.produce_sync(
-        brod_client,
-        topic,
-        &compute_kafka_partition/4,
-        key,
-        plaintext
-      )
-
-    {:reply, :ok, state}
+    result = try_producing_message(brod_client, topic, key, plaintext)
+    {:reply, result, state}
   end
 
   # ---
@@ -222,6 +223,42 @@ defmodule RigKafka.Client do
 
     Process.sleep(@reconnect_timeout_ms)
     {:stop, :shutdown, state}
+  end
+
+  # ---
+
+  defp try_producing_message(brod_client, topic, key, plaintext, retry_delay_divisor \\ 64)
+
+  defp try_producing_message(brod_client, topic, key, plaintext, retry_delay_divisor) do
+    case :brod.produce_sync(
+           brod_client,
+           topic,
+           &compute_kafka_partition/4,
+           key,
+           plaintext
+         ) do
+      :ok ->
+        :ok
+
+      {:error, :leader_not_available} ->
+        try_again? = retry_delay_divisor >= 1
+
+        if try_again? do
+          retry_delay_ms = trunc(1_920 / retry_delay_divisor)
+
+          Logger.debug(fn ->
+            "Leader not available for Kafka topic #{topic} (retry in #{retry_delay_ms} ms)"
+          end)
+
+          :timer.sleep(retry_delay_ms)
+          try_producing_message(brod_client, topic, key, plaintext, retry_delay_divisor / 2)
+        else
+          {:error, :leader_not_available}
+        end
+
+      err ->
+        err
+    end
   end
 
   # ---

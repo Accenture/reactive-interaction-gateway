@@ -9,17 +9,15 @@ defmodule RigInboundGateway.Transports.ServerSentEvents.Serializer do
 
   @behaviour Phoenix.Transports.Serializer
 
-  alias Phoenix.Socket.Reply
-  alias Phoenix.Socket.Message
   alias Phoenix.Socket.Broadcast
+  alias Phoenix.Socket.Message
+  alias Phoenix.Socket.Reply
 
   @doc """
   Translates a `Phoenix.Socket.Broadcast` into a `Phoenix.Socket.Message`.
   """
   def fastlane!(%Broadcast{} = msg) do
-    %Message{topic: msg.topic,
-             event: msg.event,
-             payload: msg.payload}
+    %Message{topic: msg.topic, event: msg.event, payload: msg.payload}
   end
 
   @doc """
@@ -35,6 +33,7 @@ defmodule RigInboundGateway.Transports.ServerSentEvents.Serializer do
       payload: %{status: reply.status, response: reply.payload}
     }
   end
+
   def encode!(%Message{} = msg), do: msg
 
   @doc """

@@ -45,16 +45,36 @@ defmodule Rig.EventFilter.Sup do
 
   @impl GenServer
   def handle_call(
-        {:refresh_subscriptions, subscriptions},
-        {from, _},
+        {:refresh_subscriptions, subscriptions, prev_subscriptions},
+        _from = {socket_pid, _tag},
         %{extractor_map: extractor_map} = state
       )
-      when is_list(subscriptions) do
-    for %Subscription{event_type: event_type} = sub <- subscriptions do
+      when is_list(subscriptions) and is_list(prev_subscriptions) do
+    subs_by_eventtype =
+      subscriptions
+      |> Enum.group_by(fn %Subscription{event_type: event_type} -> event_type end)
+
+    for {event_type, subs} <- subs_by_eventtype do
       filter_config = Config.for_event_type(extractor_map, event_type)
       filter = find_or_start_filter_process(event_type, filter_config)
-      GenServer.call(filter, {:refresh_subscription, from, sub})
+      GenServer.call(filter, {:refresh_subscriptions, socket_pid, subs})
     end
+
+    # If a subscription for an event type has been removed completely, the respective
+    # filter process has to be notified; otherwise, events will still be delivered to
+    # the connection process.
+    prev_subscriptions
+    |> Enum.map(fn %Subscription{event_type: event_type} -> event_type end)
+    # If it's in subs_by_eventtype the filter process already knows..
+    |> Enum.reject(fn event_type -> Map.has_key?(subs_by_eventtype, event_type) end)
+    # Notify the respective filter processes:
+    |> Enum.each(fn event_type ->
+      # If we can find a filter for this type, we ask it to clear all subscriptions for socket_pid:
+      case get_filter_pid(event_type) do
+        nil -> :ignore
+        filter -> GenServer.call(filter, {:refresh_subscriptions, socket_pid, _subs = []})
+      end
+    end)
 
     {:reply, :ok, state}
   end
@@ -73,6 +93,22 @@ defmodule Rig.EventFilter.Sup do
   def handle_info(:reload_config, state) do
     %{extractor_config_path_or_json: extractor_config_path_or_json} = config()
 
+    state =
+      case reload_config(extractor_config_path_or_json) do
+        nil -> state
+        extractor_map -> %{state | extractor_map: extractor_map}
+      end
+
+    {:noreply, state}
+  end
+
+  # ---
+
+  defp reload_config(extractor_config_path_or_json)
+
+  defp reload_config(nil), do: nil
+
+  defp reload_config(extractor_config_path_or_json) do
     Logger.debug(fn ->
       "Reloading extractor config from #{String.replace(extractor_config_path_or_json, "\n", "")}"
     end)
@@ -88,11 +124,14 @@ defmodule Rig.EventFilter.Sup do
       |> reload_filter_config(filter_config)
     end
 
-    {:noreply, %{state | extractor_map: extractor_map}}
+    extractor_map
   rescue
     err ->
-      Logger.error("Failed to reload extractor config: #{inspect(err)}")
-      {:noreply, state}
+      Logger.error(
+        "Failed to reload extractor config: #{inspect(err)}\n#{inspect(__STACKTRACE__)}"
+      )
+
+      nil
   end
 
   # ---

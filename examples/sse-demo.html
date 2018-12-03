@@ -40,20 +40,20 @@
       const greeting = input.value
       input.value = ""
       return fetch(`${baseUrl}/events`, {
-          method: "POST",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json; charset=utf-8"
-          },
-          body: JSON.stringify({
-            cloudEventsVersion: "0.1",
-            eventID: randomString(),
-            eventType: "greeting",
-            source: "sse-demo-ui",
-            contentType: "text/plain",
-            data: greeting
-          })
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify({
+          cloudEventsVersion: "0.1",
+          eventID: randomString(),
+          eventType: "greeting",
+          source: "sse-demo-ui",
+          contentType: "text/plain",
+          data: greeting
         })
+      })
         .then(response => response.json())
         .then(json => {
           console.log("CloudEvent sent:", json)
@@ -67,13 +67,13 @@
     function createSubscription(connectionToken) {
       const eventType = "com.red.flight.information.service.updated"
       return fetch(`${baseUrl}/connection/sse/${connectionToken}/subscriptions`, {
-          method: "POST",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json; charset=utf-8"
-          },
-          body: JSON.stringify({"subscriptions":[{"eventType": eventType}]})
-        })
+        method: "PUT",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify({ "subscriptions": [{ "eventType": eventType }] })
+      })
         .then(json => {
           console.log("Subscription created:", json)
           return json

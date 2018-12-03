@@ -10,11 +10,18 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   alias Jason
 
+  alias Rig.EventFilter
   alias RigInboundGateway.Events
+  alias RigInboundGateway.ImplicitSubscriptions.Jwt, as: JwtSubscriptions
+  alias RigInboundGateway.Subscriptions
 
   @behaviour :cowboy_websocket_handler
 
   @heartbeat_interval_ms 15_000
+  @subscription_refresh_interval_ms 60_000
+  @initial_state %{
+    subscriptions: []
+  }
 
   def init(_, _req, _opts) do
     {:upgrade, :protocol, :cowboy_websocket}
@@ -23,8 +30,19 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   @impl :cowboy_websocket_handler
   def websocket_init(_type, req, _opts) do
     send(self(), :send_connection_token)
+
+    token_param =
+      Tuple.to_list(req)
+      |> Enum.find(fn val -> is_binary(val) && String.starts_with?(val, "token=") end)
+
+    if token_param do
+      "token=" <> token = token_param
+      jwt_subscriptions = JwtSubscriptions.infer_subscriptions([token])
+      Subscriptions.check_and_forward_subscriptions(self(), jwt_subscriptions)
+    end
+
     Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
-    {:ok, req, _state = %{}}
+    {:ok, req, @initial_state}
   end
 
   @impl :cowboy_websocket_handler
@@ -42,12 +60,9 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   end
 
   @impl :cowboy_websocket_handler
-  def websocket_info({:rig_event, subscriber_group, cloud_event}, req, state) do
-    Logger.debug(fn ->
-      via = if is_nil(subscriber_group), do: "rig", else: inspect(subscriber_group)
-      "[WS] #{via}: #{inspect(cloud_event)}"
-    end)
-
+  def websocket_info({:cloud_event, cloud_event}, req, state) do
+    Logger.debug(fn -> inspect(cloud_event) end)
+    # Forward the event:
     {:reply, frame(cloud_event), req, state}
   end
 
@@ -63,8 +78,26 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   end
 
   @impl :cowboy_websocket_handler
+  def websocket_info({:set_subscriptions, subscriptions}, req, state) do
+    Logger.debug(fn -> inspect(subscriptions) end)
+    # Trigger immediate refresh:
+    EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
+    # Replace current subscriptions:
+    state = Map.put(state, :subscriptions, subscriptions)
+    # Notify the client:
+    {:reply, frame(Events.subscriptions_set(subscriptions)), req, state}
+  end
+
+  @impl :cowboy_websocket_handler
+  def websocket_info(:refresh_subscriptions, req, state) do
+    EventFilter.refresh_subscriptions(state.subscriptions, [])
+    Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
+    {:ok, req, state}
+  end
+
+  @impl :cowboy_websocket_handler
   def websocket_info({:session_killed, group}, req, state) do
-    Logger.info("[WS] session killed: #{inspect(group)}")
+    Logger.info("session killed: #{inspect(group)}")
     # This will close the connection:
     out_frame = {:close, 4000, "Session killed."}
     {:reply, out_frame, req, state}

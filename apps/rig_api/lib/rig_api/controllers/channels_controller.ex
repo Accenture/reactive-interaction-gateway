@@ -6,17 +6,18 @@ defmodule RigApi.ChannelsController do
   use RigApi, :controller
   use Rig.Config, [:session_role]
   require Logger
-  alias RigInboundGatewayWeb.Presence.Channel
-  alias RigInboundGatewayWeb.Endpoint
   alias RigAuth.Blacklist
   alias RigAuth.Jwt
+  alias RigInboundGatewayWeb.Endpoint
+  alias RigInboundGatewayWeb.Presence.Channel
 
   def list_channels(conn, _params) do
     conf = config()
+
     channels =
       "role:#{conf.session_role}"
-      |> Channel.channels_list
-      |> Map.keys
+      |> Channel.channels_list()
+      |> Map.keys()
 
     json(conn, channels)
   end
@@ -24,9 +25,9 @@ defmodule RigApi.ChannelsController do
   def list_channel_sessions(conn, %{"user" => id}) do
     sessions =
       "user:#{id}"
-      |> Channel.channels_list
-      |> Enum.map(fn(user) -> elem(user, 1).metas end)
-      |> List.flatten
+      |> Channel.channels_list()
+      |> Enum.map(fn user -> elem(user, 1).metas end)
+      |> List.flatten()
 
     json(conn, sessions)
   end
@@ -46,15 +47,22 @@ defmodule RigApi.ChannelsController do
     |> jwt_expiry_from_tokens
   rescue
     e ->
-      Logger.warn("No token (expiration) found, using default blacklist expiration timeout (#{inspect e}).")
+      Logger.warn(
+        "No token (expiration) found, using default blacklist expiration timeout (#{inspect(e)})."
+      )
+
       nil
   end
 
   defp jwt_expiry_from_tokens([]), do: nil
+
   defp jwt_expiry_from_tokens([token]) do
     {:ok, %{"exp" => expiry}} = Jwt.Utils.decode(token)
+
     expiry
-    |> Integer.to_string  # Comes as int, convert to string
-    |> Timex.parse!("{s-epoch}")  # Parse as UTC epoch
+    # Comes as int, convert to string
+    |> Integer.to_string()
+    # Parse as UTC epoch
+    |> Timex.parse!("{s-epoch}")
   end
 end

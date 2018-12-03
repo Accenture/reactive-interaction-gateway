@@ -7,6 +7,8 @@ defmodule Rig.EventStream.KafkaToHttp do
 
   alias Rig.CloudEvent
 
+  alias HTTPoison
+
   # ---
 
   def validate(%{targets: []}), do: :abort
@@ -31,9 +33,12 @@ defmodule Rig.EventStream.KafkaToHttp do
 
   defp forward_to_external_endpoint(cloud_event) do
     %{targets: targets} = config()
+    headers = [{"content-type", "application/json"}]
 
     for url <- targets do
-      case HTTPoison.post(url, cloud_event |> Poison.encode!()) do
+      body = Jason.encode!(cloud_event)
+
+      case HTTPoison.post(url, body, headers) do
         {:ok, %HTTPoison.Response{status_code: status}}
         when status >= 200 and status < 300 ->
           :ok

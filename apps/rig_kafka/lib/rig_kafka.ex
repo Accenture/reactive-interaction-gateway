@@ -1,10 +1,16 @@
 defmodule RigKafka do
-  alias RigKafka.Types
+  @moduledoc """
+  Kafka client for RIG.
 
-  # @spec start(Types.name(), Types.brokers(), Types.topics(), Types.callback()) :: {:ok, pid}
-  defdelegate start(config, callback), to: RigKafka.Client, as: :start_supervised
+  Basically wrapping :brod, tailored to our needs.
 
+  """
+  alias RigKafka.Client
+  alias RigKafka.Config
+
+  @spec start(Config.t(), Client.callback() | nil) :: {:ok, pid} | :ignore | {:error, any}
+  defdelegate start(config, callback \\ nil), to: RigKafka.Client, as: :start_supervised
+
+  @spec produce(Config.t(), String.t(), String.t(), String.t()) :: :ok
   defdelegate produce(config, topic, key, plaintext), to: RigKafka.Client
-
-  # defdelegate ready?(pid, topic, partition, timeout \\ 0), to: RigKafka.Readiness
 end

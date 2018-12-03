@@ -1,4 +1,5 @@
 defmodule RigInboundGateway.Mixfile do
+  @moduledoc false
   use Mix.Project
 
   def project do
@@ -51,8 +52,7 @@ defmodule RigInboundGateway.Mixfile do
       {:phoenix, "1.3.0"},
       {:phoenix_pubsub, "~> 1.0"},
       {:cowboy, "~> 1.0"},
-      {:httpoison, "~> 1.0.0"},
-      {:bypass, "~> 0.8.1", only: :test},
+      {:httpoison, "~> 1.3"},
       # JSON libs:
       {:poison, "~> 2.0 or ~> 3.0"},
       {:jason, "~> 1.1"},
@@ -69,7 +69,11 @@ defmodule RigInboundGateway.Mixfile do
       {:server_sent_event, "~> 0.3.1"},
       # AWS SDK
       {:ex_aws, "~> 2.0"},
-      {:ex_aws_kinesis, "~> 2.0"}
+      {:ex_aws_kinesis, "~> 2.0"},
+      # For backend service mocks:
+      {:fake_server, "~> 1.4", only: :test},
+      {:socket, "~> 0.3", only: :test},
+      {:joken, "~> 1.5"}
     ]
   end
 

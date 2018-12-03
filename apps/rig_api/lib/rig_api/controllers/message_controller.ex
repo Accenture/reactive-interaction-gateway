@@ -3,9 +3,11 @@ defmodule RigApi.MessageController do
 
   use RigApi, :controller
 
-  alias RigOutboundGateway
+  alias Rig.CloudEvent
 
-  action_fallback RigApi.FallbackController
+  action_fallback(RigApi.FallbackController)
+
+  @event_filter Application.get_env(:rig, :event_filter)
 
   @doc """
   Accepts message to be sent to front-ends.
@@ -16,15 +18,15 @@ defmodule RigApi.MessageController do
   - Given 'foo', the `:urlencoded` parser will pass '{"foo": nil}'.
   """
   def create(conn, message) do
-    with :ok <- RigOutboundGateway.send(message) do
+    with {:ok, cloud_event} <- CloudEvent.new(message) do
+      @event_filter.forward_event(cloud_event)
+
       send_resp(conn, :accepted, "message queued for transport")
     else
-      {:error, %KeyError{key: key, term: term}} ->
-        send_resp(conn, :bad_request, ~s(Bad request: expected user-ID in field "#{key}", got "#{inspect term}".\nPlease make sure the Content-Type is set correctly and that you actually pass a map.\n))
-
-      err ->
-        err |> inspect |> Logger.warn
-        send_resp(conn, :bad_request, "Bad request")
+      {:error, reason} ->
+        conn
+        |> put_status(:bad_request)
+        |> text("Failed to parse request body: #{inspect(reason)}")
     end
   end
 end

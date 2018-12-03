@@ -49,7 +49,7 @@ defmodule Rig.EventFilter.Config do
   def check(config) do
     errors =
       for {event_type, event_type_config} <- config,
-          {:error, reason} <- check_filter_config(event_type_config) do
+          {:error, reason} = check_filter_config(event_type_config) do
         {event_type, reason}
       end
 

@@ -1,0 +1,32 @@
+{
+  "greeting": {
+    "name": {
+      "stable_field_index": 1,
+      "jwt": {
+        "json_pointer": "/username"
+      },
+      "event": {
+        "json_pointer": "/data/name"
+      }
+    }
+  },
+  "nope": {
+    "fullname": {
+      "stable_field_index": 1,
+      "jwt": {
+        "json_pointer": "/fullname"
+      },
+      "event": {
+        "json_pointer": "/data/fullname"
+      }
+    }
+  },
+  "example": {
+    "email": {
+      "stable_field_index": 1,
+      "event": {
+        "json_pointer": "/data/email"
+      }
+    }
+  }
+}

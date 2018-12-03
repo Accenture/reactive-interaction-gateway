@@ -8,13 +8,12 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
   use GenServer
   require Logger
 
-  alias Poison.Parser, as: JsonParser
+  alias Rig.EventFilter
   alias RigOutboundGateway.Kinesis.LogStream
   alias Rig.EventFilter
 
   @jinterface_version "1.8.1"
   @restart_delay_ms 20_000
-  @default_send &RigOutboundGateway.send/1
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, :ok, opts)
@@ -115,8 +114,7 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
     args
   end
 
-  @spec java_client_callback(data :: [{atom(), String.t()}, ...], RigOutboundGateway.send_t()) ::
-          :ok
+  @spec java_client_callback(data :: [{atom(), String.t()}, ...]) :: :ok
   def java_client_callback(data, send \\ @default_send) do
     IO.inspect(data)
     IO.inspect(data[:body])

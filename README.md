@@ -1,3 +1,5 @@
+![Logo](./logo/Reactive-Interaction-Gateway-logo-cropped.png)
+
 # RIG - Reactive Interaction Gateway
 
 _The missing link between backend and frontend -- stop polling and go real-time!_
@@ -124,7 +126,7 @@ source.addEventListener("rig.connection.create", function (e) {
   createSubscriptions(connectionToken)
 }, false)
 
-source.addEventListener("rig.subscription.create", function (e) {
+source.addEventListener("rig.subscriptions_set", function (e) {
   cloudEvent = JSON.parse(e.data)
   const { eventType } = cloudEvent.data
   console.log(`Now subscribed to ${eventType}`)
@@ -152,7 +154,6 @@ source.addEventListener("greeting", function (e) {
 - Uses the upcoming [**CloudEvents** specification](https://github.com/cloudevents/spec).
 - Flexible event subscription model:
   - Subscription based on event types.
-  - Supports "recursive" subscriptions that include sub-events.
 - _No_ business logic inside.
   - Use RIG for a public website, or
   - Use your existing services for authentication and authorization of users and subscriptions.
@@ -181,7 +182,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
   - Suggesting new features or enhancements
   - Improve/fix documentation
 
-See the [developer's guide](guides/developer-guide.md) and [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+See the [developer's guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-dev-guide.html) and [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
 
 ## License
 

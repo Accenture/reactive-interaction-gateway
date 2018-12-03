@@ -14,6 +14,8 @@ defmodule RigApi.SessionBlacklistController do
 
   @cors_origins "*"
 
+  # ---
+
   @doc false
   def handle_preflight(%{method: "OPTIONS"} = conn, _params) do
     conn
@@ -23,9 +25,13 @@ defmodule RigApi.SessionBlacklistController do
     |> send_resp(:no_content, "")
   end
 
+  # ---
+
   defp with_allow_origin(conn) do
     put_resp_header(conn, "access-control-allow-origin", @cors_origins)
   end
+
+  # ---
 
   @doc "Check blacklist status for a specific session id."
   def check_status(%{method: "GET"} = conn, %{"session_id" => session_id}) do
@@ -34,6 +40,8 @@ defmodule RigApi.SessionBlacklistController do
       "isBlacklisted" => Session.blacklisted?(session_id)
     })
   end
+
+  # ---
 
   @doc "Plug action to add a session id to the session blacklist."
   def blacklist_session(%{method: "POST"} = conn, _params) do
@@ -54,6 +62,8 @@ defmodule RigApi.SessionBlacklistController do
     end
   end
 
+  # ---
+
   defp parse(body) do
     {:ok,
      %{
@@ -66,6 +76,6 @@ defmodule RigApi.SessionBlacklistController do
 
     e in ArgumentError ->
       # This is likely String.to_integer/1, but we don't know for sure.
-      {:error, "Invalid request body"}
+      {:error, "Invalid request body: #{inspect(e)}"}
   end
 end

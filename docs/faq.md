@@ -21,7 +21,7 @@ There might be occasions, however, where a rudimentary familiarity with Erlang d
 
 RIG handles connection state; it keeps track of which user has which devices connected where. Is uses this state to route outbound messages towards the users/devices/frontends.
 
-Additionaly, RIG also keeps track of a JWT blacklist and its reverse-proxy/gateway API definitions.
+Additionally, RIG also keeps track of a JWT blacklist and its reverse-proxy/gateway API definitions.
 
 RIG does not use disk storage - all state is kept in memory.
 

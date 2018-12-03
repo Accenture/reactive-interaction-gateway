@@ -14,7 +14,7 @@ defmodule RigInboundGatewayWeb.Router do
       scope "/connection/sse" do
         subscription_url = "/:connection_id/subscriptions"
         options(subscription_url, SubscriptionController, :handle_preflight)
-        post(subscription_url, SubscriptionController, :create_subscription)
+        put(subscription_url, SubscriptionController, :set_subscriptions)
 
         get("/", SSE, :create_and_attach)
       end
@@ -24,7 +24,7 @@ defmodule RigInboundGatewayWeb.Router do
 
         subscription_url = "/:connection_id/subscriptions"
         options(subscription_url, SubscriptionController, :handle_preflight)
-        post(subscription_url, SubscriptionController, :create_subscription)
+        put(subscription_url, SubscriptionController, :set_subscriptions)
       end
 
       options("/events", EventController, :handle_preflight)

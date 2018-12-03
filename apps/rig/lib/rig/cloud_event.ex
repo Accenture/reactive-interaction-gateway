@@ -11,7 +11,6 @@ defmodule Rig.CloudEvent do
 
   @cloud_events_version "0.1"
   @template %{
-    "cloudEventsVersion" => @cloud_events_version,
     "eventTime" => nil,
     "extensions" => nil,
     "schemaURL" => nil,

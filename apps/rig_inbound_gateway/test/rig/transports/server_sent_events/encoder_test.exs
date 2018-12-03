@@ -12,13 +12,16 @@ defmodule RigInboundGateway.Transports.ServerSentEvents.EncoderTest do
       event: "some:event",
       payload: %{user: "foo", body: "bar"}
     }
-    actual = format(msg)
-    expected = """
-               id: 123
-               event: some:event
-               data: {"user":"foo","body":"bar"}
 
-               """
+    actual = format(msg)
+
+    expected = """
+    id: 123
+    event: some:event
+    data: {"user":"foo","body":"bar"}
+
+    """
+
     assert actual == expected
   end
 
@@ -28,12 +31,15 @@ defmodule RigInboundGateway.Transports.ServerSentEvents.EncoderTest do
       event: "some:event",
       payload: %{user: "foo", body: "bar"}
     }
-    actual = format(msg)
-    expected = """
-               event: some:event
-               data: {"user":"foo","body":"bar"}
 
-               """
+    actual = format(msg)
+
+    expected = """
+    event: some:event
+    data: {"user":"foo","body":"bar"}
+
+    """
+
     assert actual == expected
   end
 
@@ -43,21 +49,27 @@ defmodule RigInboundGateway.Transports.ServerSentEvents.EncoderTest do
       topic: "rooms:lobby",
       payload: %{user: "foo", body: "bar"}
     }
-    actual = format(msg)
-    expected = """
-               id: 123
-               data: {"user":"foo","body":"bar"}
 
-               """
+    actual = format(msg)
+
+    expected = """
+    id: 123
+    data: {"user":"foo","body":"bar"}
+
+    """
+
     assert actual == expected
   end
 
   test "an empty message" do
     msg = %Message{}
     actual = format(msg)
-    expected = """
 
-               """
+    expected = """
+    data:
+
+    """
+
     assert actual == expected
   end
 end

@@ -9,6 +9,8 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   alias Rig.EventFilter
   alias RigInboundGateway.Events
+  alias RigInboundGateway.ImplicitSubscriptions.Jwt, as: JwtSubscriptions
+  alias RigInboundGateway.Subscriptions
   alias ServerSentEvent
 
   defmodule ConnectionClosed do
@@ -31,6 +33,15 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   end
 
   defp do_create_and_attach(conn) do
+    if conn.query_params |> Map.has_key?("token") do
+      %{"token" => token} = conn.query_params
+      jwt_subscriptions = JwtSubscriptions.infer_subscriptions([token])
+      Subscriptions.check_and_forward_subscriptions(self(), jwt_subscriptions)
+    end
+
+    # Schedule the first subscription refresh:
+    Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
+
     conn
     |> send_chunk(Events.welcome_event())
     |> wait_for_events()
@@ -55,60 +66,58 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     |> send_chunked(_status = 200)
   end
 
-  defp wait_for_events(conn, state \\ @initial_state, next_heartbeat_timeout \\ nil)
+  defp wait_for_events(conn, state \\ @initial_state, next_heartbeat \\ nil) do
+    next_heartbeat =
+      next_heartbeat || Timex.now() |> Timex.shift(milliseconds: @heartbeat_interval_ms)
 
-  defp wait_for_events(conn, state, nil) do
-    next_heartbeat = Timex.now() |> Timex.shift(milliseconds: @heartbeat_interval_ms)
-    wait_for_events(conn, state, next_heartbeat)
-  end
-
-  defp wait_for_events(conn, state, next_heartbeat) do
     heartbeat_remaining_ms =
       next_heartbeat
       |> Timex.diff(Timex.now(), :milliseconds)
       |> max(0)
 
     receive do
+      # Cloud Events are forwarded to the client:
       {:cloud_event, cloud_event} ->
-        Logger.debug(fn -> "[SSE] #{inspect(cloud_event)}" end)
+        Logger.debug(fn -> inspect(cloud_event) end)
 
         conn
+        # Forward the event:
         |> send_chunk(cloud_event)
+        # Keep the connection open:
         |> wait_for_events(state, next_heartbeat)
 
-      {:register_subscription, subscription} ->
-        Logger.debug(fn ->
-          event_type = "eventType=#{inspect(subscription.event_type)}"
-          constraints = "constraints=#{inspect(subscription.constraints)}"
-          "[SSE] registered subscription: #{event_type} #{constraints}"
-        end)
-
-        send(self(), :refresh_subscriptions)
-        state = update_in(state.subscriptions, &[subscription | &1])
+      # (Re-)Set subscriptions for this connection:
+      {:set_subscriptions, subscriptions} ->
+        Logger.debug(fn -> inspect(subscriptions) end)
+        # Trigger immediate refresh:
+        EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
+        # Replace current subscriptions:
+        state = Map.put(state, :subscriptions, subscriptions)
 
         conn
-        |> send_chunk(Events.subscription_create(subscription))
+        # Notify the client:
+        |> send_chunk(Events.subscriptions_set(subscriptions))
+        # Keep the connection open:
         |> wait_for_events(state, next_heartbeat)
 
+      # Subscriptions need to be refreshed periodically:
       :refresh_subscriptions ->
-        Logger.debug(fn ->
-          "[SSE] refreshing #{length(state.subscriptions)} subscriptions"
-        end)
-
-        EventFilter.refresh_subscriptions(state.subscriptions)
-
+        EventFilter.refresh_subscriptions(state.subscriptions, [])
         Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
+        # Keep the connection open:
         wait_for_events(conn, state, next_heartbeat)
 
+      # In case the connection belongs to a session and that session is killed,
+      # exit the loop and close the connection:
       {:session_killed, group} ->
-        Logger.info("[SSE] session killed: #{inspect(group)}")
+        Logger.info("session killed: #{inspect(group)}")
         send_chunk(conn, %ServerSentEvent{comments: ["Session killed."]})
     after
       heartbeat_remaining_ms ->
         # If the connection is down, the (second) heartbeat will trigger ConnectionClosed
         conn
         |> send_chunk(:heartbeat)
-        |> wait_for_events(state, nil)
+        |> wait_for_events(state)
     end
   end
 

@@ -1,4 +1,4 @@
-# Reactive Interaction Gateway Channels Example
+# Reactive Interaction Gateway Events Example
 
 Service that serves as a REST API. Implements one endpoint that can produce message to Kafka and respond if it went ok or not. Uses Hapi as a HTTP server.
 
