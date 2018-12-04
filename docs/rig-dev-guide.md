@@ -11,12 +11,12 @@ With Elixir installed, do this:
 - Install dependencies with `mix deps.get`
 - Start Phoenix endpoint with `mix phx.server`
 
-RIG doesn't come with a status website, but if you like to you can check its health endpoint:
+RIG doesn't come with a status website, but if you like to you can check its apis endpoint:
 
 ```bash
 $ curl localhost:4000
 {"message":"Route is not available"}
-$ curl localhost:4000/health
+$ curl localhost:4010/v1/apis
 OK
 ```
 
@@ -67,6 +67,7 @@ Then go through the following:
 - Update the table above with a description of what should go into the new app.
 - Add/remove your app to/from the applications set in `rel/config.exs`.
 - Add/remove your app to/from the `Dockerfile` with the relevant directories.
+- Add/remove your app to/from the `aws.dockerfile` with the relevant directories.
 
 ## Incrementing Elixir and OTP versions
 
