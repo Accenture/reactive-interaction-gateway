@@ -26,10 +26,7 @@ defmodule RigMetrics.MixProject do
     [
       applications: [
         :prometheus_ex,
-        :prometheus_ecto,
-        :prometheus_phoenix,
-        :prometheus_plugs,
-        :prometheus_process_collector
+        :prometheus_plugs
       ],
       extra_applications: [:logger],
       mod: {RigMetrics.Application, []}
@@ -49,10 +46,7 @@ defmodule RigMetrics.MixProject do
   defp deps do
     [
       {:prometheus_ex, "~> 3.0"},
-      {:prometheus_ecto, "~> 1.3"},
-      {:prometheus_phoenix, "~> 1.2"},
       {:prometheus_plugs, "~> 1.1"},
-      {:prometheus_process_collector, "~> 1.4"}
     ]
   end
 
