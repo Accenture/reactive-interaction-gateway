@@ -29,7 +29,12 @@ defmodule RigApi.Endpoint do
     signing_salt: "7t9/VVWp"
   )
 
-  plug(RigApi.Router)
+  # Prometheus Integration - START
+  # makes the /metrics URL happen
+  plug(RigMetrics.MetricsPlugExporter)
+  # Prometheus Integration - END
+
+  plug RigApi.Router
 
   def init(_key, config) do
     {:ok, config} = Confex.Resolver.resolve(config)
