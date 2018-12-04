@@ -26,6 +26,7 @@ COPY apps/rig_cloud_events/mix.exs /opt/sites/rig/apps/rig_cloud_events/
 COPY apps/rig_inbound_gateway/mix.exs /opt/sites/rig/apps/rig_inbound_gateway/
 COPY apps/rig_kafka/mix.exs /opt/sites/rig/apps/rig_kafka/
 COPY apps/rig_outbound_gateway/mix.exs /opt/sites/rig/apps/rig_outbound_gateway/
+COPY apps/rig_metrics/mix.exs /opt/sites/rig/apps/rig_metrics/
 
 # Install project dependencies
 RUN mix deps.get
@@ -56,6 +57,9 @@ COPY apps/rig_kafka/lib /opt/sites/rig/apps/rig_kafka/lib
 
 COPY apps/rig_outbound_gateway/config /opt/sites/rig/apps/rig_outbound_gateway/config
 COPY apps/rig_outbound_gateway/lib /opt/sites/rig/apps/rig_outbound_gateway/lib
+
+COPY apps/rig_outbound_gateway/config /opt/sites/rig/apps/rig_metrics/config
+COPY apps/rig_outbound_gateway/lib /opt/sites/rig/apps/rig_metrics/lib
 
 # Compile and release application production code
 RUN mix release
