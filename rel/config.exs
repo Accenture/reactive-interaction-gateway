@@ -58,7 +58,8 @@ release :rig do
       rig_auth: :permanent,
       rig_kafka: :permanent,
       rig_inbound_gateway: :permanent,
-      rig_outbound_gateway: :permanent
+      rig_outbound_gateway: :permanent,
+      rig_metrics: :permanent
     ]
   )
 
