@@ -4,7 +4,7 @@ use Mix.Config
 # you can enable the server option below.
 config :rig, RigInboundGatewayWeb.Endpoint,
   env: :test,
-  http: [port: System.get_env("INBOUND_PORT") || 4001],
+  http: [port: System.get_env("INBOUND_PORT") || 4002],
   server: false
 
 config :rig, RigInboundGateway.RateLimit,
@@ -30,3 +30,5 @@ config :rig, RigInboundGateway.Proxy,
   config_file: {:system, "PROXY_CONFIG_FILE", "proxy/proxy.test.json"}
 
 config :rig, RigInboundGatewayWeb.Proxy.Controller, rig_proxy: RigInboundGateway.ProxyMock
+
+config :fake_server, :port_range, Enum.to_list(55_000..65_000) ++ [7070]

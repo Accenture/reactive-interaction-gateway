@@ -1,10 +1,9 @@
-defmodule RigTests.MixProject do
-  @moduledoc false
+defmodule RigCommon.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :rig_tests,
+      app: :rig_common,
       version: "0.1.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -16,18 +15,15 @@ defmodule RigTests.MixProject do
     ]
   end
 
+  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger]
     ]
   end
 
+  # Run "mix help deps" to learn about dependencies.
   defp deps do
-    [
-      {:rig_api, in_umbrella: true},
-      {:rig_inbound_gateway, in_umbrella: true},
-      {:rig_kafka, in_umbrella: true},
-      {:fake_server, github: "bernardolins/fake_server", branch: "2.0.0"},
-    ]
+    []
   end
 end

@@ -17,23 +17,49 @@ config :logger, :console,
 # Phoenix
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+ranch_transport_options = [
+  # default: 100
+  num_acceptors: 100,
+  # default: 16_384
+  max_connections: :infinity
+]
+
+cowboy_dispatch = [
+  {:_,
+   [
+     {"/_rig/v1/connection/ws", RigInboundGatewayWeb.V1.Websocket, :ok},
+     {:_, Plug.Cowboy.Handler, {RigInboundGatewayWeb.Endpoint, []}}
+   ]}
+]
+
 config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
+  server: true,
   url: [
     host: {:system, "HOST", "localhost"}
   ],
   http: [
-    port: {:system, :integer, "INBOUND_PORT", 4000},
-    dispatch: [
-      {:_,
-       [
-         {"/_rig/v1/connection/ws", RigInboundGatewayWeb.V1.Websocket, []},
-         {:_, Plug.Adapters.Cowboy.Handler, {RigInboundGatewayWeb.Endpoint, []}}
-       ]}
-    ]
+    # TODO: split this endpoint into one for the proxy and one for the event hub,
+    # TODO: then use the respective port settings.
+    port: {:system, :integer, "PROXY_HTTP_PORT", 4000},
+    dispatch: cowboy_dispatch,
+    transport_options: ranch_transport_options
+  ],
+  https: [
+    port: {:system, :integer, "PROXY_HTTPS_PORT", 4001},
+    otp_app: :rig,
+    cipher_suite: :strong,
+    certfile: "cert/selfsigned.pem",
+    keyfile: "cert/selfsigned_key.pem",
+    password: {:system, "HTTPS_KEYFILE_PASS", ""},
+    dispatch: cowboy_dispatch,
+    transport_options: ranch_transport_options
   ],
   render_errors: [view: RigInboundGatewayWeb.ErrorView, accepts: ~w(html json xml)],
   pubsub: [name: Rig.PubSub],
-  check_origin: false
+  check_origin: false,
+  force_ssl: [
+    hsts: false
+  ]
 
 config :mime, :types, %{
   "text/event-stream" => ["event-stream"]
@@ -141,7 +167,7 @@ config :rig, RigAuth.AuthorizationCheck.Subscription,
 config :rig, RigAuth.AuthorizationCheck.Submission,
   validation_type: {:system, "SUBMISSION_CHECK", "NO_CHECK"}
 
-config :rig, RigInboundGateway.ImplicitSubscriptions.Jwt,
+config :rig, RigInboundGateway.AutomaticSubscriptions.Jwt,
   extractor_config_path_or_json: {:system, "EXTRACTORS", nil}
 
 # --------------------------------------

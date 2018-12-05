@@ -54,7 +54,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     sync_response = %{"message" => "the client never sees this response"}
     async_response = %{"message" => "this is the async response that reaches the client instead"}
 
-    route(endpoint_path, fn %{query: query} ->
+    route(endpoint_path, fn %{query_string: query} ->
       correlation_id =
         query
         |> Map.fetch!("correlationID")
@@ -67,7 +67,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
 
       kafka_config = kafka_config()
       assert :ok == RigKafka.produce(kafka_config, kafka_topic, "response", message)
-      Response.ok(sync_response, %{"content-type" => "application/json"})
+      Response.ok!(sync_response, %{"content-type" => "application/json"})
     end)
 
     # We register the endpoint with the proxy:
@@ -93,8 +93,8 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
           }
         },
         proxy: %{
-          target_url: FakeServer.env().ip,
-          port: FakeServer.env().port
+          target_url: "localhost",
+          port: FakeServer.port
         }
       })
 
@@ -103,6 +103,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
 
     # The client calls the proxy endpoint:
     request_url = rig_proxy_url <> endpoint_path
+
     %HTTPoison.Response{status_code: res_status, body: res_body} = HTTPoison.get!(request_url)
 
     # Now we can assert that...

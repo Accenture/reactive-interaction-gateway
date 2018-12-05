@@ -8,8 +8,9 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   use RigInboundGatewayWeb, :controller
 
   alias Rig.EventFilter
+  alias Rig.Subscription
+  alias RigInboundGateway.AutomaticSubscriptions.Jwt, as: JwtSubscriptions
   alias RigInboundGateway.Events
-  alias RigInboundGateway.ImplicitSubscriptions.Jwt, as: JwtSubscriptions
   alias RigInboundGateway.Subscriptions
   alias ServerSentEvent
 
@@ -33,11 +34,22 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   end
 
   defp do_create_and_attach(conn) do
-    if conn.query_params |> Map.has_key?("token") do
-      %{"token" => token} = conn.query_params
-      jwt_subscriptions = JwtSubscriptions.infer_subscriptions([token])
-      Subscriptions.check_and_forward_subscriptions(self(), jwt_subscriptions)
-    end
+    jwt_subscriptions =
+      for token <- conn.query_params |> Map.get("jwt", []) |> List.wrap(),
+          candidates = JwtSubscriptions.infer_subscriptions([token]),
+          candidate <- candidates,
+          %Subscription{} = parsed = Subscription.new(candidate),
+          do: parsed
+
+    manual_subscriptions =
+      for {:ok, candidates} <-
+            [conn.query_params |> Map.get("subscriptions", "[]") |> Jason.decode()],
+          candidate <- candidates,
+          %Subscription{} = parsed = Subscription.new(candidate),
+          do: parsed
+
+    all_subscriptions = jwt_subscriptions ++ manual_subscriptions
+    Subscriptions.check_and_forward_subscriptions(self(), all_subscriptions)
 
     # Schedule the first subscription refresh:
     Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
@@ -61,7 +73,6 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     |> merge_resp_headers([
       {"content-type", "text/event-stream"},
       {"cache-control", "no-cache"},
-      {"connection", "keep-alive"}
     ])
     |> send_chunked(_status = 200)
   end

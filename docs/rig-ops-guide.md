@@ -12,7 +12,15 @@ RIG uses environment variables for most of its configuration, listed in the foll
 
 Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description | Default
 -------------- | ----------- | -------
-`API_PORT` | Port at which RIG exposes internal APIs such as API Proxy management or user connections management. | 4010
+`API_HTTP_PORT` | Port at which RIG exposes internal APIs such as API Proxy management or user connections management. | nil
+`API_HTTPS_PORT` | Same as `API_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | nil
+`PROXY_HTTP_PORT` | RIG's ingress port that is used to proxy/forward incoming client requests. | 4000
+`PROXY_HTTPS_PORT` | Same as `PROXY_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | 4001
+`EVENT_HUB_HTTP_PORT` | Port used by clients to connect to RIG itself, e.g., for consuming events via SSE or WebSockets. | nil
+`EVENT_HUB_HTTPS_PORT` | Same as `EVENT_HUB_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | nil
+`HTTPS_CERTFILE` | Path to the (signed) client certificate (PEM format). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | nil
+`HTTPS_KEYFILE` | Path to the private key of the client certificate (PEM format). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | nil
+`HTTPS_KEYFILE_PASS` | Passphrase in case the private key is password-protected. | ""
 `CORS` | The "Access-Control-Allow-Origin" setting for the inbound port. It is usually a good idea to set this to your domain. | "*"
 `DISCOVERY_TYPE` | Type of discovery used in distributed mode. If not set discovery is not used. Available options: `dns`. | nil
 `DNS_NAME` | Address where RIG will do DNS discovery for Node host addresses. | "localhost"
@@ -23,7 +31,6 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `FIREHOSE_KINESIS_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KINESIS_STREAM | ["http://localhost:4040/todo"]
 `FIREHOSE_KINESIS_STREAM` | Kinesis stream RIG will use as a firehose consumer. Events will be sent to `FIREHOSE_KINESIS_HTTP_TARGETS | "RIG-firehose"
 `HOST` | Hostname for Phoenix endpoints (HTTP communication). | "localhost"
-`INBOUND_PORT` | Port at which RIG exposes proxy and websocket/sse communication. | 4000
 `JWT_BLACKLIST_DEFAULT_EXPIRY_HOURS` | DEPRECATED. Default expiration time in hours for blacklisted JWTs. Used if JWT doesn't have an expiration time in claims. | 1
 `JWT_ROLES_FIELD` | DEPRECATED. Key in JWT claims under which roles are set for each user. | "roles"
 `JWT_SECRET_KEY` | The secret key used to sign and verify the JSON web tokens. | ""

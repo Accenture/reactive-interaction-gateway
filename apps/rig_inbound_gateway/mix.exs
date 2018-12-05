@@ -52,7 +52,7 @@ defmodule RigInboundGateway.Mixfile do
       {:rig_kafka, in_umbrella: true},
       {:phoenix, "~> 1.4.0"},
       {:phoenix_pubsub, "~> 1.0"},
-      {:cowboy, "~> 2.0"},
+      {:plug_cowboy, "~> 2.0"},
       {:httpoison, "~> 1.3"},
       # JSON libs:
       {:poison, "~> 3.0 or ~> 4.0"},
