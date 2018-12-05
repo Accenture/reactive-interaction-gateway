@@ -46,7 +46,7 @@ defmodule RigMetrics.MixProject do
   defp deps do
     [
       {:prometheus_ex, "~> 3.0"},
-      {:prometheus_plugs, "~> 1.1"},
+      {:prometheus_plugs, "~> 1.1"}
     ]
   end
 
