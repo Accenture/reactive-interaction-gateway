@@ -23,7 +23,7 @@ defmodule RigMetrics.ProxyInstrumenter do
 
     Counter.declare(
       name: :rig_proxy_requests_total,
-      help: "Total count of request through RIG progx"
+      help: "Total count of request through RIG proxy"
     )
   end
 
