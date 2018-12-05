@@ -11,12 +11,12 @@ With Elixir installed, do this:
 - Install dependencies with `mix deps.get`
 - Start Phoenix endpoint with `mix phx.server`
 
-RIG doesn't come with a status website, but if you like to you can check its apis endpoint:
+RIG doesn't come with a status website, but if you like to you can check its health endpoint:
 
 ```bash
 $ curl localhost:4000
 {"message":"Route is not available"}
-$ curl localhost:4010/v1/apis
+$ curl localhost:4010/health
 OK
 ```
 
