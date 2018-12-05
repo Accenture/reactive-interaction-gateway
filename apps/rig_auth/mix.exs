@@ -41,6 +41,7 @@ defmodule RigAuth.Mixfile do
   defp deps do
     [
       {:rig, in_umbrella: true},
+      {:rig_metrics, in_umbrella: true},
       {:confex, "~> 3.3"},
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 1.3"},
