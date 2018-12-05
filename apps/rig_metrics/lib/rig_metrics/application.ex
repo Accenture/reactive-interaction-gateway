@@ -9,6 +9,10 @@ defmodule RigMetrics.Application do
   def start(_type, _args) do
     children = []
 
+    RigMetrics.ControlInstrumenter.setup()
+    RigMetrics.EventhubInstrumenter.setup()
+    RigMetrics.ProxyInstrumenter.setup()
+
     RigMetrics.MetricsPlugExporter.setup()
 
     opts = [strategy: :one_for_one, name: RigMetrics.Supervisor]
