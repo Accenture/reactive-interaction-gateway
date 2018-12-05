@@ -164,13 +164,28 @@ defmodule Rig.EventFilter.Server do
 
   # ---
 
-  defp add_wildcards_to_table(table, n_cur_fields, n_new_fields)
-       when n_new_fields > n_cur_fields do
-    match_spec = ConfigUpdater.match_spec(n_cur_fields, n_new_fields)
-    :ets.select_replace(table, match_spec)
+  def add_wildcards_to_table(table, n_cur_fields, n_new_fields)
+      when n_new_fields > n_cur_fields do
+    wildcards = List.duplicate(nil, n_new_fields - n_cur_fields)
+
+    with_added_wildcards = fn row_tuple ->
+      row_tuple |> Tuple.to_list() |> Kernel.++(wildcards) |> List.to_tuple()
+    end
+
+    # Iterate over all rows and add a new row that has the new "columns":
+    fn row_tuple, _acc ->
+      :ets.insert(table, with_added_wildcards.(row_tuple))
+      nil
+    end
+    |> :ets.foldl(nil, table)
+
+    # Remove all old rows:
+    match_tuple = List.to_tuple([:_, :_] ++ List.duplicate(:_, n_cur_fields))
+    match_spec = [{match_tuple, [], [true]}]
+    :ets.select_delete(table, match_spec)
   end
 
-  defp add_wildcards_to_table(_, _, _), do: nil
+  def add_wildcards_to_table(_, _, _), do: nil
 
   # ---
 
