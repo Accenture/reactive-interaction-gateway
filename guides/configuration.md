@@ -118,6 +118,17 @@ cluster, so all nodes share the same configuration without having to sync anythi
 ##### Delete API
 `DELETE /v1/apis/:api_id`
 
+##### Register session to blacklist
+`POST /v1/session-blacklist/`
+```json
+{
+	"validityInSeconds": "10",
+	"sessionId": "SomeSessionId123"
+}
+```
+
+##### Get status of blacklisted session
+`GET /v1/session-blacklist/_session_id`
 
 ## Message Formats
 
