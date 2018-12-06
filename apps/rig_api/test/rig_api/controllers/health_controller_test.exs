@@ -11,4 +11,3 @@ defmodule RigApi.HealthControllerTest do
       end
     end
   end
-  

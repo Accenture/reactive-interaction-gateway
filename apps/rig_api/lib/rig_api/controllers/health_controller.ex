@@ -8,4 +8,3 @@ defmodule RigApi.HealthController do
       text(conn, "OK")
     end
   end
-  

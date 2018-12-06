@@ -128,7 +128,7 @@ cluster, so all nodes share the same configuration without having to sync anythi
 ```
 
 ##### Get status of blacklisted session
-`GET /v1/session-blacklist/_session_id`
+`GET /v1/session-blacklist/:session_id`
 
 ## Message Formats
 
