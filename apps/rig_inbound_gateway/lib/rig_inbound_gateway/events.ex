@@ -2,7 +2,7 @@ defmodule RigInboundGateway.Events do
   @moduledoc """
   Utility functions used in more than one controller.
   """
-  alias Rig.CloudEvent
+  alias CloudEvent
   alias Rig.Connection
   alias Rig.Subscription
 

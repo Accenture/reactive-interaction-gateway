@@ -5,8 +5,7 @@ defmodule Rig.EventStream.KafkaToHttp do
   """
   use Rig.KafkaConsumerSetup, [:targets]
 
-  alias Rig.CloudEvent
-
+  alias CloudEvent
   alias HTTPoison
 
   # ---

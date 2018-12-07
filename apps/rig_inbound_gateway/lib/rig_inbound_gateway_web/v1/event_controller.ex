@@ -7,7 +7,8 @@ defmodule RigInboundGatewayWeb.V1.EventController do
 
   use RigInboundGatewayWeb, :controller
 
-  alias Rig.CloudEvent
+  alias CloudEvent
+
   alias Rig.EventFilter
   alias RigAuth.AuthorizationCheck.Submission
   alias RigOutboundGateway
