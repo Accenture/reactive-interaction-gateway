@@ -13,7 +13,6 @@ defmodule Rig.EventFilter.Server do
   alias Timex
 
   alias Rig.EventFilter.Config
-  alias Rig.EventFilter.MatchSpec.ConfigUpdater
   alias Rig.EventFilter.MatchSpec.SubscriptionMatcher
   alias Rig.Subscription
 
@@ -102,6 +101,26 @@ defmodule Rig.EventFilter.Server do
     {:reply, :ok, state}
   end
 
+  @impl GenServer
+  def handle_call(
+        {:reload_configuration, new_config},
+        _from,
+        %{subscription_table: subscription_table, fields: cur_fields} = state
+      ) do
+    new_fields = fields_from_config(new_config)
+
+    case Config.check_filter_config(new_config) do
+      :ok ->
+        # Any new fields are added to the table as nil (= wildcard) constraint:
+        add_wildcards_to_table(subscription_table, length(cur_fields), length(new_fields))
+        {:reply, :ok, %{state | config: new_config, fields: new_fields}}
+
+      err ->
+        Logger.error("Not loading invalid config '#{inspect(new_config)}' due to #{inspect(err)}")
+        {:reply, {:error, err}, state}
+    end
+  end
+
   # ---
 
   @impl GenServer
@@ -131,27 +150,6 @@ defmodule Rig.EventFilter.Server do
     remove_expired_records(state)
     Process.send_after(self(), :cleanup, @cleanup_interval_ms)
     {:noreply, state}
-  end
-
-  # ---
-
-  @impl GenServer
-  def handle_info(
-        {:reload_configuration, new_config},
-        %{subscription_table: subscription_table, fields: cur_fields} = state
-      ) do
-    new_fields = fields_from_config(new_config)
-
-    case Config.check_filter_config(new_config) do
-      :ok ->
-        # Any new fields are added to the table as nil (= wildcard) constraint:
-        add_wildcards_to_table(subscription_table, length(cur_fields), length(new_fields))
-        {:noreply, %{state | config: new_config, fields: new_fields}}
-
-      err ->
-        Logger.error("Not loading invalid config '#{inspect(new_config)}' due to #{inspect(err)}")
-        {:noreply, state}
-    end
   end
 
   # ---
