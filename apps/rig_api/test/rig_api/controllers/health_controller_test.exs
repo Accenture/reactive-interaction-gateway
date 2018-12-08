@@ -7,7 +7,9 @@ defmodule RigApi.HealthControllerTest do
   describe "GET /health" do
     test "should return OK as text response" do
       conn = build_conn() |> get("/health")
-      assert conn.resp_body =~ "OK"
+      content_type = get_resp_header(conn, "content-type")
+      assert conn.resp_body == "OK"
+      assert content_type == ["text/plain; charset=utf-8"]
     end
   end
 end

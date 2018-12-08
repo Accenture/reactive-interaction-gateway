@@ -35,8 +35,6 @@ defmodule RigApi.Router do
 
   scope "/health", RigApi do
     pipe_through(:api)
-    scope "/" do
-      get("/", HealthController, :check_health)
-    end
+    get("/", HealthController, :check_health)
   end
 end
