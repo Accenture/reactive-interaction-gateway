@@ -32,4 +32,9 @@ defmodule RigApi.Router do
       delete("/:id", ApisController, :deactivate_api)
     end
   end
+
+  scope "/health", RigApi do
+    pipe_through(:api)
+    get("/", HealthController, :check_health)
+  end
 end
