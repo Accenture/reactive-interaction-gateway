@@ -260,7 +260,7 @@ defmodule Rig.DistributedSet do
 
     if n_deleted > 0 do
       Logger.debug(fn -> "Removed #{n_deleted} expired records" end)
-      log_metrics(n_deleted)
+      RigMetrics.ControlInstrumenter.delete_blacklisted_session(n_deleted)
     end
 
     n_deleted
@@ -308,13 +308,5 @@ defmodule Rig.DistributedSet do
   @spec serialize_datetime!(Timex.DateTime.t()) :: String.t()
   defp serialize_datetime!(dt) do
     Timex.format!(dt, "{s-epoch}")
-  end
-
-  defp log_metrics(counter) when counter == 0 do
-  # finished 
-  end
-  defp log_metrics(counter) when counter > 0 do
-    RigMetrics.ControlInstrumenter.delete_blacklisted_session()
-    log_metrics(counter - 1)
   end
 end
