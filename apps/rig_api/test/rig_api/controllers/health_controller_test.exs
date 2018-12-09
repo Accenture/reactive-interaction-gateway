@@ -7,9 +7,18 @@ defmodule RigApi.HealthControllerTest do
   describe "GET /health" do
     test "should return OK as text response" do
       conn = build_conn() |> get("/health")
-      content_type = get_resp_header(conn, "content-type")
       assert conn.resp_body == "OK"
-      assert content_type == ["text/plain; charset=utf-8"]
+      assert "text/plain" == resp_content_type(conn)
     end
+  end
+
+  # The response content-type with parameters stripped (e.g. "text/plain").
+  defp resp_content_type(conn) do
+    [{:ok, type, subtype, _params}] =
+      conn
+      |> get_resp_header("content-type")
+      |> Enum.map(&Plug.Conn.Utils.content_type/1)
+
+    "#{type}/#{subtype}"
   end
 end
