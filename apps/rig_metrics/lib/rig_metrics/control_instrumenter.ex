@@ -17,19 +17,19 @@ defmodule RigMetrics.ControlInstrumenter do
     )
   end
 
-  def add_blacklisted_session() do
-    Gauge.inc(name: :rig_sessions_blacklisted)
+  def add_blacklisted_session(increasedBy \\ 1) do
+    Gauge.inc([name: :rig_sessions_blacklisted], increasedBy)
   end
 
-  def delete_blacklisted_session() do
-    Gauge.dec(name: :rig_sessions_blacklisted)
+  def delete_blacklisted_session(decreasedBy \\ 1) do
+    Gauge.dec([name: :rig_sessions_blacklisted], decreasedBy)
   end
 
-  def add_route() do
-    Gauge.inc(name: :rig_routes_configured)
+  def add_route(increasedBy \\ 1) do
+    Gauge.inc([name: :rig_routes_configured], increasedBy)
   end
 
-  def delete_route() do
-    Gauge.dec(name: :rig_routes_configured)
+  def delete_route(decreasedBy \\ 1) do
+    Gauge.dec([name: :rig_routes_configured], decreasedBy)
   end
 end
