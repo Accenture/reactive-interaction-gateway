@@ -39,7 +39,10 @@ defmodule RigApi.Router do
   end
 
   scope "/api/swagger" do
-    forward "/", PhoenixSwagger.Plug.SwaggerUI, otp_app: :rig_api, swagger_file: "rig_api_swagger.json"
+    forward("/", PhoenixSwagger.Plug.SwaggerUI,
+      otp_app: :rig_api,
+      swagger_file: "rig_api_swagger.json"
+    )
   end
 
   def swagger_info do
@@ -56,5 +59,5 @@ defmodule RigApi.Router do
   defp versions do
     {map, []} = Code.eval_file("version", "../..")
     map
-  end  
+  end
 end

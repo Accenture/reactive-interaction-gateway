@@ -15,49 +15,65 @@ defmodule RigApi.SessionBlacklistController do
 
   @cors_origins "*"
 
+  def swagger_definitions do
+    %{
+      SessionBlacklistRequest:
+        swagger_schema do
+          title("Session Blacklist Request")
+          description("Request for blacklisting a session")
 
-def swagger_definitions do
-  %{
-    SessionBlacklistRequest: swagger_schema do
-      title "Session Blacklist Request"
-      description "Request for blacklisting a session"
-      properties do
-        sessionId :string, "JWT JTI session Id", required: true
-        validityInSeconds :string, "Seconds how long a session should be blacklisted", required: true
-      end
-      example %{
-        sessionId: "SomeSessionID123",
-        validityInSeconds: "60"
-      }
-    end,
-    SessionBlacklistResponse: swagger_schema do
-      title "Session Blacklist Response"
-      description "Response for blacklisting a session"
-      properties do
-        sessionId :string, "JWT JTI session Id", required: true
-        validityInSeconds :string, "Seconds how long a session should be blacklisted", required: true
-        isBlacklisted :boolean, "Current status of the blacklisted session", required: true
-      end
-      example %{
-        sessionId: "SomeSessionID123",
-        validityInSeconds: "60",
-        isBlacklisted: true
-      }
-    end,
-    SessionBlacklistStatus: swagger_schema do
-      title "Session Blacklist Status"
-      description "Status for a blacklisted session"
-      properties do
-        sessionId :string, "JWT JTI session Id", required: true
-        isBlacklisted :boolean, "Current status of the blacklisted session", required: true
-      end
-      example %{
-        sessionId: "SomeSessionID123",
-        isBlacklisted: true
-      }
-    end
-  }
-end
+          properties do
+            sessionId(:string, "JWT JTI session Id", required: true)
+
+            validityInSeconds(:string, "Seconds how long a session should be blacklisted",
+              required: true
+            )
+          end
+
+          example(%{
+            sessionId: "SomeSessionID123",
+            validityInSeconds: "60"
+          })
+        end,
+      SessionBlacklistResponse:
+        swagger_schema do
+          title("Session Blacklist Response")
+          description("Response for blacklisting a session")
+
+          properties do
+            sessionId(:string, "JWT JTI session Id", required: true)
+
+            validityInSeconds(:string, "Seconds how long a session should be blacklisted",
+              required: true
+            )
+
+            isBlacklisted(:boolean, "Current status of the blacklisted session", required: true)
+          end
+
+          example(%{
+            sessionId: "SomeSessionID123",
+            validityInSeconds: "60",
+            isBlacklisted: true
+          })
+        end,
+      SessionBlacklistStatus:
+        swagger_schema do
+          title("Session Blacklist Status")
+          description("Status for a blacklisted session")
+
+          properties do
+            sessionId(:string, "JWT JTI session Id", required: true)
+            isBlacklisted(:boolean, "Current status of the blacklisted session", required: true)
+          end
+
+          example(%{
+            sessionId: "SomeSessionID123",
+            isBlacklisted: true
+          })
+        end
+    }
+  end
+
   # ---
 
   @doc false
@@ -79,13 +95,15 @@ end
 
   # Swagger documentation for endpoint GET /session-blacklist/:session-id
   swagger_path :check_status do
-    get "/v1/session-blacklist/{sessionId}"
-    summary "Getting the current blacklist status"
-    description "Provides the current status of a blacklisted session given in the parameters"
+    get("/v1/session-blacklist/{sessionId}")
+    summary("Getting the current blacklist status")
+    description("Provides the current status of a blacklisted session given in the parameters")
+
     parameters do
-      sessionId :path, :string, "The id of the session", required: true
+      sessionId(:path, :string, "The id of the session", required: true)
     end
-    response 200, "Ok", Schema.ref(:SessionBlacklistStatus)
+
+    response(200, "Ok", Schema.ref(:SessionBlacklistStatus))
   end
 
   @doc "Check blacklist status for a specific session id."
@@ -100,14 +118,21 @@ end
 
   # Swagger documentation for endpoint /session-blacklist
   swagger_path :blacklist_session do
-    post "/v1/session-blacklist"
-    summary "Blacklist a new session"
-    description "Blacklists a new session with data given in the body"
+    post("/v1/session-blacklist")
+    summary("Blacklist a new session")
+    description("Blacklists a new session with data given in the body")
+
     parameters do
-      sessionBlacklist :body, Schema.ref(:SessionBlacklistRequest), "The details for blacklisting a session", required: true
+      sessionBlacklist(
+        :body,
+        Schema.ref(:SessionBlacklistRequest),
+        "The details for blacklisting a session",
+        required: true
+      )
     end
-    response 200, "Ok", Schema.ref(:SessionBlacklistResponse)
-    response 400, "Missing value for 'x'"
+
+    response(200, "Ok", Schema.ref(:SessionBlacklistResponse))
+    response(400, "Missing value for 'x'")
   end
 
   @doc "Plug action to add a session id to the session blacklist."

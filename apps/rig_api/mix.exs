@@ -55,7 +55,7 @@ defmodule RigApi.Mixfile do
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
       {:mox, "~> 0.4", only: :test},
-      {:phoenix_swagger, "~> 0.8"},
+      {:phoenix_swagger, "~> 0.8"}
     ]
   end
 

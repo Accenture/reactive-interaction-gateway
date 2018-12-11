@@ -5,7 +5,7 @@
 # is restricted to this project.
 use Mix.Config
 
-config :rig_api, :generators, 
+config :rig_api, :generators,
   context_app: :rig_outbound_gateway,
   migration: false
 
@@ -33,8 +33,10 @@ config :rig, :event_filter, Rig.EventFilter
 config :rig_api, :phoenix_swagger,
   swagger_files: %{
     "priv/static/rig_api_swagger.json" => [
-      router: RigApi.Router,     # phoenix routes will be converted to swagger paths
-      endpoint: RigApi.Endpoint  # (optional) endpoint config used to set host, port and https schemes.
+      # phoenix routes will be converted to swagger paths
+      router: RigApi.Router,
+      # (optional) endpoint config used to set host, port and https schemes.
+      endpoint: RigApi.Endpoint
     ]
   }
 
