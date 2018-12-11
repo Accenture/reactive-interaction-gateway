@@ -37,4 +37,24 @@ defmodule RigApi.Router do
     pipe_through(:api)
     get("/", HealthController, :check_health)
   end
+
+  scope "/api/swagger" do
+    forward "/", PhoenixSwagger.Plug.SwaggerUI, otp_app: :rig_api, swagger_file: "rig_api_swagger.json"
+  end
+
+  def swagger_info do
+    %{rig: rig_version, elixir: elixir_version} = versions()
+
+    %{
+      info: %{
+        version: rig_version,
+        title: "RIG Control API"
+      }
+    }
+  end
+
+  defp versions do
+    {map, []} = Code.eval_file("version", "../..")
+    map
+  end  
 end

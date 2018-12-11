@@ -1,0 +1,145 @@
+{
+  "swagger": "2.0",
+  "paths": {
+    "/v1/session-blacklist/{sessionId}": {
+      "get": {
+        "tags": [
+          "SessionBlacklist"
+        ],
+        "summary": "Getting the current blacklist status",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/SessionBlacklistStatus"
+            },
+            "description": "Ok"
+          }
+        },
+        "parameters": [
+          {
+            "type": "string",
+            "required": true,
+            "name": "sessionId",
+            "in": "path",
+            "description": "The id of the session"
+          }
+        ],
+        "operationId": "RigApi.SessionBlacklistController.check_status",
+        "description": "Provides the current status of a blacklisted session given in the parameters"
+      }
+    },
+    "/v1/session-blacklist": {
+      "post": {
+        "tags": [
+          "SessionBlacklist"
+        ],
+        "summary": "Blacklist a new session",
+        "responses": {
+          "400": {
+            "description": "Missing value for 'x'"
+          },
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/SessionBlacklistResponse"
+            },
+            "description": "Ok"
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/definitions/SessionBlacklistRequest"
+            },
+            "required": true,
+            "name": "sessionBlacklist",
+            "in": "body",
+            "description": "The details for blacklisting a session"
+          }
+        ],
+        "operationId": "RigApi.SessionBlacklistController.blacklist_session",
+        "description": "Blacklists a new session with data given in the body"
+      }
+    }
+  },
+  "info": {
+    "version": "2.0.0-beta.2",
+    "title": "RIG Control API"
+  },
+  "definitions": {
+    "SessionBlacklistStatus": {
+      "type": "object",
+      "title": "Session Blacklist Status",
+      "required": [
+        "isBlacklisted",
+        "sessionId"
+      ],
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "description": "JWT JTI session Id"
+        },
+        "isBlacklisted": {
+          "type": "boolean",
+          "description": "Current status of the blacklisted session"
+        }
+      },
+      "example": {
+        "sessionId": "SomeSessionID123",
+        "isBlacklisted": true
+      },
+      "description": "Status for a blacklisted session"
+    },
+    "SessionBlacklistResponse": {
+      "type": "object",
+      "title": "Session Blacklist Response",
+      "required": [
+        "isBlacklisted",
+        "validityInSeconds",
+        "sessionId"
+      ],
+      "properties": {
+        "validityInSeconds": {
+          "type": "string",
+          "description": "Seconds how long a session should be blacklisted"
+        },
+        "sessionId": {
+          "type": "string",
+          "description": "JWT JTI session Id"
+        },
+        "isBlacklisted": {
+          "type": "boolean",
+          "description": "Current status of the blacklisted session"
+        }
+      },
+      "example": {
+        "validityInSeconds": "60",
+        "sessionId": "SomeSessionID123",
+        "isBlacklisted": true
+      },
+      "description": "Response for blacklisting a session"
+    },
+    "SessionBlacklistRequest": {
+      "type": "object",
+      "title": "Session Blacklist Request",
+      "required": [
+        "validityInSeconds",
+        "sessionId"
+      ],
+      "properties": {
+        "validityInSeconds": {
+          "type": "string",
+          "description": "Seconds how long a session should be blacklisted"
+        },
+        "sessionId": {
+          "type": "string",
+          "description": "JWT JTI session Id"
+        }
+      },
+      "example": {
+        "validityInSeconds": "60",
+        "sessionId": "SomeSessionID123"
+      },
+      "description": "Request for blacklisting a session"
+    }
+  }
+}
