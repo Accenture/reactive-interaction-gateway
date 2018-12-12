@@ -8,6 +8,8 @@ sidebar_label: The Big Picture
 
 **TL;DR:** In order to answer the “what, how, why” of the project, proposes a use case for real time updates, shows iterations of how to solve this problem architecturally, explains Reactive architecture, and presents where the Reactive Interaction Gateway fits into this architecture.
 
+RIG is part of Accenture's contribution to the Reactive architecture community.
+
 ## Use Case: Real Time Updates
 
 You see a Twitter notification that The Glitch Mob is doing a pop-up concert two nights from now at a venue just a few blocks from your apartment. No way! Your long-distance partner loves Glitch Mob and they’re in town for a visit this weekend.  
