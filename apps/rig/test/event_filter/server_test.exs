@@ -3,7 +3,7 @@ defmodule Rig.EventFilter.ServerTest do
   use ExUnit.Case, async: false
   doctest Rig.EventFilter.Server
 
-  alias Rig.CloudEvent
+  alias CloudEvent
   alias Rig.EventFilter
   alias Rig.EventFilter.Server
   alias Rig.Subscription

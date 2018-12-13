@@ -1,4 +1,4 @@
-defmodule Rig.CloudEvent do
+defmodule CloudEvent do
   @moduledoc """
   CloudEvents v0.1
 

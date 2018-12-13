@@ -1,7 +1,7 @@
 stages:
   - test
   - name: website
-    if: branch = master
+    if: branch = master AND type != pull_request
 
 jobs:
   include:

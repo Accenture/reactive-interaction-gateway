@@ -36,6 +36,7 @@ defmodule Rig.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:cloud_events, in_umbrella: true},
       {:rig_kafka, in_umbrella: true},
       # Read and use application configuration from environment variables:
       {:confex, "~> 3.3"},
@@ -57,7 +58,7 @@ defmodule Rig.MixProject do
       # Apache Kafka Erlang client library:
       {:brod, "~> 3.3"},
       # For distributed_set:
-      {:timex, "~> 3.1.22"},
+      {:timex, "~> 3.4"},
       {:ex2ms, "~> 1.5"},
       {:uuid, "~> 1.1"},
       # For doing HTTP requests, e.g., in kafka_as_http:
