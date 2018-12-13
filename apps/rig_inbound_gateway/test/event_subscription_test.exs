@@ -8,7 +8,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
   import Joken
 
   alias CloudEvent
-  alias Rig.EventFilter.Sup, as: EventFilterSup
+  alias RigInboundGateway.ExtractorConfig
 
   @external_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][
                    :port
@@ -17,12 +17,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
   @jwt_secret_key "mysecret"
 
   def setup do
-    extractor_config = System.get_env("EXTRACTORS")
-
-    on_exit(fn ->
-      # Restore extractor configuration:
-      System.put_env("EXTRACTORS", extractor_config)
-    end)
+    on_exit(&ExtractorConfig.restore/0)
   end
 
   defp generate_jwt(username) do
@@ -32,14 +27,6 @@ defmodule RigInboundGateway.EventSubscriptionTest do
     |> with_claim("username", username)
     |> sign
     |> get_compact
-  end
-
-  defp set_extractor_config(extractor_config) when is_map(extractor_config) do
-    System.put_env("EXTRACTORS", Jason.encode!(extractor_config))
-
-    for sup <- EventFilterSup.processes() do
-      send(sup, :reload_config)
-    end
   end
 
   defp greeting_without_name,
@@ -123,7 +110,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
     test "Adding and removing subscriptions is in effect immediately." do
       # Set up the extractor configuration:
 
-      set_extractor_config(%{
+      ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
             "stable_field_index" => 1,
@@ -207,7 +194,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
     end
 
     test "An event that lacks a value for a known field is only forwarded if there is no constraint related to that field." do
-      set_extractor_config(%{
+      ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
             "stable_field_index" => 1,
@@ -273,7 +260,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
     test "In case JWT is present in create subscription request it should automatically infer subscriptions from JWT." do
       # Set up the extractor configuration:
 
-      set_extractor_config(%{
+      ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
             "stable_field_index" => 1,
@@ -326,7 +313,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
     test "In case JWT is present in initial connection request it should automatically infer subscriptions from JWT." do
       # Set up the extractor configuration:
 
-      set_extractor_config(%{
+      ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
             "stable_field_index" => 1,
@@ -369,7 +356,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
     test "Adding and removing subscriptions is in effect immediately." do
       # Set up the extractor configuration:
 
-      set_extractor_config(%{
+      ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
             "stable_field_index" => 1,
@@ -471,7 +458,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
     end
 
     test "An event that lacks a value for a known field is only forwarded if there is no constraint related to that field." do
-      set_extractor_config(%{
+      ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
             "stable_field_index" => 1,
@@ -552,7 +539,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
     test "In case JWT is present in create subscription request it should automatically infer subscriptions from JWT." do
       # Set up the extractor configuration:
 
-      set_extractor_config(%{
+      ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
             "stable_field_index" => 1,
@@ -615,7 +602,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
     test "In case JWT is present in initial connection request it should automatically infer subscriptions from JWT." do
       # Set up the extractor configuration:
 
-      set_extractor_config(%{
+      ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
             "stable_field_index" => 1,

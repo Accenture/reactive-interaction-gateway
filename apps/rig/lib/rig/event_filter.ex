@@ -294,4 +294,20 @@ defmodule Rig.EventFilter do
 
     :ok
   end
+
+  # ---
+
+  @doc ~S"""
+  Reloads the configuration on all nodes.
+  """
+  @spec reload_config_everywhere() :: :ok
+  def reload_config_everywhere do
+    # Calls the registered Filter Supervisor on all connected nodes:
+    for pid <- FilterSup.processes() do
+      Task.async(fn -> GenServer.call(pid, :reload_config) end)
+    end
+    |> Enum.each(&Task.await/1)
+
+    :ok
+  end
 end
