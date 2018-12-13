@@ -93,7 +93,7 @@ defmodule RigApi.SessionBlacklistController do
 
   # ---
 
-  # Swagger documentation for endpoint GET /session-blacklist/:session-id
+  # Swagger documentation for endpoint GET /v1/session-blacklist/:session-id
   swagger_path :check_status do
     get("/v1/session-blacklist/{sessionId}")
     summary("Getting the current blacklist status")
@@ -116,7 +116,7 @@ defmodule RigApi.SessionBlacklistController do
 
   # ---
 
-  # Swagger documentation for endpoint /session-blacklist
+  # Swagger documentation for endpoint /v1/session-blacklist
   swagger_path :blacklist_session do
     post("/v1/session-blacklist")
     summary("Blacklist a new session")

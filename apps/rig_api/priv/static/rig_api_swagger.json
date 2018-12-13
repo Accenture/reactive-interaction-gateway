@@ -59,6 +59,22 @@
         "operationId": "RigApi.SessionBlacklistController.blacklist_session",
         "description": "Blacklists a new session with data given in the body"
       }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Provides the RIG health status",
+        "responses": {
+          "200": {
+            "description": "Ok"
+          }
+        },
+        "parameters": [],
+        "operationId": "RigApi.HealthController.check_health",
+        "description": "Provides the RIG health status"
+      }
     }
   },
   "info": {
