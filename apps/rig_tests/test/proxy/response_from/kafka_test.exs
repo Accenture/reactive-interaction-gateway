@@ -57,12 +57,12 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     route(endpoint_path, fn %{query: query} ->
       correlation_id =
         query
-        |> Map.fetch!("correlation_id")
+        |> Map.fetch!("correlationID")
         |> URI.decode_www_form()
 
       message =
         async_response
-        |> Map.put("correlation_id", correlation_id)
+        |> Map.put("rig", %{"correlationID" => correlation_id})
         |> Jason.encode!()
 
       kafka_config = kafka_config()

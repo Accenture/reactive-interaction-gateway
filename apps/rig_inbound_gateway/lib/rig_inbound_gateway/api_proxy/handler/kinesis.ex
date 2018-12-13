@@ -30,18 +30,19 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     %{params: %{"partition_key" => partition_key, "data" => data}} = conn
 
     kinesis_message =
-      Poison.encode!(%{
-        correlation_id: Codec.serialize(self()),
-        data: data,
+      data
+      |> Map.put("rig", %{
+        correlationID: Codec.serialize(self()),
         host: conn.host,
         method: conn.method,
-        request_path: conn.request_path,
+        requestPath: conn.request_path,
         port: conn.port,
-        remote_ip: conn.remote_ip,
-        req_headers: conn.req_headers,
+        remoteIP: to_string(:inet_parse.ntoa(conn.remote_ip)),
+        reqHeaders: Enum.map(conn.req_headers, &Tuple.to_list(&1)),
         scheme: conn.scheme,
-        query_string: conn.query_string
+        queryString: conn.query_string
       })
+      |> Poison.encode!()
 
     produce(
       _partition_key = partition_key,

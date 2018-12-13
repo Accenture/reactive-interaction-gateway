@@ -156,7 +156,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
   defp possibly_add_correlation_id(url, "http"), do: url
 
   defp possibly_add_correlation_id(url, _) do
-    add_query_params(url, %{correlation_id: Codec.serialize(self())})
+    add_query_params(url, %{"correlationID" => Codec.serialize(self())})
   end
 
   # ---
