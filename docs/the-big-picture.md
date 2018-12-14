@@ -6,7 +6,7 @@ sidebar_label: The Big Picture
 
 ## Reactive Interaction Gateway: The Big Picture
 
-**TL;DR:** In order to answer the “what, how, why” of the project, proposes a use case for real time updates, shows iterations of how to solve this problem architecturally, explains Reactive architecture, and presents where the Reactive Interaction Gateway fits into this architecture.
+**TL;DR:** In order to answer the “what, how, why” of the project, this document proposes a use case for real time updates, shows iterations of how to solve this problem architecturally, explains Reactive architecture, and presents where the Reactive Interaction Gateway fits into this architecture.
 
 RIG is part of Accenture's contribution to the Reactive architecture community.
 
@@ -54,7 +54,7 @@ Building endpoints between the applications means that as complexity grows, it b
 
 In this example, App1 exposes an endpoint `/foo`. App2 makes an API call for that data and builds a method `bar` on the received data. App2 then exposes an endpoint `/foobar4ever`that uses the `bar` method. It creates a method called `foobar`. 
 
-While a simple and humorous example, this is a common situation in microservice architectures. As functionality is built out, each application is dependent on endpoints existing in another application.
+While that's a simple and humorous example, this is a common situation in microservice architectures. As functionality is built out, each application is dependent on endpoints existing in another application.
 
 To change and adapt the system requires changing the whole chain of methods and endpoints. As systems grow in complexity they become ossified. 
 
@@ -84,7 +84,7 @@ The architectural design is centered on streams of data through the system rathe
 
 Say the tickets endpoint was initially written in a language and framework that can’t handle the increased volume as it scales. It can be easily replaced, with the new application simply taking over the event subscription and publication to the topic. Topics can be easily updated.
 
-A reactive architecture using an event hub like Kafka enables an increased flexibility and the ability to debug, monitor, and maintain the backend in a microservices architecture. Even so, something about this architecture feels disjointed and unaligned to reactive principles because of the real time updates.
+A reactive architecture using an event hub like Kafka enables an increased flexibility and the ability to debug, monitor, and maintain the backend in a microservices architecture. Even so, something about this architecture feels disjointed and unaligned to Reactive principles because of the real time updates.
 
 ## Reactive Interaction Gateway
 The application handing those connections in our diagram will have trouble handling thousands of concurrent users with real time updates, whether they be mobile or browser based. 
@@ -95,13 +95,13 @@ The Reactive Interaction Gateway (RIG) was designed to solve this problem elegan
 
 RIG functions as an application interface layer and works as an event hub for the front end.  It powers real time updates and decouples the backend interface from the frontend while enabling many concurrent users. It handles asynchronous events streaming from the event hub or from the UI.
 
-This architecture can evolve in complexity as features are built, adding or subtracting services in order to reflect the problem domain. It makes possible the continuous deployment of services without effecting users’ connections.
+This architecture can evolve in complexity as features are built, adding or subtracting services in order to reflect the problem domain. It enables the continuous deployment of backend services without effecting users connections.
 
-RIG is designed to have all connections to the application be language agnostic. Routes are defined using a configuration file or by POSTing directly to the application. This gives an architect a great deal of flexibility to choose the tools they use to meet functional requirements.
+RIG is designed to manage all connections and to be language agnostic. It does not matter in which framework or language a connecting application is written and developers do not need to know Elixir / Pheonix to use RIG. Routes are defined using a configuration file or by POSTing directly to the application. This gives an architect a great deal of flexibility to choose the tools they use to meet functional requirements.
 
 ![simple-add-rig](assets/simple-add-rig.png)
 
 ## Next Layer of Complexity: A Reference Architecture
-In the `/examples` folder, there is an example architecture made with a React frontend, RIG, a Node backend, and a Kafka instance. Here's a chart demonstrating that reference architecture in abstract. Go to [/examples](../examples) for more depth:
+In the [/examples](https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples) folder, there is an example architecture made with a React frontend, RIG, a Node backend, and a Kafka instance. Here's a chart demonstrating that reference architecture in abstract. Go to [/examples](https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples) for more depth:
 
 ![demo architecture abstract](assets/demo-architecture-abstract.png)
