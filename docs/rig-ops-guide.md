@@ -19,7 +19,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `EVENT_HUB_HTTP_PORT` | Port used by clients to connect to RIG itself, e.g., for consuming events via SSE or WebSockets. | nil
 `EVENT_HUB_HTTPS_PORT` | Same as `EVENT_HUB_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | nil
 `HTTPS_CERTFILE` | Path to the (signed) client certificate (PEM format). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | nil
-`HTTPS_KEYFILE` | Path to the private key of the client certificate (PEM format). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | nil
+`HTTPS_KEYFILE` | Path to the private key of the client certificate (PEM format). Also supports encrypted private keys; see `HTTPS_KEYFILE_PASS` and consult the Erlang documentation for supported ciphers (e.g. [supported password ciphers in OTP 21.2](https://github.com/erlang/otp/blob/OTP-21.2/lib/public_key/src/pubkey_pbe.erl#L55); unfortunately, with OTP 21.1 using an unsupported cipher fails silently). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | nil
 `HTTPS_KEYFILE_PASS` | Passphrase in case the private key is password-protected. | ""
 `CORS` | The "Access-Control-Allow-Origin" setting for the inbound port. It is usually a good idea to set this to your domain. | "*"
 `DISCOVERY_TYPE` | Type of discovery used in distributed mode. If not set discovery is not used. Available options: `dns`. | nil

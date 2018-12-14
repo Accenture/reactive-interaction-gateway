@@ -1,11 +1,12 @@
 use Mix.Config
 
-# We don't run a server during test. If one is required,
-# you can enable the server option below.
-config :rig, RigInboundGatewayWeb.Endpoint,
+config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
   env: :test,
-  http: [port: System.get_env("INBOUND_PORT") || 4002],
-  server: false
+  https: [
+    certfile: "cert/selfsigned.pem",
+    keyfile: "cert/selfsigned_key.des3.pem",
+    password: "test"
+  ]
 
 config :rig, RigInboundGateway.RateLimit,
   enabled?: true,

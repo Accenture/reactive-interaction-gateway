@@ -5,6 +5,8 @@ defmodule RigInboundGateway.EventSubscriptionTest do
   # Cannot be async because the extractor configuration is modified:
   use ExUnit.Case, async: false
 
+  alias HTTPoison
+  alias Jason
   alias Socket.Web, as: WebSocket
 
   alias CloudEvent
