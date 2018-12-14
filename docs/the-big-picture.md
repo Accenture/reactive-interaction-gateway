@@ -12,7 +12,7 @@ RIG is part of Accenture's contribution to the Reactive architecture community.
 
 ## Use Case: Real Time Updates
 
-You see a Twitter notification that The Glitch Mob is doing a pop-up concert two nights from now at a venue just a few blocks from your apartment. No way! Your long-distance partner loves Glitch Mob and they’re in town for a visit this weekend.  
+You see a Twitter notification that The Glitch Mob is doing a pop-up concert two nights from now at a venue just a few blocks from your apartment. No way! Your long-distance partner loves The Glitch Mob and they’re in town for a visit this weekend.  
 
 Working late at the client site, you quickly log on to the ticket vendor on your laptop and look to book tickets before your car to the airport arrives. 
 
@@ -38,7 +38,7 @@ Clearly, we’re missing the financial transaction. Let’s add that in as a mic
  
 ![add finance app](assets/simple-add-finance.png)
 
-We want to send an email to the user once the process is complete. It is common to stand up a microservice to handle sending emails. We’ll use HTTP connections from the main application to the email service to handle the connection.
+We want to send an email to the user once the process is complete. It is common to stand up a microservice to handle sending emails. We’ll use HTTP connections from the main application to the email service.
  
 ![add finance app](assets/simple-add-email.png)
 
@@ -87,7 +87,7 @@ Say the tickets endpoint was initially written in a language and framework that 
 A reactive architecture using an event hub like Kafka enables an increased flexibility and the ability to debug, monitor, and maintain the backend in a microservices architecture. Even so, something about this architecture feels disjointed and unaligned to Reactive principles because of the real time updates.
 
 ## Reactive Interaction Gateway
-The application handing those connections in our diagram will have trouble handling thousands of concurrent users with real time updates, whether they be mobile or browser based. 
+The application maintaining the websocket connections in our diagram will have trouble handling thousands of concurrent users with real time updates, whether they be mobile or browser based. 
 
 At scale, this poses problems in the infrastructure and architecture. Events will need to be sent via the event hub and an application has to function as an interface with the client side. Which application should do it? Should the application that handles the main business logic also handle connections?
 
@@ -95,9 +95,11 @@ The Reactive Interaction Gateway (RIG) was designed to solve this problem elegan
 
 RIG functions as an application interface layer and works as an event hub for the front end.  It powers real time updates and decouples the backend interface from the frontend while enabling many concurrent users. It handles asynchronous events streaming from the event hub or from the UI.
 
-This architecture can evolve in complexity as features are built, adding or subtracting services in order to reflect the problem domain. It enables the continuous deployment of backend services without effecting users connections.
+This architecture can evolve in complexity as features are built, adding or subtracting services in order to reflect the problem domain. It enables the continuous deployment of backend services without effecting users' connections.
 
-RIG is designed to manage all connections and to be language agnostic. It does not matter in which framework or language a connecting application is written and developers do not need to know Elixir / Pheonix to use RIG. Routes are defined using a configuration file or by POSTing directly to the application. This gives an architect a great deal of flexibility to choose the tools they use to meet functional requirements.
+RIG is designed to manage all connections to the front end and to be language agnostic. It does not matter in which framework or language a connecting application is written and developers do not need to know Elixir / Pheonix to use RIG. 
+
+Routes are defined using a configuration file or by POSTing directly to the application. This gives an architect a great deal of flexibility to choose the tools they use to meet functional requirements.
 
 ![simple-add-rig](assets/simple-add-rig.png)
 
