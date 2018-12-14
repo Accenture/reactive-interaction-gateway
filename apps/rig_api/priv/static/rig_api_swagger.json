@@ -1,6 +1,73 @@
 {
   "swagger": "2.0",
   "paths": {
+    "/v1/users/{user}/sessions": {
+      "get": {
+        "tags": [
+          "Channels"
+        ],
+        "summary": "tbd",
+        "responses": {
+          "200": {
+            "description": "Ok"
+          }
+        },
+        "parameters": [
+          {
+            "type": "string",
+            "required": true,
+            "name": "user",
+            "in": "path",
+            "description": "tbd"
+          }
+        ],
+        "operationId": "RigApi.ChannelsController.list_channel_sessions",
+        "description": "tbd"
+      }
+    },
+    "/v1/users": {
+      "get": {
+        "tags": [
+          "Channels"
+        ],
+        "summary": "tbd",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/Users"
+            },
+            "description": "Ok"
+          }
+        },
+        "parameters": [],
+        "operationId": "RigApi.ChannelsController.list_channels",
+        "description": "tbd"
+      }
+    },
+    "/v1/tokens/{jti}": {
+      "delete": {
+        "tags": [
+          "Channels"
+        ],
+        "summary": "tbd",
+        "responses": {
+          "200": {
+            "description": "Ok"
+          }
+        },
+        "parameters": [
+          {
+            "type": "string",
+            "required": true,
+            "name": "jti",
+            "in": "path",
+            "description": "tbd"
+          }
+        ],
+        "operationId": "RigApi.ChannelsController.disconnect_channel_session",
+        "description": "tbd"
+      }
+    },
     "/v1/session-blacklist/{sessionId}": {
       "get": {
         "tags": [
@@ -82,6 +149,31 @@
     "title": "RIG Control API"
   },
   "definitions": {
+    "Users": {
+      "type": "array",
+      "title": "tbd",
+      "items": {
+        "$ref": "#/definitions/User"
+      },
+      "description": "tbd"
+    },
+    "User": {
+      "type": "object",
+      "title": "tbd",
+      "required": [
+        "userId"
+      ],
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "tbd"
+        }
+      },
+      "example": {
+        "userId": "SomeUserId"
+      },
+      "description": "tbd"
+    },
     "SessionBlacklistStatus": {
       "type": "object",
       "title": "Session Blacklist Status",
