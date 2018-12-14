@@ -47,7 +47,7 @@ defmodule RigAuth.Jwt.UtilsTest do
       jwt = "badtoken"
 
       assert Utils.valid?(jwt) == %{
-               error: "JWT=badtoken has incorrect form. Required form is: \"Bearer token\""
+               error: "JWT=badtoken is missing token type. Required format is: \"Bearer token\""
              }
     end
   end

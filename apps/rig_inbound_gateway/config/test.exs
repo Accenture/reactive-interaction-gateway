@@ -4,6 +4,9 @@ use Mix.Config
 # you can enable the server option below.
 config :rig, RigInboundGatewayWeb.Endpoint,
   env: :test,
+  url: [
+    host: {:system, "HOST", "localhost"}
+  ],
   http: [port: System.get_env("INBOUND_PORT") || 4001],
   server: false
 

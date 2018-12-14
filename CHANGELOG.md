@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- [Auth] JWT now expects proper format -- `Bearer ...`.
+- [Auth] No longer assumes the "Bearer" token type when no access token type is prepended in the Authorization header. Consequently, a client is expected to explicitly use "Bearer" for sending its JWT authorization token. More more details, see [RFC 6749](https://tools.ietf.org/html/rfc6749#section-7.1).
 
 - [Proxy] When forwarding requests, RIG related meta data (e.g. correlation ID) in CloudEvents is now put into an object under the top-level key "rig". Note that in terms of the current [CloudEvents 0.2](https://github.com/cloudevents/spec/blob/v0.2/spec.md) specification this makes "rig" an [extension](https://github.com/cloudevents/spec/blob/v0.2/primer.md#cloudevent-attribute-extensions). Also, all RIG related keys have been renamed from snake_case to camelCase.
 
@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- [Inbound] Wrong parsing and place in cloud events for API proxy publish to Kafka/Kinesis
+- [Inbound] Fixed response to CORS related preflight request.
 
 <!-- ### Security -->
 

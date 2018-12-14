@@ -18,8 +18,11 @@ defmodule RigAuth.Jwt.Utils do
     |> get_error == nil
   end
 
-  def valid?(jwt) do
-    %{error: "JWT=#{jwt} has incorrect form. Required form is: \"Bearer token\""}
+  def valid?(invalid_access_token) do
+    %{
+      error:
+        "JWT=#{invalid_access_token} is missing token type. Required format is: \"Bearer token\""
+    }
   end
 
   # ---
