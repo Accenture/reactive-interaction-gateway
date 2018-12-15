@@ -2,6 +2,7 @@
   "docs": {
     "For Developers": [
       "intro",
+      "the-big-picture",
       "getting-started",
       "user-authentication",
       "api-gateway",
