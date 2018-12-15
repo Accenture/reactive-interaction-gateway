@@ -135,7 +135,7 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
   end
 
   test_with_server "forward_request should handle nested query params", @env do
-    route("/myapi/books", fn %{query_string: query} ->
+    route("/myapi/books", fn %{query: query} ->
       assert %{"page[limit]" => "10", "page[offset]" => "0"} = query
       Response.ok!(~s<{"response":"[]"}>)
     end)

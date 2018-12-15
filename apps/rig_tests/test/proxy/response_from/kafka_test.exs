@@ -54,7 +54,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     sync_response = %{"message" => "the client never sees this response"}
     async_response = %{"message" => "this is the async response that reaches the client instead"}
 
-    route(endpoint_path, fn %{query_string: query} ->
+    route(endpoint_path, fn %{query: query} ->
       correlation_id =
         query
         |> Map.fetch!("correlationID")

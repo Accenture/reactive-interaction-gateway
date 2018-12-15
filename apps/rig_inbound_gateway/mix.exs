@@ -72,8 +72,10 @@ defmodule RigInboundGateway.Mixfile do
       {:ex_aws, "~> 2.0"},
       {:ex_aws_kinesis, "~> 2.0"},
       # For backend service mocks:
-      # {:fake_server, "~> 2.0", only: :test},
-      {:fake_server, github: "bernardolins/fake_server", branch: "2.0.0"},
+      {:fake_server,
+       github: "bernardolins/fake_server",
+       ref: "4e0a1c2a8ea0fa9b5ab72b5cab063458ce0b447d",
+       only: :test},
       {:socket, "~> 0.3", only: :test},
       {:joken, "~> 1.5"}
     ]
