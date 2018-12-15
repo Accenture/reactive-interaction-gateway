@@ -17,13 +17,13 @@ source .env
 
 docker-compose up -d || exit 1
 
-while ! is_kafka_ready; do
-    echo "waiting for Kafka to start and create the topic.."
-    sleep 1
-done
+# while ! is_kafka_ready; do
+#     echo "waiting for Kafka to start and create the topic.."
+#     sleep 1
+# done
 
 # check whether Kafka is now ready or the loop has been aborted:
-is_kafka_ready || exit 1
+# is_kafka_ready || exit 1
 
 export KAFKA_BROKERS="${HOST}:${KAFKA_PORT_PLAIN}"
 export KAFKA_SSL_ENABLED=0

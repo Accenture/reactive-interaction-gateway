@@ -27,6 +27,11 @@ defmodule RigInboundGateway.Events do
       "eventType" => "rig.subscriptions_set",
       "source" => "rig"
     })
-    |> CloudEvent.with_data(subscriptions)
+    |> CloudEvent.with_data(
+      subscriptions
+      |> Enum.map(fn %Subscription{event_type: event_type, constraints: constraints} ->
+        %{"eventType" => event_type, "oneOf" => constraints}
+      end)
+    )
   end
 end
