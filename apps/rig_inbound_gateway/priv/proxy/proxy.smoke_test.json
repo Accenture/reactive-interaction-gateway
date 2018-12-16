@@ -17,49 +17,49 @@
             "id": "get",
             "path": "/api",
             "method": "GET",
-            "not_secured": true
+            "secured": false
           },
           {
             "id": "post",
             "path": "/api",
             "method": "POST",
-            "not_secured": true
+            "secured": false
           },
           {
             "id": "put",
             "path": "/api",
             "method": "PUT",
-            "not_secured": true
+            "secured": false
           },
           {
             "id": "patch",
             "path": "/api",
             "method": "PATCH",
-            "not_secured": true
+            "secured": false
           },
           {
             "id": "delete",
             "path": "/api",
             "method": "DELETE",
-            "not_secured": true
+            "secured": false
           },
           {
             "id": "head",
             "path": "/api",
             "method": "HEAD",
-            "not_secured": true
+            "secured": false
           },
           {
             "id": "options",
             "path": "/api",
             "method": "OPTIONS",
-            "not_secured": true
+            "secured": false
           },
           {
             "id": "post-kafka-produce",
             "path": "/kafka/produce",
             "method": "POST",
-            "not_secured": true
+            "secured": false
           }
         ]
       }

@@ -62,7 +62,7 @@ cluster, so all nodes share the same configuration without having to sync anythi
           "id": "get-auth-register",
           "path": "/auth/register",
           "method": "GET",
-          "not_secured": true
+          "secured": false
         }
       ]
     }
@@ -102,7 +102,7 @@ cluster, so all nodes share the same configuration without having to sync anythi
           "id": "get-auth-register",
           "path": "/auth/register",
           "method": "GET",
-          "not_secured": true
+          "secured": false
         }
       ]
     }

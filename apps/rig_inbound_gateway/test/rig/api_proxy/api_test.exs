@@ -15,7 +15,7 @@ defmodule RigInboundGateway.ApiProxy.ApiTest do
     api1_endpoint1 = %{
       "id" => "test-endpoint",
       "type" => "http",
-      "not_secured" => true,
+      "secured" => false,
       "method" => "GET",
       "path" => "/foo"
     }
@@ -44,7 +44,7 @@ defmodule RigInboundGateway.ApiProxy.ApiTest do
     api1_endpoint1 = %{
       "id" => "test-endpoint-that-should-not-match",
       "type" => "http",
-      "not_secured" => true,
+      "secured" => false,
       "method" => "GET",
       "path" => "/docs/123/tables"
     }
@@ -52,7 +52,7 @@ defmodule RigInboundGateway.ApiProxy.ApiTest do
     api1_endpoint2 = %{
       "id" => "test-endpoint-that-should-match",
       "type" => "http",
-      "not_secured" => true,
+      "secured" => false,
       "method" => "GET",
       "path" => "/docs/{docId}/tables/{tableId}"
     }
