@@ -57,7 +57,7 @@ defmodule RigApi.SessionBlacklistController do
 
   # ---
 
-  # Swagger documentation for endpoint /v1/session-blacklist
+  # Swagger documentation for endpoint POST /v1/session-blacklist
   swagger_path :blacklist_session do
     post("/v1/session-blacklist")
     summary("Blacklist a new session")

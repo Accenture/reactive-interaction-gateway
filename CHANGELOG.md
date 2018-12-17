@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-<!-- ### Added -->
+### Added
+- [Docs] Added swagger documentation for RIG endpoints [#116](https://github.com/Accenture/reactive-interaction-gateway/issues/116) 
 
 <!-- ### Changed -->
 

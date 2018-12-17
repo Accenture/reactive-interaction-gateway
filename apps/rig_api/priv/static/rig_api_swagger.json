@@ -127,6 +127,35 @@
         "description": "Blacklists a new session with data given in the body"
       }
     },
+    "/v1/messages": {
+      "post": {
+        "tags": [
+          "Message"
+        ],
+        "summary": "Message Acception",
+        "responses": {
+          "400": {
+            "description": "Bad Request: Failed to parse request body :parse-error"
+          },
+          "202": {
+            "description": "Accepted - message queued for transport"
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/definitions/MessageCloudEvent"
+            },
+            "required": true,
+            "name": "messageBody",
+            "in": "body",
+            "description": "The message to be provided to frontends in Cloud Event format"
+          }
+        ],
+        "operationId": "RigApi.MessageController.create",
+        "description": "Accepts message to be sent to front-ends."
+      }
+    },
     "/v1/apis/{apiId}": {
       "put": {
         "tags": [
@@ -594,6 +623,45 @@
         }
       },
       "description": "An Proxy API object - Is used for creating/updating/reading"
+    },
+    "MessageCloudEvent": {
+      "type": "object",
+      "title": "Message Cloud Event",
+      "required": [
+        "source",
+        "eventType",
+        "eventTime",
+        "eventID",
+        "cloudEventsVersion"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "example": "tutorial",
+          "description": "describes the event producer."
+        },
+        "eventType": {
+          "type": "string",
+          "example": "greeting",
+          "description": "the event type in reverse-DNS notation"
+        },
+        "eventTime": {
+          "type": "string",
+          "example": "2018-08-21T09:11:27.614970+00:00",
+          "description": "Event Time"
+        },
+        "eventID": {
+          "type": "string",
+          "example": "first-event",
+          "description": "unique ID for an event"
+        },
+        "cloudEventsVersion": {
+          "type": "string",
+          "example": "0.1",
+          "description": "Cloud Events Version"
+        }
+      },
+      "description": "The message to be provide to frontends in Cloud Event format"
     }
   }
 }

@@ -160,6 +160,11 @@ source.addEventListener("greeting", function (e) {
 - JWT signature verification for APIs as a simple authentication check.
 - Session blacklist with immediate session invalidation.
 
+### API Documentation
+The API documentation for RIG can be found when running the RIG under the endpoint /swagger-ui e.g. when running on [localhost](localhost:4010/swagger-ui)
+
+A swagger document for integration in an existing swagger UI can be found [here](./apps/rig_api/priv/static/rig_api_swagger.json)
+
 ## Configuration, Integration, Deployment
 
 RIG is designed to integrate easily into your current architecture. Should you have any problems, please open a Github issue. Also, check out
