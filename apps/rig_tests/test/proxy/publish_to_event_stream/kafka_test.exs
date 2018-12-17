@@ -169,37 +169,22 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     assert res_status == 202
     assert res_body == "Accepted."
 
-    expected_msg =
-      Jason.encode!(%{
-        "source" => "rig-test",
-        "rig" => %{
-          "scheme" => "http",
-          "requestPath" => "/mock-proxy-http-response-publish-to-kafka-endpoint",
-          "reqHeaders" => [
-            ["user-agent", "hackney/1.14.0"],
-            ["host", "#{@proxy_host}:#{@proxy_port}"],
-            ["content-type", "application/json"],
-            ["content-length", "291"]
-          ],
-          "remoteIP" => "127.0.0.1",
-          "queryString" => "",
-          "port" => @proxy_port,
-          "method" => "POST",
-          "host" => @proxy_host,
-          "correlationID" => "g2dkAA1ub25vZGVAbm9ob3N0AAADvgAAAAAA"
-        },
-        "extensions" => %{},
-        "eventTypeVersion" => "1.0",
-        "eventType" => "com.example.test",
-        "eventTime" => "2018-04-05T17:31:00Z",
-        "eventID" => "069711bf-3946-4661-984f-c667657b8d85",
-        "data" => %{
-          "foo" => "bar"
-        },
-        "contentType" => "application/json",
-        "cloudEventsVersion" => "0.1"
-      })
+    assert_receive received_msg, 10_000
+    received_msg_map = Jason.decode!(received_msg)
 
-    assert_receive expected_msg, 10_000
+    assert "bar" == get_in(received_msg_map, ["data", "foo"])
+    assert "069711bf-3946-4661-984f-c667657b8d85" == get_in(received_msg_map, ["eventID"])
+    assert "com.example.test" == get_in(received_msg_map, ["eventType"])
+
+    assert "/mock-proxy-publish-to-kafka-endpoint" ==
+             get_in(received_msg_map, ["rig", "requestPath"])
+
+    assert "127.0.0.1" == get_in(received_msg_map, ["rig", "remoteIP"])
+
+    assert "g2dkAA1ub25vZGVAbm9ob3N0AAAEWAAAAAAA" ==
+             get_in(received_msg_map, ["rig", "correlationID"])
+
+    assert get_in(received_msg_map, ["rig", "reqHeaders"])
+           |> Enum.member?(["host", "#{@proxy_host}:#{@proxy_port}"])
   end
 end
