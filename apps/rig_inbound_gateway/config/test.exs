@@ -1,14 +1,15 @@
 use Mix.Config
 
-# We don't run a server during test. If one is required,
-# you can enable the server option below.
-config :rig, RigInboundGatewayWeb.Endpoint,
+config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
   env: :test,
   url: [
     host: {:system, "HOST", "localhost"}
   ],
-  http: [port: System.get_env("INBOUND_PORT") || 4001],
-  server: false
+  https: [
+    certfile: "cert/selfsigned.pem",
+    keyfile: "cert/selfsigned_key.des3.pem",
+    password: "test"
+  ]
 
 config :rig, RigInboundGateway.RateLimit,
   enabled?: true,
@@ -33,3 +34,5 @@ config :rig, RigInboundGateway.Proxy,
   config_file: {:system, "PROXY_CONFIG_FILE", "proxy/proxy.test.json"}
 
 config :rig, RigInboundGatewayWeb.Proxy.Controller, rig_proxy: RigInboundGateway.ProxyMock
+
+config :fake_server, :port_range, Enum.to_list(55_000..65_000) ++ [7070]

@@ -2,55 +2,25 @@ defmodule RigInboundGateway.EventSubscriptionTest do
   @moduledoc """
   Clients need to be able to add and remove subscriptions to their connection.
   """
-  # Cannot be async because the extractor configuration is modified
+  # Cannot be async because the extractor configuration is modified:
   use ExUnit.Case, async: false
 
-  import Joken
+  alias HTTPoison
+  alias Jason
+  alias Socket.Web, as: WebSocket
 
   alias CloudEvent
-  alias Rig.EventFilter.Sup, as: EventFilterSup
+  alias RigAuth.Jwt.Utils, as: Jwt
+  alias RigInboundGateway.ExtractorConfig
 
-  @external_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][
-                   :port
-                 ]
-  @external_url "http://localhost:#{@external_port}"
-  @jwt_secret_key "mysecret"
+  def external_port,
+    do: Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][:port]
+
+  def hostname, do: "localhost"
 
   def setup do
-    extractor_config = System.get_env("EXTRACTORS")
-
-    on_exit(fn ->
-      # Restore extractor configuration:
-      System.put_env("EXTRACTORS", extractor_config)
-    end)
+    on_exit(&ExtractorConfig.restore/0)
   end
-
-  defp generate_jwt(username) do
-    token()
-    |> with_exp
-    |> with_signer(@jwt_secret_key |> hs256)
-    |> with_claim("username", username)
-    |> sign
-    |> get_compact
-  end
-
-  defp set_extractor_config(extractor_config) when is_map(extractor_config) do
-    System.put_env("EXTRACTORS", Jason.encode!(extractor_config))
-
-    for sup <- EventFilterSup.processes() do
-      send(sup, :reload_config)
-    end
-  end
-
-  defp greeting_without_name,
-    do:
-      %{
-        "cloudEventsVersion" => "0.1",
-        "source" => Atom.to_string(__MODULE__),
-        "eventType" => "greeting"
-      }
-      |> CloudEvent.new!()
-      |> Jason.encode!()
 
   defp greeting_for(name),
     do:
@@ -61,219 +31,211 @@ defmodule RigInboundGateway.EventSubscriptionTest do
       }
       |> CloudEvent.new!()
       |> CloudEvent.with_data(%{"name" => name})
-      |> Jason.encode!()
 
   defp greeting_for_alice, do: greeting_for("alice")
 
   defp greeting_for_bob, do: greeting_for("bob")
 
-  defp new_sse_connection(token \\ nil) do
-    connection_url =
-      if token,
-        do: "#{@external_url}/_rig/v1/connection/sse?token=#{token}",
-        else: "#{@external_url}/_rig/v1/connection/sse"
+  defp update_subscriptions(connection_id, subscriptions, jwt \\ nil) do
+    url =
+      "http://#{hostname()}:#{external_port()}/_rig/v1/connection/sse/#{connection_id}/subscriptions"
 
-    HTTPoison.get!(connection_url, %{},
-      stream_to: self(),
-      recv_timeout: 20_000
-    )
+    body = Jason.encode!(%{"subscriptions" => subscriptions})
 
-    # Extract the connection token from the response:
+    headers =
+      [{"content-type", "application/json"}] ++
+        if is_nil(jwt), do: [], else: [{"authorization", jwt}]
 
-    %{"data" => %{"connection_token" => connection_id}} =
-      receive do
-        %HTTPoison.AsyncChunk{chunk: chunk} ->
-          chunk
-          |> String.split("\n", trim: true)
-          |> Enum.reduce_while(nil, fn
-            "data: " <> data, _acc -> {:halt, Jason.decode!(data)}
-            _x, _acc -> {:cont, nil}
-          end)
-      after
-        1_000 -> nil
-      end
-
-    assert_received %HTTPoison.AsyncStatus{code: 200}
-    assert_received %HTTPoison.AsyncHeaders{}
-
-    connection_id
+    %HTTPoison.Response{status_code: 204} = HTTPoison.put!(url, body, headers)
+    :ok
   end
 
-  defp new_ws_connection(token \\ nil) do
-    path =
-      if token,
-        do: "/_rig/v1/connection/ws?token=#{token}",
-        else: "/_rig/v1/connection/ws"
+  defp submit_event(cloud_event) do
+    url = "http://#{hostname()}:#{external_port()}/_rig/v1/events"
 
-    {:ok, client} =
-      Socket.Web.connect("localhost", @external_port, %{
-        path: path,
+    %HTTPoison.Response{status_code: 202} =
+      HTTPoison.post!(url, Jason.encode!(cloud_event), [{"content-type", "application/json"}])
+
+    :ok
+  end
+
+  defp connection_id(welcome_event)
+  defp connection_id(%{"data" => %{"connection_token" => connection_id}}), do: connection_id
+
+  defdelegate url_encode_subscriptions(list), to: Jason, as: :encode!
+
+  defmodule Client do
+    @moduledoc false
+    @type client :: pid | reference | atom
+    @callback connect(params :: list) :: {:ok, pid}
+    @callback disconnect(client) :: :ok
+    @callback refute_receive(client) :: :ok
+    @callback read_event(client, event_type :: String.t()) :: map()
+    @callback read_welcome_event(client) :: map()
+    @callback read_subscriptions_set_event(client) :: map()
+  end
+
+  defmodule SseClient do
+    @moduledoc false
+    @behaviour Client
+    alias RigInboundGateway.EventSubscriptionTest, as: Test
+
+    @impl true
+    def connect(params \\ []) do
+      params =
+        if Keyword.has_key?(params, :subscriptions) do
+          encoded_subscriptions = params[:subscriptions] |> Test.url_encode_subscriptions()
+          Keyword.replace!(params, :subscriptions, encoded_subscriptions)
+        else
+          params
+        end
+
+      url =
+        "http://#{Test.hostname()}:#{Test.external_port()}/_rig/v1/connection/sse?#{
+          URI.encode_query(params)
+        }"
+
+      %HTTPoison.AsyncResponse{id: client} =
+        HTTPoison.get!(url, %{},
+          stream_to: self(),
+          recv_timeout: 20_000
+        )
+
+      assert_receive %HTTPoison.AsyncStatus{code: 200}
+      assert_receive %HTTPoison.AsyncHeaders{}
+
+      {:ok, client}
+    end
+
+    @impl true
+    def disconnect(client) do
+      {:ok, ^client} = :hackney.stop_async(client)
+      :ok
+    end
+
+    @impl true
+    def refute_receive(_client) do
+      receive do
+        %HTTPoison.AsyncChunk{} = async_chunk ->
+          raise "Unexpectedly received: #{inspect(async_chunk)}"
+      after
+        100 -> :ok
+      end
+    end
+
+    @impl true
+    def read_event(_client, event_type) do
+      cloud_event = read_sse_chunk() |> extract_cloud_event()
+      %{"eventType" => ^event_type} = cloud_event
+    end
+
+    @impl true
+    def read_welcome_event(client), do: read_event(client, "rig.connection.create")
+
+    @impl true
+    def read_subscriptions_set_event(client), do: read_event(client, "rig.subscriptions_set")
+
+    defp read_sse_chunk do
+      receive do
+        %HTTPoison.AsyncChunk{chunk: chunk} -> chunk
+      after
+        1_000 ->
+          raise "No chunk to read after 1s. #{inspect(:erlang.process_info(self(), :messages))}"
+      end
+    end
+
+    defp extract_cloud_event(sse_chunk) do
+      sse_chunk
+      |> String.split("\n", trim: true)
+      |> Enum.reduce_while(nil, fn
+        "data: " <> data, _acc -> {:halt, Jason.decode!(data)}
+        _x, _acc -> {:cont, nil}
+      end)
+      |> case do
+        nil -> raise "Failed to extract CloudEvent from chunk: #{inspect(sse_chunk)}"
+        cloud_event -> cloud_event
+      end
+    end
+  end
+
+  defmodule WsClient do
+    @moduledoc false
+    @behaviour Client
+    alias RigInboundGateway.EventSubscriptionTest, as: Test
+
+    @impl true
+    def connect(params \\ []) do
+      params =
+        if Keyword.has_key?(params, :subscriptions) do
+          encoded_subscriptions = params[:subscriptions] |> Test.url_encode_subscriptions()
+          Keyword.replace!(params, :subscriptions, encoded_subscriptions)
+        else
+          params
+        end
+
+      WebSocket.connect(Test.hostname(), Test.external_port(), %{
+        path: "/_rig/v1/connection/ws?#{URI.encode_query(params)}",
         protocol: ["ws"]
       })
+    end
 
-    # Extract the connection token from the response:
+    @impl true
+    def disconnect(client) do
+      :ok = WebSocket.close(client)
+    end
 
-    {:text, data} = client |> Socket.Web.recv!()
-    %{"data" => %{"connection_token" => connection_id}} = Jason.decode!(data)
+    @impl true
+    def refute_receive(client) do
+      case WebSocket.recv(client, timeout: 100) do
+        {:ping, _} -> client.refute_receive(client)
+        {:ok, packet} -> raise "Unexpectedly received: #{inspect(packet)}"
+        {:error, _} -> :ok
+      end
+    end
 
-    {connection_id, client}
+    @impl true
+    def read_event(client, event_type) do
+      {:text, data} = WebSocket.recv!(client)
+      cloud_event = Jason.decode!(data)
+      %{"eventType" => ^event_type} = cloud_event
+    end
+
+    @impl true
+    def read_welcome_event(client), do: read_event(client, "rig.connection.create")
+
+    @impl true
+    def read_subscriptions_set_event(client), do: read_event(client, "rig.subscriptions_set")
   end
 
-  describe "Server-sent events," do
-    test "Adding and removing subscriptions is in effect immediately." do
-      # Set up the extractor configuration:
+  @clients [SseClient, WsClient]
 
-      set_extractor_config(%{
-        "greeting" => %{
-          "name" => %{
-            "stable_field_index" => 1,
-            "event" => %{
-              "json_pointer" => "/data/name"
-            }
-          }
-        }
-      })
+  describe "Connections and subscriptions:" do
+    test "Connecting with no parameters causes empty subscription set." do
+      for client <- @clients do
+        {:ok, ref} = client.connect()
+        client.read_welcome_event(ref)
 
-      # Establish an SSE connection:
+        assert %{"data" => []} = client.read_subscriptions_set_event(ref)
 
-      connection_id = new_sse_connection()
-      subscriptions_url = "#{@external_url}/_rig/v1/connection/sse/#{connection_id}/subscriptions"
-
-      # By default, greetings to Alice are not forwarded:
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for_alice(),
-        [{"content-type", "application/json"}]
-      )
-
-      refute_receive %HTTPoison.AsyncChunk{chunk: "event: greeting\n" <> _}
-
-      # Subscribe to greetings for Alice:
-
-      HTTPoison.put!(
-        subscriptions_url,
-        Jason.encode!(%{
-          "subscriptions" => [
-            %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
-          ]
-        }),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_receive %HTTPoison.AsyncChunk{chunk: "event: rig.subscriptions_set\n" <> _}
-
-      # Now a greeting to Alice is forwarded:
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for_alice(),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_receive %HTTPoison.AsyncChunk{chunk: "event: greeting\n" <> _}
-
-      # But a greeting to Bob is not:
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for_bob(),
-        [{"content-type", "application/json"}]
-      )
-
-      refute_receive %HTTPoison.AsyncChunk{chunk: "event: greeting\n" <> _}
-
-      # We remove the subscription again:
-
-      HTTPoison.put!(
-        subscriptions_url,
-        Jason.encode!(%{
-          "subscriptions" => []
-        }),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_receive %HTTPoison.AsyncChunk{chunk: "event: rig.subscriptions_set\n" <> _}
-
-      # After this, greetings to Alice are no longer forwarded:
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for_alice(),
-        [{"content-type", "application/json"}]
-      )
-
-      refute_receive %HTTPoison.AsyncChunk{chunk: "event: greeting\n" <> _}
+        client.disconnect(ref)
+      end
     end
 
-    test "An event that lacks a value for a known field is only forwarded if there is no constraint related to that field." do
-      set_extractor_config(%{
-        "greeting" => %{
-          "name" => %{
-            "stable_field_index" => 1,
-            "event" => %{
-              "json_pointer" => "/data/name"
-            }
-          }
-        }
-      })
+    test "Connecting with subscriptions parameter sets up the subscriptions." do
+      subscriptions = [%{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}]
 
-      connection_id = new_sse_connection()
-      subscriptions_url = "#{@external_url}/_rig/v1/connection/sse/#{connection_id}/subscriptions"
+      for client <- @clients do
+        {:ok, ref} = client.connect(subscriptions: subscriptions)
+        client.read_welcome_event(ref)
 
-      # Subscribe to all greetings:
+        assert %{"data" => ^subscriptions} = client.read_subscriptions_set_event(ref)
 
-      HTTPoison.put!(
-        subscriptions_url,
-        Jason.encode!(%{
-          "subscriptions" => [
-            %{"eventType" => "greeting"}
-          ]
-        }),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_receive %HTTPoison.AsyncChunk{chunk: "event: rig.subscriptions_set\n" <> _}
-
-      # A greeting without a name value is forwarded:
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_without_name(),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_receive %HTTPoison.AsyncChunk{chunk: "event: greeting\n" <> _}
-
-      # If we subscribe to greetings for Alice..
-
-      HTTPoison.put!(
-        subscriptions_url,
-        Jason.encode!(%{
-          "subscriptions" => [
-            %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
-          ]
-        }),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_receive %HTTPoison.AsyncChunk{chunk: "event: rig.subscriptions_set\n" <> _}
-
-      # ..the greeting without name is no longer forwarded:
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_without_name(),
-        [{"content-type", "application/json"}]
-      )
-
-      refute_receive %HTTPoison.AsyncChunk{chunk: "event: greeting\n" <> _}
+        client.disconnect(ref)
+      end
     end
 
-    test "In case JWT is present in create subscription request it should automatically infer subscriptions from JWT." do
-      # Set up the extractor configuration:
-
-      set_extractor_config(%{
+    test "Connecting with jwt parameter sets up automatic subscriptions." do
+      ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
             "stable_field_index" => 1,
@@ -287,46 +249,21 @@ defmodule RigInboundGateway.EventSubscriptionTest do
         }
       })
 
-      # Establish an SSE connection:
+      jwt = Jwt.generate(%{"username" => "alice"})
+      expected_subscriptions = [%{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}]
 
-      connection_id = new_sse_connection()
-      subscriptions_url = "#{@external_url}/_rig/v1/connection/sse/#{connection_id}/subscriptions"
-      token = generate_jwt("john.doe")
+      for client <- @clients do
+        {:ok, ref} = client.connect(jwt: jwt)
+        client.read_welcome_event(ref)
 
-      HTTPoison.put!(
-        subscriptions_url,
-        Jason.encode!(%{
-          "subscriptions" => []
-        }),
-        [
-          {"content-type", "application/json"},
-          {"authorization", token}
-        ]
-      )
+        assert %{"data" => ^expected_subscriptions} = client.read_subscriptions_set_event(ref)
 
-      assert_receive %HTTPoison.AsyncChunk{chunk: "event: rig.subscriptions_set\n" <> _}
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for("john.doe"),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_receive %HTTPoison.AsyncChunk{chunk: "event: greeting\n" <> _}
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for("bob.doe"),
-        [{"content-type", "application/json"}]
-      )
-
-      refute_receive %HTTPoison.AsyncChunk{chunk: "event: greeting\n" <> _}
+        client.disconnect(ref)
+      end
     end
 
-    test "In case JWT is present in initial connection request it should automatically infer subscriptions from JWT." do
-      # Set up the extractor configuration:
-
-      set_extractor_config(%{
+    test "Connecting with both a subscriptions and a jwt parameter combines all subscriptions." do
+      ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
             "stable_field_index" => 1,
@@ -340,36 +277,145 @@ defmodule RigInboundGateway.EventSubscriptionTest do
         }
       })
 
-      # Establish an SSE connection:
-      token = generate_jwt("john.doe")
+      jwt = Jwt.generate(%{"username" => "alice"})
+      automatic_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
+      manual_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "bob"}]}
 
-      new_sse_connection(token)
+      for client <- @clients do
+        {:ok, ref} = client.connect(jwt: jwt, subscriptions: [manual_subscription])
+        client.read_welcome_event(ref)
 
-      assert_receive %HTTPoison.AsyncChunk{chunk: "event: rig.subscriptions_set\n" <> _}
+        %{"data" => actual_subscriptions} = client.read_subscriptions_set_event(ref)
 
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for("john.doe"),
-        [{"content-type", "application/json"}]
-      )
+        assert actual_subscriptions in [
+                 [automatic_subscription, manual_subscription],
+                 [manual_subscription, automatic_subscription]
+               ]
 
-      assert_receive %HTTPoison.AsyncChunk{chunk: "event: greeting\n" <> _}
+        client.disconnect(ref)
+      end
+    end
 
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for("bob.doe"),
-        [{"content-type", "application/json"}]
-      )
+    test "Replacing subscriptions without passing a JWT removes automatic subscriptions." do
+      ExtractorConfig.set(%{
+        "greeting" => %{
+          "name" => %{
+            "stable_field_index" => 1,
+            "event" => %{
+              "json_pointer" => "/data/name"
+            },
+            "jwt" => %{
+              "json_pointer" => "/username"
+            }
+          }
+        }
+      })
 
-      refute_receive %HTTPoison.AsyncChunk{chunk: "event: greeting\n" <> _}
+      jwt = Jwt.generate(%{"username" => "alice"})
+      automatic_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
+      manual_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "bob"}]}
+
+      for client <- @clients do
+        # Connect with JWT but don't pass any subscriptions:
+        {:ok, ref} = client.connect(jwt: jwt)
+        welcome_event = client.read_welcome_event(ref)
+
+        # According to the extractor config, the JWT gives us an automatic subscription:
+        %{"data" => [^automatic_subscription]} = client.read_subscriptions_set_event(ref)
+
+        # Use the connection ID to replace the subscriptions:
+        connection_id(welcome_event)
+        |> update_subscriptions([manual_subscription])
+
+        # Because we haven't passed the JWT, the automatic subscription is gone:
+        %{"data" => [^manual_subscription]} = client.read_subscriptions_set_event(ref)
+
+        client.disconnect(ref)
+      end
+    end
+
+    test "Replacing subscriptions with an empty set while passing a JWT sets up automatic subscriptions." do
+      ExtractorConfig.set(%{
+        "greeting" => %{
+          "name" => %{
+            "stable_field_index" => 1,
+            "event" => %{
+              "json_pointer" => "/data/name"
+            },
+            "jwt" => %{
+              "json_pointer" => "/username"
+            }
+          }
+        }
+      })
+
+      jwt = Jwt.generate(%{"username" => "alice"})
+      automatic_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
+
+      for client <- @clients do
+        # Connect without subscribing to anything:
+        {:ok, ref} = client.connect()
+        welcome_event = client.read_welcome_event(ref)
+
+        # We shouldn't be subscribed to anything:
+        %{"data" => []} = client.read_subscriptions_set_event(ref)
+
+        # Use the connection ID to obtain automatic subscriptions:
+        connection_id(welcome_event)
+        |> update_subscriptions([], jwt)
+
+        # We haven't passed any subscriptions, but we should've got the JWT based one automatically:
+        %{"data" => [^automatic_subscription]} = client.read_subscriptions_set_event(ref)
+
+        client.disconnect(ref)
+      end
+    end
+
+    test "Replacing subscriptions while passing a JWT combines passed with automatic subscriptions." do
+      ExtractorConfig.set(%{
+        "greeting" => %{
+          "name" => %{
+            "stable_field_index" => 1,
+            "event" => %{
+              "json_pointer" => "/data/name"
+            },
+            "jwt" => %{
+              "json_pointer" => "/username"
+            }
+          }
+        }
+      })
+
+      jwt = Jwt.generate(%{"username" => "alice"})
+      automatic_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
+      initial_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "bob"}]}
+      new_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "charlie"}]}
+
+      for client <- @clients do
+        {:ok, ref} = client.connect(subscriptions: [initial_subscription])
+        welcome_event = client.read_welcome_event(ref)
+
+        %{"data" => [^initial_subscription]} = client.read_subscriptions_set_event(ref)
+
+        connection_id(welcome_event)
+        |> update_subscriptions([new_subscription], jwt)
+
+        # We should no longer see the initial subscription, but the new one and the JWT based one:
+        %{"data" => actual_subscriptions} = client.read_subscriptions_set_event(ref)
+
+        assert actual_subscriptions in [
+                 [automatic_subscription, new_subscription],
+                 [new_subscription, automatic_subscription]
+               ]
+
+        client.disconnect(ref)
+      end
     end
   end
 
-  describe "Websocket," do
+  describe "Receiving events:" do
     test "Adding and removing subscriptions is in effect immediately." do
-      # Set up the extractor configuration:
-
-      set_extractor_config(%{
+      ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
             "stable_field_index" => 1,
@@ -380,286 +426,42 @@ defmodule RigInboundGateway.EventSubscriptionTest do
         }
       })
 
-      # Establish a WS connection:
+      for client <- @clients do
+        {:ok, ref} = client.connect()
+        welcome_event = client.read_welcome_event(ref)
+        _ = client.read_subscriptions_set_event(ref)
 
-      {connection_id, socket_client} = new_ws_connection()
-      subscriptions_url = "#{@external_url}/_rig/v1/connection/ws/#{connection_id}/subscriptions"
+        # By default, greetings to Alice are not forwarded:
+        :ok = submit_event(greeting_for_alice())
+        assert :ok = client.refute_receive(ref)
 
-      # By default, greetings to Alice are not forwarded:
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for_alice(),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_raise Socket.Error, "timeout", fn ->
-        socket_client |> Socket.Web.recv!(%{timeout: 100})
-      end
-
-      # Subscribe to greetings for Alice:
-
-      HTTPoison.put!(
-        subscriptions_url,
-        Jason.encode!(%{
-          "subscriptions" => [
+        # Subscribe to greetings for Alice:
+        :ok =
+          connection_id(welcome_event)
+          |> update_subscriptions([
             %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
-          ]
-        }),
-        [{"content-type", "application/json"}]
-      )
+          ])
 
-      {:text, response} = socket_client |> Socket.Web.recv!()
-      %{"eventType" => event_type, "data" => data} = Jason.decode!(response)
+        _ = client.read_subscriptions_set_event(ref)
 
-      assert event_type == "rig.subscriptions_set"
-      assert data == [%{"constraints" => [%{"name" => "alice"}], "event_type" => "greeting"}]
+        # Now a greeting to Alice is forwarded:
+        :ok = submit_event(greeting_for_alice())
+        assert %{"data" => %{"name" => "alice"}} = client.read_event(ref, "greeting")
 
-      # Now a greeting to Alice is forwarded:
+        # But a greeting to Bob is not:
+        :ok = submit_event(greeting_for_bob())
+        assert :ok = client.refute_receive(ref)
 
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for_alice(),
-        [{"content-type", "application/json"}]
-      )
+        # We remove the subscription again:
+        :ok =
+          connection_id(welcome_event)
+          |> update_subscriptions([])
 
-      {:text, response} = socket_client |> Socket.Web.recv!()
-      %{"eventType" => event_type, "data" => data} = Jason.decode!(response)
+        _ = client.read_subscriptions_set_event(ref)
 
-      assert event_type == "greeting"
-      assert data == %{"name" => "alice"}
-
-      # But a greeting to Bob is not:
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for_bob(),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_raise Socket.Error, "timeout", fn ->
-        socket_client |> Socket.Web.recv!(%{timeout: 100})
-      end
-
-      # We remove the subscription again:
-
-      HTTPoison.put!(
-        subscriptions_url,
-        Jason.encode!(%{
-          "subscriptions" => []
-        }),
-        [{"content-type", "application/json"}]
-      )
-
-      {:text, response} = socket_client |> Socket.Web.recv!()
-      %{"eventType" => event_type, "data" => data} = Jason.decode!(response)
-
-      assert event_type == "rig.subscriptions_set"
-      assert data == []
-
-      # After this, greetings to Alice are no longer forwarded:
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for_alice(),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_raise Socket.Error, "timeout", fn ->
-        socket_client |> Socket.Web.recv!(%{timeout: 100})
-      end
-    end
-
-    test "An event that lacks a value for a known field is only forwarded if there is no constraint related to that field." do
-      set_extractor_config(%{
-        "greeting" => %{
-          "name" => %{
-            "stable_field_index" => 1,
-            "event" => %{
-              "json_pointer" => "/data/name"
-            }
-          }
-        }
-      })
-
-      # Establish a WS connection:
-
-      {connection_id, socket_client} = new_ws_connection()
-      subscriptions_url = "#{@external_url}/_rig/v1/connection/ws/#{connection_id}/subscriptions"
-
-      # Subscribe to all greetings:
-
-      HTTPoison.put!(
-        subscriptions_url,
-        Jason.encode!(%{
-          "subscriptions" => [
-            %{"eventType" => "greeting"}
-          ]
-        }),
-        [{"content-type", "application/json"}]
-      )
-
-      {:text, response} = socket_client |> Socket.Web.recv!()
-      %{"eventType" => event_type, "data" => data} = Jason.decode!(response)
-
-      assert event_type == "rig.subscriptions_set"
-      assert data == [%{"constraints" => [], "event_type" => "greeting"}]
-
-      # A greeting without a name value is forwarded:
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_without_name(),
-        [{"content-type", "application/json"}]
-      )
-
-      {:text, response} = socket_client |> Socket.Web.recv!()
-      %{"eventType" => event_type} = Jason.decode!(response)
-
-      assert event_type == "greeting"
-
-      # If we subscribe to greetings for Alice..
-
-      HTTPoison.put!(
-        subscriptions_url,
-        Jason.encode!(%{
-          "subscriptions" => [
-            %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
-          ]
-        }),
-        [{"content-type", "application/json"}]
-      )
-
-      {:text, response} = socket_client |> Socket.Web.recv!()
-      %{"eventType" => event_type, "data" => data} = Jason.decode!(response)
-
-      assert event_type == "rig.subscriptions_set"
-      assert data == [%{"constraints" => [%{"name" => "alice"}], "event_type" => "greeting"}]
-
-      # ..the greeting without name is no longer forwarded:
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_without_name(),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_raise Socket.Error, "timeout", fn ->
-        socket_client |> Socket.Web.recv!(%{timeout: 100})
-      end
-    end
-
-    test "In case JWT is present in create subscription request it should automatically infer subscriptions from JWT." do
-      # Set up the extractor configuration:
-
-      set_extractor_config(%{
-        "greeting" => %{
-          "name" => %{
-            "stable_field_index" => 1,
-            "event" => %{
-              "json_pointer" => "/data/name"
-            },
-            "jwt" => %{
-              "json_pointer" => "/username"
-            }
-          }
-        }
-      })
-
-      # Establish a WS connection:
-
-      {connection_id, socket_client} = new_ws_connection()
-      subscriptions_url = "#{@external_url}/_rig/v1/connection/ws/#{connection_id}/subscriptions"
-      token = generate_jwt("john.doe")
-
-      HTTPoison.put!(
-        subscriptions_url,
-        Jason.encode!(%{
-          "subscriptions" => []
-        }),
-        [
-          {"content-type", "application/json"},
-          {"authorization", token}
-        ]
-      )
-
-      {:text, response} = socket_client |> Socket.Web.recv!()
-      %{"eventType" => event_type, "data" => data} = Jason.decode!(response)
-
-      assert event_type == "rig.subscriptions_set"
-      assert data == [%{"constraints" => [%{"name" => "john.doe"}], "event_type" => "greeting"}]
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for("john.doe"),
-        [{"content-type", "application/json"}]
-      )
-
-      {:text, response} = socket_client |> Socket.Web.recv!()
-      %{"eventType" => event_type, "data" => data} = Jason.decode!(response)
-
-      assert event_type == "greeting"
-      assert data == %{"name" => "john.doe"}
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for("bob.doe"),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_raise Socket.Error, "timeout", fn ->
-        socket_client |> Socket.Web.recv!(%{timeout: 100})
-      end
-    end
-
-    test "In case JWT is present in initial connection request it should automatically infer subscriptions from JWT." do
-      # Set up the extractor configuration:
-
-      set_extractor_config(%{
-        "greeting" => %{
-          "name" => %{
-            "stable_field_index" => 1,
-            "event" => %{
-              "json_pointer" => "/data/name"
-            },
-            "jwt" => %{
-              "json_pointer" => "/username"
-            }
-          }
-        }
-      })
-
-      # Establish an SSE connection:
-      token = generate_jwt("john.doe")
-
-      {_connection_id, socket_client} = new_ws_connection(token)
-
-      {:text, response} = socket_client |> Socket.Web.recv!()
-      %{"eventType" => event_type, "data" => data} = Jason.decode!(response)
-
-      assert event_type == "rig.subscriptions_set"
-      assert data == [%{"constraints" => [%{"name" => "john.doe"}], "event_type" => "greeting"}]
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for("john.doe"),
-        [{"content-type", "application/json"}]
-      )
-
-      {:text, response} = socket_client |> Socket.Web.recv!()
-      %{"eventType" => event_type, "data" => data} = Jason.decode!(response)
-
-      assert event_type == "greeting"
-      assert data == %{"name" => "john.doe"}
-
-      HTTPoison.post!(
-        "#{@external_url}/_rig/v1/events",
-        greeting_for("bob.doe"),
-        [{"content-type", "application/json"}]
-      )
-
-      assert_raise Socket.Error, "timeout", fn ->
-        socket_client |> Socket.Web.recv!(%{timeout: 100})
+        # After this, greetings to Alice are no longer forwarded:
+        :ok = submit_event(greeting_for_alice())
+        assert :ok = client.refute_receive(ref)
       end
     end
   end

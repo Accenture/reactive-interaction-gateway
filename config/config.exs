@@ -57,9 +57,16 @@ config :rig, RigApi.ChannelsController, session_role: session_role
 # Authorization Token (JWT)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+jwt_secret_key = {:system, "JWT_SECRET_KEY", ""}
+jwt_alg = {:system, "JWT_ALG", "HS256"}
+
+config :rig, RigAuth,
+  secret_key: jwt_secret_key,
+  alg: jwt_alg
+
 config :rig, RigAuth.Jwt.Utils,
-  secret_key: {:system, "JWT_SECRET_KEY", ""},
-  alg: {:system, "JWT_ALG", "HS256"}
+  secret_key: jwt_secret_key,
+  alg: jwt_alg
 
 # --------------------------------------
 # Peerage

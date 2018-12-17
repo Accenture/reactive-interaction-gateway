@@ -1,11 +1,20 @@
 defmodule RigAuth.Jwt.UtilsTest do
   @moduledoc false
-  use ExUnit.Case, async: true
+  # Cannot be async because JWT related environment variables are modified:
+  use ExUnit.Case, async: false
   use RigAuth.ConnCase
 
   alias RigAuth.Jwt.Utils
 
   setup do
+    env_jwt_key = Confex.fetch_env!(:rig, RigAuth.Jwt.Utils)[:secret_key]
+    env_jwt_alg = Confex.fetch_env!(:rig, RigAuth.Jwt.Utils)[:alg]
+
+    on_exit(fn ->
+      System.put_env("JWT_SECRET_KEY", env_jwt_key)
+      System.put_env("JWT_ALG", env_jwt_alg)
+    end)
+
     System.put_env("JWT_SECRET_KEY", "mysecret")
     System.put_env("JWT_ALG", "HS256")
   end

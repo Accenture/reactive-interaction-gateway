@@ -50,12 +50,12 @@ defmodule RigInboundGateway.Mixfile do
       {:rig, in_umbrella: true},
       {:rig_auth, in_umbrella: true},
       {:rig_kafka, in_umbrella: true},
-      {:phoenix, "1.3.0"},
+      {:phoenix, "~> 1.4.0"},
       {:phoenix_pubsub, "~> 1.0"},
-      {:cowboy, "~> 1.0"},
+      {:plug_cowboy, "~> 2.0"},
       {:httpoison, "~> 1.3"},
       # JSON libs:
-      {:poison, "~> 2.0 or ~> 3.0"},
+      {:poison, "~> 3.0 or ~> 4.0"},
       {:jason, "~> 1.1"},
       # Date and time handling:
       {:timex, "~> 3.4"},
@@ -72,7 +72,10 @@ defmodule RigInboundGateway.Mixfile do
       {:ex_aws, "~> 2.0"},
       {:ex_aws_kinesis, "~> 2.0"},
       # For backend service mocks:
-      {:fake_server, "~> 1.4", only: :test},
+      {:fake_server,
+       github: "bernardolins/fake_server",
+       ref: "4e0a1c2a8ea0fa9b5ab72b5cab063458ce0b447d",
+       only: :test},
       {:socket, "~> 0.3", only: :test},
       {:joken, "~> 1.5"}
     ]

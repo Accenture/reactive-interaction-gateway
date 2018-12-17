@@ -28,8 +28,7 @@ defmodule RigAuth.ConnCase do
         jwt_alg = System.get_env("JWT_ALG")
 
         signer =
-          jwt_alg
-          |> case do
+          case jwt_alg do
             "HS" <> _ = alg -> Joken.Signer.hs(alg, jwt_secret_key)
             "RS" <> _ = alg -> Joken.Signer.rs(alg, JOSE.JWK.from_pem(priv_key))
           end

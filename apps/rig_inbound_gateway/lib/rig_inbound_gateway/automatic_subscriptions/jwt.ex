@@ -1,4 +1,4 @@
-defmodule RigInboundGateway.ImplicitSubscriptions.Jwt do
+defmodule RigInboundGateway.AutomaticSubscriptions.Jwt do
   @moduledoc """
   Create subscriptions based on JWT and extractor file
   """
@@ -16,6 +16,7 @@ defmodule RigInboundGateway.ImplicitSubscriptions.Jwt do
   end
 
   def infer_subscriptions(jwts) do
+    Logger.debug(fn -> "Auth tokens: #{inspect(jwts)}" end)
     %{extractor_config_path_or_json: extractor_config_path_or_json} = config()
     {:ok, extractor_map} = Config.new(extractor_config_path_or_json)
     claims = extract_token_claims(jwts)

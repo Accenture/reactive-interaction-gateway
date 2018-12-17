@@ -9,27 +9,15 @@ defmodule RigApi.ChannelsController do
   alias RigAuth.Blacklist
   alias RigAuth.Jwt
   alias RigInboundGatewayWeb.Endpoint
-  alias RigInboundGatewayWeb.Presence.Channel
 
   def list_channels(conn, _params) do
-    conf = config()
-
-    channels =
-      "role:#{conf.session_role}"
-      |> Channel.channels_list()
-      |> Map.keys()
-
-    json(conn, channels)
+    Logger.warn("list_channels called but no longer implemented!")
+    json(conn, [])
   end
 
-  def list_channel_sessions(conn, %{"user" => id}) do
-    sessions =
-      "user:#{id}"
-      |> Channel.channels_list()
-      |> Enum.map(fn user -> elem(user, 1).metas end)
-      |> List.flatten()
-
-    json(conn, sessions)
+  def list_channel_sessions(conn, %{"user" => _id}) do
+    Logger.warn("list_channel_sessions called but no longer implemented!")
+    json(conn, [])
   end
 
   def disconnect_channel_session(conn, %{"jti" => jti}) do
