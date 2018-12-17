@@ -127,6 +127,162 @@
         "description": "Blacklists a new session with data given in the body"
       }
     },
+    "/v1/apis/{apiId}": {
+      "put": {
+        "tags": [
+          "Apis"
+        ],
+        "summary": "Update RIG Proxy API Details",
+        "responses": {
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ProxyAPIResponse"
+            },
+            "description": "Doesn't exist"
+          },
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/ProxyAPIResponse"
+            },
+            "description": "Ok"
+          }
+        },
+        "parameters": [
+          {
+            "x-example": "new-service",
+            "type": "string",
+            "required": true,
+            "name": "apiId",
+            "in": "path",
+            "description": "The id of the API"
+          },
+          {
+            "schema": {
+              "$ref": "#/definitions/ProxyAPI"
+            },
+            "required": true,
+            "name": "proxyAPI",
+            "in": "body",
+            "description": "The details for the new Proxy endpoint"
+          }
+        ],
+        "operationId": "RigApi.ApisController.update_api",
+        "description": "Update details of a RIG Proxy API"
+      },
+      "get": {
+        "tags": [
+          "Apis"
+        ],
+        "summary": "Getting RIG Proxy API Details",
+        "responses": {
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ProxyAPIResponse"
+            },
+            "description": "Doesn't exist"
+          },
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/ProxyAPI"
+            },
+            "description": "Ok"
+          }
+        },
+        "parameters": [
+          {
+            "x-example": "new-service",
+            "type": "string",
+            "required": true,
+            "name": "apiId",
+            "in": "path",
+            "description": "The id of the API"
+          }
+        ],
+        "operationId": "RigApi.ApisController.get_api_detail",
+        "description": "Provides the current status and details of a RIG Proxy API"
+      },
+      "delete": {
+        "tags": [
+          "Apis"
+        ],
+        "summary": "Delete/Deactivate RIG Proxy API",
+        "responses": {
+          "404": {
+            "schema": {
+              "$ref": "#/definitions/ProxyAPIResponse"
+            },
+            "description": "Doesn't exist"
+          },
+          "204": {
+            "description": "Deleted"
+          }
+        },
+        "parameters": [
+          {
+            "x-example": "new-service",
+            "type": "string",
+            "required": true,
+            "name": "apiId",
+            "in": "path",
+            "description": "The id of the API"
+          }
+        ],
+        "operationId": "RigApi.ApisController.deactivate_api",
+        "description": "Deletes/Deactivatesn a RIG Proxy API"
+      }
+    },
+    "/v1/apis": {
+      "post": {
+        "tags": [
+          "Apis"
+        ],
+        "summary": "New RIG Proxy API",
+        "responses": {
+          "409": {
+            "schema": {
+              "$ref": "#/definitions/ProxyAPIResponse"
+            },
+            "description": "Already exists"
+          },
+          "201": {
+            "schema": {
+              "$ref": "#/definitions/ProxyAPIResponse"
+            },
+            "description": "Ok"
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/definitions/ProxyAPI"
+            },
+            "required": true,
+            "name": "proxyAPI",
+            "in": "body",
+            "description": "The details for the new Proxy endpoint"
+          }
+        ],
+        "operationId": "RigApi.ApisController.add_api",
+        "description": "Adds a new API to the RIG Proxy"
+      },
+      "get": {
+        "tags": [
+          "Apis"
+        ],
+        "summary": "RIG Proxy API list",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/ProxyAPIList"
+            },
+            "description": "Ok"
+          }
+        },
+        "parameters": [],
+        "operationId": "RigApi.ApisController.list_apis",
+        "description": "Provides a list of parameterized APIs on the RIG Proxy"
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -146,7 +302,8 @@
   },
   "info": {
     "version": "2.0.0-beta.2",
-    "title": "RIG Control API"
+    "title": "RIG Control API",
+    "description": "This is the description for the RIG Control API exposed on Port 4010 by default or API_PORT within the config-file.\n        It manages the Proxy APIs or user connections for RIGs proxy."
   },
   "definitions": {
     "Users": {
@@ -248,6 +405,195 @@
         "sessionId": "SomeSessionID123"
       },
       "description": "Request for blacklisting a session"
+    },
+    "ProxyAPIResponse": {
+      "type": "object",
+      "title": "Proxy API Response",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "ok",
+          "description": "Response"
+        }
+      },
+      "description": "Proxy API Response"
+    },
+    "ProxyAPIList": {
+      "type": "array",
+      "title": "Proxy API List",
+      "items": {
+        "$ref": "#/definitions/ProxyAPI"
+      },
+      "description": " A List of parameterized Proxy APIs"
+    },
+    "ProxyAPIEndpointArray": {
+      "type": "array",
+      "title": "Proxy API Endpoint Array",
+      "items": {
+        "$ref": "#/definitions/ProxyAPIEndpoint"
+      },
+      "description": "Array of Endpoints for the Proxy API"
+    },
+    "ProxyAPIEndpoint": {
+      "type": "object",
+      "title": "Proxy API Endpoint",
+      "required": [
+        "method",
+        "path",
+        "id"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "example": "/auth/register",
+          "description": "Endpoint path"
+        },
+        "not_secured": {
+          "type": "boolean",
+          "example": true,
+          "description": "Endpoint Security",
+          "default": true
+        },
+        "method": {
+          "type": "string",
+          "example": "GET",
+          "description": "Endpoint HTTP method"
+        },
+        "id": {
+          "type": "string",
+          "example": "get-auth-register",
+          "description": "Endpoint ID"
+        }
+      },
+      "description": "Endpoint for the Proxy API for Request"
+    },
+    "ProxyAPI": {
+      "type": "object",
+      "title": "Proxy API Object",
+      "required": [
+        "auth_type",
+        "name",
+        "id"
+      ],
+      "properties": {
+        "versioned": {
+          "type": "boolean",
+          "example": false,
+          "description": "is Versioned Endpoint?",
+          "default": false
+        },
+        "version_data": {
+          "type": "object",
+          "properties": {
+            "default": {
+              "type": "object",
+              "properties": {
+                "endpoints": {
+                  "$ref": "#/definitions/ProxyAPIEndpointArray"
+                }
+              }
+            }
+          }
+        },
+        "timestamp": {
+          "type": "string",
+          "example": "2018-12-17T10:38:06.334013Z",
+          "description": "creation timestamp"
+        },
+        "ref_number": {
+          "type": "integer",
+          "example": 0,
+          "description": "reference number"
+        },
+        "proxy": {
+          "type": "object",
+          "required": [
+            "port",
+            "target_url"
+          ],
+          "properties": {
+            "use_env": {
+              "type": "boolean",
+              "example": true,
+              "description": "TBD",
+              "default": true
+            },
+            "target_url": {
+              "type": "string",
+              "example": "IS_HOST",
+              "description": "Proxy Target URL"
+            },
+            "port": {
+              "type": "integer",
+              "example": 6666,
+              "description": "Proxy Port"
+            }
+          }
+        },
+        "phx_ref": {
+          "type": "string",
+          "example": "ewTJVcM7Bzc=",
+          "description": "Phoenix Reference"
+        },
+        "node_name": {
+          "type": "string",
+          "example": "nonode@nohost",
+          "description": "Node name"
+        },
+        "name": {
+          "type": "string",
+          "example": "new-service",
+          "description": "Proxy API Name"
+        },
+        "id": {
+          "type": "string",
+          "example": "new-service",
+          "description": "Proxy API ID"
+        },
+        "auth_type": {
+          "type": "string",
+          "example": "jwt",
+          "description": "Authorization type"
+        },
+        "auth": {
+          "type": "object",
+          "required": [
+            "header_name"
+          ],
+          "properties": {
+            "use_query": {
+              "type": "boolean",
+              "example": false,
+              "description": "Authorization Header Query Usage",
+              "default": false
+            },
+            "use_header": {
+              "type": "boolean",
+              "example": true,
+              "description": "Authorization Header Usage",
+              "default": true
+            },
+            "query_name": {
+              "type": "string",
+              "description": "Authorization Header Query Name"
+            },
+            "header_name": {
+              "type": "string",
+              "example": "Authorization",
+              "description": "Authorization Header Name"
+            }
+          }
+        },
+        "active": {
+          "type": "boolean",
+          "example": true,
+          "description": "ID Status"
+        }
+      },
+      "description": "An Proxy API object - Is used for creating/updating/reading"
     }
   }
 }

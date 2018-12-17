@@ -1,5 +1,5 @@
 defmodule RigApi.Router do
-  use RigApi, :router
+  use RigApi, :router 
 
   pipeline :api do
     plug(:put_format, :json)
@@ -51,7 +51,9 @@ defmodule RigApi.Router do
     %{
       info: %{
         version: rig_version,
-        title: "RIG Control API"
+        title: "RIG Control API",
+        description: "This is the description for the RIG Control API exposed on Port 4010 by default or API_PORT within the config-file.
+        It manages the Proxy APIs or user connections for RIGs proxy."
       }
     }
   end

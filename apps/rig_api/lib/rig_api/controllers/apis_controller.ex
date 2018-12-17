@@ -5,13 +5,38 @@ defmodule RigApi.ApisController do
   """
   use Rig.Config, [:rig_proxy]
   use RigApi, :controller
+  use PhoenixSwagger
   require Logger
+
+  # Swagger documentation for endpoint GET /v1/apis
+  swagger_path :list_apis do
+    get("/v1/apis")
+    summary("RIG Proxy API list")
+    description("Provides a list of parameterized APIs on the RIG Proxy")
+
+    response(200, "Ok", Schema.ref(:ProxyAPIList))
+  end
 
   def list_apis(conn, _params) do
     %{rig_proxy: proxy} = config()
     api_defs = proxy.list_apis(proxy)
     active_apis = for {_, api} <- api_defs, api["active"], do: api
     send_response(conn, 200, active_apis)
+  end
+
+
+  # Swagger documentation for endpoint GET /v1/apis/:api-id
+  swagger_path :get_api_detail do
+    get("/v1/apis/{apiId}")
+    summary("Getting RIG Proxy API Details")
+    description("Provides the current status and details of a RIG Proxy API")
+
+    parameters do
+      apiId(:path, :string, "The id of the API", required: true, example: "new-service")
+    end
+
+    response(200, "Ok", Schema.ref(:ProxyAPI))
+    response(404, "Doesn't exist", Schema.ref(:ProxyAPIResponse))
   end
 
   def get_api_detail(conn, params) do
@@ -26,12 +51,31 @@ defmodule RigApi.ApisController do
     end
   end
 
+  # Swagger documentation for endpoint POST /v1/apis
+  swagger_path :add_api do
+    post("/v1/apis")
+    summary("New RIG Proxy API")
+    description("Adds a new API to the RIG Proxy")
+
+    parameters do
+      proxyAPI(
+        :body,
+        Schema.ref(:ProxyAPI),
+        "The details for the new Proxy endpoint",
+        required: true
+      )
+    end
+
+    response(201, "Ok", Schema.ref(:ProxyAPIResponse))
+    response(409, "Already exists", Schema.ref(:ProxyAPIResponse))
+  end
+
   def add_api(conn, params) do
     %{"id" => id} = params
     %{rig_proxy: proxy} = config()
 
     with nil <- proxy.get_api(proxy, id),
-         {:ok, _phx_ref} <- proxy.add_api(proxy, id, params) do
+        {:ok, _phx_ref} <- proxy.add_api(proxy, id, params) do
       send_response(conn, 201, %{message: "ok"})
     else
       {_id, %{"active" => true}} ->
@@ -43,11 +87,31 @@ defmodule RigApi.ApisController do
     end
   end
 
+  # Swagger documentation for endpoint PUT /v1/apis/:api-id
+  swagger_path :update_api do
+    put("/v1/apis/{apiId}")
+    summary("Update RIG Proxy API Details")
+    description("Update details of a RIG Proxy API")
+
+    parameters do
+      apiId(:path, :string, "The id of the API", required: true, example: "new-service")
+      proxyAPI(
+        :body,
+        Schema.ref(:ProxyAPI),
+        "The details for the new Proxy endpoint",
+        required: true
+      )
+    end
+
+    response(200, "Ok", Schema.ref(:ProxyAPIResponse))
+    response(404, "Doesn't exist", Schema.ref(:ProxyAPIResponse))
+  end
+
   def update_api(conn, params) do
     %{"id" => id} = params
 
     with {_id, current_api} <- get_active_api(id),
-         {:ok, _phx_ref} <- merge_and_update(id, current_api, params) do
+      {:ok, _phx_ref} <- merge_and_update(id, current_api, params) do
       send_response(conn, 200, %{message: "ok"})
     else
       api when api == nil or api == :inactive ->
@@ -55,12 +119,26 @@ defmodule RigApi.ApisController do
     end
   end
 
+  # Swagger documentation for endpoint DELETE /v1/apis/:api-id
+  swagger_path :deactivate_api do
+    delete("/v1/apis/{apiId}")
+    summary("Delete/Deactivate RIG Proxy API")
+    description("Deletes/Deactivatesn a RIG Proxy API")
+
+    parameters do
+      apiId(:path, :string, "The id of the API", required: true, example: "new-service")
+    end
+
+    response(204, "Deleted")
+    response(404, "Doesn't exist", Schema.ref(:ProxyAPIResponse))
+  end
+
   def deactivate_api(conn, params) do
     %{"id" => id} = params
     %{rig_proxy: proxy} = config()
 
     with {_id, _current_api} <- get_active_api(id),
-         {:ok, _phx_ref} <- proxy.deactivate_api(proxy, id) do
+        {:ok, _phx_ref} <- proxy.deactivate_api(proxy, id) do
       send_response(conn, 204)
     else
       api when api == nil or api == :inactive ->
@@ -72,7 +150,7 @@ defmodule RigApi.ApisController do
     %{rig_proxy: proxy} = config()
 
     with {id, current_api} <- proxy.get_api(proxy, id),
-         true <- current_api["active"] == true do
+        true <- current_api["active"] == true do
       {id, current_api}
     else
       nil -> nil
@@ -91,5 +169,88 @@ defmodule RigApi.ApisController do
     conn
     |> put_status(status_code)
     |> json(body)
+  end
+
+  def swagger_definitions do
+    %{
+      ProxyAPI:
+        swagger_schema do
+          title("Proxy API Object")
+          description("An Proxy API object - Is used for creating/updating/reading")
+
+          properties do
+            id(:string, "Proxy API ID", required: true, example: "new-service")
+            name(:string, "Proxy API Name", required: true, example: "new-service")
+            auth_type(:string, "Authorization type", required: true, example:  "jwt")
+            auth (Schema.new do
+              properties do
+                use_header(:boolean, "Authorization Header Usage", default: true, example: true)
+                header_name(:string, "Authorization Header Name", required: true, example: "Authorization")
+                use_query(:boolean, "Authorization Header Query Usage", default: false, example: false)
+                query_name(:string, "Authorization Header Query Name", required: false)
+              end
+            end)
+            timestamp(:string, "creation timestamp", required: false, example: "2018-12-17T10:38:06.334013Z")
+            ref_number(:integer, "reference number", required: false, example: 0)
+            node_name(:string, "Node name", required: false, example: "nonode@nohost")
+            active(:boolean, "ID Status", required: false, example: true)
+            phx_ref(:string, "Phoenix Reference", required: false, example: "ewTJVcM7Bzc=")
+            versioned(:boolean, "is Versioned Endpoint?", default: false,  example: false)
+            version_data (Schema.new do
+              properties do
+                default (Schema.new do
+                  properties do
+                    endpoints(Schema.ref(:ProxyAPIEndpointArray))
+                  end
+                end)
+              end
+            end)
+            proxy (Schema.new do
+              properties do
+                use_env(:boolean, "TBD", default: true, example: true)
+                target_url(:string, "Proxy Target URL", required: true, example: "IS_HOST")
+                port(:integer, "Proxy Port", required: true, example: 6666)
+              end
+            end)
+          end
+        end, 
+
+        ProxyAPIEndpointArray:
+          swagger_schema do
+            title("Proxy API Endpoint Array")
+            description("Array of Endpoints for the Proxy API")
+            type(:array)
+            items(Schema.ref(:ProxyAPIEndpoint))
+          end,
+
+        ProxyAPIEndpoint:
+          swagger_schema do
+            title("Proxy API Endpoint")
+            description("Endpoint for the Proxy API for Request")
+            properties do
+              id(:string, "Endpoint ID", required: true, example: "get-auth-register")
+              path(:string, "Endpoint path", required: true, example: "/auth/register")
+              method(:string, "Endpoint HTTP method", required: true, example: "GET")
+              not_secured(:boolean, "Endpoint Security", default: true, example: true)
+            end
+          end,
+
+        ProxyAPIResponse:
+          swagger_schema do
+            title("Proxy API Response")
+            description("Proxy API Response")
+            properties do
+              message(:string, "Response", required: true, example: "ok")
+            end
+          end,
+
+        ProxyAPIList:
+          swagger_schema do
+            title("Proxy API List")
+            description(" A List of parameterized Proxy APIs")
+            type(:array)
+            items(Schema.ref(:ProxyAPI))
+          end
+    }
   end
 end
