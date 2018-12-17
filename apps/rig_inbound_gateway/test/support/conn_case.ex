@@ -48,7 +48,7 @@ defmodule RigInboundGatewayWeb.ConnCase do
               %{
                 "id" => "get-movies",
                 "method" => "GET",
-                "not_secured" => true,
+                "secured" => false,
                 "path" => "/myapi/movies"
               }
             ]

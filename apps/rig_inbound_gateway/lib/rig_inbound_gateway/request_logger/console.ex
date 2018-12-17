@@ -8,7 +8,7 @@ defmodule RigInboundGateway.RequestLogger.Console do
   @impl RigInboundGateway.RequestLogger
   @spec log_call(Proxy.endpoint(), Proxy.api_definition(), %Plug.Conn{}) :: :ok
   def log_call(
-        %{"not_secured" => false} = endpoint,
+        %{"secured" => true} = endpoint,
         %{"auth_type" => "jwt"} = api_definition,
         _conn
       ) do
@@ -22,6 +22,7 @@ defmodule RigInboundGateway.RequestLogger.Console do
         api_definition["proxy"]["target_url"]
       }"
     )
+
     :ok
   end
 

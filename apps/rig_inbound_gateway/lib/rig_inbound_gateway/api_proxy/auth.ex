@@ -15,13 +15,13 @@ defmodule RigInboundGateway.ApiProxy.Auth do
   def check(_, %{"auth_type" => "none"}, _), do: :ok
 
   # Skip authentication if turned off:
-  def check(_, _, %{"not_secured" => true}), do: :ok
+  def check(_, _, %{"secured" => false}), do: :ok
 
   # Authenticate by JWT:
   def check(
         conn,
         %{"auth_type" => "jwt"} = api,
-        %{"not_secured" => false}
+        %{"secured" => true}
       ),
       do: Jwt.check(conn, api)
 end

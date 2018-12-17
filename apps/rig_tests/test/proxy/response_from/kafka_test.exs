@@ -84,7 +84,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
               %{
                 id: endpoint_id,
                 type: "http",
-                not_secured: true,
+                secured: false,
                 method: "GET",
                 path: endpoint_path,
                 response_from: "kafka"
@@ -94,7 +94,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
         },
         proxy: %{
           target_url: "localhost",
-          port: FakeServer.port
+          port: FakeServer.port()
         }
       })
 

@@ -14,7 +14,7 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
   @impl RigInboundGateway.RequestLogger
   @spec log_call(Proxy.endpoint(), Proxy.api_definition(), %Plug.Conn{}) :: :ok
   def log_call(
-        %{"not_secured" => false} = endpoint,
+        %{"secured" => true} = endpoint,
         %{"auth_type" => "jwt"} = api_definition,
         conn
       ) do

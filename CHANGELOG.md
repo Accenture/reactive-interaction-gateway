@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Proxy and Event Hub no longer use the same port and both support transport encryption now. Consequently, the `INBOUND_PORT` settings has been dropped in favor of `API_HTTP_PORT`, `API_HTTPS_PORT`, `PROXY_HTTP_PORT`, `PROXY_HTTPS_PORT`, `EVENT_HUB_HTTP_PORT`, `EVENT_HUB_HTTPS_PORT`, `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, and `HTTPS_KEYFILE_PASS`. Consult the [Operator's Guide](docs/rig-ops-guide.md) for a detailed description of those settings.
 - The SSE and WebSocket endpoints' "token" parameter is renamed to "jwt" (to not confuse it with the connection token).
 - [Proxy] When forwarding requests, RIG related meta data (e.g. correlation ID) in CloudEvents is now put into an object under the top-level key "rig". Note that in terms of the current [CloudEvents 0.2](https://github.com/cloudevents/spec/blob/v0.2/spec.md) specification this makes "rig" an [extension](https://github.com/cloudevents/spec/blob/v0.2/primer.md#cloudevent-attribute-extensions). Also, all RIG related keys have been renamed from snake_case to camelCase.
+- [Proxy] Previously API definitions for proxy were turning on security check for endpoints by `not_secured: false` which is a bit confusing -- changed to more readable form `secured: true`.
 
 <!-- ### Deprecated -->
 

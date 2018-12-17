@@ -43,7 +43,7 @@ defmodule RigApi.ConnCase do
               %{
                 "id" => "get-movies",
                 "method" => "GET",
-                "not_secured" => true,
+                "secured" => false,
                 "path" => "/myapi/movies"
               }
             ]
@@ -61,5 +61,4 @@ defmodule RigApi.ConnCase do
   setup _tags do
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
-
 end

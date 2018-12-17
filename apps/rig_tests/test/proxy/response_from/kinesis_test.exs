@@ -60,7 +60,7 @@ defmodule RigTests.Proxy.ResponseFrom.KinesisTest do
               %{
                 id: endpoint_id,
                 type: "http",
-                not_secured: true,
+                secured: false,
                 method: "GET",
                 path: endpoint_path,
                 response_from: "kinesis"
