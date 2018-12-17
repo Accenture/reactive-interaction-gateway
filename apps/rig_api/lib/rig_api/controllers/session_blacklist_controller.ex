@@ -15,65 +15,6 @@ defmodule RigApi.SessionBlacklistController do
 
   @cors_origins "*"
 
-  def swagger_definitions do
-    %{
-      SessionBlacklistRequest:
-        swagger_schema do
-          title("Session Blacklist Request")
-          description("Request for blacklisting a session")
-
-          properties do
-            sessionId(:string, "JWT JTI session Id", required: true)
-
-            validityInSeconds(:string, "Seconds how long a session should be blacklisted",
-              required: true
-            )
-          end
-
-          example(%{
-            sessionId: "SomeSessionID123",
-            validityInSeconds: "60"
-          })
-        end,
-      SessionBlacklistResponse:
-        swagger_schema do
-          title("Session Blacklist Response")
-          description("Response for blacklisting a session")
-
-          properties do
-            sessionId(:string, "JWT JTI session Id", required: true)
-
-            validityInSeconds(:string, "Seconds how long a session should be blacklisted",
-              required: true
-            )
-
-            isBlacklisted(:boolean, "Current status of the blacklisted session", required: true)
-          end
-
-          example(%{
-            sessionId: "SomeSessionID123",
-            validityInSeconds: "60",
-            isBlacklisted: true
-          })
-        end,
-      SessionBlacklistStatus:
-        swagger_schema do
-          title("Session Blacklist Status")
-          description("Status for a blacklisted session")
-
-          properties do
-            sessionId(:string, "JWT JTI session Id", required: true)
-            isBlacklisted(:boolean, "Current status of the blacklisted session", required: true)
-          end
-
-          example(%{
-            sessionId: "SomeSessionID123",
-            isBlacklisted: true
-          })
-        end
-    }
-  end
-
   # ---
 
   @doc false
@@ -158,10 +99,10 @@ defmodule RigApi.SessionBlacklistController do
 
   defp parse(body) do
     {:ok,
-     %{
-       session_id: Map.fetch!(body, "sessionId"),
-       ttl_s: body |> Map.fetch!("validityInSeconds") |> String.to_integer()
-     }}
+      %{
+        session_id: Map.fetch!(body, "sessionId"),
+        ttl_s: body |> Map.fetch!("validityInSeconds") |> String.to_integer()
+      }}
   rescue
     e in KeyError ->
       {:error, "Missing value for '#{e.key}'"}
@@ -169,5 +110,64 @@ defmodule RigApi.SessionBlacklistController do
     e in ArgumentError ->
       # This is likely String.to_integer/1, but we don't know for sure.
       {:error, "Invalid request body: #{inspect(e)}"}
+  end
+ 
+  def swagger_definitions do
+    %{
+      SessionBlacklistRequest:
+        swagger_schema do
+          title("Session Blacklist Request")
+          description("Request for blacklisting a session")
+
+          properties do
+            sessionId(:string, "JWT JTI session Id", required: true)
+
+            validityInSeconds(:string, "Seconds how long a session should be blacklisted",
+              required: true
+            )
+          end
+
+          example(%{
+            sessionId: "SomeSessionID123",
+            validityInSeconds: "60"
+          })
+        end,
+      SessionBlacklistResponse:
+        swagger_schema do
+          title("Session Blacklist Response")
+          description("Response for blacklisting a session")
+
+          properties do
+            sessionId(:string, "JWT JTI session Id", required: true)
+
+            validityInSeconds(:string, "Seconds how long a session should be blacklisted",
+              required: true
+            )
+
+            isBlacklisted(:boolean, "Current status of the blacklisted session", required: true)
+          end
+
+          example(%{
+            sessionId: "SomeSessionID123",
+            validityInSeconds: "60",
+            isBlacklisted: true
+          })
+        end,
+      SessionBlacklistStatus:
+        swagger_schema do
+          title("Session Blacklist Status")
+          description("Status for a blacklisted session")
+
+          properties do
+            sessionId(:string, "JWT JTI session Id", required: true)
+            isBlacklisted(:boolean, "Current status of the blacklisted session", required: true)
+          end
+
+          example(%{
+            sessionId: "SomeSessionID123",
+            isBlacklisted: true
+          })
+        end
+    }
   end
 end
