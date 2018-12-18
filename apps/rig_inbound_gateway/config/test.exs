@@ -2,6 +2,9 @@ use Mix.Config
 
 config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
   env: :test,
+  url: [
+    host: {:system, "HOST", "localhost"}
+  ],
   https: [
     certfile: "cert/selfsigned.pem",
     keyfile: "cert/selfsigned_key.des3.pem",

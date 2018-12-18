@@ -45,7 +45,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   def handle_http_request(conn, api, endpoint)
 
   @doc "CORS response for preflight request."
-  def handle_http_request(%{"method" => "OPTIONS"} = conn, _, %{"target" => "kafka"}) do
+  def handle_http_request(%{method: "OPTIONS"} = conn, _, %{"target" => "kafka"}) do
     conn
     |> with_cors()
     |> Conn.send_resp(:no_content, "")
@@ -128,6 +128,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     conn
     |> Conn.put_resp_header("access-control-allow-origin", config().cors)
     |> Conn.put_resp_header("access-control-allow-methods", "*")
-    |> Conn.put_resp_header("access-control-allow-headers", "content-type")
+    |> Conn.put_resp_header("access-control-allow-headers", "content-type,authorization")
   end
 end

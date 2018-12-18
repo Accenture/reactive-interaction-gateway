@@ -113,8 +113,7 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
     args
   end
 
-  @spec java_client_callback(data :: [{atom(), String.t()}, ...]) ::
-          :ok
+  @spec java_client_callback(data :: [{atom(), String.t()}, ...]) :: :ok
   def java_client_callback(data) do
     data[:body]
     |> Poison.decode!()
