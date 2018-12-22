@@ -30,4 +30,14 @@ config :rig, RigApi.ApisController, rig_proxy: RigInboundGateway.Proxy
 
 config :rig, :event_filter, Rig.EventFilter
 
+config :rig_api, :phoenix_swagger,
+  swagger_files: %{
+    "priv/static/rig_api_swagger.json" => [
+      # phoenix routes will be converted to swagger paths
+      router: RigApi.Router,
+      # (optional) endpoint config used to set host, port and https schemes.
+      endpoint: RigApi.Endpoint
+    ]
+  }
+
 import_config "#{Mix.env()}.exs"

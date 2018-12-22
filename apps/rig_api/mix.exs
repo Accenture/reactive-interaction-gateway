@@ -13,7 +13,7 @@ defmodule RigApi.Mixfile do
       lockfile: "../../mix.lock",
       elixir: elixir_version,
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      compilers: [:phoenix, :gettext, :phoenix_swagger] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
@@ -54,7 +54,8 @@ defmodule RigApi.Mixfile do
       {:phoenix_pubsub, "~> 1.0"},
       {:gettext, "~> 0.11"},
       {:plug_cowboy, "~> 2.0"},
-      {:mox, "~> 0.4", only: :test}
+      {:mox, "~> 0.4", only: :test},
+      {:phoenix_swagger, "~> 0.8"}
     ]
   end
 

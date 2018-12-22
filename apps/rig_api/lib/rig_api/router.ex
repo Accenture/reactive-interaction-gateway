@@ -1,5 +1,5 @@
 defmodule RigApi.Router do
-  use RigApi, :router
+  use RigApi, :router 
 
   pipeline :api do
     plug(:put_format, :json)
@@ -36,5 +36,30 @@ defmodule RigApi.Router do
   scope "/health", RigApi do
     pipe_through(:api)
     get("/", HealthController, :check_health)
+  end
+
+  scope "/swagger-ui" do
+    forward("/", PhoenixSwagger.Plug.SwaggerUI,
+      otp_app: :rig_api,
+      swagger_file: "rig_api_swagger.json"
+    )
+  end
+
+  def swagger_info do
+    %{rig: rig_version} = versions()
+
+    %{
+      info: %{
+        version: rig_version,
+        title: "RIG Control API",
+        description: "This is the description for the RIG Control API exposed on Port 4010 by default or API_PORT within the config-file.
+        It manages the Proxy APIs or user connections for RIGs proxy."
+      }
+    }
+  end
+
+  defp versions do
+    {map, []} = Code.eval_file("version", "../..")
+    map
   end
 end

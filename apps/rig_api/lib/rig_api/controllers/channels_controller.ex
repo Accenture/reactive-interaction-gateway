@@ -5,19 +5,80 @@ defmodule RigApi.ChannelsController do
   """
   use RigApi, :controller
   use Rig.Config, [:session_role]
+  use PhoenixSwagger
   require Logger
   alias RigAuth.Blacklist
   alias RigAuth.Jwt
   alias RigInboundGatewayWeb.Endpoint
+
+  def swagger_definitions do
+    %{
+      User:
+        swagger_schema do
+          title("tbd")
+          description("tbd")
+
+          properties do
+            userId(:string, "tbd", required: true)
+          end
+
+          example(%{
+            userId: "SomeUserId"
+          })
+        end,
+      Users:
+        swagger_schema do
+          title("tbd")
+          description("tbd")
+          type(:array)
+          items(Schema.ref(:User))
+        end
+    }
+  end
+
+  # Swagger documentation for endpoint GET /v1/users
+  swagger_path :list_channels do
+    get("/v1/users")
+    summary("tbd")
+    description("tbd")
+
+    response(200, "Ok", Schema.ref(:Users))
+  end
 
   def list_channels(conn, _params) do
     Logger.warn("list_channels called but no longer implemented!")
     json(conn, [])
   end
 
+  # Swagger documentation for endpoint GET /v1/users/:user/sessions
+  swagger_path :list_channel_sessions do
+    get("/v1/users/{user}/sessions")
+    summary("tbd")
+    description("tbd")
+
+    parameters do
+      user(:path, :string, "tbd", required: true)
+    end
+
+    response(200, "Ok")
+  end
+
   def list_channel_sessions(conn, %{"user" => _id}) do
     Logger.warn("list_channel_sessions called but no longer implemented!")
     json(conn, [])
+  end
+
+  # Swagger documentation for endpoint DELETE /v1/tokens/:jti
+  swagger_path :disconnect_channel_session do
+    delete("/v1/tokens/{jti}")
+    summary("tbd")
+    description("tbd")
+
+    parameters do
+      jti(:path, :string, "tbd", required: true)
+    end
+
+    response(200, "Ok")
   end
 
   def disconnect_channel_session(conn, %{"jti" => jti}) do

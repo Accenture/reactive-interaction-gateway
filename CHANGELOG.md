@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - HTTP/2 and HTTPS support. [#34](https://github.com/Accenture/reactive-interaction-gateway/issues/34)
 - The SSE and WebSocket endpoints now take a "subscriptions" parameter that allows to create (manual) subscriptions (JSON encoded list). This has the same effect as establishing a connection and calling the subscriptions endpoint afterwards.
+- OpenAPI (Swagger) documentation. [#116](https://github.com/Accenture/reactive-interaction-gateway/issues/116)
 
 ### Changed
 
