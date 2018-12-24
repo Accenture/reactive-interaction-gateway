@@ -1,73 +1,6 @@
 {
   "swagger": "2.0",
   "paths": {
-    "/v1/users/{user}/sessions": {
-      "get": {
-        "tags": [
-          "Channels"
-        ],
-        "summary": "tbd",
-        "responses": {
-          "200": {
-            "description": "Ok"
-          }
-        },
-        "parameters": [
-          {
-            "type": "string",
-            "required": true,
-            "name": "user",
-            "in": "path",
-            "description": "tbd"
-          }
-        ],
-        "operationId": "RigApi.ChannelsController.list_channel_sessions",
-        "description": "tbd"
-      }
-    },
-    "/v1/users": {
-      "get": {
-        "tags": [
-          "Channels"
-        ],
-        "summary": "tbd",
-        "responses": {
-          "200": {
-            "schema": {
-              "$ref": "#/definitions/Users"
-            },
-            "description": "Ok"
-          }
-        },
-        "parameters": [],
-        "operationId": "RigApi.ChannelsController.list_channels",
-        "description": "tbd"
-      }
-    },
-    "/v1/tokens/{jti}": {
-      "delete": {
-        "tags": [
-          "Channels"
-        ],
-        "summary": "tbd",
-        "responses": {
-          "200": {
-            "description": "Ok"
-          }
-        },
-        "parameters": [
-          {
-            "type": "string",
-            "required": true,
-            "name": "jti",
-            "in": "path",
-            "description": "tbd"
-          }
-        ],
-        "operationId": "RigApi.ChannelsController.disconnect_channel_session",
-        "description": "tbd"
-      }
-    },
     "/v1/session-blacklist/{sessionId}": {
       "get": {
         "tags": [
@@ -320,7 +253,7 @@
         "summary": "Provides the RIG health status",
         "responses": {
           "200": {
-            "description": "Ok"
+            "description": "OK"
           }
         },
         "parameters": [],
@@ -332,34 +265,9 @@
   "info": {
     "version": "2.0.0-beta.2",
     "title": "RIG Control API",
-    "description": "This is the description for the RIG Control API exposed on Port 4010 by default or API_PORT within the config-file.\n        It manages the Proxy APIs or user connections for RIGs proxy."
+    "description": "This is the description for the RIG Control API exposed on Port 4010 by default or API_PORT within the config-file.\r\n        It manages the Proxy APIs or user connections for RIGs proxy."
   },
   "definitions": {
-    "Users": {
-      "type": "array",
-      "title": "tbd",
-      "items": {
-        "$ref": "#/definitions/User"
-      },
-      "description": "tbd"
-    },
-    "User": {
-      "type": "object",
-      "title": "tbd",
-      "required": [
-        "userId"
-      ],
-      "properties": {
-        "userId": {
-          "type": "string",
-          "description": "tbd"
-        }
-      },
-      "example": {
-        "userId": "SomeUserId"
-      },
-      "description": "tbd"
-    },
     "SessionBlacklistStatus": {
       "type": "object",
       "title": "Session Blacklist Status",

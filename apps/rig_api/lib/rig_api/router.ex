@@ -46,20 +46,13 @@ defmodule RigApi.Router do
   end
 
   def swagger_info do
-    %{rig: rig_version} = versions()
-
     %{
       info: %{
-        version: rig_version,
+        version: RigApi.Mixfile.project[:version],
         title: "RIG Control API",
         description: "This is the description for the RIG Control API exposed on Port 4010 by default or API_PORT within the config-file.
         It manages the Proxy APIs or user connections for RIGs proxy."
       }
     }
-  end
-
-  defp versions do
-    {map, []} = Code.eval_file("version", "../..")
-    map
   end
 end

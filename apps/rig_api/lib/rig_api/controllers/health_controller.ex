@@ -10,7 +10,7 @@ defmodule RigApi.HealthController do
     summary("Provides the RIG health status")
     description("Provides the RIG health status")
 
-    response(200, "Ok")
+    response(200, "OK")
   end
 
   @doc "Default response for health status"
