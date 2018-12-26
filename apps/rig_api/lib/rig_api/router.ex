@@ -46,9 +46,10 @@ defmodule RigApi.Router do
   end
 
   def swagger_info do
+    Application.ensure_all_started(:rig_api, :temporary) 
     %{
       info: %{
-        version: RigApi.Mixfile.project[:version],
+        version: Application.spec(:rig_api,:vsn) |> to_string,
         title: "RIG Control API",
         description: "This is the description for the RIG Control API exposed on Port 4010 by default or API_PORT within the config-file.
         It manages the Proxy APIs or user connections for RIGs proxy."
