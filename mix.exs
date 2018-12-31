@@ -4,6 +4,7 @@ defmodule Rig.Umbrella.Mixfile do
 
   def project do
     %{elixir: elixir_version} = versions()
+
     [
       apps_path: "apps",
       description: description(),
@@ -15,7 +16,6 @@ defmodule Rig.Umbrella.Mixfile do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases(),
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
         coveralls: :test,
@@ -28,7 +28,7 @@ defmodule Rig.Umbrella.Mixfile do
 
   defp versions do
     {map, []} = Code.eval_file("version", ".")
-    map 
+    map
   end
 
   # Dependencies listed here are available only for this
@@ -43,7 +43,7 @@ defmodule Rig.Umbrella.Mixfile do
       {:dialyxir, "~> 0.5", only: [:dev, :test]},
       {:distillery, "~> 2.0.0-rc.6"},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
-      {:mix_test_watch, "~> 0.5", only: :dev, runtime: false},
+      {:mix_test_watch, "~> 0.5", only: :dev, runtime: false}
     ]
   end
 
@@ -89,15 +89,6 @@ defmodule Rig.Umbrella.Mixfile do
           group: "Architecture Decisions"
         ]
       ]
-    ]
-  end
-
-  # Aliases are shortcuts or tasks specific to the current project.
-  #
-  # See the documentation for `Mix` for more info on aliases.
-  defp aliases do
-    [
-      "phx.server": ["phx.swagger.generate", "phx.server"]
     ]
   end
 end
