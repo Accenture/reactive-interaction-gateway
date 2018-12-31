@@ -4,12 +4,9 @@ defmodule RigApi.HealthController do
   use RigApi, :controller
   use PhoenixSwagger
 
-  # Swagger documentation for endpoint GET /health
   swagger_path :check_health do
     get("/health")
-    summary("Provides the RIG health status")
-    description("Provides the RIG health status")
-
+    summary("Check if RIG is online.")
     response(200, "OK")
   end
 

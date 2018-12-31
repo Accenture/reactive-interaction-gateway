@@ -10,17 +10,19 @@ defmodule RigApi.MessageController do
 
   @event_filter Application.get_env(:rig, :event_filter)
 
-  # Swagger documentation for endpoint POST /v1/messages
   swagger_path :create do
     post("/v1/messages")
-    summary("Message Acception")
-    description("Accepts message to be sent to front-ends.")
+    summary("Submit an event, to be forwarded to subscribed frontends.")
+    description("Allows you to submit a single event to RIG using a simple, \
+    synchronous call. While for production setups we recommend ingesting events \
+    asynchronously (e.g., via a Kafka topic), using this endpoint can be simple \
+    alternative during development or for low-traffic production setups.")
 
     parameters do
       messageBody(
         :body,
         Schema.ref(:MessageCloudEvent),
-        "The message to be provided to frontends in Cloud Event format",
+        "CloudEvent",
         required: true
       )
     end

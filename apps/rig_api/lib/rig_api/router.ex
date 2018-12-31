@@ -49,10 +49,15 @@ defmodule RigApi.Router do
     %{
       info: %{
         version: RigApi.Mixfile.project()[:version],
-        title: "RIG Control API",
-        description:
-          "This is the description for the RIG Control API exposed on Port 4010 by default or API_PORT within the config-file.
-        It manages the Proxy APIs or user connections for RIGs proxy."
+        title: "Reactive Interaction Gateway: API",
+        description: """
+        The Reactive Interaction Gateway provides an API that allows backend services
+        to query internal state and control behavior (e.g., by blacklisting a JWT).
+        The port can be configured using the `API_PORT` environment variable.
+
+        Please note that there is no authentication or authorization on this API;
+        therefore, consider exposing it to your internal network only.
+        """
       }
     }
   end

@@ -34,14 +34,14 @@ defmodule RigApi.SessionBlacklistController do
 
   # ---
 
-  # Swagger documentation for endpoint GET /v1/session-blacklist/:session-id
   swagger_path :check_status do
     get("/v1/session-blacklist/{sessionId}")
-    summary("Getting the current blacklist status")
-    description("Provides the current status of a blacklisted session given in the parameters")
+    summary("Check whether a given session is currently blacklisted.")
 
     parameters do
-      sessionId(:path, :string, "The id of the session", required: true)
+      sessionId(:path, :string, "The JWT ID (jti) claim that identifies the session.",
+        required: true
+      )
     end
 
     response(200, "Ok", Schema.ref(:SessionBlacklistStatus))
@@ -57,11 +57,18 @@ defmodule RigApi.SessionBlacklistController do
 
   # ---
 
-  # Swagger documentation for endpoint POST /v1/session-blacklist
   swagger_path :blacklist_session do
     post("/v1/session-blacklist")
-    summary("Blacklist a new session")
-    description("Blacklists a new session with data given in the body")
+    summary("Add a session to the session blacklist.")
+
+    description("""
+    When successful, the given session is no longer considered valid, regardless of \
+    the token's expiration timestamp. This has the following consequences:
+
+    - Any existing connection related to the session is terminated immediately.
+    - The related authorization token is ignored when a client establishes a connection.
+    - The related authorization token is ignored when a client creates a subscription.
+    """)
 
     parameters do
       sessionBlacklist(
@@ -117,12 +124,13 @@ defmodule RigApi.SessionBlacklistController do
       SessionBlacklistRequest:
         swagger_schema do
           title("Session Blacklist Request")
-          description("Request for blacklisting a session")
 
           properties do
-            sessionId(:string, "JWT JTI session Id", required: true)
+            sessionId(:string, "JWT ID (jti) claim", required: true)
 
-            validityInSeconds(:string, "Seconds how long a session should be blacklisted",
+            validityInSeconds(
+              :string,
+              "Defines how long the JWT ID should be considered invalid. Typically set to the token's remaining life time.",
               required: true
             )
           end
@@ -135,10 +143,9 @@ defmodule RigApi.SessionBlacklistController do
       SessionBlacklistResponse:
         swagger_schema do
           title("Session Blacklist Response")
-          description("Response for blacklisting a session")
 
           properties do
-            sessionId(:string, "JWT JTI session Id", required: true)
+            sessionId(:string, "JWT ID (jti) claim", required: true)
 
             validityInSeconds(:string, "Seconds how long a session should be blacklisted",
               required: true

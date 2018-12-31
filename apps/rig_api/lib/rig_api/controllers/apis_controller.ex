@@ -8,12 +8,9 @@ defmodule RigApi.ApisController do
   use PhoenixSwagger
   require Logger
 
-  # Swagger documentation for endpoint GET /v1/apis
   swagger_path :list_apis do
     get("/v1/apis")
-    summary("RIG Proxy API list")
-    description("Provides a list of parameterized APIs on the RIG Proxy")
-
+    summary("List current proxy API-definitions.")
     response(200, "Ok", Schema.ref(:ProxyAPIList))
   end
 
@@ -24,14 +21,12 @@ defmodule RigApi.ApisController do
     send_response(conn, 200, active_apis)
   end
 
-  # Swagger documentation for endpoint GET /v1/apis/:api-id
   swagger_path :get_api_detail do
     get("/v1/apis/{apiId}")
-    summary("Getting RIG Proxy API Details")
-    description("Provides the current status and details of a RIG Proxy API")
+    summary("Obtain details on a proxy API-definition.")
 
     parameters do
-      apiId(:path, :string, "The id of the API", required: true, example: "new-service")
+      apiId(:path, :string, "API definition identifier", required: true, example: "new-service")
     end
 
     response(200, "Ok", Schema.ref(:ProxyAPI))
@@ -50,11 +45,9 @@ defmodule RigApi.ApisController do
     end
   end
 
-  # Swagger documentation for endpoint POST /v1/apis
   swagger_path :add_api do
     post("/v1/apis")
-    summary("New RIG Proxy API")
-    description("Adds a new API to the RIG Proxy")
+    summary("Register a new proxy API-definition.")
 
     parameters do
       proxyAPI(
@@ -86,14 +79,12 @@ defmodule RigApi.ApisController do
     end
   end
 
-  # Swagger documentation for endpoint PUT /v1/apis/:api-id
   swagger_path :update_api do
     put("/v1/apis/{apiId}")
-    summary("Update RIG Proxy API Details")
-    description("Update details of a RIG Proxy API")
+    summary("Update a proxy API-definition.")
 
     parameters do
-      apiId(:path, :string, "The id of the API", required: true, example: "new-service")
+      apiId(:path, :string, "API definition identifier", required: true, example: "new-service")
 
       proxyAPI(
         :body,
@@ -119,14 +110,12 @@ defmodule RigApi.ApisController do
     end
   end
 
-  # Swagger documentation for endpoint DELETE /v1/apis/:api-id
   swagger_path :deactivate_api do
     delete("/v1/apis/{apiId}")
-    summary("Delete/Deactivate RIG Proxy API")
-    description("Deletes/Deactivates a RIG Proxy API")
+    summary("Deactivate a proxy API-definition.")
 
     parameters do
-      apiId(:path, :string, "The id of the API", required: true, example: "new-service")
+      apiId(:path, :string, "API definition identifier", required: true, example: "new-service")
     end
 
     response(204, "Deleted")
