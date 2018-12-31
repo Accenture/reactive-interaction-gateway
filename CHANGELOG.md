@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - OpenAPI (Swagger) documentation. [#116](https://github.com/Accenture/reactive-interaction-gateway/issues/116)
 
 <!-- ### Changed -->

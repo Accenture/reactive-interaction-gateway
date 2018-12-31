@@ -99,10 +99,10 @@ defmodule RigApi.SessionBlacklistController do
 
   defp parse(body) do
     {:ok,
-      %{
-        session_id: Map.fetch!(body, "sessionId"),
-        ttl_s: body |> Map.fetch!("validityInSeconds") |> String.to_integer()
-      }}
+     %{
+       session_id: Map.fetch!(body, "sessionId"),
+       ttl_s: body |> Map.fetch!("validityInSeconds") |> String.to_integer()
+     }}
   rescue
     e in KeyError ->
       {:error, "Missing value for '#{e.key}'"}
@@ -111,7 +111,7 @@ defmodule RigApi.SessionBlacklistController do
       # This is likely String.to_integer/1, but we don't know for sure.
       {:error, "Invalid request body: #{inspect(e)}"}
   end
- 
+
   def swagger_definitions do
     %{
       SessionBlacklistRequest:

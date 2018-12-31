@@ -161,9 +161,8 @@ source.addEventListener("greeting", function (e) {
 - Session blacklist with immediate session invalidation.
 
 ### API Documentation
-RIG exposes its API documentation on its API endpoint under /swagger-ui (e.g. http://localhost:4010/swagger-ui).
 
-A swagger document for integration in an existing swagger UI can be found [here](./apps/rig_api/priv/static/rig_api_swagger.json)
+RIG exposes its API documentation on its API endpoint under [/swagger-ui](http://localhost:4010/swagger-ui). For integration into an existing swagger UI, the related JSON document can either be [retrieved at runtime](http://localhost:4010/swagger-ui/rig_api_swagger.json) or [found on disk](./apps/rig_api/priv/static/rig_api_swagger.json) after compiling RIG at least once.
 
 ## Configuration, Integration, Deployment
 

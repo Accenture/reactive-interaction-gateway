@@ -10,7 +10,6 @@ defmodule RigApi.MessageController do
 
   @event_filter Application.get_env(:rig, :event_filter)
 
-
   # Swagger documentation for endpoint POST /v1/messages
   swagger_path :create do
     post("/v1/messages")
@@ -57,11 +56,21 @@ defmodule RigApi.MessageController do
         swagger_schema do
           title("Message Cloud Event")
           description("The message to be provide to frontends in Cloud Event format")
-          properties do  
+
+          properties do
             cloudEventsVersion(:string, "Cloud Events Version", required: true, example: "0.1")
             eventID(:string, "unique ID for an event", required: true, example: "first-event")
-            eventTime(:string, "Event Time", required: true, example: "2018-08-21T09:11:27.614970+00:00")
-            eventType(:string, "the event type in reverse-DNS notation", required: true, example: "greeting")
+
+            eventTime(:string, "Event Time",
+              required: true,
+              example: "2018-08-21T09:11:27.614970+00:00"
+            )
+
+            eventType(:string, "the event type in reverse-DNS notation",
+              required: true,
+              example: "greeting"
+            )
+
             source(:string, "describes the event producer.", required: true, example: "tutorial")
             # extensions(:string, "Cloud events extensions.", required: false)
             # schemaURL(:string, "Schema URL", required: false)

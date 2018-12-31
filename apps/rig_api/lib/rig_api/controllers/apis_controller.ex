@@ -24,7 +24,6 @@ defmodule RigApi.ApisController do
     send_response(conn, 200, active_apis)
   end
 
-
   # Swagger documentation for endpoint GET /v1/apis/:api-id
   swagger_path :get_api_detail do
     get("/v1/apis/{apiId}")
@@ -75,7 +74,7 @@ defmodule RigApi.ApisController do
     %{rig_proxy: proxy} = config()
 
     with nil <- proxy.get_api(proxy, id),
-        {:ok, _phx_ref} <- proxy.add_api(proxy, id, params) do
+         {:ok, _phx_ref} <- proxy.add_api(proxy, id, params) do
       send_response(conn, 201, %{message: "ok"})
     else
       {_id, %{"active" => true}} ->
@@ -95,6 +94,7 @@ defmodule RigApi.ApisController do
 
     parameters do
       apiId(:path, :string, "The id of the API", required: true, example: "new-service")
+
       proxyAPI(
         :body,
         Schema.ref(:ProxyAPI),
@@ -111,7 +111,7 @@ defmodule RigApi.ApisController do
     %{"id" => id} = params
 
     with {_id, current_api} <- get_active_api(id),
-      {:ok, _phx_ref} <- merge_and_update(id, current_api, params) do
+         {:ok, _phx_ref} <- merge_and_update(id, current_api, params) do
       send_response(conn, 200, %{message: "ok"})
     else
       api when api == nil or api == :inactive ->
@@ -138,7 +138,7 @@ defmodule RigApi.ApisController do
     %{rig_proxy: proxy} = config()
 
     with {_id, _current_api} <- get_active_api(id),
-        {:ok, _phx_ref} <- proxy.deactivate_api(proxy, id) do
+         {:ok, _phx_ref} <- proxy.deactivate_api(proxy, id) do
       send_response(conn, 204)
     else
       api when api == nil or api == :inactive ->
@@ -150,7 +150,7 @@ defmodule RigApi.ApisController do
     %{rig_proxy: proxy} = config()
 
     with {id, current_api} <- proxy.get_api(proxy, id),
-        true <- current_api["active"] == true do
+         true <- current_api["active"] == true do
       {id, current_api}
     else
       nil -> nil
@@ -181,76 +181,99 @@ defmodule RigApi.ApisController do
           properties do
             id(:string, "Proxy API ID", required: true, example: "new-service")
             name(:string, "Proxy API Name", required: true, example: "new-service")
-            auth_type(:string, "Authorization type", required: true, example:  "jwt")
-            auth (Schema.new do
-              properties do
-                use_header(:boolean, "Authorization Header Usage", default: true, example: true)
-                header_name(:string, "Authorization Header Name", required: true, example: "Authorization")
-                use_query(:boolean, "Authorization Header Query Usage", default: false, example: false)
-                query_name(:string, "Authorization Header Query Name", required: false)
+            auth_type(:string, "Authorization type", required: true, example: "jwt")
+
+            auth(
+              Schema.new do
+                properties do
+                  use_header(:boolean, "Authorization Header Usage", default: true, example: true)
+
+                  header_name(:string, "Authorization Header Name",
+                    required: true,
+                    example: "Authorization"
+                  )
+
+                  use_query(:boolean, "Authorization Header Query Usage",
+                    default: false,
+                    example: false
+                  )
+
+                  query_name(:string, "Authorization Header Query Name", required: false)
+                end
               end
-            end)
-            timestamp(:string, "creation timestamp", required: false, example: "2018-12-17T10:38:06.334013Z")
+            )
+
+            timestamp(:string, "creation timestamp",
+              required: false,
+              example: "2018-12-17T10:38:06.334013Z"
+            )
+
             ref_number(:integer, "reference number", required: false, example: 0)
             node_name(:string, "Node name", required: false, example: "nonode@nohost")
             active(:boolean, "ID Status", required: false, example: true)
             phx_ref(:string, "Phoenix Reference", required: false, example: "ewTJVcM7Bzc=")
-            versioned(:boolean, "is Versioned Endpoint?", default: false,  example: false)
-            version_data (Schema.new do
-              properties do
-                default (Schema.new do
-                  properties do
-                    endpoints(Schema.ref(:ProxyAPIEndpointArray))
-                  end
-                end)
+            versioned(:boolean, "is Versioned Endpoint?", default: false, example: false)
+
+            version_data(
+              Schema.new do
+                properties do
+                  default(
+                    Schema.new do
+                      properties do
+                        endpoints(Schema.ref(:ProxyAPIEndpointArray))
+                      end
+                    end
+                  )
+                end
               end
-            end)
-            proxy (Schema.new do
-              properties do
-                use_env(:boolean, "TBD", default: true, example: true)
-                target_url(:string, "Proxy Target URL", required: true, example: "IS_HOST")
-                port(:integer, "Proxy Port", required: true, example: 6666)
+            )
+
+            proxy(
+              Schema.new do
+                properties do
+                  use_env(:boolean, "TBD", default: true, example: true)
+                  target_url(:string, "Proxy Target URL", required: true, example: "IS_HOST")
+                  port(:integer, "Proxy Port", required: true, example: 6666)
+                end
               end
-            end)
+            )
           end
         end,
+      ProxyAPIEndpointArray:
+        swagger_schema do
+          title("Proxy API Endpoint Array")
+          description("Array of Endpoints for the Proxy API")
+          type(:array)
+          items(Schema.ref(:ProxyAPIEndpoint))
+        end,
+      ProxyAPIEndpoint:
+        swagger_schema do
+          title("Proxy API Endpoint")
+          description("Endpoint for the Proxy API for Request")
 
-        ProxyAPIEndpointArray:
-          swagger_schema do
-            title("Proxy API Endpoint Array")
-            description("Array of Endpoints for the Proxy API")
-            type(:array)
-            items(Schema.ref(:ProxyAPIEndpoint))
-          end,
-
-        ProxyAPIEndpoint:
-          swagger_schema do
-            title("Proxy API Endpoint")
-            description("Endpoint for the Proxy API for Request")
-            properties do
-              id(:string, "Endpoint ID", required: true, example: "get-auth-register")
-              path(:string, "Endpoint path", required: true, example: "/auth/register")
-              method(:string, "Endpoint HTTP method", required: true, example: "GET")
-              not_secured(:boolean, "Endpoint Security", default: true, example: true)
-            end
-          end,
-
-        ProxyAPIResponse:
-          swagger_schema do
-            title("Proxy API Response")
-            description("Proxy API Response")
-            properties do
-              message(:string, "Response", required: true, example: "ok")
-            end
-          end,
-
-        ProxyAPIList:
-          swagger_schema do
-            title("Proxy API List")
-            description(" A List of parameterized Proxy APIs")
-            type(:array)
-            items(Schema.ref(:ProxyAPI))
+          properties do
+            id(:string, "Endpoint ID", required: true, example: "get-auth-register")
+            path(:string, "Endpoint path", required: true, example: "/auth/register")
+            method(:string, "Endpoint HTTP method", required: true, example: "GET")
+            not_secured(:boolean, "Endpoint Security", default: true, example: true)
           end
+        end,
+      ProxyAPIResponse:
+        swagger_schema do
+          title("Proxy API Response")
+          description("Proxy API Response")
+
+          properties do
+            message(:string, "Response", required: true, example: "ok")
+          end
+        end,
+      ProxyAPIList:
+        swagger_schema do
+          title("Proxy API List")
+          description(" A List of parameterized Proxy APIs")
+          type(:array)
+          items(Schema.ref(:ProxyAPI))
+        end
     }
   end
 end
