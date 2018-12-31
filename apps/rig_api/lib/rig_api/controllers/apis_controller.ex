@@ -123,7 +123,7 @@ defmodule RigApi.ApisController do
   swagger_path :deactivate_api do
     delete("/v1/apis/{apiId}")
     summary("Delete/Deactivate RIG Proxy API")
-    description("Deletes/Deactivatesn a RIG Proxy API")
+    description("Deletes/Deactivates a RIG Proxy API")
 
     parameters do
       apiId(:path, :string, "The id of the API", required: true, example: "new-service")
@@ -213,7 +213,7 @@ defmodule RigApi.ApisController do
               end
             end)
           end
-        end, 
+        end,
 
         ProxyAPIEndpointArray:
           swagger_schema do
