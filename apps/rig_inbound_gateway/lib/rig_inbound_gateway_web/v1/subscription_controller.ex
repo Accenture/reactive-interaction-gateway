@@ -6,7 +6,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   alias Rig.Connection
   alias RigAuth.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
   alias RigAuth.Session
-  alias RigInboundGateway.ImplicitSubscriptions.Jwt, as: JwtSubscriptions
+  alias RigInboundGateway.AutomaticSubscriptions.Jwt, as: JwtSubscriptions
   alias RigInboundGateway.Subscriptions
 
   # ---

@@ -26,7 +26,11 @@ defmodule RigTests.MixProject do
     [
       {:rig_api, in_umbrella: true},
       {:rig_inbound_gateway, in_umbrella: true},
-      {:rig_kafka, in_umbrella: true}
+      {:rig_kafka, in_umbrella: true},
+      {:fake_server,
+       github: "bernardolins/fake_server",
+       ref: "4e0a1c2a8ea0fa9b5ab72b5cab063458ce0b447d",
+       only: :test}
     ]
   end
 end

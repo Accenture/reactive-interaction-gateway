@@ -43,7 +43,7 @@ defmodule RigTests.Proxy.ResponseFrom.KinesisTest do
 
     route(endpoint_path, fn _ ->
       # TODO produce async_response to Kinesis stream
-      Response.ok(sync_response, %{"content-type" => "application/json"})
+      Response.ok!(sync_response, %{"content-type" => "application/json"})
     end)
 
     # We register the endpoint with the proxy:
@@ -60,7 +60,7 @@ defmodule RigTests.Proxy.ResponseFrom.KinesisTest do
               %{
                 id: endpoint_id,
                 type: "http",
-                not_secured: true,
+                secured: false,
                 method: "GET",
                 path: endpoint_path,
                 response_from: "kinesis"
@@ -69,8 +69,8 @@ defmodule RigTests.Proxy.ResponseFrom.KinesisTest do
           }
         },
         proxy: %{
-          target_url: FakeServer.env().ip,
-          port: FakeServer.env().port
+          target_url: "localhost",
+          port: FakeServer.port()
         }
       })
 

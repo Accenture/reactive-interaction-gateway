@@ -17,61 +17,61 @@
             "id": "get-myapi-detail-id",
             "path": "/myapi/detail/{id}",
             "method": "GET",
-            "not_secured": false
+            "secured": true
           },
           {
             "id": "get-myapi-free",
             "path": "/myapi/free",
             "method": "GET",
-            "not_secured": true
+            "secured": false
           },
           {
             "id": "badmethod-myapi-books",
             "path": "/myapi/books",
             "method": "BADMETHOD",
-            "not_secured": false
+            "secured": true
           },
           {
             "id": "options-myapi-books",
             "path": "/myapi/books",
             "method": "OPTIONS",
-            "not_secured": false
+            "secured": true
           },
           {
             "id": "head-myapi-books",
             "path": "/myapi/books",
             "method": "HEAD",
-            "not_secured": false
+            "secured": true
           },
           {
             "id": "delete-myapi-books",
             "path": "/myapi/books",
             "method": "DELETE",
-            "not_secured": false
+            "secured": true
           },
           {
             "id": "patch-myapi-books",
             "path": "/myapi/books",
             "method": "PATCH",
-            "not_secured": false
+            "secured": true
           },
           {
             "id": "put-myapi-books",
             "path": "/myapi/books",
             "method": "PUT",
-            "not_secured": false
+            "secured": true
           },
           {
             "id": "post-myapi-books",
             "path": "/myapi/books",
             "method": "POST",
-            "not_secured": false
+            "secured": true
           },
           {
             "id": "get-myapi-books",
             "path": "/myapi/books",
             "method": "GET",
-            "not_secured": false
+            "secured": true
           }
         ]
       }
@@ -100,7 +100,7 @@
             "id": "get-myapi-direct",
             "path": "/myapi/direct",
             "method": "GET",
-            "not_secured": false
+            "secured": true
           }
         ]
       }

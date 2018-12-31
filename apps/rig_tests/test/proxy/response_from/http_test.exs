@@ -5,9 +5,10 @@ defmodule RigTests.Proxy.ResponseFrom.HttpTest do
   Note that `test_with_server` sets up an HTTP server mock, which is then configured
   using the `route` macro.
   """
+  # cause FakeServer opens a port:
   use ExUnit.Case, async: false
   import FakeServer
-  alias FakeServer.HTTP.Response
+  alias FakeServer.Response
 
   @api_port Confex.fetch_env!(:rig_api, RigApi.Endpoint)[:http][:port]
   @proxy_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][:port]
@@ -22,7 +23,7 @@ defmodule RigTests.Proxy.ResponseFrom.HttpTest do
 
     route(
       endpoint_path,
-      Response.ok(sync_response, %{"content-type" => "application/json"})
+      Response.ok!(sync_response, %{"content-type" => "application/json"})
     )
 
     # We register the endpoint with the proxy:
@@ -39,7 +40,7 @@ defmodule RigTests.Proxy.ResponseFrom.HttpTest do
               %{
                 id: endpoint_id,
                 type: "http",
-                not_secured: true,
+                secured: false,
                 method: "GET",
                 path: endpoint_path
               }
@@ -47,8 +48,8 @@ defmodule RigTests.Proxy.ResponseFrom.HttpTest do
           }
         },
         proxy: %{
-          target_url: FakeServer.env().ip,
-          port: FakeServer.env().port
+          target_url: "localhost",
+          port: FakeServer.port()
         }
       })
 

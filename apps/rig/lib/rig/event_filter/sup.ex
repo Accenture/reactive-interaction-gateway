@@ -35,8 +35,13 @@ defmodule Rig.EventFilter.Sup do
     :ok = :pg2.create(@pg2_group)
     :ok = :pg2.join(@pg2_group, self())
 
-    state = %{extractor_map: %{}}
-    send(self(), :reload_config)
+    %{extractor_config_path_or_json: extractor_config_path_or_json} = config()
+
+    state =
+      case reload_config(extractor_config_path_or_json) do
+        nil -> %{extractor_map: %{}}
+        extractor_map -> %{extractor_map: extractor_map}
+      end
 
     {:ok, state}
   end
@@ -79,18 +84,8 @@ defmodule Rig.EventFilter.Sup do
     {:reply, :ok, state}
   end
 
-  # ---
-
   @impl GenServer
-  def handle_info({:DOWN, ref, :process, object, reason}, state) do
-    Logger.error("Filter #{inspect(object)}/ref=#{inspect(ref)} died: #{inspect(reason)}")
-    {:noreply, state}
-  end
-
-  # ---
-
-  @impl GenServer
-  def handle_info(:reload_config, state) do
+  def handle_call(:reload_config, _from, state) do
     %{extractor_config_path_or_json: extractor_config_path_or_json} = config()
 
     state =
@@ -99,6 +94,14 @@ defmodule Rig.EventFilter.Sup do
         extractor_map -> %{state | extractor_map: extractor_map}
       end
 
+    {:reply, :ok, state}
+  end
+
+  # ---
+
+  @impl GenServer
+  def handle_info({:DOWN, ref, :process, object, reason}, state) do
+    Logger.error("Filter #{inspect(object)}/ref=#{inspect(ref)} died: #{inspect(reason)}")
     {:noreply, state}
   end
 
@@ -139,7 +142,7 @@ defmodule Rig.EventFilter.Sup do
   defp reload_filter_config(nil, _), do: nil
 
   defp reload_filter_config(filter_pid, filter_config) do
-    send(filter_pid, {:reload_configuration, filter_config})
+    GenServer.call(filter_pid, {:reload_configuration, filter_config})
   end
 
   # ---

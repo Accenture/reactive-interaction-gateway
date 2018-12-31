@@ -4,20 +4,41 @@ defmodule RigInboundGateway.ImplicitSubscriptions.JwtTest do
 
   import Joken
 
+  alias RigInboundGateway.ExtractorConfig
   alias RigInboundGateway.ImplicitSubscriptions.Jwt
 
   @jwt_secret_key "mysecret"
-  @extractors System.get_env("EXTRACTORS")
 
   setup do
-    System.put_env(
-      "EXTRACTORS",
-      "{\"event_one\":{\"name\":{\"stable_field_index\":1,\"jwt\":{\"json_pointer\":\"\/username\"},\"event\":{\"json_pointer\":\"\/data\/name\"}}},\"event_two\":{\"fullname\":{\"stable_field_index\":1,\"jwt\":{\"json_pointer\":\"\/fullname\"},\"event\":{\"json_pointer\":\"\/data\/fullname\"}},\"name\":{\"stable_field_index\":1,\"jwt\":{\"json_pointer\":\"\/username\"},\"event\":{\"json_pointer\":\"\/data\/name\"}}},\"example\":{\"email\":{\"stable_field_index\":1,\"event\":{\"json_pointer\":\"\/data\/email\"}}}}"
-    )
+    ExtractorConfig.set(%{
+      "event_one" => %{
+        "name" => %{
+          "event" => %{"json_pointer" => "/data/name"},
+          "jwt" => %{"json_pointer" => "/username"},
+          "stable_field_index" => 1
+        }
+      },
+      "event_two" => %{
+        "fullname" => %{
+          "event" => %{"json_pointer" => "/data/fullname"},
+          "jwt" => %{"json_pointer" => "/fullname"},
+          "stable_field_index" => 1
+        },
+        "name" => %{
+          "event" => %{"json_pointer" => "/data/name"},
+          "jwt" => %{"json_pointer" => "/username"},
+          "stable_field_index" => 1
+        }
+      },
+      "example" => %{
+        "email" => %{
+          "event" => %{"json_pointer" => "/data/email"},
+          "stable_field_index" => 1
+        }
+      }
+    })
 
-    on_exit(fn ->
-      System.put_env("EXTRACTORS", @extractors)
-    end)
+    on_exit(&ExtractorConfig.restore/0)
 
     :ok
   end

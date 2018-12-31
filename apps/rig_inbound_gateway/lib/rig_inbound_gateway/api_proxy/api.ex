@@ -5,7 +5,7 @@ defmodule RigInboundGateway.ApiProxy.Api do
   """
 
   @type endpoint :: %{
-          optional(:not_secured) => boolean,
+          optional(:secured) => boolean,
           optional(:transform_request_headers) => boolean,
           optional(:type) => String.t(),
           optional(:target) => String.t(),

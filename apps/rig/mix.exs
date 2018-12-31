@@ -50,7 +50,7 @@ defmodule Rig.MixProject do
       # HTTP request handling (wraps Cowboy):
       {:plug, "~> 1.4"},
       # JSON parser, for cloud_event and event_hub:
-      {:poison, "~> 2.0 or ~> 3.0"},
+      {:poison, "~> 3.0 or ~> 4.0"},
       # JSON parser that's supposedly faster than poison:
       {:jason, "~> 1.1"},
       # JSON Pointer (RFC 6901) implementation for subscriptions:
@@ -58,7 +58,7 @@ defmodule Rig.MixProject do
       # Apache Kafka Erlang client library:
       {:brod, "~> 3.3"},
       # For distributed_set:
-      {:timex, "~> 3.1.22"},
+      {:timex, "~> 3.4"},
       {:ex2ms, "~> 1.5"},
       {:uuid, "~> 1.1"},
       # For doing HTTP requests, e.g., in kafka_as_http:
