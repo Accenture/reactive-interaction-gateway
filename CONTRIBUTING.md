@@ -24,7 +24,7 @@ Since this is a standard mix project, typical mix commands work as expected:
 
 - Generate documentation with `mix docs`.
 - Run unit tests with `mix test` and see the test coverage with
-  `mix coveralls.html`, which generates a file at `doc/excoveralls.html`.
+  `MIX_ENV=test mix coveralls.html --umbrella`, which creates a report at `doc/excoveralls.html`.
 
 For static analysis, we use [credo](https://github.com/rrrene/credo):
 

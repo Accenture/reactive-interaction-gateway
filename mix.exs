@@ -38,7 +38,7 @@ defmodule Rig.Umbrella.Mixfile do
   # Run "mix help deps" for examples and options.
   defp deps do
     [
-      {:excoveralls, "~> 0.8", only: [:dev, :test]},
+      {:excoveralls, "~> 0.10", only: :test},
       {:credo, "~> 1.0", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test]},
       {:distillery, "~> 2.0"},

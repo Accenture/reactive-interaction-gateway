@@ -14,7 +14,8 @@ defmodule RigKafka.MixProject do
       lockfile: "../../mix.lock",
       elixir: elixir_version,
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
