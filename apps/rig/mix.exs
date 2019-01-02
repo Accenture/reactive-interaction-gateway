@@ -15,6 +15,7 @@ defmodule Rig.MixProject do
       elixir: elixir_version,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      test_coverage: [tool: ExCoveralls],
       aliases: aliases()
     ]
   end

@@ -62,7 +62,9 @@ mix new rig_my_new_app
 
 Then go through the following:
 
-- In the app's `mix.exs`, make sure to set `version` and `elixir` to the global versions; ideally just copy the respective parts from another app's `mix.exs` file.
+- In the app's `mix.exs`:
+  - make sure to set `version` and `elixir` to the global versions; ideally just copy the respective parts from another app's `mix.exs` file.
+  - add `test_coverage: [tool: ExCoveralls]` to `project`.
 - Update the table above with a description of what should go into the new app.
 - Add/remove your app to/from the applications set in `rel/config.exs`.
 - Add/remove your app to/from the `Dockerfile` with the relevant directories.
