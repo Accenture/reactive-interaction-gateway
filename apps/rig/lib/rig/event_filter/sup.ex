@@ -38,7 +38,7 @@ defmodule Rig.EventFilter.Sup do
     %{extractor_config_path_or_json: extractor_config_path_or_json} = config()
 
     state =
-      case reload_config(extractor_config_path_or_json) do
+      case reload_config(extractor_config_path_or_json, %{}) do
         nil -> %{extractor_map: %{}}
         extractor_map -> %{extractor_map: extractor_map}
       end
@@ -85,11 +85,11 @@ defmodule Rig.EventFilter.Sup do
   end
 
   @impl GenServer
-  def handle_call(:reload_config, _from, state) do
+  def handle_call(:reload_config, _from, %{extractor_map: extractor_map} = state) do
     %{extractor_config_path_or_json: extractor_config_path_or_json} = config()
 
     state =
-      case reload_config(extractor_config_path_or_json) do
+      case reload_config(extractor_config_path_or_json, extractor_map) do
         nil -> state
         extractor_map -> %{state | extractor_map: extractor_map}
       end
@@ -107,27 +107,44 @@ defmodule Rig.EventFilter.Sup do
 
   # ---
 
-  defp reload_config(extractor_config_path_or_json)
+  defp reload_config(extractor_config_path_or_json, current_extractor_map)
 
-  defp reload_config(nil), do: nil
+  defp reload_config(nil, _), do: nil
 
-  defp reload_config(extractor_config_path_or_json) do
+  defp reload_config(extractor_config_path_or_json, current_extractor_map) do
     Logger.debug(fn ->
       "Reloading extractor config from #{String.replace(extractor_config_path_or_json, "\n", "")}"
     end)
 
-    {:ok, extractor_map} = Config.new(extractor_config_path_or_json)
+    {:ok, new_extractor_map} = Config.new(extractor_config_path_or_json)
 
-    for {event_type, filter_config} <- extractor_map do
+    # Make sure the current event types are also present in the map, even if they're
+    # empty, so we don't "forget" about them:
+    current_event_types = Map.keys(current_extractor_map)
+
+    combined_extractor_map =
+      Map.merge(
+        for(event_type <- current_event_types, into: %{}, do: {event_type, %{}}),
+        new_extractor_map
+      )
+
+    for {event_type, filter_config} <- combined_extractor_map do
       # The config should be checked regardless of whether the filter is alive or not:
       :ok = Config.check_filter_config(filter_config)
 
       event_type
       |> get_filter_pid()
       |> reload_filter_config(filter_config)
+
+      Logger.debug(fn ->
+        case filter_config do
+          %{} -> "Extractor config for event type #{event_type} has been removed."
+          _ -> "Extractor config for event type #{event_type} has been updated."
+        end
+      end)
     end
 
-    extractor_map
+    new_extractor_map
   rescue
     err ->
       Logger.error(
