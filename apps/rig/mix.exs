@@ -63,7 +63,9 @@ defmodule Rig.MixProject do
       {:ex2ms, "~> 1.5"},
       {:uuid, "~> 1.1"},
       # For doing HTTP requests, e.g., in kafka_as_http:
-      {:httpoison, "~> 1.3"}
+      {:httpoison, "~> 1.3"},
+      # For property-based testing:
+      {:stream_data, "~> 0.1", only: :test}
     ]
   end
 

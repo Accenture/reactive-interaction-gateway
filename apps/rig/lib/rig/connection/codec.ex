@@ -10,8 +10,7 @@ defmodule Rig.Connection.Codec do
   def serialize(pid) do
     pid
     |> :erlang.term_to_binary()
-    |> Base.encode64()
-    |> URI.encode_www_form()
+    |> Base.url_encode64()
 
     # TODO sign this
   end
@@ -20,11 +19,10 @@ defmodule Rig.Connection.Codec do
 
   @doc "Convert a serialized string back into a pid."
   @spec deserialize(binary) :: {:ok, pid} | {:error, :not_base64 | :invalid_term}
-  def deserialize(url_encoded) do
+  def deserialize(base64_encoded) do
     # TODO check signature here
 
-    with base64_encoded <- URI.decode_www_form(url_encoded),
-         {:ok, decoded_binary} <- decode64(base64_encoded) do
+    with {:ok, decoded_binary} <- decode64(base64_encoded) do
       binary_to_term(decoded_binary)
     end
   end
@@ -42,7 +40,7 @@ defmodule Rig.Connection.Codec do
 
   @spec decode64(binary()) :: {:ok, binary()} | {:error, :not_base64}
   defp decode64(base64) do
-    case Base.decode64(base64) do
+    case Base.url_decode64(base64) do
       {:ok, decoded} -> {:ok, decoded}
       :error -> {:error, :not_base64}
     end

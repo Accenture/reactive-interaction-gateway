@@ -63,6 +63,7 @@
   "snappyer": {:hex, :snappyer, "1.2.4", "6d739c534cd2339633127a2b40279be71f149e5842c5363a4d88e66efb7c1fec", [:make, :rebar, :rebar3], [], "hexpm"},
   "socket": {:hex, :socket, "0.3.13", "98a2ab20ce17f95fb512c5cadddba32b57273e0d2dba2d2e5f976c5969d0c632", [:mix], [], "hexpm"},
   "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.4", "f0eafff810d2041e93f915ef59899c923f4568f4585904d010387ed74988e77b", [:make, :mix, :rebar3], [], "hexpm"},
+  "stream_data": {:hex, :stream_data, "0.4.2", "fa86b78c88ec4eaa482c0891350fcc23f19a79059a687760ddcf8680aac2799b", [:mix], [], "hexpm"},
   "stubr": {:hex, :stubr, "1.5.1", "6c710a66089c0b0393d29050b4294b46541baaae3ea7f8ff16925f13323e061e", [:mix], [], "hexpm"},
   "supervisor3": {:hex, :supervisor3, "1.1.7", "ba0602c908d3d90f898d814daf36e04d75f1337735dc527d0441e3e4ab3e7d5a", [:make, :rebar, :rebar3], [], "hexpm"},
   "timex": {:hex, :timex, "3.4.2", "d74649c93ad0e12ce5b17cf5e11fbd1fb1b24a3d114643e86dba194b64439547", [:mix], [{:combine, "~> 0.10", [hex: :combine, repo: "hexpm", optional: false]}, {:gettext, "~> 0.10", [hex: :gettext, repo: "hexpm", optional: false]}, {:tzdata, "~> 0.1.8 or ~> 0.5", [hex: :tzdata, repo: "hexpm", optional: false]}], "hexpm"},

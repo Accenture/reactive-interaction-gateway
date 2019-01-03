@@ -82,9 +82,11 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
         conn |> put_status(:forbidden) |> text("Subscription denied.")
 
       {:error, :not_base64} ->
+        Logger.warn(fn -> "Connection token #{connection_id} is not Base64 encoded." end)
         conn |> put_status(:bad_request) |> text("Invalid connection token.")
 
       {:error, :invalid_term} ->
+        Logger.warn(fn -> "Connection token #{connection_id} is not a valid term." end)
         conn |> put_status(:bad_request) |> text("Invalid connection token.")
 
       {:error, :process_dead} ->
