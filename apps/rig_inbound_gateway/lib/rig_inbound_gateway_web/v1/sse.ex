@@ -9,6 +9,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   alias Rig.EventFilter
   alias Rig.Subscription
+  alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.AutomaticSubscriptions.Jwt, as: JwtSubscriptions
   alias RigInboundGateway.Events
   alias RigInboundGateway.Subscriptions
@@ -72,7 +73,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     conn
     |> merge_resp_headers([
       {"content-type", "text/event-stream"},
-      {"cache-control", "no-cache"},
+      {"cache-control", "no-cache"}
     ])
     |> send_chunked(_status = 200)
   end
@@ -88,12 +89,12 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
     receive do
       # Cloud Events are forwarded to the client:
-      {:cloud_event, cloud_event} ->
-        Logger.debug(fn -> inspect(cloud_event) end)
+      {:cloud_event, event} ->
+        Logger.debug(fn -> inspect(event) end)
 
         conn
         # Forward the event:
-        |> send_chunk(cloud_event)
+        |> send_chunk(event)
         # Keep the connection open:
         |> wait_for_events(state, next_heartbeat)
 
@@ -136,12 +137,10 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     send_chunk(conn, %ServerSentEvent{comments: ["heartbeat"]})
   end
 
-  defp send_chunk(conn, %{"eventID" => event_id, "eventType" => event_type} = cloud_event) do
-    server_sent_event =
-      cloud_event
-      |> Jason.encode!()
-      |> ServerSentEvent.new(id: event_id, type: event_type)
-
+  defp send_chunk(conn, %CloudEvent{json: json} = event) do
+    event_id = CloudEvent.id!(event)
+    event_type = CloudEvent.type!(event)
+    server_sent_event = ServerSentEvent.new(json, id: event_id, type: event_type)
     send_chunk(conn, server_sent_event)
   end
 

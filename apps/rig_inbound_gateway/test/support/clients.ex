@@ -78,7 +78,11 @@ defmodule SseClient do
   @impl true
   def read_event(_client, event_type) do
     cloud_event = read_sse_chunk() |> extract_cloud_event()
-    %{"eventType" => ^event_type} = cloud_event
+
+    case cloud_event do
+      %{"specversion" => "0.2", "type" => ^event_type} -> cloud_event
+      %{"cloudEventsVersion" => "0.1", "eventType" => ^event_type} -> cloud_event
+    end
   end
 
   @impl true
@@ -161,7 +165,11 @@ defmodule WsClient do
   def read_event(client, event_type) do
     {:text, data} = WebSocket.recv!(client)
     cloud_event = Jason.decode!(data)
-    %{"eventType" => ^event_type} = cloud_event
+
+    case cloud_event do
+      %{"specversion" => "0.2", "type" => ^event_type} -> cloud_event
+      %{"cloudEventsVersion" => "0.1", "eventType" => ^event_type} -> cloud_event
+    end
   end
 
   @impl true

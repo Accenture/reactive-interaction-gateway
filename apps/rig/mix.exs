@@ -37,7 +37,7 @@ defmodule Rig.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:cloud_events, in_umbrella: true},
+      {:rig_cloud_events, in_umbrella: true},
       {:rig_kafka, in_umbrella: true},
       # Read and use application configuration from environment variables:
       {:confex, "~> 3.3"},

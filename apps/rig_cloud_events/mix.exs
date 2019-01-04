@@ -3,14 +3,16 @@ defmodule CloudEvents.MixProject do
   use Mix.Project
 
   def project do
+    %{rig: rig_version, elixir: elixir_version} = versions()
+
     [
-      app: :cloud_events,
-      version: "0.1.0",
+      app: :rig_cloud_events,
+      version: rig_version,
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.7",
+      elixir: elixir_version,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: [tool: ExCoveralls]
@@ -24,11 +26,19 @@ defmodule CloudEvents.MixProject do
     ]
   end
 
+  defp versions do
+    {map, []} = Code.eval_file("version", "../..")
+    map
+  end
+
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       # Encode/decode to/from JSON:
       {:jason, "~> 1.1"},
+      {:jaxon, "~> 1.0"},
+      # JSON Pointer implementation:
+      {:odgn_json_pointer, "~> 2.3"},
       # Auto-fill eventTime:
       {:timex, "~> 3.4"},
       # Auto-fill eventID:

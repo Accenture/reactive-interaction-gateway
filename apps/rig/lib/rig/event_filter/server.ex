@@ -9,12 +9,12 @@ defmodule Rig.EventFilter.Server do
   require Logger
   use GenServer
 
-  alias JSONPointer
   alias Timex
 
   alias Rig.EventFilter.Config
   alias Rig.EventFilter.MatchSpec.SubscriptionMatcher
   alias Rig.Subscription
+  alias RigCloudEvents.CloudEvent
 
   @default_subscription_ttl_s 60
   @cleanup_interval_ms 90_000
@@ -280,8 +280,8 @@ defmodule Rig.EventFilter.Server do
 
   # ---
 
-  defp extract_value(event, json_pointer) do
-    case JSONPointer.get(event, json_pointer) do
+  defp extract_value(%CloudEvent{} = event, json_pointer) do
+    case CloudEvent.find_value(event, json_pointer) do
       {:ok, value} ->
         value
 

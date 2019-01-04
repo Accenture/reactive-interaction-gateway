@@ -7,9 +7,10 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
   alias HTTPoison
   alias Jason
+  alias UUID
 
-  alias CloudEvent
   alias RigAuth.Jwt.Utils, as: Jwt
+  alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.ExtractorConfig
 
   alias SSeClient
@@ -28,13 +29,13 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
   defp greeting_for(name),
     do:
-      %{
-        "cloudEventsVersion" => "0.1",
-        "source" => Atom.to_string(__MODULE__),
-        "eventType" => "greeting"
-      }
-      |> CloudEvent.new!()
-      |> CloudEvent.with_data(%{"name" => name})
+      CloudEvent.parse!(%{
+        specversion: "0.2",
+        type: "greeting",
+        source: Atom.to_string(__MODULE__),
+        id: UUID.uuid4(),
+        data: %{name: name}
+      })
 
   defp greeting_for_alice, do: greeting_for("alice")
 
@@ -54,11 +55,11 @@ defmodule RigInboundGateway.EventSubscriptionTest do
     :ok
   end
 
-  defp submit_event(cloud_event) do
+  defp submit_event(%CloudEvent{json: json}) do
     url = "http://#{@hostname}:#{@eventhub_port}/_rig/v1/events"
 
     %HTTPoison.Response{status_code: 202} =
-      HTTPoison.post!(url, Jason.encode!(cloud_event), [{"content-type", "application/json"}])
+      HTTPoison.post!(url, json, [{"content-type", "application/json"}])
 
     :ok
   end
