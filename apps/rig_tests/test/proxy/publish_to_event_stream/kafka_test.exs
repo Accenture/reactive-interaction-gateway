@@ -147,20 +147,17 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
 
     kafka_body =
       Jason.encode!(%{
-        "data" => %{
-          "eventID" => "069711bf-3946-4661-984f-c667657b8d85",
-          "eventType" => "com.example.test",
-          "eventTypeVersion" => "1.0",
-          "eventTime" => "2018-04-05T17:31:00Z",
-          "cloudEventsVersion" => "0.1",
+        "event" => %{
+          "specversion" => "0.2",
+          "type" => "com.example.test",
           "source" => "/rig-test",
-          "contentType" => "application/json",
-          "extensions" => %{},
+          "id" => "069711bf-3946-4661-984f-c667657b8d85",
+          "time" => "2018-04-05T17:31:00Z",
           "data" => %{
             "foo" => "bar"
           }
         },
-        "partition_key" => "test_key"
+        "partition" => "test_key"
       })
 
     %HTTPoison.Response{status_code: res_status, body: res_body} =
@@ -172,19 +169,19 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     assert_receive received_msg, 10_000
     received_msg_map = Jason.decode!(received_msg)
 
-    assert "bar" == get_in(received_msg_map, ["data", "foo"])
-    assert "069711bf-3946-4661-984f-c667657b8d85" == get_in(received_msg_map, ["eventID"])
-    assert "com.example.test" == get_in(received_msg_map, ["eventType"])
+    # The event payload is still there:
+    assert get_in(received_msg_map, ["data", "foo"]) == "bar"
 
-    assert "/mock-proxy-publish-to-kafka-endpoint" ==
-             get_in(received_msg_map, ["rig", "requestPath"])
+    # The event context attributes are, too:
+    assert get_in(received_msg_map, ["type"]) == "com.example.test"
+    assert get_in(received_msg_map, ["id"]) == "069711bf-3946-4661-984f-c667657b8d85"
 
-    assert "127.0.0.1" == get_in(received_msg_map, ["rig", "remoteIP"])
+    # RIG adds meta data to the "rig" extension attribute:
+    assert get_in(received_msg_map, ["rig", "path"]) == "/mock-proxy-publish-to-kafka-endpoint"
+    assert get_in(received_msg_map, ["rig", "remoteip"]) == "127.0.0.1"
+    assert get_in(received_msg_map, ["rig", "correlation"]) |> byte_size > 0
 
-    assert "g2dkAA1ub25vZGVAbm9ob3N0AAAEWAAAAAAA" ==
-             get_in(received_msg_map, ["rig", "correlationID"])
-
-    assert get_in(received_msg_map, ["rig", "reqHeaders"])
+    assert get_in(received_msg_map, ["rig", "headers"])
            |> Enum.member?(["host", "#{@proxy_host}:#{@proxy_port}"])
   end
 end
