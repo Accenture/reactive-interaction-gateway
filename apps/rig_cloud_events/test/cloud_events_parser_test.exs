@@ -131,11 +131,7 @@ defmodule CloudEventsParserTest do
 
       assert {:ok, 0} = parser.find_value(tokens, ~S(/))
       assert {:ok, 1} = parser.find_value(tokens, ~S(/a~1b))
-
-      # Currently a bug in JSONPointer..
-      if parser != RigCloudEvents.Parser.FullParser,
-        do: assert({:ok, 2} = parser.find_value(tokens, ~S(/c%d)))
-
+      assert({:ok, 2} = parser.find_value(tokens, ~S(/c%d)))
       assert {:ok, 3} = parser.find_value(tokens, ~S(/e^f))
       assert {:ok, 4} = parser.find_value(tokens, ~S(/g|h))
       # No idea why this doesn't work:
