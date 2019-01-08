@@ -19,10 +19,9 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
   # ---
 
   @impl Handler
-  def handle_http_request(conn, api, endpoint) do
+  def handle_http_request(conn, api, endpoint, request_path) do
     %{
       method: method,
-      request_path: request_path,
       params: params,
       req_headers: req_headers
     } = conn

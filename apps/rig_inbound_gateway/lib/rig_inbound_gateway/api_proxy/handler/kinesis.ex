@@ -16,17 +16,17 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   # ---
 
   @impl Handler
-  def handle_http_request(conn, api, endpoint)
+  def handle_http_request(conn, api, endpoint, request_path)
 
   @doc "CORS response for preflight request."
-  def handle_http_request(%{method: "OPTIONS"} = conn, _, %{"target" => "kinesis"}) do
+  def handle_http_request(%{method: "OPTIONS"} = conn, _, %{"target" => "kinesis"}, _) do
     conn
     |> with_cors()
     |> Conn.send_resp(:no_content, "")
   end
 
   @doc "Produce request to Kafka topic and optionally wait for response."
-  def handle_http_request(conn, _, %{"target" => "kinesis"} = endpoint) do
+  def handle_http_request(conn, _, %{"target" => "kinesis"} = endpoint, request_path) do
     %{params: %{"partition_key" => partition_key, "data" => data}} = conn
 
     kinesis_message =
@@ -35,7 +35,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         correlationID: Codec.serialize(self()),
         host: conn.host,
         method: conn.method,
-        requestPath: conn.request_path,
+        requestPath: request_path,
         port: conn.port,
         remoteIP: to_string(:inet_parse.ntoa(conn.remote_ip)),
         reqHeaders: Enum.map(conn.req_headers, &Tuple.to_list(&1)),
