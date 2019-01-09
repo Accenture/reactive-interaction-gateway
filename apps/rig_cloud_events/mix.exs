@@ -38,11 +38,7 @@ defmodule CloudEvents.MixProject do
       {:jason, "~> 1.1"},
       {:jaxon, "~> 1.0"},
       # JSON Pointer implementation:
-      {:odgn_json_pointer, "~> 2.3"},
-      # Auto-fill eventTime:
-      {:timex, "~> 3.4"},
-      # Auto-fill eventID:
-      {:uuid, "~> 1.1"}
+      {:odgn_json_pointer, "~> 2.3"}
     ]
   end
 end
