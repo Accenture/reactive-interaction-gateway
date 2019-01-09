@@ -13,26 +13,30 @@ defmodule RigInboundGateway.Events do
     connection_pid = self()
     connection_token = Connection.Codec.serialize(connection_pid)
 
-    CloudEvent.parse!(%{
-      specversion: "0.2",
-      type: "rig.connection.create",
-      source: "rig",
-      id: UUID.uuid4(),
-      data: %{connection_token: connection_token}
-    })
+    rig_event(
+      "rig.connection.create",
+      %{connection_token: connection_token}
+    )
   end
 
   @spec subscriptions_set([Subscription.t()]) :: CloudEvent.t()
   def subscriptions_set(subscriptions) do
+    rig_event(
+      "rig.subscriptions_set",
+      Enum.map(subscriptions, fn %Subscription{event_type: event_type, constraints: constraints} ->
+        %{"eventType" => event_type, "oneOf" => constraints}
+      end)
+    )
+  end
+
+  defp rig_event(type, data) do
     CloudEvent.parse!(%{
       specversion: "0.2",
-      type: "rig.subscriptions_set",
+      type: type,
       source: "rig",
       id: UUID.uuid4(),
-      data:
-        Enum.map(subscriptions, fn %Subscription{event_type: event_type, constraints: constraints} ->
-          %{"eventType" => event_type, "oneOf" => constraints}
-        end)
+      time: Timex.now() |> Timex.format!("{RFC3339}"),
+      data: data
     })
   end
 end
