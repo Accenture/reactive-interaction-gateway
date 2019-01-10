@@ -49,6 +49,7 @@
           cloudEventsVersion: "0.1",
           eventID: randomString(),
           eventType: "greeting",
+          eventTime: new Date().toISOString(),
           source: "sse-demo-ui",
           contentType: "text/plain",
           data: {
@@ -79,8 +80,17 @@
 
     function createSubscription(connectionToken) {
       const eventType = "greeting"
-      const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbImN1c3RvbWVyIl0sInVzZXJuYW1lIjoiZmlyc3QudXNlci5zayIsImZ1bGxuYW1lIjoiRmlyc3QgVXNlciBTSyIsImVtYWlsIjoiRWx5c2U0MEB5YWhvby5jb20iLCJhdmF0YXIiOiJodHRwczovL3MzLmFtYXpvbmF3cy5jb20vdWlmYWNlcy9mYWNlcy90d2l0dGVyL2Rvcm9ubWFsa2kvMTI4LmpwZyIsImliYW4iOiJTSzEyQVJFUzAwU0swMDAwMSIsInVzZXJUeXBlIjoiaW5kaXZpZHVhbCIsImJ1c2luZXNzQXJlYSI6IiIsImNvdW50cnkiOiJTbG92YWtpYSIsInNjb3BlcyI6e30sImlhdCI6MTU0MTQxMzA4MiwiZXhwIjoxNTQxNDE2NjgyLCJqdGkiOiI5NzMwMGIzMi05OWRkLTRhMzUtOWQ2OC1mYWE1ZDVkZTMzMzMifQ.iGPfYIXlvaA4O1bBImRvYzKMXYDH7WpfzBIazMCoY5c";
-      // const jwt = "bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbImN1c3RvbWVyIl0sInVzZXJuYW1lIjoiZmlyc3QudXNlci5zayIsImZ1bGxuYW1lIjoiRmlyc3QgVXNlciBTSyIsImVtYWlsIjoiRWx5c2U0MEB5YWhvby5jb20iLCJhdmF0YXIiOiJodHRwczovL3MzLmFtYXpvbmF3cy5jb20vdWlmYWNlcy9mYWNlcy90d2l0dGVyL2Rvcm9ubWFsa2kvMTI4LmpwZyIsImliYW4iOiJTSzEyQVJFUzAwU0swMDAwMSIsInVzZXJUeXBlIjoiaW5kaXZpZHVhbCIsImJ1c2luZXNzQXJlYSI6IiIsImNvdW50cnkiOiJTbG92YWtpYSIsInNjb3BlcyI6e30sImlhdCI6MTU0MTE2MTkxMywiZXhwIjoxNTQxMTY1NTEzLCJqdGkiOiJhMDgxMWQzZS05NGJlLTRjNTUtYWZiZi1iN2QzMzc0N2NjZGYifQ.9JOOST3TvZL7EFevT4qrwgaqmU5ulQOLBnI7plP8J-w";
+      /**
+       * JWT PAYLOAD DATA
+       * {
+       *   "sub": "1234567890",
+       *   "fullname": "John Doe",
+       *   "username": "john.doe",
+       *   "iat": 4103258143,
+       *   "exp": 4103258143
+       * }
+       */
+      const jwt = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZnVsbG5hbWUiOiJKb2huIERvZSIsInVzZXJuYW1lIjoiam9obi5kb2UiLCJpYXQiOjQxMDMyNTgxNDMsImV4cCI6NDEwMzI1ODE0M30.3ziftuo1JbXed7XSFJTcrdzOewSu7Jos9Vljk9dOTYI";
       return fetch(`${baseUrl}/connection/sse/${connectionToken}/subscriptions`, {
         method: "PUT",
         mode: "cors",

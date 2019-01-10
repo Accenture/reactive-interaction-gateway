@@ -49,6 +49,7 @@
           cloudEventsVersion: "0.1",
           eventID: randomString(),
           eventType: "greeting",
+          eventTime: new Date().toISOString(),
           source: "sse-demo-ui",
           contentType: "text/plain",
           data: greeting
@@ -89,7 +90,7 @@
     source.onmessage = (e) => {
       console.log("message", e)
       const cloudEvent = JSON.parse(e.data)
-      if (cloudEvent.eventType === 'rig.connection.create') {
+      if (cloudEvent.type === 'rig.connection.create') {
         payload = cloudEvent.data
         connectionToken = payload["connection_token"]
         createSubscription(connectionToken)
