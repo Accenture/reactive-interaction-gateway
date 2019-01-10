@@ -75,8 +75,8 @@ class HomeSplash extends React.Component {
         <div className="inner" style={{ padding: "5em 0em" }}>
           <ProjectTitle />
           <PromoSection>
-            <Button href={docUrl('intro.html', language)}>What is this?</Button>
-            <Button href={docUrl('getting-started.html', language)}>Get Started</Button>
+            <Button href={docUrl('intro.html', language)}>Introduction</Button>
+            <Button href={docUrl('tutorial.html', language)}>Tutorial</Button>
             <Button href="https://github.com/Accenture/reactive-interaction-gateway">GitHub</Button>
           </PromoSection>
         </div>

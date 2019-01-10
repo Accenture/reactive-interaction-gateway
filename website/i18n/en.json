@@ -13,10 +13,6 @@
         "title": "Frequently Asked Questions",
         "sidebar_label": "FAQ"
       },
-      "getting-started": {
-        "title": "Getting started",
-        "sidebar_label": "Getting started"
-      },
       "intro": {
         "title": "What is RIG?",
         "sidebar_label": "What is RIG?"
@@ -33,6 +29,10 @@
         "title": "The Big Picture",
         "sidebar_label": "The Big Picture"
       },
+      "tutorial": {
+        "title": "Tutorial",
+        "sidebar_label": "Tutorial"
+      },
       "user-authentication": {
         "title": "User authentication",
         "sidebar_label": "User authentication"
@@ -42,7 +42,10 @@
       "Docs": "Docs"
     },
     "categories": {
-      "For Developers": "For Developers",
+      "Getting Started": "Getting Started",
+      "Main Concepts": "Main Concepts",
+      "Advanced Guides": "Advanced Guides",
+      "API Reference": "API Reference",
       "RIG in Production": "RIG in Production",
       "Hacking the Source": "Hacking the Source"
     }

@@ -4,8 +4,6 @@ title: What is RIG?
 sidebar_label: What is RIG?
 ---
 
-(If you're in a hurry you can skip this part and go directly to [setting up your development environment](getting-started.md).)
-
 ## The ugly part of web apps: handling asynchronous events
 
 Do you already use asynchronous events in your app? If you don't, you probably should. Just think of a website that shows game stats of your favorite sports team while they're on the field. I bet you'd expect the scores to be updated in real-time - you definitely don't want to refresh the page every 10 seconds. But how would you implement something like that in your app?
