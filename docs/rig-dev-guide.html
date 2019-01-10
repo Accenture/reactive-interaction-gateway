@@ -56,6 +56,7 @@ using <code>iex --sname nodename -S mix</code>.</li>
 <tr><td>apps/rig</td><td><code>:rig</code></td><td>The main application logic, including event filtering and distribution.</td></tr>
 <tr><td>apps/rig_api</td><td><code>:rig_api</code></td><td>The internal API, built as a Phoenix app. The actual code triggered by a call to this API would typically be implemented in another umbrella app (for example, see <code>RigApi.MessageController</code>, which uses <code>RigOutboundGateway.send/1</code> underneath).</td></tr>
 <tr><td>apps/rig_auth</td><td><code>:rig_auth</code></td><td>Code concerned with handling JWTs (or authentication, in general).</td></tr>
+<tr><td>apps/rig_cloud_events</td><td><code>:rig_cloud_events</code></td><td>CloudEvents implementation.</td></tr>
 <tr><td>apps/rig_inbound_gateway</td><td><code>:rig_inbound_gateway</code></td><td>The externally facing HTTP server, built as a Phoenix app. It includes the reverse proxy, which forwards requests to back-end services as configured, as well as the Phoenix transports (e.g., WebSocket and SSE endpoints).</td></tr>
 <tr><td>apps/rig_kafka</td><td><code>:rig_kafka</code></td><td>Kafka group consumer and producer.</td></tr>
 <tr><td>apps/rig_outbound_gateway</td><td><code>:rig_outbound_gateway</code></td><td>Messages that are to be distributed to connected front-ends go through the outbound gateway.</td></tr>
