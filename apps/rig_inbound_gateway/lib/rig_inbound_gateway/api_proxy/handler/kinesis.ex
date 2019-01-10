@@ -27,10 +27,10 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   # ---
 
   @impl Handler
-  def handle_http_request(conn, api, endpoint)
+  def handle_http_request(conn, api, endpoint, request_path)
 
   @doc "CORS response for preflight request."
-  def handle_http_request(%{method: "OPTIONS"} = conn, _, %{"target" => "kinesis"}) do
+  def handle_http_request(%{method: "OPTIONS"} = conn, _, %{"target" => "kinesis"}, _) do
     conn
     |> with_cors()
     |> Conn.send_resp(:no_content, "")
@@ -40,7 +40,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   def handle_http_request(
         %{params: %{"partition" => partition, "event" => event}} = conn,
         _,
-        %{"target" => "kinesis"} = endpoint
+        %{"target" => "kinesis"} = endpoint,
+        request_path
       ) do
     kinesis_message =
       event
@@ -52,7 +53,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         scheme: conn.scheme,
         headers: Enum.map(conn.req_headers, &Tuple.to_list(&1)),
         method: conn.method,
-        path: conn.request_path,
+        path: request_path,
         query: conn.query_string
       })
       |> Poison.encode!()
@@ -72,7 +73,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     end
   end
 
-  def handle_http_request(conn, _, %{"target" => "kinesis"}) do
+  def handle_http_request(conn, _, %{"target" => "kinesis"}, _) do
     response = """
     Bad request: missing expected body parameters.
 

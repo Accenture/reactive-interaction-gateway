@@ -35,18 +35,18 @@ defmodule RigInboundGateway.ApiProxy.Router do
       [] ->
         send_resp(conn, :not_found, Serializer.encode_error_message(:not_found))
 
-      [{api, endpoint} | other_matches] ->
+      [{api, endpoint, request_path} | other_matches] ->
         if other_matches != [] do
           Logger.warn(fn -> "Multiple API definitions for %{conn.method} %{conn.request_path}" end)
         end
 
-        proxy_request(conn, api, endpoint)
+        proxy_request(conn, api, endpoint, request_path)
     end
   end
 
   # ---
 
-  defp proxy_request(conn, api, endpoint) do
+  defp proxy_request(conn, api, endpoint, request_path) do
     with :ok <- Auth.check(conn, api, endpoint),
          conn <- transform_req_headers(conn, api, endpoint) do
       target = Map.get(endpoint, "target", "http") |> String.downcase()
@@ -58,7 +58,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
           "kinesis" -> KinesisHandler
         end
 
-      handler.handle_http_request(conn, api, endpoint)
+      handler.handle_http_request(conn, api, endpoint, request_path)
     else
       {:error, :authentication_failed} -> send_resp(conn, :unauthorized, "Authentication failed.")
     end
