@@ -6,5 +6,7 @@ defmodule RigInboundGateway.ApiProxy.Handler do
 
   alias RigInboundGateway.ApiProxy.Api
 
-  @callback handle_http_request(Conn.t(), Api.t(), Api.endpoint()) :: :ok | {:error, any}
+  @type request_path :: String.t()
+  @callback handle_http_request(Conn.t(), Api.t(), Api.endpoint(), request_path) ::
+              :ok | {:error, any}
 end

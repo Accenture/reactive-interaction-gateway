@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HTTP/2 and HTTPS support. [#34](https://github.com/Accenture/reactive-interaction-gateway/issues/34)
 - The SSE and WebSocket endpoints now take a "subscriptions" parameter that allows to create (manual) subscriptions (JSON encoded list). This has the same effect as establishing a connection and calling the subscriptions endpoint afterwards.
 - OpenAPI (Swagger) documentation for RIG's internal API. [#116](https://github.com/Accenture/reactive-interaction-gateway/issues/116)
+- [Proxy] In API definitions regular expressions can now be used to define matching request paths. Also, request paths can be rewritten (see [api.ex](apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/api.ex) for an example). [#88](https://github.com/Accenture/reactive-interaction-gateway/issues/88)
 
 ### Changed
 
