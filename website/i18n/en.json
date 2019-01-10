@@ -39,13 +39,13 @@
       }
     },
     "links": {
-      "Docs": "Docs"
+      "Docs": "Docs",
+      "API Reference": "API Reference"
     },
     "categories": {
       "Getting Started": "Getting Started",
       "Main Concepts": "Main Concepts",
       "Advanced Guides": "Advanced Guides",
-      "API Reference": "API Reference",
       "RIG in Production": "RIG in Production",
       "Hacking the Source": "Hacking the Source"
     }
