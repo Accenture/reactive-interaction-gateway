@@ -54,19 +54,21 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     sync_response = %{"message" => "the client never sees this response"}
     async_response = %{"message" => "this is the async response that reaches the client instead"}
 
-    route(endpoint_path, fn %{query: query} ->
-      correlation_id =
-        query
-        |> Map.fetch!("correlationID")
-        |> URI.decode_www_form()
-
-      message =
-        async_response
-        |> Map.put("rig", %{"correlationID" => correlation_id})
-        |> Jason.encode!()
+    # The following service fake also shows how a real service should
+    # wrap its response in a CloudEvent:
+    route(endpoint_path, fn %{query: %{"correlation" => correlation_id}} ->
+      event =
+        Jason.encode!(%{
+          specversion: "0.2",
+          type: "rig.async-response",
+          source: "fake-service",
+          id: "1",
+          rig: %{correlation: correlation_id},
+          data: async_response
+        })
 
       kafka_config = kafka_config()
-      assert :ok == RigKafka.produce(kafka_config, kafka_topic, "response", message)
+      assert :ok == RigKafka.produce(kafka_config, kafka_topic, "response", event)
       Response.ok!(sync_response, %{"content-type" => "application/json"})
     end)
 
@@ -114,6 +116,6 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     # ...the client never saw the http response:
     assert Jason.decode!(res_body) != sync_response
     # ...but the client got the response sent to the Kafka topic:
-    assert Jason.decode!(res_body)["message"] == Map.fetch!(async_response, "message")
+    assert Jason.decode!(res_body)["data"] == async_response
   end
 end

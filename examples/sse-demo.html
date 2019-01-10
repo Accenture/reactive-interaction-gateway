@@ -49,6 +49,7 @@
           cloudEventsVersion: "0.1",
           eventID: randomString(),
           eventType: "greeting",
+          eventTime: new Date().toISOString(),
           source: "sse-demo-ui",
           contentType: "text/plain",
           data: greeting

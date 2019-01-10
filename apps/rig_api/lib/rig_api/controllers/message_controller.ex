@@ -4,7 +4,7 @@ defmodule RigApi.MessageController do
   use RigApi, :controller
   use PhoenixSwagger
 
-  alias CloudEvent
+  alias RigCloudEvents.CloudEvent
 
   action_fallback(RigApi.FallbackController)
 
@@ -21,7 +21,7 @@ defmodule RigApi.MessageController do
     parameters do
       messageBody(
         :body,
-        Schema.ref(:MessageCloudEvent),
+        Schema.ref(:CloudEvent),
         "CloudEvent",
         required: true
       )
@@ -40,7 +40,7 @@ defmodule RigApi.MessageController do
   - Given 'foo', the `:urlencoded` parser will pass '{"foo": nil}'.
   """
   def create(conn, message) do
-    with {:ok, cloud_event} <- CloudEvent.new(message) do
+    with {:ok, cloud_event} <- CloudEvent.parse(message) do
       @event_filter.forward_event(cloud_event)
 
       send_resp(conn, :accepted, "message queued for transport")
@@ -54,30 +54,29 @@ defmodule RigApi.MessageController do
 
   def swagger_definitions do
     %{
-      MessageCloudEvent:
+      CloudEvent:
         swagger_schema do
-          title("Message Cloud Event")
-          description("The message to be provide to frontends in Cloud Event format")
+          title("CloudEvent")
+          description("The broadcasted CloudEvent according to the CloudEvents spec.")
 
           properties do
-            cloudEventsVersion(:string, "Cloud Events Version", required: true, example: "0.1")
-            eventID(:string, "unique ID for an event", required: true, example: "first-event")
-
-            eventTime(:string, "Event Time",
+            specversion(
+              :string,
+              "The version of the CloudEvents specification which the event uses. This \
+              enables the interpretation of the context. Compliant event producers \
+              MUST use a value of 0.2 when referring to this version of the \
+              specification.",
               required: true,
-              example: "2018-08-21T09:11:27.614970+00:00"
+              example: "0.2"
             )
 
-            eventType(:string, "the event type in reverse-DNS notation",
+            type(
+              :string,
+              "Type of occurrence which has happened. Often this attribute is used for \
+              routing, observability, policy enforcement, etc.",
               required: true,
-              example: "greeting"
+              example: "com.example.object.delete.v2"
             )
-
-            source(:string, "describes the event producer.", required: true, example: "tutorial")
-            # extensions(:string, "Cloud events extensions.", required: false)
-            # schemaURL(:string, "Schema URL", required: false)
-            # contentType(:string, "Content Type", required: false)
-            # data(:string, "Data", required: false)
           end
         end
     }

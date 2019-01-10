@@ -56,6 +56,7 @@ release :rig do
       rig: :permanent,
       rig_api: :permanent,
       rig_auth: :permanent,
+      rig_cloud_events: :permanent,
       rig_kafka: :permanent,
       rig_inbound_gateway: :permanent,
       rig_outbound_gateway: :permanent
