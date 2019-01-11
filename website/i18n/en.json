@@ -14,8 +14,8 @@
         "sidebar_label": "FAQ"
       },
       "intro": {
-        "title": "What is RIG?",
-        "sidebar_label": "What is RIG?"
+        "title": "Intro",
+        "sidebar_label": "Intro"
       },
       "rig-dev-guide": {
         "title": "Developer's Guide to the Reactive Interaction Gateway",
@@ -24,10 +24,6 @@
       "rig-ops-guide": {
         "title": "Operator's Guide to the Reactive Interaction Gateway",
         "sidebar_label": "Operator's Guide"
-      },
-      "the-big-picture": {
-        "title": "The Big Picture",
-        "sidebar_label": "The Big Picture"
       },
       "tutorial": {
         "title": "Tutorial",
