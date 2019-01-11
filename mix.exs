@@ -61,6 +61,7 @@ defmodule Rig.Umbrella.Mixfile do
   defp package do
     [
       name: "rig",
+      organization: "Accenture",
       maintainers: ["Kevin Bader", "Mario Macai"],
       licenses: ["Apache 2.0"],
       links: %{"GitHub" => "https://github.com/Accenture/reactive-interaction-gateway"}
@@ -72,23 +73,8 @@ defmodule Rig.Umbrella.Mixfile do
       main: "api-reference",
       output: "website/static/reference",
       extras: [
-        "README.md": [title: "README"],
-        # "guides/motivation.md": [title: "Why we built it"],
-        # "guides/configuration.md": [title: "Configuration"],
-        "CODE_OF_CONDUCT.md": [title: "Code of Conduct"],
-        "CONTRIBUTING.md": [title: "Contributing"]
-        # "guides/architecture/decisions/0001-record-architecture-decisions.md": [
-        #   group: "Architecture Decisions"
-        # ],
-        # "guides/architecture/decisions/0002-don-t-check-for-functionclauseerror-in-tests.md": [
-        #   group: "Architecture Decisions"
-        # ],
-        # "guides/architecture/decisions/0004-use-rig-config-for-global-configuration.md": [
-        #   group: "Architecture Decisions"
-        # ],
-        # "guides/architecture/decisions/0005-maintain-changelog.md": [
-        #   group: "Architecture Decisions"
-        # ]
+        "README.md": [title: "Readme"],
+        "CHANGELOG.md": [title: "Changelog"]
       ]
     ]
   end
