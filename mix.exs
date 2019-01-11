@@ -69,12 +69,17 @@ defmodule Rig.Umbrella.Mixfile do
   end
 
   defp docs do
+    apps =
+      for snake_cased_string <- File.ls!("apps"),
+          do: :"Elixir.#{Macro.camelize(snake_cased_string)}"
+
     [
       main: "api-reference",
       output: "website/static/reference",
       extras: [
         "CHANGELOG.md": [title: "Changelog"]
-      ]
+      ],
+      nest_modules_by_prefix: apps
     ]
   end
 end
