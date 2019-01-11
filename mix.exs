@@ -73,7 +73,6 @@ defmodule Rig.Umbrella.Mixfile do
       main: "api-reference",
       output: "website/static/reference",
       extras: [
-        "README.md": [title: "Readme"],
         "CHANGELOG.md": [title: "Changelog"]
       ]
     ]
