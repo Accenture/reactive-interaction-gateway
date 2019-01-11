@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HTTP/2 and HTTPS support. [#34](https://github.com/Accenture/reactive-interaction-gateway/issues/34)
 - The SSE and WebSocket endpoints now take a "subscriptions" parameter that allows to create (manual) subscriptions (JSON encoded list). This has the same effect as establishing a connection and calling the subscriptions endpoint afterwards.
 - OpenAPI (Swagger) documentation for RIG's internal API. [#116](https://github.com/Accenture/reactive-interaction-gateway/issues/116)
+- Support for the CloudEvents v0.2 format. [#112](https://github.com/Accenture/reactive-interaction-gateway/issues/112)
 - [Proxy] In API definitions regular expressions can now be used to define matching request paths. Also, request paths can be rewritten (see [api.ex](apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/api.ex) for an example). [#88](https://github.com/Accenture/reactive-interaction-gateway/issues/88)
 
 ### Changed
@@ -21,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Proxy] When forwarding requests, RIG related meta data (e.g. correlation ID) in CloudEvents is now put into an object under the top-level key "rig". Note that in terms of the current [CloudEvents 0.2](https://github.com/cloudevents/spec/blob/v0.2/spec.md) specification this makes "rig" an [extension](https://github.com/cloudevents/spec/blob/v0.2/primer.md#cloudevent-attribute-extensions). Also, all RIG related keys have been renamed from snake_case to camelCase.
 - [Proxy] Previously API definitions for proxy were turning on security check for endpoints by `not_secured: false` which is a bit confusing -- changed to more readable form `secured: true`.
 - [Auth] No longer assumes the "Bearer" token type when no access token type is prepended in the Authorization header. Consequently, a client is expected to explicitly use "Bearer" for sending its JWT authorization token. More more details, see [RFC 6749](https://tools.ietf.org/html/rfc6749#section-7.1).
+- All events that RIG creates are now in CloudEvents v0.2 format (before: CloudEvents v0.1).
+- [Proxy] When using Kafka or Kinesis as the target, connection related data is added to the event before publishing it to the respective topic/partition. With the introduction of CloudEvents v0.2, RIG now follows the CloudEvent extension syntax with all fields put into a common top-level object called "rig". Additionally, the object's field names have been changed slightly to prevent simple mistakes like case-sensitivity issues. Also, the expected request body fields have been renamed to be more descriptive. To that end, usage information returned as plaintext should help the API user in case of a Bad Request.
 
 <!-- ### Deprecated -->
 

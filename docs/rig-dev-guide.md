@@ -37,6 +37,7 @@ Path | Umbrella&nbsp;App&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&n
 apps/rig | `:rig` | The main application logic, including event filtering and distribution.
 apps/rig_api | `:rig_api` | The internal API, built as a Phoenix app. The actual code triggered by a call to this API would typically be implemented in another umbrella app (for example, see `RigApi.MessageController`, which uses `RigOutboundGateway.send/1` underneath).
 apps/rig_auth | `:rig_auth` | Code concerned with handling JWTs (or authentication, in general).
+apps/rig_cloud_events | `:rig_cloud_events` | CloudEvents implementation.
 apps/rig_inbound_gateway | `:rig_inbound_gateway` | The externally facing HTTP server, built as a Phoenix app. It includes the reverse proxy, which forwards requests to back-end services as configured, as well as the Phoenix transports (e.g., WebSocket and SSE endpoints).
 apps/rig_kafka | `:rig_kafka` | Kafka group consumer and producer.
 apps/rig_outbound_gateway | `:rig_outbound_gateway` | Messages that are to be distributed to connected front-ends go through the outbound gateway.

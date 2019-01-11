@@ -5,9 +5,8 @@ defmodule Rig.EventStream.KafkaToFilter do
   """
   use Rig.KafkaConsumerSetup
 
-  alias CloudEvent
-
   alias Rig.EventFilter
+  alias RigCloudEvents.CloudEvent
 
   # ---
 
@@ -16,9 +15,9 @@ defmodule Rig.EventStream.KafkaToFilter do
   # ---
 
   def kafka_handler(message) do
-    case CloudEvent.new(message) do
-      {:ok, cloud_event} ->
-        Logger.debug(fn -> inspect(cloud_event) end)
+    case CloudEvent.parse(message) do
+      {:ok, %CloudEvent{} = cloud_event} ->
+        Logger.debug(fn -> inspect(cloud_event.parsed) end)
         EventFilter.forward_event(cloud_event)
         :ok
 

@@ -12,6 +12,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   alias Rig.EventFilter
   alias Rig.Subscription
+  alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.AutomaticSubscriptions.Jwt, as: JwtSubscriptions
   alias RigInboundGateway.Events
   alias RigInboundGateway.Subscriptions
@@ -80,10 +81,10 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   # ---
 
   @impl :cowboy_websocket
-  def websocket_info({:cloud_event, cloud_event}, state) do
-    Logger.debug(fn -> inspect(cloud_event) end)
+  def websocket_info({:cloud_event, event}, state) do
+    Logger.debug(fn -> inspect(event) end)
     # Forward the event:
-    {:reply, frame(cloud_event), state}
+    {:reply, frame(event), state}
   end
 
   @impl :cowboy_websocket
@@ -120,7 +121,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   # ---
 
-  defp frame(%{} = cloud_event) do
-    {:text, Jason.encode!(cloud_event)}
+  defp frame(%CloudEvent{json: json}) do
+    {:text, json}
   end
 end

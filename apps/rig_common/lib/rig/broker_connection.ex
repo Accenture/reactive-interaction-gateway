@@ -3,7 +3,7 @@ defmodule Rig.BrokerConnection do
   Interface to any publish-subscribe capable broker service.
   """
 
-  alias Rig.CloudEvent
+  alias RigCloudEvents.CloudEvent
 
   @type connection :: any
   @type topic :: String.t()

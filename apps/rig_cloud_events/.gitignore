@@ -20,5 +20,5 @@ erl_crash.dump
 *.ez
 
 # Ignore package tarball (built via "mix hex.build").
-cloud_events-*.tar
+rig_cloud_events-*.tar
 

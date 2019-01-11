@@ -256,10 +256,10 @@ defmodule Rig.EventFilter do
       removed eventually.
 
   """
-  alias Rig.CloudEvent
   alias Rig.EventFilter.Server, as: Filter
   alias Rig.EventFilter.Sup, as: FilterSup
   alias Rig.Subscription
+  alias RigCloudEvents.CloudEvent
 
   @doc """
   Refresh an existing subscription.
@@ -285,7 +285,8 @@ defmodule Rig.EventFilter do
 
   @callback forward_event(CloudEvent.t()) :: :ok
   @spec forward_event(CloudEvent.t()) :: :ok
-  def forward_event(%{"eventType" => event_type} = event) do
+  def forward_event(%CloudEvent{} = event) do
+    event_type = CloudEvent.type!(event)
     # On any node, there is only one Filter process for a given event type, or none, if
     # there are no subscriptions for the event type.
     with name <- Filter.process(event_type) do

@@ -3,10 +3,10 @@ defmodule Rig.EventFilter.ServerTest do
   use ExUnit.Case, async: false
   doctest Rig.EventFilter.Server
 
-  alias CloudEvent
   alias Rig.EventFilter
   alias Rig.EventFilter.Server
   alias Rig.Subscription
+  alias RigCloudEvents.CloudEvent
 
   test "subscribe & receive an event" do
     event_type = "test.event"
@@ -14,10 +14,11 @@ defmodule Rig.EventFilter.ServerTest do
     subscription = Subscription.new(%{event_type: event_type})
 
     event =
-      CloudEvent.new!(%{
-        "cloudEventsVersion" => "0.1",
-        "eventType" => event_type,
-        "source" => "test"
+      CloudEvent.parse!(%{
+        "specversion" => "0.2",
+        "type" => event_type,
+        "source" => "test",
+        "id" => "1"
       })
 
     opts = [debug?: true, subscription_ttl_s: 0]
@@ -66,19 +67,27 @@ defmodule Rig.EventFilter.ServerTest do
     joe_and_30_subscription =
       Subscription.new(%{event_type: event_type, constraints: [Map.merge(name_is_joe, age_is_30)]})
 
-    base_event =
-      CloudEvent.new!(%{
-        "cloudEventsVersion" => "0.1",
-        "eventType" => event_type,
-        "source" => "test"
-      })
+    base_event = %{"specversion" => "0.2", "type" => event_type, "source" => "test"}
 
-    joe_20_event = CloudEvent.with_data(base_event, %{"name" => "joe", "age" => 20, "x" => "x"})
-    joe_30_event = CloudEvent.with_data(base_event, %{"name" => "joe", "age" => 30, "x" => "x"})
-    bob_30_event = CloudEvent.with_data(base_event, %{"name" => "bob", "age" => 30, "x" => "x"})
+    joe_20_event =
+      base_event
+      |> Map.merge(%{"id" => 1, "data" => %{"name" => "joe", "age" => 20, "x" => "x"}})
+      |> CloudEvent.parse!()
+
+    joe_30_event =
+      base_event
+      |> Map.merge(%{"id" => 2, "data" => %{"name" => "joe", "age" => 30, "x" => "x"}})
+      |> CloudEvent.parse!()
+
+    bob_30_event =
+      base_event
+      |> Map.merge(%{"id" => 3, "data" => %{"name" => "bob", "age" => 30, "x" => "x"}})
+      |> CloudEvent.parse!()
 
     joe_noage_event =
-      CloudEvent.with_data(base_event, %{"name" => "joe", "age" => nil, "x" => "x"})
+      base_event
+      |> Map.merge(%{"id" => 4, "data" => %{"name" => "joe", "age" => nil, "x" => "x"}})
+      |> CloudEvent.parse!()
 
     specs = [
       {joe_subscription, joe_20_event, :match},
@@ -127,15 +136,13 @@ defmodule Rig.EventFilter.ServerTest do
 
     EventFilter.refresh_subscriptions([greetings_to_joe_subscription], [])
 
-    base_event =
-      CloudEvent.new!(%{
-        "cloudEventsVersion" => "0.1",
-        "eventType" => event_type,
-        "source" => "test"
-      })
+    base_event = %{"specversion" => "0.2", "type" => event_type, "source" => "test"}
 
-    greeting_to_joe = CloudEvent.with_data(base_event, %{"name" => "joe"})
-    greeting_to_sam = CloudEvent.with_data(base_event, %{"name" => "sam"})
+    greeting_to_joe =
+      base_event |> Map.merge(%{"id" => 1, "data" => %{"name" => "joe"}}) |> CloudEvent.parse!()
+
+    greeting_to_sam =
+      base_event |> Map.merge(%{"id" => 2, "data" => %{"name" => "sam"}}) |> CloudEvent.parse!()
 
     # Even though the greeting is for Sam and not for Joe, we receive it:
     EventFilter.forward_event(greeting_to_sam)

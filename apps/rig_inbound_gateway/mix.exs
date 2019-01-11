@@ -46,7 +46,7 @@ defmodule RigInboundGateway.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:cloud_events, in_umbrella: true},
+      {:rig_cloud_events, in_umbrella: true},
       {:rig, in_umbrella: true},
       {:rig_auth, in_umbrella: true},
       {:rig_kafka, in_umbrella: true},

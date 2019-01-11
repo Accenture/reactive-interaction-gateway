@@ -13,6 +13,17 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   alias RigInboundGateway.ApiProxy.Handler
   @behaviour Handler
 
+  @help_text """
+  Produce the request to a Kinesis topic and optionally wait for the (correlated) response.
+
+  Expects a JSON encoded HTTP body with the following fields:
+
+  - `event`: The published CloudEvent >= v0.2. The event is extended by metadata
+  written to the "rig" extension field (following the CloudEvents v0.2 spec).
+  - `partition`: The targetted Kafka partition.
+
+  """
+
   # ---
 
   @impl Handler
@@ -25,29 +36,29 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     |> Conn.send_resp(:no_content, "")
   end
 
-  @doc "Produce request to Kafka topic and optionally wait for response."
-  def handle_http_request(conn, _, %{"target" => "kinesis"} = endpoint, request_path) do
-    %{params: %{"partition_key" => partition_key, "data" => data}} = conn
-
+  @doc @help_text
+  def handle_http_request(
+        %{params: %{"partition" => partition, "event" => event}} = conn,
+        _,
+        %{"target" => "kinesis"} = endpoint,
+        request_path
+      ) do
     kinesis_message =
-      data
+      event
       |> Map.put("rig", %{
-        correlationID: Codec.serialize(self()),
+        correlation: Codec.serialize(self()),
+        remoteip: to_string(:inet_parse.ntoa(conn.remote_ip)),
         host: conn.host,
-        method: conn.method,
-        requestPath: request_path,
         port: conn.port,
-        remoteIP: to_string(:inet_parse.ntoa(conn.remote_ip)),
-        reqHeaders: Enum.map(conn.req_headers, &Tuple.to_list(&1)),
         scheme: conn.scheme,
-        queryString: conn.query_string
+        headers: Enum.map(conn.req_headers, &Tuple.to_list(&1)),
+        method: conn.method,
+        path: request_path,
+        query: conn.query_string
       })
       |> Poison.encode!()
 
-    produce(
-      _partition_key = partition_key,
-      _plaintext = kinesis_message
-    )
+    produce(partition, kinesis_message)
 
     wait_for_response? =
       case Map.get(endpoint, "response_from") do
@@ -60,6 +71,18 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     else
       Conn.send_resp(conn, :accepted, "Accepted.")
     end
+  end
+
+  def handle_http_request(conn, _, %{"target" => "kinesis"}, _) do
+    response = """
+    Bad request: missing expected body parameters.
+
+    # Usage
+
+    #{@help_text}
+    """
+
+    Conn.send_resp(conn, :bad_request, response)
   end
 
   # ---

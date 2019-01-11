@@ -5,8 +5,9 @@ defmodule Rig.EventStream.KafkaToHttp do
   """
   use Rig.KafkaConsumerSetup, [:targets]
 
-  alias CloudEvent
   alias HTTPoison
+
+  alias RigCloudEvents.CloudEvent
 
   # ---
 
@@ -16,9 +17,9 @@ defmodule Rig.EventStream.KafkaToHttp do
   # ---
 
   def kafka_handler(message) do
-    case CloudEvent.new(message) do
-      {:ok, cloud_event} ->
-        Logger.debug(fn -> inspect(cloud_event) end)
+    case CloudEvent.parse(message) do
+      {:ok, %CloudEvent{} = cloud_event} ->
+        Logger.debug(fn -> inspect(cloud_event.parsed) end)
         forward_to_external_endpoint(cloud_event)
 
       {:error, :parse_error} ->
@@ -30,12 +31,12 @@ defmodule Rig.EventStream.KafkaToHttp do
 
   # ---
 
-  defp forward_to_external_endpoint(cloud_event) do
+  defp forward_to_external_endpoint(%CloudEvent{json: json}) do
     %{targets: targets} = config()
     headers = [{"content-type", "application/json"}]
 
     for url <- targets do
-      body = Jason.encode!(cloud_event)
+      body = json
 
       case HTTPoison.post(url, body, headers) do
         {:ok, %HTTPoison.Response{status_code: status}}
