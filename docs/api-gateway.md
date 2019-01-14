@@ -18,7 +18,7 @@ docker run \
   accenture/reactive-interaction-gateway
 ```
 
-The file contains a list of API definitions. The definitions are expected in the same format as the HTTP request body outlined below.
+The file contains a list of API definitions. The definitions are expected in the same format as the HTTP request body outlined in [API documentation](../guides/configuration.md#api-gateway).
 
 ## Proxy HTTP API
 
