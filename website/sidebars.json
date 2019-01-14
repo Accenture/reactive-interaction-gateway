@@ -8,6 +8,7 @@
     ],
     "Main Concepts": [
       "api-gateway",
+      "event-subscription",
       "user-authentication"
     ],
     "Advanced Guides": [],
