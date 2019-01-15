@@ -17,7 +17,7 @@ Subsequent runs will be a bit faster, as the script does not tear down additiona
 The `run_smoke_tests.sh` scripts leaves Kafka and the fake REST-API service running, so you can easily run tests against them during development. For example, run this when in the project root directory:
 
 ```bash
-KAFKA_ENABLED=true PROXY_CONFIG_FILE=proxy/proxy.smoke_test.json mix test --only smoke
+KAFKA_BROKERS=localhost:9092 PROXY_CONFIG_FILE=proxy/proxy.smoke_test.json mix test --only smoke
 ```
 
 The default setting for the Kafka broker location is `localhost:9092`, so it'll pick up the running Kafka Docker container.

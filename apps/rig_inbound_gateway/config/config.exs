@@ -77,7 +77,7 @@ config :rig, RigInboundGateway.ApiProxy.Base,
 config :rig, RigInboundGateway.ApiProxy.Router,
   # E.g., to enable both console and kafka loggers, use ["console", "kafka"], which
   # corresponds to REQUEST_LOG=console,kafka. Note that for the Kafka logger to actually
-  # produce messages, KAFKA_ENABLED=1 has to be set as well.
+  # produce messages.
   active_loggers: {:system, :list, "REQUEST_LOG", []},
   logger_modules: %{
     "console" => RigInboundGateway.RequestLogger.Console,
@@ -117,8 +117,6 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"}
 
-config :rig, RigInboundGatewayWeb.Proxy.Controller, rig_proxy: RigInboundGateway.Proxy
-
 config :rig, RigInboundGateway.RateLimit,
   # Internal ETS table name (must be unique).
   table_name: :rate_limit_buckets,
@@ -134,31 +132,8 @@ config :rig, RigInboundGateway.RateLimit,
   sweep_interval_ms: {:system, :integer, "RATE_LIMIT_SWEEP_INTERVAL_MS", 5_000}
 
 # --------------------------------------
-# User Roles
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-# A connection is only considered a "session" if the user is member of the `session_role` as
-# defined here and stated in the JWT. For example, if you need a system user that should not show
-# up when listing active users, just make sure the user does not assume the session role.
-session_role = {:system, "SESSION_ROLE", "user"}
-
-# Users that belong to a privileged role are allowed to subscribe to messages of any user. Role
-# names are case-sensitive. By default, there are no privileged roles.
-# For example, to allow all users in the "admin" and "support" groups to subscribe to any
-# messages, you could use start RIG with `PRIVILEGED_ROLES=admin,support`.
-privileged_roles = {:system, :list, "PRIVILEGED_ROLES", []}
-
-# --------------------------------------
 # Authorization Token (JWT)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-# JWT payload fields:
-jwt_payload_field_map = %{
-  # The claim holding the user ID:
-  user: {:system, "JWT_USER_FIELD", "user"},
-  # The claim holding the user's roles:
-  roles: {:system, "JWT_ROLES_FIELD", "roles"}
-}
 
 config :rig, RigAuth.Session, jwt_session_field: {:system, "JWT_SESSION_FIELD", nil}
 
@@ -174,22 +149,6 @@ config :rig, RigInboundGateway.AutomaticSubscriptions.Jwt,
 # --------------------------------------
 # Transports, Channels, etc
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-config :rig, RigInboundGateway.Transports.ServerSentEvents,
-  user_channel_name_mf: {RigInboundGatewayWeb.Presence.Channel, :user_channel_name},
-  role_channel_name_mf: {RigInboundGatewayWeb.Presence.Channel, :role_channel_name}
-
-config :rig, RigInboundGatewayWeb.Presence.Channel,
-  # See "JWT payload fields"
-  jwt_user_field: jwt_payload_field_map.user,
-  # See "JWT payload fields"
-  jwt_roles_field: jwt_payload_field_map.roles,
-  # See "User Roles"
-  privileged_roles: privileged_roles
-
-config :rig, RigInboundGatewayWeb.Presence.Controller,
-  # See "User Roles"
-  session_role: session_role
 
 cors = {:system, "CORS", "*"}
 

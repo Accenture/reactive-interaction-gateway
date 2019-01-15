@@ -4,7 +4,6 @@ defmodule RigApi.ChannelsController do
 
   """
   use RigApi, :controller
-  use Rig.Config, [:session_role]
   require Logger
   alias RigAuth.Blacklist
   alias RigAuth.Jwt

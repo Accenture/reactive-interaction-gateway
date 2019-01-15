@@ -22,14 +22,12 @@ done
 
 section_header "Running tests, plaintext Kafka connection"
 $COMPOSE run --rm \
-  -e KAFKA_ENABLED=1 \
   -e KAFKA_SSL_ENABLED=0 \
   -e KAFKA_HOSTS=kafka:9292 \
   rig
 
 section_header "Running tests, encrypted Kafka connection"
 $COMPOSE run --rm \
-  -e KAFKA_ENABLED=1 \
   -e KAFKA_SSL_ENABLED=1 \
   -e KAFKA_HOSTS=kafka:9393 \
   -e KAFKA_SSL_KEYFILE_PASS=abcdefgh \

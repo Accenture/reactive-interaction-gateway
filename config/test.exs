@@ -25,11 +25,3 @@ config :rig, RigInboundGateway.Kafka.CallLogTest,
 
 config :rig, RigInboundGateway.Kafka.CallLogDisabledTest,
   jwt_secret_key: jwt_secret_key
-
-session_role = "customer"
-
-config :rig, RigApi.ChannelsController,
-  session_role: session_role
-
-config :rig, RigInboundGatewayWeb.Presence.Controller,
-  session_role: session_role
