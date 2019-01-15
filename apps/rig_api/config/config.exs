@@ -14,14 +14,24 @@ config :rig_api, :generators,
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 config :rig_api, RigApi.Endpoint,
+  server: true,
   url: [
     host: {:system, "HOST", "localhost"}
   ],
   http: [
-    port: {:system, :integer, "API_PORT", 4010}
+    port: {:system, :integer, "API_HTTP_PORT", 4010}
+  ],
+  https: [
+    port: {:system, :integer, "API_HTTPS_PORT", 4011},
+    otp_app: :rig,
+    cipher_suite: :strong,
+    certfile: "cert/selfsigned.pem",
+    keyfile: "cert/selfsigned_key.pem",
+    password: {:system, "HTTPS_KEYFILE_PASS", ""}
   ],
   render_errors: [view: RigApi.ErrorView, accepts: ~w(json)],
-  pubsub: [name: Rig.PubSub]
+  pubsub: [name: Rig.PubSub],
+  check_origin: false
 
 # Always start the HTTP endpoints on application startup:
 config :phoenix, :serve_endpoints, true

@@ -12,8 +12,8 @@ RIG uses environment variables for most of its configuration, listed in the foll
 
 Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description | Default
 -------------- | ----------- | -------
-`API_HTTP_PORT` | Port at which RIG exposes internal APIs such as API Proxy management or user connections management. | nil
-`API_HTTPS_PORT` | Same as `API_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | nil
+`API_HTTP_PORT` | Port at which RIG exposes internal APIs such as API Proxy management or user connections management. | 4010
+`API_HTTPS_PORT` | Same as `API_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | 4011
 `PROXY_HTTP_PORT` | RIG's ingress port that is used to proxy/forward incoming client requests. | 4000
 `PROXY_HTTPS_PORT` | Same as `PROXY_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | 4001
 `EVENT_HUB_HTTP_PORT` | Port used by clients to connect to RIG itself, e.g., for consuming events via SSE or WebSockets. | nil

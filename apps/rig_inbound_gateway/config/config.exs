@@ -56,10 +56,7 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
   ],
   render_errors: [view: RigInboundGatewayWeb.ErrorView, accepts: ~w(html json xml)],
   pubsub: [name: Rig.PubSub],
-  check_origin: false,
-  force_ssl: [
-    hsts: false
-  ]
+  check_origin: false
 
 config :mime, :types, %{
   "text/event-stream" => ["event-stream"]
