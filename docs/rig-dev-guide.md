@@ -78,6 +78,12 @@ To have the project use a newer Elixir version, make sure to change the followin
 - `Dockerfile` (the `FROM` image tag)
 - `version`
 
+## Releasing a new version
+
+- Increment `rig` version in the [version](../version) file
+- In [CHANGELOG.md](../CHANGELOG.md), rename `[Unreleased]` and add a corresponding link to the bottom of the file
+- Create a signed Git tag either using `git -s` or by creating a release using the Github UI
+
 ## Test Tags
 
 We use `tag`s to group tests together. Often, it makes sense to assign more than one tag to a test case.
