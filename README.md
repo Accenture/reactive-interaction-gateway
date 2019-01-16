@@ -14,13 +14,7 @@ Take a look at the [documentation](https://accenture.github.io/reactive-interact
 - Send events to RIG and have them forwarded to clients based on their event subscriptions.
 - Use RIG to forward client requests to backend services.
 
-<!-- You want UI updates without delay, "real time". However, handling connections to thousands of frontend instances concurrently is not only hard to implement in a scalable way – it also makes it very hard (impossible?) to upgrade your service without losing those connections. And in a microservice environment, which service should manage those connections? -->
-
-<!-- Instead, let the Reactive Interaction Gateway (RIG) handle those connections for you. RIG is designed for scalability and allows you to focus on more important things. Backend (micro)services no longer have to care about connection state, which allows them to be stateless. Having stateless services enables many things, including DevOps practices, rolling updates and auto-scaling. RIG is built for consuming events from message brokers like Kafka and Kinesis, but it also supports submitting events using HTTP POST, which is great for testing and low-traffic scenarios. -->
-
 Built on open standards, RIG is very easy to integrate – and easy to _replace_ – which means low-cost, low-risk adoption. Unlike other solutions, RIG does not leak into your application – no libraries or SDKs required.
-
-<!-- RIG also comes with a basic API gateway implementation, enabling effective two-way communication between your services and your frontends. -->
 
 For more details take a look at the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/the-big-picture.html).
 
