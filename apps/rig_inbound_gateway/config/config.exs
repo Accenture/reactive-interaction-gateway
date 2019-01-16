@@ -38,14 +38,12 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
     host: {:system, "HOST", "localhost"}
   ],
   http: [
-    # TODO: split this endpoint into one for the proxy and one for the event hub,
-    # TODO: then use the respective port settings.
-    port: {:system, :integer, "PROXY_HTTP_PORT", 4000},
+    port: {:system, :integer, "INBOUND_PORT", 4000},
     dispatch: cowboy_dispatch,
     transport_options: ranch_transport_options
   ],
   https: [
-    port: {:system, :integer, "PROXY_HTTPS_PORT", 4001},
+    port: {:system, :integer, "INBOUND_HTTPS_PORT", 4001},
     otp_app: :rig,
     cipher_suite: :strong,
     certfile: "cert/selfsigned.pem",
@@ -56,10 +54,7 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
   ],
   render_errors: [view: RigInboundGatewayWeb.ErrorView, accepts: ~w(html json xml)],
   pubsub: [name: Rig.PubSub],
-  check_origin: false,
-  force_ssl: [
-    hsts: false
-  ]
+  check_origin: false
 
 config :mime, :types, %{
   "text/event-stream" => ["event-stream"]
