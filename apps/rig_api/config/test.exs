@@ -2,8 +2,11 @@ use Mix.Config
 
 config :rig_api, RigApi.Endpoint,
   env: :test,
-  # server: false,
-  http: [port: System.get_env("API_PORT") || 4011]
+  https: [
+    certfile: "cert/selfsigned.pem",
+    keyfile: "cert/selfsigned_key.des3.pem",
+    password: "test"
+  ]
 
 config :rig, RigApi.ApisController, rig_proxy: RigInboundGateway.ProxyMock
 

@@ -12,8 +12,8 @@ RIG uses environment variables for most of its configuration, listed in the foll
 
 Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description | Default
 -------------- | ----------- | -------
-`API_HTTP_PORT` | Port at which RIG exposes internal APIs such as API Proxy management or user connections management. | nil
-`API_HTTPS_PORT` | Same as `API_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | nil
+`API_HTTP_PORT` | Port at which RIG exposes internal APIs such as API Proxy management or user connections management. | 4010
+`API_HTTPS_PORT` | Same as `API_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | 4011
 `INBOUND_PORT` | Port at which RIG exposes proxy and websocket/sse communication. | 4000
 `INBOUND_HTTPS_PORT` | Same as `INBOUND_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | 4000
 `HTTPS_CERTFILE` | Path to the (signed) client certificate (PEM format). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | nil
