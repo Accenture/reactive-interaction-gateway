@@ -43,8 +43,8 @@
       }
     },
     "links": {
-      "Docs": "Docs",
-      "API Reference": "API Reference"
+      "User Documentation": "User Documentation",
+      "Source Documentation": "Source Documentation"
     },
     "categories": {
       "Getting Started": "Getting Started",

@@ -21,11 +21,11 @@ const siteConfig = {
   repoUrl: `https://github.com/accenture/reactive-interaction-gateway`,
   headerLinks: [{
       doc: 'intro',
-      label: 'Docs'
+      label: 'User Documentation'
     },
     {
-      href: 'reference/',
-      label: 'API Reference'
+      href: 'source_docs/',
+      label: 'Source Documentation'
     },
     // { page: 'help', label: 'Help' },
     // { blog: true, label: 'Blog' },

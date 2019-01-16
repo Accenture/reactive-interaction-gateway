@@ -2,6 +2,8 @@ stages:
   - test
   - name: website
     if: branch = master AND type != pull_request
+  - name: sourcedocs
+    if: branch = master AND type != pull_request
 
 jobs:
   include:
@@ -25,3 +27,9 @@ jobs:
         - git config --global user.email "${GH_EMAIL}"
         - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
         - cd website && yarn install && GIT_USER="${GH_NAME}" yarn run publish-gh-pages
+    - stage: sourcedocs
+      language: elixir
+      elixir: "1.7"
+      otp_release: "21.0"
+      script:
+        - mix publish_gh_pages

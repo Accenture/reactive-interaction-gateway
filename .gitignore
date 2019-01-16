@@ -36,4 +36,4 @@ erl_crash.dump
 /website/build/
 
 # mix docs
-/website/static/reference
+/website/static/source_docs
