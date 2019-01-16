@@ -1,12 +1,6 @@
 use Mix.Config
 
 # --------------------------------------
-# Common
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-config :rig, RigOutboundGateway, message_user_field: {:system, "MESSAGE_USER_FIELD", "user"}
-
-# --------------------------------------
 # Kafka
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

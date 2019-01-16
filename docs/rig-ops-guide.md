@@ -30,12 +30,9 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `FIREHOSE_KINESIS_STREAM` | Kinesis stream RIG will use as a firehose consumer. Events will be sent to `FIREHOSE_KINESIS_HTTP_TARGETS | "RIG-firehose"
 `HOST` | Hostname for Phoenix endpoints (HTTP communication). | "localhost"
 `JWT_BLACKLIST_DEFAULT_EXPIRY_HOURS` | DEPRECATED. Default expiration time in hours for blacklisted JWTs. Used if JWT doesn't have an expiration time in claims. | 1
-`JWT_ROLES_FIELD` | DEPRECATED. Key in JWT claims under which roles are set for each user. | "roles"
 `JWT_SECRET_KEY` | The secret key used to sign and verify the JSON web tokens. | ""
 `JWT_ALG` | Algorithm used to sign and verify JSON web tokens. | "HS256"
-`JWT_USER_FIELD` | DEPRECATED. The JSON web token as sent by the front-ends should contain the user ID, in the same format used by the back-ends in the messages they send towards the user. `JWT_USER_FIELD` is the name of that user ID field in the JWT. For the corresponding field used in outbound messages, see `MESSAGE_USER_FIELD`. | "user"
 `JWT_SESSION_FIELD` | The JWT field that defines a "session", which is used for listing and killing/blacklisting sessions. What a session is depends on your application. For example, one might set `JWT_SESSION_FIELD` to the users' ID field, which would group all connections that belong to the same user to a single session - this way, blacklisting a session would mean killing all connections of a single user. The `JWT_SESSION_FIELD` is specified using the [JSON Pointer](https://tools.ietf.org/html/rfc6901) notation. Given that the JWT contains a user ID in its "userId" field, the configuration could look like this: `JWT_SESSION_FIELD=/userId`. | nil
-`KAFKA_ENABLED` | DEPRECATED. If set to true, RIG will consume messages from a Kafka broker using the configured broker and topic(s). | nil
 `KAFKA_BROKERS` | List of Kafka brokers RIG should connect to, delimited by comma (e.g., `localhost:9092,localhost:9093`). Usually it's enough to specify one broker and RIG will auto-discover rest of the Kafka cluster. | []
 `KAFKA_LOG_TOPIC` | Kafka topic for producer used to log HTTP requests going through RIG's API Proxy. | "rig-request-log"
 `KAFKA_RESTART_DELAY_MS` | If the connection to Kafka fails or cannot be established, RIG retries setting up the connection after `KAFKA_RESTART_DELAY_MS` milliseconds. | nil
@@ -56,10 +53,8 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `KINESIS_OTP_JAR` | Path to the `OtpErlang.jar` file that contains the `JInterface` implementation. If left empty, RIG picks the file from its Erlang environment (Erlang must be compiled with Java support enabled). | nil
 `KINESIS_STREAM` | The name of the Kinesis stream to consume. | "RIG-outbound"
 `LOG_LEVEL` | Controls logging level for RIG, available values are: "debug", "info", "warn", "error". Production is using "warn" level. | :debug
-`MESSAGE_USER_FIELD` | DEPRECATED. (Outbound) messages are expected to be in JSON format. For routing the message to a specific user, RIG expects the user's ID to be present in such a JSON message. The corresponding JSON field is defined by `MESSAGE_USER_FIELD`. | "user"
 `NODE_COOKIE` | Erlang cookie used in distributed mode, so nodes in cluster can communicate between each other. | nil
 `NODE_HOST` | Erlang hostname for given node, used to build Erlang long-name `rig@NODE_HOST`. This value is used by Erlang's distributed mode, so nodes can see each other. | nil
-`PRIVILEGED_ROLES` | DEPRECATED. User roles that are able to subscribe to messages of any user. You can specify multiple roles delimited by comma. | []
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Expected path is `proxy/your_json_file.json`. | nil
 `PROXY_RECV_TIMEOUT` | Timeout used when receiving a response for a forwarded/proxied request. | 5000
 `PROXY_KAFKA_RESPONSE_TOPICS` | Kafka topic for acknowledging Kafka sync events from proxy by correlation ID | ["rig-proxy-response"]
@@ -74,7 +69,6 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `RATE_LIMIT_PER_IP` | DEPRECATED. If true, the remote IP is taken into account, otherwise the limits are per endpoint only. | true
 `RATE_LIMIT_SWEEP_INTERVAL_MS` | DEPRECATED. Garbage collector interval. If set to zero, Garbage collector is disabled. | 5000
 `REQUEST_LOG` | Type of loggers to use to log requests processed by API Proxy, delimited by comma. | []
-`SESSION_ROLE` | DEPRECATED. Type of users that are visible to the outside world (possible to list). Only users with these roles will be listed. Possible roles are listed in `JWT_ROLES_FIELD`. Define as strings, separated by comma. | "user"
 `SUBMISSION_CHECK` | Select if and how submitting/publishing events should be denied. Can be either `no_check` (submissions are always allowed), `jwt_validation` (submissions are allowed if at least one authorization token is valid - using JWT_SECRET_KEY - and not blacklisted), or an URL that points to an external service that decides whether to allow or deny the submissions. Such an external service is expected to accept POST requests. The CloudEvent is passed as a JSON map in the body. The original request's `Authorization` headers are reused for this request. The subscription is allowed if the service returns 2xx and denied otherwise. | "NO_CHECK"
 `SUBSCRIPTION_CHECK` | Select if and how creating subscriptions should be denied. Can be either `no_check` (subscriptions are always allowed), `jwt_validation` (subscription are allowed if at least one authorization token is valid - using JWT_SECRET_KEY - and not blacklisted), or an URL that points to an external service that decides whether to allow or deny the subscription. Such an external service is expected to accept POST requests. The subscription parameters are passed in the body. The original request's `Authorization` headers are reused for this request. The subscription is allowed if the service returns 2xx and denied otherwise. | "NO_CHECK"
 

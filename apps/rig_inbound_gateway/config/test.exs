@@ -16,20 +16,7 @@ config :rig, RigInboundGateway.RateLimit,
 
 config :rig, RigInboundGateway.Kafka, log_topic: "rig"
 
-config :rig, RigInboundGateway.Kafka.MessageHandler, message_user_field: "username"
-
-config :rig, RigInboundGateway.Kafka.SupWrapper,
-  message_user_field: "username",
-  enabled?: false
-
-config :rig, RigInboundGatewayWeb.Presence.Channel,
-  jwt_user_field: "username",
-  jwt_roles_field: "role",
-  privileged_roles: ["support"]
-
 config :rig, RigInboundGateway.Proxy,
   config_file: {:system, "PROXY_CONFIG_FILE", "proxy/proxy.test.json"}
-
-config :rig, RigInboundGatewayWeb.Proxy.Controller, rig_proxy: RigInboundGateway.ProxyMock
 
 config :fake_server, :port_range, Enum.to_list(55_000..65_000) ++ [7070]
