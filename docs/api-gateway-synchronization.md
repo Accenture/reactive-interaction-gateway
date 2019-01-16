@@ -4,18 +4,18 @@ title: API Gateway Synchronization
 sidebar_label: API Gateway Synchronization
 ---
 
-Synchronization of APIs in API Gateway works out of the box and happens almost instantly. It's important to mention that as everything we store in RIG, also API definitions are stored in memory, thus it operates very fast, but it's not strongly consistent. Image below describes as you do any change to API definition on single node (doesn't matter which one) it will eventually spread to other nodes and save in memory.
+The reverse proxy configuration consists of API definitions, which are synchronized among RIG nodes (eventually consistent). API definitions, like everything else in RIG, are stored in-memory only, which makes accessing them very fast. The image below shows how a change to an API definition on any node will eventually spread to all other nodes.
 
 ![api-gateway-synchronization](assets/api-gateway-synchronization.png)
 
 ## Initial startup
 
-Very first synchronization happens on RIG startup. In fact it's enough if one node has JSON file with API definitions and it will be automatically spread among other nodes. In case you would use different JSON files with different APIs cluster will eventually synchronize all APIs -- so you'll end up have all APIs on each node. JSON file is used only at startup, after that it doesn't have any impact on API definitions (e.g. in case it would be changed, deleted, ...). Conflicts are resolved using several rules:
+The initial synchronization happens on RIG startup. Indeed, as long as one node has a JSON file with API definitions the configuration will be automatically spread among all nodes. In case there are two different JSON files found in the cluster, both are loaded and synchronized - eventually, all nodes have them configured. Note that the JSON file is only used at startup and is not used thereafter; for example, changes done to an API definition through RIG's API are not reflected in the file. Conflicts are resolved using several rules:
 
-1. `ref_number` - describes version of API definition, higher the number -- newer the API and higher the priority in merging process.
-1. Data comparison - compares data of API definition -- if it's different, checks the same API also on other nodes. Chooses version that is used on more nodes.
-1. If multiple versions of API definition are used evenly between nodes then it compares timestamps and chooses the newer one.
+1. `ref_number` - Describes the version of the API definition. The higher the number, the newer the API and the higher the priority in the merging process.
+1. Data comparison - compares the API definitions directly. If they are different, the API is also checked on other nodes. Finally, the version that is used on most nodes is determined to be current.
+1. If multiple versions of the API definition are used evenly among nodes then timestamps are compared and the newer definition is selected.
 
 ## Runtime changes
 
-You can change API definitions also during runtime via REST API. Again it's enough to change API on single node and changes will be spread among the nodes. For this type of synchronization we use the same rules as above.
+You can change API definitions also during runtime via the REST API. Again, it's enough to change an API definition on single node and changes will be spread to the others. For this type of synchronization we use the same rules as above.
