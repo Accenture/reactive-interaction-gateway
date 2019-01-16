@@ -1,13 +1,17 @@
 {
   "docs": {
-    "For Developers": [
+    "Getting Started": [
       "intro",
       "the-big-picture",
-      "getting-started",
-      "user-authentication",
-      "api-gateway",
+      "tutorial",
       "faq"
     ],
+    "Main Concepts": [
+      "api-gateway",
+      "event-subscription",
+      "user-authentication"
+    ],
+    "Advanced Guides": [],
     "RIG in Production": [
       "rig-ops-guide"
     ],

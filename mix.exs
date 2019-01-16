@@ -3,11 +3,15 @@ defmodule Rig.Umbrella.Mixfile do
   use Mix.Project
 
   def project do
-    %{elixir: elixir_version} = versions()
+    %{elixir: elixir_version, rig: rig_version} = versions()
 
     [
       apps_path: "apps",
+      name: "Reactive Interaction Gateway",
       description: description(),
+      version: rig_version,
+      source_url: "https://github.com/Accenture/reactive-interaction-gateway",
+      homepage_url: "https://accenture.github.io/reactive-interaction-gateway",
       docs: docs(),
       # hex.pm doesn't support umbrella projects
       package: package(),
@@ -57,38 +61,25 @@ defmodule Rig.Umbrella.Mixfile do
   defp package do
     [
       name: "rig",
-      maintainers: ["Kevin Bader", "Mario Macai", "Martin Lofaj"],
+      organization: "Accenture",
+      maintainers: ["Kevin Bader", "Mario Macai"],
       licenses: ["Apache 2.0"],
       links: %{"GitHub" => "https://github.com/Accenture/reactive-interaction-gateway"}
     ]
   end
 
   defp docs do
+    apps =
+      for snake_cased_string <- File.ls!("apps"),
+          do: :"Elixir.#{Macro.camelize(snake_cased_string)}"
+
     [
-      name: "Reactive Interaction Gateway",
-      source_url: "https://github.com/Accenture/reactive-interaction-gateway",
-      homepage_url: "https://github.com/Accenture/reactive-interaction-gateway",
-      # homepage_url: "https://accenture.github.io/reactive-interaction-gateway",
-      main: "motivation",
+      main: "api-reference",
+      output: "website/static/reference",
       extras: [
-        "README.md": [title: "README"],
-        "guides/motivation.md": [title: "Why we built it"],
-        "guides/configuration.md": [title: "Configuration"],
-        "CODE_OF_CONDUCT.md": [title: "Code of Conduct"],
-        "CONTRIBUTING.md": [title: "Contributing"],
-        "guides/architecture/decisions/0001-record-architecture-decisions.md": [
-          group: "Architecture Decisions"
-        ],
-        "guides/architecture/decisions/0002-don-t-check-for-functionclauseerror-in-tests.md": [
-          group: "Architecture Decisions"
-        ],
-        "guides/architecture/decisions/0004-use-rig-config-for-global-configuration.md": [
-          group: "Architecture Decisions"
-        ],
-        "guides/architecture/decisions/0005-maintain-changelog.md": [
-          group: "Architecture Decisions"
-        ]
-      ]
+        "CHANGELOG.md": [title: "Changelog"]
+      ],
+      nest_modules_by_prefix: apps
     ]
   end
 end
