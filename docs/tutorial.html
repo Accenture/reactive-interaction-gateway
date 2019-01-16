@@ -1,0 +1,116 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Tutorial · Reactive Interaction Gateway</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;In this tutorial we use &lt;a href=&quot;https://httpie.org/&quot;&gt;HTTPie&lt;/a&gt; for HTTP requests, but of course you can also use curl or any other HTTP client. Please note that HTTPie sets the content type to &lt;code&gt;application/json&lt;/code&gt; automatically, whereas for curl you need to use &lt;code&gt;-H &amp;quot;Content-Type: application/json&amp;quot;&lt;/code&gt; for all but &lt;code&gt;GET&lt;/code&gt; requests.&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Tutorial · Reactive Interaction Gateway"/><meta property="og:type" content="website"/><meta property="og:url" content="https://accenture.github.io/reactive-interaction-gateway/index.html"/><meta property="og:description" content="&lt;p&gt;In this tutorial we use &lt;a href=&quot;https://httpie.org/&quot;&gt;HTTPie&lt;/a&gt; for HTTP requests, but of course you can also use curl or any other HTTP client. Please note that HTTPie sets the content type to &lt;code&gt;application/json&lt;/code&gt; automatically, whereas for curl you need to use &lt;code&gt;-H &amp;quot;Content-Type: application/json&amp;quot;&lt;/code&gt; for all but &lt;code&gt;GET&lt;/code&gt; requests.&lt;/p&gt;
+"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/reactive-interaction-gateway/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/reactive-interaction-gateway/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/reactive-interaction-gateway/"><img class="logo" src="/reactive-interaction-gateway/img/icon.svg" alt="Reactive Interaction Gateway"/><h2 class="headerTitleWithLogo">Reactive Interaction Gateway</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/reactive-interaction-gateway/docs/intro.html" target="_self">Docs</a></li><li class=""><a href="reference/" target="_self">API Reference</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Getting Started</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/intro.html">Intro</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/reactive-interaction-gateway/docs/tutorial.html">Tutorial</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/faq.html">FAQ</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Main Concepts</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway.html">API Gateway</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-subscription.html">Event Subscription</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/user-authentication.html">User authentication</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">RIG in Production</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator&#x27;s Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Hacking the Source</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-dev-guide.html">Developer&#x27;s Guide</a></li></ul></div></div></section></div><script>
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              const headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                if (event.target.tagName === 'A') {
+                  document.body.classList.remove('tocActive');
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Tutorial</h1></header><article><div><span><p>In this tutorial we use <a href="https://httpie.org/">HTTPie</a> for HTTP requests, but of course you can also use curl or any other HTTP client. Please note that HTTPie sets the content type to <code>application/json</code> automatically, whereas for curl you need to use <code>-H &quot;Content-Type: application/json&quot;</code> for all but <code>GET</code> requests.</p>
+<h3><a class="anchor" aria-hidden="true" id="1-start-rig"></a><a href="#1-start-rig" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>1. Start RIG</h3>
+<p>The easiest way to start RIG is using Docker. Before running a production setup please read the <a href="/reactive-interaction-gateway/docs/rig-ops-guide.html">RIG operator guide</a>, but for now all you need to do is this:</p>
+<pre><code class="hljs css language-bash">docker run -d -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="2-create-a-connection"></a><a href="#2-create-a-connection" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>2. Create a connection</h3>
+<p>Let's connect to RIG using <a href="https://en.wikipedia.org/wiki/Server-sent_events">Server-Sent Events</a>, which is our recommended approach (open standard, firewall friendly, plays nice with HTTP/2):</p>
+<pre><code class="hljs css language-bash">$ http --stream :4000/_rig/v1/connection/sse
+HTTP/1.1 200 OK
+connection: keep-alive
+content-type: text/event-stream
+transfer-encoding: chunked
+...
+
+event: rig.connection.create
+data: {<span class="hljs-string">"specversion"</span>:<span class="hljs-string">"0.2"</span>,<span class="hljs-string">"source"</span>:<span class="hljs-string">"rig"</span>,<span class="hljs-string">"type"</span>:<span class="hljs-string">"rig.connection.create"</span>,<span class="hljs-string">"time"</span>:<span class="hljs-string">"2018-08-22T10:06:04.730484+00:00"</span>,<span class="hljs-string">"id"</span>:<span class="hljs-string">"2b0a4f05-9032-4617-8d1e-92d97fb870dd"</span>,<span class="hljs-string">"data"</span>:{<span class="hljs-string">"connection_token"</span>:<span class="hljs-string">"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"</span>}}
+id: 2b0a4f05-9032-4617-8d1e-92d97fb870dd
+</code></pre>
+<p>After the connection has been established, RIG sends out a <a href="https://github.com/cloudevents/spec/blob/v0.2/spec.md">CloudEvent</a> of type <code>rig.connection.create</code>.</p>
+<blockquote>
+<p>You can see that ID and event type of the outer event (= SSE event) match ID and event type of the inner event (= CloudEvent). The cloud event is serialized to the <code>data</code> field.</p>
+</blockquote>
+<p>Please take note of the <code>connection_token</code> in the CloudEvent's <code>data</code> field - you need it in the next step.</p>
+<h3><a class="anchor" aria-hidden="true" id="3-subscribe-to-a-topic"></a><a href="#3-subscribe-to-a-topic" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3. Subscribe to a topic</h3>
+<p>With the connection established, you can create <em>subscriptions</em> - that is, you can tell RIG which events your app is interested in. RIG needs to know which connection you are referring to, so you need to use the connection token you have noted down in the last step:</p>
+<pre><code class="hljs css language-bash">$ CONN_TOKEN=<span class="hljs-string">"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"</span>
+$ SUBSCRIPTIONS=<span class="hljs-string">'{"subscriptions":[{"eventType":"greeting"}]}'</span>
+$ http put <span class="hljs-string">":4000/_rig/v1/connection/sse/<span class="hljs-variable">${CONN_TOKEN}</span>/subscriptions"</span> &lt;&lt;&lt;<span class="hljs-string">"<span class="hljs-variable">$SUBSCRIPTIONS</span>"</span>
+HTTP/1.1 201 Created
+content-type: application/json; charset=utf-8
+...
+</code></pre>
+<p>With that you're ready to receive all &quot;greeting&quot; events.</p>
+<h3><a class="anchor" aria-hidden="true" id="4-create-a-new-greeting-event"></a><a href="#4-create-a-new-greeting-event" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4. Create a new &quot;greeting&quot; event</h3>
+<p>RIG expects to receive <a href="https://github.com/cloudevents/spec">CloudEvents</a>, so the following fields are required:</p>
+<ul>
+<li><code>specversion</code>: must be set to &quot;0.2&quot; (version &quot;0.1&quot; is also supported).</li>
+<li><code>type</code>: Type of occurrence which has happened. Often this attribute is used for routing, observability, policy enforcement, etc.</li>
+<li><code>id</code>: ID of the event. The semantics of this string are explicitly undefined to ease the implementation of producers. Enables deduplication.</li>
+<li><code>source</code>: This describes the event producer. Often this will include information such as the type of the event source, the organization publishing the event, the process that produced the event, and some unique identifiers. The exact syntax and semantics behind the data encoded in the URI is event producer defined.</li>
+</ul>
+<p>Let's send a simple <code>greeting</code> event:</p>
+<pre><code class="hljs css language-bash">$ http post :4000/_rig/v1/events specversion=0.2 <span class="hljs-built_in">type</span>=greeting id=first-event <span class="hljs-built_in">source</span>=tutorial
+HTTP/1.1 202 Accepted
+content-type: application/json; charset=utf-8
+...
+
+{
+    <span class="hljs-string">"specversion"</span>: <span class="hljs-string">"0.2"</span>,
+    <span class="hljs-string">"id"</span>: <span class="hljs-string">"first-event"</span>,
+    <span class="hljs-string">"time"</span>: <span class="hljs-string">"2018-08-21T09:11:27.614970+00:00"</span>,
+    <span class="hljs-string">"type"</span>: <span class="hljs-string">"greeting"</span>,
+    <span class="hljs-string">"source"</span>: <span class="hljs-string">"tutorial"</span>
+}
+
+</code></pre>
+<p>RIG responds with <code>202 Accepted</code>, followed by the CloudEvent as sent to subscribers.</p>
+<blockquote>
+<p>If there are no subscribers for a received event, the response will still be <code>202 Accepted</code> and the event will be silently dropped.</p>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="5-the-event-has-been-delivered-to-our-subscriber"></a><a href="#5-the-event-has-been-delivered-to-our-subscriber" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5. The event has been delivered to our subscriber</h3>
+<p>Going back to the first terminal window you should now see your greeting event :tada:</p>
+<h3><a class="anchor" aria-hidden="true" id="6-next-connect-your-app"></a><a href="#6-next-connect-your-app" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>6. Next: connect your app</h3>
+<p>Simply add an event listener to your frontend:</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> url = <span class="hljs-string">"http://localhost:4000/_rig/v1/connection/sse"</span>
+<span class="hljs-keyword">const</span> source = <span class="hljs-keyword">new</span> EventSource(url)
+
+source.onopen = <span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"SSE connection open"</span>, e)
+source.onerror = <span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"SSE connection error"</span>, e)
+
+source.addEventListener(<span class="hljs-string">"rig.connection.create"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
+  cloudEvent = <span class="hljs-built_in">JSON</span>.parse(e.data)
+  <span class="hljs-keyword">const</span> { connectionToken } = cloudEvent.data
+  createSubscriptions(connectionToken)
+}, <span class="hljs-literal">false</span>)
+
+source.addEventListener(<span class="hljs-string">"rig.subscriptions_set"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
+  cloudEvent = <span class="hljs-built_in">JSON</span>.parse(e.data)
+  <span class="hljs-keyword">const</span> { type } = cloudEvent.data
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Now subscribed to <span class="hljs-subst">${type}</span>`</span>)
+}, <span class="hljs-literal">false</span>)
+
+source.addEventListener(<span class="hljs-string">"greeting"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Got a greeting!"</span>)
+}, <span class="hljs-literal">false</span>)
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/the-big-picture.html"><span class="arrow-prev">← </span><span>Previous</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/faq.html"><span>FAQ</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div></body></html>
