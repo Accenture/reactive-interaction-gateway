@@ -14,10 +14,8 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 -------------- | ----------- | -------
 `API_HTTP_PORT` | Port at which RIG exposes internal APIs such as API Proxy management or user connections management. | nil
 `API_HTTPS_PORT` | Same as `API_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | nil
-`PROXY_HTTP_PORT` | RIG's ingress port that is used to proxy/forward incoming client requests. | 4000
-`PROXY_HTTPS_PORT` | Same as `PROXY_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | 4001
-`EVENT_HUB_HTTP_PORT` | Port used by clients to connect to RIG itself, e.g., for consuming events via SSE or WebSockets. | nil
-`EVENT_HUB_HTTPS_PORT` | Same as `EVENT_HUB_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | nil
+`INBOUND_PORT` | Port at which RIG exposes proxy and websocket/sse communication. | 4000
+`INBOUND_HTTPS_PORT` | Same as `INBOUND_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | 4000
 `HTTPS_CERTFILE` | Path to the (signed) client certificate (PEM format). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | nil
 `HTTPS_KEYFILE` | Path to the private key of the client certificate (PEM format). Also supports encrypted private keys; see `HTTPS_KEYFILE_PASS` and consult the Erlang documentation for supported ciphers (e.g. [supported password ciphers in OTP 21.2](https://github.com/erlang/otp/blob/OTP-21.2/lib/public_key/src/pubkey_pbe.erl#L55); unfortunately, with OTP 21.1 using an unsupported cipher fails silently). Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | nil
 `HTTPS_KEYFILE_PASS` | Passphrase in case the private key is password-protected. | ""
