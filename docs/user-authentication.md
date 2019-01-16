@@ -8,7 +8,7 @@ RIG uses [JSON Web Tokens](https://jwt.io/) (JWT, for short) for authenticating 
 
 > RIG can also be used without having any authentication at all, as long as frontends only subscribe to public topics.
 
-RIG can handle authentication itself in a very simple way or you can use _your_ own authentication service to do that. One of our goals is to _keep RIG free from any business logic_. This enables an important property: even if your authentication mechanism changes completely, you won't have to restart RIG. Your clients' connections won't be interrupted and you can roll out your changes incrementally, which makes for a nicer user experience.
+RIG can handle authentication itself in a very simple way or you can use _your_ own authentication service to do that. One of our goals is to keep RIG free from any business logic. This enables an important property: even if your authentication mechanism changes completely, you won't have to restart RIG. Your clients' connections won't be interrupted and you can roll out your changes incrementally, which makes for a nicer user experience.
 
 ## Authentication token
 

@@ -11,7 +11,9 @@
       "event-subscription",
       "user-authentication"
     ],
-    "Advanced Guides": [],
+    "Advanced Guides": [
+      "api-gateway-synchronization"
+    ],
     "RIG in Production": [
       "rig-ops-guide"
     ],

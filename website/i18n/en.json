@@ -5,6 +5,10 @@
     "previous": "Previous",
     "tagline": "Your UI deserves an API, too!",
     "docs": {
+      "api-gateway-synchronization": {
+        "title": "API Gateway Synchronization",
+        "sidebar_label": "API Gateway Synchronization"
+      },
       "api-gateway": {
         "title": "API Gateway",
         "sidebar_label": "API Gateway"
