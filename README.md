@@ -40,7 +40,7 @@ For more details take a look at the [documentation](https://accenture.github.io/
 
 ## Getting Started
 
-Take a look at the [getting-started tutorial](https://accenture.github.io/reactive-interaction-gateway/docs/getting-started.html).
+Take a look at the [getting-started tutorial](https://accenture.github.io/reactive-interaction-gateway/docs/tutorial.html).
 
 ### API Documentation
 
