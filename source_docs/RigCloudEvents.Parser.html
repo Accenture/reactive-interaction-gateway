@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.19.2">
+    <title>RigCloudEvents.Parser — Reactive Interaction Gateway v2.0.0</title>
+    <link rel="stylesheet" href="dist/html-c1666276880c0f8e3769.css" />
+    <script src="dist/sidebar_items-8f94b36ce2.js"></script>
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+    <div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  <a href="https://accenture.github.io/reactive-interaction-gateway" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+Reactive Interaction Gateway      </h1>
+      <h2 class="sidebar-projectVersion">
+        v2.0.0
+      </h2>
+    </div>
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+      <li><a id="exceptions-list" href="#full-list">Exceptions</a></li>
+
+      <li><a id="tasks-list" href="#full-list">Mix Tasks</a></li>
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">Reactive Interaction Gateway v2.0.0</small>
+RigCloudEvents.Parser <small>behaviour</small>        
+          <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_cloud_events/lib/rig_cloud_events/parser.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Tolerant reader for JSON encoded CloudEvents.</p>
+        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:attribute/0">attribute()</a>
+  </div>
+    <div class="summary-synopsis"><p>A CloudEvents context attribute name</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:extension/0">extension()</a>
+  </div>
+    <div class="summary-synopsis"><p>A CloudEvents extension name</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:json_pointer/0">json_pointer()</a>
+  </div>
+    <div class="summary-synopsis"><p>A JSON Pointer (see <a href="https://tools.ietf.org/html/rfc6901">RFC 6901</a>)</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:json_string/0">json_string()</a>
+  </div>
+    <div class="summary-synopsis"><p>The JSON encoded CloudEvent</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:t/0">t()</a>
+  </div>
+</div>
+  </div>
+  <div class="summary-callbacks summary">
+    <h2>
+      <a href="#callbacks">Callbacks</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:context_attribute/2">context_attribute(t, attribute)</a>
+  </div>
+    <div class="summary-synopsis"><p>Fetch the value of a CloudEvents context attribute</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:extension_attribute/3">extension_attribute(t, extension, attribute)</a>
+  </div>
+    <div class="summary-synopsis"><p>Fetch the value of a CloudEvents extension attribute</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:find_value/2">find_value(t, json_pointer)</a>
+  </div>
+    <div class="summary-synopsis"><p>Find a specific value using a JSON Pointer</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:parse/1">parse(json_string)</a>
+  </div>
+    <div class="summary-synopsis"><p>Parse a JSON encoded CloudEvent</p>
+</div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:attribute/0">
+    <div class="detail-header">
+    <a href="#t:attribute/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">attribute()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_cloud_events/lib/rig_cloud_events/parser.ex#L11" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>attribute() :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A CloudEvents context attribute name.</p>
+  </section>
+</section>
+<section class="detail" id="t:extension/0">
+    <div class="detail-header">
+    <a href="#t:extension/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">extension()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_cloud_events/lib/rig_cloud_events/parser.ex#L14" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>extension() :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A CloudEvents extension name.</p>
+  </section>
+</section>
+<section class="detail" id="t:json_pointer/0">
+    <div class="detail-header">
+    <a href="#t:json_pointer/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">json_pointer()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_cloud_events/lib/rig_cloud_events/parser.ex#L17" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>json_pointer() :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A JSON Pointer (see <a href="https://tools.ietf.org/html/rfc6901">RFC 6901</a>).</p>
+  </section>
+</section>
+<section class="detail" id="t:json_string/0">
+    <div class="detail-header">
+    <a href="#t:json_string/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">json_string()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_cloud_events/lib/rig_cloud_events/parser.ex#L8" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>json_string() :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>The JSON encoded CloudEvent.</p>
+  </section>
+</section>
+<section class="detail" id="t:t/0">
+    <div class="detail-header">
+    <a href="#t:t/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">t()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_cloud_events/lib/rig_cloud_events/parser.ex#L5" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>t() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="callbacks" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#callbacks">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Callbacks          </h1>
+          <div class="callbacks-list">
+<section class="detail" id="c:context_attribute/2">
+    <div class="detail-header">
+    <a href="#c:context_attribute/2" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">context_attribute(t, attribute)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_cloud_events/lib/rig_cloud_events/parser.ex#L27" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>context_attribute(<a href="#t:t/0">t</a>(), <a href="#t:attribute/0">attribute</a>()) ::
+  {:ok, value :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}
+  | {:error, {:not_found, Parser.attribute(), <a href="#t:t/0">t</a>()}}
+  | {:error, {:non_scalar_value, Parser.attribute(), <a href="#t:t/0">t</a>()}}
+  | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Fetch the value of a CloudEvents context attribute.</p>
+  </section>
+</section>
+<section class="detail" id="c:extension_attribute/3">
+    <div class="detail-header">
+    <a href="#c:extension_attribute/3" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">extension_attribute(t, extension, attribute)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_cloud_events/lib/rig_cloud_events/parser.ex#L36" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>extension_attribute(<a href="#t:t/0">t</a>(), <a href="#t:extension/0">extension</a>(), <a href="#t:attribute/0">attribute</a>()) ::
+  {:ok, value :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}
+  | {:error, {:not_found, Parser.attribute(), <a href="#t:t/0">t</a>()}}
+  | {:error, {:not_an_object | :non_scalar_value, Parser.attribute(), <a href="#t:t/0">t</a>()}}
+  | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Fetch the value of a CloudEvents extension attribute.</p>
+  </section>
+</section>
+<section class="detail" id="c:find_value/2">
+    <div class="detail-header">
+    <a href="#c:find_value/2" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">find_value(t, json_pointer)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_cloud_events/lib/rig_cloud_events/parser.ex#L45" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>find_value(<a href="#t:t/0">t</a>(), <a href="#t:json_pointer/0">json_pointer</a>()) ::
+  {:ok, value :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}
+  | {:error, {:not_found, location :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="#t:t/0">t</a>()}}
+  | {:error, {:non_scalar_value, location :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="#t:t/0">t</a>()}}
+  | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Find a specific value using a JSON Pointer.</p>
+  </section>
+</section>
+<section class="detail" id="c:parse/1">
+    <div class="detail-header">
+    <a href="#c:parse/1" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">parse(json_string)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_cloud_events/lib/rig_cloud_events/parser.ex#L22" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>parse(<a href="#t:json_string/0">json_string</a>()) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Parse a JSON encoded CloudEvent.</p>
+  </section>
+</section>
+          </div>
+        </section>
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.19.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/html-c1666276880c0f8e3769.js"></script>
+  
+  </body>
+</html>
+
