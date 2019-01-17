@@ -16,7 +16,7 @@ Take a look at the [documentation](https://accenture.github.io/reactive-interact
 
 Built on open standards, RIG is very easy to integrate – and easy to _replace_ – which means low-cost, low-risk adoption. Unlike other solutions, RIG does not leak into your application – no libraries or SDKs required.
 
-For more details take a look at the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/the-big-picture.html).
+For more details take a look at the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html).
 
 ## Feature Summary
 
