@@ -15,11 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Removed -->
 
-### Fixed
-
-- A library upgrade caused idle SSE connections to time out after 60 seconds. This timeout is now disabled.
+<!-- ### Fixed -->
 
 <!-- ### Security -->
+
+## [2.0.1] - 2019-01-20
+
+### Fixed
+
+- A library upgrade caused idle SSE connections to time out after 60 seconds. This timeout is now disabled. [PR #148](https://github.com/Accenture/reactive-interaction-gateway/pull/148)
 
 ## [2.0.0] - 2019-01-16
 
@@ -155,7 +159,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [Config] Disable Origin checking. [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
-[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0...HEAD
+[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.1...HEAD
+[2.0.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0-beta.2...2.0.0
 [2.0.0-beta.2]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0-beta.1...2.0.0-beta.2
 [2.0.0-beta.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/1.1.0...2.0.0-beta.1
