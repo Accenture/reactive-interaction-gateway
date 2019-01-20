@@ -15,7 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Removed -->
 
-<!-- ### Fixed -->
+### Fixed
+
+- A library upgrade caused idle SSE connections to time out after 60 seconds. This timeout is now disabled.
 
 <!-- ### Security -->
 

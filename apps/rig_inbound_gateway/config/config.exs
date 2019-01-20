@@ -24,6 +24,13 @@ ranch_transport_options = [
   max_connections: :infinity
 ]
 
+cowboy_options = [
+  idle_timeout: :infinity,
+  inactivity_timeout: :infinity,
+  # Experimental feature that allows using WebSocket over HTTP/2:
+  enable_connect_protocol: true
+]
+
 cowboy_dispatch = [
   {:_,
    [
@@ -40,6 +47,7 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
   http: [
     port: {:system, :integer, "INBOUND_PORT", 4000},
     dispatch: cowboy_dispatch,
+    protocol_options: cowboy_options,
     transport_options: ranch_transport_options
   ],
   https: [
@@ -50,6 +58,7 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
     keyfile: "cert/selfsigned_key.pem",
     password: {:system, "HTTPS_KEYFILE_PASS", ""},
     dispatch: cowboy_dispatch,
+    protocol_options: cowboy_options,
     transport_options: ranch_transport_options
   ],
   render_errors: [view: RigInboundGatewayWeb.ErrorView, accepts: ~w(html json xml)],
