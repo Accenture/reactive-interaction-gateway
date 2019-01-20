@@ -15,7 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Removed -->
 
-<!-- ### Fixed -->
+### Fixed
+
+- Upgraded a dependency to fix the Docker build. [#149](https://github.com/Accenture/reactive-interaction-gateway/issues/149)
 
 <!-- ### Security -->
 
