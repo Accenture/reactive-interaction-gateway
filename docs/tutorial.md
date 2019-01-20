@@ -8,11 +8,22 @@ In this tutorial we use [HTTPie](https://httpie.org/) for HTTP requests, but of 
 
 ### 1. Start RIG
 
-The easiest way to start RIG is using Docker. Before running a production setup please read the [RIG operator guide](rig-ops-guide.md), but for now all you need to do is this:
+When running the Docker image you need to supply HTTPS certificates, as a production setup is assumed. [We are going to make this easier](https://github.com/Accenture/reactive-interaction-gateway/issues/151), but for now run this:
 
 ```bash
-docker run -d -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
+$ git clone https://github.com/Accenture/reactive-interaction-gateway.git
+$ cd reactive-interaction-gateway
+$ docker run -d -p 4000:4000 -p 4010:4010 \
+  -e HTTPS_CERTFILE=selfsigned.pem \
+  -e HTTPS_KEYFILE=selfsigned_key.pem \
+  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned.pem",dst=/opt/sites/rig/lib/rig_inbound_gateway-2.0.2/priv/selfsigned.pem,readonly \
+  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned_key.pem",dst=/opt/sites/rig/lib/rig_inbound_gateway-2.0.2/priv/selfsigned_key.pem,readonly \
+  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned.pem",dst=/opt/sites/rig/lib/rig_api-2.0.2/priv/selfsigned.pem,readonly \
+  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned_key.pem",dst=/opt/sites/rig/lib/rig_api-2.0.2/priv/selfsigned_key.pem,readonly \
+  accenture/reactive-interaction-gateway:2.0.2
 ```
+
+Note: Please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
 
 ### 2. Create a connection
 
