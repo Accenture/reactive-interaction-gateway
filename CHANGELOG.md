@@ -15,11 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Removed -->
 
+<!-- ### Fixed -->
+
+<!-- ### Security -->
+
+## [2.0.2] - 2019-01-20
+
 ### Fixed
 
 - Upgraded a dependency to fix the Docker build. [#149](https://github.com/Accenture/reactive-interaction-gateway/issues/149)
-
-<!-- ### Security -->
 
 ## [2.0.1] - 2019-01-20
 
@@ -162,6 +166,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Config] Disable Origin checking. [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
 [unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.1...HEAD
+[2.0.2]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0-beta.2...2.0.0
 [2.0.0-beta.2]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0-beta.1...2.0.0-beta.2
