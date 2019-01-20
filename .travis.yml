@@ -1,5 +1,7 @@
 stages:
   - test
+  - name: dockerbuild
+    if: branch = master
   - name: website
     if: branch = master AND type != pull_request
 
@@ -14,6 +16,12 @@ jobs:
       script:
         - mix test
         - mix credo --ignore-checks Design
+    - stage: dockerbuild
+      language: minimal
+      services:
+        - docker
+      script:
+        - docker build .
     - stage: website
       language: node_js
       node_js:
