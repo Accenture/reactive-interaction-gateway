@@ -74,8 +74,11 @@ defmodule Rig.Umbrella.Mixfile do
           do: :"Elixir.#{Macro.camelize(snake_cased_string)}"
 
     [
+      # Website and documentation is built off master,
+      # so that's where we should link to:
+      source_ref: "master",
       main: "api-reference",
-      output: "website/static/reference",
+      output: "website/static/source_docs",
       extras: [
         "CHANGELOG.md": [title: "Changelog"]
       ],
