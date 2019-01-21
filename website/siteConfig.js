@@ -24,7 +24,7 @@ const siteConfig = {
       label: 'User Documentation'
     },
     {
-      href: 'source_docs/',
+      href: 'source_docs/index.html',
       label: 'Source Documentation'
     },
     // { page: 'help', label: 'Help' },
