@@ -39,7 +39,7 @@ defmodule Mix.Tasks.PublishGhPages do
           branch
       end
 
-    git(["branch", "-a"])
+    IO.inspect(git(["branch", "-a"]), label: "git branch -a")
     git(["checkout", "origin/#{@target_branch}"])
     File.rm_rf!(@target_dir)
     File.cp_r!(docs_out_dir, @target_dir)
