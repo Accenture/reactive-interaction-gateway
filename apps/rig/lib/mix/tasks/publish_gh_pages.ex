@@ -24,9 +24,9 @@ defmodule Mix.Tasks.PublishGhPages do
       |> Map.put(:userinfo, git_user)
       |> URI.to_string()
 
-    docs_out_dir = System.tmp_dir!() |> Path.join("rig_source_docs")
-    File.rm_rf!(docs_out_dir)
-    File.mkdir!(docs_out_dir)
+    IO.puts("Source URL: #{source_url}")
+
+    docs_out_dir = new_empty_tmp_dir("rig_source_docs")
     Mix.Task.run("docs", ["--output", docs_out_dir])
 
     orig_ref =
@@ -39,20 +39,29 @@ defmodule Mix.Tasks.PublishGhPages do
           branch
       end
 
-    git(["checkout", "origin/#{@target_branch}"])
-    File.rm_rf!(@target_dir)
-    File.cp_r!(docs_out_dir, @target_dir)
-    git(["add", @target_dir])
-    git(["commit", "-m", "Deploy source documentation"])
-    git(["push", "--verbose", source_url, "HEAD:#{@target_branch}"])
+    gh_pages_workdir = new_empty_tmp_dir("rig_gh-pages")
+    git(["clone", "--single-branch", "--branch", "gh-pages", source_url, gh_pages_workdir])
+    target_dir = Path.join(gh_pages_workdir, @target_dir)
+    File.rm_rf!(target_dir)
+    File.cp_r!(docs_out_dir, target_dir)
+    git(["add", "."], cd: gh_pages_workdir)
+    git(["commit", "-m", "Deploy source documentation"], cd: gh_pages_workdir)
+    git(["push", "--verbose"], cd: gh_pages_workdir)
 
     # cleanup
     File.rm_rf(docs_out_dir)
-    git(["checkout", orig_ref])
+    File.rm_rf(gh_pages_workdir)
   end
 
-  defp git(args) do
-    {stdout, 0} = System.cmd("git", args)
+  defp new_empty_tmp_dir(dirname) do
+    dir = System.tmp_dir!() |> Path.join(dirname)
+    File.rm_rf!(dir)
+    File.mkdir!(dir)
+    dir
+  end
+
+  defp git(args, opts \\ []) do
+    {stdout, 0} = System.cmd("git", args, opts)
     stdout |> String.trim()
   end
 end
