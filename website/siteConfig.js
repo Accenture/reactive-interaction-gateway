@@ -11,11 +11,13 @@ const users = [{
   pinned: true,
 }, ];
 
+const baseUrl = '/reactive-interaction-gateway/';
+
 const siteConfig = {
   title: 'Reactive Interaction Gateway',
   tagline: 'Your UI deserves an API, too!',
   url: 'https://accenture.github.io',
-  baseUrl: '/reactive-interaction-gateway/',
+  baseUrl,
   projectName: 'reactive-interaction-gateway',
   organizationName: 'Accenture',
   repoUrl: `https://github.com/accenture/reactive-interaction-gateway`,
@@ -24,7 +26,7 @@ const siteConfig = {
       label: 'User Documentation'
     },
     {
-      href: 'source_docs/index.html',
+      href: `${baseUrl}source_docs/index.html`,
       label: 'Source Documentation'
     },
     // { page: 'help', label: 'Help' },
