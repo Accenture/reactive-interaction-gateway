@@ -4,7 +4,7 @@ defmodule RigMetrics.ControlInstrumenter do
   """
   use Prometheus.Metric
 
-  # TODO: setup currently commented out, as metrics are not yet implemented and 
+  # TODO: setup currently commented out, as metrics are not yet implemented and
   # therefore shouldn't be exposed yet to the endpoint
 
   # to be called at app startup.
