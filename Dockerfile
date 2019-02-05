@@ -58,8 +58,8 @@ COPY apps/rig_kafka/lib /opt/sites/rig/apps/rig_kafka/lib
 COPY apps/rig_outbound_gateway/config /opt/sites/rig/apps/rig_outbound_gateway/config
 COPY apps/rig_outbound_gateway/lib /opt/sites/rig/apps/rig_outbound_gateway/lib
 
-COPY apps/rig_outbound_gateway/config /opt/sites/rig/apps/rig_metrics/config
-COPY apps/rig_outbound_gateway/lib /opt/sites/rig/apps/rig_metrics/lib
+COPY apps/rig_metrics/config /opt/sites/rig/apps/rig_metrics/config
+COPY apps/rig_metrics/lib /opt/sites/rig/apps/rig_metrics/lib
 
 # Compile and release application production code
 RUN mix release
