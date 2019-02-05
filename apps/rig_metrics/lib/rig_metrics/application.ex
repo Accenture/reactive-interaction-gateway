@@ -9,9 +9,11 @@ defmodule RigMetrics.Application do
   def start(_type, _args) do
     children = []
 
-    RigMetrics.ControlInstrumenter.setup()
-    RigMetrics.EventhubInstrumenter.setup()
-    RigMetrics.ProxyInstrumenter.setup()
+    # TODO: setup currently commented out, as metrics are not yet implemented and therefore shouldn't be exposed yet to the endpoint
+
+    # RigMetrics.ControlInstrumenter.setup()
+    # RigMetrics.EventhubInstrumenter.setup()
+    # RigMetrics.ProxyInstrumenter.setup()
 
     RigMetrics.MetricsPlugExporter.setup()
 

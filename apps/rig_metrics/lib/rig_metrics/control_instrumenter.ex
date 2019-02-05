@@ -4,18 +4,20 @@ defmodule RigMetrics.ControlInstrumenter do
   """
   use Prometheus.Metric
 
-  # to be called at app startup.
-  def setup() do
-    Gauge.declare(
-      name: :rig_sessions_blacklisted,
-      help: "Current count of sessions blacklisted"
-    )
+  # TODO: setup currently commented out, as metrics are not yet implemented and therefore shouldn't be exposed yet to the endpoint
 
-    Gauge.declare(
-      name: :rig_routes_configured,
-      help: "Current count of routes configured for RIG"
-    )
-  end
+  # to be called at app startup.
+  # def setup() do
+  #   Gauge.declare(
+  #     name: :rig_sessions_blacklisted,
+  #     help: "Current count of sessions blacklisted"
+  #   )
+
+  #   Gauge.declare(
+  #     name: :rig_routes_configured,
+  #     help: "Current count of routes configured for RIG"
+  #   )
+  # end
 
   def add_blacklisted_session(increasedBy \\ 1) do
     Gauge.inc([name: :rig_sessions_blacklisted], increasedBy)
