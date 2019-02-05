@@ -4,7 +4,8 @@ defmodule RigMetrics.ProxyInstrumenter do
   """
   use Prometheus.Metric
 
-  # TODO: setup currently commented out, as metrics are not yet implemented and therefore shouldn't be exposed yet to the endpoint
+  # TODO: setup currently commented out, as metrics are not yet implemented and 
+  # therefore shouldn't be exposed yet to the endpoint
 
   # to be called at app startup.
   # def setup() do
@@ -29,31 +30,31 @@ defmodule RigMetrics.ProxyInstrumenter do
   #   )
   # end
 
-  def add_session() do
+  def add_session do
     Gauge.inc(name: :rig_current_session_count)
   end
 
-  def delete_session() do
+  def delete_session do
     Gauge.dec(name: :rig_current_session_count)
   end
 
-  def add_subscription() do
+  def add_subscription do
     Gauge.inc(name: :rig_current_subscription_count)
   end
 
-  def delete_subscription() do
+  def delete_subscription do
     Gauge.dec(name: :rig_current_subscription_count)
   end
 
-  def add_connection() do
+  def add_connection do
     Gauge.inc(name: :rig_current_open_proxy_connection_count)
   end
 
-  def delete_connection() do
+  def delete_connection do
     Gauge.dec(name: :rig_current_open_proxy_connection_count)
   end
 
-  def count_proxy_request() do
+  def count_proxy_request do
     Counter.inc(name: :rig_proxy_requests_total)
   end
 end
