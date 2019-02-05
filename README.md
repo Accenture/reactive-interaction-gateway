@@ -46,6 +46,10 @@ Take a look at the [getting-started tutorial](https://accenture.github.io/reacti
 
 RIG exposes its API documentation on its API endpoint under [/swagger-ui](http://localhost:4010/swagger-ui). For integration into an existing swagger UI, the related JSON document can either be [retrieved at runtime](http://localhost:4010/swagger-ui/rig_api_swagger.json) or [found on disk](./apps/rig_api/priv/static/rig_api_swagger.json) after compiling RIG at least once.
 
+### Metrics
+
+RIG exposes Metrics in [Prometheus](https://prometheus.io/) format on its API endpoint under [/metrics](http:localhost:4010/metrics)
+
 ## Contribute
 
 - **Use issues for everything.**

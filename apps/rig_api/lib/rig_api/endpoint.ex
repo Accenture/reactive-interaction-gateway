@@ -34,12 +34,7 @@ defmodule RigApi.Endpoint do
   plug(RigMetrics.MetricsPlugExporter)
   # Prometheus Integration - END
 
-  # Prometheus Integration - START
-  # makes the /metrics URL happen
-  plug(RigMetrics.MetricsPlugExporter)
-  # Prometheus Integration - END
-
-  plug RigApi.Router
+  plug(RigApi.Router)
 
   def init(_key, config) do
     {:ok, config} = Confex.Resolver.resolve(config)

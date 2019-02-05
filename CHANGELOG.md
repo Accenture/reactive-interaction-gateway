@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 <!-- ### Added -->
+- Initial Prometheus Integration providing standard metrics. [#96](https://github.com/Accenture/reactive-interaction-gateway/issues/96)
 
 <!-- ### Changed -->
 
