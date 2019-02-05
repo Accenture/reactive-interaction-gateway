@@ -19,7 +19,6 @@ defmodule RigAuth.Session do
   @spec blacklist(session_name_t, validity_period_t) :: nil
   def blacklist(session_name, validity_period_s) do
     DistributedSet.add(@blacklist_server, session_name, validity_period_s)
-    RigMetrics.ControlInstrumenter.add_blacklisted_session();
     SessionHub.kill(session_name)
   end
 
