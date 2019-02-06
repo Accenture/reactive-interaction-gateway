@@ -8,22 +8,16 @@ In this tutorial we use [HTTPie](https://httpie.org/) for HTTP requests, but of 
 
 ### 1. Start RIG
 
-When running the Docker image you need to supply HTTPS certificates, as a production setup is assumed. [We are going to make this easier](https://github.com/Accenture/reactive-interaction-gateway/issues/151), but for now run this:
+To get started, run our Docker image using this command:
 
 ```bash
-$ git clone https://github.com/Accenture/reactive-interaction-gateway.git
-$ cd reactive-interaction-gateway
-$ docker run -d -p 4000:4000 -p 4010:4010 \
-  -e HTTPS_CERTFILE=selfsigned.pem \
-  -e HTTPS_KEYFILE=selfsigned_key.pem \
-  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned.pem",dst=/opt/sites/rig/lib/rig_inbound_gateway-2.0.2/priv/selfsigned.pem,readonly \
-  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned_key.pem",dst=/opt/sites/rig/lib/rig_inbound_gateway-2.0.2/priv/selfsigned_key.pem,readonly \
-  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned.pem",dst=/opt/sites/rig/lib/rig_api-2.0.2/priv/selfsigned.pem,readonly \
-  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned_key.pem",dst=/opt/sites/rig/lib/rig_api-2.0.2/priv/selfsigned_key.pem,readonly \
-  accenture/reactive-interaction-gateway:2.0.2
+$ docker run -p 4000:4000 -p 4010:4010 -e HTTPS_CERTFILE=cert/selfsigned.pem -e HTTPS_KEYFILE=cert/selfsigned_key.pem accenture/reactive-interaction-gateway:2.0.2
+NODE_HOST not set, defaults to 127.0.0.1. Consider setting NODE_HOST to the machine's hostname or IP, as seen by others in the network.
+NODE_COOKIE not set; randomly generated to VcMxc8ylrFipfnUsmxaZvhLkeSonlbCF
+Reactive Interaction Gateway 2.0.2 [rig@127.0.0.1, ERTS 10.2.2, OTP 21]
 ```
 
-Note: Please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
+In production, please make sure to use proper HTTPS certificates instead of the self-signed certificates contained in the image (they are _not_ randomly generated). Also, please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
 
 ### 2. Create a connection
 
