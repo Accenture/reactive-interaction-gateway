@@ -94,27 +94,63 @@ content-type: application/json; charset=utf-8
 <h3><a class="anchor" aria-hidden="true" id="5-the-event-has-been-delivered-to-our-subscriber"></a><a href="#5-the-event-has-been-delivered-to-our-subscriber" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5. The event has been delivered to our subscriber</h3>
 <p>Going back to the first terminal window you should now see your greeting event :tada:</p>
 <h3><a class="anchor" aria-hidden="true" id="6-next-connect-your-app"></a><a href="#6-next-connect-your-app" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>6. Next: connect your app</h3>
-<p>Simply add an event listener to your frontend:</p>
-<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> url = <span class="hljs-string">"http://localhost:4000/_rig/v1/connection/sse"</span>
-<span class="hljs-keyword">const</span> source = <span class="hljs-keyword">new</span> EventSource(url)
+<p>To connect your app to RIG, add an event listener to your frontend. See <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/examples/sse-demo.html">examples/sse-demo.html</a> for a full example. Here are the most important parts:</p>
+<pre><code class="hljs css language-html"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
 
-source.onopen = <span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"SSE connection open"</span>, e)
-source.onerror = <span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"SSE connection error"</span>, e)
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+  ...
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/event-source-polyfill/src/eventsource.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
 
-source.addEventListener(<span class="hljs-string">"rig.connection.create"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
-  cloudEvent = <span class="hljs-built_in">JSON</span>.parse(e.data)
-  <span class="hljs-keyword">const</span> { connectionToken } = cloudEvent.data
-  createSubscriptions(connectionToken)
-}, <span class="hljs-literal">false</span>)
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+  ...
 
-source.addEventListener(<span class="hljs-string">"rig.subscriptions_set"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
-  cloudEvent = <span class="hljs-built_in">JSON</span>.parse(e.data)
-  <span class="hljs-keyword">const</span> { type } = cloudEvent.data
-  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Now subscribed to <span class="hljs-subst">${type}</span>`</span>)
-}, <span class="hljs-literal">false</span>)
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+    ...
 
-source.addEventListener(<span class="hljs-string">"greeting"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
-  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Got a greeting!"</span>)
-}, <span class="hljs-literal">false</span>)
+    const source = <span class="hljs-keyword">new</span> EventSource(<span class="hljs-string">`http://localhost:4000/_rig/v1/connection/sse`</span>)
+
+    source.onopen = <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"open"</span>, e)
+    source.onmessage = <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"message"</span>, e)
+    source.onerror = <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"error"</span>, e)
+
+    source.addEventListener(<span class="hljs-string">"rig.connection.create"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
+      cloudEvent = <span class="hljs-built_in">JSON</span>.parse(e.data)
+      payload = cloudEvent.data
+      connectionToken = payload[<span class="hljs-string">"connection_token"</span>]
+      createSubscription(connectionToken)
+    }, <span class="hljs-literal">false</span>);
+
+    source.addEventListener(<span class="hljs-string">"greeting"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
+      cloudEvent = <span class="hljs-built_in">JSON</span>.parse(e.data)
+      ...
+    })
+
+    source.addEventListener(<span class="hljs-string">"error"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
+      <span class="hljs-keyword">if</span> (e.readyState == EventSource.CLOSED) {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Connection was closed."</span>)
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Connection error:"</span>, e)
+      }
+    }, <span class="hljs-literal">false</span>);
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createSubscription</span>(<span class="hljs-params">connectionToken</span>) </span>{
+      <span class="hljs-keyword">const</span> eventType = <span class="hljs-string">"greeting"</span>
+      <span class="hljs-keyword">return</span> fetch(<span class="hljs-string">`http://localhost:4000/_rig/v1/connection/sse/<span class="hljs-subst">${connectionToken}</span>/subscriptions`</span>, {
+          <span class="hljs-attr">method</span>: <span class="hljs-string">"PUT"</span>,
+          ...,
+          <span class="hljs-attr">body</span>: <span class="hljs-built_in">JSON</span>.stringify({
+            <span class="hljs-string">"subscriptions"</span>: [{
+              <span class="hljs-string">"eventType"</span>: eventType
+            }]
+          })
+        })
+        ...
+    }
+
+  </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
 </code></pre>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/the-big-picture.html"><span class="arrow-prev">← </span><span>Previous</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/faq.html"><span>FAQ</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div></body></html>
