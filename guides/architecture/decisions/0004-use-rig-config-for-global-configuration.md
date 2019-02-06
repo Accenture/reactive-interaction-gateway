@@ -21,29 +21,11 @@ We use [Confex](https://hexdocs.pm/confex/Confex.html) to make this more flexibl
 Consider the following example for use in `config.exs`:
 
 ```elixir
-config :rig, Rig.RateLimit,
-  # Internal ETS table name (must be unique).
-  table_name: :rate_limit_buckets,
-  # Enables/disables rate limiting globally.
-  enabled?: {:system, :boolean, "RATE_LIMIT_ENABLED", false},
-  # If true, the remote IP is taken into account; otherwise the limits are per endpoint only.
-  per_ip?: {:system, :boolean, "RATE_LIMIT_PER_IP", true},
-  # The permitted average amount of requests per second.
-  avg_rate_per_sec: {:system, :integer, "RATE_LIMIT_AVG_RATE_PER_SEC", 10_000},
-  # The permitted peak amount of requests.
-  burst_size: {:system, :integer, "RATE_LIMIT_BURST_SIZE", 5_000},
-  # GC interval. If set to zero, GC is disabled.
-  sweep_interval_ms: {:system, :integer, "RATE_LIMIT_SWEEP_INTERVAL_MS", 5_000}
+config :rig, RigInboundGateway.ApiProxy.Base,
+  recv_timeout: {:system, :integer, "PROXY_RECV_TIMEOUT", 5_000}
 ```
 
 Note that default values are given in `config.exs` and _never in the implementation_.
-
-In `Rig.RateLimit`, this configuration would be accessible using the `Rig.Config` macro:
-
-```elixir
-  use Rig.Config,
-    [:table_name, :enabled?, :per_ip?, :avg_rate_per_sec, :burst_size, :sweep_interval_ms]
-```
 
 The keyword list that supplied to the macro specifies the _required_ keys; that is,
 their presence will be checked. Note that you can also validate the configuration
