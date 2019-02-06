@@ -94,28 +94,64 @@ Going back to the first terminal window you should now see your greeting event :
 
 ### 6. Next: connect your app
 
-Simply add an event listener to your frontend:
+To connect your app to RIG, add an event listener to your frontend. See [examples/sse-demo.html](https://github.com/Accenture/reactive-interaction-gateway/blob/master/examples/sse-demo.html) for a full example. Here are the most important parts:
 
-```javascript
-const url = "http://localhost:4000/_rig/v1/connection/sse"
-const source = new EventSource(url)
+```html
+<!DOCTYPE html>
+<html>
 
-source.onopen = e => console.log("SSE connection open", e)
-source.onerror = e => console.log("SSE connection error", e)
+<head>
+  ...
+  <script src="https://unpkg.com/event-source-polyfill/src/eventsource.min.js"></script>
+</head>
 
-source.addEventListener("rig.connection.create", function (e) {
-  cloudEvent = JSON.parse(e.data)
-  const { connectionToken } = cloudEvent.data
-  createSubscriptions(connectionToken)
-}, false)
+<body>
+  ...
 
-source.addEventListener("rig.subscriptions_set", function (e) {
-  cloudEvent = JSON.parse(e.data)
-  const { type } = cloudEvent.data
-  console.log(`Now subscribed to ${type}`)
-}, false)
+  <script>
+    ...
 
-source.addEventListener("greeting", function (e) {
-  console.log("Got a greeting!")
-}, false)
+    const source = new EventSource(`http://localhost:4000/_rig/v1/connection/sse`)
+
+    source.onopen = (e) => console.log("open", e)
+    source.onmessage = (e) => console.log("message", e)
+    source.onerror = (e) => console.log("error", e)
+
+    source.addEventListener("rig.connection.create", function (e) {
+      cloudEvent = JSON.parse(e.data)
+      payload = cloudEvent.data
+      connectionToken = payload["connection_token"]
+      createSubscription(connectionToken)
+    }, false);
+
+    source.addEventListener("greeting", function (e) {
+      cloudEvent = JSON.parse(e.data)
+      ...
+    })
+
+    source.addEventListener("error", function (e) {
+      if (e.readyState == EventSource.CLOSED) {
+        console.log("Connection was closed.")
+      } else {
+        console.log("Connection error:", e)
+      }
+    }, false);
+
+    function createSubscription(connectionToken) {
+      const eventType = "greeting"
+      return fetch(`http://localhost:4000/_rig/v1/connection/sse/${connectionToken}/subscriptions`, {
+          method: "PUT",
+          ...,
+          body: JSON.stringify({
+            "subscriptions": [{
+              "eventType": eventType
+            }]
+          })
+        })
+        ...
+    }
+
+  </script>
+</body>
+</html>
 ```
