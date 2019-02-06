@@ -92,9 +92,9 @@ RIG responds with `202 Accepted`, followed by the CloudEvent as sent to subscrib
 
 Going back to the first terminal window you should now see your greeting event :tada:
 
-### 6. Next: connect your app
+### 6. Connect your app to RIG
 
-To connect your app to RIG, add an event listener to your frontend. See [examples/sse-demo.html](https://github.com/Accenture/reactive-interaction-gateway/blob/master/examples/sse-demo.html) for a full example. Here are the most important parts:
+To connect your app to RIG, add an event listener to your frontend. See [examples/sse-demo.html](https://github.com/Accenture/reactive-interaction-gateway/blob/master/examples/sse-demo.html) for a full example. Here are the most important bits:
 
 ```html
 <!DOCTYPE html>
