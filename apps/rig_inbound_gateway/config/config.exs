@@ -73,7 +73,7 @@ config :mime, :types, %{
 # API Gateway (Proxy)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-config :rig, RigInboundGateway.Proxy, config_file: {:system, "PROXY_CONFIG_FILE", nil}
+config :rig, RigInboundGateway.Proxy, config_path_or_json: {:system, "PROXY_CONFIG_FILE", nil}
 
 config :rig, RigInboundGateway.ApiProxy.Base,
   recv_timeout: {:system, :integer, "PROXY_RECV_TIMEOUT", 5_000}

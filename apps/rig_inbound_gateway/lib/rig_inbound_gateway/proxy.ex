@@ -19,6 +19,7 @@ defmodule RigInboundGateway.Proxy do
   use Rig.Config, []
   require Logger
 
+  alias Rig.Config
   alias RigInboundGateway.ApiProxy.Api
 
   @typep state_t :: map
@@ -59,12 +60,15 @@ defmodule RigInboundGateway.Proxy do
     Logger.info("Initial loading of API definitions to presence")
     conf = config()
 
-    conf.config_file
-    |> read_init_apis
-    |> Enum.each(fn api ->
-      api_with_default_values = set_default_api_values(api)
-      state.tracker_mod.track(api["id"], api_with_default_values)
-    end)
+    with {:ok, config} when is_list(config) <- Config.parse_json_env(conf.config_path_or_json) do
+      Enum.each(config, fn api ->
+        api_with_default_values = set_default_api_values(api)
+        state.tracker_mod.track(api["id"], api_with_default_values)
+      end)
+    else
+      {:ok, not_a_list} -> {:error, :not_a_list, not_a_list}
+      {:error, :syntax_error, _details} = err -> err
+    end
   end
 
   @impl ProxyBehaviour
@@ -112,7 +116,7 @@ defmodule RigInboundGateway.Proxy do
 
   @spec handle_info(:init_apis, state_t) :: {:noreply, state_t}
   def handle_info(:init_apis, state) do
-    init_presence(state)
+    :ok = init_presence(state)
     {:noreply, state}
   end
 
@@ -335,17 +339,6 @@ defmodule RigInboundGateway.Proxy do
     |> Map.delete(:phx_ref_prev)
     |> Map.delete("node_name")
     |> Map.delete("timestamp")
-  end
-
-  @spec read_init_apis(String.t() | nil) :: [Api.t()]
-  defp read_init_apis(nil), do: []
-
-  defp read_init_apis(config_file) do
-    :rig_inbound_gateway
-    |> :code.priv_dir()
-    |> Path.join(config_file)
-    |> File.read!()
-    |> Poison.decode!()
   end
 
   @spec set_default_api_values(Api.t()) :: Api.t()

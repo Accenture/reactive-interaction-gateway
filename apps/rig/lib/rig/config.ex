@@ -37,6 +37,7 @@ defmodule Rig.Config do
   If you use :custom_validation, you should deal with the raw keyword list
   by implementing `validate_config!/1` in the module.
   """
+  require Logger
   alias Jason
 
   defmacro __using__(:custom_validation) do
@@ -103,20 +104,52 @@ defmodule Rig.Config do
 
   @spec from_file(String.t()) :: {:ok, any} | {:error, reason :: any}
   defp from_file(path) do
-    with {:ok, content} <- File.read(path),
-         {:ok, config} <- from_encoded(content) do
-      {:ok, config}
-    else
-      {:error, _reason} = err -> err
+    %{path: path, found?: false}
+    |> check_path_as_is()
+    |> check_relative_to_priv()
+    |> case do
+      %{found?: false} ->
+        {:error, :no_such_file}
+
+      %{path: path} ->
+        with {:ok, content} <- File.read(path),
+             {:ok, config} <- from_encoded(content) do
+          {:ok, config}
+        else
+          {:error, _reason} = err -> err
+        end
     end
   end
 
   # ---
 
-  @spec from_encoded(String.t()) :: {:ok, any} | {:error, Jason.DecodeError.t()}
-  defp from_encoded(encoded) do
+  defp check_path_as_is(%{found?: false, path: path} = ctx) when byte_size(path) > 0,
+    do: if(File.exists?(path), do: %{ctx | found?: true}, else: ctx)
+
+  defp check_path_as_is(ctx), do: ctx
+
+  # ---
+
+  defp check_relative_to_priv(%{found?: false, path: path} = ctx) when byte_size(path) > 0 do
+    [:rig, :rig_inbound_gateway, :rig_api]
+    |> Enum.map(fn app -> :code.priv_dir(app) |> Path.join(path) end)
+    |> Enum.find(&File.exists?/1)
+    |> case do
+      nil -> ctx
+      path -> %{found?: true, path: path}
+    end
+  end
+
+  defp check_relative_to_priv(ctx), do: ctx
+
+  # ---
+
+  @spec from_encoded(String.t()) :: {:ok, any} | {:error, Jason.DecodeError.t() | any}
+  defp from_encoded(encoded) when byte_size(encoded) > 0 do
     Jason.decode(encoded)
   end
+
+  defp from_encoded(_), do: {:error, :not_a_nonempty_string}
 
   # ---
 

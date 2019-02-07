@@ -1,9 +1,10 @@
 defmodule RigInboundGateway.ProxyTest do
   @moduledoc false
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   require Logger
   alias RigInboundGateway.Proxy
   use RigInboundGatewayWeb.ConnCase
+  alias RigInboundGateway.ProxyConfig
 
   import RigInboundGateway.Proxy,
     only: [
@@ -19,11 +20,49 @@ defmodule RigInboundGateway.ProxyTest do
   setup [:with_tracker_mock_proxy]
 
   describe "list_apis" do
-    test "should return list with 2 API definitions", ctx do
+    test "should return API definitions when the configuration is passed as a JSON file.", ctx do
       {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
 
       assert proxy |> list_apis |> length == 2
       assert ctx.tracker |> Stubr.called_once?(:list_by_node)
+    end
+
+    test "should return API definitions when the configuration is passed as a JSON string.",
+         ctx do
+      id = "config-by-json-string"
+
+      ProxyConfig.set([
+        %{
+          "active" => true,
+          "auth_type" => "none",
+          "id" => id,
+          "name" => id,
+          "proxy" => %{
+            "port" => 3000,
+            "target_url" => "http://localhost",
+            "use_env" => false
+          },
+          "version_data" => %{
+            "default" => %{
+              "endpoints" => [
+                %{
+                  "id" => id <> "1",
+                  "method" => "GET",
+                  "not_secured" => true,
+                  "path" => "/foo"
+                }
+              ]
+            }
+          },
+          "versioned" => false
+        }
+      ])
+
+      {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+      apis = Proxy.list_apis(proxy)
+      assert [{^id, _api}] = apis
+
+      ProxyConfig.restore()
     end
   end
 
@@ -413,8 +452,8 @@ defmodule RigInboundGateway.ProxyTest do
               Agent.get(agent, fn list ->
                 list
                 |> Enum.find(fn {key, meta} ->
-                     key == id && meta["node_name"] == api["node_name"]
-                   end)
+                  key == id && meta["node_name"] == api["node_name"]
+                end)
               end) != nil
 
             if already_tracked? do
@@ -434,8 +473,8 @@ defmodule RigInboundGateway.ProxyTest do
             Agent.update(agent, fn list ->
               list
               |> Enum.filter(fn {key, meta} ->
-                   key != id || meta["node_name"] != :nonode@nohost
-                 end)
+                key != id || meta["node_name"] != :nonode@nohost
+              end)
               |> Enum.concat([{id, api}])
             end)
 
@@ -459,8 +498,8 @@ defmodule RigInboundGateway.ProxyTest do
             Agent.get(agent, fn list ->
               list
               |> Enum.find(fn {key, meta} ->
-                   key == id && meta["node_name"] == node_name
-                 end)
+                key == id && meta["node_name"] == node_name
+              end)
             end)
           end,
           find_all: fn id ->
