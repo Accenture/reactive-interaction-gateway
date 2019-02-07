@@ -18,6 +18,8 @@ defmodule RigInboundGateway.ApiProxy.Router do
   alias RigInboundGateway.ApiProxy.Serializer
   alias RigInboundGateway.Proxy
 
+  @host Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:url][:host]
+
   plug(:match)
   plug(:dispatch)
 
@@ -58,7 +60,9 @@ defmodule RigInboundGateway.ApiProxy.Router do
           "kinesis" -> KinesisHandler
         end
 
-      handler.handle_http_request(conn, api, endpoint, request_path)
+      updated_conn = add_forward_headers(conn)
+
+      handler.handle_http_request(updated_conn, api, endpoint, request_path)
     else
       {:error, :authentication_failed} -> send_resp(conn, :unauthorized, "Authentication failed.")
     end
@@ -88,4 +92,36 @@ defmodule RigInboundGateway.ApiProxy.Router do
   end
 
   defp transform_req_headers(conn, _, _), do: conn
+
+  # ---
+
+  def add_forward_headers(conn) do
+    %{
+      req_headers: req_headers,
+      remote_ip: remote_ip
+    } = conn
+
+    # GET HOST IP ADDRESS AS STRING
+    {:ok, host_ip} = @host |> String.to_charlist() |> :inet.getaddr(:inet)
+    host_ip_str = host_ip |> :inet.ntoa() |> to_string
+
+    # GET REMOTE IP AS STRING
+    remote_ip_str = remote_ip |> :inet.ntoa() |> to_string
+
+    forward_headers = [
+      {"X-Content-Type-Options", "nosniff"},
+      {"Forwarded", "for=#{remote_ip_str};by=#{host_ip_str}"}
+    ]
+
+    updated_headers =
+      for(
+        {key, val} when key not in ["X-Content-Type-Options", "Forwarded"] <- req_headers,
+        do: {key, val}
+      ) ++ forward_headers
+
+    conn
+    |> Map.put(:req_headers, updated_headers)
+  end
+
+  # ---
 end
