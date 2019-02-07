@@ -58,6 +58,29 @@ defmodule RigApi.Router do
         Please note that there is no authentication or authorization on this API;
         therefore, consider exposing it to your internal network only.
         """
+      },
+
+      # Documentation for paths without Controller go here
+      paths: %{
+        "/metrics": %{
+          get: %{
+            tags: ["Metrics"],
+            summary:
+              "Providing metrics for monitoring in Prometheus Format (please change Scheme to http if you want to try it)",
+            responses: %{
+              "200": %{
+                description: "Response in Prometheus format",
+                content: %{
+                  "text/plain": %{
+                    schema: %{
+                      type: "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   end
