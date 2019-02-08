@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Deprecated -->
 
 <!-- ### Removed -->
-
+- Removing the Rate Limit feature from Inbound gateway [#144](https://github.com/Accenture/reactive-interaction-gateway/issues/144)
 <!-- ### Fixed -->
 
 <!-- ### Security -->
