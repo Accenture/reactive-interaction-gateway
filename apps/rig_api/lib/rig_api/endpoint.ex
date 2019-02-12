@@ -1,8 +1,6 @@
 defmodule RigApi.Endpoint do
   use Phoenix.Endpoint, otp_app: :rig_api
 
-  @metrics_enabled? Confex.fetch_env!(:rig_metrics, RigMetrics.Application)[:metrics_enabled?]
-
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do
@@ -32,12 +30,8 @@ defmodule RigApi.Endpoint do
   )
 
   # Prometheus Integration - START
-
   # makes the /metrics URL happen
-  if @metrics_enabled? == true do
-    plug(RigMetrics.MetricsPlugExporter)
-  end
-
+  plug(RigMetrics.MetricsPlugExporter)
   # Prometheus Integration - END
 
   plug(RigApi.Router)
