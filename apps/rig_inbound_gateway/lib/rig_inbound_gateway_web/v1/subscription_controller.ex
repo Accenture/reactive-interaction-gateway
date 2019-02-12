@@ -1,13 +1,18 @@
 defmodule RigInboundGatewayWeb.V1.SubscriptionController do
-  require Logger
   use Rig.Config, [:cors]
   use RigInboundGatewayWeb, :controller
 
+  alias Result
+
   alias Rig.Connection
+  alias RIG.JWT
+  alias Rig.Subscription
+  alias RIG.Subscriptions
   alias RigAuth.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
   alias RigAuth.Session
-  alias RigInboundGateway.AutomaticSubscriptions.Jwt, as: JwtSubscriptions
-  alias RigInboundGateway.Subscriptions
+  alias RigInboundGateway.Subscriptions, as: RigInboundGatewaySubscriptions
+
+  require Logger
 
   # ---
 
@@ -67,16 +72,40 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
     with :ok <- SubscriptionAuthZ.check_authorization(conn),
          {:ok, socket_pid} <- Connection.Codec.deserialize(connection_id),
-         :ok <- connection_alive!(socket_pid),
-         # Updating the session allows blacklisting it later on:
-         Session.update(conn, socket_pid),
-         all_subscriptions <-
-           conn
-           |> Plug.Conn.get_req_header("authorization")
-           |> JwtSubscriptions.infer_subscriptions()
-           |> Enum.concat(subscriptions),
-         :ok <- Subscriptions.check_and_forward_subscriptions(socket_pid, all_subscriptions) do
-      send_resp(conn, :no_content, "")
+         :ok <- connection_alive!(socket_pid) do
+      # Updating the session allows blacklisting it later on:
+      Session.update(conn, socket_pid)
+
+      jwt_subscription_results =
+        conn.req_headers
+        |> JWT.parse_http_header()
+        |> Result.filter_and_unwrap()
+        |> Enum.reduce(%{}, &Map.merge/2)
+        |> Subscriptions.from_jwt_claims()
+
+      manual_subscription_results = Enum.map(subscriptions, &Subscription.new/1)
+
+      all_errors =
+        Result.filter_and_unwrap_err(jwt_subscription_results) ++
+          Result.filter_and_unwrap_err(manual_subscription_results)
+
+      if Enum.empty?(all_errors) do
+        all_subscriptions =
+          Enum.uniq(
+            Result.filter_and_unwrap(jwt_subscription_results) ++
+              Result.filter_and_unwrap(manual_subscription_results)
+          )
+
+        :ok =
+          RigInboundGatewaySubscriptions.check_and_forward_subscriptions(
+            socket_pid,
+            all_subscriptions
+          )
+
+        send_resp(conn, :no_content, "")
+      else
+        conn |> put_status(:bad_request) |> json(all_errors)
+      end
     else
       {:error, :not_authorized} ->
         conn |> put_status(:forbidden) |> text("Subscription denied.")

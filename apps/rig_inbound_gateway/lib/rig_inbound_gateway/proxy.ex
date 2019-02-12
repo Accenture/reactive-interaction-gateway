@@ -57,17 +57,31 @@ defmodule RigInboundGateway.Proxy do
 
   @spec init_presence(state_t) :: :ok
   def init_presence(state) do
-    Logger.info("Initial loading of API definitions to presence")
     conf = config()
 
-    with {:ok, config} when is_list(config) <- Config.parse_json_env(conf.config_path_or_json) do
+    case conf.config_path_or_json do
+      nil ->
+        Logger.info(fn -> "Reverse-proxy configuration not present." end)
+
+      config_path_or_json ->
+        do_init_presence(config_path_or_json, state)
+    end
+  end
+
+  defp do_init_presence(config_path_or_json, state) do
+    with {:ok, config} when is_list(config) <- Config.parse_json_env(config_path_or_json) do
       Enum.each(config, fn api ->
+        Logger.info(fn -> "Reverse proxy: service #{api.id}" end)
         api_with_default_values = set_default_api_values(api)
         state.tracker_mod.track(api["id"], api_with_default_values)
       end)
     else
-      {:ok, not_a_list} -> {:error, :not_a_list, not_a_list}
-      {:error, :syntax_error, _details} = err -> err
+      {:ok, not_a_list} ->
+        {:error, "the proxy config must be a list", [not_a_list: not_a_list]}
+
+      {:error, :syntax_error, details} ->
+        {:error, "could not read proxy config",
+         [syntax_error: details, path_or_json: config_path_or_json]}
     end
   end
 

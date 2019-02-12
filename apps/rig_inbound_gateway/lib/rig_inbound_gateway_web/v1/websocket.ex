@@ -10,12 +10,13 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   alias Jason
 
+  alias Result
+  alias RIG.Subscriptions
+
   alias Rig.EventFilter
-  alias Rig.Subscription
   alias RigCloudEvents.CloudEvent
-  alias RigInboundGateway.AutomaticSubscriptions.Jwt, as: JwtSubscriptions
   alias RigInboundGateway.Events
-  alias RigInboundGateway.Subscriptions
+  alias RigInboundGateway.Subscriptions, as: RigInboundGatewaySubscriptions
 
   @behaviour :cowboy_websocket
 
@@ -26,27 +27,29 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   @impl :cowboy_websocket
   def init(req, :ok) do
-    # TODO If token is given but invalid this crashes with
-    # TODO {:badmatch, {:error, "Invalid signature"}}.
-    # TODO Instead, logging should be moved from infer_subscriptions,
-    # TODO with appropriate error handling.
-    jwt_subscriptions =
-      for {"jwt", token} <- :cowboy_req.parse_qs(req),
-          candidates = JwtSubscriptions.infer_subscriptions([token]),
-          candidate <- candidates,
-          %Subscription{} = parsed = Subscription.new(candidate),
-          do: parsed
+    query_params = req |> :cowboy_req.parse_qs() |> Enum.into(%{})
 
-    manual_subscriptions =
-      for {"subscriptions", encoded} <- :cowboy_req.parse_qs(req),
-          {:ok, candidates} = Jason.decode(encoded),
-          candidate <- candidates,
-          %Subscription{} = parsed = Subscription.new(candidate),
-          do: parsed
+    jwt_subscription_results =
+      query_params
+      |> Map.get("jwt")
+      |> Subscriptions.from_token()
 
-    all_subscriptions = jwt_subscriptions ++ manual_subscriptions
+    manual_subscription_results =
+      query_params
+      |> Map.get("subscriptions", "[]")
+      |> Subscriptions.from_json()
 
-    state = %{subscriptions: all_subscriptions}
+    all_subscriptions =
+      (Result.filter_and_unwrap(jwt_subscription_results) ++
+         Result.filter_and_unwrap(manual_subscription_results))
+      |> Enum.uniq()
+
+    all_errors =
+      jwt_subscription_results
+      |> Result.filter_and_unwrap_err()
+      |> Enum.concat(manual_subscription_results |> Result.filter_and_unwrap_err())
+
+    state = %{subscriptions: all_subscriptions, errors: all_errors}
     opts = %{idle_timeout: :infinity}
 
     {:cowboy_websocket, req, state, opts}
@@ -55,11 +58,11 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   # ---
 
   @impl :cowboy_websocket
-  def websocket_init(%{subscriptions: subscriptions} = state) do
-    Subscriptions.check_and_forward_subscriptions(self(), subscriptions)
+  def websocket_init(%{subscriptions: subscriptions, errors: errors} = state) do
+    RigInboundGatewaySubscriptions.check_and_forward_subscriptions(self(), subscriptions)
 
     Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
-    {:reply, frame(Events.welcome_event()), state}
+    {:reply, frame(Events.welcome_event(errors)), %{state | errors: []}}
   end
 
   # ---

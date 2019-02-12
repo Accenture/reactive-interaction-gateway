@@ -32,7 +32,7 @@ transfer-encoding: chunked
 ...
 
 event: rig.connection.create
-data: {"specversion":"0.2","source":"rig","type":"rig.connection.create","time":"2018-08-22T10:06:04.730484+00:00","id":"2b0a4f05-9032-4617-8d1e-92d97fb870dd","data":{"connection_token":"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"}}
+data: {"specversion":"0.2","source":"rig","type":"rig.connection.create","time":"2018-08-22T10:06:04.730484+00:00","id":"2b0a4f05-9032-4617-8d1e-92d97fb870dd","data":{"connection_token":"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA","errors":[]}}
 id: 2b0a4f05-9032-4617-8d1e-92d97fb870dd
 ```
 
@@ -50,7 +50,7 @@ With the connection established, you can create _subscriptions_ - that is, you c
 $ CONN_TOKEN="g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"
 $ SUBSCRIPTIONS='{"subscriptions":[{"eventType":"greeting"}]}'
 $ http put ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions" <<<"$SUBSCRIPTIONS"
-HTTP/1.1 201 Created
+HTTP/1.1 204 No Content
 content-type: application/json; charset=utf-8
 ...
 ```

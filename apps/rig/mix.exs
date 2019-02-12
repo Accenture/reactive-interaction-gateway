@@ -65,7 +65,9 @@ defmodule Rig.MixProject do
       # For doing HTTP requests, e.g., in kafka_as_http:
       {:httpoison, "~> 1.3"},
       # For property-based testing:
-      {:stream_data, "~> 0.1", only: :test}
+      {:stream_data, "~> 0.1", only: :test},
+      # For JSON Web Tokens:
+      {:joken, "~> 1.5"}
     ]
   end
 

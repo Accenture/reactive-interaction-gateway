@@ -11,7 +11,7 @@ defmodule Rig.EventFilter.ServerTest do
   test "subscribe & receive an event" do
     event_type = "test.event"
     field_config = %{}
-    subscription = Subscription.new(%{event_type: event_type})
+    subscription = Subscription.new!(%{event_type: event_type})
 
     event =
       CloudEvent.parse!(%{
@@ -62,10 +62,13 @@ defmodule Rig.EventFilter.ServerTest do
     name_is_joe = %{"name" => "joe"}
     age_is_30 = %{"age" => 30}
 
-    joe_subscription = Subscription.new(%{event_type: event_type, constraints: [name_is_joe]})
+    joe_subscription = Subscription.new!(%{event_type: event_type, constraints: [name_is_joe]})
 
     joe_and_30_subscription =
-      Subscription.new(%{event_type: event_type, constraints: [Map.merge(name_is_joe, age_is_30)]})
+      Subscription.new!(%{
+        event_type: event_type,
+        constraints: [Map.merge(name_is_joe, age_is_30)]
+      })
 
     base_event = %{"specversion" => "0.2", "type" => event_type, "source" => "test"}
 
@@ -132,7 +135,7 @@ defmodule Rig.EventFilter.ServerTest do
     name_is_joe = %{"name" => "joe"}
 
     greetings_to_joe_subscription =
-      Subscription.new(%{event_type: event_type, constraints: [name_is_joe]})
+      Subscription.new!(%{event_type: event_type, constraints: [name_is_joe]})
 
     EventFilter.refresh_subscriptions([greetings_to_joe_subscription], [])
 
