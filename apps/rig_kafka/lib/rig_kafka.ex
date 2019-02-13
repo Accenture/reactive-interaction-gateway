@@ -11,6 +11,6 @@ defmodule RigKafka do
   @spec start(Config.t(), Client.callback() | nil) :: {:ok, pid} | :ignore | {:error, any}
   defdelegate start(config, callback \\ nil), to: RigKafka.Client, as: :start_supervised
 
-  @spec produce(Config.t(), String.t(), String.t(), String.t()) :: :ok
-  defdelegate produce(config, topic, key, plaintext), to: RigKafka.Client
+  @spec produce(Config.t(), String.t(), String.t(), String.t(), String.t()) :: :ok
+  defdelegate produce(config, topic, schema, key, plaintext), to: RigKafka.Client
 end

@@ -141,7 +141,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   @impl GenServer
   def handle_call({:produce, key, plaintext}, _from, %{kafka_config: kafka_config} = state) do
     %{request_topic: topic} = config()
-    res = RigKafka.produce(kafka_config, topic, key, plaintext)
+    res = RigKafka.produce(kafka_config, topic, "test2-value", key, plaintext)
     {:reply, res, state}
   end
 

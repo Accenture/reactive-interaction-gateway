@@ -5,8 +5,10 @@ defmodule RigKafka.Client do
   require Logger
   @reconnect_timeout_ms 20_000
   use GenServer, shutdown: @reconnect_timeout_ms + 5_000
+  use Rig.Config, [:serializer]
 
   alias RigKafka.Config
+  alias RigKafka.Serializer
 
   @supervisor RigKafka.DynamicSupervisor
 
@@ -28,11 +30,82 @@ defmodule RigKafka.Client do
       {:ok, state}
     end
 
+    # TODO: move to separate file
+
+    def extract_headers(%{
+          "cloudEvents_contentType" => contentType,
+          "cloudEvents_cloudEventsVersion" => cloudEventsVersion,
+          "cloudEvents_source" => source,
+          "cloudEvents_eventType" => eventType,
+          "cloudEvents_eventTime" => eventTime,
+          "cloudEvents_eventID" => eventID
+        }) do
+      %{
+        "contentType" => contentType,
+        "cloudEventsVersion" => cloudEventsVersion,
+        "source" => source,
+        "eventType" => eventType,
+        "eventTime" => eventTime,
+        "eventID" => eventID
+      }
+    end
+
+    def extract_headers(%{
+          "cloudEvents_contenttype" => contentType,
+          "cloudEvents_specversion" => cloudEventsVersion,
+          "cloudEvents_source" => source,
+          "cloudEvents_type" => eventType,
+          "cloudEvents_time" => eventTime,
+          "cloudEvents_id" => eventID
+        }) do
+      %{
+        "contenttype" => contentType,
+        "specversion" => cloudEventsVersion,
+        "source" => source,
+        "type" => eventType,
+        "time" => eventTime,
+        "id" => eventID
+      }
+    end
+
+    def extract_headers(_headers), do: %{}
+
     @impl :brod_group_subscriber
     def handle_message(topic, partition, message, %{callback: callback} = state) do
-      %{offset: offset, value: body} = Enum.into(kafka_message(message), %{})
+      %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
 
-      case callback.(body) do
+      deconstructed_headers =
+        headers
+        |> Enum.into(%{})
+        |> extract_headers()
+
+      decoded_body =
+        cond do
+          Map.get(deconstructed_headers, "contentType") == "avro/binary" ->
+            data = Jason.decode!(Serializer.decode_body(body, "avro"))
+            Map.merge(deconstructed_headers, %{"data" => data})
+
+          Map.get(deconstructed_headers, "contenttype") == "avro/binary" ->
+            data = Jason.decode!(Serializer.decode_body(body, "avro"))
+            Map.merge(deconstructed_headers, %{"data" => data})
+
+          Map.get(deconstructed_headers, "contentType") ==
+              "application/cloudevents+json; charset=UTF-8" ->
+            body
+
+          Map.get(deconstructed_headers, "contenttype") ==
+              "application/cloudevents+json; charset=UTF-8" ->
+            body
+
+          :binary.at(body, 0) == 0 ->
+            data = Jason.decode!(Serializer.decode_body(body, "avro"))
+            Map.merge(deconstructed_headers, %{"data" => data})
+
+          true ->
+            body
+        end
+
+      case callback.(decoded_body) do
         :ok ->
           {:ok, :ack, state}
 
@@ -82,9 +155,9 @@ defmodule RigKafka.Client do
 
   # ---
 
-  def produce(%{server_id: server_id}, topic, key, plaintext)
+  def produce(%{server_id: server_id}, topic, schema, key, plaintext)
       when is_binary(topic) and is_binary(key) and is_binary(plaintext) do
-    GenServer.call(server_id, {:produce, topic, key, plaintext})
+    GenServer.call(server_id, {:produce, topic, schema, key, plaintext})
   end
 
   # ---
@@ -206,8 +279,12 @@ defmodule RigKafka.Client do
   # ---
 
   @impl GenServer
-  def handle_call({:produce, topic, key, plaintext}, _from, %{brod_client: brod_client} = state) do
-    result = try_producing_message(brod_client, topic, key, plaintext)
+  def handle_call(
+        {:produce, topic, schema, key, plaintext},
+        _from,
+        %{brod_client: brod_client} = state
+      ) do
+    result = try_producing_message(brod_client, topic, schema, key, plaintext)
     {:reply, result, state}
   end
 
@@ -225,17 +302,107 @@ defmodule RigKafka.Client do
     {:stop, :shutdown, state}
   end
 
+  # --- TODO: move to separate file
+
+  defp construct_headers("binary", %{
+         "contenttype" => contenttype,
+         "specversion" => specversion,
+         "source" => source,
+         "type" => type,
+         "time" => time,
+         "id" => id
+       }) do
+    [
+      {"cloudEvents_contenttype", contenttype},
+      {"cloudEvents_specversion", specversion},
+      {"cloudEvents_source", source},
+      {"cloudEvents_type", type},
+      {"cloudEvents_time", time},
+      {"cloudEvents_id", id}
+      # {"cloudEvents_rig", convert(rig)} TODO: not working yet
+    ]
+  end
+
+  defp construct_headers("binary", %{
+         "contentType" => contentType,
+         "cloudEventsVersion" => cloudEventsVersion,
+         "source" => source,
+         "eventType" => eventType,
+         "eventTime" => eventTime,
+         "eventID" => eventID,
+         "extensions" => extensions,
+         "rig" => rig
+       }) do
+    [
+      {"cloudEvents_contentType", contentType},
+      {"cloudEvents_cloudEventsVersion", cloudEventsVersion},
+      {"cloudEvents_source", source},
+      {"cloudEvents_eventType", eventType},
+      {"cloudEvents_eventTime", eventTime},
+      {"cloudEvents_eventID", eventID},
+      {"extensions", Enum.into(extensions, [])}
+      # {"cloudEvents_rig", convert(rig)} TODO: not working yet
+    ]
+  end
+
+  defp construct_headers(_type, %{
+         "contenttype" => contenttype
+       }) do
+    [
+      {"cloudEvents_contenttype", contenttype}
+    ]
+  end
+
+  defp construct_headers(_type, %{
+         "contentType" => contentType
+       }) do
+    [
+      {"cloudEvents_contentType", contentType}
+    ]
+  end
+
   # ---
 
-  defp try_producing_message(brod_client, topic, key, plaintext, retry_delay_divisor \\ 64)
+  defp try_producing_message(
+         brod_client,
+         topic,
+         schema,
+         key,
+         plaintext,
+         retry_delay_divisor \\ 64
+       )
 
-  defp try_producing_message(brod_client, topic, key, plaintext, retry_delay_divisor) do
+  defp convert(map) do
+    for {key, val} <- map,
+        into: [],
+        do: if(is_integer(val), do: {key, Integer.to_string(val)}, else: {key, val})
+  end
+
+  defp try_producing_message(brod_client, topic, schema, key, plaintext, retry_delay_divisor) do
+    plaintext_map = Jason.decode!(plaintext)
+    %{serializer: serializer} = config()
+
+    {constructed_headers, body} =
+      case serializer do
+        "avro" ->
+          constructed_headers = construct_headers("binary", plaintext_map)
+          %{"data" => data} = plaintext_map
+          {constructed_headers, Serializer.encode_body(Jason.encode!(data), "avro", schema)}
+
+        _ ->
+          constructed_headers = construct_headers("structured", plaintext_map)
+          {constructed_headers, plaintext}
+      end
+
     case :brod.produce_sync(
            brod_client,
            topic,
            &compute_kafka_partition/4,
            key,
-           plaintext
+           %{
+             value: body,
+             headers: constructed_headers
+           }
          ) do
       :ok ->
         :ok
@@ -251,7 +418,7 @@ defmodule RigKafka.Client do
           end)
 
           :timer.sleep(retry_delay_ms)
-          try_producing_message(brod_client, topic, key, plaintext, retry_delay_divisor / 2)
+          try_producing_message(brod_client, topic, key, body, retry_delay_divisor / 2)
         else
           {:error, :leader_not_available}
         end
