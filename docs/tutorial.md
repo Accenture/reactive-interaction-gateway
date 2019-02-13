@@ -8,22 +8,16 @@ In this tutorial we use [HTTPie](https://httpie.org/) for HTTP requests, but of 
 
 ### 1. Start RIG
 
-When running the Docker image you need to supply HTTPS certificates, as a production setup is assumed. [We are going to make this easier](https://github.com/Accenture/reactive-interaction-gateway/issues/151), but for now run this:
+To get started, run our Docker image using this command:
 
 ```bash
-$ git clone https://github.com/Accenture/reactive-interaction-gateway.git
-$ cd reactive-interaction-gateway
-$ docker run -d -p 4000:4000 -p 4010:4010 \
-  -e HTTPS_CERTFILE=selfsigned.pem \
-  -e HTTPS_KEYFILE=selfsigned_key.pem \
-  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned.pem",dst=/opt/sites/rig/lib/rig_inbound_gateway-2.0.2/priv/selfsigned.pem,readonly \
-  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned_key.pem",dst=/opt/sites/rig/lib/rig_inbound_gateway-2.0.2/priv/selfsigned_key.pem,readonly \
-  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned.pem",dst=/opt/sites/rig/lib/rig_api-2.0.2/priv/selfsigned.pem,readonly \
-  --mount type=bind,source="$(pwd)/apps/rig_inbound_gateway/priv/cert/selfsigned_key.pem",dst=/opt/sites/rig/lib/rig_api-2.0.2/priv/selfsigned_key.pem,readonly \
-  accenture/reactive-interaction-gateway:2.0.2
+$ docker run -p 4000:4000 -p 4010:4010 -e HTTPS_CERTFILE=cert/selfsigned.pem -e HTTPS_KEYFILE=cert/selfsigned_key.pem accenture/reactive-interaction-gateway:2.0.2
+NODE_HOST not set, defaults to 127.0.0.1. Consider setting NODE_HOST to the machine's hostname or IP, as seen by others in the network.
+NODE_COOKIE not set; randomly generated to VcMxc8ylrFipfnUsmxaZvhLkeSonlbCF
+Reactive Interaction Gateway 2.0.2 [rig@127.0.0.1, ERTS 10.2.2, OTP 21]
 ```
 
-Note: Please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
+In production, please make sure to use proper HTTPS certificates instead of the self-signed certificates contained in the image (they are _not_ randomly generated). Also, please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
 
 ### 2. Create a connection
 
@@ -98,30 +92,66 @@ RIG responds with `202 Accepted`, followed by the CloudEvent as sent to subscrib
 
 Going back to the first terminal window you should now see your greeting event :tada:
 
-### 6. Next: connect your app
+### 6. Connect your app to RIG
 
-Simply add an event listener to your frontend:
+To connect your app to RIG, add an event listener to your frontend. See [examples/sse-demo.html](https://github.com/Accenture/reactive-interaction-gateway/blob/master/examples/sse-demo.html) for a full example. Here are the most important bits:
 
-```javascript
-const url = "http://localhost:4000/_rig/v1/connection/sse"
-const source = new EventSource(url)
+```html
+<!DOCTYPE html>
+<html>
 
-source.onopen = e => console.log("SSE connection open", e)
-source.onerror = e => console.log("SSE connection error", e)
+<head>
+  ...
+  <script src="https://unpkg.com/event-source-polyfill/src/eventsource.min.js"></script>
+</head>
 
-source.addEventListener("rig.connection.create", function (e) {
-  cloudEvent = JSON.parse(e.data)
-  const { connectionToken } = cloudEvent.data
-  createSubscriptions(connectionToken)
-}, false)
+<body>
+  ...
 
-source.addEventListener("rig.subscriptions_set", function (e) {
-  cloudEvent = JSON.parse(e.data)
-  const { type } = cloudEvent.data
-  console.log(`Now subscribed to ${type}`)
-}, false)
+  <script>
+    ...
 
-source.addEventListener("greeting", function (e) {
-  console.log("Got a greeting!")
-}, false)
+    const source = new EventSource(`http://localhost:4000/_rig/v1/connection/sse`)
+
+    source.onopen = (e) => console.log("open", e)
+    source.onmessage = (e) => console.log("message", e)
+    source.onerror = (e) => console.log("error", e)
+
+    source.addEventListener("rig.connection.create", function (e) {
+      cloudEvent = JSON.parse(e.data)
+      payload = cloudEvent.data
+      connectionToken = payload["connection_token"]
+      createSubscription(connectionToken)
+    }, false);
+
+    source.addEventListener("greeting", function (e) {
+      cloudEvent = JSON.parse(e.data)
+      ...
+    })
+
+    source.addEventListener("error", function (e) {
+      if (e.readyState == EventSource.CLOSED) {
+        console.log("Connection was closed.")
+      } else {
+        console.log("Connection error:", e)
+      }
+    }, false);
+
+    function createSubscription(connectionToken) {
+      const eventType = "greeting"
+      return fetch(`http://localhost:4000/_rig/v1/connection/sse/${connectionToken}/subscriptions`, {
+          method: "PUT",
+          ...,
+          body: JSON.stringify({
+            "subscriptions": [{
+              "eventType": eventType
+            }]
+          })
+        })
+        ...
+    }
+
+  </script>
+</body>
+</html>
 ```
