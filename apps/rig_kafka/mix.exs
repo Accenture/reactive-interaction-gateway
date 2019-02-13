@@ -47,7 +47,7 @@ defmodule RigKafka.MixProject do
       {:schemex, "~> 0.1.1"},
       # Caching library using ETS:
       {:memoize, "~> 1.3"},
-      {:bypass, "~> 1.0", only: :test}
+      {:fake_server, "~> 2.0", only: :test}
     ]
   end
 end
