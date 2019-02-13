@@ -26,26 +26,17 @@ magic byte, schema id, data
 
 ### Consumer example
 
-TODO
-
-- unit tests
-- merge with master
-- changelog
-
 ```bash
 {"schema":"{\"name\":\"myrecord\",\"type\":\"record\",\"fields\":[{\"name\":\"foo\",\"type\":\"string\"}]}"}
 ```
 
 ```bash
 KAFKA_BROKERS=localhost:9092 \
+KAFKA_SERIALIZER=avro \
 KAFKA_SOURCE_TOPICS=test2 \
 PROXY_CONFIG_FILE=proxy/proxy.testx.json \
 PROXY_KAFKA_REQUEST_TOPIC=test2 \
-mix phx.server
-
-KAFKA_BROKERS=localhost:9092 \
-PROXY_CONFIG_FILE=proxy/proxy.testx.json \
-PROXY_KAFKA_REQUEST_TOPIC=test2 \
+PROXY_KAFKA_REQUEST_SCHEMA=test2-value \
 mix phx.server
 ```
 

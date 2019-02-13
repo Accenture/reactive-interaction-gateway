@@ -80,8 +80,7 @@ defmodule RigKafka.Avro do
   # ---
 
   defp parse_binary_metadata(data) when is_binary(data) do
-    # TODO: hack
-    <<id::40, body::binary>> = data
+    <<0::8, id::32, body::binary>> = data
     {id, body}
   end
 

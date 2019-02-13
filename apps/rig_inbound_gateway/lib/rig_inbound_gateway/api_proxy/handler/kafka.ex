@@ -3,7 +3,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   Handles requests for Kafka targets.
 
   """
-  use Rig.KafkaConsumerSetup, [:cors, :request_topic, :response_timeout]
+  use Rig.KafkaConsumerSetup, [:cors, :request_topic, :request_schema, :response_timeout]
 
   alias Plug.Conn
 
@@ -140,8 +140,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
   @impl GenServer
   def handle_call({:produce, key, plaintext}, _from, %{kafka_config: kafka_config} = state) do
-    %{request_topic: topic} = config()
-    res = RigKafka.produce(kafka_config, topic, "test2-value", key, plaintext)
+    %{request_topic: topic, request_schema: schema} = config()
+    res = RigKafka.produce(kafka_config, topic, schema, key, plaintext)
     {:reply, res, state}
   end
 

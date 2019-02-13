@@ -109,6 +109,7 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
   sasl: {:system, "KAFKA_SASL", nil},
   request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", ""},
+  request_schema: {:system, "PROXY_KAFKA_REQUEST_SCHEMA", ""},
   cors: {:system, "CORS", "*"},
   response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000}
 
@@ -119,7 +120,8 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
   cors: {:system, "CORS", "*"}
 
 config :rig, RigInboundGateway.RequestLogger.Kafka,
-  log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"}
+  log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"},
+  log_schema: {:system, "KAFKA_LOG_SCHEMA", ""}
 
 config :rig, RigInboundGateway.RateLimit,
   # Internal ETS table name (must be unique).
