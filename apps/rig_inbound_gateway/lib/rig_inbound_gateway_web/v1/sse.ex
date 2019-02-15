@@ -51,7 +51,6 @@ defmodule RigInboundGatewayWeb.V1.SSE do
          Result.filter_and_unwrap(manual_subscription_results))
       |> Enum.uniq()
 
-    # all_subscriptions = Enum.uniq(jwt_subscriptions ++ manual_subscriptions)
     RigInboundGatewaySubscriptions.check_and_forward_subscriptions(self(), all_subscriptions)
 
     # Schedule the first subscription refresh:

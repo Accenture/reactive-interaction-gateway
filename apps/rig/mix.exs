@@ -16,9 +16,12 @@ defmodule Rig.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
-      aliases: aliases()
+      aliases: aliases(),
+      test_paths: test_paths(Mix.env())
     ]
   end
+
+  defp test_paths(_), do: ["."]
 
   # Run "mix help compile.app" to learn about applications.
   def application do

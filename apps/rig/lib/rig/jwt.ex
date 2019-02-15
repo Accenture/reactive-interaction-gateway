@@ -24,10 +24,9 @@ defmodule RIG.JWT do
   Find JWT claims in one or more HTTP headers.
 
   All "Authorization" headers are considered. A single header may contain one or more
-  credentials. Only "Bearer"-type (scheme) credentials are considered are interpreted
-  as JSON Web Tokens. Each of those JWTs is validated using their signature. The
-  result contains JWT claims for successfully validated tokens and errors where the
-  validation failed.
+  credentials. Only "Bearer"-type (scheme) credentials are interpreted as JSON Web
+  Tokens. Each of those JWTs is validated using their signature. The result contains
+  JWT claims for successfully validated tokens and errors where the validation failed.
   """
   @callback parse_http_header(http_header_value | http_headers, jwt_conf, redact_blacklisted) ::
               claims_and_errors
