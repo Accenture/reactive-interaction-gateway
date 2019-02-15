@@ -7,20 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
- ### Added
-- Initial Prometheus Integration providing standard metrics. [#96](https://github.com/Accenture/reactive-interaction-gateway/issues/96)
-
-- The proxy configuration can now also be passed as a JSON string. This allows to run the Docker image in environments where mounting a file in a container is not possible. [#159](https://github.com/Accenture/reactive-interaction-gateway/issues/159)
+<!-- ### Added -->
 
 <!-- ### Changed -->
 
 <!-- ### Deprecated -->
 
-### Removed
-- Removing the Rate Limit feature from Inbound gateway [#144](https://github.com/Accenture/reactive-interaction-gateway/issues/144)
+<!-- ### Removed -->
+
 <!-- ### Fixed -->
 
 <!-- ### Security -->
+
+## [2.1.0] - 2019-02-15
+
+### Added
+
+- Prometheus monitoring endpoint. [#96](https://github.com/Accenture/reactive-interaction-gateway/issues/96)
+- The proxy configuration can now also be passed as a JSON string. This allows to run the Docker image in environments where mounting a file in a container is not possible. [#159](https://github.com/Accenture/reactive-interaction-gateway/issues/159)
+
+### Removed
+
+- Rate limiting. [#144](https://github.com/Accenture/reactive-interaction-gateway/issues/144)
 
 ## [2.0.2] - 2019-01-20
 
@@ -168,7 +176,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [Config] Disable Origin checking. [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
-[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.1...HEAD
+[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.0...HEAD
+[2.1.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.2...2.1.0
 [2.0.2]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0-beta.2...2.0.0
