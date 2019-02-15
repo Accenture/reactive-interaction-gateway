@@ -7,27 +7,30 @@ assignees: kevinbader
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Summary and context
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+> A clear and concise description of what the bug is.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## How to reproduce
 
-**Log output**
-Add the log output to help us determine your problem. If possible, reproduce the problem after setting the environment variable `LOG_LEVEL` to `debug`.
+**When I run RIG with these settings:**
 
-**Versions (please complete the following information):**
+> Describe whether you use Docker or not, the environment variables you set and the config files you use.
+
+**..and set up clients and services like this:**
+
+> Describe how your clients are set up, whether they connect via SSE or WS, etc.
+
+**..I see the following error and/or log output:**
+
+> Add the log output to help us determine your problem. If possible, reproduce the problem after setting the environment variable `LOG_LEVEL` to `debug`.
+
+**..but I really expected this:**
+
+> A clear and concise description of what you expected to happen.
+
+## Versions (please complete the following information):**
+
  - Host OS: [e.g. Ubuntu Bionic amd64]
  - Frontend [e.g. chrome, safari]
  - RIG version as shown on startup [e.g. Reactive Interaction Gateway 2.0.2 [rig@127.0.0.1, ERTS 10.2.2, OTP 21]]
-
-**Additional context**
-Add any other context about the problem here.
-
