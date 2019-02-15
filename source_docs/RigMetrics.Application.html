@@ -5,7 +5,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.19.2">
-    <title>RigInboundGateway.ApiProxy.Handler — Reactive Interaction Gateway v2.0.2</title>
+    <title>RigMetrics.Application — Reactive Interaction Gateway v2.0.2</title>
     <link rel="stylesheet" href="dist/html-c1666276880c0f8e3769.css" />
     <script src="dist/sidebar_items-0e476d6f70.js"></script>
     
@@ -60,8 +60,8 @@ Reactive Interaction Gateway      </h1>
 
       <h1>
         <small class="visible-xs">Reactive Interaction Gateway v2.0.2</small>
-RigInboundGateway.ApiProxy.Handler <small>behaviour</small>        
-          <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/handler.ex#L1" title="View Source" class="view-source" rel="help">
+RigMetrics.Application        
+          <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_metrics/lib/rig_metrics/application.ex#L1" title="View Source" class="view-source" rel="help">
             <span class="icon-code" aria-hidden="true"></span>
             <span class="sr-only">View Source</span>
           </a>
@@ -69,7 +69,7 @@ RigInboundGateway.ApiProxy.Handler <small>behaviour</small>
 
 
         <section id="moduledoc">
-<p>Request handler that proxies the request according to the implementation.</p>
+<p>This is the main entry point of the RigMetrics application.</p>
         </section>
 
         <section id="summary" class="details-list">
@@ -80,87 +80,73 @@ RigInboundGateway.ApiProxy.Handler <small>behaviour</small>
             </a>
             Summary
           </h1>
-  <div class="summary-types summary">
+  <div class="summary-functions summary">
     <h2>
-      <a href="#types">Types</a>
+      <a href="#functions">Functions</a>
     </h2>
 <div class="summary-row">
   <div class="summary-signature">
-    <a href="#t:request_path/0">request_path()</a>
+    <a href="#start/2">start(type, args)</a>
   </div>
+    <div class="summary-synopsis"><p>Called when an application is started</p>
 </div>
-  </div>
-  <div class="summary-callbacks summary">
-    <h2>
-      <a href="#callbacks">Callbacks</a>
-    </h2>
-<div class="summary-row">
-  <div class="summary-signature">
-    <a href="#c:handle_http_request/4">handle_http_request(arg0, arg1, arg2, request_path)</a>
-  </div>
 </div>
   </div>
         </section>
 
-        <section id="types" class="details-list">
+        <section id="functions" class="details-list">
           <h1 class="section-heading">
-            <a class="hover-link" href="#types">
+            <a class="hover-link" href="#functions">
               <span class="icon-link" aria-hidden="true"></span>
               <span class="sr-only">Link to this section</span>
             </a>
-Types          </h1>
-          <div class="types-list">
-<section class="detail" id="t:request_path/0">
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="start/2">
     <div class="detail-header">
-    <a href="#t:request_path/0" class="detail-link" title="Link to this type">
+    <a href="#start/2" class="detail-link" title="Link to this function">
       <span class="icon-link" aria-hidden="true"></span>
-      <span class="sr-only">Link to this type</span>
+      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature">request_path()</span>
-      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/handler.ex#L9" class="view-source" rel="help" title="View Source">
+    <h1 class="signature">start(type, args)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_metrics/lib/rig_metrics/application.ex#L9" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
-        
-      <div class="specs">
-          <pre>request_path() :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
-      </div>
-  </div>
-  <section class="docstring">
-  </section>
-</section>
           </div>
-        </section>
-        <section id="callbacks" class="details-list">
-          <h1 class="section-heading">
-            <a class="hover-link" href="#callbacks">
-              <span class="icon-link" aria-hidden="true"></span>
-              <span class="sr-only">Link to this section</span>
-            </a>
-Callbacks          </h1>
-          <div class="callbacks-list">
-<section class="detail" id="c:handle_http_request/4">
-    <div class="detail-header">
-    <a href="#c:handle_http_request/4" class="detail-link" title="Link to this callback">
-      <span class="icon-link" aria-hidden="true"></span>
-      <span class="sr-only">Link to this callback</span>
-    </a>
-    <h1 class="signature">handle_http_request(arg0, arg1, arg2, request_path)</span>
-      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/handler.ex#L10" class="view-source" rel="help" title="View Source">
-       <span class="icon-code" aria-hidden="true"></span>
-       <span class="sr-only">View Source</span>
-     </a>
-        
-      <div class="specs">
-          <pre>handle_http_request(
-  <a href="https://hexdocs.pm/plug/1.7.1/Plug.Conn.html#t:t/0">Plug.Conn.t</a>(),
-  <a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>(),
-  <a href="RigInboundGateway.ApiProxy.Api.html#t:endpoint/0">RigInboundGateway.ApiProxy.Api.endpoint</a>(),
-  <a href="#t:request_path/0">request_path</a>()
-) :: :ok | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}</pre>
-      </div>
-  </div>
   <section class="docstring">
+<p>Called when an application is started.</p>
+<p>This function is called when an application is started using
+<a href="https://hexdocs.pm/elixir/Application.html#start/2"><code class="inline">Application.start/2</code></a> (and functions on top of that, such as
+<a href="https://hexdocs.pm/elixir/Application.html#ensure_started/2"><code class="inline">Application.ensure_started/2</code></a>). This function should start the top-level
+process of the application (which should be the top supervisor of the
+application&#39;s supervision tree if the application follows the OTP design
+principles around supervision).</p>
+<p><code class="inline">start_type</code> defines how the application is started:</p>
+<ul>
+<li><code class="inline">:normal</code> - used if the startup is a normal startup or if the application
+is distributed and is started on the current node because of a failover
+from another node and the application specification key <code class="inline">:start_phases</code>
+is <code class="inline">:undefined</code>.
+</li>
+<li><code class="inline">{:takeover, node}</code> - used if the application is distributed and is
+started on the current node because of a failover on the node <code class="inline">node</code>.
+</li>
+<li><code class="inline">{:failover, node}</code> - used if the application is distributed and is
+started on the current node because of a failover on node <code class="inline">node</code>, and the
+application specification key <code class="inline">:start_phases</code> is not <code class="inline">:undefined</code>.
+</li>
+</ul>
+<p><code class="inline">start_args</code> are the arguments passed to the application in the <code class="inline">:mod</code>
+specification key (e.g., <code class="inline">mod: {MyApp, [:my_args]}</code>).</p>
+<p>This function should either return <code class="inline">{:ok, pid}</code> or <code class="inline">{:ok, pid, state}</code> if
+startup is successful. <code class="inline">pid</code> should be the PID of the top supervisor. <code class="inline">state</code>
+can be an arbitrary term, and if omitted will default to <code class="inline">[]</code>; if the
+application is later stopped, <code class="inline">state</code> is passed to the <code class="inline">stop/1</code> callback (see
+the documentation for the <code class="inline">c:stop/1</code> callback for more information).</p>
+<p><code class="inline">use Application</code> provides no default implementation for the <a href="#start/2"><code class="inline">start/2</code></a>
+callback.</p>
+<p>Callback implementation for <a href="https://hexdocs.pm/elixir/Application.html#c:start/2"><code class="inline">Application.start/2</code></a>.</p>
   </section>
 </section>
           </div>

@@ -5,7 +5,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.19.2">
-    <title>RigInboundGateway.ApiProxy.Handler — Reactive Interaction Gateway v2.0.2</title>
+    <title>RigMetrics.ControlInstrumenter — Reactive Interaction Gateway v2.0.2</title>
     <link rel="stylesheet" href="dist/html-c1666276880c0f8e3769.css" />
     <script src="dist/sidebar_items-0e476d6f70.js"></script>
     
@@ -60,8 +60,8 @@ Reactive Interaction Gateway      </h1>
 
       <h1>
         <small class="visible-xs">Reactive Interaction Gateway v2.0.2</small>
-RigInboundGateway.ApiProxy.Handler <small>behaviour</small>        
-          <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/handler.ex#L1" title="View Source" class="view-source" rel="help">
+RigMetrics.ControlInstrumenter        
+          <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_metrics/lib/rig_metrics/control_instrumenter.ex#L1" title="View Source" class="view-source" rel="help">
             <span class="icon-code" aria-hidden="true"></span>
             <span class="sr-only">View Source</span>
           </a>
@@ -69,7 +69,7 @@ RigInboundGateway.ApiProxy.Handler <small>behaviour</small>
 
 
         <section id="moduledoc">
-<p>Request handler that proxies the request according to the implementation.</p>
+<p>Metrics instrumenter for the Rig Control</p>
         </section>
 
         <section id="summary" class="details-list">
@@ -80,86 +80,106 @@ RigInboundGateway.ApiProxy.Handler <small>behaviour</small>
             </a>
             Summary
           </h1>
-  <div class="summary-types summary">
+  <div class="summary-functions summary">
     <h2>
-      <a href="#types">Types</a>
+      <a href="#functions">Functions</a>
     </h2>
 <div class="summary-row">
   <div class="summary-signature">
-    <a href="#t:request_path/0">request_path()</a>
+    <a href="#add_blacklisted_session/1">add_blacklisted_session(increasedBy \\ 1)</a>
   </div>
 </div>
-  </div>
-  <div class="summary-callbacks summary">
-    <h2>
-      <a href="#callbacks">Callbacks</a>
-    </h2>
 <div class="summary-row">
   <div class="summary-signature">
-    <a href="#c:handle_http_request/4">handle_http_request(arg0, arg1, arg2, request_path)</a>
+    <a href="#add_route/1">add_route(increasedBy \\ 1)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_blacklisted_session/1">delete_blacklisted_session(decreasedBy \\ 1)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_route/1">delete_route(decreasedBy \\ 1)</a>
   </div>
 </div>
   </div>
         </section>
 
-        <section id="types" class="details-list">
+        <section id="functions" class="details-list">
           <h1 class="section-heading">
-            <a class="hover-link" href="#types">
+            <a class="hover-link" href="#functions">
               <span class="icon-link" aria-hidden="true"></span>
               <span class="sr-only">Link to this section</span>
             </a>
-Types          </h1>
-          <div class="types-list">
-<section class="detail" id="t:request_path/0">
-    <div class="detail-header">
-    <a href="#t:request_path/0" class="detail-link" title="Link to this type">
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="add_blacklisted_session/1">
+  
+    <span id="add_blacklisted_session/0"></span>
+  <div class="detail-header">
+    <a href="#add_blacklisted_session/1" class="detail-link" title="Link to this function">
       <span class="icon-link" aria-hidden="true"></span>
-      <span class="sr-only">Link to this type</span>
+      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature">request_path()</span>
-      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/handler.ex#L9" class="view-source" rel="help" title="View Source">
+    <h1 class="signature">add_blacklisted_session(increasedBy \\ 1)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_metrics/lib/rig_metrics/control_instrumenter.ex#L23" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
-        
-      <div class="specs">
-          <pre>request_path() :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
-      </div>
-  </div>
+          </div>
   <section class="docstring">
   </section>
 </section>
-          </div>
-        </section>
-        <section id="callbacks" class="details-list">
-          <h1 class="section-heading">
-            <a class="hover-link" href="#callbacks">
-              <span class="icon-link" aria-hidden="true"></span>
-              <span class="sr-only">Link to this section</span>
-            </a>
-Callbacks          </h1>
-          <div class="callbacks-list">
-<section class="detail" id="c:handle_http_request/4">
-    <div class="detail-header">
-    <a href="#c:handle_http_request/4" class="detail-link" title="Link to this callback">
+<section class="detail" id="add_route/1">
+  
+    <span id="add_route/0"></span>
+  <div class="detail-header">
+    <a href="#add_route/1" class="detail-link" title="Link to this function">
       <span class="icon-link" aria-hidden="true"></span>
-      <span class="sr-only">Link to this callback</span>
+      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature">handle_http_request(arg0, arg1, arg2, request_path)</span>
-      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/handler.ex#L10" class="view-source" rel="help" title="View Source">
+    <h1 class="signature">add_route(increasedBy \\ 1)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_metrics/lib/rig_metrics/control_instrumenter.ex#L31" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
-        
-      <div class="specs">
-          <pre>handle_http_request(
-  <a href="https://hexdocs.pm/plug/1.7.1/Plug.Conn.html#t:t/0">Plug.Conn.t</a>(),
-  <a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>(),
-  <a href="RigInboundGateway.ApiProxy.Api.html#t:endpoint/0">RigInboundGateway.ApiProxy.Api.endpoint</a>(),
-  <a href="#t:request_path/0">request_path</a>()
-) :: :ok | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}</pre>
-      </div>
-  </div>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="delete_blacklisted_session/1">
+  
+    <span id="delete_blacklisted_session/0"></span>
+  <div class="detail-header">
+    <a href="#delete_blacklisted_session/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_blacklisted_session(decreasedBy \\ 1)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_metrics/lib/rig_metrics/control_instrumenter.ex#L27" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="delete_route/1">
+  
+    <span id="delete_route/0"></span>
+  <div class="detail-header">
+    <a href="#delete_route/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_route(decreasedBy \\ 1)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_metrics/lib/rig_metrics/control_instrumenter.ex#L35" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
   <section class="docstring">
   </section>
 </section>

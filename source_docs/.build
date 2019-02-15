@@ -4,7 +4,7 @@ dist/html/fonts/icomoon.eot
 dist/html/fonts/icomoon.svg
 dist/html/fonts/icomoon.ttf
 dist/html/fonts/icomoon.woff
-dist/sidebar_items-dfbce1b02d.js
+dist/sidebar_items-0e476d6f70.js
 api-reference.html
 changelog.html
 search.html
@@ -89,6 +89,12 @@ RigKafka.html
 RigKafka.Client.html
 RigKafka.Client.GroupSubscriber.html
 RigKafka.Config.html
+RigMetrics.html
+RigMetrics.Application.html
+RigMetrics.ControlInstrumenter.html
+RigMetrics.EventhubInstrumenter.html
+RigMetrics.MetricsPlugExporter.html
+RigMetrics.ProxyInstrumenter.html
 RigOutboundGateway.Kinesis.JavaClient.html
 RigOutboundGateway.Kinesis.LogStream.html
 RigOutboundGateway.KinesisFirehose.JavaClient.html
