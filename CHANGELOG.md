@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-<!-- ### Added -->
+ ### Added
+- Initial Prometheus Integration providing standard metrics. [#96](https://github.com/Accenture/reactive-interaction-gateway/issues/96)
 
 - The proxy configuration can now also be passed as a JSON string. This allows to run the Docker image in environments where mounting a file in a container is not possible. [#159](https://github.com/Accenture/reactive-interaction-gateway/issues/159)
 

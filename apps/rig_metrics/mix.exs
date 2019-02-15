@@ -1,12 +1,11 @@
-defmodule RigAuth.Mixfile do
-  @moduledoc false
+defmodule RigMetrics.MixProject do
   use Mix.Project
 
   def project do
     %{rig: rig_version, elixir: elixir_version} = versions()
 
     [
-      app: :rig_auth,
+      app: :rig_metrics,
       version: rig_version,
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -14,7 +13,9 @@ defmodule RigAuth.Mixfile do
       lockfile: "../../mix.lock",
       elixir: elixir_version,
       elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
+      aliases: aliases(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls]
     ]
@@ -23,8 +24,12 @@ defmodule RigAuth.Mixfile do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {RigAuth.Application, []},
-      extra_applications: [:logger]
+      applications: [
+        :prometheus_ex,
+        :prometheus_plugs
+      ],
+      extra_applications: [:logger],
+      mod: {RigMetrics.Application, []}
     ]
   end
 
@@ -40,18 +45,15 @@ defmodule RigAuth.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:rig, in_umbrella: true},
-      {:rig_metrics, in_umbrella: true},
-      {:confex, "~> 3.3"},
-      {:httpoison, "~> 1.3"},
-      {:joken, "~> 1.5"},
-      {:phoenix, "~> 1.4.0"},
-      {:plug, "~> 1.4"},
-      {:poison, "~> 3.0 or ~> 4.0"},
-      {:stubr, "~> 1.5.0", only: :test},
-      {:timex, "~> 3.4"},
-      # JSON Pointer (RFC 6901) implementation for extracting the session name from JWTs:
-      {:odgn_json_pointer, "~> 2.3"}
+      {:prometheus_ex, "~> 3.0"},
+      {:prometheus_plugs, "~> 1.1"}
     ]
+  end
+
+  # Aliases are shortcuts or tasks specific to the current project.
+  #
+  # See the documentation for `Mix` for more info on aliases.
+  defp aliases do
+    []
   end
 end
