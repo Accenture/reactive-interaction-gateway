@@ -1,24 +1,27 @@
-version: "3"
+version: '3'
 services:
   zookeeper:
-    image: wurstmeister/zookeeper:latest
+    image: confluentinc/cp-zookeeper:5.0.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
     ports:
       - 2181
 
   kafka:
-    image: wurstmeister/kafka:2.11-2.0.0
+    image: confluentinc/cp-kafka:5.0.0
     environment:
-      - KAFKA_LISTENERS=HOSTPLAIN://:${KAFKA_PORT_PLAIN},HOSTSSL://:${KAFKA_PORT_SSL},DOCKERPLAIN://:9292,DOCKERSSL://:9393
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=HOSTPLAIN:PLAINTEXT,HOSTSSL:SSL,DOCKERPLAIN:PLAINTEXT,DOCKERSSL:SSL
-      - KAFKA_ADVERTISED_LISTENERS=HOSTPLAIN://${HOST}:${KAFKA_PORT_PLAIN},HOSTSSL://${HOST}:${KAFKA_PORT_SSL},DOCKERPLAIN://kafka:9292,DOCKERSSL://kafka:9393
-      - KAFKA_INTER_BROKER_LISTENER_NAME=DOCKERPLAIN
+      - KAFKA_LISTENERS=HOSTPLAIN://:${KAFKA_PORT_PLAIN},HOSTSSL://:${KAFKA_PORT_SSL},PLAINTEXT://:9292,DOCKERSSL://:9393
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=HOSTPLAIN:PLAINTEXT,HOSTSSL:SSL,PLAINTEXT:PLAINTEXT,DOCKERSSL:SSL
+      - KAFKA_ADVERTISED_LISTENERS=HOSTPLAIN://${HOST}:${KAFKA_PORT_PLAIN},HOSTSSL://${HOST}:${KAFKA_PORT_SSL},PLAINTEXT://kafka:9292,DOCKERSSL://kafka:9393
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CREATE_TOPICS=rig:1:1,rig-proxy-response:1:1
-      - KAFKA_SSL_TRUSTSTORE_LOCATION=/certs/truststore.jks
-      - KAFKA_SSL_TRUSTSTORE_PASSWORD=abcdefgh
-      - KAFKA_SSL_KEYSTORE_LOCATION=/certs/server.keystore.jks
-      - KAFKA_SSL_KEYSTORE_PASSWORD=abcdefgh
-      - KAFKA_SSL_KEY_PASSWORD=abcdefgh
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0
+      - KAFKA_SSL_TRUSTSTORE_FILENAME=truststore.jks
+      - KAFKA_SSL_TRUSTSTORE_CREDENTIALS=truststore.creds
+      - KAFKA_SSL_KEYSTORE_FILENAME=server.keystore.jks
+      - KAFKA_SSL_KEYSTORE_CREDENTIALS=server.keystore.creds
+      - KAFKA_SSL_KEY_CREDENTIALS=key.creds
       - KAFKA_SSL_CLIENT_AUTH=required
     ports:
       - ${KAFKA_PORT_PLAIN}:${KAFKA_PORT_PLAIN}
@@ -26,6 +29,29 @@ services:
       - 9292
       - 9393
     volumes:
-      - ./certs:/certs
+      - ./certs:/etc/kafka/secrets
     depends_on:
       - zookeeper
+
+  kafka-schema-registry:
+    image: confluentinc/cp-schema-registry:5.0.0
+    ports:
+      - 8081:8081
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+      SCHEMA_REGISTRY_HOST_NAME: kafka-schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://kafka-schema-registry:8081
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: GET,POST,PUT,OPTIONS
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9292
+      # SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: DOCKERPLAIN
+    #   SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /var/private/ssl/broker_broker1_server.truststore.jks
+    #   SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: confluent
+    #   SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_LOCATION: /var/private/ssl/broker_broker1_server.keystore.jks
+    #   SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_PASSWORD: confluent
+    #   SCHEMA_REGISTRY_KAFKASTORE_SSL_KEY_PASSWORD: confluent
+    depends_on:
+      - kafka
+      - zookeeper
+    # volumes:
+    #   - ./server-certs:/var/private/ssl

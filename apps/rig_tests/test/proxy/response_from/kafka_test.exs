@@ -68,7 +68,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
         })
 
       kafka_config = kafka_config()
-      assert :ok == RigKafka.produce(kafka_config, kafka_topic, "response", event)
+      assert :ok == RigKafka.produce(kafka_config, kafka_topic, "", "response", event)
       Response.ok!(sync_response, %{"content-type" => "application/json"})
     end)
 

@@ -52,11 +52,11 @@ defmodule RigKafkaTest do
 
     {:ok, pid} = RigKafka.start(config, callback)
 
-    RigKafka.produce(config, topic, "test", expected_msg)
+    RigKafka.produce(config, topic, "", "test", expected_msg)
 
     assert_receive :test_message_received, 10_000
 
-    RigKafka.produce(config, topic, "test", expected_msg)
+    RigKafka.produce(config, topic, "", "test", expected_msg)
     assert_receive :test_message_received, 10_000
 
     DynamicSupervisor.terminate_child(@sup, pid)

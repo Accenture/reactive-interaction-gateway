@@ -361,6 +361,10 @@ defmodule RigKafka.Client do
     ]
   end
 
+  defp construct_headers(_type, _headers) do
+    []
+  end
+
   # ---
 
   defp try_producing_message(
@@ -379,20 +383,51 @@ defmodule RigKafka.Client do
   end
 
   defp try_producing_message(brod_client, topic, schema, key, plaintext, retry_delay_divisor) do
-    plaintext_map = Jason.decode!(plaintext)
-    %{serializer: serializer} = config()
-
     {constructed_headers, body} =
-      case serializer do
-        "avro" ->
-          constructed_headers = construct_headers("binary", plaintext_map)
-          %{"data" => data} = plaintext_map
-          {constructed_headers, Serializer.encode_body(Jason.encode!(data), "avro", schema)}
+      case Jason.decode(plaintext) do
+        {:ok, plaintext_map} ->
+          #
+          %{serializer: serializer} = config()
 
-        _ ->
-          constructed_headers = construct_headers("structured", plaintext_map)
-          {constructed_headers, plaintext}
+          case serializer do
+            "avro" ->
+              constructed_headers = construct_headers("binary", plaintext_map)
+              %{"data" => data} = plaintext_map
+              {constructed_headers, Serializer.encode_body(Jason.encode!(data), "avro", schema)}
+
+            _ ->
+              constructed_headers = construct_headers("structured", plaintext_map)
+              {constructed_headers, plaintext}
+          end
+
+        {:error, _reason} ->
+          # IO.inspect(reason)
+          {[], plaintext}
       end
+
+    # plaintext_map = Jason.decode!(plaintext)
+
+    # IO.puts("plaintext_map")
+    # IO.inspect(plaintext_map)
+    # IO.puts("serializer")
+    # IO.inspect(serializer)
+
+    # {constructed_headers, body} =
+    #   case serializer do
+    #     "avro" ->
+    #       constructed_headers = construct_headers("binary", plaintext_map)
+    #       %{"data" => data} = plaintext_map
+    #       {constructed_headers, Serializer.encode_body(Jason.encode!(data), "avro", schema)}
+
+    #     _ ->
+    #       constructed_headers = construct_headers("structured", plaintext_map)
+    #       {constructed_headers, plaintext}
+    #   end
+
+    IO.puts("constructed_headers")
+    IO.inspect(constructed_headers)
+    IO.puts("body")
+    IO.inspect(body)
 
     case :brod.produce_sync(
            brod_client,
