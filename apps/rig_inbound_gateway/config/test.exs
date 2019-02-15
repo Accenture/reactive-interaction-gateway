@@ -8,12 +8,6 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
     password: "test"
   ]
 
-config :rig, RigInboundGateway.RateLimit,
-  enabled?: true,
-  avg_rate_per_sec: 0,
-  burst_size: 10,
-  sweep_interval_ms: 0
-
 config :rig, RigInboundGateway.Kafka, log_topic: "rig"
 
 config :rig, RigInboundGateway.Proxy,
