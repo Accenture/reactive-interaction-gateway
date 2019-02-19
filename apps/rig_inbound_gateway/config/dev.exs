@@ -6,6 +6,12 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
   check_origin: false,
   watchers: []
 
+# https: [
+#   certfile: "cert/selfsigned.pem",
+#   keyfile: "cert/selfsigned_key.des3.pem",
+#   password: "test"
+# ]
+
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
