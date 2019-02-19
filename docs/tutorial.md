@@ -17,7 +17,8 @@ NODE_COOKIE not set; randomly generated to VcMxc8ylrFipfnUsmxaZvhLkeSonlbCF
 Reactive Interaction Gateway 2.0.2 [rig@127.0.0.1, ERTS 10.2.2, OTP 21]
 ```
 
-In production, please make sure to use proper HTTPS certificates instead of the self-signed certificates contained in the image (they are _not_ randomly generated). Also, please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
+In production, please make sure to use proper HTTPS certificates instead of the self-signed certificates contained in the repo (they are _not_ randomly generated). The certifictes will not be included in the Docker image.
+Also, please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
 
 ### 2. Create a connection
 
