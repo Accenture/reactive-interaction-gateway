@@ -28,7 +28,9 @@ cowboy_options = [
   idle_timeout: :infinity,
   inactivity_timeout: :infinity,
   # Experimental feature that allows using WebSocket over HTTP/2:
-  enable_connect_protocol: true
+  enable_connect_protocol: true,
+  # Headers configuration
+  max_header_value_length: 16_384
 ]
 
 cowboy_dispatch = [
