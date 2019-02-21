@@ -25,81 +25,77 @@ defmodule RigKafka.Client do
     import Record, only: [defrecord: 2, extract: 2]
     defrecord :kafka_message, extract(:kafka_message, from_lib: "brod/include/brod.hrl")
 
+    @type kafka_headers :: list()
+
     @impl :brod_group_subscriber
     def init(_brod_group_id, state) do
       {:ok, state}
     end
 
-    # TODO: move to separate file
+    # ---
 
-    def extract_headers(%{
-          "cloudEvents_contentType" => contentType,
-          "cloudEvents_cloudEventsVersion" => cloudEventsVersion,
-          "cloudEvents_source" => source,
-          "cloudEvents_eventType" => eventType,
-          "cloudEvents_eventTime" => eventTime,
-          "cloudEvents_eventID" => eventID
-        }) do
-      %{
-        "contentType" => contentType,
-        "cloudEventsVersion" => cloudEventsVersion,
-        "source" => source,
-        "eventType" => eventType,
-        "eventTime" => eventTime,
-        "eventID" => eventID
-      }
+    @spec get_content_type(any()) :: String.t()
+    defp get_content_type(<<0::8, _id::32, _body::binary>>), do: "avro/binary"
+    defp get_content_type(_), do: "application/json"
+
+    # ---
+
+    @spec get_content_type(kafka_headers) :: map()
+    defp remove_prefix(headers) do
+      for {k, v} <- headers do
+        if String.starts_with?(k, "cloudEvents_") do
+          stripped_key =
+            k
+            |> String.replace_prefix("cloudEvents_", "")
+            |> String.to_atom()
+
+          if k == "cloudEvents_rig" do
+            {stripped_key, Plug.Conn.Query.decode(v)}
+          else
+            {stripped_key, v}
+          end
+        else
+          {String.to_atom(k), v}
+        end
+      end
+      |> Enum.into(%{})
     end
 
-    def extract_headers(%{
-          "cloudEvents_contenttype" => contentType,
-          "cloudEvents_specversion" => cloudEventsVersion,
-          "cloudEvents_source" => source,
-          "cloudEvents_type" => eventType,
-          "cloudEvents_time" => eventTime,
-          "cloudEvents_id" => eventID
-        }) do
-      %{
-        "contenttype" => contentType,
-        "specversion" => cloudEventsVersion,
-        "source" => source,
-        "type" => eventType,
-        "time" => eventTime,
-        "id" => eventID
-      }
-    end
-
-    def extract_headers(_headers), do: %{}
+    # ---
 
     @impl :brod_group_subscriber
     def handle_message(topic, partition, message, %{callback: callback} = state) do
       %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
 
-      deconstructed_headers =
-        headers
-        |> Enum.into(%{})
-        |> extract_headers()
+      headers_no_prefix = remove_prefix(headers)
+
+      ce_specversion =
+        case headers_no_prefix do
+          %{specversion: version} ->
+            version
+
+          %{cloudEventsVersion: version} ->
+            version
+
+          _ ->
+            headers_no_prefix
+        end
+
+      content_type =
+        case ce_specversion do
+          "0.2" -> Map.get(headers_no_prefix, :contenttype, get_content_type(body))
+          "0.1" -> Map.get(headers_no_prefix, :contentType, get_content_type(body))
+          _ -> get_content_type(body)
+        end
 
       decoded_body =
         cond do
-          Map.get(deconstructed_headers, "contentType") == "avro/binary" ->
+          content_type == "avro/binary" ->
             data = Jason.decode!(Serializer.decode_body(body, "avro"))
-            Map.merge(deconstructed_headers, %{"data" => data})
+            Map.merge(headers_no_prefix, %{data: data})
 
-          Map.get(deconstructed_headers, "contenttype") == "avro/binary" ->
-            data = Jason.decode!(Serializer.decode_body(body, "avro"))
-            Map.merge(deconstructed_headers, %{"data" => data})
-
-          Map.get(deconstructed_headers, "contentType") ==
-              "application/cloudevents+json; charset=UTF-8" ->
+          content_type == "application/json" ->
             body
-
-          Map.get(deconstructed_headers, "contenttype") ==
-              "application/cloudevents+json; charset=UTF-8" ->
-            body
-
-          :binary.at(body, 0) == 0 ->
-            data = Jason.decode!(Serializer.decode_body(body, "avro"))
-            Map.merge(deconstructed_headers, %{"data" => data})
 
           true ->
             body
@@ -161,6 +157,8 @@ defmodule RigKafka.Client do
   end
 
   # ---
+
+  @type kafka_headers :: list()
 
   @impl GenServer
   def init(%{config: config} = args) do
@@ -302,67 +300,17 @@ defmodule RigKafka.Client do
     {:stop, :shutdown, state}
   end
 
-  # --- TODO: move to separate file
+  # ---
 
-  defp construct_headers("binary", %{
-         "contenttype" => contenttype,
-         "specversion" => specversion,
-         "source" => source,
-         "type" => type,
-         "time" => time,
-         "id" => id
-       }) do
-    [
-      {"cloudEvents_contenttype", contenttype},
-      {"cloudEvents_specversion", specversion},
-      {"cloudEvents_source", source},
-      {"cloudEvents_type", type},
-      {"cloudEvents_time", time},
-      {"cloudEvents_id", id}
-      # {"cloudEvents_rig", convert(rig)} TODO: not working yet
-    ]
-  end
-
-  defp construct_headers("binary", %{
-         "contentType" => contentType,
-         "cloudEventsVersion" => cloudEventsVersion,
-         "source" => source,
-         "eventType" => eventType,
-         "eventTime" => eventTime,
-         "eventID" => eventID,
-         "extensions" => extensions,
-         "rig" => rig
-       }) do
-    [
-      {"cloudEvents_contentType", contentType},
-      {"cloudEvents_cloudEventsVersion", cloudEventsVersion},
-      {"cloudEvents_source", source},
-      {"cloudEvents_eventType", eventType},
-      {"cloudEvents_eventTime", eventTime},
-      {"cloudEvents_eventID", eventID},
-      {"extensions", Enum.into(extensions, [])}
-      # {"cloudEvents_rig", convert(rig)} TODO: not working yet
-    ]
-  end
-
-  defp construct_headers(_type, %{
-         "contenttype" => contenttype
-       }) do
-    [
-      {"cloudEvents_contenttype", contenttype}
-    ]
-  end
-
-  defp construct_headers(_type, %{
-         "contentType" => contentType
-       }) do
-    [
-      {"cloudEvents_contentType", contentType}
-    ]
-  end
-
-  defp construct_headers(_type, _headers) do
-    []
+  @spec add_prefix(map()) :: kafka_headers
+  defp add_prefix(headers) do
+    for {k, v} <- headers do
+      if k == "rig" do
+        {"cloudEvents_#{k}", Plug.Conn.Query.encode(v)}
+      else
+        {"cloudEvents_#{k}", v}
+      end
+    end
   end
 
   # ---
@@ -376,58 +324,42 @@ defmodule RigKafka.Client do
          retry_delay_divisor \\ 64
        )
 
-  defp convert(map) do
-    for {key, val} <- map,
-        into: [],
-        do: if(is_integer(val), do: {key, Integer.to_string(val)}, else: {key, val})
-  end
-
   defp try_producing_message(brod_client, topic, schema, key, plaintext, retry_delay_divisor) do
     {constructed_headers, body} =
       case Jason.decode(plaintext) do
         {:ok, plaintext_map} ->
-          #
           %{serializer: serializer} = config()
 
           case serializer do
             "avro" ->
-              constructed_headers = construct_headers("binary", plaintext_map)
-              %{"data" => data} = plaintext_map
-              {constructed_headers, Serializer.encode_body(Jason.encode!(data), "avro", schema)}
+              {data, headers} = Map.pop(plaintext_map, "data", %{})
+              prefixed_headers = add_prefix(headers)
+
+              {prefixed_headers, Serializer.encode_body(data, "avro", schema)}
 
             _ ->
-              constructed_headers = construct_headers("structured", plaintext_map)
+              constructed_headers =
+                case plaintext_map do
+                  %{"contenttype" => contenttype} ->
+                    [
+                      {"cloudEvents_contenttype", contenttype}
+                    ]
+
+                  %{"contentType" => contentType} ->
+                    [
+                      {"cloudEvents_contentType", contentType}
+                    ]
+
+                  _ ->
+                    []
+                end
+
               {constructed_headers, plaintext}
           end
 
         {:error, _reason} ->
-          # IO.inspect(reason)
           {[], plaintext}
       end
-
-    # plaintext_map = Jason.decode!(plaintext)
-
-    # IO.puts("plaintext_map")
-    # IO.inspect(plaintext_map)
-    # IO.puts("serializer")
-    # IO.inspect(serializer)
-
-    # {constructed_headers, body} =
-    #   case serializer do
-    #     "avro" ->
-    #       constructed_headers = construct_headers("binary", plaintext_map)
-    #       %{"data" => data} = plaintext_map
-    #       {constructed_headers, Serializer.encode_body(Jason.encode!(data), "avro", schema)}
-
-    #     _ ->
-    #       constructed_headers = construct_headers("structured", plaintext_map)
-    #       {constructed_headers, plaintext}
-    #   end
-
-    IO.puts("constructed_headers")
-    IO.inspect(constructed_headers)
-    IO.puts("body")
-    IO.inspect(body)
 
     case :brod.produce_sync(
            brod_client,

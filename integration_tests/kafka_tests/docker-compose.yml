@@ -44,14 +44,6 @@ services:
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: GET,POST,PUT,OPTIONS
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9292
-      # SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: DOCKERPLAIN
-    #   SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /var/private/ssl/broker_broker1_server.truststore.jks
-    #   SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: confluent
-    #   SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_LOCATION: /var/private/ssl/broker_broker1_server.keystore.jks
-    #   SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_PASSWORD: confluent
-    #   SCHEMA_REGISTRY_KAFKASTORE_SSL_KEY_PASSWORD: confluent
     depends_on:
       - kafka
       - zookeeper
-    # volumes:
-    #   - ./server-certs:/var/private/ssl

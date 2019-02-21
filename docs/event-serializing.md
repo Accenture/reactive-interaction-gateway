@@ -36,7 +36,7 @@ KAFKA_SERIALIZER=avro \
 KAFKA_SOURCE_TOPICS=test2 \
 PROXY_CONFIG_FILE=proxy/proxy.testx.json \
 PROXY_KAFKA_REQUEST_TOPIC=test2 \
-PROXY_KAFKA_REQUEST_SCHEMA=test2-value \
+PROXY_KAFKA_REQUEST_AVRO=test2-value \
 mix phx.server
 ```
 
@@ -50,12 +50,20 @@ kafka-avro-console-producer \
 
 {"source":"/postman","rig":{"scheme":"http","remoteip":"127.0.0.1","query":"","port":4000,"path":"/myapi/publish-async","method":"POST","host":"localhost","headers":[["accept","*/*"],["accept-encoding","gzip, deflate"],["cache-control","no-cache"],["connection","keep-alive"],["content-length","418"],["content-type","application/json"],["host","localhost:4000"],["postman-token","8e6cbed9-2d7d-4998-b90f-56a5fdeeb410"],["user-agent","PostmanRuntime/7.6.0"]],"correlation":"g2dkAA1ub25vZGVAbm9ob3N0AAAD7QAAAAAA"},"extensions":{},"eventTypeVersion":"1.0","eventType":"com.example","eventTime":"2018-04-05T17:31:00Z","eventID":"069711bf-3946-4661-984f-c667657b8d85","data":{"foo":"test"},"contentType":"application/json","cloudEventsVersion":"0.1"}
 
-kafka-avro-console-consumer --topic test2 \
---bootstrap-server rig-kafka:9092 \
---property schema.registry.url='http://rig-kafka-schema-registry:8081'
+kafka-avro-console-consumer --topic rigAvro \
+--bootstrap-server kafka:9292 \
+--property schema.registry.url='http://kafka-schema-registry:8081'
 ```
 
 ```
 kafka-console-producer \
 --broker-list rig-kafka:9092 --topic test2
 ```
+
+0.1
+required fields: eventType, cloudEventsVersion, source, eventID
+optional fields: eventTypeVersion, eventTime, schemaURL, contentType, extensions, data, rigextension
+
+0.2
+required fields: type, specversion, source, id
+optional fields: time, schemaurl, contenttype, data, rigextension
