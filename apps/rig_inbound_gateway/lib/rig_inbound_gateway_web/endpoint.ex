@@ -1,7 +1,6 @@
 defmodule RigInboundGatewayWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :rig_inbound_gateway
   use Rig.Config, []
-  require Logger
 
   alias Rig.Config
 
