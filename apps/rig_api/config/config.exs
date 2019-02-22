@@ -13,13 +13,19 @@ config :rig_api, :generators,
 # Phoenix
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+cowboy_options = [
+  # Headers configuration
+  max_header_value_length: 16_384
+]
+
 config :rig_api, RigApi.Endpoint,
   server: true,
   url: [
     host: {:system, "HOST", "localhost"}
   ],
   http: [
-    port: {:system, :integer, "API_HTTP_PORT", 4010}
+    port: {:system, :integer, "API_HTTP_PORT", 4010},
+    protocol_options: cowboy_options
   ],
   https: [
     port: {:system, :integer, "API_HTTPS_PORT", 4011},
@@ -27,7 +33,8 @@ config :rig_api, RigApi.Endpoint,
     cipher_suite: :strong,
     certfile: {:system, "HTTPS_CERTFILE", ""},
     keyfile: {:system, "HTTPS_KEYFILE", ""},
-    password: {:system, "HTTPS_KEYFILE_PASS", ""}
+    password: {:system, "HTTPS_KEYFILE_PASS", ""},
+    protocol_options: cowboy_options
   ],
   render_errors: [view: RigApi.ErrorView, accepts: ~w(json)],
   pubsub: [name: Rig.PubSub],
