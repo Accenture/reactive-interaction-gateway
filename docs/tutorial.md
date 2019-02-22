@@ -12,8 +12,6 @@ To get started, run our Docker image using this command:
 
 ```bash
 $ docker run \
--e HTTPS_CERTFILE=cert/selfsigned.pem \
--e HTTPS_KEYFILE=cert/selfsigned_key.pem \
 -p 4000:4000 -p 4010:4010 \
 accenture/reactive-interaction-gateway
 
