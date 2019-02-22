@@ -11,7 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The proxy configuration can now also be passed as a JSON string. This allows to run the Docker image in environments where mounting a file in a container is not possible. [#159](https://github.com/Accenture/reactive-interaction-gateway/issues/159)
 
-<!-- ### Changed -->
+### Changed
+
+- The HTTPS certificate location has been changed from two mount-locations (rig_api/priv/cert & rig_inbound_gateway/priv/cert) to just one location rig/priv/cert. This means the OPS configuration needs to be changed in order to still support HTTPS. Additionally the selfsigned dev-certificate is not longer shipped with the docker image for security reasons [#151](https://github.com/Accenture/reactive-interaction-gateway/issues/151)
 
 <!-- ### Deprecated -->
 
