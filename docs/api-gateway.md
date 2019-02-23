@@ -62,8 +62,6 @@ $ docker run \
   -v "$(pwd)"/config.json:/config.json \
   -e PROXY_CONFIG_FILE=/config.json \
   -p 4000:4000 -p 4010:4010 \
-  -e HTTPS_CERTFILE=cert/selfsigned.pem \
-  -e HTTPS_KEYFILE=cert/selfsigned_key.pem \
   accenture/reactive-interaction-gateway
 ```
 
@@ -82,10 +80,16 @@ $ docker run \
   -e API_HOST=http://host.docker.internal \
   -e PROXY_CONFIG_FILE="$config" \
   -p 4000:4000 -p 4010:4010 \
-  -e HTTPS_CERTFILE=cert/selfsigned.pem \
-  -e HTTPS_KEYFILE=cert/selfsigned_key.pem \
   accenture/reactive-interaction-gateway
 ```
+### HTTPs / SSL
+To enable HTTPS following additional environment-variables would be required in the command above:
+```bash
+  -e HTTPS_CERTFILE=cert/selfsigned.pem \
+  -e HTTPS_KEYFILE=cert/selfsigned_key.pem \
+```
+In production, please make sure to use proper HTTPS certificates instead of the self-signed certificates contained in the repo. Also, please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
+*(please note that you'll need to create certifications yourself. For security reasons they are not shipped within the docker image)*
 
 Note that this way we don't need a Docker volume, which might work better in your environment. Again, we should be able to reach the demo service:
 
