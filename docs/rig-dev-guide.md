@@ -16,7 +16,7 @@ RIG doesn't come with a status website, but if you like to you can check its hea
 ```bash
 $ curl localhost:4000
 {"message":"Route is not available"}
-$ curl localhost:4000/health
+$ curl localhost:4010/health
 OK
 ```
 
@@ -42,6 +42,7 @@ apps/rig_inbound_gateway | `:rig_inbound_gateway` | The externally facing HTTP s
 apps/rig_kafka | `:rig_kafka` | Kafka group consumer and producer.
 apps/rig_outbound_gateway | `:rig_outbound_gateway` | Messages that are to be distributed to connected front-ends go through the outbound gateway.
 apps/rig_tests | `:rig_tests` | Tests using multiple components and don't belong to certain sub-app.
+apps/rig_metrics | `:rig_metrics` | Responsible for RIG's Metrics. Currently providing an Prometheus /metrics-Endpoint using rig_api's port
 
 While all apps share the same config, the convention is to put an app's config in its own config file and use the umbrella config file only for things that concern multiple apps.
 
@@ -69,6 +70,7 @@ Then go through the following:
 - Update the table above with a description of what should go into the new app.
 - Add/remove your app to/from the applications set in `rel/config.exs`.
 - Add/remove your app to/from the `Dockerfile` with the relevant directories.
+- Add/remove your app to/from the `aws.dockerfile` with the relevant directories.
 
 ## Incrementing Elixir and OTP versions
 

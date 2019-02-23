@@ -11,13 +11,22 @@ In this tutorial we use [HTTPie](https://httpie.org/) for HTTP requests, but of 
 To get started, run our Docker image using this command:
 
 ```bash
-$ docker run -p 4000:4000 -p 4010:4010 -e HTTPS_CERTFILE=cert/selfsigned.pem -e HTTPS_KEYFILE=cert/selfsigned_key.pem accenture/reactive-interaction-gateway:2.0.2
+$ docker run \
+-p 4000:4000 -p 4010:4010 \
+accenture/reactive-interaction-gateway
+
 NODE_HOST not set, defaults to 127.0.0.1. Consider setting NODE_HOST to the machine's hostname or IP, as seen by others in the network.
 NODE_COOKIE not set; randomly generated to VcMxc8ylrFipfnUsmxaZvhLkeSonlbCF
-Reactive Interaction Gateway 2.0.2 [rig@127.0.0.1, ERTS 10.2.2, OTP 21]
+Reactive Interaction Gateway 2.1.0 [rig@127.0.0.1, ERTS 10.2.2, OTP 21]
 ```
-
-In production, please make sure to use proper HTTPS certificates instead of the self-signed certificates contained in the image (they are _not_ randomly generated). Also, please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
+### HTTPs / SSL
+To enable HTTPS following additional environment-variables would be required in the command above:
+```bash
+  -e HTTPS_CERTFILE=cert/selfsigned.pem \
+  -e HTTPS_KEYFILE=cert/selfsigned_key.pem \
+```
+In production, please make sure to use proper HTTPS certificates instead of the self-signed certificates contained in the repo. Also, please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
+*(please note that you'll need to create certifications yourself. For security reasons they are not shipped within the docker image)*
 
 ### 2. Create a connection
 

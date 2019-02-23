@@ -9,11 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- The proxy configuration can now also be passed as a JSON string. This allows to run the Docker image in environments where mounting a file in a container is not possible. [#159](https://github.com/Accenture/reactive-interaction-gateway/issues/159)
+- Increased length of header value in HTTP requests to 16384. Reason is to support long tokens such as SAML.
 
 ### Changed
 
 - Validation errors for SSE & WS connections and the subscriptions endpoint should now be a lot more helpful. Also, the welcome event (after establishing a connection) now contains the list of errors (non-breaking change). For example, when passing an invalid JWT, the connection is established nevertheless (new behaviour), but the error is communicated in the welcome event. [#54](https://github.com/Accenture/reactive-interaction-gateway/issues/54)
+- The HTTPS certificate location has been changed from two mount-locations (rig_api/priv/cert & rig_inbound_gateway/priv/cert) to just one location rig/priv/cert. This means the OPS configuration needs to be changed in order to still support HTTPS. Additionally the selfsigned dev-certificate is not longer shipped with the docker image for security reasons [#151](https://github.com/Accenture/reactive-interaction-gateway/issues/151)
 
 <!-- ### Deprecated -->
 
@@ -22,6 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Fixed -->
 
 <!-- ### Security -->
+
+## [2.1.0] - 2019-02-15
+
+### Added
+
+- Prometheus monitoring endpoint. [#96](https://github.com/Accenture/reactive-interaction-gateway/issues/96)
+- The proxy configuration can now also be passed as a JSON string. This allows to run the Docker image in environments where mounting a file in a container is not possible. [#159](https://github.com/Accenture/reactive-interaction-gateway/issues/159)
+
+### Removed
+
+- Rate limiting. [#144](https://github.com/Accenture/reactive-interaction-gateway/issues/144)
 
 ## [2.0.2] - 2019-01-20
 
@@ -169,7 +181,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [Config] Disable Origin checking. [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
-[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.1...HEAD
+[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.0...HEAD
+[2.1.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.2...2.1.0
 [2.0.2]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0-beta.2...2.0.0
