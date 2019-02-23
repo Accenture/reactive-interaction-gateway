@@ -6,31 +6,21 @@ sidebar_label: Tutorial
 
 In this tutorial we use [HTTPie](https://httpie.org/) for HTTP requests, but of course you can also use curl or any other HTTP client. Please note that HTTPie sets the content type to `application/json` automatically, whereas for curl you need to use `-H "Content-Type: application/json"` for all but `GET` requests.
 
-### 1. Start RIG
+## 1. Start RIG
 
 To get started, run our Docker image using this command:
 
 ```bash
-$ docker run \
--p 4000:4000 -p 4010:4010 \
-accenture/reactive-interaction-gateway
-
-NODE_HOST not set, defaults to 127.0.0.1. Consider setting NODE_HOST to the machine's hostname or IP, as seen by others in the network.
-NODE_COOKIE not set; randomly generated to VcMxc8ylrFipfnUsmxaZvhLkeSonlbCF
+$ docker run -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
+...
 Reactive Interaction Gateway 2.1.0 [rig@127.0.0.1, ERTS 10.2.2, OTP 21]
 ```
-### HTTPs / SSL
-To enable HTTPS following additional environment-variables would be required in the command above:
-```bash
-  -e HTTPS_CERTFILE=cert/selfsigned.pem \
-  -e HTTPS_KEYFILE=cert/selfsigned_key.pem \
-```
-In production, please make sure to use proper HTTPS certificates instead of the self-signed certificates contained in the repo. Also, please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
-*(please note that you'll need to create certifications yourself. For security reasons they are not shipped within the docker image)*
 
-### 2. Create a connection
+Note that HTTPS is not enabled by default. Please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
 
-Let's connect to RIG using [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events), which is our recommended approach (open standard, firewall friendly, plays nice with HTTP/2):
+## 2. Create a connection
+
+Let's connect to RIG using [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events), which is our recommended approach (open standard, firewall friendly, plays nicely with HTTP/2):
 
 ```bash
 $ http --stream :4000/_rig/v1/connection/sse
@@ -51,7 +41,7 @@ After the connection has been established, RIG sends out a [CloudEvent](https://
 
 Please take note of the `connection_token` in the CloudEvent's `data` field - you need it in the next step.
 
-### 3. Subscribe to a topic
+## 3. Subscribe to a topic
 
 With the connection established, you can create _subscriptions_ - that is, you can tell RIG which events your app is interested in. RIG needs to know which connection you are referring to, so you need to use the connection token you have noted down in the last step:
 
@@ -66,7 +56,7 @@ content-type: application/json; charset=utf-8
 
 With that you're ready to receive all "greeting" events.
 
-### 4. Create a new "greeting" event
+## 4. Create a new "greeting" event
 
 RIG expects to receive [CloudEvents](https://github.com/cloudevents/spec), so the following fields are required:
 
@@ -97,11 +87,11 @@ RIG responds with `202 Accepted`, followed by the CloudEvent as sent to subscrib
 
 > If there are no subscribers for a received event, the response will still be `202 Accepted` and the event will be silently dropped.
 
-### 5. The event has been delivered to our subscriber
+## 5. The event has been delivered to our subscriber
 
 Going back to the first terminal window you should now see your greeting event :tada:
 
-### 6. Connect your app to RIG
+## 6. Connect your app to RIG
 
 To connect your app to RIG, add an event listener to your frontend. See [examples/sse-demo.html](https://github.com/Accenture/reactive-interaction-gateway/blob/master/examples/sse-demo.html) for a full example. Here are the most important bits:
 

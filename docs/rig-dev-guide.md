@@ -22,7 +22,7 @@ OK
 
 Additional notes:
 
-- You can run tests with `mix test`. See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+- You can run tests with `mix test`. See [CONTRIBUTING.md](https://github.com/Accenture/reactive-interaction-gateway/blob/master/CONTRIBUTING.md) for more details.
 - When debugging multi-node features, it's helpful to run the (named) nodes in `iex` sessions
   using `iex --sname nodename -S mix`.
 
@@ -83,7 +83,7 @@ To have the project use a newer Elixir version, make sure to change the followin
 ## Releasing a new version
 
 - Increment `rig` version in the [version](../version) file
-- In [CHANGELOG.md](../CHANGELOG.md), rename `[Unreleased]` and add a corresponding link to the bottom of the file
+- In [CHANGELOG.md](https://github.com/Accenture/reactive-interaction-gateway/blob/master/CHANGELOG.md), rename `[Unreleased]` and add a corresponding link to the bottom of the file
 - Create a signed Git tag either using `git -s` or by creating a release using the Github UI
 
 ## Test Tags
