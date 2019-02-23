@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.19.2">
+    <title>RigInboundGateway.ApiProxy.Api — Reactive Interaction Gateway v2.1.0</title>
+    <link rel="stylesheet" href="dist/html-c1666276880c0f8e3769.css" />
+    <script src="dist/sidebar_items-c218fb12fc.js"></script>
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+    <div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  <a href="https://accenture.github.io/reactive-interaction-gateway" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+Reactive Interaction Gateway      </h1>
+      <h2 class="sidebar-projectVersion">
+        v2.1.0
+      </h2>
+    </div>
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+      <li><a id="exceptions-list" href="#full-list">Exceptions</a></li>
+
+      <li><a id="tasks-list" href="#full-list">Mix Tasks</a></li>
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">Reactive Interaction Gateway v2.1.0</small>
+RigInboundGateway.ApiProxy.Api        
+          <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/api.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Service definitions for the proxy.</p>
+        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:api_list/0">api_list()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:endpoint/0">endpoint()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:endpoint_match/0">endpoint_match()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:t/0">t()</a>
+  </div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#filter/2">filter(apis, map)</a>
+  </div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:api_list/0">
+    <div class="detail-header">
+    <a href="#t:api_list/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">api_list()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/api.ex#L66" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>api_list() :: [<a href="#t:t/0">t</a>()]</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:endpoint/0">
+    <div class="detail-header">
+    <a href="#t:endpoint/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">endpoint()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/api.ex#L7" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>endpoint() :: %{
+  optional(:secured) => <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+  optional(:transform_request_headers) => <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+  optional(:type) => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  optional(:target) => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  :id => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  :path => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  :path_regex => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  :path_replacement => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  :method => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()
+}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:endpoint_match/0">
+    <div class="detail-header">
+    <a href="#t:endpoint_match/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">endpoint_match()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/api.ex#L70" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>endpoint_match() :: {<a href="#t:t/0">t</a>(), <a href="#t:endpoint/0">endpoint</a>(), request_path :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:t/0">
+    <div class="detail-header">
+    <a href="#t:t/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">t()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/api.ex#L34" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>t() :: %{
+  optional(:auth_type) => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  optional(:versioned) => <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+  optional(:active) => <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+  optional(:node_name) => <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+  optional(:ref_number) => <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+  optional(:timestamp) => DateTime,
+  optional(:transform_request_headers) => %{
+    optional(:add_headers) => %{optional(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()}
+  },
+  :id => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  :name => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  :auth => %{
+    optional(:use_header) => <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+    optional(:header_name) => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+    optional(:use_query) => <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+    optional(:query_name) => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()
+  },
+  :version_data => %{optional(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) => %{endpoints: [<a href="#t:endpoint/0">endpoint</a>()]}},
+  :proxy => %{
+    optional(:use_env) => <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+    :target_url => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+    :port => <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()
+  }
+}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="filter/2">
+    <div class="detail-header">
+    <a href="#filter/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">filter(apis, map)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig_inbound_gateway/lib/rig_inbound_gateway/api_proxy/api.ex#L73" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>filter(<a href="#t:api_list/0">api_list</a>(), <a href="https://hexdocs.pm/plug/1.7.1/Plug.Conn.html#t:t/0">Plug.Conn.t</a>()) :: [<a href="#t:endpoint_match/0">endpoint_match</a>()]</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.19.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/html-c1666276880c0f8e3769.js"></script>
+  
+  </body>
+</html>
+
