@@ -55,7 +55,7 @@ transfer-encoding: chunked
 ...
 
 event: rig.connection.create
-data: {<span class="hljs-string">"specversion"</span>:<span class="hljs-string">"0.2"</span>,<span class="hljs-string">"source"</span>:<span class="hljs-string">"rig"</span>,<span class="hljs-string">"type"</span>:<span class="hljs-string">"rig.connection.create"</span>,<span class="hljs-string">"time"</span>:<span class="hljs-string">"2018-08-22T10:06:04.730484+00:00"</span>,<span class="hljs-string">"id"</span>:<span class="hljs-string">"2b0a4f05-9032-4617-8d1e-92d97fb870dd"</span>,<span class="hljs-string">"data"</span>:{<span class="hljs-string">"connection_token"</span>:<span class="hljs-string">"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"</span>}}
+data: {<span class="hljs-string">"specversion"</span>:<span class="hljs-string">"0.2"</span>,<span class="hljs-string">"source"</span>:<span class="hljs-string">"rig"</span>,<span class="hljs-string">"type"</span>:<span class="hljs-string">"rig.connection.create"</span>,<span class="hljs-string">"time"</span>:<span class="hljs-string">"2018-08-22T10:06:04.730484+00:00"</span>,<span class="hljs-string">"id"</span>:<span class="hljs-string">"2b0a4f05-9032-4617-8d1e-92d97fb870dd"</span>,<span class="hljs-string">"data"</span>:{<span class="hljs-string">"connection_token"</span>:<span class="hljs-string">"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"</span>,<span class="hljs-string">"errors"</span>:[]}}
 id: 2b0a4f05-9032-4617-8d1e-92d97fb870dd
 </code></pre>
 <p>After the connection has been established, RIG sends out a <a href="https://github.com/cloudevents/spec/blob/v0.2/spec.md">CloudEvent</a> of type <code>rig.connection.create</code>.</p>
@@ -68,7 +68,7 @@ id: 2b0a4f05-9032-4617-8d1e-92d97fb870dd
 <pre><code class="hljs css language-bash">$ CONN_TOKEN=<span class="hljs-string">"g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"</span>
 $ SUBSCRIPTIONS=<span class="hljs-string">'{"subscriptions":[{"eventType":"greeting"}]}'</span>
 $ http put <span class="hljs-string">":4000/_rig/v1/connection/sse/<span class="hljs-variable">${CONN_TOKEN}</span>/subscriptions"</span> &lt;&lt;&lt;<span class="hljs-string">"<span class="hljs-variable">$SUBSCRIPTIONS</span>"</span>
-HTTP/1.1 201 Created
+HTTP/1.1 204 No Content
 content-type: application/json; charset=utf-8
 ...
 </code></pre>
