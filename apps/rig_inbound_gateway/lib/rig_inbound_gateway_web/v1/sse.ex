@@ -7,12 +7,13 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   use RigInboundGatewayWeb, :controller
 
+  alias Result
+  alias RIG.Subscriptions
+
   alias Rig.EventFilter
-  alias Rig.Subscription
   alias RigCloudEvents.CloudEvent
-  alias RigInboundGateway.AutomaticSubscriptions.Jwt, as: JwtSubscriptions
   alias RigInboundGateway.Events
-  alias RigInboundGateway.Subscriptions
+  alias RigInboundGateway.Subscriptions, as: RigInboundGatewaySubscriptions
   alias ServerSentEvent
 
   defmodule ConnectionClosed do
@@ -35,28 +36,33 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   end
 
   defp do_create_and_attach(conn) do
-    jwt_subscriptions =
-      for token <- conn.query_params |> Map.get("jwt", []) |> List.wrap(),
-          candidates = JwtSubscriptions.infer_subscriptions([token]),
-          candidate <- candidates,
-          %Subscription{} = parsed = Subscription.new(candidate),
-          do: parsed
+    jwt_subscription_results =
+      conn.query_params
+      |> Map.get("jwt")
+      |> Subscriptions.from_token()
 
-    manual_subscriptions =
-      for {:ok, candidates} <-
-            [conn.query_params |> Map.get("subscriptions", "[]") |> Jason.decode()],
-          candidate <- candidates,
-          %Subscription{} = parsed = Subscription.new(candidate),
-          do: parsed
+    manual_subscription_results =
+      conn.query_params
+      |> Map.get("subscriptions", "[]")
+      |> Subscriptions.from_json()
 
-    all_subscriptions = jwt_subscriptions ++ manual_subscriptions
-    Subscriptions.check_and_forward_subscriptions(self(), all_subscriptions)
+    all_subscriptions =
+      (Result.filter_and_unwrap(jwt_subscription_results) ++
+         Result.filter_and_unwrap(manual_subscription_results))
+      |> Enum.uniq()
+
+    RigInboundGatewaySubscriptions.check_and_forward_subscriptions(self(), all_subscriptions)
 
     # Schedule the first subscription refresh:
     Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
 
+    all_errors =
+      jwt_subscription_results
+      |> Result.filter_and_unwrap_err()
+      |> Enum.concat(manual_subscription_results |> Result.filter_and_unwrap_err())
+
     conn
-    |> send_chunk(Events.welcome_event())
+    |> send_chunk(Events.welcome_event(all_errors))
     |> wait_for_events()
   rescue
     ex in ConnectionClosed ->

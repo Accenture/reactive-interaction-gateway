@@ -7,8 +7,10 @@ defmodule RigAuth.Session do
   alias JSONPointer
 
   alias Rig.DistributedSet
+  alias RIG.JWT
   alias Rig.SessionHub
-  alias RigAuth.Jwt.Utils, as: Jwt
+
+  require Logger
 
   @type session_name_t :: String.t()
   @type validity_period_t :: pos_integer()
@@ -40,9 +42,17 @@ defmodule RigAuth.Session do
   defp do_update(conn, pid, jwt_session_field) do
     tokens = Map.get(conn.assigns, :auth_tokens, [])
 
-    for {"bearer", token} <- tokens,
-        {:ok, token_map} <- Jwt.decode(token),
-        {:ok, session_name} <- JSONPointer.get(token_map, jwt_session_field),
-        do: SessionHub.join(pid, session_name)
+    results =
+      for {"bearer", token} <- tokens do
+        token
+        |> JWT.parse_token()
+        |> Result.and_then(fn claims -> JSONPointer.get(claims, jwt_session_field) end)
+        |> Result.and_then(fn session_name -> Result.ok(SessionHub.join(pid, session_name)) end)
+      end
+
+    Logger.debug(fn ->
+      msg = results |> Result.filter_and_unwrap_err() |> Enum.map(&inspect/1) |> Enum.join(", ")
+      "Session update errors: #{msg}"
+    end)
   end
 end

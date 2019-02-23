@@ -10,7 +10,7 @@ defmodule RigInboundGateway.Subscriptions do
     subscriptions
     |> Enum.map(&Subscription.new/1)
     |> Enum.group_by(fn
-      %Subscription{} -> :good
+      {:ok, %Subscription{}} -> :good
       _ -> :bad
     end)
     |> case do
@@ -18,7 +18,8 @@ defmodule RigInboundGateway.Subscriptions do
         {:error, :could_not_parse_subscriptions, bad}
 
       %{good: good} ->
-        send(socket_pid, {:set_subscriptions, good})
+        subscriptions = Enum.map(good, fn {:ok, sub} -> sub end)
+        send(socket_pid, {:set_subscriptions, subscriptions})
         :ok
 
       %{} ->
