@@ -16,9 +16,12 @@ defmodule Rig.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
-      aliases: aliases()
+      aliases: aliases(),
+      test_paths: test_paths(Mix.env())
     ]
   end
+
+  defp test_paths(_), do: ["."]
 
   # Run "mix help compile.app" to learn about applications.
   def application do
@@ -65,7 +68,9 @@ defmodule Rig.MixProject do
       # For doing HTTP requests, e.g., in kafka_as_http:
       {:httpoison, "~> 1.3"},
       # For property-based testing:
-      {:stream_data, "~> 0.1", only: :test}
+      {:stream_data, "~> 0.1", only: :test},
+      # For JSON Web Tokens:
+      {:joken, "~> 1.5"}
     ]
   end
 

@@ -9,7 +9,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
   alias Jason
   alias UUID
 
-  alias RigAuth.Jwt.Utils, as: Jwt
+  alias RIG.JWT
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.ExtractorConfig
 
@@ -49,7 +49,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
     headers =
       [{"content-type", "application/json"}] ++
-        if is_nil(jwt), do: [], else: [{"authorization", jwt}]
+        if is_nil(jwt), do: [], else: [{"authorization", "Bearer #{jwt}"}]
 
     %HTTPoison.Response{status_code: 204} = HTTPoison.put!(url, body, headers)
     :ok
@@ -107,7 +107,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
         }
       })
 
-      jwt = Jwt.generate(%{"username" => "alice"})
+      jwt = JWT.encode(%{"username" => "alice"})
       expected_subscriptions = [%{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}]
 
       for client <- @clients do
@@ -135,7 +135,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
         }
       })
 
-      jwt = Jwt.generate(%{"username" => "alice"})
+      jwt = JWT.encode(%{"username" => "alice"})
       automatic_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
       manual_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "bob"}]}
 
@@ -169,7 +169,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
         }
       })
 
-      jwt = Jwt.generate(%{"username" => "alice"})
+      jwt = JWT.encode(%{"username" => "alice"})
       automatic_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
       manual_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "bob"}]}
 
@@ -207,7 +207,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
         }
       })
 
-      jwt = Jwt.generate(%{"username" => "alice"})
+      jwt = JWT.encode(%{"username" => "alice"})
       automatic_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
 
       for client <- @clients do
@@ -244,7 +244,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
         }
       })
 
-      jwt = Jwt.generate(%{"username" => "alice"})
+      jwt = JWT.encode(%{"username" => "alice"})
       automatic_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
       initial_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "bob"}]}
       new_subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "charlie"}]}

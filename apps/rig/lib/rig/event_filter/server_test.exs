@@ -11,7 +11,7 @@ defmodule Rig.EventFilter.ServerTest do
   test "subscribe & receive an event" do
     event_type = "test.event"
     field_config = %{}
-    subscription = Subscription.new(%{event_type: event_type})
+    subscription = Subscription.new!(%{event_type: event_type})
 
     event =
       CloudEvent.parse!(%{
@@ -62,10 +62,13 @@ defmodule Rig.EventFilter.ServerTest do
     name_is_joe = %{"name" => "joe"}
     age_is_30 = %{"age" => 30}
 
-    joe_subscription = Subscription.new(%{event_type: event_type, constraints: [name_is_joe]})
+    joe_subscription = Subscription.new!(%{event_type: event_type, constraints: [name_is_joe]})
 
     joe_and_30_subscription =
-      Subscription.new(%{event_type: event_type, constraints: [Map.merge(name_is_joe, age_is_30)]})
+      Subscription.new!(%{
+        event_type: event_type,
+        constraints: [Map.merge(name_is_joe, age_is_30)]
+      })
 
     base_event = %{"specversion" => "0.2", "type" => event_type, "source" => "test"}
 
@@ -132,7 +135,7 @@ defmodule Rig.EventFilter.ServerTest do
     name_is_joe = %{"name" => "joe"}
 
     greetings_to_joe_subscription =
-      Subscription.new(%{event_type: event_type, constraints: [name_is_joe]})
+      Subscription.new!(%{event_type: event_type, constraints: [name_is_joe]})
 
     EventFilter.refresh_subscriptions([greetings_to_joe_subscription], [])
 
@@ -165,5 +168,39 @@ defmodule Rig.EventFilter.ServerTest do
     assert_receive {:cloud_event, ^greeting_to_joe}
 
     :ok = GenServer.stop(filter_pid)
+  end
+end
+
+defmodule Rig.EventFilter.TableModificationTest do
+  @moduledoc false
+  use ExUnit.Case, async: false
+
+  alias Rig.EventFilter.Server, as: SUT
+
+  describe "Wildcards" do
+    test "are not applied to an empty ETS table" do
+      table = new_table()
+      SUT.add_wildcards_to_table(table, 0, 1)
+      assert :ets.info(table)[:size] == 0
+      :ets.delete(table)
+    end
+
+    test "adds wildcards to each row in a non-empty ETS table" do
+      table = new_table()
+      insert_row(table, [])
+      SUT.add_wildcards_to_table(table, 0, 1)
+      assert :ets.info(table)[:size] == 1
+      :ets.delete(table)
+    end
+  end
+
+  defp new_table, do: :ets.new(:test, [:bag, :public])
+
+  defp insert_row(table, fields) do
+    pid = self()
+    exp = 123
+    row = ([pid, exp] ++ fields) |> List.to_tuple()
+    :ets.insert(table, row)
+    table
   end
 end

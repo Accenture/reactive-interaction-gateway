@@ -1,6 +1,7 @@
 use Mix.Config
 
 config :rig, Rig.EventFilter.Sup, extractor_config_path_or_json: {:system, "EXTRACTORS", nil}
+config :rig, :extractor_path_or_json, {:system, "EXTRACTORS", nil}
 
 config :porcelain, driver: Porcelain.Driver.Basic
 
@@ -37,5 +38,10 @@ config :rig, Rig.EventStream.KafkaToHttp,
   sasl: {:system, "KAFKA_SASL", nil},
   # HTTP endpoints to invoke for each Kafka message:
   targets: {:system, :list, "FIREHOSE_KAFKA_HTTP_TARGETS", []}
+
+config :rig, :jwt_conf, %{
+  key: {:system, "JWT_SECRET_KEY", ""},
+  alg: {:system, "JWT_ALG", "HS256"}
+}
 
 import_config "#{Mix.env()}.exs"

@@ -17,7 +17,8 @@
       "event-serializing"
     ],
     "RIG in Production": [
-      "rig-ops-guide"
+      "rig-ops-guide",
+      "metrics-details"
     ],
     "Hacking the Source": [
       "rig-dev-guide"

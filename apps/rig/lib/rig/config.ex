@@ -88,7 +88,9 @@ defmodule Rig.Config do
     end
   end
 
-  # ---
+  # -------------
+  # Public Interface
+  # -------------
 
   @spec parse_json_env(String.t()) :: {:ok, any} | {:error, :syntax_error, any}
   def parse_json_env(path_or_encoded) do
@@ -101,6 +103,29 @@ defmodule Rig.Config do
   end
 
   # ---
+
+  @spec check_and_update_https_config(Keyword.t()) :: Keyword.t()
+  def check_and_update_https_config(config) do
+    certfile = config[:https][:certfile]
+
+    if(certfile === "") do
+      Logger.warn("No HTTPS_CERTFILE environment variable provided. Disabling HTTPS...")
+
+      # DISABLE HTTPS
+      config
+      |> update_in([:https], &disable_https/1)
+    else
+      # UPDATE https_config to add priv/ folder to path
+      config
+      |> update_in([:https, :certfile], &resolve_path/1)
+      |> update_in([:https, :keyfile], &resolve_path/1)
+      |> update_in([:https, :password], &String.to_charlist/1)
+    end
+  end
+
+  # -------------
+  # Helpers
+  # -------------
 
   @spec from_file(String.t()) :: {:ok, any} | {:error, reason :: any}
   defp from_file(path) do
@@ -131,7 +156,7 @@ defmodule Rig.Config do
   # ---
 
   defp check_relative_to_priv(%{found?: false, path: path} = ctx) when byte_size(path) > 0 do
-    [:rig, :rig_inbound_gateway, :rig_api]
+    phx_app_list()
     |> Enum.map(fn app -> :code.priv_dir(app) |> Path.join(path) end)
     |> Enum.find(&File.exists?/1)
     |> case do
@@ -160,5 +185,22 @@ defmodule Rig.Config do
       [host, port] = for part <- String.split(broker, ":"), do: String.trim(part)
       {host, String.to_integer(port)}
     end)
+  end
+
+  # ---
+
+  defp resolve_path(path) do
+    :code.priv_dir(:rig) |> Path.join(path)
+  end
+
+  # ---
+
+  defp disable_https(_) do
+    false
+  end
+
+  # ---
+  defp phx_app_list do
+    [:rig, :rig_inbound_gateway, :rig_api]
   end
 end

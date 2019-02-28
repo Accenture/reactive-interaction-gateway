@@ -28,7 +28,9 @@ cowboy_options = [
   idle_timeout: :infinity,
   inactivity_timeout: :infinity,
   # Experimental feature that allows using WebSocket over HTTP/2:
-  enable_connect_protocol: true
+  enable_connect_protocol: true,
+  # Headers configuration
+  max_header_value_length: 16_384
 ]
 
 cowboy_dispatch = [
@@ -54,8 +56,8 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
     port: {:system, :integer, "INBOUND_HTTPS_PORT", 4001},
     otp_app: :rig,
     cipher_suite: :strong,
-    certfile: "cert/selfsigned.pem",
-    keyfile: "cert/selfsigned_key.pem",
+    certfile: {:system, "HTTPS_CERTFILE", ""},
+    keyfile: {:system, "HTTPS_KEYFILE", ""},
     password: {:system, "HTTPS_KEYFILE_PASS", ""},
     dispatch: cowboy_dispatch,
     protocol_options: cowboy_options,
@@ -122,20 +124,6 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"},
   log_schema: {:system, "KAFKA_LOG_SCHEMA", ""}
-
-config :rig, RigInboundGateway.RateLimit,
-  # Internal ETS table name (must be unique).
-  table_name: :rate_limit_buckets,
-  # Enables/disables rate limiting globally.
-  enabled?: {:system, :boolean, "RATE_LIMIT_ENABLED", false},
-  # If true, the remote IP is taken into account; otherwise the limits are per endpoint only.
-  per_ip?: {:system, :boolean, "RATE_LIMIT_PER_IP", true},
-  # The permitted average amount of requests per second.
-  avg_rate_per_sec: {:system, :integer, "RATE_LIMIT_AVG_RATE_PER_SEC", 10_000},
-  # The permitted peak amount of requests.
-  burst_size: {:system, :integer, "RATE_LIMIT_BURST_SIZE", 5_000},
-  # GC interval. If set to zero, GC is disabled.
-  sweep_interval_ms: {:system, :integer, "RATE_LIMIT_SWEEP_INTERVAL_MS", 5_000}
 
 # --------------------------------------
 # Authorization Token (JWT)
