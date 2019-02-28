@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Increased length of header value in HTTP requests to 16384. Reason is to support long tokens such as SAML.
+- _Beta_ - Added Apache Avro support for consumer and producer as well as Kafka Schema Registry.
 
 ### Changed
 
