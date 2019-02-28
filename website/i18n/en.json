@@ -13,6 +13,10 @@
         "title": "API Gateway",
         "sidebar_label": "API Gateway"
       },
+      "event-serializing": {
+        "title": "Event Serializing",
+        "sidebar_label": "Event Serializing"
+      },
       "event-subscription": {
         "title": "Event Subscription",
         "sidebar_label": "Event Subscription"

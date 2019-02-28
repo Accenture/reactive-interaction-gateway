@@ -1,11 +1,12 @@
 defmodule RigKafka.Avro do
   @moduledoc """
-  TODO
+  Module responsible for event serialization and deserialization. Manages also connection to Kafka Schema Registry and caching of used schemas.
   """
 
-  require Logger
   use Memoize
   use Rig.Config, [:schema_registry_host]
+
+  require Logger
 
   @typep schema_name :: String.t()
   @typep schema :: map()
@@ -15,7 +16,7 @@ defmodule RigKafka.Avro do
   @spec decode(any()) :: String.t()
   def decode(data) do
     {id, binary_body} = parse_binary_metadata(data)
-    schema = fetch_schema_by_id(id)
+    {_id, schema} = fetch_schema(id)
 
     decoded_data =
       binary_body
@@ -32,7 +33,7 @@ defmodule RigKafka.Avro do
 
   @spec encode(schema_name, any()) :: avro_binary
   def encode(schema_name, data) do
-    {id, schema} = fetch_schema_by_name(schema_name)
+    {id, schema} = fetch_schema(schema_name)
 
     kv = encoder(schema, [])
     bin = kv.(schema, deep_map_to_list(data))
@@ -73,21 +74,8 @@ defmodule RigKafka.Avro do
 
   # ---
 
-  @spec fetch_schema_by_name(schema_name) :: {id, schema}
-  defmemo fetch_schema_by_name(subject) do
-    %{schema_registry_host: schema_registry_host} = config()
-
-    {:ok, %{"schema" => raw_schema, "id" => id}} =
-      schema_registry_host
-      |> Schemex.latest(subject)
-
-    schema = :avro.decode_schema(raw_schema)
-    Logger.debug(fn -> "Using Avro schema with name=#{subject}" end)
-    {id, schema}
-  end
-
-  @spec fetch_schema_by_id(id) :: schema
-  defmemo fetch_schema_by_id(id) do
+  @spec fetch_schema(any()) :: {id, schema}
+  defmemo fetch_schema(id) when is_number(id) do
     %{schema_registry_host: schema_registry_host} = config()
 
     {:ok, %{"schema" => raw_schema}} =
@@ -96,7 +84,19 @@ defmodule RigKafka.Avro do
 
     schema = :avro.decode_schema(raw_schema)
     Logger.debug(fn -> "Using Avro schema with id=#{id}" end)
-    schema
+    {nil, schema}
+  end
+
+  defmemo fetch_schema(schema_name) do
+    %{schema_registry_host: schema_registry_host} = config()
+
+    {:ok, %{"schema" => raw_schema, "id" => id}} =
+      schema_registry_host
+      |> Schemex.latest(schema_name)
+
+    schema = :avro.decode_schema(raw_schema)
+    Logger.debug(fn -> "Using Avro schema with name=#{schema_name}" end)
+    {id, schema}
   end
 
   # ---

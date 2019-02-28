@@ -1,5 +1,6 @@
 defmodule RigKafka.AvroTest do
   @moduledoc false
+
   use ExUnit.Case, async: false
   use Memoize
 

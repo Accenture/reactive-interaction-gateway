@@ -2,6 +2,7 @@ defmodule RigTests.Avro.AvroTest do
   @moduledoc """
   With `avro` enabled, Kafka producer and consumer should handle encoding and decoding.
   """
+
   use Rig.Config, [
     :brokers,
     :consumer_topics,
@@ -12,7 +13,6 @@ defmodule RigTests.Avro.AvroTest do
     :ssl_keyfile_pass,
     :sasl
   ]
-
   use ExUnit.Case, async: false
 
   alias Rig.KafkaConfig, as: RigKafkaConfig
@@ -204,13 +204,13 @@ defmodule RigTests.Avro.AvroTest do
   test "Given avro is enabled, the producer and consumer should be able to fallback to non-encoding(decoding) behavior" do
     AvroConfig.set("avro")
 
-    event = "Simple unstrctured event"
+    event = "Simple unstructured event"
 
     kafka_config = kafka_config()
     assert :ok == RigKafka.produce(kafka_config, "rigAvro", "rigAvro-value", "response", event)
 
     assert_receive received_msg, 10_000
-    assert received_msg == "Simple unstrctured event"
+    assert received_msg == "Simple unstructured event"
 
     AvroConfig.restore()
   end

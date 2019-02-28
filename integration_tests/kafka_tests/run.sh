@@ -13,8 +13,9 @@ function is_kafka_ready() {
     else
         # Kafka responds!
         section_header "Creating Kafka topics"
-        docker-compose exec kafka bash -c 'kafka-topics --create --topic rig --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:2181'
+        docker-compose exec kafka bash -c 'kafka-topics --create --topic rig_test --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:2181'
         docker-compose exec kafka bash -c 'kafka-topics --create --topic rig-proxy-response --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:2181'
+        docker-compose exec kafka bash -c 'kafka-topics --create --topic rig_kafka_test_simple_topic --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:2181'
         docker-compose exec kafka bash -c 'kafka-topics --create --topic rigAvro --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:2181'
         section_header "List of Kafka topics"
         docker-compose exec kafka bash -c 'kafka-topics --list --zookeeper zookeeper:2181'

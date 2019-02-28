@@ -2,17 +2,19 @@ defmodule RigKafka.Client do
   @moduledoc """
   The Kafka client that holds connections to one or more brokers.
   """
-  require Logger
-  @reconnect_timeout_ms 20_000
-  use GenServer, shutdown: @reconnect_timeout_ms + 5_000
-  use Rig.Config, [:serializer]
 
   alias RigKafka.Config
   alias RigKafka.Serializer
 
-  @supervisor RigKafka.DynamicSupervisor
+  require Logger
 
   @type callback :: (any -> :ok | any)
+
+  @reconnect_timeout_ms 20_000
+  @supervisor RigKafka.DynamicSupervisor
+
+  use GenServer, shutdown: @reconnect_timeout_ms + 5_000
+  use Rig.Config, [:serializer]
 
   defmodule GroupSubscriber do
     @moduledoc """
@@ -20,9 +22,12 @@ defmodule RigKafka.Client do
 
     """
     @behaviour :brod_group_subscriber
+
+    import Record, only: [defrecord: 2, extract: 2]
+
     require Logger
     require Record
-    import Record, only: [defrecord: 2, extract: 2]
+
     defrecord :kafka_message, extract(:kafka_message, from_lib: "brod/include/brod.hrl")
 
     @type kafka_headers :: list()
@@ -40,34 +45,11 @@ defmodule RigKafka.Client do
 
     # ---
 
-    @spec get_content_type(kafka_headers) :: map()
-    defp remove_prefix(headers) do
-      for {k, v} <- headers do
-        if String.starts_with?(k, "cloudEvents_") do
-          stripped_key =
-            k
-            |> String.replace_prefix("cloudEvents_", "")
-            |> String.to_atom()
-
-          if k == "cloudEvents_rig" do
-            {stripped_key, Plug.Conn.Query.decode(v)}
-          else
-            {stripped_key, v}
-          end
-        else
-          {String.to_atom(k), v}
-        end
-      end
-      |> Enum.into(%{})
-    end
-
-    # ---
-
     @impl :brod_group_subscriber
     def handle_message(topic, partition, message, %{callback: callback} = state) do
       %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
 
-      headers_no_prefix = remove_prefix(headers)
+      headers_no_prefix = Serializer.remove_prefix(headers)
 
       ce_specversion =
         case headers_no_prefix do
@@ -302,16 +284,20 @@ defmodule RigKafka.Client do
 
   # ---
 
-  @spec add_prefix(map()) :: kafka_headers
-  defp add_prefix(headers) do
-    for {k, v} <- headers do
-      if k == "rig" do
-        {"cloudEvents_#{k}", Plug.Conn.Query.encode(v)}
-      else
-        {"cloudEvents_#{k}", v}
-      end
-    end
+  @spec transform_content_type(map()) :: [{String.t(), String.t()}]
+  defp transform_content_type(%{"contenttype" => contenttype}) do
+    [
+      {"cloudEvents_contenttype", contenttype}
+    ]
   end
+
+  defp transform_content_type(%{"contentType" => contentType}) do
+    [
+      {"cloudEvents_contentType", contentType}
+    ]
+  end
+
+  defp transform_content_type(_), do: []
 
   # ---
 
@@ -333,27 +319,11 @@ defmodule RigKafka.Client do
           case serializer do
             "avro" ->
               {data, headers} = Map.pop(plaintext_map, "data", %{})
-              prefixed_headers = add_prefix(headers)
-
+              prefixed_headers = Serializer.add_prefix(headers)
               {prefixed_headers, Serializer.encode_body(data, "avro", schema)}
 
             _ ->
-              constructed_headers =
-                case plaintext_map do
-                  %{"contenttype" => contenttype} ->
-                    [
-                      {"cloudEvents_contenttype", contenttype}
-                    ]
-
-                  %{"contentType" => contentType} ->
-                    [
-                      {"cloudEvents_contentType", contentType}
-                    ]
-
-                  _ ->
-                    []
-                end
-
+              constructed_headers = transform_content_type(plaintext_map)
               {constructed_headers, plaintext}
           end
 

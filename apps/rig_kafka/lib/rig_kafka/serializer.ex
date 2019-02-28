@@ -1,12 +1,15 @@
 defmodule RigKafka.Serializer do
   @moduledoc """
-  TODO
+  Interface for event serialization and deserialization. Used to decide which serializer to use, such as Apache Avro.
   """
 
   alias RigKafka.Avro
 
   @typep encode_type :: String.t()
   @typep schema_name :: String.t()
+  @typep kafka_headers :: list()
+
+  @prefix "cloudEvents_"
 
   @spec decode_body(any(), encode_type) :: any()
   def decode_body(body, "avro") do
@@ -24,4 +27,51 @@ defmodule RigKafka.Serializer do
   end
 
   def encode_body(body, nil, _schema), do: body
+
+  # ---
+
+  defp query?(value) do
+    value
+    |> Map.values()
+    |> Enum.member?(nil)
+    |> Kernel.not()
+  end
+
+  # ---
+
+  @spec remove_prefix(kafka_headers) :: map()
+  def remove_prefix(headers) do
+    for {key, value} <- headers do
+      if String.starts_with?(key, @prefix) do
+        stripped_key =
+          key
+          |> String.replace_prefix(@prefix, "")
+          |> String.to_atom()
+
+        decoded_value = Plug.Conn.Query.decode(value)
+
+        if query?(decoded_value) do
+          {stripped_key, decoded_value}
+        else
+          {stripped_key, value}
+        end
+      else
+        {String.to_atom(key), value}
+      end
+    end
+    |> Enum.into(%{})
+  end
+
+  # ---
+
+  @spec add_prefix(map()) :: kafka_headers
+  def add_prefix(headers) do
+    for {key, value} <- headers do
+      if is_map(value) do
+        {"#{@prefix}#{key}", Plug.Conn.Query.encode(value)}
+      else
+        {"#{@prefix}#{key}", value}
+      end
+    end
+  end
 end

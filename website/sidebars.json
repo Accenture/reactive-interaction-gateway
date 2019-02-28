@@ -13,7 +13,8 @@
     ],
     "Advanced Guides": [
       "api-gateway-synchronization",
-      "event-subscription"
+      "event-subscription",
+      "event-serializing"
     ],
     "RIG in Production": [
       "rig-ops-guide"

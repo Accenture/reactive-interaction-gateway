@@ -1,7 +1,8 @@
-version: '3'
+version: "3"
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:5.0.0
+    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     ports:
@@ -9,6 +10,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:5.0.0
+    container_name: kafka
     environment:
       - KAFKA_LISTENERS=HOSTPLAIN://:${KAFKA_PORT_PLAIN},HOSTSSL://:${KAFKA_PORT_SSL},PLAINTEXT://:9292,DOCKERSSL://:9393
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=HOSTPLAIN:PLAINTEXT,HOSTSSL:SSL,PLAINTEXT:PLAINTEXT,DOCKERSSL:SSL
@@ -35,6 +37,7 @@ services:
 
   kafka-schema-registry:
     image: confluentinc/cp-schema-registry:5.0.0
+    container_name: kafka-schema-registry
     ports:
       - 8081:8081
     environment:
@@ -42,7 +45,7 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: kafka-schema-registry
       SCHEMA_REGISTRY_LISTENERS: http://kafka-schema-registry:8081
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: GET,POST,PUT,OPTIONS
-      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: "*"
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9292
     depends_on:
       - kafka
