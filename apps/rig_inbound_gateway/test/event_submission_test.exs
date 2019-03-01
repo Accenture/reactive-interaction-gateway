@@ -34,7 +34,7 @@ defmodule RigInboundGateway.EventSubmissionTest do
 
     headers =
       [{"content-type", "application/json"}] ++
-        if is_nil(jwt), do: [], else: [{"authorization", jwt}]
+        if is_nil(jwt), do: [], else: [{"authorization", "Bearer #{jwt}"}]
 
     %HTTPoison.Response{status_code: 204} = HTTPoison.put!(url, body, headers)
     :ok

@@ -257,7 +257,12 @@ defmodule Rig.DistributedSet do
       end
 
     n_deleted = :ets.select_delete(ets_table, match_spec)
-    if n_deleted > 0, do: Logger.debug(fn -> "Removed #{n_deleted} expired records" end)
+
+    if n_deleted > 0 do
+      Logger.debug(fn -> "Removed #{n_deleted} expired records" end)
+      RigMetrics.ControlInstrumenter.delete_blacklisted_session(n_deleted)
+    end
+
     n_deleted
   end
 

@@ -39,7 +39,10 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
         handle_response(conn, res, response_from)
 
       {:error, err} ->
-        Logger.warn(fn -> "Failed to proxy '#{method} #{request_path}': #{inspect(err)}" end)
+        Logger.warn(fn ->
+          "Failed to proxy to #{inspect(url)} (#{method} #{request_path}): #{inspect(err)}"
+        end)
+
         Conn.send_resp(conn, :bad_gateway, "Bad gateway.")
 
       :unknown_method ->

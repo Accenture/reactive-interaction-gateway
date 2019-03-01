@@ -1,5 +1,8 @@
 defmodule RigApi.Endpoint do
   use Phoenix.Endpoint, otp_app: :rig_api
+  use Rig.Config
+
+  alias Rig.Config
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
@@ -29,22 +32,18 @@ defmodule RigApi.Endpoint do
     signing_salt: "7t9/VVWp"
   )
 
+  # Prometheus Integration - START
+  # makes the /metrics URL happen
+  plug(RigMetrics.MetricsPlugExporter)
+  # Prometheus Integration - END
+
   plug(RigApi.Router)
 
   def init(_key, config) do
     {:ok, config} = Confex.Resolver.resolve(config)
 
-    config =
-      config
-      |> update_in([:https, :certfile], &resolve_path/1)
-      |> update_in([:https, :keyfile], &resolve_path/1)
-      |> update_in([:https, :password], &String.to_charlist/1)
+    config = config |> Config.check_and_update_https_config()
 
     {:ok, config}
-  end
-
-  defp resolve_path(path) do
-    :code.priv_dir(:rig_api)
-    |> Path.join(path)
   end
 end

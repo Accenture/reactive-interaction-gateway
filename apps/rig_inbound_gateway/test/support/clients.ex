@@ -77,7 +77,9 @@ defmodule SseClient do
 
   @impl true
   def read_event(_client, event_type) do
-    cloud_event = read_sse_chunk() |> extract_cloud_event()
+    cloud_event =
+      read_sse_chunk()
+      |> extract_cloud_event()
 
     case cloud_event do
       %{"specversion" => "0.2", "type" => ^event_type} -> cloud_event
