@@ -6,6 +6,8 @@ sidebar_label: API Gateway
 
 RIG includes a basic API Gateway implementation (a configurable, distributed HTTP reverse proxy). Provided a route is configured, RIG will forward any matching HTTP request to the respective service, wait for the reply and forward that reply to the original caller.
 
+## API Endpoint Configuration
+
 The configuration should be passed at startup. Additionally, RIG provides an API to add, change or remove routes at runtime. These changes are replicated throughout the cluster, but they are not persisted; that is, if all RIG nodes are shut down, any changes to the proxy configuration are lost. Check out the [Advanced API documentation](api-gateway-synchronization.md) to learn more.
 
 To pass the configuration at startup, RIG uses an environment variable called `PROXY_CONFIG_FILE`. This variable can be used to either pass the _path_ to an existing JSON file, or to directly pass the configuration as a JSON string. Let's configure a simple endpoint to show how this works.
@@ -82,14 +84,6 @@ $ docker run \
   -p 4000:4000 -p 4010:4010 \
   accenture/reactive-interaction-gateway
 ```
-### HTTPs / SSL
-To enable HTTPS following additional environment-variables would be required in the command above:
-```bash
-  -e HTTPS_CERTFILE=cert/selfsigned.pem \
-  -e HTTPS_KEYFILE=cert/selfsigned_key.pem \
-```
-In production, please make sure to use proper HTTPS certificates instead of the self-signed certificates contained in the repo. Also, please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
-*(please note that you'll need to create certifications yourself. For security reasons they are not shipped within the docker image)*
 
 Note that this way we don't need a Docker volume, which might work better in your environment. Again, we should be able to reach the demo service:
 
@@ -97,3 +91,15 @@ Note that this way we don't need a Docker volume, which might work better in you
 $ curl localhost:4000
 Hi, I'm a demo service!
 ```
+
+## HTTPS/TLS
+
+In order to enable HTTPS, the `HTTPS_CERTFILE` and `HTTPS_KEYFILE` environment variables must be set. During development, this may be set to the self-signed certificate that comes with the repository:
+
+```bash
+export HTTPS_CERTFILE=cert/selfsigned.pem
+export HTTPS_KEYFILE=cert/selfsigned_key.pem
+```
+
+For production you should use proper HTTPS certificates instead (for that reason the Docker image comes without certificates). Refer to the [RIG operator guide](rig-ops-guide.md) to learn more about available configuration options.
+
