@@ -11,6 +11,8 @@ config :rig, RigTests.Proxy.ResponseFrom.KafkaTest,
   group_id: "rig_proxy_responsefrom_kafkatest_brod_group",
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
+  serializer: {:system, "KAFKA_SERIALIZER", nil},
+  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", "localhost:8081"},
   # The list of topics to consume messages from:
   consumer_topics: {:system, :list, "KAFKA_SOURCE_TOPICS", []},
   # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored; otherwise, they're required.
@@ -31,6 +33,8 @@ config :rig, RigTests.Proxy.PublishToEventStream.KafkaTest,
   group_id: "rig_proxy_publish_kafkatest_brod_group",
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
+  serializer: {:system, "KAFKA_SERIALIZER", nil},
+  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", "localhost:8081"},
   # The list of topics to consume messages from:
   consumer_topics: {:system, :list, "KAFKA_SOURCE_TOPICS", []},
   # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored; otherwise, they're required.
@@ -50,6 +54,8 @@ config :rig, RigTests.Avro.AvroTest,
   group_id: "rig_avro_kafkatest_brod_group",
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
+  serializer: {:system, "KAFKA_SERIALIZER", nil},
+  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", "localhost:8081"},
   # The list of topics to consume messages from:
   consumer_topics: {:system, :list, "KAFKA_SOURCE_TOPICS", []},
   # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored; otherwise, they're required.

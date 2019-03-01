@@ -98,6 +98,8 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Http,
 config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
+  serializer: {:system, "KAFKA_SERIALIZER", nil},
+  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", "localhost:8081"},
   # The list of topics to consume messages from:
   consumer_topics: {:system, :list, "PROXY_KAFKA_RESPONSE_TOPICS", ["rig-proxy-response"]},
   # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored; otherwise, they're required.

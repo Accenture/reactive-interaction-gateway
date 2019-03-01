@@ -12,8 +12,8 @@ defmodule RigKafka.Serializer do
   @prefix "cloudEvents_"
 
   @spec decode_body(any(), encode_type) :: any()
-  def decode_body(body, "avro") do
-    Avro.decode(body)
+  def decode_body(body, "avro", schema_registry_host) do
+    Avro.decode(body, schema_registry_host)
   end
 
   def decode_body(body, nil), do: body
@@ -21,9 +21,9 @@ defmodule RigKafka.Serializer do
   # ---
 
   @spec encode_body(any(), encode_type, schema_name) :: any()
-  def encode_body(body, "avro", schema_name) do
+  def encode_body(body, "avro", schema_name, schema_registry_host) do
     schema_name
-    |> Avro.encode(body)
+    |> Avro.encode(body, schema_registry_host)
   end
 
   def encode_body(body, nil, _schema), do: body

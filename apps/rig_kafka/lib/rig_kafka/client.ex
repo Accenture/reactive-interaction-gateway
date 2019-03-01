@@ -14,7 +14,6 @@ defmodule RigKafka.Client do
   @supervisor RigKafka.DynamicSupervisor
 
   use GenServer, shutdown: @reconnect_timeout_ms + 5_000
-  use Rig.Config, [:serializer]
 
   defmodule GroupSubscriber do
     @moduledoc """
@@ -39,20 +38,13 @@ defmodule RigKafka.Client do
 
     # ---
 
-    @spec get_content_type(any()) :: String.t()
+    @spec get_content_type(any(), any()) :: String.t()
     defp get_content_type(<<0::8, _id::32, _body::binary>>), do: "avro/binary"
     defp get_content_type(_), do: "application/json"
 
-    # ---
-
-    @impl :brod_group_subscriber
-    def handle_message(topic, partition, message, %{callback: callback} = state) do
-      %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
-
-      headers_no_prefix = Serializer.remove_prefix(headers)
-
+    defp get_content_type(headers, body) do
       ce_specversion =
-        case headers_no_prefix do
+        case headers do
           %{specversion: version} ->
             version
 
@@ -60,20 +52,38 @@ defmodule RigKafka.Client do
             version
 
           _ ->
-            headers_no_prefix
+            headers
         end
 
-      content_type =
-        case ce_specversion do
-          "0.2" -> Map.get(headers_no_prefix, :contenttype, get_content_type(body))
-          "0.1" -> Map.get(headers_no_prefix, :contentType, get_content_type(body))
-          _ -> get_content_type(body)
-        end
+      case ce_specversion do
+        "0.2" -> Map.get(headers, :contenttype, get_content_type(body))
+        "0.1" -> Map.get(headers, :contentType, get_content_type(body))
+        _ -> get_content_type(body)
+      end
+    end
+
+    # ---
+
+    @impl :brod_group_subscriber
+    def handle_message(
+          topic,
+          partition,
+          message,
+          %{callback: callback, schema_registry_host: schema_registry_host} = state
+        ) do
+      %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
+      headers_no_prefix = Serializer.remove_prefix(headers)
+
+      content_type = get_content_type(headers_no_prefix, body)
 
       decoded_body =
         cond do
           content_type == "avro/binary" ->
-            data = Jason.decode!(Serializer.decode_body(body, "avro"))
+            data =
+              body
+              |> Serializer.decode_body("avro", schema_registry_host)
+              |> Jason.decode!()
+
             Map.merge(headers_no_prefix, %{data: data})
 
           content_type == "application/json" ->
@@ -238,7 +248,8 @@ defmodule RigKafka.Client do
          config: %{
            client_id: client_id,
            group_id: group_id,
-           consumer_topics: consumer_topics
+           consumer_topics: consumer_topics,
+           schema_registry_host: schema_registry_host
          },
          callback: callback
        }) do
@@ -252,7 +263,7 @@ defmodule RigKafka.Client do
       group_config,
       consumer_config,
       _callback_module = GroupSubscriber,
-      _callback_init_args = %{callback: callback}
+      _callback_init_args = %{callback: callback, schema_registry_host: schema_registry_host}
     )
   end
 
@@ -262,9 +273,26 @@ defmodule RigKafka.Client do
   def handle_call(
         {:produce, topic, schema, key, plaintext},
         _from,
-        %{brod_client: brod_client} = state
+        %{
+          brod_client: brod_client,
+          config: config
+        } = state
       ) do
-    result = try_producing_message(brod_client, topic, schema, key, plaintext)
+    %{schema_registry_host: schema_registry_host, serializer: serializer} = config
+
+    result =
+      try_producing_message(
+        %{
+          brod_client: brod_client,
+          schema_registry_host: schema_registry_host,
+          serializer: serializer
+        },
+        topic,
+        schema,
+        key,
+        plaintext
+      )
+
     {:reply, result, state}
   end
 
@@ -302,7 +330,7 @@ defmodule RigKafka.Client do
   # ---
 
   defp try_producing_message(
-         brod_client,
+         conf,
          topic,
          schema,
          key,
@@ -310,17 +338,28 @@ defmodule RigKafka.Client do
          retry_delay_divisor \\ 64
        )
 
-  defp try_producing_message(brod_client, topic, schema, key, plaintext, retry_delay_divisor) do
+  defp try_producing_message(
+         %{
+           brod_client: brod_client,
+           schema_registry_host: schema_registry_host,
+           serializer: serializer
+         },
+         topic,
+         schema,
+         key,
+         plaintext,
+         retry_delay_divisor
+       ) do
     {constructed_headers, body} =
       case Jason.decode(plaintext) do
         {:ok, plaintext_map} ->
-          %{serializer: serializer} = config()
-
           case serializer do
             "avro" ->
               {data, headers} = Map.pop(plaintext_map, "data", %{})
               prefixed_headers = Serializer.add_prefix(headers)
-              {prefixed_headers, Serializer.encode_body(data, "avro", schema)}
+
+              {prefixed_headers,
+               Serializer.encode_body(data, "avro", schema, schema_registry_host)}
 
             _ ->
               constructed_headers = transform_content_type(plaintext_map)

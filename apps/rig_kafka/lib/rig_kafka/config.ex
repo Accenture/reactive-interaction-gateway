@@ -32,8 +32,17 @@ defmodule RigKafka.Config do
           sasl: nil | sasl_config
         }
 
-  @enforce_keys [:brokers, :consumer_topics, :client_id, :group_id]
+  @enforce_keys [
+    :brokers,
+    :serializer,
+    :schema_registry_host,
+    :consumer_topics,
+    :client_id,
+    :group_id
+  ]
   defstruct brokers: [],
+            serializer: nil,
+            schema_registry_host: nil,
             consumer_topics: [],
             server_id: nil,
             client_id: nil,
@@ -48,6 +57,8 @@ defmodule RigKafka.Config do
 
     %__MODULE__{
       brokers: Map.get(config, :brokers, []),
+      serializer: Map.get(config, :serializer),
+      schema_registry_host: Map.get(config, :schema_registry_host),
       consumer_topics: Map.get(config, :consumer_topics, []),
       server_id: Map.get(config, :server_id) || String.to_atom("rig_kafka_#{uuid}"),
       client_id: Map.get(config, :client_id) || String.to_atom("brod_client_#{uuid}"),

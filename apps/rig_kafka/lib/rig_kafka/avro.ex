@@ -4,19 +4,19 @@ defmodule RigKafka.Avro do
   """
 
   use Memoize
-  use Rig.Config, [:schema_registry_host]
 
   require Logger
 
   @typep schema_name :: String.t()
+  @typep schema_host :: String.t()
   @typep schema :: map()
   @typep avro_binary :: binary()
   @typep id :: integer
 
-  @spec decode(any()) :: String.t()
-  def decode(data) do
+  @spec decode(any(), schema_host) :: String.t()
+  def decode(data, schema_registry_host) do
     {id, binary_body} = parse_binary_metadata(data)
-    {_id, schema} = fetch_schema(id)
+    {_id, schema} = fetch_schema(id, schema_registry_host)
 
     decoded_data =
       binary_body
@@ -31,9 +31,9 @@ defmodule RigKafka.Avro do
 
   # ---
 
-  @spec encode(schema_name, any()) :: avro_binary
-  def encode(schema_name, data) do
-    {id, schema} = fetch_schema(schema_name)
+  @spec encode(schema_name, any(), schema_host) :: avro_binary
+  def encode(schema_name, data, schema_registry_host) do
+    {id, schema} = fetch_schema(schema_name, schema_registry_host)
 
     kv = encoder(schema, [])
     bin = kv.(schema, deep_map_to_list(data))
@@ -74,10 +74,8 @@ defmodule RigKafka.Avro do
 
   # ---
 
-  @spec fetch_schema(any()) :: {id, schema}
-  defmemo fetch_schema(id) when is_number(id) do
-    %{schema_registry_host: schema_registry_host} = config()
-
+  @spec fetch_schema(any(), schema_host) :: {id, schema}
+  defmemo fetch_schema(id, schema_registry_host) when is_number(id) do
     {:ok, %{"schema" => raw_schema}} =
       schema_registry_host
       |> Schemex.schema(id)
@@ -87,9 +85,7 @@ defmodule RigKafka.Avro do
     {nil, schema}
   end
 
-  defmemo fetch_schema(schema_name) do
-    %{schema_registry_host: schema_registry_host} = config()
-
+  defmemo fetch_schema(schema_name, schema_registry_host) do
     {:ok, %{"schema" => raw_schema, "id" => id}} =
       schema_registry_host
       |> Schemex.latest(schema_name)

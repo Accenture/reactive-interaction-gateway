@@ -5,6 +5,8 @@ defmodule RigTests.Avro.AvroTest do
 
   use Rig.Config, [
     :brokers,
+    :serializer,
+    :schema_registry_host,
     :consumer_topics,
     :ssl_enabled?,
     :ssl_ca_certfile,
@@ -13,6 +15,7 @@ defmodule RigTests.Avro.AvroTest do
     :ssl_keyfile_pass,
     :sasl
   ]
+
   use ExUnit.Case, async: false
 
   alias Rig.KafkaConfig, as: RigKafkaConfig
@@ -22,6 +25,7 @@ defmodule RigTests.Avro.AvroTest do
   defp kafka_config, do: RigKafkaConfig.parse(config())
 
   setup do
+    AvroConfig.set("avro")
     kafka_config = kafka_config()
 
     test_pid = self()
@@ -43,8 +47,6 @@ defmodule RigTests.Avro.AvroTest do
 
   @tag :kafka
   test "Given avro is enabled, the producer should be able to encode message with required cloud events(0.1) fields and consumer decode message" do
-    AvroConfig.set("avro")
-
     event =
       Jason.encode!(%{
         cloudEventsVersion: "0.1",
@@ -74,8 +76,6 @@ defmodule RigTests.Avro.AvroTest do
 
   @tag :kafka
   test "Given avro is enabled, the producer should be able to encode message with optional cloud events(0.1) fields and consumer decode message" do
-    AvroConfig.set("avro")
-
     event =
       Jason.encode!(%{
         cloudEventsVersion: "0.1",
@@ -111,8 +111,6 @@ defmodule RigTests.Avro.AvroTest do
 
   @tag :kafka
   test "Given avro is enabled, the producer should be able to encode message with required cloud events(0.2) fields and consumer decode message" do
-    AvroConfig.set("avro")
-
     event =
       Jason.encode!(%{
         specversion: "0.2",
@@ -142,8 +140,6 @@ defmodule RigTests.Avro.AvroTest do
 
   @tag :kafka
   test "Given avro is enabled, the producer should be able to encode message with optional cloud events(0.2) fields and consumer decode message" do
-    AvroConfig.set("avro")
-
     event =
       Jason.encode!(%{
         specversion: "0.2",
@@ -179,8 +175,6 @@ defmodule RigTests.Avro.AvroTest do
 
   @tag :kafka
   test "Given avro is enabled, the producer should be able to encode message without any cloud events fields and consumer decode message" do
-    AvroConfig.set("avro")
-
     event =
       Jason.encode!(%{
         data: %{
@@ -202,8 +196,6 @@ defmodule RigTests.Avro.AvroTest do
 
   @tag :kafka
   test "Given avro is enabled, the producer and consumer should be able to fallback to non-encoding(decoding) behavior" do
-    AvroConfig.set("avro")
-
     event = "Simple unstructured event"
 
     kafka_config = kafka_config()

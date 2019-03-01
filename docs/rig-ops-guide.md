@@ -16,9 +16,9 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `API_HTTPS_PORT` | Same as `API_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | 4011
 `INBOUND_PORT` | Port at which RIG exposes proxy and websocket/sse communication. | 4000
 `INBOUND_HTTPS_PORT` | Same as `INBOUND_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | 4001
-`HTTPS_CERTFILE` | Path to the (signed) client certificate (PEM format). The path is relative to the `priv` directory of the `:rig`-OTP app. **Attention:** If not configured, we will disable HTTPS | ""
-`HTTPS_KEYFILE` | Path to the private key of the client certificate (PEM format). Also supports encrypted private keys; see `HTTPS_KEYFILE_PASS` and consult the Erlang documentation for supported ciphers (e.g. [supported password ciphers in OTP 21.2](https://github.com/erlang/otp/blob/OTP-21.2/lib/public_key/src/pubkey_pbe.erl#L55); unfortunately, with OTP 21.1 using an unsupported cipher fails silently). The path is relative to the `priv` directory of the `:rig`-OTP app. | ""
-`HTTPS_KEYFILE_PASS` | Passphrase in case the private key is password-protected. | ""
+`HTTPS_CERTFILE` | Path to the (signed) client certificate (PEM format). The path is relative to the `priv` directory of the `:rig`-OTP app. **Attention:** If not configured, we will disable HTTPS | nil
+`HTTPS_KEYFILE` | Path to the private key of the client certificate (PEM format). Also supports encrypted private keys; see `HTTPS_KEYFILE_PASS` and consult the Erlang documentation for supported ciphers (e.g. [supported password ciphers in OTP 21.2](https://github.com/erlang/otp/blob/OTP-21.2/lib/public_key/src/pubkey_pbe.erl#L55); unfortunately, with OTP 21.1 using an unsupported cipher fails silently). The path is relative to the `priv` directory of the `:rig`-OTP app. | nil
+`HTTPS_KEYFILE_PASS` | Passphrase in case the private key is password-protected. | nil
 `CORS` | The "Access-Control-Allow-Origin" setting for the inbound port. It is usually a good idea to set this to your domain. | "*"
 `DISCOVERY_TYPE` | Type of discovery used in distributed mode. If not set discovery is not used. Available options: `dns`. | nil
 `DNS_NAME` | Address where RIG will do DNS discovery for Node host addresses. | "localhost"

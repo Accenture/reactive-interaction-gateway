@@ -22,6 +22,8 @@ defmodule Rig.KafkaConfig do
 
     conf
     |> Map.put(:brokers, Rig.Config.parse_socket_list(conf.brokers))
+    |> Map.put(:serializer, conf.serializer)
+    |> Map.put(:schema_registry_host, conf.schema_registry_host)
     |> Map.put(:ssl, ssl_config)
     |> Map.put(:sasl, parse_sasl_config(conf.sasl))
     |> RigKafka.Config.new()

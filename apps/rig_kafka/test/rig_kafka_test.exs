@@ -17,7 +17,7 @@ defmodule RigKafkaTest do
 
   @sup RigKafka.DynamicSupervisor
 
-  defp kafka_config(consumer_topics) do
+  defp kafka_config(consumer_topics, serializer, schema_registry_host) do
     broker_env = System.get_env("KAFKA_BROKERS")
     assert not is_nil(broker_env), "KAFKA_BROKERS needs to be set for Kafka test to work"
 
@@ -31,15 +31,19 @@ defmodule RigKafkaTest do
 
     Config.new(%{
       brokers: brokers,
-      consumer_topics: consumer_topics
+      consumer_topics: consumer_topics,
+      serializer: serializer,
+      schema_registry_host: schema_registry_host
     })
   end
 
   @tag :kafka
   test "Given a started RigKafka client, messages can be produced and consumed." do
     topic = "rig_kafka_test_simple_topic"
+    serializer = nil
+    schema_registry_host = ""
 
-    config = kafka_config([topic])
+    config = kafka_config([topic], serializer, schema_registry_host)
 
     expected_msg = "this is a test message"
     test_pid = self()
