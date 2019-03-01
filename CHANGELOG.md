@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The proxy configuration can now also be passed as a JSON string. This allows to run the Docker image in environments where mounting a file in a container is not possible. [#159](https://github.com/Accenture/reactive-interaction-gateway/issues/159)
+- When using the proxy, RIG will now add additional forward handlers "X-Content-Type-Options" and "Forwarded" [#113](https://github.com/Accenture/reactive-interaction-gateway/issues/113)
 - Increased length of header value in HTTP requests to 16384. Reason is to support long tokens such as SAML.
 
 ### Changed
