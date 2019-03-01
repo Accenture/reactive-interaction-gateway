@@ -2,11 +2,7 @@ use Mix.Config
 
 config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
   env: :prod,
-  watchers: [],
-  https: [
-    certfile: {:system, "HTTPS_CERTFILE", ""},
-    keyfile: {:system, "HTTPS_KEYFILE", ""}
-  ]
+  watchers: []
 
 # ## Using releases
 #

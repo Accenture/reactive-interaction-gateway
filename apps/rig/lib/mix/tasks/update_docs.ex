@@ -14,11 +14,18 @@ defmodule Mix.Tasks.UpdateDocs do
 
   @erlang_envs ["NODE_HOST", "NODE_COOKIE"]
 
+  @target_path "./docs/rig-ops-guide.md"
+
   @shortdoc "Uses actual configuration defaults for updating the operator's guide."
   def run(_) do
-    # Only run when compiling the whole umbrella application in DEV:
-    if Project.umbrella?() and Mix.env() == :dev do
-      update_file("./docs/rig-ops-guide.md")
+    # Only run when compiling the whole umbrella application in PROD
+    # (as only then we'll find the correct default values):
+    if Project.umbrella?() and Mix.env() == :prod do
+      if File.exists?(@target_path) do
+        update_file(@target_path)
+      else
+        Logger.info(fn -> "Not updating documentation (file not present: #{@target_path})" end)
+      end
     end
   end
 
@@ -170,8 +177,8 @@ defmodule Mix.Tasks.UpdateDocs do
 
   def env_defaults(env) do
     env
-    |> Stream.flat_map(fn {_mod, kwlist} -> List.wrap(kwlist) end)
-    |> Stream.map(fn
+    |> Enum.flat_map(fn {_mod, kwlist} -> List.wrap(kwlist) end)
+    |> Enum.map(fn
       {_, {:system, key, val}} ->
         {key, val}
 
@@ -188,8 +195,7 @@ defmodule Mix.Tasks.UpdateDocs do
       _ ->
         nil
     end)
-    |> Stream.reject(&is_nil/1)
-    |> Enum.to_list()
+    |> Enum.reject(&is_nil/1)
     |> nested_envs
   end
 
