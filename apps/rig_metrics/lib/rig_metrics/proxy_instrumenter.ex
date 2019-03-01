@@ -8,27 +8,40 @@ defmodule RigMetrics.ProxyInstrumenter do
   # therefore shouldn't be exposed yet to the endpoint
 
   # to be called at app startup.
-  # def setup() do
-  #   Gauge.declare(
-  #     name: :rig_current_session_count,
-  #     help: "Current count of sessions established to RIG"
-  #   )
+  def setup() do
+    Gauge.declare(
+      name: :rig_current_session_count,
+      help: "Current count of sessions established to RIG"
+    )
 
-  #   Gauge.declare(
-  #     name: :rig_current_subscription_count,
-  #     help: "Current count of subscriptions established to RIG"
-  #   )
+    #   Gauge.declare(
+    #     name: :rig_current_subscription_count,
+    #     help: "Current count of subscriptions established to RIG"
+    #   )
 
-  #   Gauge.declare(
-  #     name: :rig_current_open_proxy_connection_count,
-  #     help: "Current count of open proxy connections established to RIG"
-  #   )
+    #   Gauge.declare(
+    #     name: :rig_current_open_proxy_connection_count,
+    #     help: "Current count of open proxy connections established to RIG"
+    #   )
 
-  #   Counter.declare(
-  #     name: :rig_proxy_requests_total,
-  #     help: "Total count of request through RIG proxy"
-  #   )
-  # end
+    Counter.declare(
+      name: :rig_proxy_requests_total,
+      help: "Total count of requests through RIG proxy",
+      labels: [:channel_label]
+    )
+
+    Counter.declare(
+      name: :rig_proxy_requests_successful,
+      help: "Count of successful requests through RIG proxy",
+      labels: [:channel_label]
+    )
+
+    Counter.declare(
+      name: :rig_proxy_requests_failed,
+      help: "Count of failed requests through RIG proxy",
+      labels: [:channel_label]
+    )
+  end
 
   def add_session do
     Gauge.inc(name: :rig_current_session_count)
@@ -54,7 +67,13 @@ defmodule RigMetrics.ProxyInstrumenter do
     Gauge.dec(name: :rig_current_open_proxy_connection_count)
   end
 
-  def count_proxy_request do
-    Counter.inc(name: :rig_proxy_requests_total)
+  def count_successful_proxy_request(channel_label) do
+    Counter.inc(name: :rig_proxy_requests_total, labels: [channel_label])
+    Counter.inc(name: :rig_proxy_requests_successful, labels: [channel_label])
+  end
+
+  def count_failed_proxy_request(channel_label) do
+    Counter.inc(name: :rig_proxy_requests_total, labels: [channel_label])
+    Counter.inc(name: :rig_proxy_requests_failed, labels: [channel_label])
   end
 end
