@@ -70,8 +70,8 @@ defmodule RigInboundGateway.Proxy do
 
   defp do_init_presence(config_path_or_json, state) do
     with {:ok, config} when is_list(config) <- Config.parse_json_env(config_path_or_json) do
-      Enum.each(config, fn api ->
-        Logger.info(fn -> "Reverse proxy: service #{api.id}" end)
+      Enum.each(config, fn %{"id" => id} = api ->
+        Logger.info(fn -> "Reverse proxy: service #{id}" end)
         api_with_default_values = set_default_api_values(api)
         state.tracker_mod.track(api["id"], api_with_default_values)
       end)
