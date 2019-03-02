@@ -60,9 +60,9 @@ defmodule RigInboundGateway.ApiProxy.Router do
           "kinesis" -> KinesisHandler
         end
 
-      updated_conn = add_forward_headers(conn)
-
-      handler.handle_http_request(updated_conn, api, endpoint, request_path)
+      conn
+      |> add_forward_headers()
+      |> handler.handle_http_request(api, endpoint, request_path)
     else
       {:error, :authentication_failed} -> send_resp(conn, :unauthorized, "Authentication failed.")
     end
@@ -96,26 +96,19 @@ defmodule RigInboundGateway.ApiProxy.Router do
   # ---
 
   def add_forward_headers(conn) do
-    %{
-      req_headers: req_headers,
-      remote_ip: remote_ip
-    } = conn
-
-    # GET HOST IP ADDRESS AS STRING
-    {:ok, host_ip} = @host |> String.to_charlist() |> :inet.getaddr(:inet)
-    host_ip_str = host_ip |> :inet.ntoa() |> to_string
-
-    # GET REMOTE IP AS STRING
-    remote_ip_str = remote_ip |> :inet.ntoa() |> to_string
+    remote_ip = resolve_addr(conn.remote_ip)
+    host_ip = resolve_addr(@host)
 
     forward_headers = [
+      # with nosniff we tell the browser not to actively try to set the content-type on it's own
+      # as we expect that content-type is always set
       {"X-Content-Type-Options", "nosniff"},
-      {"Forwarded", "for=#{remote_ip_str};by=#{host_ip_str}"}
+      {"Forwarded", "for=#{remote_ip};by=#{host_ip}"}
     ]
 
     updated_headers =
       for(
-        {key, val} when key not in ["X-Content-Type-Options", "Forwarded"] <- req_headers,
+        {key, val} when key not in ["X-Content-Type-Options", "Forwarded"] <- conn.req_headers,
         do: {key, val}
       ) ++ forward_headers
 
@@ -124,4 +117,15 @@ defmodule RigInboundGateway.ApiProxy.Router do
   end
 
   # ---
+
+  defp resolve_addr(ip_addr_or_hostname)
+
+  defp resolve_addr(ip_addr) when is_tuple(ip_addr) do
+    ip_addr |> :inet.ntoa() |> to_string()
+  end
+
+  defp resolve_addr(hostname) when byte_size(hostname) > 0 do
+    {:ok, ip_addr} = hostname |> String.to_charlist() |> :inet.getaddr(:inet)
+    resolve_addr(ip_addr)
+  end
 end
