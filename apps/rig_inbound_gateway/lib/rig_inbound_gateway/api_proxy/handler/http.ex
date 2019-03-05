@@ -11,6 +11,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
   alias Rig.Connection.Codec
 
+  alias RigMetrics.ProxyMetrics
+
   alias RigInboundGateway.ApiProxy.Base
 
   alias RigInboundGateway.ApiProxy.Handler
@@ -36,6 +38,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
     case result do
       {:ok, res} ->
+        ProxyMetrics.count_proxy_request(method, request_path, response_from, "ok")
+
         handle_response(conn, res, response_from)
 
       {:error, err} ->
@@ -43,9 +47,18 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
           "Failed to proxy to #{inspect(url)} (#{method} #{request_path}): #{inspect(err)}"
         end)
 
+        ProxyMetrics.count_proxy_request(method, request_path, response_from, "bad_gateway")
+
         Conn.send_resp(conn, :bad_gateway, "Bad gateway.")
 
       :unknown_method ->
+        ProxyMetrics.count_proxy_request(
+          method,
+          request_path,
+          response_from,
+          "method_not_allowed"
+        )
+
         Conn.send_resp(conn, :method_not_allowed, "Method not allowed.")
     end
   end

@@ -1,79 +1,20 @@
-defmodule RigMetrics.ProxyInstrumenter do
+defmodule RigMetrics.ProxyMetrics do
   @moduledoc """
   Metrics instrumenter for the Rig Proxy
   """
   use Prometheus.Metric
 
-  # TODO: setup currently commented out, as metrics are not yet implemented and
-  # therefore shouldn't be exposed yet to the endpoint
-
   # to be called at app startup.
   def setup() do
-    Gauge.declare(
-      name: :rig_current_session_count,
-      help: "Current count of sessions established to RIG"
-    )
-
-    #   Gauge.declare(
-    #     name: :rig_current_subscription_count,
-    #     help: "Current count of subscriptions established to RIG"
-    #   )
-
-    #   Gauge.declare(
-    #     name: :rig_current_open_proxy_connection_count,
-    #     help: "Current count of open proxy connections established to RIG"
-    #   )
-
     Counter.declare(
       name: :rig_proxy_requests_total,
       help: "Total count of requests through RIG proxy",
-      labels: [:channel_label]
-    )
-
-    Counter.declare(
-      name: :rig_proxy_requests_successful,
-      help: "Count of successful requests through RIG proxy",
-      labels: [:channel_label]
-    )
-
-    Counter.declare(
-      name: :rig_proxy_requests_failed,
-      help: "Count of failed requests through RIG proxy",
-      labels: [:channel_label]
+      labels: [:method, :path, :target, :status]
     )
   end
 
-  def add_session do
-    Gauge.inc(name: :rig_current_session_count)
-  end
-
-  def delete_session do
-    Gauge.dec(name: :rig_current_session_count)
-  end
-
-  def add_subscription do
-    Gauge.inc(name: :rig_current_subscription_count)
-  end
-
-  def delete_subscription do
-    Gauge.dec(name: :rig_current_subscription_count)
-  end
-
-  def add_connection do
-    Gauge.inc(name: :rig_current_open_proxy_connection_count)
-  end
-
-  def delete_connection do
-    Gauge.dec(name: :rig_current_open_proxy_connection_count)
-  end
-
-  def count_successful_proxy_request(channel_label) do
-    Counter.inc(name: :rig_proxy_requests_total, labels: [channel_label])
-    Counter.inc(name: :rig_proxy_requests_successful, labels: [channel_label])
-  end
-
-  def count_failed_proxy_request(channel_label) do
-    Counter.inc(name: :rig_proxy_requests_total, labels: [channel_label])
-    Counter.inc(name: :rig_proxy_requests_failed, labels: [channel_label])
+  @doc "Increases the Prometheus counter rig_proxy_request_total"
+  def count_proxy_request(method, path, target, status) do
+    Counter.inc(name: :rig_proxy_requests_total, labels: [method, path, target, status])
   end
 end
