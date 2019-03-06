@@ -9,12 +9,15 @@ defmodule RigMetrics.ProxyMetrics do
     Counter.declare(
       name: :rig_proxy_requests_total,
       help: "Total count of requests through RIG proxy",
-      labels: [:method, :path, :target, :status]
+      labels: [:method, :path, :target, :response_from, :status]
     )
   end
 
   @doc "Increases the Prometheus counter rig_proxy_request_total"
-  def count_proxy_request(method, path, target, status) do
-    Counter.inc(name: :rig_proxy_requests_total, labels: [method, path, target, status])
+  def count_proxy_request(method, path, target, response_from, status) do
+    Counter.inc(
+      name: :rig_proxy_requests_total,
+      labels: [method, path, target, response_from, status]
+    )
   end
 end
