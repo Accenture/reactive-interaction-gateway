@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   zookeeper:
     container_name: zookeeper
@@ -29,7 +29,7 @@ services:
       - LOG_LEVEL=debug
       - KAFKA_SOURCE_TOPICS=example
       - KAFKA_BROKERS=kafka:9092
-      - API_PORT=7010
+      - API_HTTP_PORT=7010
       - INBOUND_PORT=7000
       - EXTRACTORS={"message":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}}}
     ports:
