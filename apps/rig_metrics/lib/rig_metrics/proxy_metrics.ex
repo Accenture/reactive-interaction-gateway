@@ -5,7 +5,7 @@ defmodule RigMetrics.ProxyMetrics do
   use Prometheus.Metric
 
   # to be called at app startup.
-  def setup() do
+  def setup do
     Counter.declare(
       name: :rig_proxy_requests_total,
       help: "Total count of requests through RIG proxy",
