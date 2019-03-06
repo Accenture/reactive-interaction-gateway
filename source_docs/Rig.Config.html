@@ -76,9 +76,9 @@ Rig.Config
   Specify a list of expected keys
 </h3>
 
-<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Rig.MyExample</span><span class="w"> </span><span class="k" data-group-id="1854036812-1">do</span><span class="w">
-  </span><span class="kn">use</span><span class="w"> </span><span class="nc">Rig.Config</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1854036812-2">[</span><span class="ss">:some_key</span><span class="p">,</span><span class="w"> </span><span class="ss">:other_key</span><span class="p" data-group-id="1854036812-2">]</span><span class="w">
-</span><span class="k" data-group-id="1854036812-1">end</span></code></pre>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Rig.MyExample</span><span class="w"> </span><span class="k" data-group-id="0745804698-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">Rig.Config</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0745804698-2">[</span><span class="ss">:some_key</span><span class="p">,</span><span class="w"> </span><span class="ss">:other_key</span><span class="p" data-group-id="0745804698-2">]</span><span class="w">
+</span><span class="k" data-group-id="0745804698-1">end</span></code></pre>
 <p><a href="Rig.Config.html#content"><code class="inline">Rig.Config</code></a> expects a config entry similar to this:</p>
 <pre><code class="nohighlight makeup elixir"><span class="n">config</span><span class="w"> </span><span class="ss">:rig</span><span class="p">,</span><span class="w"> </span><span class="nc">Rig.MyExample</span><span class="p">,</span><span class="w">
   </span><span class="ss">some_key</span><span class="p">:</span><span class="w"> </span><span class="n">...</span><span class="p">,</span><span class="w">
@@ -92,13 +92,13 @@ If there are other keys present, they&#39;ll be added to that map as well.</p>
   Specify <code class="inline">:custom_validation</code> instead
 </h3>
 
-<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Rig.MyExample</span><span class="w"> </span><span class="k" data-group-id="4676923535-1">do</span><span class="w">
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Rig.MyExample</span><span class="w"> </span><span class="k" data-group-id="9512351137-1">do</span><span class="w">
   </span><span class="kn">use</span><span class="w"> </span><span class="nc">Rig.Config</span><span class="p">,</span><span class="w"> </span><span class="ss">:custom_validation</span><span class="w">
 
-  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">validate_config!</span><span class="p" data-group-id="4676923535-2">(</span><span class="n">config</span><span class="p" data-group-id="4676923535-2">)</span><span class="w"> </span><span class="k" data-group-id="4676923535-3">do</span><span class="w">
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">validate_config!</span><span class="p" data-group-id="9512351137-2">(</span><span class="n">config</span><span class="p" data-group-id="9512351137-2">)</span><span class="w"> </span><span class="k" data-group-id="9512351137-3">do</span><span class="w">
     </span><span class="n">...</span><span class="w">
-  </span><span class="k" data-group-id="4676923535-3">end</span><span class="w">
-</span><span class="k" data-group-id="4676923535-1">end</span></code></pre>
+  </span><span class="k" data-group-id="9512351137-3">end</span><span class="w">
+</span><span class="k" data-group-id="9512351137-1">end</span></code></pre>
 <p>If you use :custom_validation, you should deal with the raw keyword list
 by implementing <code class="inline">validate_config!/1</code> in the module.</p>
         </section>
