@@ -12,7 +12,40 @@ This metrics can be used to be included into a monitoring platform like [**Grafa
 
 ## RIG Specific Metrics
 
-Currently there are no RIG specific metrics implemented yet. We are exposing the standard metrics providing information about the running application itself.
+### Proxy Metrics - `rig_proxy_requests_total` ###
+
+With this metric the usage of RIGs API Proxy/Gateway can be monitored.
+
+Following Labels are provided:
+- **method** - The HTTP method called for this request Following possible values:
+  - `GET`
+  - `POST`
+  - `PUT`
+  - `PATCH`
+  - `DELETE`
+  - `HEAD`
+  - `OPTIONS`
+  - etc.
+- **path** - The path used for this request.
+- **target** - The target for this request. Grabbed from proxy parametrization. Following possible values:
+  - `http`
+  - `kafka`
+  - `kinesis`
+  - `N/A` - Not available, due to missing parametrization
+- **response_from** - Where the response is provided from. Grabbed from proxy parametrization. Following possible values:
+  - `http`
+  - `kafka`
+  - `N/A` - Not available, due to missing parametrization
+- **status** - The *internal* status for the request. Attention: this status only tracks the internal rig process status. Once forwarded we track as "ok". We expect that called services are monitored on it's own. Following possible status codes:
+  - `ok` - if forwarded successfully
+  - `not_parameterized` - if the provided `method` and/or `path` isn't parameterized
+  - `bad_gateway` - Could not connect to the parameterized backend (e.g. offline)
+  - `method_not_allowed` - If HTTP method is used that is not provided in the list above
+  - `gateway_timeout` - On timeout for async response. May only occur if endpoint parameter `response_from` is set to `kafka` or `kinesis`
+
+****
+### Standard Metrics ###
+We are exposing the standard metrics providing information about the running application itself.
 
 Following standard metrics are currently provided:
 - erlang_vm_memory_ets_tables - *Erlang VM ETS Tables count*
