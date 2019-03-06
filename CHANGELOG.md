@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - [Proxy] Parsing of JSON files in proxy module. Expected that `api.id` is an atom, but when using files it's a string.
+- [Docs] Fixed channels example with latest RIG API changes.
 
 <!-- ### Security -->
 

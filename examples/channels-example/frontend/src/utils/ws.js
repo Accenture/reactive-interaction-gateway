@@ -12,13 +12,11 @@ export class Ws {
     const token = getJwtToken(username);
 
     // Creates Websocket connection
-    this.socket = new WebSocket(
-      `ws://localhost:7000/_rig/v1/connection/ws?token=${token}`
-    );
+    this.socket = new WebSocket(`ws://localhost:7000/_rig/v1/connection/ws?jwt=${token}`);
 
     this.socket.onmessage = e => {
       const cloudEvent = JSON.parse(e.data);
-      if (cloudEvent.eventType === 'rig.connection.create') {
+      if (cloudEvent.type === 'rig.connection.create') {
         const payload = cloudEvent.data;
         const connectionToken = payload['connection_token'];
         this.createSubscription(connectionToken, subscriberEvent, token);
