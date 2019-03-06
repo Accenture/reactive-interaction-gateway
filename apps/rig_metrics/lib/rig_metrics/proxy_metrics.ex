@@ -20,4 +20,12 @@ defmodule RigMetrics.ProxyMetrics do
       labels: [method, path, target, response_from, status]
     )
   end
+
+  @doc "Gets current value of metric rig_proxy_request_total"
+  def get_current_value(method, path, target, response_from, status) do
+    Counter.value(
+      name: :rig_proxy_requests_total,
+      labels: [method, path, target, response_from, status]
+    )
+  end
 end
