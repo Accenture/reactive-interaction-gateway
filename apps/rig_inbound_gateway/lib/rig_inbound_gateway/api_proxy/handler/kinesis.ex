@@ -8,6 +8,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   alias ExAws
   alias Plug.Conn
 
+  alias RigMetrics.ProxyMetrics
+
   alias Rig.Connection.Codec
 
   alias RigInboundGateway.ApiProxy.Handler
@@ -30,7 +32,20 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   def handle_http_request(conn, api, endpoint, request_path)
 
   @doc "CORS response for preflight request."
-  def handle_http_request(%{method: "OPTIONS"} = conn, _, %{"target" => "kinesis"}, _) do
+  def handle_http_request(
+        %{method: "OPTIONS"} = conn,
+        _,
+        %{"target" => "kinesis"} = endpoint,
+        _
+      ) do
+    ProxyMetrics.count_proxy_request(
+      conn.method,
+      conn.request_path,
+      "kinesis",
+      Map.get(endpoint, "response_from", "http"),
+      "ok"
+    )
+
     conn
     |> with_cors()
     |> Conn.send_resp(:no_content, "")
@@ -43,6 +58,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         %{"target" => "kinesis"} = endpoint,
         request_path
       ) do
+    response_from = Map.get(endpoint, "response_from", "http")
+
     kinesis_message =
       event
       |> Map.put("rig", %{
@@ -61,19 +78,27 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     produce(partition, kinesis_message)
 
     wait_for_response? =
-      case Map.get(endpoint, "response_from") do
+      case response_from do
         # TODO: "kinesis" -> true
         _ -> false
       end
 
     if wait_for_response? do
-      wait_for_response(conn)
+      wait_for_response(conn, response_from)
     else
+      ProxyMetrics.count_proxy_request(
+        conn.method,
+        conn.request_path,
+        "kinesis",
+        response_from,
+        "ok"
+      )
+
       Conn.send_resp(conn, :accepted, "Accepted.")
     end
   end
 
-  def handle_http_request(conn, _, %{"target" => "kinesis"}, _) do
+  def handle_http_request(conn, _, %{"target" => "kinesis"} = endpoint, _) do
     response = """
     Bad request: missing expected body parameters.
 
@@ -82,22 +107,46 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     #{@help_text}
     """
 
+    ProxyMetrics.count_proxy_request(
+      conn.method,
+      conn.request_path,
+      "kinesis",
+      Map.get(endpoint, "response_from", "http"),
+      "bad_request"
+    )
+
     Conn.send_resp(conn, :bad_request, response)
   end
 
   # ---
 
-  defp wait_for_response(conn) do
+  defp wait_for_response(conn, response_from) do
     conf = config()
 
     receive do
       {:response_received, response} ->
+        ProxyMetrics.count_proxy_request(
+          conn.method,
+          conn.request_path,
+          "kinesis",
+          response_from,
+          "ok"
+        )
+
         conn
         |> with_cors()
         |> Conn.put_resp_content_type("application/json")
         |> Conn.send_resp(:ok, response)
     after
       conf.response_timeout ->
+        ProxyMetrics.count_proxy_request(
+          conn.method,
+          conn.request_path,
+          "kinesis",
+          response_from,
+          "gateway_timeout"
+        )
+
         conn
         |> with_cors()
         |> Conn.send_resp(:gateway_timeout, "")

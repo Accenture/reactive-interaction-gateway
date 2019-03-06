@@ -17,6 +17,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   alias RigInboundGateway.ApiProxy.Handler.Kinesis, as: KinesisHandler
   alias RigInboundGateway.ApiProxy.Serializer
   alias RigInboundGateway.Proxy
+  alias RigMetrics.ProxyMetrics
 
   plug(:match)
   plug(:dispatch)
@@ -33,6 +34,14 @@ defmodule RigInboundGateway.ApiProxy.Router do
 
     case matches do
       [] ->
+        ProxyMetrics.count_proxy_request(
+          conn.method,
+          conn.request_path,
+          "N/A",
+          "N/A",
+          "not_parameterized"
+        )
+
         send_resp(conn, :not_found, Serializer.encode_error_message(:not_found))
 
       [{api, endpoint, request_path} | other_matches] ->
