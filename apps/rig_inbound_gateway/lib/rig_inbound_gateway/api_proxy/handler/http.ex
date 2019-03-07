@@ -46,15 +46,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
         end)
 
         case err.reason do
-          :econnrefused ->
-            ProxyMetrics.count_proxy_request(
-              method,
-              request_path,
-              "http",
-              response_from,
-              "unreachable"
-            )
-
           :timeout ->
             ProxyMetrics.count_proxy_request(
               method,
@@ -70,21 +61,13 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
               request_path,
               "http",
               response_from,
-              "backend_error"
+              "unreachable"
             )
         end
 
         Conn.send_resp(conn, :bad_gateway, "Bad gateway.")
 
       :unknown_method ->
-        ProxyMetrics.count_proxy_request(
-          method,
-          request_path,
-          "http",
-          response_from,
-          "method_not_allowed"
-        )
-
         Conn.send_resp(conn, :method_not_allowed, "Method not allowed.")
     end
   end

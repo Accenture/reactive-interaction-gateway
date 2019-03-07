@@ -41,9 +41,7 @@ Following Labels are provided:
   - `not_found` - If the provided `method` and/or `path` isn't found in the proxy parametrization
   - `unreachable` - Could not connect to the parameterized backend (e.g. offline)
   - `request_timeout` - If service is reachable, but times out.
-  - `backend_error` - If any other error than `unreachable` or `request_timout` occour
-  - `method_not_allowed` - If a HTTP method is used that is not provided in the list above
-  - `response_timeout` - On timeout for async response. May only occur if endpoint parameter `response_from` is set to `kafka` or `kinesis`
+  - `response_timeout` - On timeout for async response. May only occur if endpoint parameter `response_from` is set.
 
 ****
 ### Standard Metrics ###
