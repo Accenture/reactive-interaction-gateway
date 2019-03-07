@@ -39,7 +39,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
           conn.request_path,
           "N/A",
           "N/A",
-          "not_parameterized"
+          "not_found"
         )
 
         send_resp(conn, :not_found, Serializer.encode_error_message(:not_found))

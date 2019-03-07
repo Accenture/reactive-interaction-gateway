@@ -25,7 +25,6 @@ Following Labels are provided:
   - `DELETE`
   - `HEAD`
   - `OPTIONS`
-  - etc.
 - **path** - The path used for this request.
 - **target** - The target for this request. Grabbed from proxy parametrization. Following possible values:
   - `http`
@@ -38,7 +37,7 @@ Following Labels are provided:
   - `N/A` - Not available, due to missing parametrization
 - **status** - The *internal* status for the request. Attention: this status only tracks the internal rig process status. Once forwarded we track as "ok". We expect that called services are monitored on it's own. Following possible status codes:
   - `ok` - if forwarded successfully
-  - `not_parameterized` - if the provided `method` and/or `path` isn't parameterized
+  - `not_found` - if the provided `method` and/or `path` isn't found in the proxy parametrization
   - `bad_gateway` - Could not connect to the parameterized backend (e.g. offline)
   - `method_not_allowed` - If HTTP method is used that is not provided in the list above
   - `gateway_timeout` - On timeout for async response. May only occur if endpoint parameter `response_from` is set to `kafka` or `kinesis`
