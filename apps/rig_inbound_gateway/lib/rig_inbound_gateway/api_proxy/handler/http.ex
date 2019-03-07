@@ -45,13 +45,34 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
           "Failed to proxy to #{inspect(url)} (#{method} #{request_path}): #{inspect(err)}"
         end)
 
-        ProxyMetrics.count_proxy_request(
-          method,
-          request_path,
-          "http",
-          response_from,
-          "bad_gateway"
-        )
+        case err.reason do
+          :econnrefused ->
+            ProxyMetrics.count_proxy_request(
+              method,
+              request_path,
+              "http",
+              response_from,
+              "unreachable"
+            )
+
+          :timeout ->
+            ProxyMetrics.count_proxy_request(
+              method,
+              request_path,
+              "http",
+              response_from,
+              "request_timeout"
+            )
+
+          _ ->
+            ProxyMetrics.count_proxy_request(
+              method,
+              request_path,
+              "http",
+              response_from,
+              "backend_error"
+            )
+        end
 
         Conn.send_resp(conn, :bad_gateway, "Bad gateway.")
 
@@ -119,7 +140,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
           request_path,
           "http",
           response_from,
-          "gateway_timeout"
+          "response_timeout"
         )
 
         conn

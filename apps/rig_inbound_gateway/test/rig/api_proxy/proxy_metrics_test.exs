@@ -14,26 +14,33 @@ defmodule RigInboundGateway.ApiProxy.ProxyMetricsTest do
   @env [port: 7070]
 
   test_with_server "Metric should track undefined routes", @env do
-    assert ProxyMetrics.get_current_value(
-             "GET",
-             "/endpoint/undefined",
-             "N/A",
-             "N/A",
-             "not_parameterized"
-           ) ===
-             :undefined
+    metric_status_before =
+      ProxyMetrics.get_current_value(
+        "GET",
+        "/endpoint/undefined",
+        "N/A",
+        "N/A",
+        "not_found"
+      )
 
     request = construct_request_with_jwt(:get, "/endpoint/undefined")
     conn = call(Router, request)
     assert conn.status == 404
 
-    assert ProxyMetrics.get_current_value(
-             "GET",
-             "/endpoint/undefined",
-             "N/A",
-             "N/A",
-             "not_parameterized"
-           ) === 1
+    metric_status_after =
+      ProxyMetrics.get_current_value(
+        "GET",
+        "/endpoint/undefined",
+        "N/A",
+        "N/A",
+        "not_found"
+      )
+
+    if metric_status_before === :undefined do
+      assert metric_status_after === 1
+    else
+      assert metric_status_after === metric_status_before + 1
+    end
   end
 
   # ---
@@ -41,13 +48,21 @@ defmodule RigInboundGateway.ApiProxy.ProxyMetricsTest do
   test_with_server "Standard HTTP call should increase metrics counter", @env do
     route("/myapi/free", Response.ok!(~s<{"status":"ok"}>))
 
-    assert ProxyMetrics.get_current_value("GET", "/myapi/free", "http", "http", "ok") ===
-             :undefined
+    metric_status_before =
+      ProxyMetrics.get_current_value("GET", "/myapi/free", "http", "http", "ok")
 
     conn = call(Router, build_conn(:get, "/myapi/free"))
     assert conn.status == 200
     assert conn.resp_body =~ "{\"status\":\"ok\"}"
-    assert ProxyMetrics.get_current_value("GET", "/myapi/free", "http", "http", "ok") === 1
+
+    metric_status_after =
+      ProxyMetrics.get_current_value("GET", "/myapi/free", "http", "http", "ok")
+
+    if metric_status_before === :undefined do
+      assert metric_status_after === 1
+    else
+      assert metric_status_after === metric_status_before + 1
+    end
   end
 
   # ---
@@ -57,14 +72,22 @@ defmodule RigInboundGateway.ApiProxy.ProxyMetricsTest do
       Response.ok!(~s<{"status":"ok"}>)
     end)
 
-    assert ProxyMetrics.get_current_value("POST", "/myapi/books", "http", "http", "ok") ===
-             :undefined
+    metric_status_before =
+      ProxyMetrics.get_current_value("POST", "/myapi/books", "http", "http", "ok")
 
     request = construct_request_with_jwt(:post, "/myapi/books")
     conn = call(Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"status\":\"ok\"}"
-    assert ProxyMetrics.get_current_value("POST", "/myapi/books", "http", "http", "ok") === 1
+
+    metric_status_after =
+      ProxyMetrics.get_current_value("POST", "/myapi/books", "http", "http", "ok")
+
+    if metric_status_before === :undefined do
+      assert metric_status_after === 1
+    else
+      assert metric_status_after === metric_status_before + 1
+    end
   end
 
   # ---

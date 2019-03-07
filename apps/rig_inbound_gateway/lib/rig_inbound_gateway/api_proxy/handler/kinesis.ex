@@ -144,7 +144,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
           conn.request_path,
           "kinesis",
           response_from,
-          "gateway_timeout"
+          "response_timeout"
         )
 
         conn

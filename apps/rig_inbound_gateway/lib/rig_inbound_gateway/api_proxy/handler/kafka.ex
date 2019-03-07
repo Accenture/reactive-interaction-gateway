@@ -175,7 +175,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
           conn.request_path,
           "kafka",
           response_from,
-          "gateway_timeout"
+          "response_timeout"
         )
 
         conn
