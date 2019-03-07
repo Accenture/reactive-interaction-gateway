@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Increased length of header value in HTTP requests to 16384. Reason is to support long tokens such as SAML.
 - Added custom metrics for "API Proxy Gateway" called: rig_proxy_requests_total. For details see metrics-details.md - partially implementing [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
-l
+
 ### Changed
 
 - Validation errors for SSE & WS connections and the subscriptions endpoint should now be a lot more helpful. Also, the welcome event (after establishing a connection) now contains the list of errors (non-breaking change). For example, when passing an invalid JWT, the connection is established nevertheless (new behaviour), but the error is communicated in the welcome event. [#54](https://github.com/Accenture/reactive-interaction-gateway/issues/54)

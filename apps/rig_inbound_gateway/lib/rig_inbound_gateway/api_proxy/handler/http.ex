@@ -38,7 +38,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
     case result do
       {:ok, res} ->
-        handle_response(conn, res, response_from, request_path)
+        handle_response(conn, res, response_from)
 
       {:error, err} ->
         Logger.warn(fn ->
@@ -49,7 +49,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
           :timeout ->
             ProxyMetrics.count_proxy_request(
               method,
-              request_path,
+              conn.request_path,
               "http",
               response_from,
               "request_timeout"
@@ -58,7 +58,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
           _ ->
             ProxyMetrics.count_proxy_request(
               method,
-              request_path,
+              conn.request_path,
               "http",
               response_from,
               "unreachable"
@@ -89,17 +89,17 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
   # ---
 
-  defp handle_response(conn, res, response_from, request_path)
+  defp handle_response(conn, res, response_from)
 
-  defp handle_response(conn, res, "http", request_path),
-    do: send_or_chunk_response(conn, res, request_path)
+  defp handle_response(conn, res, "http"),
+    do: send_or_chunk_response(conn, res)
 
-  defp handle_response(conn, _, response_from, request_path),
-    do: wait_for_response(conn, response_from, request_path)
+  defp handle_response(conn, _, response_from),
+    do: wait_for_response(conn, response_from)
 
   # ---
 
-  defp wait_for_response(conn, response_from, request_path) do
+  defp wait_for_response(conn, response_from) do
     conf = config()
 
     response_timeout =
@@ -110,7 +110,13 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
     receive do
       {:response_received, response} ->
-        ProxyMetrics.count_proxy_request(conn.method, request_path, "http", response_from, "ok")
+        ProxyMetrics.count_proxy_request(
+          conn.method,
+          conn.request_path,
+          "http",
+          response_from,
+          "ok"
+        )
 
         conn
         |> with_cors()
@@ -120,7 +126,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
       response_timeout ->
         ProxyMetrics.count_proxy_request(
           conn.method,
-          request_path,
+          conn.request_path,
           "http",
           response_from,
           "response_timeout"
@@ -208,21 +214,20 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
   # ---
 
-  @spec send_or_chunk_response(Plug.Conn.t(), HTTPoison.Response.t(), String.t()) :: Plug.Conn.t()
+  @spec send_or_chunk_response(Plug.Conn.t(), HTTPoison.Response.t()) :: Plug.Conn.t()
   defp send_or_chunk_response(
          conn,
          %HTTPoison.Response{
            headers: headers,
            status_code: status_code,
            body: body
-         },
-         request_path
+         }
        ) do
     headers = for {k, v} <- headers, do: {String.downcase(k), v}
     conn = %{conn | resp_headers: headers}
 
     # only possibility for "response_from" = "http", therefore hardcoded here
-    ProxyMetrics.count_proxy_request(conn.method, request_path, "http", "http", "ok")
+    ProxyMetrics.count_proxy_request(conn.method, conn.request_path, "http", "http", "ok")
 
     headers
     |> Map.new()
