@@ -4,7 +4,9 @@ title: Tutorial
 sidebar_label: Tutorial
 ---
 
-In this tutorial we use [HTTPie](https://httpie.org/) for HTTP requests, but of course you can also use curl or any other HTTP client. Please note that HTTPie sets the content type to `application/json` automatically, whereas for curl you need to use `-H "Content-Type: application/json"` for all but `GET` requests.
+This tutorial should show a basic usecase for RIG. A frontend (e.g. the mobile app for a chatroom service) will connect to RIG and subscribe to a certain eventtype (e.g. Messages from a chatroom channel). The backend (e.g. chatroom server) will publish the message to RIG and the RIG will do the rest.
+
+We'll fake frontend/backend using [HTTPie](https://httpie.org/) for HTTP requests, but of course you can also use curl or any other HTTP client. Please note that HTTPie sets the content type to `application/json` automatically, whereas for curl you need to use `-H "Content-Type: application/json"` for all but `GET` requests.
 
 ## 1. Start RIG
 
@@ -18,7 +20,7 @@ Reactive Interaction Gateway 2.1.0 [rig@127.0.0.1, ERTS 10.2.2, OTP 21]
 
 Note that HTTPS is not enabled by default. Please read the [RIG operator guide](rig-ops-guide.md) before running a production setup.
 
-## 2. Create a connection
+## 2. Create a connection [Frontend]
 
 Let's connect to RIG using [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events), which is our recommended approach (open standard, firewall friendly, plays nicely with HTTP/2):
 
@@ -41,22 +43,22 @@ After the connection has been established, RIG sends out a [CloudEvent](https://
 
 Please take note of the `connection_token` in the CloudEvent's `data` field - you need it in the next step.
 
-## 3. Subscribe to a topic
+## 3. Subscribe to a topic [Frontend]
 
 With the connection established, you can create _subscriptions_ - that is, you can tell RIG which events your app is interested in. RIG needs to know which connection you are referring to, so you need to use the connection token you have noted down in the last step:
 
 ```bash
 $ CONN_TOKEN="g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"
-$ SUBSCRIPTIONS='{"subscriptions":[{"eventType":"greeting"}]}'
+$ SUBSCRIPTIONS='{"subscriptions":[{"eventType":"chatroom_channel_messages"}]}'
 $ http put ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions" <<<"$SUBSCRIPTIONS"
 HTTP/1.1 204 No Content
 content-type: application/json; charset=utf-8
 ...
 ```
 
-With that you're ready to receive all "greeting" events.
+With that you're ready to receive all "chatroom_channel_messages" events.
 
-## 4. Create a new "greeting" event
+## 4. Create a new "chatroom_channel_messages" event [Backend]
 
 RIG expects to receive [CloudEvents](https://github.com/cloudevents/spec), so the following fields are required:
 
@@ -65,10 +67,10 @@ RIG expects to receive [CloudEvents](https://github.com/cloudevents/spec), so th
 - `id`: ID of the event. The semantics of this string are explicitly undefined to ease the implementation of producers. Enables deduplication.
 - `source`: This describes the event producer. Often this will include information such as the type of the event source, the organization publishing the event, the process that produced the event, and some unique identifiers. The exact syntax and semantics behind the data encoded in the URI is event producer defined.
 
-Let's send a simple `greeting` event:
+Let's send a simple `chatroom_channel_messages` event:
 
 ```bash
-$ http post :4000/_rig/v1/events specversion=0.2 type=greeting id=first-event source=tutorial
+$ http post :4000/_rig/v1/events specversion=0.2 type=chatroom_channel_messages id=first-event source=tutorial
 HTTP/1.1 202 Accepted
 content-type: application/json; charset=utf-8
 ...
@@ -77,7 +79,7 @@ content-type: application/json; charset=utf-8
     "specversion": "0.2",
     "id": "first-event",
     "time": "2018-08-21T09:11:27.614970+00:00",
-    "type": "greeting",
+    "type": "chatroom_channel_messages",
     "source": "tutorial"
 }
 
@@ -87,13 +89,15 @@ RIG responds with `202 Accepted`, followed by the CloudEvent as sent to subscrib
 
 > If there are no subscribers for a received event, the response will still be `202 Accepted` and the event will be silently dropped.
 
-## 5. The event has been delivered to our subscriber
+## 5. The event has been delivered to our subscriber [Frontend]
 
-Going back to the first terminal window you should now see your greeting event :tada:
+Going back to the first terminal window you should now see your greeting event
 
-## 6. Connect your app to RIG
+# Connect your app to RIG
 
-To connect your app to RIG, add an event listener to your frontend. See [examples/sse-demo.html](https://github.com/Accenture/reactive-interaction-gateway/blob/master/examples/sse-demo.html) for a full example. Here are the most important bits:
+In a real-world frontend app the above example to connect your app to RIG would look something like this below.
+
+See [**examples/sse-demo.html**](https://github.com/Accenture/reactive-interaction-gateway/blob/master/examples/sse-demo.html) for a full example.
 
 ```html
 <!DOCTYPE html>
