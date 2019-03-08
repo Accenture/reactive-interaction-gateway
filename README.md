@@ -68,7 +68,7 @@ See the [developer's guide](https://accenture.github.io/reactive-interaction-gat
 
 ## License
 
-The Reactive Interaction Gateway (patent pending) is licensed under the Apache License 2.0 - see
+The Reactive Interaction Gateway [(patent: granted)](https://patents.google.com/patent/US10193992B2/en) is licensed under the Apache License 2.0 - see
 [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
