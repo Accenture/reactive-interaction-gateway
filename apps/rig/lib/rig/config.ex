@@ -129,7 +129,7 @@ defmodule Rig.Config do
 
   @spec from_file(String.t()) :: {:ok, any} | {:error, reason :: any}
   defp from_file(path) do
-    %{path: path, found?: false}
+    %{found?: false, path: path}
     |> check_path_as_is()
     |> check_relative_to_priv()
     |> case do
@@ -189,8 +189,18 @@ defmodule Rig.Config do
 
   # ---
 
+  @spec resolve_path(String.t()) :: Struing.t()
   defp resolve_path(path) do
-    :code.priv_dir(:rig) |> Path.join(path)
+    %{found?: false, path: path}
+    |> check_path_as_is()
+    |> check_relative_to_priv()
+    |> case do
+      %{found?: false} ->
+        Logger.error("Could not resolve path for HTTPS file: #{path}")
+
+      %{path: path} ->
+        path
+    end
   end
 
   # ---
