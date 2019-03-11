@@ -18,17 +18,18 @@ WARNING: only use the generated certificate for testing in a closed network envi
 
 For production you should use proper HTTPS certificates instead (for that reason the Docker image comes without certificates).
 
-1. Create your own not-selfsigned certificate
+1. Create your own certificate
 2. Store it on your machine
 3. Run the docker image by mounting the files as shown here:
 
 ```bash
 $ docker run \
-  -v "$(pwd)"/cert/not-selfsigned.pem:/cert/not-selfsigned.pem \
-  -e HTTPS_CERTFILE=/cert/not-selfsigned.pem \
-  -v "$(pwd)"/cert/not-selfsigned_key.pem:/cert/not-selfsigned_key.pem \
-  -e HTTPS_KEYFILE=/cert/not-selfsigned_key.pem \
+  -v "$(pwd)"/cert/own-certificate.pem:/cert/own-certificate.pem \
+  -e HTTPS_CERTFILE=/cert/own-certificate.pem \
+  -v "$(pwd)"/cert/own-certificate_key.pem:/cert/own-certificate_key.pem \
+  -e HTTPS_KEYFILE=/cert/own-certificate_key.pem \
   -p 4000:4000 -p 4010:4010 \
+  -p 4001:4001 -p 4011:4011 \
   accenture/reactive-interaction-gateway
 ```
 
