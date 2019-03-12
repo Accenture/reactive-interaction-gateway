@@ -13,7 +13,7 @@ export class Sse {
 
     // Create SSE connection
     this.socket = new EventSource(
-      `http://localhost:7000/_rig/v1/connection/sse?token=${token}`
+      `http://localhost:7000/_rig/v1/connection/sse?jwt=${token}`
     );
 
     // Wait for RIG's reply and execute callback

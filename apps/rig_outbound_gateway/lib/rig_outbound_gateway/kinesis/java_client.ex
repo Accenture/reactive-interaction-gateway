@@ -6,10 +6,11 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
   """
   use Rig.Config, :custom_validation
   use GenServer
-  require Logger
 
-  alias Rig.EventFilter
+  alias Rig.EventStream.KinesisToFilter
   alias RigOutboundGateway.Kinesis.LogStream
+
+  require Logger
 
   @jinterface_version "1.8.1"
   @restart_delay_ms 20_000
@@ -117,8 +118,6 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
   def java_client_callback(data) do
     data[:body]
     |> Poison.decode!()
-    |> EventFilter.forward_event()
-
-    :ok
+    |> KinesisToFilter.kinesis_handler()
   end
 end

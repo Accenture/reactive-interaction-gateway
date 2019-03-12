@@ -7,6 +7,7 @@
       "faq"
     ],
     "Main Concepts": [
+      "architecture",
       "api-gateway",
       "event-subscription",
       "user-authentication"

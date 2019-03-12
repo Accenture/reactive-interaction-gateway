@@ -13,6 +13,10 @@
         "title": "API Gateway",
         "sidebar_label": "API Gateway"
       },
+      "architecture": {
+        "title": "Architecture",
+        "sidebar_label": "Architecture"
+      },
       "event-serializing": {
         "title": "Event Serializing",
         "sidebar_label": "Event Serializing"
@@ -28,6 +32,10 @@
       "intro": {
         "title": "Intro",
         "sidebar_label": "Intro"
+      },
+      "metrics-details": {
+        "title": "Metrics Details",
+        "sidebar_label": "Metrics Details"
       },
       "rig-dev-guide": {
         "title": "Developer's Guide to the Reactive Interaction Gateway",
