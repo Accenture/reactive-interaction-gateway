@@ -26,22 +26,22 @@ Following Labels are provided:
   - `HEAD`
   - `OPTIONS`
 - **path** - The path used for this request.
-- **target** - The target for this request. Grabbed from proxy parametrization. Following possible values:
+- **target** - The target for this request. Grabbed from proxy config. Following possible values:
   - `http`
   - `kafka`
   - `kinesis`
-  - `N/A` - Not available, due to missing parametrization
-- **response_from** - Where the response is provided from. Grabbed from proxy parametrization. Following possible values:
+  - `N/A` - Not applicable, e.g., the request path is not configured.
+- **response_from** - Where the response is provided from. Grabbed from proxy config. Following possible values:
   - `http`
   - `kafka`
-  - `N/A` - Not available, due to missing parametrization
+  - `N/A` - Not applicable, e.g., the request path is not configured.
 - **status** - The *internal* status for the request. Attention: this status only tracks the internal rig process status. Once forwarded we track as "ok". We expect that called services are monitored on it's own. Following possible status codes:
-  - `ok` - If forwarded successfully
-  - `bad_request` - If there are missing expected body parameters. Targets `kafka` and `kinesis` only.
-  - `not_found` - If the provided `method` and/or `path` isn't found in the proxy parametrization
-  - `unreachable` - Could not connect to the parameterized backend (e.g. offline)
-  - `request_timeout` - If service is reachable, but times out.
-  - `response_timeout` - On timeout for async response. May only occur if endpoint parameter `response_from` is set.
+  - `ok` - Forwarded successfully.
+  - `bad_request` - Missing body parameters (`kafka` and `kinesis` only).
+  - `not_found` - No configuration found for the given `method` and/or `path`.
+  - `unreachable` - The backend cannot be connected to (e.g., service is offline or domain cannot be resolved)
+  - `request_timeout` - The service is reachable but fails to deliver a response in time.
+  - `response_timeout` - The endpoint has its `response_from` parameter set and RIG times out while waiting for a response#1.
 
 ****
 ### Standard Metrics ###
