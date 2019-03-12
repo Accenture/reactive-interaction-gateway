@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Validation errors for SSE & WS connections and the subscriptions endpoint should now be a lot more helpful. Also, the welcome event (after establishing a connection) now contains the list of errors (non-breaking change). For example, when passing an invalid JWT, the connection is established nevertheless (new behaviour), but the error is communicated in the welcome event. [#54](https://github.com/Accenture/reactive-interaction-gateway/issues/54)
 - The HTTPS certificate location has been changed from two mount-locations (rig_api/priv/cert & rig_inbound_gateway/priv/cert) to just one location rig/priv/cert. This means the OPS configuration needs to be changed in order to still support HTTPS. Additionally the selfsigned dev-certificate is not longer shipped with the docker image for security reasons [#151](https://github.com/Accenture/reactive-interaction-gateway/issues/151)
+- The HTTPS certificate can now be mounted to an absolute path independent of the applications /priv directory [#182](https://github.com/Accenture/reactive-interaction-gateway/issues/182)
 
 <!-- ### Deprecated -->
 
