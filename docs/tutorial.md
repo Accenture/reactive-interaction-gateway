@@ -4,9 +4,9 @@ title: Tutorial
 sidebar_label: Tutorial
 ---
 
-This tutorial should show a basic usecase for RIG. A frontend (e.g. the mobile app for a chatroom service) will connect to RIG and subscribe to a certain eventtype (e.g. Messages from a chatroom channel). The backend (e.g. chatroom server) will publish the message to RIG and the RIG will do the rest.
+This tutorial shows a basic use case for RIG. A frontend (e.g. the mobile app for a chatroom service) connects to RIG and subscribes to a certain event type (e.g. messages from a chatroom). The backend (e.g. chatroom server) publishes the message to RIG, and RIG forwards it to the frontend.
 
-We'll fake frontend/backend using [HTTPie](https://httpie.org/) for HTTP requests, but of course you can also use curl or any other HTTP client. Please note that HTTPie sets the content type to `application/json` automatically, whereas for curl you need to use `-H "Content-Type: application/json"` for all but `GET` requests.
+We simulate frontend and backend HTTP requests using [HTTPie](https://httpie.org/) for HTTP requests, but of course you can also use curl or any other HTTP client. Please note that HTTPie sets the content type to `application/json` automatically, whereas for curl you need to use `-H "Content-Type: application/json"` for all but `GET` requests.
 
 ## 1. Start RIG
 
@@ -49,16 +49,16 @@ With the connection established, you can create _subscriptions_ - that is, you c
 
 ```bash
 $ CONN_TOKEN="g2dkAA1ub25vZGVAbm9ob3N0AAACrAAAAAAA"
-$ SUBSCRIPTIONS='{"subscriptions":[{"eventType":"chatroom_channel_messages"}]}'
+$ SUBSCRIPTIONS='{"subscriptions":[{"eventType":"chatroom_message"}]}'
 $ http put ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions" <<<"$SUBSCRIPTIONS"
 HTTP/1.1 204 No Content
 content-type: application/json; charset=utf-8
 ...
 ```
 
-With that you're ready to receive all "chatroom_channel_messages" events.
+With that you're ready to receive all "chatroom_message" events.
 
-## 4. Create a new "chatroom_channel_messages" event [Backend]
+## 4. Create a new "chatroom_message" event [Backend]
 
 RIG expects to receive [CloudEvents](https://github.com/cloudevents/spec), so the following fields are required:
 
@@ -67,10 +67,10 @@ RIG expects to receive [CloudEvents](https://github.com/cloudevents/spec), so th
 - `id`: ID of the event. The semantics of this string are explicitly undefined to ease the implementation of producers. Enables deduplication.
 - `source`: This describes the event producer. Often this will include information such as the type of the event source, the organization publishing the event, the process that produced the event, and some unique identifiers. The exact syntax and semantics behind the data encoded in the URI is event producer defined.
 
-Let's send a simple `chatroom_channel_messages` event:
+Let's send a simple `chatroom_message` event:
 
 ```bash
-$ http post :4000/_rig/v1/events specversion=0.2 type=chatroom_channel_messages id=first-event source=tutorial
+$ http post :4000/_rig/v1/events specversion=0.2 type=chatroom_message id=first-event source=tutorial
 HTTP/1.1 202 Accepted
 content-type: application/json; charset=utf-8
 ...
@@ -79,7 +79,7 @@ content-type: application/json; charset=utf-8
     "specversion": "0.2",
     "id": "first-event",
     "time": "2018-08-21T09:11:27.614970+00:00",
-    "type": "chatroom_channel_messages",
+    "type": "chatroom_message",
     "source": "tutorial"
 }
 
