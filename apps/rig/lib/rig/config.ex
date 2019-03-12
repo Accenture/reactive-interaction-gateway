@@ -94,7 +94,7 @@ defmodule Rig.Config do
 
   @spec parse_json_env(String.t()) :: {:ok, any} | {:error, :syntax_error, any}
   def parse_json_env(path_or_encoded) do
-    with {:error, reason1} <- from_file(path_or_encoded),
+    with {:error, reason1} <- decode_json_file(path_or_encoded),
          {:error, reason2} <- from_encoded(path_or_encoded) do
       {:error, :syntax_error, [reason1, reason2]}
     else
@@ -117,8 +117,8 @@ defmodule Rig.Config do
     else
       # UPDATE https_config to add priv/ folder to path
       config
-      |> update_in([:https, :certfile], &resolve_path/1)
-      |> update_in([:https, :keyfile], &resolve_path/1)
+      |> update_in([:https, :certfile], &update_https_path/1)
+      |> update_in([:https, :keyfile], &update_https_path/1)
       |> update_in([:https, :password], &String.to_charlist/1)
     end
   end
@@ -126,27 +126,6 @@ defmodule Rig.Config do
   # -------------
   # Helpers
   # -------------
-
-  @spec from_file(String.t()) :: {:ok, any} | {:error, reason :: any}
-  defp from_file(path) do
-    %{found?: false, path: path}
-    |> check_path_as_is()
-    |> check_relative_to_priv()
-    |> case do
-      %{found?: false} ->
-        {:error, :no_such_file}
-
-      %{path: path} ->
-        with {:ok, content} <- File.read(path),
-             {:ok, config} <- from_encoded(content) do
-          {:ok, config}
-        else
-          {:error, _reason} = err -> err
-        end
-    end
-  end
-
-  # ---
 
   defp check_path_as_is(%{found?: false, path: path} = ctx) when byte_size(path) > 0,
     do: if(File.exists?(path), do: %{ctx | found?: true}, else: ctx)
@@ -169,12 +148,48 @@ defmodule Rig.Config do
 
   # ---
 
+  @spec resolve_path(path) :: {:ok, path} | {:error, any} when path: String.t()
+  defp resolve_path(path) do
+    %{found?: false, path: path}
+    |> check_path_as_is()
+    |> check_relative_to_priv()
+    |> case do
+      %{found?: false} ->
+        {:error, :no_such_file}
+
+      %{path: path} ->
+        {:ok, path}
+    end
+  end
+
+  # ---
+
   @spec from_encoded(String.t()) :: {:ok, any} | {:error, Jason.DecodeError.t() | any}
   defp from_encoded(encoded) when byte_size(encoded) > 0 do
     Jason.decode(encoded)
   end
 
   defp from_encoded(_), do: {:error, :not_a_nonempty_string}
+
+  # ---
+
+  @spec decode_json_file(String.t()) :: {:ok, any} | {:error, reason :: any}
+  defp decode_json_file(path) do
+    path
+    |> resolve_path()
+    |> case do
+      {:error, err} ->
+        {:error, err}
+
+      {:ok, path} ->
+        with {:ok, content} <- File.read(path),
+             {:ok, config} <- from_encoded(content) do
+          {:ok, config}
+        else
+          {:error, _reason} = err -> err
+        end
+    end
+  end
 
   # ---
 
@@ -188,17 +203,15 @@ defmodule Rig.Config do
   end
 
   # ---
-
-  @spec resolve_path(String.t()) :: Struing.t()
-  defp resolve_path(path) do
-    %{found?: false, path: path}
-    |> check_path_as_is()
-    |> check_relative_to_priv()
+  defp update_https_path(path) do
+    path
+    |> resolve_path()
     |> case do
-      %{found?: false} ->
-        Logger.error("Could not resolve path for HTTPS file: #{path}")
+      {:error, err} ->
+        Logger.error("Could not resolve path for HTTPS environment variable with path #{path} 
+          with error #{err}")
 
-      %{path: path} ->
+      {:ok, path} ->
         path
     end
   end
