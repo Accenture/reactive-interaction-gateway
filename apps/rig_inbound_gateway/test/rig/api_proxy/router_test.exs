@@ -181,7 +181,6 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
 
     assert conn.status == 200
     assert conn.resp_body =~ "{\"status\":\"ok\"}"
-    assert get_req_header(conn, "X-Content-Type-Options") == ["nosniff"]
     assert [forwarded_header] = get_req_header(conn, "Forwarded")
     assert forwarded_header =~ ~r/for=[^;]+;by=.*/
   end

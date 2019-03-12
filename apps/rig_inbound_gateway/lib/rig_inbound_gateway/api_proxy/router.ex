@@ -100,15 +100,12 @@ defmodule RigInboundGateway.ApiProxy.Router do
     host_ip = resolve_addr(@host)
 
     forward_headers = [
-      # with nosniff we tell the browser not to actively try to set the content-type on it's own
-      # as we expect that content-type is always set
-      {"X-Content-Type-Options", "nosniff"},
       {"Forwarded", "for=#{remote_ip};by=#{host_ip}"}
     ]
 
     updated_headers =
       for(
-        {key, val} when key not in ["X-Content-Type-Options", "Forwarded"] <- conn.req_headers,
+        {key, val} when key not in ["Forwarded"] <- conn.req_headers,
         do: {key, val}
       ) ++ forward_headers
 
