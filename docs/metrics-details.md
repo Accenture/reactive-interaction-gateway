@@ -41,7 +41,7 @@ Following Labels are provided:
   - `not_found` - No configuration found for the given `method` and/or `path`.
   - `unreachable` - The backend cannot be connected to (e.g., service is offline or domain cannot be resolved)
   - `request_timeout` - The service is reachable but fails to deliver a response in time.
-  - `response_timeout` - The endpoint has its `response_from` parameter set and RIG times out while waiting for a response#1.
+  - `response_timeout` - The endpoint has its `response_from` parameter set and RIG times out while waiting for a response.
 
 ****
 ### Standard Metrics ###
