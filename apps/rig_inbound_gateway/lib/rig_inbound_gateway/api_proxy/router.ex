@@ -100,14 +100,13 @@ defmodule RigInboundGateway.ApiProxy.Router do
     host_ip = resolve_addr(@host)
 
     forward_headers = [
-      {"Forwarded", "for=#{remote_ip};by=#{host_ip}"}
+      {"forwarded", "for=#{remote_ip};by=#{host_ip}"}
     ]
 
     updated_headers =
-      for(
-        {key, val} when key not in ["Forwarded"] <- conn.req_headers,
-        do: {key, val}
-      ) ++ forward_headers
+      conn.req_headers
+      |> Enum.reject(fn {k, _} -> k === "forwarded" end)
+      |> Enum.concat(forward_headers)
 
     conn
     |> Map.put(:req_headers, updated_headers)
