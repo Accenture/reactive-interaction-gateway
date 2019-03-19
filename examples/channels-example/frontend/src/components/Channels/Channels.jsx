@@ -40,7 +40,7 @@ class Channels extends PureComponent {
   };
 
   disconnectFromChannel = () => {
-    const { type, protocols, subscriberEvent } = this.state;
+    const { type, protocols } = this.state;
     // Choose one of the imported protocol types (ws, sse), controlled by radio buttons
     const channels = protocols[type];
 
@@ -148,7 +148,7 @@ class Channels extends PureComponent {
             <button
               className={`button is-primary ${
                 status === 'ok' ? 'is-loading' : ''
-              }`}
+                }`}
               onClick={this.connectToChannel}
               disabled={status === 'ok'}
             >
