@@ -17,7 +17,8 @@
     ],
     "RIG in Production": [
       "rig-ops-guide",
-      "metrics-details"
+      "metrics-details",
+      "https"
     ],
     "Hacking the Source": [
       "rig-dev-guide"
