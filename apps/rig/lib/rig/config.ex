@@ -88,9 +88,9 @@ defmodule Rig.Config do
     end
   end
 
-  # -------------
-  # Public Interface
-  # -------------
+  # ---
+  # pub
+  # ---
 
   @spec parse_json_env(String.t()) :: {:ok, any} | {:error, :syntax_error, any}
   def parse_json_env(path_or_encoded) do
@@ -106,72 +106,29 @@ defmodule Rig.Config do
 
   @spec check_and_update_https_config(Keyword.t()) :: Keyword.t()
   def check_and_update_https_config(config) do
-    certfile = config[:https][:certfile]
+    case config[:https][:certfile] do
+      certfile when byte_size(certfile) > 0 ->
+        # Paths might be given in absolute form, relative to the CWD, or relative to the
+        # priv dir, so we "resolve" the paths for both the certfile and the keyfile:
 
-    if(certfile === "") do
-      Logger.warn("No HTTPS_CERTFILE environment variable provided. Disabling HTTPS...")
+        config
+        |> update_in([:https, :certfile], &resolve_path!/1)
+        |> update_in([:https, :keyfile], &resolve_path!/1)
+        |> update_in([:https, :password], &String.to_charlist/1)
 
-      # DISABLE HTTPS
-      config
-      |> update_in([:https], &disable_https/1)
-    else
-      # UPDATE https_config to add priv/ folder to path
-      config
-      |> update_in([:https, :certfile], &update_https_path/1)
-      |> update_in([:https, :keyfile], &update_https_path/1)
-      |> update_in([:https, :password], &String.to_charlist/1)
+      _ ->
+        Logger.info(fn ->
+          "No HTTPS_CERTFILE environment variable provided. Disabling HTTPS..."
+        end)
+
+        # Disable HTTPS:
+        put_in(config, [:https], false)
     end
   end
 
-  # -------------
-  # Helpers
-  # -------------
-
-  defp check_path_as_is(%{found?: false, path: path} = ctx) when byte_size(path) > 0,
-    do: if(File.exists?(path), do: %{ctx | found?: true}, else: ctx)
-
-  defp check_path_as_is(ctx), do: ctx
-
-  # ---
-
-  defp check_relative_to_priv(%{found?: false, path: path} = ctx) when byte_size(path) > 0 do
-    phx_app_list()
-    |> Enum.map(fn app -> :code.priv_dir(app) |> Path.join(path) end)
-    |> Enum.find(&File.exists?/1)
-    |> case do
-      nil -> ctx
-      path -> %{found?: true, path: path}
-    end
-  end
-
-  defp check_relative_to_priv(ctx), do: ctx
-
-  # ---
-
-  @spec resolve_path(path) :: {:ok, path} | {:error, any} when path: String.t()
-  defp resolve_path(path) do
-    %{found?: false, path: path}
-    |> check_path_as_is()
-    |> check_relative_to_priv()
-    |> case do
-      %{found?: false} ->
-        {:error, :no_such_file}
-
-      %{path: path} ->
-        {:ok, path}
-    end
-  end
-
-  # ---
-
-  @spec from_encoded(String.t()) :: {:ok, any} | {:error, Jason.DecodeError.t() | any}
-  defp from_encoded(encoded) when byte_size(encoded) > 0 do
-    Jason.decode(encoded)
-  end
-
-  defp from_encoded(_), do: {:error, :not_a_nonempty_string}
-
-  # ---
+  # ----
+  # priv
+  # ----
 
   @spec decode_json_file(String.t()) :: {:ok, any} | {:error, reason :: any}
   defp decode_json_file(path) do
@@ -193,6 +150,68 @@ defmodule Rig.Config do
 
   # ---
 
+  @spec resolve_path!(path) :: path when path: String.t()
+  defp resolve_path!(path) do
+    case resolve_path(path) do
+      {:ok, path} -> path
+      {:error, msg} -> raise msg
+    end
+  end
+
+  # ---
+
+  @spec resolve_path(path) :: {:ok, path} | {:error, any} when path: String.t()
+  defp resolve_path(path) do
+    %{found?: false, path: path}
+    |> check_path_as_is()
+    |> check_relative_to_priv()
+    |> case do
+      %{found?: false} ->
+        {:error, "cannot resolve path #{inspect(path)}"}
+
+      %{path: path} ->
+        {:ok, path}
+    end
+  end
+
+  # ---
+
+  defp check_path_as_is(%{found?: false, path: path} = ctx) when byte_size(path) > 0,
+    do: if(File.exists?(path), do: %{ctx | found?: true}, else: ctx)
+
+  defp check_path_as_is(ctx), do: ctx
+
+  # ---
+
+  defp check_relative_to_priv(%{found?: false, path: path} = ctx) when byte_size(path) > 0 do
+    [:rig, :rig_inbound_gateway, :rig_api]
+    |> Enum.map(&:code.priv_dir/1)
+    # If the app is not yet loaded this errors, so let's ignore that:
+    |> Enum.filter(fn
+      {:error, _} -> false
+      _ -> true
+    end)
+    |> Enum.map(fn priv_dir -> Path.join(priv_dir, path) end)
+    |> Enum.find(&File.exists?/1)
+    |> case do
+      nil -> ctx
+      path -> %{found?: true, path: path}
+    end
+  end
+
+  defp check_relative_to_priv(ctx), do: ctx
+
+  # ---
+
+  @spec from_encoded(String.t()) :: {:ok, any} | {:error, Jason.DecodeError.t() | any}
+  defp from_encoded(encoded) when byte_size(encoded) > 0 do
+    Jason.decode(encoded)
+  end
+
+  defp from_encoded(_), do: {:error, :not_a_nonempty_string}
+
+  # ---
+
   @spec parse_socket_list([String.t(), ...]) :: [{String.t(), pos_integer()}, ...]
   def parse_socket_list(socket_list) do
     socket_list
@@ -200,30 +219,5 @@ defmodule Rig.Config do
       [host, port] = for part <- String.split(broker, ":"), do: String.trim(part)
       {host, String.to_integer(port)}
     end)
-  end
-
-  # ---
-  defp update_https_path(path) do
-    path
-    |> resolve_path()
-    |> case do
-      {:error, err} ->
-        Logger.error("Could not resolve path for HTTPS environment variable with path #{path} 
-          with error #{err}")
-
-      {:ok, path} ->
-        path
-    end
-  end
-
-  # ---
-
-  defp disable_https(_) do
-    false
-  end
-
-  # ---
-  defp phx_app_list do
-    [:rig, :rig_inbound_gateway, :rig_api]
   end
 end
