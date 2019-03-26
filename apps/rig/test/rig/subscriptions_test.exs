@@ -22,18 +22,18 @@ defmodule RIG.SubscriptionsTest do
         "fullname" => %{
           "event" => %{"json_pointer" => "/data/fullname"},
           "jwt" => %{"json_pointer" => "/fullname"},
-          "stable_field_index" => 2
+          "stable_field_index" => 1
         },
         "name" => %{
           "event" => %{"json_pointer" => "/data/name"},
           "jwt" => %{"json_pointer" => "/username"},
-          "stable_field_index" => 3
+          "stable_field_index" => 2
         }
       },
       "example" => %{
         "email" => %{
           "event" => %{"json_pointer" => "/data/email"},
-          "stable_field_index" => 4
+          "stable_field_index" => 1
         }
       }
     })
