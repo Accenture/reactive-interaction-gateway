@@ -19,7 +19,7 @@ defmodule RIG.Subscriptions do
 
   # ---
 
-  @spec from_jwt_claims(claims) :: [Result.t(Subscription.t(), any)]
+  @spec from_jwt_claims(claims) :: Result.t([Subscription.t()], error :: String.t())
   def from_jwt_claims(
         claims,
         extractor_path_or_json \\ Confex.fetch_env!(:rig, :extractor_path_or_json)
@@ -32,19 +32,15 @@ defmodule RIG.Subscriptions do
 
   # ---
 
-  @spec from_token(token :: JWT.token()) :: [Result.t(Subscription.t(), any)]
+  @spec from_token(token :: JWT.token()) :: Result.t([Subscription.t()], error :: String.t())
   def from_token(token)
 
-  def from_token(nil), do: []
-  def from_token(""), do: []
+  def from_token(nil), do: Result.ok([])
+  def from_token(""), do: Result.ok([])
 
   def from_token(token) do
     token
     |> JWT.parse_token()
-    |> Result.map(&from_jwt_claims/1)
-    |> case do
-      {:ok, subscription_results} -> subscription_results
-      {:error, jwt_error} -> [{:error, "JWT: #{jwt_error}"}]
-    end
+    |> Result.and_then(&from_jwt_claims/1)
   end
 end

@@ -1,163 +1,146 @@
 defmodule RigInboundGatewayWeb.V1.SSE do
   @moduledoc """
-  Create a Server-Sent Events connection and wait for events/messages.
-  """
-  require Logger
-  use Rig.Config, [:cors]
+  Cowboy WebSocket handler.
 
-  use RigInboundGatewayWeb, :controller
+  As soon as Phoenix pulls in Cowboy 2 this will have to be rewritten using the
+  :cowboy_websocket behaviour.
+  """
+
+  require Logger
+
+  alias Jason
+  alias ServerSentEvent
 
   alias Result
-  alias RIG.Subscriptions
 
   alias Rig.EventFilter
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
-  alias RigInboundGateway.Subscriptions, as: RigInboundGatewaySubscriptions
-  alias ServerSentEvent
+  alias RigInboundGatewayWeb.ConnectionInit
 
-  defmodule ConnectionClosed do
-    defexception message: "connection closed"
-  end
+  @behaviour :cowboy_loop
 
-  # As recommended at https://html.spec.whatwg.org/multipage/server-sent-events.html#authoring-notes
   @heartbeat_interval_ms 15_000
   @subscription_refresh_interval_ms 60_000
-  @initial_state %{
-    subscriptions: []
-  }
 
-  @doc "Plug action to create a new SSE connection and wait for messages."
-  def create_and_attach(%{method: "GET"} = conn, _params) do
-    conn
-    |> with_allow_origin()
-    |> with_chunked_transfer()
-    |> do_create_and_attach()
-  end
+  # ---
 
-  defp do_create_and_attach(conn) do
-    jwt_subscription_results =
-      conn.query_params
-      |> Map.get("jwt")
-      |> Subscriptions.from_token()
+  @impl :cowboy_loop
+  def init(req, :ok = state) do
+    query_params = req |> :cowboy_req.parse_qs() |> Enum.into(%{})
 
-    manual_subscription_results =
-      conn.query_params
-      |> Map.get("subscriptions", "[]")
-      |> Subscriptions.from_json()
+    on_success = fn subscriptions ->
+      # Tell the client the request is good and the response is chunked:
+      req = :cowboy_req.stream_reply(200, req)
 
-    all_subscriptions =
-      (Result.filter_and_unwrap(jwt_subscription_results) ++
-         Result.filter_and_unwrap(manual_subscription_results))
-      |> Enum.uniq()
+      # Say hello to the client:
+      Events.welcome_event()
+      |> serialize()
+      |> :cowboy_req.stream_body(:nofin, req)
 
-    RigInboundGatewaySubscriptions.check_and_forward_subscriptions(self(), all_subscriptions)
-
-    # Schedule the first subscription refresh:
-    Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
-
-    all_errors =
-      jwt_subscription_results
-      |> Result.filter_and_unwrap_err()
-      |> Enum.concat(manual_subscription_results |> Result.filter_and_unwrap_err())
-
-    conn
-    |> send_chunk(Events.welcome_event(all_errors))
-    |> wait_for_events()
-  rescue
-    ex in ConnectionClosed ->
-      Logger.warn(inspect(ex))
-      conn
-  end
-
-  defp with_allow_origin(conn) do
-    %{cors: origins} = config()
-    put_resp_header(conn, "access-control-allow-origin", origins)
-  end
-
-  defp with_chunked_transfer(conn) do
-    conn
-    |> merge_resp_headers([
-      {"content-type", "text/event-stream"},
-      {"cache-control", "no-cache"}
-    ])
-    |> send_chunked(_status = 200)
-  end
-
-  defp wait_for_events(conn, state \\ @initial_state, next_heartbeat \\ nil) do
-    next_heartbeat =
-      next_heartbeat || Timex.now() |> Timex.shift(milliseconds: @heartbeat_interval_ms)
-
-    heartbeat_remaining_ms =
-      next_heartbeat
-      |> Timex.diff(Timex.now(), :milliseconds)
-      |> max(0)
-
-    receive do
-      # Cloud Events are forwarded to the client:
-      {:cloud_event, event} ->
-        Logger.debug(fn -> inspect(event) end)
-
-        conn
-        # Forward the event:
-        |> send_chunk(event)
-        # Keep the connection open:
-        |> wait_for_events(state, next_heartbeat)
-
-      # (Re-)Set subscriptions for this connection:
-      {:set_subscriptions, subscriptions} ->
-        Logger.debug(fn -> inspect(subscriptions) end)
-        # Trigger immediate refresh:
-        EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
-        # Replace current subscriptions:
-        state = Map.put(state, :subscriptions, subscriptions)
-
-        conn
-        # Notify the client:
-        |> send_chunk(Events.subscriptions_set(subscriptions))
-        # Keep the connection open:
-        |> wait_for_events(state, next_heartbeat)
-
-      # Subscriptions need to be refreshed periodically:
-      :refresh_subscriptions ->
-        EventFilter.refresh_subscriptions(state.subscriptions, [])
-        Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
-        # Keep the connection open:
-        wait_for_events(conn, state, next_heartbeat)
-
-      # In case the connection belongs to a session and that session is killed,
-      # exit the loop and close the connection:
-      {:session_killed, group} ->
-        Logger.info("session killed: #{inspect(group)}")
-        send_chunk(conn, %ServerSentEvent{comments: ["Session killed."]})
-    after
-      heartbeat_remaining_ms ->
-        # If the connection is down, the (second) heartbeat will trigger ConnectionClosed
-        conn
-        |> send_chunk(:heartbeat)
-        |> wait_for_events(state)
+      # Enter the loop and wait for cloud events to forward to the client:
+      state = %{subscriptions: subscriptions}
+      {:cowboy_loop, req, state, :hibernate}
     end
+
+    on_error = fn reason ->
+      req = :cowboy_req.reply(400, %{}, reason, req)
+      {:stop, req, state}
+    end
+
+    ConnectionInit.set_up(
+      "SSE",
+      query_params,
+      on_success,
+      on_error,
+      @heartbeat_interval_ms,
+      @subscription_refresh_interval_ms
+    )
   end
 
-  defp send_chunk(conn, :heartbeat) do
-    send_chunk(conn, %ServerSentEvent{comments: ["heartbeat"]})
+  # ---
+
+  @impl :cowboy_loop
+  def info(:heartbeat, req, state) do
+    # We send a heartbeat now:
+    :heartbeat
+    |> serialize()
+    |> :cowboy_req.stream_body(:nofin, req)
+
+    # And schedule the next one:
+    Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
+
+    {:ok, req, state, :hibernate}
   end
 
-  defp send_chunk(conn, %CloudEvent{json: json} = event) do
+  @impl :cowboy_loop
+  def info(%CloudEvent{} = event, req, state) do
+    Logger.debug(fn -> inspect(event) end)
+
+    # Forward the event to the client:
+    event
+    |> serialize()
+    |> :cowboy_req.stream_body(:nofin, req)
+
+    {:ok, req, state, :hibernate}
+  end
+
+  @impl :cowboy_loop
+  def info({:set_subscriptions, subscriptions}, req, state) do
+    Logger.debug(fn -> inspect(subscriptions) end)
+
+    # Trigger immediate refresh:
+    EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
+
+    # Replace current subscriptions:
+    state = Map.put(state, :subscriptions, subscriptions)
+
+    # Notify the client:
+    Events.subscriptions_set(subscriptions)
+    |> serialize()
+    |> :cowboy_req.stream_body(:nofin, req)
+
+    {:ok, req, state, :hibernate}
+  end
+
+  @impl :cowboy_loop
+  def info(:refresh_subscriptions, req, state) do
+    EventFilter.refresh_subscriptions(state.subscriptions, [])
+    Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
+    {:ok, req, state, :hibernate}
+  end
+
+  @impl :cowboy_loop
+  def info({:session_killed, group}, req, state) do
+    Logger.info("session killed: #{inspect(group)}")
+
+    # We tell the client:
+    :session_killed
+    |> serialize()
+    |> :cowboy_req.stream_body(:nofin, req)
+
+    # And close the connection:
+    {:stop, req, state}
+  end
+
+  # ---
+
+  defp serialize(:heartbeat) do
+    %ServerSentEvent{comments: ["heartbeat"]}
+    |> ServerSentEvent.serialize()
+  end
+
+  defp serialize(:session_killed) do
+    %ServerSentEvent{comments: ["Session killed."]}
+    |> ServerSentEvent.serialize()
+  end
+
+  defp serialize(%CloudEvent{json: json} = event) do
     event_id = CloudEvent.id!(event)
     event_type = CloudEvent.type!(event)
-    server_sent_event = ServerSentEvent.new(json, id: event_id, type: event_type)
-    send_chunk(conn, server_sent_event)
-  end
 
-  defp send_chunk(conn, %ServerSentEvent{} = event) do
-    send_chunk(conn, ServerSentEvent.serialize(event))
-  end
-
-  defp send_chunk(conn, chunk) when is_binary(chunk) do
-    case Plug.Conn.chunk(conn, chunk) do
-      {:ok, conn} -> conn
-      {:error, :closed} -> raise ConnectionClosed
-    end
+    json
+    |> ServerSentEvent.new(id: event_id, type: event_type)
+    |> ServerSentEvent.serialize()
   end
 end

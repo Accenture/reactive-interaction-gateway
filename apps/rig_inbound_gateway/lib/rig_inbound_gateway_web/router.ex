@@ -16,7 +16,8 @@ defmodule RigInboundGatewayWeb.Router do
         options(subscription_url, SubscriptionController, :handle_preflight)
         put(subscription_url, SubscriptionController, :set_subscriptions)
 
-        get("/", SSE, :create_and_attach)
+        # The SSE handler is implemented using Cowboy's loop handler behaviour and set
+        # up using the Cowboy dispatch configuration; see the `config.exs` file.
       end
 
       scope "/connection/ws" do

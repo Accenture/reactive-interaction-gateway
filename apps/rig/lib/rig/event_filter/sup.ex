@@ -137,9 +137,10 @@ defmodule Rig.EventFilter.Sup do
       |> reload_filter_config(filter_config)
 
       Logger.debug(fn ->
-        case filter_config do
-          %{} -> "Extractor config for event type #{event_type} has been removed."
-          _ -> "Extractor config for event type #{event_type} has been updated."
+        if filter_config == %{} do
+          "Extractor config for event type #{event_type} has been removed."
+        else
+          "Extractor config for event type #{event_type} has been updated."
         end
       end)
     end
