@@ -21,10 +21,13 @@ defmodule RIG.Subscriptions do
   alias __MODULE__.Parser
 
   @type claims :: %{optional(String.t()) => String.t()}
+  @type jwt_conf :: %{alg: String.t(), key: String.t()}
+
+  @jwt_conf Confex.fetch_env!(:rig, :jwt_conf)
 
   # ---
 
-  @spec from_json(json :: String.t() | nil) :: Result.t([Subscription.t()], error :: String.t())
+  @spec from_json(json :: String.t() | nil) :: Result.t([Subscription.t()], %Error{})
   def from_json(json) do
     json
     |> Parser.JSON.from_json()
@@ -33,7 +36,7 @@ defmodule RIG.Subscriptions do
 
   # ---
 
-  @spec from_jwt_claims(claims) :: Result.t([Subscription.t()], error :: String.t())
+  @spec from_jwt_claims(claims) :: Result.t([Subscription.t()], %Error{})
   def from_jwt_claims(
         claims,
         extractor_path_or_json \\ Confex.fetch_env!(:rig, :extractor_path_or_json)
@@ -48,15 +51,15 @@ defmodule RIG.Subscriptions do
 
   # ---
 
-  @spec from_token(token :: JWT.token()) :: Result.t([Subscription.t()], error :: String.t())
-  def from_token(token)
+  @spec from_token(token :: JWT.token(), jwt_conf) :: Result.t([Subscription.t()], %Error{})
+  def from_token(token, jwt_conf \\ @jwt_conf)
 
-  def from_token(nil), do: Result.ok([])
-  def from_token(""), do: Result.ok([])
+  def from_token(nil, _jwt_conf), do: Result.ok([])
+  def from_token("", _jwt_conf), do: Result.ok([])
 
-  def from_token(token) do
+  def from_token(token, jwt_conf) do
     token
-    |> JWT.parse_token()
+    |> JWT.parse_token(jwt_conf)
     |> Result.map_err(&%Error{cause: &1})
     |> Result.and_then(&from_jwt_claims/1)
   end

@@ -8,6 +8,7 @@
 
 <body>
   <form onsubmit="sendGreeting(); return false;">
+    <input type="text" id="name" placeholder="Your name here" autofocus>
     <input type="text" id="greeting" placeholder="Your greeting here" autofocus>
     <input type="submit">
   </form>
@@ -36,9 +37,12 @@
     }
 
     function sendGreeting() {
-      const input = document.getElementById("greeting")
-      const greeting = input.value
-      input.value = ""
+      const inputGreeting = document.getElementById("greeting")
+      const inputName = document.getElementById("name")
+      const greeting = inputGreeting.value
+      const name = inputName.value
+      inputGreeting.value = ""
+      inputName.value = ""
       return fetch(`${baseUrl}/events`, {
         method: "POST",
         mode: "cors",
@@ -53,7 +57,8 @@
           source: "sse-demo-ui",
           contentType: "text/plain",
           data: {
-            name: greeting
+            name,
+            greeting
           }
         })
       })
@@ -81,7 +86,7 @@
               "eventType": eventType,
               "oneOf": [
                 {
-                  "name": "yolo"
+                  "name": "john"
                 }
               ]
             }
@@ -107,7 +112,7 @@
      *   "exp": 4103258143
      * }
      */
-    const jwt = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZnVsbG5hbWUiOiJKb2huIERvZSIsInVzZXJuYW1lIjoiam9obi5kb2UiLCJpYXQiOjQxMDMyNTgxNDMsImV4cCI6NDEwMzI1ODE0M30.3ziftuo1JbXed7XSFJTcrdzOewSu7Jos9Vljk9dOTYI";
+    const jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZnVsbG5hbWUiOiJKb2huIERvZSIsInVzZXJuYW1lIjoiam9obi5kb2UiLCJpYXQiOjQxMDMyNTgxNDMsImV4cCI6NDEwMzI1ODE0M30.3ziftuo1JbXed7XSFJTcrdzOewSu7Jos9Vljk9dOTYI";
     const source = new WebSocket(`${wsUrl}/connection/ws?jwt=${jwt}`)
 
     source.onopen = (e) => console.log("open", e)

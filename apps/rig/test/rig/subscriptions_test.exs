@@ -1,11 +1,11 @@
-defmodule RigInboundGateway.ImplicitSubscriptions.JwtTest do
+defmodule RIG.SubscriptionsTest do
   @moduledoc false
   use ExUnit.Case, async: false
 
   import Joken
 
+  alias RIG.Subscriptions
   alias RigInboundGateway.ExtractorConfig
-  alias RigInboundGateway.ImplicitSubscriptions.Jwt
 
   @jwt_secret_key "mysecret"
 
@@ -27,7 +27,7 @@ defmodule RigInboundGateway.ImplicitSubscriptions.JwtTest do
         "name" => %{
           "event" => %{"json_pointer" => "/data/name"},
           "jwt" => %{"json_pointer" => "/username"},
-          "stable_field_index" => 1
+          "stable_field_index" => 2
         }
       },
       "example" => %{
@@ -43,32 +43,33 @@ defmodule RigInboundGateway.ImplicitSubscriptions.JwtTest do
     :ok
   end
 
-  test "should return empty array when no JWT present in headers" do
-    assert Jwt.infer_subscriptions([]) == []
+  test "A token may be empty." do
+    assert {:ok, []} = Subscriptions.from_token("")
+    assert {:ok, []} = Subscriptions.from_token(nil)
   end
 
   test "should return array with constraints mapped to events when JWT present" do
     jwt = generate_jwt()
 
-    assert Jwt.infer_subscriptions([jwt]) == [
-             %{"eventType" => "event_one", "oneOf" => [%{"name" => "john"}]},
-             %{
-               "eventType" => "event_two",
-               "oneOf" => [%{"fullname" => "John Doe"}, %{"name" => "john"}]
-             }
-           ]
+    assert Subscriptions.from_token(jwt, %{key: "mysecret", alg: "HS256"}) ==
+             {:ok,
+              [
+                %Rig.Subscription{
+                  constraints: [%{"name" => "john"}],
+                  event_type: "event_one"
+                },
+                %Rig.Subscription{
+                  constraints: [%{"fullname" => "John Doe", "name" => "john"}],
+                  event_type: "event_two"
+                }
+              ]}
   end
 
-  test "should return array with constraints mapped to events when JWT present with Bearer schema" do
+  test "should return error when JWT is using Bearer" do
     jwt = "Bearer " <> generate_jwt()
 
-    assert Jwt.infer_subscriptions([jwt]) == [
-             %{"eventType" => "event_one", "oneOf" => [%{"name" => "john"}]},
-             %{
-               "eventType" => "event_two",
-               "oneOf" => [%{"fullname" => "John Doe"}, %{"name" => "john"}]
-             }
-           ]
+    assert Subscriptions.from_token(jwt) ==
+             {:error, %Subscriptions.Error{cause: "Invalid signature"}}
   end
 
   defp generate_jwt do

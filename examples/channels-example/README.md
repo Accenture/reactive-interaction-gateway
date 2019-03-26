@@ -36,17 +36,19 @@ For RIG we could use default configuration values, but where's fun in that. Let'
 ```sh
 # Description of environment variables
 
+# KAFKA_BROKERS => host for Kafka broker, setting this will automatically turn on Kafka handlers in RIG
 # KAFKA_SOURCE_TOPICS => Name of Kafka topic to which consumer will connect, by default rig
 # JWT_SECRET_KEY => Secret key by which JWTs are signed, by default empty string
-# API_PORT => Port at which we want to expose RIG's internal APIs, by default 4010
+# API_HTTP_PORT => Port at which we want to expose RIG's internal APIs, by default 4010
 # INBOUND_PORT => Port at which we want to expose RIG's proxy and websocket/sse communication, by default 4000
 # EXTRACTORS => sets constraints for given subscriptions - based on this RIG can use private event communication and decide where to route events
 
 JWT_SECRET_KEY=mysecret \
+KAFKA_BROKERS=localhost:9092 \
 KAFKA_SOURCE_TOPICS=example \
-API_PORT=7010 \
+API_HTTP_PORT=7010 \
 INBOUND_PORT=7000 \
-EXTRACTORS={"message":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}}} \
+EXTRACTORS='{"message":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}}}' \
 mix phx.server
 ```
 
