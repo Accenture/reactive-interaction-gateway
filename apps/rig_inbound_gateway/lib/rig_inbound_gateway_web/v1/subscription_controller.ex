@@ -109,10 +109,10 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
       send(socket_pid, {:set_subscriptions, subscriptions})
       send_resp(conn, :no_content, "")
     else
-      {:error, error} ->
+      {:error, error} when byte_size(error) > 0 ->
         conn
         |> put_status(:bad_request)
-        |> text("cannot accept subscription request: #{inspect(error)}")
+        |> text("cannot accept subscription request: #{error}")
     end
   end
 
@@ -128,11 +128,14 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   defp get_all_claims(headers) do
     headers
     |> JWT.parse_http_header()
-    |> Result.list_to_result(fn errors ->
-      errors = errors |> Enum.map(&inspect/1) |> Enum.join("; ")
-      "invalid authorization header: #{errors}"
+    |> Enum.reduce(%{}, fn
+      {:ok, claims}, acc -> Map.merge(acc, claims)
+      {:error, error}, _acc -> throw(error)
     end)
-    |> Result.map(fn claims_list -> Enum.reduce(claims_list, %{}, &Map.merge/2) end)
+    |> Result.ok()
+  catch
+    %JWT.DecodeError{} = error ->
+      Result.err("invalid authorization header: #{Exception.message(error)}")
   end
 
   # ---
