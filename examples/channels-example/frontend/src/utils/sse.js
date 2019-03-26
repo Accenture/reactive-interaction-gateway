@@ -21,7 +21,11 @@ export class Sse {
       const cloudEvent = JSON.parse(e.data);
       const payload = cloudEvent.data;
       const connectionToken = payload['connection_token'];
-      this.createSubscription(connectionToken, subscriberEvent, token);
+      // we don't want to subscribe to inferred event, otherwise we get 2 subscriptions
+      if (subscriberEvent !== 'message') {
+        this.createSubscription(connectionToken, subscriberEvent, token);
+      }
+
       cb({ status: 'ok', response: 'connection established' });
     });
 
@@ -36,7 +40,7 @@ export class Sse {
         mode: 'cors',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          Authorization: token
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           subscriptions: [{ eventType: subscriberEvent }]

@@ -13,6 +13,8 @@ defmodule RIG.Subscriptions do
 
   @type claims :: %{optional(String.t()) => String.t()}
 
+  @jwt_conf Confex.fetch_env!(:rig, :jwt_conf)
+
   # ---
 
   defdelegate from_json(json), to: Parser.JSON
@@ -33,14 +35,14 @@ defmodule RIG.Subscriptions do
   # ---
 
   @spec from_token(token :: JWT.token()) :: [Result.t(Subscription.t(), any)]
-  def from_token(token)
+  def from_token(token, jwt_conf \\ @jwt_conf)
 
-  def from_token(nil), do: []
-  def from_token(""), do: []
+  def from_token(nil, _jwt_conf), do: []
+  def from_token("", _jwt_conf), do: []
 
-  def from_token(token) do
+  def from_token(token, jwt_conf) do
     token
-    |> JWT.parse_token()
+    |> JWT.parse_token(jwt_conf)
     |> Result.map(&from_jwt_claims/1)
     |> case do
       {:ok, subscription_results} -> subscription_results
