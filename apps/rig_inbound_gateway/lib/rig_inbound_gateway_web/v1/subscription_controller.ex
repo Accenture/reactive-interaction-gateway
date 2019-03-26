@@ -137,12 +137,12 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
   # ---
 
-  defp parse_subscriptions(subscriptions) do
+  defp parse_subscriptions(subscriptions) when is_list(subscriptions) do
     subscriptions
-    |> Enum.map(&Subscription.new/1)
-    |> Result.list_to_result(fn errors ->
-      errors = errors |> Enum.map(&inspect/1) |> Enum.join("; ")
-      "could not parse given subscriptions: #{errors}"
-    end)
+    |> Enum.map(&Subscription.new!/1)
+    |> Result.ok()
+  rescue
+    error in Subscription.ValidationError ->
+      Result.err("could not parse given subscriptions: #{Exception.message(error)}")
   end
 end

@@ -45,8 +45,8 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
 
       on_success.(subscriptions)
     else
-      {:error, reason} ->
-        on_error.(reason)
+      {:error, %Subscriptions.Error{} = e} ->
+        on_error.(Exception.message(e))
     end
   end
 end

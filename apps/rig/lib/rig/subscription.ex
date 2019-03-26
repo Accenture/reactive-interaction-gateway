@@ -18,9 +18,11 @@ defmodule Rig.Subscription do
   ```
 
   """
+  defmodule ValidationError do
+    defexception [:error, :params]
 
-  defmodule ValidationFailed do
-    defexception [:message]
+    def message(%__MODULE__{error: error, params: params}),
+      do: "invalid subscription: #{error} when parsing #{inspect(params)}"
   end
 
   @type constraints :: [%{required(String.t()) => String.t()}]
@@ -43,7 +45,9 @@ defmodule Rig.Subscription do
     end
   end
 
-  @spec new(map) :: {:ok, t} | {:error, any}
+  # ---
+
+  @spec new(any) :: {:ok, t} | {:error, %ValidationError{}}
   def new(%{} = params) do
     params = %{
       event_type: event_type(params),
@@ -53,26 +57,29 @@ defmodule Rig.Subscription do
     subscription = struct!(__MODULE__, params)
     validate(subscription)
     {:ok, subscription}
-  rescue
-    err in ValidationFailed ->
-      {:error, "subscription malformed in #{inspect(params)}: #{err.message}"}
-
-    err ->
-      {:error, [error: err, params: params]}
+  catch
+    {:error, reason} when byte_size(reason) > 0 ->
+      {:error, %ValidationError{error: reason, params: params}}
   end
 
-  @spec new!(map) :: t
-  def new!(%{} = params) do
+  def new(params), do: {:error, %ValidationError{error: "not a map", params: params}}
+
+  # ---
+
+  @spec new!(any) :: t
+  def new!(params) do
     case new(params) do
       {:ok, sub} -> sub
       {:error, err} -> raise err
     end
   end
 
+  # ---
+
   defp event_type(%{event_type: event_type}), do: event_type
   defp event_type(%{"event_type" => event_type}), do: event_type
   defp event_type(%{"eventType" => event_type}), do: event_type
-  defp event_type(_), do: raise("event-type not found")
+  defp event_type(_), do: throw({:error, "event-type not found"})
 
   defp constraints(%{constraints: constraints}), do: constraints
   defp constraints(%{"constraints" => constraints}), do: constraints
@@ -91,7 +98,7 @@ defmodule Rig.Subscription do
   # ---
 
   defp validate_event_type(type) when byte_size(type) > 0, do: :ok
-  defp validate_event_type(_), do: raise(ValidationFailed, "event-type empty")
+  defp validate_event_type(_), do: throw({:error, "event-type empty"})
 
   # ---
 
@@ -100,21 +107,20 @@ defmodule Rig.Subscription do
   end
 
   defp validate_constraints(_),
-    do: raise(ValidationFailed, "constraints expected to be a list of disjunctive clauses")
+    do: throw({:error, "constraints expected to be a list of disjunctive clauses"})
 
   # ---
 
-  defp validate_constraint(conjunction) when not is_map(conjunction) do
-    raise ValidationFailed,
-          "a disjunctive clause expected to be a conjunction represented by a map"
-  end
+  defp validate_constraint(conjunction) when not is_map(conjunction),
+    do: throw({:error, "a disjunctive clause expected to be a conjunction represented by a map"})
 
   defp validate_constraint(conjunction) do
     if not Enum.all?(conjunction, fn {k, _} -> is_nonempty_string(k) end) do
-      raise ValidationFailed,
-            "conjunctive clauses expected to be a map with nonempty strings as keys"
+      throw({:error, "conjunctive clauses expected to be a map with nonempty strings as keys"})
     end
   end
+
+  # ---
 
   defp is_nonempty_string(s) when byte_size(s) > 0, do: true
   defp is_nonempty_string(_), do: false
