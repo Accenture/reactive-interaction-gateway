@@ -4,10 +4,13 @@ defmodule RIG.SubscriptionsTest do
 
   import Joken
 
+  alias RIG.JWT
   alias RIG.Subscriptions
   alias RigInboundGateway.ExtractorConfig
 
-  @jwt_secret_key "mysecret"
+  @jwt_secret_key "my-super-secret-for-this-test"
+  @jwt_alg "HS256"
+  @jwt_conf %{alg: @jwt_alg, key: @jwt_secret_key}
 
   setup do
     ExtractorConfig.set(%{
@@ -51,7 +54,7 @@ defmodule RIG.SubscriptionsTest do
   test "should return array with constraints mapped to events when JWT present" do
     jwt = generate_jwt()
 
-    assert Subscriptions.from_token(jwt, %{key: "mysecret", alg: "HS256"}) ==
+    assert Subscriptions.from_token(jwt, @jwt_conf) ==
              {:ok,
               [
                 %Rig.Subscription{
@@ -66,10 +69,14 @@ defmodule RIG.SubscriptionsTest do
   end
 
   test "should return error when JWT is using Bearer" do
-    jwt = "Bearer " <> generate_jwt()
+    jwt = generate_jwt()
 
-    assert Subscriptions.from_token(jwt) ==
-             {:error, %Subscriptions.Error{cause: "Invalid signature"}}
+    # Works as-is:
+    assert {:ok, _} = Subscriptions.from_token(jwt, @jwt_conf)
+
+    # Doesn't work with "Bearer" prepended:
+    assert {:error, %Subscriptions.Error{cause: %JWT.DecodeError{}}} =
+             Subscriptions.from_token("Bearer #{jwt}", @jwt_conf)
   end
 
   defp generate_jwt do
