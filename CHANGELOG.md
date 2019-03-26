@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- When using the proxy, RIG will now add additional forward header "Forwarded" [#113](https://github.com/Accenture/reactive-interaction-gateway/issues/113)
+When using the proxy, RIG will now add an additional [`Forwarded` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded). [#113](https://github.com/Accenture/reactive-interaction-gateway/issues/113)
 - Increased length of header value in HTTP requests to 16384. Reason is to support long tokens such as SAML.
 
 ### Changed
