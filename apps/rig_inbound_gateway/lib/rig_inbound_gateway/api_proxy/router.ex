@@ -18,6 +18,8 @@ defmodule RigInboundGateway.ApiProxy.Router do
   alias RigInboundGateway.ApiProxy.Serializer
   alias RigInboundGateway.Proxy
 
+  @host Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:url][:host]
+
   plug(:match)
   plug(:dispatch)
 
@@ -58,7 +60,9 @@ defmodule RigInboundGateway.ApiProxy.Router do
           "kinesis" -> KinesisHandler
         end
 
-      handler.handle_http_request(conn, api, endpoint, request_path)
+      conn
+      |> add_forward_headers()
+      |> handler.handle_http_request(api, endpoint, request_path)
     else
       {:error, :authentication_failed} -> send_resp(conn, :unauthorized, "Authentication failed.")
     end
@@ -88,4 +92,36 @@ defmodule RigInboundGateway.ApiProxy.Router do
   end
 
   defp transform_req_headers(conn, _, _), do: conn
+
+  # ---
+
+  def add_forward_headers(conn) do
+    remote_ip = resolve_addr(conn.remote_ip)
+    host_ip = resolve_addr(@host)
+
+    forward_headers = [
+      {"forwarded", "for=#{remote_ip};by=#{host_ip}"}
+    ]
+
+    updated_headers =
+      conn.req_headers
+      |> Enum.reject(fn {k, _} -> k === "forwarded" end)
+      |> Enum.concat(forward_headers)
+
+    conn
+    |> Map.put(:req_headers, updated_headers)
+  end
+
+  # ---
+
+  defp resolve_addr(ip_addr_or_hostname)
+
+  defp resolve_addr(ip_addr) when is_tuple(ip_addr) do
+    ip_addr |> :inet.ntoa() |> to_string()
+  end
+
+  defp resolve_addr(hostname) when byte_size(hostname) > 0 do
+    {:ok, ip_addr} = hostname |> String.to_charlist() |> :inet.getaddr(:inet)
+    resolve_addr(ip_addr)
+  end
 end
