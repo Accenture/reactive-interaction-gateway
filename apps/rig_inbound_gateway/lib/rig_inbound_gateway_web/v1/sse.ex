@@ -5,8 +5,9 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   As soon as Phoenix pulls in Cowboy 2 this will have to be rewritten using the
   :cowboy_websocket behaviour.
   """
+  @behaviour :cowboy_loop
 
-  require Logger
+  use Rig.Config, [:cors]
 
   alias Jason
   alias ServerSentEvent
@@ -18,7 +19,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   alias RigInboundGateway.Events
   alias RigInboundGatewayWeb.ConnectionInit
 
-  @behaviour :cowboy_loop
+  require Logger
 
   @heartbeat_interval_ms 15_000
   @subscription_refresh_interval_ms 60_000
@@ -28,15 +29,25 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   @impl :cowboy_loop
   def init(req, :ok = state) do
     query_params = req |> :cowboy_req.parse_qs() |> Enum.into(%{})
+    conf = config()
 
     on_success = fn subscriptions ->
       # Tell the client the request is good and the response is chunked:
-      req = :cowboy_req.stream_reply(200, req)
+      req =
+        :cowboy_req.stream_reply(
+          200,
+          %{
+            "content-type" => "text/event-stream; charset=utf-8",
+            "cache-control" => "no-cache",
+            "access-control-allow-origin" => conf.cors
+          },
+          req
+        )
 
       # Say hello to the client:
       Events.welcome_event()
-      |> serialize()
-      |> :cowboy_req.stream_body(:nofin, req)
+      |> to_server_sent_event()
+      |> :cowboy_req.stream_events(:nofin, req)
 
       # Enter the loop and wait for cloud events to forward to the client:
       state = %{subscriptions: subscriptions}
@@ -64,8 +75,8 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   def info(:heartbeat, req, state) do
     # We send a heartbeat now:
     :heartbeat
-    |> serialize()
-    |> :cowboy_req.stream_body(:nofin, req)
+    |> to_server_sent_event()
+    |> :cowboy_req.stream_events(:nofin, req)
 
     # And schedule the next one:
     Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
@@ -75,19 +86,19 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   @impl :cowboy_loop
   def info(%CloudEvent{} = event, req, state) do
-    Logger.debug(fn -> inspect(event) end)
+    Logger.debug(fn -> "event: " <> inspect(event) end)
 
     # Forward the event to the client:
     event
-    |> serialize()
-    |> :cowboy_req.stream_body(:nofin, req)
+    |> to_server_sent_event()
+    |> :cowboy_req.stream_events(:nofin, req)
 
     {:ok, req, state, :hibernate}
   end
 
   @impl :cowboy_loop
   def info({:set_subscriptions, subscriptions}, req, state) do
-    Logger.debug(fn -> inspect(subscriptions) end)
+    Logger.debug(fn -> "subscriptions: " <> inspect(subscriptions) end)
 
     # Trigger immediate refresh:
     EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
@@ -97,8 +108,8 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
     # Notify the client:
     Events.subscriptions_set(subscriptions)
-    |> serialize()
-    |> :cowboy_req.stream_body(:nofin, req)
+    |> to_server_sent_event()
+    |> :cowboy_req.stream_events(:nofin, req)
 
     {:ok, req, state, :hibernate}
   end
@@ -116,8 +127,8 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
     # We tell the client:
     :session_killed
-    |> serialize()
-    |> :cowboy_req.stream_body(:nofin, req)
+    |> to_server_sent_event()
+    |> :cowboy_req.stream_events(:nofin, req)
 
     # And close the connection:
     {:stop, req, state}
@@ -125,22 +136,12 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   # ---
 
-  defp serialize(:heartbeat) do
-    %ServerSentEvent{comments: ["heartbeat"]}
-    |> ServerSentEvent.serialize()
-  end
+  defp to_server_sent_event(:heartbeat), do: %{comment: "heartbeat"}
+  defp to_server_sent_event(:session_killed), do: %{comment: "Session killed."}
 
-  defp serialize(:session_killed) do
-    %ServerSentEvent{comments: ["Session killed."]}
-    |> ServerSentEvent.serialize()
-  end
-
-  defp serialize(%CloudEvent{json: json} = event) do
-    event_id = CloudEvent.id!(event)
-    event_type = CloudEvent.type!(event)
-
-    json
-    |> ServerSentEvent.new(id: event_id, type: event_type)
-    |> ServerSentEvent.serialize()
-  end
+  defp to_server_sent_event(%CloudEvent{} = event),
+    do: %{
+      data: event.json,
+      event: CloudEvent.type!(event)
+    }
 end

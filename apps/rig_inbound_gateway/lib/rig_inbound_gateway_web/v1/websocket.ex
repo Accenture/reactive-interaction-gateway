@@ -96,14 +96,14 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   @impl :cowboy_websocket
   def websocket_info(%CloudEvent{} = event, state) do
-    Logger.debug(fn -> inspect(event) end)
+    Logger.debug(fn -> "event: " <> inspect(event) end)
     # Forward the event to the client:
     {:reply, frame(event), state, :hibernate}
   end
 
   @impl :cowboy_websocket
   def websocket_info({:set_subscriptions, subscriptions}, state) do
-    Logger.debug(fn -> inspect(subscriptions) end)
+    Logger.debug(fn -> "subscriptions: " <> inspect(subscriptions) end)
     # Trigger immediate refresh:
     EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
     # Replace current subscriptions:
