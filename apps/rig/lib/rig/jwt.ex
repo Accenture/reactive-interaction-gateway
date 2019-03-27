@@ -1,5 +1,16 @@
 defmodule RIG.JWT do
   @moduledoc "JSON Web Token handling."
+  defmodule DecodeError do
+    defexception [:cause]
+
+    def message(%__MODULE__{cause: cause}) when byte_size(cause) > 0,
+      do: "could not decode JWT: #{cause}"
+
+    def message(%__MODULE__{cause: cause}),
+      do: "could not decode JWT: #{Exception.message(cause)}"
+  end
+
+  use Rig.Config, [:jwt_conf]
 
   alias __MODULE__.Claims
   alias __MODULE__.HttpCredentials
@@ -8,7 +19,7 @@ defmodule RIG.JWT do
 
   @type token :: String.t()
   @type claims :: %{optional(String.t()) => String.t()}
-  @type validation_result :: {:ok, claims} | {:error, any}
+  @type validation_result :: {:ok, claims} | {:error, %DecodeError{}}
   @type claims_and_errors :: [validation_result]
   @type http_header_value :: String.t()
   @type http_header :: {http_header_name :: String.t(), http_header_value}
@@ -16,9 +27,7 @@ defmodule RIG.JWT do
   @type jwt_conf :: %{alg: String.t(), key: String.t()}
 
   @typedoc "Turns claims into errors for blacklisted JWTs."
-  @type redact_blacklisted :: (validation_result -> validation_result)
-
-  @jwt_conf Confex.fetch_env!(:rig, :jwt_conf)
+  @type ensure_not_blacklisted :: (claims -> validation_result)
 
   @doc """
   Find JWT claims in one or more HTTP headers.
@@ -28,24 +37,25 @@ defmodule RIG.JWT do
   Tokens. Each of those JWTs is validated using their signature. The result contains
   JWT claims for successfully validated tokens and errors where the validation failed.
   """
-  @callback parse_http_header(http_header_value | http_headers, jwt_conf, redact_blacklisted) ::
+  @callback parse_http_header(http_header_value | http_headers, jwt_conf, ensure_not_blacklisted) ::
               claims_and_errors
   def parse_http_header(
         http_headers,
-        jwt_conf \\ @jwt_conf,
-        redact_blacklisted \\ &redact_blacklisted/1
+        jwt_conf \\ config().jwt_conf,
+        ensure_not_blacklisted \\ &ensure_not_blacklisted/1
       )
 
-  def parse_http_header(http_headers, jwt_conf, redact_blacklisted) when is_list(http_headers) do
+  def parse_http_header(http_headers, jwt_conf, ensure_not_blacklisted)
+      when is_list(http_headers) do
     for {"authorization", value} <- http_headers,
-        validation_result <- parse_http_header(value, jwt_conf, redact_blacklisted),
+        validation_result <- parse_http_header(value, jwt_conf, ensure_not_blacklisted),
         do: validation_result
   end
 
-  def parse_http_header(header_value, jwt_conf, redact_blacklisted)
+  def parse_http_header(header_value, jwt_conf, ensure_not_blacklisted)
       when byte_size(header_value) > 0 do
     for {:bearer, token} <- HttpCredentials.from(header_value) do
-      parse_token(token, jwt_conf, redact_blacklisted)
+      parse_token(token, jwt_conf, ensure_not_blacklisted)
     end
   end
 
@@ -56,24 +66,23 @@ defmodule RIG.JWT do
   @doc """
   Extract claims from a given encoded JWT.
   """
-  @callback parse_token(token, jwt_conf, redact_blacklisted) :: validation_result
+  @callback parse_token(token, jwt_conf, ensure_not_blacklisted) :: validation_result
   def parse_token(
         token,
-        jwt_conf \\ @jwt_conf,
-        redact_blacklisted \\ &redact_blacklisted/1
+        jwt_conf \\ config().jwt_conf,
+        ensure_not_blacklisted \\ &ensure_not_blacklisted/1
       )
 
-  def parse_token(token, jwt_conf, redact_blacklisted) do
+  def parse_token(token, jwt_conf, ensure_not_blacklisted) do
     token
     |> Claims.from(jwt_conf)
-    |> redact_blacklisted.()
+    |> Result.and_then(fn claims -> ensure_not_blacklisted.(claims) end)
+    |> Result.map_err(&%DecodeError{cause: &1})
   end
 
   # ---
 
-  @spec redact_blacklisted(validation_result) :: validation_result
-
-  defp redact_blacklisted({:ok, %{"jti" => jti} = claims}) do
+  defp ensure_not_blacklisted(%{"jti" => jti} = claims) do
     if Blacklist.contains_jti?(Blacklist, jti) do
       {:error, "Ignoring blacklisted JWT with ID #{jti}."}
     else
@@ -81,12 +90,12 @@ defmodule RIG.JWT do
     end
   end
 
-  defp redact_blacklisted(result), do: result
+  defp ensure_not_blacklisted(claims), do: {:ok, claims}
 
   # ---
 
   @spec encode(claims, jwt_conf) :: token
-  def encode(claims, jwt_conf \\ @jwt_conf)
+  def encode(claims, jwt_conf \\ config().jwt_conf)
 
   defdelegate encode(claims, jwt_conf), to: Claims
 end

@@ -5,10 +5,25 @@ defmodule RIG.Subscriptions.Parser.JSONTest do
 
   alias Result
 
-  alias Rig.Subscription
   alias RIG.Subscriptions.Parser.JSON, as: SUT
 
-  test "In a JSON string, valid subscriptions are decoded as such, while ill-formed subscriptions are turned into errors." do
+  test "Good subscriptions are decoded as expected." do
+    # Two good subscriptions:
+    input = ~S"""
+    [
+      {"eventType": "foo", "oneOf": [{"a": "b"}]},
+      {"eventType": "bar", "oneOf": []}
+    ]
+    """
+
+    assert {:ok, subscriptions} = SUT.from_json(input)
+    assert [foo, bar] = subscriptions
+    assert %{event_type: "foo", constraints: [%{"a" => "b"}]} = foo
+    assert %{event_type: "bar", constraints: []} = bar
+  end
+
+  test "Either all subscriptions are decoded, or an error is returned." do
+    # Two subscriptions, a good and a bad one:
     input = ~S"""
     [
       {"eventType": "greeting", "oneOf": []},
@@ -16,9 +31,8 @@ defmodule RIG.Subscriptions.Parser.JSONTest do
     ]
     """
 
-    assert [good, bad] = SUT.from_json(input)
-    assert %Subscription{} = Result.unwrap(good)
-    assert Result.err?(bad)
+    # Since one of them doesn't contain a valid eventType, we get back an error:
+    assert {:error, _} = SUT.from_json(input)
   end
 
   test "A non-JSON string leads to a decoding error." do
@@ -30,7 +44,6 @@ defmodule RIG.Subscriptions.Parser.JSONTest do
     ]
     """
 
-    assert [error] = SUT.from_json(input)
-    assert %Jason.DecodeError{} = Result.unwrap_err(error)
+    assert {:error, _} = SUT.from_json(input)
   end
 end

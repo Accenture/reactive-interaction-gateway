@@ -9,6 +9,17 @@ defmodule Client do
   @callback read_subscriptions_set_event(client) :: map()
 end
 
+defmodule TestClient.ConnectionError do
+  defexception [:code, :mailbox]
+
+  def exception(code, mailbox),
+    do: %__MODULE__{code: code, mailbox: mailbox}
+
+  def message(%__MODULE__{code: code, mailbox: mailbox}),
+    do:
+      "could not establish connection, server responded with #{inspect(code)}: #{inspect(mailbox)}"
+end
+
 defmodule SseClient do
   @moduledoc false
   @behaviour Client
@@ -44,8 +55,11 @@ defmodule SseClient do
       )
 
     receive do
-      %HTTPoison.AsyncStatus{code: 200} -> :ok
-      %HTTPoison.AsyncStatus{code: code} -> raise "Unexpected status code: #{inspect(code)}"
+      %HTTPoison.AsyncStatus{code: 200} ->
+        :ok
+
+      %HTTPoison.AsyncStatus{code: code} ->
+        raise TestClient.ConnectionError, code: code, mailbox: flush_mailbox()
     after
       500 -> raise "No response"
     end
@@ -112,6 +126,14 @@ defmodule SseClient do
     |> case do
       nil -> raise "Failed to extract CloudEvent from chunk: #{inspect(sse_chunk)}"
       cloud_event -> cloud_event
+    end
+  end
+
+  defp flush_mailbox do
+    receive do
+      msg -> [msg | flush_mailbox()]
+    after
+      100 -> []
     end
   end
 end

@@ -26,10 +26,8 @@ defmodule RIG.Subscriptions.Parser.JWTTest do
       }
     }
 
-    subscriptions = SUT.from_jwt_claims(claims, extractor_config)
-
-    assert length(subscriptions) == 1
-    subscription = subscriptions |> hd() |> Result.unwrap()
+    assert {:ok, subscriptions} = SUT.from_jwt_claims(claims, extractor_config)
+    assert [subscription] = subscriptions
 
     assert subscription == %Subscription{
              event_type: "testevent",
@@ -50,8 +48,7 @@ defmodule RIG.Subscriptions.Parser.JWTTest do
       }
     }
 
-    subscriptions = SUT.from_jwt_claims(claims, extractor_config)
-
+    {:ok, subscriptions} = SUT.from_jwt_claims(claims, extractor_config)
     assert subscriptions == []
   end
 
@@ -71,15 +68,14 @@ defmodule RIG.Subscriptions.Parser.JWTTest do
       }
     }
 
-    subscriptions = SUT.from_jwt_claims(claims, extractor_config)
-
+    {:ok, subscriptions} = SUT.from_jwt_claims(claims, extractor_config)
     assert subscriptions == []
   end
 
   test "With an empty extractor config, no subscriptions are created." do
     claims = %{"givenName" => "alice", "age" => 33}
     extractor_config = %{}
-    subscriptions = SUT.from_jwt_claims(claims, extractor_config)
+    {:ok, subscriptions} = SUT.from_jwt_claims(claims, extractor_config)
     assert subscriptions == []
   end
 end

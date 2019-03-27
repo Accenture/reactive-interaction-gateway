@@ -290,7 +290,7 @@ defmodule Rig.EventFilter do
     # On any node, there is only one Filter process for a given event type, or none, if
     # there are no subscriptions for the event type.
     with name <- Filter.process(event_type) do
-      GenServer.cast(name, {:cloud_event, event})
+      GenServer.cast(name, event)
     end
 
     :ok

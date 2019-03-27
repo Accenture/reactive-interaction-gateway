@@ -4,10 +4,13 @@ defmodule RIG.SubscriptionsTest do
 
   import Joken
 
+  alias RIG.JWT
   alias RIG.Subscriptions
   alias RigInboundGateway.ExtractorConfig
 
-  @jwt_secret_key "mysecret"
+  @jwt_secret_key "my-super-secret-for-this-test"
+  @jwt_alg "HS256"
+  @jwt_conf %{alg: @jwt_alg, key: @jwt_secret_key}
 
   setup do
     ExtractorConfig.set(%{
@@ -43,28 +46,37 @@ defmodule RIG.SubscriptionsTest do
     :ok
   end
 
-  test "should return empty array when no JWT present" do
-    assert Subscriptions.from_token("") == []
+  test "A token may be empty." do
+    assert {:ok, []} = Subscriptions.from_token("")
+    assert {:ok, []} = Subscriptions.from_token(nil)
   end
 
   test "should return array with constraints mapped to events when JWT present" do
     jwt = generate_jwt()
 
-    assert Subscriptions.from_token(jwt, %{key: "mysecret", alg: "HS256"}) == [
-             ok: %Rig.Subscription{
-               constraints: [%{"name" => "john"}],
-               event_type: "event_one"
-             },
-             ok: %Rig.Subscription{
-               constraints: [%{"fullname" => "John Doe", "name" => "john"}],
-               event_type: "event_two"
-             }
-           ]
+    assert Subscriptions.from_token(jwt, @jwt_conf) ==
+             {:ok,
+              [
+                %Rig.Subscription{
+                  constraints: [%{"name" => "john"}],
+                  event_type: "event_one"
+                },
+                %Rig.Subscription{
+                  constraints: [%{"fullname" => "John Doe", "name" => "john"}],
+                  event_type: "event_two"
+                }
+              ]}
   end
 
   test "should return error when JWT is using Bearer" do
-    jwt = "Bearer " <> generate_jwt()
-    assert Subscriptions.from_token(jwt) == [error: "JWT: Invalid signature"]
+    jwt = generate_jwt()
+
+    # Works as-is:
+    assert {:ok, _} = Subscriptions.from_token(jwt, @jwt_conf)
+
+    # Doesn't work with "Bearer" prepended:
+    assert {:error, %Subscriptions.Error{cause: %JWT.DecodeError{}}} =
+             Subscriptions.from_token("Bearer #{jwt}", @jwt_conf)
   end
 
   defp generate_jwt do
