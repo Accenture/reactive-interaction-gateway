@@ -67,7 +67,7 @@ RUN mix release
 FROM erlang:21-alpine
 
 LABEL org.label-schema.name="Reactive Interaction Gateway"
-LABEL org.label-schema.description="Asynchronous API gateway and event hub"
+LABEL org.label-schema.description="Reactive API Gateway and Event Hub"
 LABEL org.label-schema.url="https://accenture.github.io/reactive-interaction-gateway/"
 LABEL org.label-schema.vcs-url="https://github.com/Accenture/reactive-interaction-gateway"
 

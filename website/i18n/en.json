@@ -25,6 +25,10 @@
         "title": "Frequently Asked Questions",
         "sidebar_label": "FAQ"
       },
+      "https": {
+        "title": "HTTPS",
+        "sidebar_label": "HTTPS"
+      },
       "intro": {
         "title": "Intro",
         "sidebar_label": "Intro"
