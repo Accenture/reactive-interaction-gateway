@@ -39,6 +39,7 @@ defmodule Rig.Config do
   """
   require Logger
   alias Jason
+  alias Result
 
   defmacro __using__(:custom_validation) do
     __MODULE__.__everything_but_validation__()
@@ -106,29 +107,66 @@ defmodule Rig.Config do
 
   @spec check_and_update_https_config(Keyword.t()) :: Keyword.t()
   def check_and_update_https_config(config) do
-    case config[:https][:certfile] do
-      certfile when byte_size(certfile) > 0 ->
-        # Paths might be given in absolute form, relative to the CWD, or relative to the
-        # priv dir, so we "resolve" the paths for both the certfile and the keyfile:
+    certfile = resolve_path_or_abort("HTTPS_CERTFILE", config[:https][:certfile])
+    keyfile = resolve_path_or_abort("HTTPS_KEYFILE", config[:https][:keyfile])
+    password = config[:https][:password] |> String.to_charlist()
 
+    case set_https(config, certfile, keyfile, password) do
+      {:ok, {config, :https_enabled}} ->
         config
-        |> update_in([:https, :certfile], &resolve_path!/1)
-        |> update_in([:https, :keyfile], &resolve_path!/1)
-        |> update_in([:https, :password], &String.to_charlist/1)
 
-      _ ->
-        Logger.info(fn ->
-          "No HTTPS_CERTFILE environment variable provided. Disabling HTTPS..."
+      {:ok, {config, :https_disabled}} ->
+        Logger.warn(fn ->
+          """
+          HTTPS is *disabled*. To enable it, set the HTTPS_CERTFILE and HTTPS_KEYFILE environment variables \
+          (see https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html for details). \
+          Note that we strongly recommend enabling HTTPS (unless you've employed TLS termination elsewhere). \
+          """
         end)
 
-        # Disable HTTPS:
-        put_in(config, [:https], false)
+        config
+
+      {:error, :only_password} ->
+        Logger.error("Please also set HTTPS_CERTFILE and HTTPS_KEYFILE to enable HTTPS.")
+        System.stop(1)
+
+      {:error, :only_keyfile} ->
+        Logger.error("Please also set HTTPS_CERTFILE to enable HTTPS.")
+        System.stop(1)
+
+      {:error, :only_certfile} ->
+        Logger.error("Please also set HTTPS_KEYFILE to enable HTTPS.")
+        System.stop(1)
     end
   end
 
   # ----
   # priv
   # ----
+
+  defp set_https(config, certfile, keyfile, password)
+  defp set_https(config, :empty, :empty, ''), do: {:ok, {disable_https(config), :https_disabled}}
+  defp set_https(_, :empty, :empty, _), do: {:error, :only_password}
+  defp set_https(_, :empty, _, _), do: {:error, :only_keyfile}
+  defp set_https(_, _, :empty, _), do: {:error, :only_certfile}
+
+  defp set_https(config, certfile, keyfile, password),
+    do: {:ok, {enable_https(config, certfile, keyfile, password), :https_enabled}}
+
+  # ---
+
+  defp enable_https(config, certfile, keyfile, password),
+    do:
+      config
+      |> put_in([:https, :certfile], certfile)
+      |> put_in([:https, :keyfile], keyfile)
+      |> put_in([:https, :password], password)
+
+  # ---
+
+  defp disable_https(config), do: put_in(config, [:https], false)
+
+  # ---
 
   @spec decode_json_file(String.t()) :: {:ok, any} | {:error, reason :: any}
   defp decode_json_file(path) do
@@ -150,27 +188,33 @@ defmodule Rig.Config do
 
   # ---
 
-  @spec resolve_path!(path) :: path when path: String.t()
-  defp resolve_path!(path) do
-    case resolve_path(path) do
-      {:ok, path} -> path
-      {:error, msg} -> raise msg
+  defp resolve_path_or_abort(var_name, value) do
+    case resolve_path(value) do
+      {:ok, path} ->
+        path
+
+      {:error, :empty} ->
+        :empty
+
+      {:error, {:not_found, path}} ->
+        Logger.error("Could not resolve #{var_name}: #{inspect(path)}")
+        System.stop(1)
     end
   end
 
   # ---
 
-  @spec resolve_path(path) :: {:ok, path} | {:error, any} when path: String.t()
+  defp resolve_path(path)
+  defp resolve_path(nil), do: {:error, :empty}
+  defp resolve_path(""), do: {:error, :empty}
+
   defp resolve_path(path) do
     %{found?: false, path: path}
     |> check_path_as_is()
     |> check_relative_to_priv()
     |> case do
-      %{found?: false} ->
-        {:error, "cannot resolve path #{inspect(path)}"}
-
-      %{path: path} ->
-        {:ok, path}
+      %{found?: false} -> Result.err({:not_found, path})
+      %{path: path} -> Result.ok(path)
     end
   end
 
