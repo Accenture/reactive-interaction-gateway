@@ -12,7 +12,40 @@ This metrics can be used to be included into a monitoring platform like [**Grafa
 
 ## RIG Specific Metrics
 
-Currently there are no RIG specific metrics implemented yet. We are exposing the standard metrics providing information about the running application itself.
+### Proxy Metrics - `rig_proxy_requests_total` ###
+
+With this metric the usage of RIGs API Proxy/Gateway can be monitored.
+
+Following Labels are provided:
+- **method** - The HTTP method called for this request Following possible values:
+  - `GET`
+  - `POST`
+  - `PUT`
+  - `PATCH`
+  - `DELETE`
+  - `HEAD`
+  - `OPTIONS`
+- **path** - The path used for this request.
+- **target** - The target for this request. Grabbed from proxy config. Following possible values:
+  - `http`
+  - `kafka`
+  - `kinesis`
+  - `N/A` - Not applicable, e.g., the request path is not configured.
+- **response_from** - Where the response is provided from. Grabbed from proxy config. Following possible values:
+  - `http`
+  - `kafka`
+  - `N/A` - Not applicable, e.g., the request path is not configured.
+- **status** - The *internal* status for the request. Attention: this status only tracks the internal rig process status. Once forwarded we track as "ok". We expect that called services are monitored on it's own. Following possible status codes:
+  - `ok` - Forwarded successfully.
+  - `bad_request` - Missing body parameters (`kafka` and `kinesis` only).
+  - `not_found` - No configuration found for the given `method` and/or `path`.
+  - `unreachable` - The backend cannot be connected to (e.g., service is offline or domain cannot be resolved)
+  - `request_timeout` - The service is reachable but fails to deliver a response in time.
+  - `response_timeout` - The endpoint has its `response_from` parameter set and RIG times out while waiting for a response.
+
+****
+### Standard Metrics ###
+We are exposing the standard metrics providing information about the running application itself.
 
 Following standard metrics are currently provided:
 - erlang_vm_memory_ets_tables - *Erlang VM ETS Tables count*

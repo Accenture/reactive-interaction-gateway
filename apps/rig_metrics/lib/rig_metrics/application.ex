@@ -14,7 +14,7 @@ defmodule RigMetrics.Application do
 
     # RigMetrics.ControlInstrumenter.setup()
     # RigMetrics.EventhubInstrumenter.setup()
-    # RigMetrics.ProxyInstrumenter.setup()
+    RigMetrics.ProxyMetrics.setup()
 
     RigMetrics.MetricsPlugExporter.setup()
 
