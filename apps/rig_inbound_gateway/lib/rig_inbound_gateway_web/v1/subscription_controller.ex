@@ -10,7 +10,6 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   alias RIG.Subscriptions
   alias RigAuth.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
   alias RigAuth.Session
-  alias RigInboundGateway.Subscriptions, as: RigInboundGatewaySubscriptions
 
   require Logger
 
@@ -75,37 +74,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
          :ok <- connection_alive!(socket_pid) do
       # Updating the session allows blacklisting it later on:
       Session.update(conn, socket_pid)
-
-      jwt_subscription_results =
-        conn.req_headers
-        |> JWT.parse_http_header()
-        |> Result.filter_and_unwrap()
-        |> Enum.reduce(%{}, &Map.merge/2)
-        |> Subscriptions.from_jwt_claims()
-
-      manual_subscription_results = Enum.map(subscriptions, &Subscription.new/1)
-
-      all_errors =
-        Result.filter_and_unwrap_err(jwt_subscription_results) ++
-          Result.filter_and_unwrap_err(manual_subscription_results)
-
-      if Enum.empty?(all_errors) do
-        all_subscriptions =
-          Enum.uniq(
-            Result.filter_and_unwrap(jwt_subscription_results) ++
-              Result.filter_and_unwrap(manual_subscription_results)
-          )
-
-        :ok =
-          RigInboundGatewaySubscriptions.check_and_forward_subscriptions(
-            socket_pid,
-            all_subscriptions
-          )
-
-        send_resp(conn, :no_content, "")
-      else
-        conn |> put_status(:bad_request) |> json(all_errors)
-      end
+      do_set_subscriptions(conn, socket_pid, subscriptions)
     else
       {:error, :not_authorized} ->
         conn |> put_status(:forbidden) |> text("Subscription denied.")
@@ -130,7 +99,53 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
   # ---
 
+  defp do_set_subscriptions(conn, socket_pid, subscriptions_param) do
+    with {:ok, jwt_subscriptions} <-
+           conn.req_headers
+           |> get_all_claims()
+           |> Result.and_then(fn claims -> Subscriptions.from_jwt_claims(claims) end),
+         {:ok, passed_subscriptions} <- parse_subscriptions(subscriptions_param) do
+      subscriptions = jwt_subscriptions ++ passed_subscriptions
+      send(socket_pid, {:set_subscriptions, subscriptions})
+      send_resp(conn, :no_content, "")
+    else
+      {:error, error} when byte_size(error) > 0 ->
+        conn
+        |> put_status(:bad_request)
+        |> text("cannot accept subscription request: #{error}")
+    end
+  end
+
+  # ---
+
   defp connection_alive!(pid) do
     if Process.alive?(pid), do: :ok, else: {:error, :process_dead}
+  end
+
+  # ---
+
+  # All claims, from all Authorization tokens. Returns a Result.
+  defp get_all_claims(headers) do
+    headers
+    |> JWT.parse_http_header()
+    |> Enum.reduce(%{}, fn
+      {:ok, claims}, acc -> Map.merge(acc, claims)
+      {:error, error}, _acc -> throw(error)
+    end)
+    |> Result.ok()
+  catch
+    %JWT.DecodeError{} = error ->
+      Result.err("invalid authorization header: #{Exception.message(error)}")
+  end
+
+  # ---
+
+  defp parse_subscriptions(subscriptions) when is_list(subscriptions) do
+    subscriptions
+    |> Enum.map(&Subscription.new!/1)
+    |> Result.ok()
+  rescue
+    error in Subscription.ValidationError ->
+      Result.err("could not parse given subscriptions: #{Exception.message(error)}")
   end
 end

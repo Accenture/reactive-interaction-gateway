@@ -19,12 +19,12 @@ defmodule Rig.ConfigTest do
     config = config |> Config.check_and_update_https_config()
 
     assert config[:https][:certfile]
-           |> String.contains?("rig/priv/cert/selfsigned.pem") === true
+           |> String.contains?("rig/priv/cert/selfsigned.pem")
 
     assert config[:https][:keyfile]
-           |> String.contains?("rig/priv/cert/selfsigned_key.des3.pem") === true
+           |> String.contains?("rig/priv/cert/selfsigned_key.des3.pem")
 
-    assert config[:https][:password] |> is_list === true
+    assert is_list(config[:https][:password])
   end
 
   test "should set https to false if certfile is empty string" do
@@ -41,6 +41,6 @@ defmodule Rig.ConfigTest do
 
     config = config |> Config.check_and_update_https_config()
 
-    assert config[:https] === false
+    assert config[:https] == false
   end
 end

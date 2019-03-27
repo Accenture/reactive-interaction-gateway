@@ -16,9 +16,9 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `API_HTTPS_PORT` | Same as `API_HTTP_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | 4011
 `INBOUND_PORT` | Port at which RIG exposes proxy and websocket/sse communication. | 4000
 `INBOUND_HTTPS_PORT` | Same as `INBOUND_PORT`, but encrypted. See `HTTPS_CERTFILE`, `HTTPS_KEYFILE`, `HTTPS_KEYFILE_PASS`. | 4001
-`HTTPS_CERTFILE` | Path to the (signed) client certificate (PEM format). The path is relative to the `priv` directory of the `:rig`-OTP app. **Attention:** If not configured, we will disable HTTPS | ""
-`HTTPS_KEYFILE` | Path to the private key of the client certificate (PEM format). Also supports encrypted private keys; see `HTTPS_KEYFILE_PASS` and consult the Erlang documentation for supported ciphers (e.g. [supported password ciphers in OTP 21.2](https://github.com/erlang/otp/blob/OTP-21.2/lib/public_key/src/pubkey_pbe.erl#L55); unfortunately, with OTP 21.1 using an unsupported cipher fails silently). The path is relative to the `priv` directory of the `:rig`-OTP app. | ""
-`HTTPS_KEYFILE_PASS` | Passphrase in case the private key is password-protected. | ""
+`HTTPS_CERTFILE` | Path to the public HTTPS certificate (PEM format). If set, HTTPS is enabled for all endpoints. | ""
+`HTTPS_KEYFILE` | Path to the HTTPS certificate's private key (PEM format). Also supports encrypted private keys; see `HTTPS_KEYFILE_PASS` and consult the Erlang documentation for supported ciphers (e.g. [supported password ciphers in OTP 21.2](https://github.com/erlang/otp/blob/OTP-21.2/lib/public_key/src/pubkey_pbe.erl#L55); note that as of OTP 21.1, using an unsupported cipher fails silently). | ""
+`HTTPS_KEYFILE_PASS` | Passphrase to the HTTPS certificate private key. Only set this if the private key is encrypted. | ""
 `CORS` | The "Access-Control-Allow-Origin" setting for the inbound port. It is usually a good idea to set this to your domain. | "*"
 `DISCOVERY_TYPE` | Type of discovery used in distributed mode. If not set discovery is not used. Available options: `dns`. | nil
 `DNS_NAME` | Address where RIG will do DNS discovery for Node host addresses. | "localhost"
@@ -52,7 +52,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `KINESIS_LOG_LEVEL` | The log level for the (Java) Kinesis-client subsystem. Allowed values: OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL. | "INFO"
 `KINESIS_OTP_JAR` | Path to the `OtpErlang.jar` file that contains the `JInterface` implementation. If left empty, RIG picks the file from its Erlang environment (Erlang must be compiled with Java support enabled). | nil
 `KINESIS_STREAM` | The name of the Kinesis stream to consume. | "RIG-outbound"
-`LOG_LEVEL` | Controls logging level for RIG, available values are: "debug", "info", "warn", "error". Production is using "warn" level. | :debug
+`LOG_LEVEL` | Controls logging level for RIG, available values are: "debug", "info", "warn", "error". Production is using "warn" level. | :warn
 `NODE_COOKIE` | Erlang cookie used in distributed mode, so nodes in cluster can communicate between each other. | nil
 `NODE_HOST` | Erlang hostname for given node, used to build Erlang long-name `rig@NODE_HOST`. This value is used by Erlang's distributed mode, so nodes can see each other. | nil
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Use this variable to pass either a path to a JSON file, or the JSON string itself. A path can be given in absolute or in relative form (e.g., `proxy/your_json_file.json`). If given in relative form, the working directory is one of RIG's `priv` dirs (e.g., `/opt/sites/rig/lib/rig_inbound_gateway-2.0.2/priv/` in a Docker container). | nil

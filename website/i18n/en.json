@@ -13,6 +13,10 @@
         "title": "API Gateway",
         "sidebar_label": "API Gateway"
       },
+      "architecture": {
+        "title": "Architecture",
+        "sidebar_label": "Architecture"
+      },
       "event-subscription": {
         "title": "Event Subscription",
         "sidebar_label": "Event Subscription"
@@ -21,9 +25,21 @@
         "title": "Frequently Asked Questions",
         "sidebar_label": "FAQ"
       },
+      "https": {
+        "title": "HTTPS",
+        "sidebar_label": "HTTPS"
+      },
       "intro": {
         "title": "Intro",
         "sidebar_label": "Intro"
+      },
+      "metrics-details": {
+        "title": "Metrics Details",
+        "sidebar_label": "Metrics Details"
+      },
+      "https": {
+        "title": "HTTPS",
+        "sidebar_label": "HTTPS"
       },
       "rig-dev-guide": {
         "title": "Developer's Guide to the Reactive Interaction Gateway",

@@ -12,16 +12,18 @@ export class Ws {
     const token = getJwtToken(username);
 
     // Creates Websocket connection
-    this.socket = new WebSocket(
-      `ws://localhost:7000/_rig/v1/connection/ws?token=${token}`
-    );
+    this.socket = new WebSocket(`ws://localhost:7000/_rig/v1/connection/ws?jwt=${token}`);
 
     this.socket.onmessage = e => {
       const cloudEvent = JSON.parse(e.data);
-      if (cloudEvent.eventType === 'rig.connection.create') {
+      if (cloudEvent.type === 'rig.connection.create') {
         const payload = cloudEvent.data;
         const connectionToken = payload['connection_token'];
-        this.createSubscription(connectionToken, subscriberEvent, token);
+        // we don't want to subscribe to inferred event, otherwise we get 2 subscriptions
+        if (subscriberEvent !== 'message') {
+          this.createSubscription(connectionToken, subscriberEvent, token);
+        }
+
         cb({ status: 'ok', response: 'connection established' });
       }
     };
@@ -37,7 +39,7 @@ export class Ws {
         mode: 'cors',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          Authorization: token
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           subscriptions: [{ eventType: subscriberEvent }]

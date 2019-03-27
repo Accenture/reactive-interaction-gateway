@@ -7,6 +7,7 @@
       "faq"
     ],
     "Main Concepts": [
+      "architecture",
       "api-gateway",
       "event-subscription",
       "user-authentication"
@@ -16,7 +17,8 @@
     ],
     "RIG in Production": [
       "rig-ops-guide",
-      "metrics-details"
+      "metrics-details",
+      "https"
     ],
     "Hacking the Source": [
       "rig-dev-guide"

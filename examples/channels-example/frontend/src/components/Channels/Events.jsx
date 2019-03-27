@@ -11,20 +11,20 @@ class Events extends PureComponent {
   }
 
   errorSubscription() {
-    const { subscriberTopic, response } = this.props;
+    const { subscriberEvent, response } = this.props;
     return (
       <p className="notification is-danger">
-        Couldn't subscribe to <strong>{subscriberTopic}</strong> event type.
+        Couldn't subscribe to <strong>{subscriberEvent}</strong> event type.
         Error <strong>{response}</strong>.
       </p>
     );
   }
 
   existingSubscription() {
-    const { subscriberTopic } = this.props;
+    const { subscriberEvent } = this.props;
     return (
       <p className="notification is-success">
-        You are now subscribed to <strong>{subscriberTopic}</strong> event type.
+        You are now subscribed to <strong>{subscriberEvent}</strong> event type.
         Try to send some event.
       </p>
     );

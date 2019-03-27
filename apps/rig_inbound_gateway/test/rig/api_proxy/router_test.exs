@@ -174,6 +174,17 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
     assert conn.resp_body =~ "{\"response\": \"file uploaded successfully\"}"
   end
 
+  test_with_server "Any request should include forward headers", @env do
+    route("/myapi/direct", Response.ok!(~s<{"status":"ok"}>))
+
+    conn = call(Router, build_conn(:get, "/myapi/direct"))
+
+    assert conn.status == 200
+    assert conn.resp_body =~ "{\"status\":\"ok\"}"
+    assert [forwarded_header] = get_req_header(conn, "forwarded")
+    assert forwarded_header =~ ~r/for=[^;]+;by=.*/
+  end
+
   test_with_server "should skip auth if no auth method is set", @env do
     route("/myapi/direct", Response.ok!(~s<{"status":"ok"}>))
 

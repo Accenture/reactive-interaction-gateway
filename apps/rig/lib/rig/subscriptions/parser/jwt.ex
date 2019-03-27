@@ -2,6 +2,12 @@ defmodule RIG.Subscriptions.Parser.JWT do
   @moduledoc """
   Create subscriptions based on JWT and extractor file
   """
+  defmodule Error do
+    defexception [:cause]
+
+    def message(error),
+      do: "could not infer subscription from JWT: #{Exception.message(error.cause)}"
+  end
 
   alias Result
 
@@ -9,7 +15,7 @@ defmodule RIG.Subscriptions.Parser.JWT do
 
   # ---
 
-  @spec from_jwt_claims(map, map) :: [Result.t(Subscription.t(), any)]
+  @spec from_jwt_claims(map, map) :: Result.t([Subscription.t()], error :: String.t())
 
   def from_jwt_claims(claims, extractor_map) when is_map(claims) and is_map(extractor_map) do
     for {event_type, type_config} <- extractor_map do
@@ -18,13 +24,17 @@ defmodule RIG.Subscriptions.Parser.JWT do
           nil
 
         constraints ->
-          Subscription.new(%{
+          Subscription.new!(%{
             event_type: event_type,
             constraints: constraints
           })
       end
     end
     |> Enum.reject(&is_nil/1)
+    |> Result.ok()
+  rescue
+    error in Subscription.ValidationError ->
+      Result.err(%Error{cause: error})
   end
 
   # ---

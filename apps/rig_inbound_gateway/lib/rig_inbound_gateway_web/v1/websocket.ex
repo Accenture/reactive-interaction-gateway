@@ -11,12 +11,11 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   alias Jason
 
   alias Result
-  alias RIG.Subscriptions
 
   alias Rig.EventFilter
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
-  alias RigInboundGateway.Subscriptions, as: RigInboundGatewaySubscriptions
+  alias RigInboundGatewayWeb.ConnectionInit
 
   @behaviour :cowboy_websocket
 
@@ -29,82 +28,88 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   def init(req, :ok) do
     query_params = req |> :cowboy_req.parse_qs() |> Enum.into(%{})
 
-    jwt_subscription_results =
-      query_params
-      |> Map.get("jwt")
-      |> Subscriptions.from_token()
+    # The initialization is done in the websocket handler, which is a different process.
 
-    manual_subscription_results =
-      query_params
-      |> Map.get("subscriptions", "[]")
-      |> Subscriptions.from_json()
-
-    all_subscriptions =
-      (Result.filter_and_unwrap(jwt_subscription_results) ++
-         Result.filter_and_unwrap(manual_subscription_results))
-      |> Enum.uniq()
-
-    all_errors =
-      jwt_subscription_results
-      |> Result.filter_and_unwrap_err()
-      |> Enum.concat(manual_subscription_results |> Result.filter_and_unwrap_err())
-
-    state = %{subscriptions: all_subscriptions, errors: all_errors}
+    # Upgrade the connection to WebSocket protocol:
+    state = %{query_params: query_params}
     opts = %{idle_timeout: :infinity}
-
     {:cowboy_websocket, req, state, opts}
   end
 
   # ---
 
   @impl :cowboy_websocket
-  def websocket_init(%{subscriptions: subscriptions, errors: errors} = state) do
-    RigInboundGatewaySubscriptions.check_and_forward_subscriptions(self(), subscriptions)
+  def websocket_init(%{query_params: query_params} = state) do
+    on_success = fn subscriptions ->
+      # Say "hi", enter the loop and wait for cloud events to forward to the client:
+      state = %{subscriptions: subscriptions}
+      {:reply, frame(Events.welcome_event()), state, :hibernate}
+    end
 
-    Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
-    {:reply, frame(Events.welcome_event(errors)), %{state | errors: []}}
+    on_error = fn reason ->
+      # WebSocket close frames may include a payload to indicate the error, but we found
+      # that error message must be really short; if it isn't, the `{:close, :normal,
+      # payload}` is silently converted to `{:close, :abnormal, nil}`. Since there is no
+      # limit mentioned in the spec (RFC-6455), we opt for consistent responses,
+      # omitting the detailed error.
+      Logger.warn(fn -> "WS conn failed: #{reason}" end)
+      reason = "Bad request."
+      # This will close the connection:
+      {:reply, closing_frame(reason), state}
+    end
+
+    ConnectionInit.set_up(
+      "WS",
+      query_params,
+      on_success,
+      on_error,
+      @heartbeat_interval_ms,
+      @subscription_refresh_interval_ms
+    )
   end
 
   # ---
 
   @doc ~S"The client may send this as the response to the :ping heartbeat."
   @impl :cowboy_websocket
-  def websocket_handle({:pong, _}, state), do: {:ok, state}
+  def websocket_handle({:pong, _}, state), do: {:ok, state, :hibernate}
   @impl :cowboy_websocket
-  def websocket_handle(:pong, state), do: {:ok, state}
+  def websocket_handle(:pong, state), do: {:ok, state, :hibernate}
 
   @impl :cowboy_websocket
   def websocket_handle(in_frame, state) do
-    Logger.debug(fn -> "[ws] unexpected input: #{inspect(in_frame)}" end)
+    Logger.debug(fn -> "Unexpected WebSocket input: #{inspect(in_frame)}" end)
     # This will close the connection:
-    out_frame = {:close, 1003, "Unexpected input."}
-    {:reply, out_frame, state}
+    {:reply, closing_frame("This WebSocket endpoint cannot be used for two-way communication."),
+     state}
   end
 
   # ---
 
   @impl :cowboy_websocket
-  def websocket_info({:cloud_event, event}, state) do
-    Logger.debug(fn -> inspect(event) end)
-    # Forward the event:
-    {:reply, frame(event), state}
+  def websocket_info(:heartbeat, state) do
+    # Schedule the next heartbeat:
+    Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
+    # Ping the client to keep the connection alive:
+    {:reply, :ping, state, :hibernate}
   end
 
   @impl :cowboy_websocket
-  def websocket_info(:heartbeat, state) do
-    Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
-    {:reply, :ping, state}
+  def websocket_info(%CloudEvent{} = event, state) do
+    Logger.debug(fn -> "event: " <> inspect(event) end)
+    # Forward the event to the client:
+    {:reply, frame(event), state, :hibernate}
   end
 
   @impl :cowboy_websocket
   def websocket_info({:set_subscriptions, subscriptions}, state) do
-    Logger.debug(fn -> inspect(subscriptions) end)
+    Logger.debug(fn -> "subscriptions: " <> inspect(subscriptions) end)
     # Trigger immediate refresh:
     EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
     # Replace current subscriptions:
     state = Map.put(state, :subscriptions, subscriptions)
     # Notify the client:
-    {:reply, frame(Events.subscriptions_set(subscriptions)), state}
+    {:reply, frame(Events.subscriptions_set(subscriptions)), state, :hibernate}
   end
 
   @impl :cowboy_websocket
@@ -118,13 +123,24 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   def websocket_info({:session_killed, group}, state) do
     Logger.info("session killed: #{inspect(group)}")
     # This will close the connection:
-    out_frame = {:close, 4000, "Session killed."}
-    {:reply, out_frame, state}
+    {:reply, closing_frame("Session killed."), state}
   end
 
   # ---
 
   defp frame(%CloudEvent{json: json}) do
     {:text, json}
+  end
+
+  # ---
+
+  defp closing_frame(reason) do
+    # Sending this will close the connection:
+    {
+      :close,
+      # "Normal Closure":
+      1_000,
+      reason
+    }
   end
 end

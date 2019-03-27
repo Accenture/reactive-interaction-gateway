@@ -28,13 +28,13 @@ defmodule Rig.EventFilter.ServerTest do
     EventFilter.forward_event(event)
     EventFilter.forward_event(event)
 
-    assert_receive {:cloud_event, ^event}
-    assert_receive {:cloud_event, ^event}
+    assert_receive ^event
+    assert_receive ^event
 
     # No longer receive an event for timed-out subscriptions after :cleanup:
     simulate_cleanup(filter_pid)
     EventFilter.forward_event(event)
-    refute_receive {:cloud_event, ^event}
+    refute_receive ^event
 
     :ok = GenServer.stop(filter_pid)
   end
@@ -109,8 +109,8 @@ defmodule Rig.EventFilter.ServerTest do
       EventFilter.forward_event(event)
 
       case match_expectation do
-        :match -> assert_receive {:cloud_event, ^event}
-        :no_match -> refute_receive {:cloud_event, ^event}
+        :match -> assert_receive ^event
+        :no_match -> refute_receive ^event
       end
 
       :ok = GenServer.stop(filter_pid)
@@ -149,23 +149,23 @@ defmodule Rig.EventFilter.ServerTest do
 
     # Even though the greeting is for Sam and not for Joe, we receive it:
     EventFilter.forward_event(greeting_to_sam)
-    assert_receive {:cloud_event, ^greeting_to_sam}
+    assert_receive ^greeting_to_sam
 
     # Let's load the proper field config now:
     GenServer.call(filter_pid, {:reload_configuration, greeting_with_name_field_config})
 
     # Without touching the subscriptions, there is no change:
     EventFilter.forward_event(greeting_to_sam)
-    assert_receive {:cloud_event, ^greeting_to_sam}
+    assert_receive ^greeting_to_sam
 
     # But after refreshing the subscriptions, a greeting to Sam is no longer forwarded:
     EventFilter.refresh_subscriptions([greetings_to_joe_subscription], [])
     EventFilter.forward_event(greeting_to_sam)
-    refute_receive {:cloud_event, ^greeting_to_sam}
+    refute_receive ^greeting_to_sam
 
     # ...but a greeting to Joe still is:
     EventFilter.forward_event(greeting_to_joe)
-    assert_receive {:cloud_event, ^greeting_to_joe}
+    assert_receive ^greeting_to_joe
 
     :ok = GenServer.stop(filter_pid)
   end
