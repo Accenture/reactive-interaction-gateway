@@ -7,10 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<!-- ### Added -->
+
+<!-- ### Changed -->
+
+<!-- ### Deprecated -->
+
+<!-- ### Removed -->
+
+<!-- ### Fixed -->
+
+<!-- ### Security -->
+
+## [2.1.1] - 2019-03-27
+
 ### Added
 
-When using the proxy, RIG will now add an additional [`Forwarded` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded). [#113](https://github.com/Accenture/reactive-interaction-gateway/issues/113)
-- Increased length of header value in HTTP requests to 16384. Reason is to support long tokens such as SAML.
+- When using the proxy, RIG will now add an additional [`Forwarded` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded).
+[#113](https://github.com/Accenture/reactive-interaction-gateway/issues/113)
+- Increased length of header value in HTTP requests to 16384 to support long tokens for SAML.
 
 ### Changed
 
@@ -21,18 +36,12 @@ When using the proxy, RIG will now add an additional [`Forwarded` header](https:
 [#54](https://github.com/Accenture/reactive-interaction-gateway/issues/54)
 [#164](https://github.com/Accenture/reactive-interaction-gateway/issues/164)
 
-<!-- ### Deprecated -->
-
-<!-- ### Removed -->
-
 ### Fixed
 
-- [Proxy] Parsing of JSON files in proxy module. Expected that `api.id` is an atom, but when using files it's a string.
+- [Proxy] Parsing of JSON files in proxy module - `api.id` was expected to be an atom, but when using files it's a string.
 - [Kinesis] Support for CloudEvents versions 0.1 and 0.2.
 - [Docs] Fixed channels example with latest RIG API changes.
 - [Docs] Fixed sse/ws examples to use JWT inferred subscriptions correctly.
-
-<!-- ### Security -->
 
 ## [2.1.0] - 2019-02-15
 
@@ -191,7 +200,8 @@ When using the proxy, RIG will now add an additional [`Forwarded` header](https:
 
 - [Config] Disable Origin checking. [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
-[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.0...HEAD
+[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.1...HEAD
+[2.1.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.2...2.1.0
 [2.0.2]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0...2.0.1
