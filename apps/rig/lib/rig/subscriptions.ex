@@ -12,6 +12,8 @@ defmodule RIG.Subscriptions do
       do: "could not parse subscriptions: #{Exception.message(cause)}"
   end
 
+  use Rig.Config, [:jwt_conf, :extractor_path_or_json]
+
   alias Result
 
   alias Rig.EventFilter.Config, as: ExtractorConfig
@@ -22,8 +24,6 @@ defmodule RIG.Subscriptions do
 
   @type claims :: %{optional(String.t()) => String.t()}
   @type jwt_conf :: %{alg: String.t(), key: String.t()}
-
-  @jwt_conf Confex.fetch_env!(:rig, :jwt_conf)
 
   # ---
 
@@ -39,7 +39,7 @@ defmodule RIG.Subscriptions do
   @spec from_jwt_claims(claims) :: Result.t([Subscription.t()], %Error{})
   def from_jwt_claims(
         claims,
-        extractor_path_or_json \\ Confex.fetch_env!(:rig, :extractor_path_or_json)
+        extractor_path_or_json \\ config().extractor_path_or_json
       )
 
   def from_jwt_claims(claims, extractor_path_or_json) do
@@ -52,7 +52,7 @@ defmodule RIG.Subscriptions do
   # ---
 
   @spec from_token(token :: JWT.token(), jwt_conf) :: Result.t([Subscription.t()], %Error{})
-  def from_token(token, jwt_conf \\ @jwt_conf)
+  def from_token(token, jwt_conf \\ config().jwt_conf)
 
   def from_token(nil, _jwt_conf), do: Result.ok([])
   def from_token("", _jwt_conf), do: Result.ok([])

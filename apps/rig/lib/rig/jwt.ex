@@ -10,6 +10,8 @@ defmodule RIG.JWT do
       do: "could not decode JWT: #{Exception.message(cause)}"
   end
 
+  use Rig.Config, [:jwt_conf]
+
   alias __MODULE__.Claims
   alias __MODULE__.HttpCredentials
 
@@ -27,8 +29,6 @@ defmodule RIG.JWT do
   @typedoc "Turns claims into errors for blacklisted JWTs."
   @type ensure_not_blacklisted :: (claims -> validation_result)
 
-  @jwt_conf Confex.fetch_env!(:rig, :jwt_conf)
-
   @doc """
   Find JWT claims in one or more HTTP headers.
 
@@ -41,7 +41,7 @@ defmodule RIG.JWT do
               claims_and_errors
   def parse_http_header(
         http_headers,
-        jwt_conf \\ @jwt_conf,
+        jwt_conf \\ config().jwt_conf,
         ensure_not_blacklisted \\ &ensure_not_blacklisted/1
       )
 
@@ -69,7 +69,7 @@ defmodule RIG.JWT do
   @callback parse_token(token, jwt_conf, ensure_not_blacklisted) :: validation_result
   def parse_token(
         token,
-        jwt_conf \\ @jwt_conf,
+        jwt_conf \\ config().jwt_conf,
         ensure_not_blacklisted \\ &ensure_not_blacklisted/1
       )
 
@@ -95,7 +95,7 @@ defmodule RIG.JWT do
   # ---
 
   @spec encode(claims, jwt_conf) :: token
-  def encode(claims, jwt_conf \\ @jwt_conf)
+  def encode(claims, jwt_conf \\ config().jwt_conf)
 
   defdelegate encode(claims, jwt_conf), to: Claims
 end
