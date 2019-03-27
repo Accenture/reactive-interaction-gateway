@@ -1,5 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Event Subscription · Reactive Interaction Gateway</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Important part of RIG is creating event subscriptions. RIG is holding connections between clients and itself and forwarding events to proper clients. Currently the supported options are &lt;a href=&quot;https://en.wikipedia.org/wiki/Server-sent_events&quot;&gt;Server-Sent Events&lt;/a&gt; and &lt;a href=&quot;https://en.wikipedia.org/wiki/WebSocket&quot;&gt;WebSocket&lt;/a&gt;. There is multiple ways how you can create subscription for given events.&lt;/p&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Event Subscription · Reactive Interaction Gateway"/><meta property="og:type" content="website"/><meta property="og:url" content="https://accenture.github.io/reactive-interaction-gateway/index.html"/><meta property="og:description" content="&lt;p&gt;Important part of RIG is creating event subscriptions. RIG is holding connections between clients and itself and forwarding events to proper clients. Currently the supported options are &lt;a href=&quot;https://en.wikipedia.org/wiki/Server-sent_events&quot;&gt;Server-Sent Events&lt;/a&gt; and &lt;a href=&quot;https://en.wikipedia.org/wiki/WebSocket&quot;&gt;WebSocket&lt;/a&gt;. There is multiple ways how you can create subscription for given events.&lt;/p&gt;
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Event Subscription · Reactive Interaction Gateway</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;There are &lt;strong&gt;two ways to receive events&lt;/strong&gt;, either via &lt;a href=&quot;https://en.wikipedia.org/wiki/Server-sent_events&quot;&gt;Server-Sent Events&lt;/a&gt; (SSE) or via a &lt;a href=&quot;https://en.wikipedia.org/wiki/WebSocket&quot;&gt;WebSocket&lt;/a&gt; connection. We recommend SSE:&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Event Subscription · Reactive Interaction Gateway"/><meta property="og:type" content="website"/><meta property="og:url" content="https://accenture.github.io/reactive-interaction-gateway/index.html"/><meta property="og:description" content="&lt;p&gt;There are &lt;strong&gt;two ways to receive events&lt;/strong&gt;, either via &lt;a href=&quot;https://en.wikipedia.org/wiki/Server-sent_events&quot;&gt;Server-Sent Events&lt;/a&gt; (SSE) or via a &lt;a href=&quot;https://en.wikipedia.org/wiki/WebSocket&quot;&gt;WebSocket&lt;/a&gt; connection. We recommend SSE:&lt;/p&gt;
 "/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/reactive-interaction-gateway/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/reactive-interaction-gateway/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/reactive-interaction-gateway/"><img class="logo" src="/reactive-interaction-gateway/img/icon.svg" alt="Reactive Interaction Gateway"/><h2 class="headerTitleWithLogo">Reactive Interaction Gateway</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/reactive-interaction-gateway/docs/intro.html" target="_self">User Documentation</a></li><li class=""><a href="/reactive-interaction-gateway/source_docs/index.html" target="_self">Source Documentation</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Main Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/intro.html">Intro</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/tutorial.html">Tutorial</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/faq.html">FAQ</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Main Concepts</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/architecture.html">Architecture</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway.html">API Gateway</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/reactive-interaction-gateway/docs/event-subscription.html">Event Subscription</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/user-authentication.html">User authentication</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced Guides</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-synchronization.html">API Gateway Synchronization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">RIG in Production</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator&#x27;s Guide</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/metrics-details.html">Metrics Details</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/https.html">HTTPS</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Hacking the Source</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-dev-guide.html">Developer&#x27;s Guide</a></li></ul></div></div></section></div><script>
             document.addEventListener('DOMContentLoaded', function() {
               createToggler('#navToggler', '#docsNav', 'docsSliderActive');
@@ -27,84 +27,125 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Event Subscription</h1></header><article><div><span><p>Important part of RIG is creating event subscriptions. RIG is holding connections between clients and itself and forwarding events to proper clients. Currently the supported options are <a href="https://en.wikipedia.org/wiki/Server-sent_events">Server-Sent Events</a> and <a href="https://en.wikipedia.org/wiki/WebSocket">WebSocket</a>. There is multiple ways how you can create subscription for given events.</p>
-<h2><a class="anchor" aria-hidden="true" id="manual-subscriptions"></a><a href="#manual-subscriptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Manual subscriptions</h2>
-<p>Subscription is created by calling HTTP endpoint:</p>
-<pre><code class="hljs"><span class="hljs-function"><span class="hljs-keyword">Method</span>:</span> PUT
-Url: `/connection/sse/:connectionToken/subscriptions`
-Body: <span class="hljs-comment">{ "subscriptions": [{ "eventType": "example-event-type" }</span>] }
-</code></pre>
-<p><code>connectionToken</code> is provided by initial SSE/WS connection call, thus it's recommended to save it somewhere. In body you provide which event types to listen to (notice it's an array). After successful you'll get all events with given event type(s).</p>
-<h2><a class="anchor" aria-hidden="true" id="constraints-extractors"></a><a href="#constraints-extractors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Constraints &amp; extractors</h2>
-<p>To be more restrictive in who should receive what event you can leverage from constraints and extractors. Extractors are set on RIG describing how to match events to clients -- to be more specific where to look for values. As an example <em>check <code>name</code> field in event</em>. This can be set as an environment variable (string or JSON file). Constraints are set on client side providing exact value to look for in filtering -- for example <code>John</code>. Combining with extractor example RIG will try to find <code>John</code> in event -- if found event is forwarded to client.</p>
-<p>Extractor example:</p>
-<pre><code class="hljs css language-json">{
-  <span class="hljs-attr">"greeting"</span>: {
-    <span class="hljs-attr">"name"</span>: {
-      <span class="hljs-attr">"stable_field_index"</span>: <span class="hljs-number">1</span>,
-      <span class="hljs-attr">"event"</span>: {
-        <span class="hljs-attr">"json_pointer"</span>: <span class="hljs-string">"/data/name"</span>
-      }
-    }
-  }
-}
-</code></pre>
-<p>Environment variable:</p>
-<pre><code class="hljs"><span class="hljs-attr">EXTRACTORS</span>=my-extractor.json
-</code></pre>
-<p>Constraints example (in subscription call):</p>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Event Subscription</h1></header><article><div><span><p>There are <strong>two ways to receive events</strong>, either via <a href="https://en.wikipedia.org/wiki/Server-sent_events">Server-Sent Events</a> (SSE) or via a <a href="https://en.wikipedia.org/wiki/WebSocket">WebSocket</a> connection. We recommend SSE:</p>
+<ul>
+<li>With HTTP/2, there is no (practical) limit to the number of SSE connections/streams that can be created.</li>
+<li>SSE does not require dropping the HTTP protocol, which makes it firewall-friendly.</li>
+<li>SSE is a better fit to the architecture RIG implements (WebSocket is typically used for full-duplex connection).</li>
+</ul>
+<p><strong>Event subscriptions</strong> allow both backend and frontend developers to select the events they want to have forwarded towards the UI:</p>
+<ul>
+<li>Frontend developers can set up <strong>(manual) subscriptions</strong> that refer to an event type and zero, one or more <em>named</em> fields of an event. The fields that can be referred to have to be set up in advance using the so-called <em>extractor configuration</em> (see below).</li>
+<li>Backend developers/administrators can set up <strong>automatic subscriptions</strong>, where events are subscribed to according to the JWT the UI sends with its request.</li>
+</ul>
+<p>Both automatic and manual subscriptions can be used at the same time - they are simply merged into a single set of subscriptions. Below there are examples for both types, but first we introduce <em>constraints</em> and <em>extractors</em>.</p>
+<h2><a class="anchor" aria-hidden="true" id="constraints-extractors"></a><a href="#constraints-extractors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Constraints &amp; Extractors</h2>
+<p>If subscribing to events by their event type is all you need, you can skip this.</p>
+<p>For a larges example and more details take a look at <a href="https://accenture.github.io/reactive-interaction-gateway/source_docs/Rig.EventFilter.html">the source documentation of <code>EventFilter</code></a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="constraints"></a><a href="#constraints" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Constraints</h3>
+<p>Constraints allow you to subscribe to events based on the value of pre-defined fields. For example, this is a subscription for &quot;greeting&quot; events that have the &quot;name&quot; field set to &quot;John&quot;:</p>
 <pre><code class="hljs css language-json">{
   <span class="hljs-attr">"subscriptions"</span>: [
     {
-      <span class="hljs-attr">"eventType"</span>: <span class="hljs-string">"example"</span>,
+      <span class="hljs-attr">"eventType"</span>: <span class="hljs-string">"greeting"</span>,
       <span class="hljs-attr">"oneOf"</span>: [
-        {
-          <span class="hljs-attr">"name"</span>: <span class="hljs-string">"John"</span>
-        }
+        { <span class="hljs-attr">"name"</span>: <span class="hljs-string">"John"</span> }
       ]
     }
   ]
 }
 </code></pre>
-<h2><a class="anchor" aria-hidden="true" id="auth"></a><a href="#auth" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Auth</h2>
-<p>Authentication can be turned on by setting environment variables:</p>
-<pre><code class="hljs"><span class="hljs-attr">SUBSCRIPTION_CHECK</span>=jwt_validation
-<span class="hljs-attr">JWT_SECRET_KEY</span>=secret
+<p>The &quot;oneOf&quot; property contains a list of objects. Each object may contain one or more fields and each of them must match the respective value in the event, but only one of those objects must match (that's the reason the property is called &quot;oneOf&quot;). This allows you to query for greeting event to either &quot;John&quot; or &quot;Frank&quot;:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"subscriptions"</span>: [
+    {
+      <span class="hljs-attr">"eventType"</span>: <span class="hljs-string">"greeting"</span>,
+      <span class="hljs-attr">"oneOf"</span>: [
+        { <span class="hljs-attr">"name"</span>: <span class="hljs-string">"John"</span> },
+        { <span class="hljs-attr">"name"</span>: <span class="hljs-string">"Frank"</span> }
+      ]
+    }
+  ]
+}
 </code></pre>
-<p>JWT needs to be in form of <code>Bearer eyJh...</code>.</p>
-<h2><a class="anchor" aria-hidden="true" id="inferred-subscriptions"></a><a href="#inferred-subscriptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Inferred subscriptions</h2>
-<p>There is also possibility to create subscription automatically (without calling subscription endpoint above) -- inferring from JWT. This behavior is triggered right away in first connection call. Event types to be subscribed to are inferred from extractors, thus it's needed to set them up.</p>
-<p>Extractors example:</p>
+<h3><a class="anchor" aria-hidden="true" id="basic-extractor-configuration"></a><a href="#basic-extractor-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Basic Extractor configuration</h3>
+<p>When referring to the &quot;name&quot; field in a subscription, we assume that RIG knows what &quot;name&quot; refers to in incoming events. In RIG, obtaining the value for a named field is called <em>extraction</em> and the corresponding configuration is called <em>extractor configuration</em>. The latter can be set using the <code>EXTRACTORS</code> environment variable, which expects either a file path or a JSON encoded string.</p>
+<p>Consider the following extractor configuration, <code>extractors.json</code>:</p>
 <pre><code class="hljs css language-json">{
   <span class="hljs-attr">"greeting"</span>: {
     <span class="hljs-attr">"name"</span>: {
       <span class="hljs-attr">"stable_field_index"</span>: <span class="hljs-number">1</span>,
-      <span class="hljs-attr">"jwt"</span>: {
-        <span class="hljs-attr">"json_pointer"</span>: <span class="hljs-string">"/username"</span>
-      },
       <span class="hljs-attr">"event"</span>: {
         <span class="hljs-attr">"json_pointer"</span>: <span class="hljs-string">"/data/name"</span>
-      }
-    }
-  },
-  <span class="hljs-attr">"example"</span>: {
-    <span class="hljs-attr">"fullname"</span>: {
-      <span class="hljs-attr">"stable_field_index"</span>: <span class="hljs-number">1</span>,
-      <span class="hljs-attr">"jwt"</span>: {
-        <span class="hljs-attr">"json_pointer"</span>: <span class="hljs-string">"/fullname"</span>
-      },
-      <span class="hljs-attr">"event"</span>: {
-        <span class="hljs-attr">"json_pointer"</span>: <span class="hljs-string">"/data/fullname"</span>
       }
     }
   }
 }
 </code></pre>
-<p>This would lead to subscription to event types - <code>greeting</code> and <code>example</code>.</p>
-<p>Environment variable:</p>
-<pre><code class="hljs"><span class="hljs-attr">EXTRACTORS</span>=my-extractor.json
+<p>This sets up an extractor for events of type &quot;greeting&quot;. It has one field called &quot;name&quot;; the value of &quot;name&quot; for any given event is extracted using the <a href="https://tools.ietf.org/html/rfc6901">JSON Pointer</a> <code>/data/name</code>.</p>
+<p>We can pass this configuration to RIG using the environment variable:</p>
+<pre><code class="hljs css language-bash"><span class="hljs-built_in">export</span> EXTRACTORS=extractors.json
 </code></pre>
-<p>Connection call (client side):</p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">new</span> EventSource(<span class="hljs-string">`/connection/sse?jwt=<span class="hljs-subst">${jwt}</span>`</span>)
+<p>Assuming the UI sets up a subscription like this:</p>
+<pre><code class="hljs css language-json">{ <span class="hljs-attr">"subscriptions"</span>: [ { <span class="hljs-attr">"eventType"</span>: <span class="hljs-string">"greeting"</span>, <span class="hljs-attr">"oneOf"</span>: [ { <span class="hljs-attr">"name"</span>: <span class="hljs-string">"John"</span> } ] } ] }
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/api-gateway.html"><span class="arrow-prev">← </span><span>API Gateway</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/user-authentication.html"><span>User authentication</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#manual-subscriptions">Manual subscriptions</a></li><li><a href="#constraints-extractors">Constraints &amp; extractors</a></li><li><a href="#auth">Auth</a></li><li><a href="#inferred-subscriptions">Inferred subscriptions</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div></body></html>
+<p>And RIG receives the following event:</p>
+<pre><code class="hljs css language-json">{
+  "type": "greeting",
+  "data": {
+    "name": "John"
+  },
+  ...
+}
+</code></pre>
+<p>Then RIG's greeting extractor would use the JSON pointer configured for &quot;name&quot; to extract the value &quot;John&quot; and match that against the subscription - this matches, so RIG forwards the event to the UI.</p>
+<h3><a class="anchor" aria-hidden="true" id="extractor-configuration-for-automatic-subscriptions"></a><a href="#extractor-configuration-for-automatic-subscriptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Extractor configuration for automatic subscriptions</h3>
+<p>In order to support automatic, JWT-based subscriptions, the extractor also needs to know how to extract the value from JWT claims. Going back to the previous example, we extends the extractor configuration by an additional <code>jwt</code> property:</p>
+<pre><code class="hljs">
+{
+  "greeting": {
+    "name": {
+      "stable_field_index": 1,
+      "event": {
+        "json_pointer": "/data/name"
+      },
+      <b>"jwt": {
+        "json_pointer": "/username"
+      }</b>
+    }
+  }
+}
+</code></pre>
+<p>With that configuration, a frontend receives all events of type &quot;greeting&quot; where the value of <code>/data/name</code> equals the value of <code>/username</code> in the JWT.</p>
+<h2><a class="anchor" aria-hidden="true" id="manual-subscriptions"></a><a href="#manual-subscriptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Manual subscriptions</h2>
+<p>Manual subscriptions can be set up when establishing the connection. Additionally, RIG offers an endpoint to update a connection's subscriptions after the connection has already been established.</p>
+<p>The following example works similarly for both SSE and WebSocket. We use HTTPie here to make the examples a bit shorter. See the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events">MDN web docs article on SSE</a> for an example on how to set up SSE in a browser.</p>
+<p>Example for setting up initial subscriptions:</p>
+<pre><code class="hljs css language-bash">$ http --stream <span class="hljs-string">':4000/_rig/v1/connection/sse?subscriptions=[{"eventType":"greeting"}]'</span>
+HTTP/1.1 200 OK
+content-type: text/event-stream
+transfer-encoding: chunked
+
+event: rig.connection.create
+data: {<span class="hljs-string">"data"</span>:{<span class="hljs-string">"connection_token"</span>:<span class="hljs-string">"g2dkAA1yaWdAMTI3LjAuMC4xAAAKNwAAAAAD"</span>,<span class="hljs-string">"errors"</span>:[]},<span class="hljs-string">"id"</span>:<span class="hljs-string">"634b8420-010f-4430-870b-fb5ca8e02945"</span>,<span class="hljs-string">"source"</span>:<span class="hljs-string">"rig"</span>,<span class="hljs-string">"specversion"</span>:<span class="hljs-string">"0.2"</span>,<span class="hljs-string">"time"</span>:<span class="hljs-string">"2019-03-27T11:53:18.435690+00:00"</span>,<span class="hljs-string">"type"</span>:<span class="hljs-string">"rig.connection.create"</span>}
+
+event: rig.subscriptions_set
+data: {<span class="hljs-string">"data"</span>:[{<span class="hljs-string">"eventType"</span>:<span class="hljs-string">"greeting"</span>,<span class="hljs-string">"oneOf"</span>:[]}],<span class="hljs-string">"id"</span>:<span class="hljs-string">"ec4deb26-d2a7-46ed-806d-d1beaa2560f8"</span>,<span class="hljs-string">"source"</span>:<span class="hljs-string">"rig"</span>,<span class="hljs-string">"specversion"</span>:<span class="hljs-string">"0.2"</span>,<span class="hljs-string">"time"</span>:<span class="hljs-string">"2019-03-27T11:53:18.438281+00:00"</span>,<span class="hljs-string">"type"</span>:<span class="hljs-string">"rig.subscriptions_set"</span>}
+
+</code></pre>
+<p>Note that the <code>rig.subscriptions_set</code> event includes the passed subscription. Also, note that the <code>rig.connection.create</code> event includes a <code>connection_token</code>; this token can now be used to update the subscriptions after the connection has been established. Let's replace our initial subscription to &quot;greeting&quot; with a new one to &quot;greeting2&quot;:</p>
+<pre><code class="hljs css language-bash">$ CONN_TOKEN=g2dkAA1yaWdAMTI3LjAuMC4xAAAKTAAAAAAD
+$ BODY=<span class="hljs-string">'{"subscriptions": [{"eventType":"greeting2"}]}'</span>
+$ <span class="hljs-built_in">echo</span> <span class="hljs-string">"<span class="hljs-variable">${BODY}</span>"</span> | http put :4000/_rig/v1/connection/sse/<span class="hljs-variable">${CONN_TOKEN}</span>/subscriptions
+HTTP/1.1 204 No Content
+
+</code></pre>
+<p>After this call, the client receives a new <code>rig.subscriptions_set</code> event:</p>
+<pre><code class="hljs css language-plain"><span class="hljs-symbol">event:</span> rig.subscriptions_set
+<span class="hljs-symbol">data:</span> {<span class="hljs-string">"data"</span>:[{<span class="hljs-string">"eventType"</span>:<span class="hljs-string">"greeting2"</span>,<span class="hljs-string">"oneOf"</span>:[]}],<span class="hljs-string">"id"</span>:<span class="hljs-string">"0ba84600-f5cc-4abb-b55d-f9e145cbd03d"</span>,<span class="hljs-string">"source"</span>:<span class="hljs-string">"rig"</span>,<span class="hljs-string">"specversion"</span>:<span class="hljs-string">"0.2"</span>,<span class="hljs-string">"time"</span>:<span class="hljs-string">"2019-03-27T11:58:11.411963+00:00"</span>,<span class="hljs-string">"type"</span>:<span class="hljs-string">"rig.subscriptions_set"</span>}
+</code></pre>
+<p>We see that the subscription to &quot;greeting&quot; has been replaced by a subscription to &quot;greeting2&quot;.</p>
+<p>Note that if you want to retain any automatic subscriptions you got along with setting up the connection, you need to make sure you <em>include the same HTTP Authorization header in both requests</em>.</p>
+<h2><a class="anchor" aria-hidden="true" id="subscription-authorization"></a><a href="#subscription-authorization" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Subscription Authorization</h2>
+<p>RIG can either allow anyone to subscribe to any events, restrict subscriptions to clients that send a valid JWT, or forward subscription requests to an external endpoint and let that endpoint decide whether or not to allow a particular subscription. This can be configured using the environment variable <code>SUBSCRIPTION_CHECK</code> - please consult the <a href="rig-ops-guide">Operator's Guide</a> for details.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/api-gateway.html"><span class="arrow-prev">← </span><span>API Gateway</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/user-authentication.html"><span>User authentication</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#constraints-extractors">Constraints &amp; Extractors</a><ul class="toc-headings"><li><a href="#constraints">Constraints</a></li><li><a href="#basic-extractor-configuration">Basic Extractor configuration</a></li><li><a href="#extractor-configuration-for-automatic-subscriptions">Extractor configuration for automatic subscriptions</a></li></ul></li><li><a href="#manual-subscriptions">Manual subscriptions</a></li><li><a href="#subscription-authorization">Subscription Authorization</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div></body></html>
