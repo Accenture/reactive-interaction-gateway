@@ -34,6 +34,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `JWT_ALG` | Algorithm used to sign and verify JSON web tokens. | "HS256"
 `JWT_SESSION_FIELD` | The JWT field that defines a "session", which is used for listing and killing/blacklisting sessions. What a session is depends on your application. For example, one might set `JWT_SESSION_FIELD` to the users' ID field, which would group all connections that belong to the same user to a single session - this way, blacklisting a session would mean killing all connections of a single user. The `JWT_SESSION_FIELD` is specified using the [JSON Pointer](https://tools.ietf.org/html/rfc6901) notation. Given that the JWT contains a user ID in its "userId" field, the configuration could look like this: `JWT_SESSION_FIELD=/userId`. | nil
 `KAFKA_BROKERS` | List of Kafka brokers RIG should connect to, delimited by comma (e.g., `localhost:9092,localhost:9093`). Usually it's enough to specify one broker and RIG will auto-discover rest of the Kafka cluster. | []
+`KAFKA_GROUP_ID` | Kafka group ID that will be used for all consumers. Ensures nodes will correctly distribute partitions. | "rig"
 `KAFKA_LOG_TOPIC` | Kafka topic for producer used to log HTTP requests going through RIG's API Proxy. | "rig-request-log"
 `KAFKA_RESTART_DELAY_MS` | If the connection to Kafka fails or cannot be established, RIG retries setting up the connection after `KAFKA_RESTART_DELAY_MS` milliseconds. | nil
 `KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will consume, delimited by comma. | ["rig"]

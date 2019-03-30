@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - [Docs] Added missing `id` field to swagger spec for `message` API.
+- [Kafka] Fixed random generation of group IDs. This led to wrong partition distribution when using multiple RIG nodes. Now consumers will have the same ID which can be changed via environment variable - defaults to `rig`.
 
 <!-- ### Security -->
 
