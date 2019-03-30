@@ -60,6 +60,14 @@ defmodule RigApi.MessageController do
           description("The broadcasted CloudEvent according to the CloudEvents spec.")
 
           properties do
+            id(
+              :string,
+              "ID of the event. The semantics of this string are explicitly undefined to ease \
+              the implementation of producers. Enables deduplication.",
+              required: true,
+              example: "A database commit ID"
+            )
+
             specversion(
               :string,
               "The version of the CloudEvents specification which the event uses. This \
