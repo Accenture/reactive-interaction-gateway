@@ -11,6 +11,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
   alias Rig.Connection.Codec
 
+  alias RigMetrics.ProxyMetrics
+
   alias RigInboundGateway.ApiProxy.Base
 
   alias RigInboundGateway.ApiProxy.Handler
@@ -43,6 +45,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
           "Failed to proxy to #{inspect(url)} (#{method} #{request_path}): #{inspect(err)}"
         end)
 
+        count_http_request_error(conn, err.reason, response_from)
+
         Conn.send_resp(conn, :bad_gateway, "Bad gateway.")
 
       :unknown_method ->
@@ -68,8 +72,12 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
   # ---
 
   defp handle_response(conn, res, response_from)
-  defp handle_response(conn, res, "http"), do: send_or_chunk_response(conn, res)
-  defp handle_response(conn, _, response_from), do: wait_for_response(conn, response_from)
+
+  defp handle_response(conn, res, "http"),
+    do: send_or_chunk_response(conn, res)
+
+  defp handle_response(conn, _, response_from),
+    do: wait_for_response(conn, response_from)
 
   # ---
 
@@ -84,12 +92,28 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
     receive do
       {:response_received, response} ->
+        ProxyMetrics.count_proxy_request(
+          conn.method,
+          conn.request_path,
+          "http",
+          response_from,
+          "ok"
+        )
+
         conn
         |> with_cors()
         |> Conn.put_resp_content_type("application/json")
         |> Conn.send_resp(:ok, response)
     after
       response_timeout ->
+        ProxyMetrics.count_proxy_request(
+          conn.method,
+          conn.request_path,
+          "http",
+          response_from,
+          "response_timeout"
+        )
+
         conn
         |> with_cors()
         |> Conn.send_resp(:gateway_timeout, "")
@@ -173,13 +197,19 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
   # ---
 
   @spec send_or_chunk_response(Plug.Conn.t(), HTTPoison.Response.t()) :: Plug.Conn.t()
-  defp send_or_chunk_response(conn, %HTTPoison.Response{
-         headers: headers,
-         status_code: status_code,
-         body: body
-       }) do
+  defp send_or_chunk_response(
+         conn,
+         %HTTPoison.Response{
+           headers: headers,
+           status_code: status_code,
+           body: body
+         }
+       ) do
     headers = for {k, v} <- headers, do: {String.downcase(k), v}
     conn = %{conn | resp_headers: headers}
+
+    # only possibility for "response_from" = "http", therefore hardcoded here
+    ProxyMetrics.count_proxy_request(conn.method, conn.request_path, "http", "http", "ok")
 
     headers
     |> Map.new()
@@ -206,5 +236,27 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
     |> Conn.put_resp_header("access-control-allow-origin", config().cors)
     |> Conn.put_resp_header("access-control-allow-methods", "*")
     |> Conn.put_resp_header("access-control-allow-headers", "content-type")
+  end
+
+  # ---
+
+  defp count_http_request_error(conn, :timeout, response_from) do
+    ProxyMetrics.count_proxy_request(
+      conn.method,
+      conn.request_path,
+      "http",
+      response_from,
+      "request_timeout"
+    )
+  end
+
+  defp count_http_request_error(conn, _, response_from) do
+    ProxyMetrics.count_proxy_request(
+      conn.method,
+      conn.request_path,
+      "http",
+      response_from,
+      "unreachable"
+    )
   end
 end

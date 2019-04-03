@@ -5,6 +5,14 @@ defmodule RigInboundGateway.EventSubscriptionTest do
   # Cannot be async because the extractor configuration is modified:
   use ExUnit.Case, async: false
 
+  defmodule SubscriptionError do
+    defexception [:code, :body]
+    def exception(code, body), do: %__MODULE__{code: code, body: body}
+
+    def message(%__MODULE__{code: code, body: body}),
+      do: "updating subscriptions failed with #{inspect(code)}: #{inspect(body)}"
+  end
+
   alias HTTPoison
   alias Jason
   alias UUID
@@ -51,8 +59,13 @@ defmodule RigInboundGateway.EventSubscriptionTest do
       [{"content-type", "application/json"}] ++
         if is_nil(jwt), do: [], else: [{"authorization", "Bearer #{jwt}"}]
 
-    %HTTPoison.Response{status_code: 204} = HTTPoison.put!(url, body, headers)
-    :ok
+    case HTTPoison.put!(url, body, headers) do
+      %HTTPoison.Response{status_code: 204} ->
+        :ok
+
+      %HTTPoison.Response{status_code: code, body: body} ->
+        raise SubscriptionError, code: code, body: body
+    end
   end
 
   defp submit_event(%CloudEvent{json: json}) do
@@ -120,7 +133,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
       end
     end
 
-    test "Connecting with both a subscriptions and a jwt parameter combines all subscriptions." do
+    test "Connecting with both a subscriptions and a JWT parameter combines all subscriptions." do
       ExtractorConfig.set(%{
         "greeting" => %{
           "name" => %{
@@ -265,6 +278,58 @@ defmodule RigInboundGateway.EventSubscriptionTest do
                  [automatic_subscription, new_subscription],
                  [new_subscription, automatic_subscription]
                ]
+
+        client.disconnect(ref)
+      end
+    end
+
+    test "An invalid subscription causes the request to fail." do
+      invalid_subscription = %{"this" => "is not", "a" => "subscription"}
+
+      for client <- @clients do
+        {:ok, ref} = client.connect(subscriptions: [])
+        welcome_event = client.read_welcome_event(ref)
+
+        %{"data" => []} = client.read_subscriptions_set_event(ref)
+
+        error =
+          assert_raise SubscriptionError, fn ->
+            welcome_event
+            |> connection_id()
+            |> update_subscriptions([invalid_subscription])
+          end
+
+        assert error.code == 400
+        assert error.body =~ ~r/could not parse given subscriptions/
+
+        # The request has failed, so there should be no subscriptions_set event:
+        :ok = client.refute_receive(ref)
+
+        client.disconnect(ref)
+      end
+    end
+
+    test "An invalid JWT causes the request to fail." do
+      invalid_jwt = "this is not a valid JWT"
+
+      for client <- @clients do
+        {:ok, ref} = client.connect(subscriptions: [])
+        welcome_event = client.read_welcome_event(ref)
+
+        %{"data" => []} = client.read_subscriptions_set_event(ref)
+
+        error =
+          assert_raise SubscriptionError, fn ->
+            welcome_event
+            |> connection_id()
+            |> update_subscriptions([], invalid_jwt)
+          end
+
+        assert error.code == 400
+        assert error.body =~ ~r/invalid authorization header/
+
+        # The request has failed, so there should be no subscriptions_set event:
+        :ok = client.refute_receive(ref)
 
         client.disconnect(ref)
       end

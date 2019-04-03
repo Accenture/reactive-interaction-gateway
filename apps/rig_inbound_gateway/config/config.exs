@@ -36,6 +36,7 @@ cowboy_options = [
 cowboy_dispatch = [
   {:_,
    [
+     {"/_rig/v1/connection/sse", RigInboundGatewayWeb.V1.SSE, :ok},
      {"/_rig/v1/connection/ws", RigInboundGatewayWeb.V1.Websocket, :ok},
      {:_, Plug.Cowboy.Handler, {RigInboundGatewayWeb.Endpoint, []}}
    ]}

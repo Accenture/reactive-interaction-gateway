@@ -9,25 +9,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Increased length of header value in HTTP requests to 16384. Reason is to support long tokens such as SAML.
+- [API Gateway] New custom metric: `rig_proxy_requests_total`. For details see [`metrics-details.md`](docs/metrics-details.md). [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
 - _Beta_ - Added Apache Avro support for consumer and producer as well as Kafka Schema Registry.
 
-### Changed
-
-- Validation errors for SSE & WS connections and the subscriptions endpoint should now be a lot more helpful. Also, the welcome event (after establishing a connection) now contains the list of errors (non-breaking change). For example, when passing an invalid JWT, the connection is established nevertheless (new behaviour), but the error is communicated in the welcome event. [#54](https://github.com/Accenture/reactive-interaction-gateway/issues/54)
-- The HTTPS certificate location has been changed from two mount-locations (rig_api/priv/cert & rig_inbound_gateway/priv/cert) to just one location rig/priv/cert. This means the OPS configuration needs to be changed in order to still support HTTPS. Additionally the selfsigned dev-certificate is not longer shipped with the docker image for security reasons [#151](https://github.com/Accenture/reactive-interaction-gateway/issues/151)
+<!-- ### Changed -->
 
 <!-- ### Deprecated -->
 
 <!-- ### Removed -->
 
-### Fixed
-
-- [Proxy] Parsing of JSON files in proxy module. Expected that `api.id` is an atom, but when using files it's a string.
-- [Kinesis] Support for CloudEvents versions 0.1 and 0.2.
-- [Docs] Fixed channels example with latest RIG API changes.
+<!-- ### Fixed -->
 
 <!-- ### Security -->
+
+## [2.1.1] - 2019-03-27
+
+### Added
+
+- When using the proxy, RIG will now add an additional [`Forwarded` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded).
+[#113](https://github.com/Accenture/reactive-interaction-gateway/issues/113)
+- Increased length of header value in HTTP requests to 16384 to support long tokens for SAML.
+
+### Changed
+
+- HTTPS certificates may now be passed using absolute paths. (Previously, the locations of the HTTPS certificates were limited to the OTP-applications' `priv` directories `rig_api/priv/cert` and `rig_inbound_gateway/priv/cert`.) Additionally, for security reasons we no longer include the self-signed certificate with the docker image. Please adapt your environment configuration accordingly.
+[#151](https://github.com/Accenture/reactive-interaction-gateway/issues/151)
+[#182](https://github.com/Accenture/reactive-interaction-gateway/issues/182)
+- Validation errors for SSE & WS connections and the subscriptions endpoint should now be a lot more helpful. Invalid JWTs, as well as invalid subscriptions, cause the endpoints to respond with an error immediately.
+[#54](https://github.com/Accenture/reactive-interaction-gateway/issues/54)
+[#164](https://github.com/Accenture/reactive-interaction-gateway/issues/164)
+
+### Fixed
+
+- [Proxy] Parsing of JSON files in proxy module - `api.id` was expected to be an atom, but when using files it's a string.
+- [Kinesis] Support for CloudEvents versions 0.1 and 0.2.
+- [Docs] Fixed channels example with latest RIG API changes.
+- [Docs] Fixed sse/ws examples to use JWT inferred subscriptions correctly.
 
 ## [2.1.0] - 2019-02-15
 
@@ -186,7 +203,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [Config] Disable Origin checking. [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
-[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.0...HEAD
+[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.1...HEAD
+[2.1.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.2...2.1.0
 [2.0.2]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.0...2.0.1

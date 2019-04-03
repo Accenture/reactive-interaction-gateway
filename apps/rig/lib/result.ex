@@ -270,4 +270,48 @@ defmodule Result do
     |> Enum.filter(&err?/1)
     |> Enum.map(&unwrap_err/1)
   end
+
+  # ---
+
+  @doc """
+  Turns a list of results into a result with lists of either values or errors.
+
+  As soon as there is at least one error in the given list, the result is an
+  error-type Result.
+
+  ## Example
+
+      iex> [ok: :a, ok: :b] |> Result.list_to_result()
+      {:ok, [:a, :b]}
+      iex> [ok: :a, ok: :b, error: :c, error: :d] |> Result.list_to_result()
+      {:error, [:c, :d]}
+
+  """
+  @type fmt_errors :: ([error] -> any)
+  @spec list_to_result([t], fmt_errors) :: ok(list) | err(list)
+  def list_to_result(results, fmt_errors \\ & &1) when is_list(results) do
+    errors = filter_and_unwrap_err(results)
+
+    case errors do
+      [] -> results |> filter_and_unwrap() |> ok()
+      _ -> fmt_errors.(errors) |> err()
+    end
+  end
+
+  # ---
+
+  @doc """
+  Turns a result that holds a list of values or errors into a list of results.
+
+  ## Example
+
+      iex> {:ok, [:a, :b]} |> Result.result_to_list()
+      [ok: :a, ok: :b]
+      iex> {:error, [:c, :d]} |> Result.result_to_list()
+      [error: :c, error: :d]
+
+  """
+  @spec result_to_list(t) :: [ok] | [err]
+  def result_to_list({:ok, values}), do: Enum.map(values, &ok/1)
+  def result_to_list({:error, errors}), do: Enum.map(errors, &err/1)
 end

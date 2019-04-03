@@ -91,15 +91,3 @@ Note that this way we don't need a Docker volume, which might work better in you
 $ curl localhost:4000
 Hi, I'm a demo service!
 ```
-
-## HTTPS/TLS
-
-In order to enable HTTPS, the `HTTPS_CERTFILE` and `HTTPS_KEYFILE` environment variables must be set. During development, this may be set to the self-signed certificate that comes with the repository:
-
-```bash
-export HTTPS_CERTFILE=cert/selfsigned.pem
-export HTTPS_KEYFILE=cert/selfsigned_key.pem
-```
-
-For production you should use proper HTTPS certificates instead (for that reason the Docker image comes without certificates). Refer to the [RIG operator guide](rig-ops-guide.md) to learn more about available configuration options.
-

@@ -16,14 +16,13 @@ const randomString = () => {
 /**
  * Generates JWT with required fields
  * @param   {string} username
- * @param   {array} levels
  * @returns {string} generated JWT
  */
 export const getJwtToken = username => {
   // Populates claims with required fields
   const claims = { username };
 
-  return sign(claims, JWT_SECRET_KEY, { expiresIn: '60m', jwtid: v4() });
+  return sign(claims, JWT_SECRET_KEY, { expiresIn: '60m' });
 };
 
 /**

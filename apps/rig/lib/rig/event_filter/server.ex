@@ -125,7 +125,7 @@ defmodule Rig.EventFilter.Server do
 
   @impl GenServer
   def handle_cast(
-        {:cloud_event, event},
+        %CloudEvent{} = event,
         %{subscription_table: subscription_table, config: config, fields: fields} = state
       ) do
     get_value_in_event = get_extractor(config, event)
@@ -137,7 +137,7 @@ defmodule Rig.EventFilter.Server do
       |> MapSet.new()
 
     for socket_pid <- socket_pid_set do
-      send(socket_pid, {:cloud_event, event})
+      send(socket_pid, event)
     end
 
     {:noreply, state}

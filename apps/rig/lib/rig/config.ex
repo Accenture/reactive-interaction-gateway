@@ -39,6 +39,7 @@ defmodule Rig.Config do
   """
   require Logger
   alias Jason
+  alias Result
 
   defmacro __using__(:custom_validation) do
     __MODULE__.__everything_but_validation__()
@@ -88,13 +89,13 @@ defmodule Rig.Config do
     end
   end
 
-  # -------------
-  # Public Interface
-  # -------------
+  # ---
+  # pub
+  # ---
 
   @spec parse_json_env(String.t()) :: {:ok, any} | {:error, :syntax_error, any}
   def parse_json_env(path_or_encoded) do
-    with {:error, reason1} <- from_file(path_or_encoded),
+    with {:error, reason1} <- decode_json_file(path_or_encoded),
          {:error, reason2} <- from_encoded(path_or_encoded) do
       {:error, :syntax_error, [reason1, reason2]}
     else
@@ -106,43 +107,114 @@ defmodule Rig.Config do
 
   @spec check_and_update_https_config(Keyword.t()) :: Keyword.t()
   def check_and_update_https_config(config) do
-    certfile = config[:https][:certfile]
+    certfile = resolve_path_or_abort("HTTPS_CERTFILE", config[:https][:certfile])
+    keyfile = resolve_path_or_abort("HTTPS_KEYFILE", config[:https][:keyfile])
+    password = config[:https][:password] |> String.to_charlist()
 
-    if(certfile === "") do
-      Logger.warn("No HTTPS_CERTFILE environment variable provided. Disabling HTTPS...")
+    case set_https(config, certfile, keyfile, password) do
+      {:ok, {config, :https_enabled}} ->
+        config
 
-      # DISABLE HTTPS
-      config
-      |> update_in([:https], &disable_https/1)
-    else
-      # UPDATE https_config to add priv/ folder to path
-      config
-      |> update_in([:https, :certfile], &resolve_path/1)
-      |> update_in([:https, :keyfile], &resolve_path/1)
-      |> update_in([:https, :password], &String.to_charlist/1)
+      {:ok, {config, :https_disabled}} ->
+        Logger.warn(fn ->
+          """
+          HTTPS is *disabled*. To enable it, set the HTTPS_CERTFILE and HTTPS_KEYFILE environment variables \
+          (see https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html for details). \
+          Note that we strongly recommend enabling HTTPS (unless you've employed TLS termination elsewhere). \
+          """
+        end)
+
+        config
+
+      {:error, :only_password} ->
+        Logger.error("Please also set HTTPS_CERTFILE and HTTPS_KEYFILE to enable HTTPS.")
+        System.stop(1)
+
+      {:error, :only_keyfile} ->
+        Logger.error("Please also set HTTPS_CERTFILE to enable HTTPS.")
+        System.stop(1)
+
+      {:error, :only_certfile} ->
+        Logger.error("Please also set HTTPS_KEYFILE to enable HTTPS.")
+        System.stop(1)
     end
   end
 
-  # -------------
-  # Helpers
-  # -------------
+  # ----
+  # priv
+  # ----
 
-  @spec from_file(String.t()) :: {:ok, any} | {:error, reason :: any}
-  defp from_file(path) do
-    %{path: path, found?: false}
-    |> check_path_as_is()
-    |> check_relative_to_priv()
+  defp set_https(config, certfile, keyfile, password)
+  defp set_https(config, :empty, :empty, ''), do: {:ok, {disable_https(config), :https_disabled}}
+  defp set_https(_, :empty, :empty, _), do: {:error, :only_password}
+  defp set_https(_, :empty, _, _), do: {:error, :only_keyfile}
+  defp set_https(_, _, :empty, _), do: {:error, :only_certfile}
+
+  defp set_https(config, certfile, keyfile, password),
+    do: {:ok, {enable_https(config, certfile, keyfile, password), :https_enabled}}
+
+  # ---
+
+  defp enable_https(config, certfile, keyfile, password),
+    do:
+      config
+      |> put_in([:https, :certfile], certfile)
+      |> put_in([:https, :keyfile], keyfile)
+      |> put_in([:https, :password], password)
+
+  # ---
+
+  defp disable_https(config), do: put_in(config, [:https], false)
+
+  # ---
+
+  @spec decode_json_file(String.t()) :: {:ok, any} | {:error, reason :: any}
+  defp decode_json_file(path) do
+    path
+    |> resolve_path()
     |> case do
-      %{found?: false} ->
-        {:error, :no_such_file}
+      {:error, err} ->
+        {:error, err}
 
-      %{path: path} ->
+      {:ok, path} ->
         with {:ok, content} <- File.read(path),
              {:ok, config} <- from_encoded(content) do
           {:ok, config}
         else
           {:error, _reason} = err -> err
         end
+    end
+  end
+
+  # ---
+
+  defp resolve_path_or_abort(var_name, value) do
+    case resolve_path(value) do
+      {:ok, path} ->
+        path
+
+      {:error, :empty} ->
+        :empty
+
+      {:error, {:not_found, path}} ->
+        Logger.error("Could not resolve #{var_name}: #{inspect(path)}")
+        System.stop(1)
+    end
+  end
+
+  # ---
+
+  defp resolve_path(path)
+  defp resolve_path(nil), do: {:error, :empty}
+  defp resolve_path(""), do: {:error, :empty}
+
+  defp resolve_path(path) do
+    %{found?: false, path: path}
+    |> check_path_as_is()
+    |> check_relative_to_priv()
+    |> case do
+      %{found?: false} -> Result.err({:not_found, path})
+      %{path: path} -> Result.ok(path)
     end
   end
 
@@ -156,8 +228,14 @@ defmodule Rig.Config do
   # ---
 
   defp check_relative_to_priv(%{found?: false, path: path} = ctx) when byte_size(path) > 0 do
-    phx_app_list()
-    |> Enum.map(fn app -> :code.priv_dir(app) |> Path.join(path) end)
+    [:rig, :rig_inbound_gateway, :rig_api]
+    |> Enum.map(&:code.priv_dir/1)
+    # If the app is not yet loaded this errors, so let's ignore that:
+    |> Enum.filter(fn
+      {:error, _} -> false
+      _ -> true
+    end)
+    |> Enum.map(fn priv_dir -> Path.join(priv_dir, path) end)
     |> Enum.find(&File.exists?/1)
     |> case do
       nil -> ctx
@@ -185,22 +263,5 @@ defmodule Rig.Config do
       [host, port] = for part <- String.split(broker, ":"), do: String.trim(part)
       {host, String.to_integer(port)}
     end)
-  end
-
-  # ---
-
-  defp resolve_path(path) do
-    :code.priv_dir(:rig) |> Path.join(path)
-  end
-
-  # ---
-
-  defp disable_https(_) do
-    false
-  end
-
-  # ---
-  defp phx_app_list do
-    [:rig, :rig_inbound_gateway, :rig_api]
   end
 end

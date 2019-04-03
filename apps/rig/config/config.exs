@@ -1,9 +1,22 @@
 use Mix.Config
 
-config :rig, Rig.EventFilter.Sup, extractor_config_path_or_json: {:system, "EXTRACTORS", nil}
-config :rig, :extractor_path_or_json, {:system, "EXTRACTORS", nil}
+extractor_path_or_json = {:system, "EXTRACTORS", nil}
+# config :rig, :jwt_conf, %{
+#   key: {:system, "JWT_SECRET_KEY", ""},
+#   alg: {:system, "JWT_ALG", "HS256"}
+# }
+jwt_conf = %{
+  key: {:system, "JWT_SECRET_KEY", ""},
+  alg: {:system, "JWT_ALG", "HS256"}
+}
 
-config :porcelain, driver: Porcelain.Driver.Basic
+config :rig, Rig.EventFilter.Sup, extractor_config_path_or_json: extractor_path_or_json
+
+config :rig, RIG.JWT, jwt_conf: jwt_conf
+
+config :rig, RIG.Subscriptions,
+  jwt_conf: jwt_conf,
+  extractor_path_or_json: extractor_path_or_json
 
 config :rig, Rig.EventStream.KafkaToFilter,
   # The list of brokers, given by a comma-separated list of host:port items:
@@ -43,9 +56,6 @@ config :rig, Rig.EventStream.KafkaToHttp,
   # HTTP endpoints to invoke for each Kafka message:
   targets: {:system, :list, "FIREHOSE_KAFKA_HTTP_TARGETS", []}
 
-config :rig, :jwt_conf, %{
-  key: {:system, "JWT_SECRET_KEY", ""},
-  alg: {:system, "JWT_ALG", "HS256"}
-}
+config :porcelain, driver: Porcelain.Driver.Basic
 
 import_config "#{Mix.env()}.exs"
