@@ -5,10 +5,10 @@ defmodule RigKafka.SerializerTest do
 
   alias RigKafka.Serializer
 
-  test "remove_prefix should remove 'cloudEvents_' prefix and ignore cases without such prefix" do
+  test "remove_prefix should remove 'ce-' prefix and ignore cases without such prefix" do
     prefixed_headers = [
-      {"cloudEvents_field1", "value1"},
-      {"cloudEvents_field2", "value2"},
+      {"ce-field1", "value1"},
+      {"ce-field2", "value2"},
       {"field3", "value3"}
     ]
 
@@ -16,13 +16,13 @@ defmodule RigKafka.SerializerTest do
     assert headers_no_prefix == %{field1: "value1", field2: "value2", field3: "value3"}
   end
 
-  test "add_prefix should add 'cloudEvents_' prefix to all fields" do
+  test "add_prefix should add 'ce-' prefix to all fields" do
     headers = %{field1: "value1", field2: "value2"}
     prefixed_headers = Serializer.add_prefix(headers)
 
     assert prefixed_headers == [
-             {"cloudEvents_field1", "value1"},
-             {"cloudEvents_field2", "value2"}
+             {"ce-field1", "value1"},
+             {"ce-field2", "value2"}
            ]
   end
 
@@ -31,8 +31,8 @@ defmodule RigKafka.SerializerTest do
     prefixed_headers = Serializer.add_prefix(headers)
 
     assert prefixed_headers == [
-             {"cloudEvents_field1", "value1"},
-             {"cloudEvents_field2", "field22[field222]=value2"}
+             {"ce-field1", "value1"},
+             {"ce-field2", "field22[field222]=value2"}
            ]
 
     headers_no_prefix = Serializer.remove_prefix(prefixed_headers)

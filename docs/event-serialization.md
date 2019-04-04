@@ -9,12 +9,12 @@ We support [Apache Avro](https://avro.apache.org/) and standard JSON (de)seriali
 
 **Structured content mode**
 
-Includes context attributes in Kafka event value and `cloudEvent_contentType` in headers.
+Includes context attributes in Kafka event value and `ce-contenttype` in headers.
 
 > ##### KAFKA EVENT HEADERS
 >
 > ```
-> cloudEvent_contentType: "application/json"
+> ce-contenttype: "application/json"
 > ```
 >
 > ##### KAFKA EVENT VALUE
@@ -35,9 +35,9 @@ Includes all context attributes in Kafka headers and event value carries only da
 > ##### KAFKA EVENT HEADERS
 >
 > ```
-> cloudEvent_contentType: "avro/binary"
-> cloudEvent_specversion: "0.2"
-> cloudEvent_type: "com.example.someevent"
+> ce-contenttype: "avro/binary"
+> ce-specversion: "0.2"
+> ce-type: "com.example.someevent"
 > ...
 > ```
 >
@@ -70,16 +70,16 @@ Adopting Avro for event (de)serialization is fairly straightforward. First you n
 ### Producer details
 
 - producer evaluates if serialization is turned on by checking `KAFKA_SERIALIZER` environment variable and if it's value is `avro`
-- If it is, creates headers for Kafka event by appending `cloudEvents_` prefix for every field, besides `data` field
+- If it is, creates headers for Kafka event by appending `ce-` prefix for every field, besides `data` field
   - **for deep nested values we are using query encoding**, since Kafka headers don't support nested values
 - after that, the `data` field is serialized using the schema name (function for getting schemas from registry is cached in-memory)
 - producer sends event with created headers and data (in binary format `<<0, 0, 0, 0, 1, 5, 3, 8, ...>>`) to Kafka
 
-> If `KAFKA_SERIALIZER` is not set to `avro`, producer sets **only** `cloudEvents_contenttype` or `cloudEvents_contentType` for kafka event
+> If `KAFKA_SERIALIZER` is not set to `avro`, producer sets **only** `ce-contenttype` or `ce-contentType` for kafka event
 
 ### Consumer details
 
-- when consuming Kafka event, RIG checks headers of such event and removes `cloudEvents_` prefix
+- when consuming Kafka event, RIG checks headers of such event and removes `ce-` prefix
 - based on headers decides cloud events version and content type
 - In case content type is `avro/binary`, schema ID is taken from event value and deserialized
 - If content type is **not** present, RIG checks for Avro format (`<<0, 0, 0, 0, 1, 5, 3, 8, ...>>`) and attempts for deserialization, otherwise event is sent to client as it is without any deserialization

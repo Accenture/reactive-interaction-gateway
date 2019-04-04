@@ -315,13 +315,13 @@ defmodule RigKafka.Client do
   @spec transform_content_type(map()) :: [{String.t(), String.t()}]
   defp transform_content_type(%{"contenttype" => contenttype}) do
     [
-      {"cloudEvents_contenttype", contenttype}
+      {"ce-contenttype", contenttype}
     ]
   end
 
   defp transform_content_type(%{"contentType" => contentType}) do
     [
-      {"cloudEvents_contentType", contentType}
+      {"ce-contentType", contentType}
     ]
   end
 

@@ -9,7 +9,7 @@ defmodule RigKafka.Serializer do
   @typep schema_name :: String.t()
   @typep kafka_headers :: list()
 
-  @prefix "cloudEvents_"
+  @prefix "ce-"
 
   @spec decode_body(any(), encode_type) :: any()
   def decode_body(body, "avro", schema_registry_host) do
