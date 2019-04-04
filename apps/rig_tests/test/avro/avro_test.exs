@@ -59,7 +59,7 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
-    assert :ok == RigKafka.produce(kafka_config, "rigAvro", "rigAvro-value", "response", event)
+    assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
 
@@ -91,7 +91,7 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
-    assert :ok == RigKafka.produce(kafka_config, "rigAvro", "rigAvro-value", "response", event)
+    assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
 
@@ -123,7 +123,7 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
-    assert :ok == RigKafka.produce(kafka_config, "rigAvro", "rigAvro-value", "response", event)
+    assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
 
@@ -155,7 +155,7 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
-    assert :ok == RigKafka.produce(kafka_config, "rigAvro", "rigAvro-value", "response", event)
+    assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
 
@@ -183,7 +183,7 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
-    assert :ok == RigKafka.produce(kafka_config, "rigAvro", "rigAvro-value", "response", event)
+    assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
 
@@ -199,7 +199,7 @@ defmodule RigTests.Avro.AvroTest do
     event = "Simple unstructured event"
 
     kafka_config = kafka_config()
-    assert :ok == RigKafka.produce(kafka_config, "rigAvro", "rigAvro-value", "response", event)
+    assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
     assert received_msg == "Simple unstructured event"

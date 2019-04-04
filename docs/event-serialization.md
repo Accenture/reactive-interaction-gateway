@@ -1,14 +1,15 @@
 ---
-id: event-serializing
-title: Event Serializing
-sidebar_label: Event Serializing
+id: event-serialization
+title: Event Serialization
+sidebar_label: Event Serialization
 ---
 
-We support [Apache Avro](https://avro.apache.org/) and standard JSON (de)serialization of events for producer as well as for consumer. This is working together with [Cloud Events specification](https://github.com/cloudevents/spec) (versions `0.1` and `0.2`). To make both of these worlds work we are utilizing Kafka headers introduced in version `0.11`. As Cloud Events specify there are 2 modes how to make this combination work. Discussion about this topic can be followed on [Github](https://github.com/cloudevents/spec/pull/337/files).
+We support [Apache Avro](https://avro.apache.org/) and standard JSON (de)serialization of events for both Kafka consumers and producers. We aim at following the [CloudEvents specification](https://github.com/cloudevents/spec) as closely as possible (the related part of the spec is called _transport bindings_ and is, at the time of writing, still under development). For the Kafka transport binding, we utilize Kafka headers introduced in Kafka version `0.11`. CloudEvents currently defines two modes of operation; the related discussion can be followed on [Github](https://github.com/cloudevents/spec/pull/337/files).
+
 
 **Structured content mode**
 
-This mode should be used when JSON format is desired, thus no further serialization and deserialization such as Apache Avro.
+Includes context attributes in Kafka event value and `cloudEvent_contentType` in headers.
 
 > ##### KAFKA EVENT HEADERS
 >
@@ -29,7 +30,7 @@ This mode should be used when JSON format is desired, thus no further serializat
 
 **Binary content mode**
 
-This mode should be used when further serialization and deserialization is desired (e.g. Apache Avro).
+Includes all context attributes in Kafka headers and event value carries only data attribute.
 
 > ##### KAFKA EVENT HEADERS
 >
@@ -61,26 +62,27 @@ To be compatible across the board Apache Avro is using specific [format](https:/
 
 ### Setup
 
-![event-serializing-avro](assets/event-serializing-avro.png)
+![event-serialization-avro](assets/event-serialization-avro.png)
 
-Setup for event (de)serialization if fairly straightforward. Besides classic components like web client, RIG and Kafka it needs also `Kafka Schema Registry`. `Kafka Schema Registry` is place where all schemas are stored and retrieved from. As event is consumed from Kafka, RIG fetches schema, caches it in-memory and does deserialization. After that event is sent to web client (or any other client able to connect via WS/SSE). As for producing, RIG fetches schema, caches it in-memory and serialize event. Then it's sent to Kafka.
+Adopting Avro for event (de)serialization is fairly straightforward. First you need to run an instance of the `Kafka Schema Registry`, which is a central store for all Avro schemas in use. As an event is consumed from Kafka, RIG fetches the corresponding schema from the registry and deserializes the event with it, caching the schema in the process (in memory). As for producing, RIG again retrieves and caches the schemas used for serializing events.
+
 
 ### Producer details
 
-- producer evaluates if serializing is turned on by checking `KAFKA_SERIALIZER` environment variable and if it's value is `avro`
-- If it is, creates headers for Kafka event by appending `cloudEvents_` prefix for every field besides `data` field
-  - **for deep nested values we are using query encoding** since Kafka headers don't support nested values
-- after that `data` field is serialized using the schema name (function for getting schemas from registry is cached in-memory)
+- producer evaluates if serialization is turned on by checking `KAFKA_SERIALIZER` environment variable and if it's value is `avro`
+- If it is, creates headers for Kafka event by appending `cloudEvents_` prefix for every field, besides `data` field
+  - **for deep nested values we are using query encoding**, since Kafka headers don't support nested values
+- after that, the `data` field is serialized using the schema name (function for getting schemas from registry is cached in-memory)
 - producer sends event with created headers and data (in binary format `<<0, 0, 0, 0, 1, 5, 3, 8, ...>>`) to Kafka
 
-> If `KAFKA_SERIALIZER` is not set to `avro` producer sets **only** `cloudEvents_contenttype` or `cloudEvents_contentType` for kafka event
+> If `KAFKA_SERIALIZER` is not set to `avro`, producer sets **only** `cloudEvents_contenttype` or `cloudEvents_contentType` for kafka event
 
 ### Consumer details
 
-- when consuming Kafka event RIG checks headers of such event and removes `cloudEvents_` prefix
+- when consuming Kafka event, RIG checks headers of such event and removes `cloudEvents_` prefix
 - based on headers decides cloud events version and content type
 - In case content type is `avro/binary`, schema ID is taken from event value and deserialized
-- If content type is **not** present RIG checks for Avro format (`<<0, 0, 0, 0, 1, 5, 3, 8, ...>>`) and attempts for deserialization, otherwise event is sent to client as it is without any deserialization
+- If content type is **not** present, RIG checks for Avro format (`<<0, 0, 0, 0, 1, 5, 3, 8, ...>>`) and attempts for deserialization, otherwise event is sent to client as it is without any deserialization
 
 ### Example
 

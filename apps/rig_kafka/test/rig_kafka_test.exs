@@ -40,7 +40,7 @@ defmodule RigKafkaTest do
 
   @tag :kafka
   test "Given a started RigKafka client, messages can be produced and consumed." do
-    topic = "rig_kafka_test_simple_topic"
+    topic = "rig-kafka-test-simple-topic"
     serializer = nil
     schema_registry_host = ""
 

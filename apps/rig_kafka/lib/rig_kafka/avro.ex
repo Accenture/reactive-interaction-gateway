@@ -1,6 +1,7 @@
 defmodule RigKafka.Avro do
   @moduledoc """
-  Module responsible for event serialization and deserialization. Manages also connection to Kafka Schema Registry and caching of used schemas.
+  Module responsible for event serialization and deserialization. Manages also
+  connection to Kafka Schema Registry and caching of used schemas.
   """
 
   use Memoize
