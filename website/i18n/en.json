@@ -41,10 +41,6 @@
         "title": "Metrics Details",
         "sidebar_label": "Metrics Details"
       },
-      "https": {
-        "title": "HTTPS",
-        "sidebar_label": "HTTPS"
-      },
       "rig-dev-guide": {
         "title": "Developer's Guide to the Reactive Interaction Gateway",
         "sidebar_label": "Developer's Guide"

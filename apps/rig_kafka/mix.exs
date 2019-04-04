@@ -39,15 +39,15 @@ defmodule RigKafka.MixProject do
       {:brod, "~> 3.7"},
       # For Kafka, partition from MurmurHash(key):
       {:murmur, "~> 1.0"},
-      # For generating client_id and group_id:
-      {:uuid, "~> 1.1"},
       # Apache Avro encoding/decoding library:
       {:erlavro, "~> 2.6.3"},
       # Apache Kafka Schema Registry wrapper library:
       {:schemex, "~> 0.1.1"},
       # Caching library using ETS:
       {:memoize, "~> 1.3"},
-      {:fake_server, "~> 2.0", only: :test}
+      {:fake_server, "~> 2.0", only: :test},
+      # For generating client_id:
+      {:uuid, "~> 1.1"}
     ]
   end
 end

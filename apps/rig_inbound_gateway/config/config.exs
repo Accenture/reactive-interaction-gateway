@@ -116,7 +116,8 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", ""},
   request_schema: {:system, "PROXY_KAFKA_REQUEST_AVRO", ""},
   cors: {:system, "CORS", "*"},
-  response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000}
+  response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000},
+  group_id: {:system, "KAFKA_GROUP_ID", "rig"}
 
 config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
   kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},

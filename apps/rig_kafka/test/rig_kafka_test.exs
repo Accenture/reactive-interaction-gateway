@@ -33,7 +33,8 @@ defmodule RigKafkaTest do
       brokers: brokers,
       consumer_topics: consumer_topics,
       serializer: serializer,
-      schema_registry_host: schema_registry_host
+      schema_registry_host: schema_registry_host,
+      group_id: "rig"
     })
   end
 

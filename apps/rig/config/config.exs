@@ -34,7 +34,8 @@ config :rig, Rig.EventStream.KafkaToFilter,
   # In case the private key is password protected:
   ssl_keyfile_pass: {:system, "KAFKA_SSL_KEYFILE_PASS", ""},
   # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
-  sasl: {:system, "KAFKA_SASL", nil}
+  sasl: {:system, "KAFKA_SASL", nil},
+  group_id: {:system, "KAFKA_GROUP_ID", "rig"}
 
 config :rig, Rig.EventStream.KafkaToHttp,
   # The list of brokers, given by a comma-separated list of host:port items:
@@ -54,7 +55,8 @@ config :rig, Rig.EventStream.KafkaToHttp,
   # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
   sasl: {:system, "KAFKA_SASL", nil},
   # HTTP endpoints to invoke for each Kafka message:
-  targets: {:system, :list, "FIREHOSE_KAFKA_HTTP_TARGETS", []}
+  targets: {:system, :list, "FIREHOSE_KAFKA_HTTP_TARGETS", []},
+  group_id: {:system, "KAFKA_GROUP_ID", "rig"}
 
 config :porcelain, driver: Porcelain.Driver.Basic
 
