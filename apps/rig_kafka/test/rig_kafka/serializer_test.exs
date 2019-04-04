@@ -32,7 +32,7 @@ defmodule RigKafka.SerializerTest do
 
     assert prefixed_headers == [
              {"ce-field1", "value1"},
-             {"ce-field2", "field22[field222]=value2"}
+             {"ce-field2", "{\"field22\":{\"field222\":\"value2\"}}"}
            ]
 
     headers_no_prefix = Serializer.remove_prefix(prefixed_headers)

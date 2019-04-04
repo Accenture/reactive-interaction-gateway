@@ -48,9 +48,14 @@ defmodule RigKafka.Serializer do
           |> String.replace_prefix(@prefix, "")
           |> String.to_atom()
 
-        decoded_value = Plug.Conn.Query.decode(value)
+        decoded_value =
+          try do
+            Jason.decode!(value)
+          rescue
+            _ -> value
+          end
 
-        if query?(decoded_value) do
+        if is_map(decoded_value) && query?(decoded_value) do
           {stripped_key, decoded_value}
         else
           {stripped_key, value}
@@ -68,7 +73,7 @@ defmodule RigKafka.Serializer do
   def add_prefix(headers) do
     for {key, value} <- headers do
       if is_map(value) do
-        {"#{@prefix}#{key}", Plug.Conn.Query.encode(value)}
+        {"#{@prefix}#{key}", Jason.encode!(value)}
       else
         {"#{@prefix}#{key}", value}
       end

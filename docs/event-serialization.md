@@ -71,7 +71,7 @@ Adopting Avro for event (de)serialization is fairly straightforward. First you n
 
 - producer evaluates if serialization is turned on by checking `KAFKA_SERIALIZER` environment variable and if it's value is `avro`
 - If it is, creates headers for Kafka event by appending `ce-` prefix for every field, besides `data` field
-  - **for deep nested values we are using query encoding**, since Kafka headers don't support nested values
+  - **nested context attributes are stringified**, since Kafka headers don't support nested values (this is common when using Cloud events extensions)
 - after that, the `data` field is serialized using the schema name (function for getting schemas from registry is cached in-memory)
 - producer sends event with created headers and data (in binary format `<<0, 0, 0, 0, 1, 5, 3, 8, ...>>`) to Kafka
 
