@@ -31,7 +31,8 @@ defmodule RigKafkaTest do
 
     Config.new(%{
       brokers: brokers,
-      consumer_topics: consumer_topics
+      consumer_topics: consumer_topics,
+      group_id: "rig"
     })
   end
 

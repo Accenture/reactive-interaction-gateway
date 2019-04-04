@@ -22,7 +22,7 @@ while ! is_kafka_ready; do
     sleep 1
 done
 
-check whether Kafka is now ready or the loop has been aborted:
+# check whether Kafka is now ready or the loop has been aborted:
 is_kafka_ready || exit 1
 
 export KAFKA_BROKERS="${HOST}:${KAFKA_PORT_PLAIN}"

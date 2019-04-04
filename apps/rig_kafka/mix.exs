@@ -39,7 +39,7 @@ defmodule RigKafka.MixProject do
       {:brod, "~> 3.7"},
       # For Kafka, partition from MurmurHash(key):
       {:murmur, "~> 1.0"},
-      # For generating client_id and group_id:
+      # For generating client_id:
       {:uuid, "~> 1.1"}
     ]
   end
