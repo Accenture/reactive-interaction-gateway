@@ -49,7 +49,7 @@ Includes all context attributes in Kafka headers and event value carries only da
 
 ## Apache Avro format
 
-To be compatible across the board Apache Avro is using specific [format](https://docs.confluent.io/current/schema-registry/docs/serializer-formatter.html#wire-format) that needs to be followed.
+To be compatible across the board Apache Avro is using specific [format](https://docs.confluent.io/current/schema-registry/docs/serializer-formatter.html#wire-format).
 
 ```bash
 # 0 - magic byte

@@ -50,7 +50,8 @@ defmodule RigKafka.Serializer do
 
         decoded_value =
           try do
-            Jason.decode!(value)
+            {:ok, val} = Jason.decode(value)
+            val
           rescue
             _ -> value
           end
