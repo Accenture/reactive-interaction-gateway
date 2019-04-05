@@ -5,6 +5,10 @@
     "previous": "Previous",
     "tagline": "Your UI deserves an API, too!",
     "docs": {
+      "api-gateway-management": {
+        "title": "API Gateway Management",
+        "sidebar_label": "API Gateway Management"
+      },
       "api-gateway-synchronization": {
         "title": "API Gateway Synchronization",
         "sidebar_label": "API Gateway Synchronization"
@@ -16,6 +20,10 @@
       "architecture": {
         "title": "Architecture",
         "sidebar_label": "Architecture"
+      },
+      "event-streams": {
+        "title": "Event Streams",
+        "sidebar_label": "Event Streams"
       },
       "event-subscription": {
         "title": "Event Subscription",
@@ -44,6 +52,10 @@
       "rig-ops-guide": {
         "title": "Operator's Guide to the Reactive Interaction Gateway",
         "sidebar_label": "Operator's Guide"
+      },
+      "scaling": {
+        "title": "Scaling",
+        "sidebar_label": "Scaling"
       },
       "tutorial": {
         "title": "Tutorial",
