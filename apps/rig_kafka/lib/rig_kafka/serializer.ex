@@ -49,10 +49,8 @@ defmodule RigKafka.Serializer do
           |> String.to_atom()
 
         decoded_value =
-          try do
-            {:ok, val} = Jason.decode(value)
-            val
-          rescue
+          case Jason.decode(value) do
+            {:ok, val} -> val
             _ -> value
           end
 
