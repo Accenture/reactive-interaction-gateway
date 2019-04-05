@@ -10,6 +10,13 @@ cluster, so all nodes share the same configuration without having to sync anythi
 
 ## Swagger
 
+```bash
+docker run -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
+
+# Visit http://localhost:4010/swagger-ui
+# TODO fix swagger in official container
+```
+
 ## Create new API
 
 `POST /v1/apis`

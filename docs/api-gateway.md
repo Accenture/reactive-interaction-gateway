@@ -167,6 +167,8 @@ As you can it needs 2 fields -- `event` and `partition`. `event` holds event its
 
 Topic/stream configuration is handled by environment variables. See `PROXY_KAFKA_*` and `PROXY_KINESIS_*` variables in [Operator's Guide](./rig-ops-guide.md).
 
+> __NOTE:__ Kinesis is not yet supported with `response_from`.
+
 ### Async
 
 Async works in a similar with a difference that RIG won't wait for response. This means as HTTP requests hits RIG, event is published and response sent right away to client.
