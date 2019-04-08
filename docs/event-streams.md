@@ -4,16 +4,16 @@ title: Event Streams
 sidebar_label: Event Streams
 ---
 
-Real time part of RIG is driven by events (Kafka/Kinesis), so to achieve it we'll take a look how to properly configure it.
+Real time part of RIG is driven by events (Kafka/Kinesis) -- to make it work there is some configuration required.
 
 Where is RIG using event streams:
 
-- publishing via API Gateway to specific topic/stream
+- publishing via API Gateway to specific topic/stream, see [Publishing to event streams](./api-gateway#publishing-to-event-streams) for more details
   - consuming of events from specific topic/stream to achieve sync requests
-- consuming of events to forward via SSE/WS
-- publishing monitoring messages per API Gateway call
+- consuming of events to be forwarded via SSE/WS
+- publishing "monitoring" messages per API Gateway call
 
-Event stream functionality is by default turned off -- can be controlled via environment variables. All possible configuration can be found in [Operator's Guide](./rig-ops-guide.md)
+Event stream functionality is by default disabled -- can be controlled via environment variables. All possible configuration can be found in [Operator's Guide](./rig-ops-guide.md)
 
 ## Kafka
 
@@ -29,11 +29,11 @@ docker run accenture/reactive-interaction-gateway
 docker run -e KAFKA_BROKERS=kafka:9092 accenture/reactive-interaction-gateway
 ```
 
-> __NOTE:__ it's enough to set one Kafka broker, RIG will automatically discover rest of Kafka cluster.
+> __NOTE:__ it's enough to set one Kafka broker, RIG will automatically discover rest of the Kafka cluster.
 
 ### Change consumer topics and group ID
 
-As Kafka is enabled RIG starts to consume events on 2 default topics `rig` and `rig-proxy-response`. `rig` topic is used to consume all events and forward them to client via SSE/WS. `rig-proxy-response` is used for HTTP sync publishing, see [API Gateway docs](./api-gateway#sync).
+As Kafka is enabled, RIG starts to consume events on 2 default topics `rig` and `rig-proxy-response`. `rig` topic is used to consume all events and forward them to client via SSE/WS. `rig-proxy-response` is used for HTTP sync publishing, see [API Gateway docs](./api-gateway#sync).
 
 Change topics:
 
@@ -53,8 +53,8 @@ docker run \
 accenture/reactive-interaction-gateway
 ```
 
-In addition to topics you can configure also group ID for these consumers.
-> __NOTE:__ same group ID will be used for all topics
+In addition to topics you can configure also consumer group ID.
+> __NOTE:__ same group ID will be used for all topics.
 
 Change group ID:
 
@@ -69,7 +69,7 @@ accenture/reactive-interaction-gateway
 
 ### Change producer topics
 
-Rig can produce "monitoring" events as an HTTP endpoint is called in proxy and as a target of HTTP endpoint itself, see [API Gateway docs](./api-gateway#sync).
+Rig can produce "monitoring" events as an HTTP endpoint is called in proxy and as a target of HTTP endpoint itself, see [API Gateway docs](./api-gateway#sync). Request are by default using `console` as an output.
 
 Producing "monitoring" events as you call API Gateway endpoints is by default using `rig-request-log` topic.
 
@@ -78,11 +78,12 @@ Change topic:
 ```bash
 docker run \
 -e KAFKA_BROKERS=kafka:9092 \
+-e REQUEST_LOG=console,kafka \
 -e KAFKA_LOG_TOPIC=my-log-topic \
 accenture/reactive-interaction-gateway
 ```
 
-Producing events from proxy as a target of a request is by default turned off.
+Producing events from proxy as a target of a request is by default disabled.
 
 Change topic:
 
@@ -104,7 +105,7 @@ docker run \
 -e KAFKA_SSL_KEYFILE_PASS=abcdefgh \
 accenture/reactive-interaction-gateway
 
-# Change default paths
+# Change default paths for certificates
 docker run \
 -e KAFKA_BROKERS=kafka:9092 \
 -e KAFKA_SSL_ENABLED=1 \
@@ -130,7 +131,7 @@ accenture/reactive-interaction-gateway
 
 ### Enable Kinesis
 
-Similar as Kafka by default disabled and can be enabled via `KINESIS_ENABLED` environment variable.
+Similar as Kafka, Kinesis is by default disabled and can be enabled via `KINESIS_ENABLED` environment variable.
 
 ```bash
 # Kinesis disabled
@@ -140,14 +141,14 @@ docker run accenture/reactive-interaction-gateway
 docker run -e KINESIS_ENABLED=1 accenture/reactive-interaction-gateway
 
 # Configure AWS region
-docker run -e KINESIS_AWS_REGION=eu-west-3 accenture/reactive-interaction-gateway
+docker run -e KINESIS_ENABLED=1 -e KINESIS_AWS_REGION=eu-west-3 accenture/reactive-interaction-gateway
 ```
 
-### Change consumer streams and app name
+### Change consumer stream and app name
 
-As Kinesis is enabled RIG starts to consume events on default stream `RIG-outbound`. `RIG-outbound` topic is used to consume all events and forward them to client via SSE/WS.
+As Kinesis is enabled, RIG starts to consume events on default stream `RIG-outbound`. `RIG-outbound` topic is used to consume all events and forward them to client via SSE/WS.
 
-Change topics:
+Change stream:
 
 ```bash
 docker run \
@@ -156,7 +157,7 @@ docker run \
 accenture/reactive-interaction-gateway
 ```
 
-In addition to topics you can configure also app name. Kinesis is using value of `KINESIS_APP_NAME` as a name for DynamoDB table. DynamoDB is internally used to handle leases and groups. You can think of `KINESIS_APP_NAME` as a group ID in Kafka.
+In addition to stream, you can configure also app name. Kinesis is using value of `KINESIS_APP_NAME` as a name for DynamoDB table. DynamoDB is internally used to handle leases and consumer groups. It's similar to group ID in Kafka.
 
 Change app name:
 
@@ -172,7 +173,7 @@ accenture/reactive-interaction-gateway
 
 Rig can produce events as a target of HTTP endpoint call, see [API Gateway docs](./api-gateway#sync).
 
-Producing events from proxy as a target of a request is by default turned off.
+Producing events from proxy as a target of a request is by default disabled.
 
 Change topic:
 

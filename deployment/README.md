@@ -23,6 +23,7 @@ RIG currently supports distributed deployment via DNS discovery. To make it work
 DNS discovery is executed every 5 seconds.
 
 ### Additional configuration
+
 When running in distributed mode, additional variables may be passed to the deployment in order to run the proper configuration.
 Changes to these variables are required in most production circumstances.
 

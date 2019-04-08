@@ -8,7 +8,7 @@
 
 You can use your own Docker image if it's based on original RIG Docker image.
 
-```
+```yaml
 image: accenture/reactive-interaction-gateway
 ```
 
@@ -16,7 +16,7 @@ image: accenture/reactive-interaction-gateway
 
 IP used to set Node host for each node. Automatically taken from Kubernetes Pod configuration.
 
-```
+```yaml
 - name: NODE_HOST
   valueFrom:
     fieldRef:
@@ -27,12 +27,13 @@ IP used to set Node host for each node. Automatically taken from Kubernetes Pod 
 
 Address upon which RIG will do DNS discovery. This has to point to Kubernetes headless service.
 
-```
+```yaml
 - name: DNS_NAME
   value: "reactive-interaction-gateway-service-headless.default.svc.cluster.local"
 ```
 
 ### Additional Configuration
+
 When running in distributed mode, additional variables may be passed to the deployment in order to run the proper configuration. Updates to the helm chart can be made in ```helm/reactive-interaction-gateway/values.yaml```
 Changes to these variables are required in most production circumstances.
 

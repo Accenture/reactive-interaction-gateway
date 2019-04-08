@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [API Gateway] New custom metric: `rig_proxy_requests_total`. For details see [`metrics-details.md`](docs/metrics-details.md). [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
+- [Docs] Added new set of topics in documentation about Api Gateway, even streams and scaling.
 
 <!-- ### Changed -->
 
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [Docs] Added missing `id` field to swagger spec for `message` API.
 - [Kafka] Fixed random generation of group IDs. This led to wrong partition distribution when using multiple RIG nodes. Now consumers will have the same ID which can be changed via environment variable - defaults to `rig`.
+- [Docs] Fixed missing `swagger.json` file in production Docker image.
 
 <!-- ### Security -->
 

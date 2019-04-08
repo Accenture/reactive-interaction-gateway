@@ -4,18 +4,21 @@ title: API Gateway Management
 sidebar_label: API Gateway Management
 ---
 
-RIG offers an API for creating, changing, and removing API endpoint definitions at runtime.
-Changes caused by calling the API on one RIG node will automatically get distributed among the
-cluster, so all nodes share the same configuration without having to sync anything manually.
+RIG offers an API for creating, changing, and removing API endpoint definitions at runtime. Changes caused by calling the API on one RIG node will automatically get distributed among the cluster, so all nodes share the same configuration without having to sync anything manually. Check out the [API Gateway Synchronization](api-gateway-synchronization.md) to learn more.
 
 ## Swagger
+
+Easiest way how to work with internal REST API is via Swagger.
+
+> __NOTE:__ API running on port `4010` is intended to be internal and thus not publicly exposed without any authorization -- to prevent malicious actions.
 
 ```bash
 docker run -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
 
 # Visit http://localhost:4010/swagger-ui
-# TODO fix swagger in official container
 ```
+
+You'll right away see list of all internal APIs.
 
 ## Create new API
 
@@ -37,9 +40,9 @@ docker run -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
     "default": {
       "endpoints": [
         {
-          "id": "get-auth-register",
+          "id": "post-auth-register",
           "path": "/auth/register",
-          "method": "GET",
+          "method": "POST",
           "secured": false
         }
       ]
@@ -56,6 +59,8 @@ docker run -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
 ## Read list of APIs
 
 `GET /v1/apis`
+
+This is also way how to check if your APIs were loaded properly.
 
 ## Read detail of specific API
 
@@ -81,9 +86,9 @@ docker run -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
     "default": {
       "endpoints": [
         {
-          "id": "get-auth-register",
+          "id": "post-auth-register",
           "path": "/auth/register",
-          "method": "GET",
+          "method": "POST",
           "secured": false
         }
       ]

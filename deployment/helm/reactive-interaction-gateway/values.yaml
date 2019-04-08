@@ -2,28 +2,121 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+## --- Operator's Guide ---
+## To see full list of environemnt variables with values check: https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html
+## ------------------------
 
+## 1 RIG node by default
+replicas: 1
+
+## Docker image configuration
 image:
   repository: accenture/reactive-interaction-gateway
   tag: latest
   pullPolicy: IfNotPresent
 
+## HTTP ports
+# Port for reverse proxy and sse/ws
 apiPort: 4010
+# Port for internal API, such as REST API to change APIs for proxy
 inboundPort: 4000
 
+## Service type - here you decide if RIG should be exposed outside of the cluster
 service:
   type: ClusterIP
 
+## Configuration for headless service which takes care of DNS and discovery of nodes
 service_headless:
   type: ClusterIP
   clusterIP: None
 
-
+## List of environemnt variables
 deployment:
   env:
-    PROXY_CONFIG_FILE: proxy/proxy.test.json
+    ## Ports
+    API_HTTP_PORT: 4010
+    # API_HTTPS_PORT: 4011
+    INBOUND_PORT: 4000
+    # INBOUND_HTTPS_PORT: 4001
+
+    ## Hostname for HTTP endpoints
+    # HOST: localhost
+
+    ## HTTPS
+    # HTTPS_CERTFILE: ""
+    # HTTPS_KEYFILE: ""
+    # HTTPS_KEYFILE_PASS: ""
+
+    ## CORS (Access-Control-Allow-Origin) for "inbound" port
+    # CORS: *
+
+    ## Discovery & node
     DISCOVERY_TYPE: dns
+    ## Change "default" if you are using different namespace
     DNS_NAME: reactive-interaction-gateway-headless.default.svc.cluster.local
     NODE_COOKIE: magiccookie
-    JWT_SECRET_KEY: asdf
+    ## NODE_HOST - you shouldn't set this value by yourself unless you know how
+    ## - it's set dynamically in  "deployment.yaml"
+    # NODE_HOST: ""
+
+    ## Kafka
+    ## Setting "KAFKA_BROKERS" automatically enables usage of Kafka in RIG
+    # KAFKA_BROKERS: localhost:9092
+    # KAFKA_SOURCE_TOPICS: rig
+    # KAFKA_GROUP_ID: rig
+    # KAFKA_RESTART_DELAY_MS: 10000
+    # KAFKA_LOG_TOPIC: rig-request-log
+
+    ## Kafka SASL
+    # KAFKA_SASL: plain:myusername:mypassword
+
+    ## Kafka SSL
+    # KAFKA_SSL_ENABLED: 1
+    # KAFKA_SSL_CA_CERTFILE: ca.crt.pem
+    # KAFKA_SSL_CERTFILE: client.crt.pem
+    # KAFKA_SSL_KEYFILE: client.key.pem
+    # KAFKA_SSL_KEYFILE_PASS: asdf
+
+    ## Kinesis
+    # KINESIS_ENABLED: 1
+    # KINESIS_STREAM: RIG-outbound
+    # KINESIS_APP_NAME: Reactive-Interaction-Gateway
+    # KINESIS_AWS_REGION: eu-west-1
+    # KINESIS_CLIENT_JAR: ./kinesis-client/target/rig-kinesis-client-1.0-SNAPSHOT.jar
+    # KINESIS_OTP_JAR: ""
+    # KINESIS_LOG_LEVEL: INFO
+
+    ## Kinesis internal endpoints - you shouldn't really set these values - they are mostly intended for local testing using e.g. "Localstack"
+    # KINESIS_DYNAMODB_ENDPOINT: ""
+    # KINESIS_ENDPOINT: ""
+
+    ## Proxy
+    # PROXY_CONFIG_FILE: /proxy.json
+    # PROXY_RECV_TIMEOUT: 5000
+
+    ## Proxy Kafka
+    # PROXY_KAFKA_RESPONSE_TOPICS: rig-proxy-response
+    # PROXY_KAFKA_REQUEST_TOPIC: rig-proxy-request
+    # PROXY_KAFKA_RESPONSE_TIMEOUT: 5000
+
+    ## Proxy Kinesis
+    # PROXY_KINESIS_REQUEST_STREAM: rig-proxy-request
+    # PROXY_KINESIS_REQUEST_REGION: eu-west-1
+    # PROXY_KINESIS_RESPONSE_TIMEOUT: 5000
+
+    ## Extractors
+    # EXTRACTORS: '{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/name"}}}}'
+
+    ## JWT
+    # JWT_SECRET_KEY: asdf
+    # JWT_ALG: HS256
+    # JWT_SESSION_FIELD: /userId
+
+    ## Logging
+    # REQUEST_LOG: console,kafka
+    LOG_LEVEL: debug
+
+    ## SSE, WS
+    # SUBSCRIPTION_CHECK: jwt_validation
+    ## HTTP events endpoint
+    # SUBMISSION_CHECK: jwt_validation
