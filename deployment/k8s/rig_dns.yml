@@ -1,3 +1,7 @@
+## --- Operator's Guide ---
+## To see full list of environemnt variables with values check: https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html
+## ------------------------
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,11 +13,19 @@ spec:
     - port: 4000
       targetPort: 4000
       protocol: TCP
-      name: proxy
+      name: proxy-http
+    - port: 4001
+      targetPort: 4001
+      protocol: TCP
+      name: proxy-https
     - port: 4010
       targetPort: 4010
       protocol: TCP
-      name: internal
+      name: internal-http
+    - port: 4011
+      targetPort: 4011
+      protocol: TCP
+      name: internal-https
   selector:
     app: reactive-interaction-gateway-deployment
 ---
@@ -27,9 +39,13 @@ metadata:
 spec:
   ports:
   - port: 4000
-    name: proxy
+    name: proxy-http
+  - port: 4001
+    name: proxy-https
   - port: 4010
-    name: internal
+    name: internal-http
+  - port: 4011
+    name: internal-https
   selector:
     app: reactive-interaction-gateway-deployment
   clusterIP: None
@@ -51,21 +67,117 @@ spec:
         image: accenture/reactive-interaction-gateway
         ports:
         - containerPort: 4000
+        - containerPort: 4001
         - containerPort: 4010
+        - containerPort: 4011
         env:
-        # Kafka is by default disabled
-        # If you want to test with Kafka set KAFKA_BROKERS env var to point to Kafka
-        # Let's have some test-endpoints
-        - name: PROXY_CONFIG_FILE
-          value: "proxy/proxy.test.json"
-        # Mandatory: distributed mode setup
+          ## Ports
+        - name: API_HTTP_PORT
+          value: "4010"
+        - name: API_HTTPS_PORT
+          value: "4011"
+        - name: INBOUND_PORT
+          value: "4000"
+        - name: INBOUND_HTTPS_PORT
+          value: "4001"
+        ## Hostname for HTTP endpoints
+        # - name: HOST
+        #   value: "localhost"
+        ## HTTPS
+        # - name: HTTPS_CERTFILE
+        #   value: "cert/signed.pem"
+        # - name: HTTPS_KEYFILE
+        #   value: "cert/signed_key.pem"
+        # - name: HTTPS_KEYFILE_PASS
+        #   value: "asdf"
+        ## CORS (Access-Control-Allow-Origin) for "inbound" port
+        # - name: CORS: "*"
+        ## Discovery & node
+        - name: DISCOVERY_TYPE
+          value: "dns"
+        ## Change "default" if you are using different namespace
+        - name: DNS_NAME
+          value: "reactive-interaction-gateway-headless.default.svc.cluster.local"
+        - name: NODE_COOKIE
+          value: "magiccookie"
         - name: NODE_HOST
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
-        - name: DISCOVERY_TYPE
-          value: "dns"
-        - name: DNS_NAME
-          value: "reactive-interaction-gateway-service-headless.default.svc.cluster.local"
-        - name: NODE_COOKIE
-          value: "magiccookie"
+        ## Kafka
+        ## Setting "KAFKA_BROKERS" automatically enables usage of Kafka in RIG
+        # - name: KAFKA_BROKERS
+        #   value: "localhost:9092"
+        # - name: KAFKA_SOURCE_TOPICS
+        #   value: "rig"
+        # - name: KAFKA_GROUP_ID
+        #   value: "rig"
+        # - name: KAFKA_RESTART_DELAY_MS
+        #   value: "10000"
+        # - name: KAFKA_LOG_TOPIC
+        #   value: "rig-request-log"
+        ## Kafka SASL
+        # - name: KAFKA_SASL
+        #   value: "plain:myusername:mypassword"
+        ## Kafka SSL
+        # - name: KAFKA_SSL_ENABLED
+        #   value: "1"
+        # - name: KAFKA_SSL_CA_CERTFILE
+        #   value: "ca.crt.pem"
+        # - name: KAFKA_SSL_CERTFILE
+        #   value: "client.crt.pem"
+        # - name: KAFKA_SSL_KEYFILE
+        #   value: "client.key.pem"
+        # - name: KAFKA_SSL_KEYFILE_PASS
+        #   value: "asdf"
+        ## Kinesis
+        # - name: KINESIS_ENABLED
+        #   value: "1"
+        # - name: KINESIS_STREAM
+        #   value: "RIG-outbound"
+        # - name: KINESIS_APP_NAME
+        #   value: "Reactive-Interaction-Gateway"
+        # - name: KINESIS_AWS_REGION
+        #   value: "eu-west-1"
+        # - name: KINESIS_LOG_LEVEL
+        #   value: "INFO"
+        ## Proxy
+        # - name: PROXY_CONFIG_FILE
+        #   value: "/proxy.json"
+        # - name: PROXY_RECV_TIMEOUT
+        #   value: "5000"
+        ## Proxy Kafka
+        # - name: PROXY_KAFKA_RESPONSE_TOPICS
+        #   value: "rig-proxy-response"
+        # - name: PROXY_KAFKA_REQUEST_TOPIC
+        #   value: "rig-proxy-request"
+        # - name: PROXY_KAFKA_RESPONSE_TIMEOUT
+        #   value: "5000"
+        ## Proxy Kinesis
+        # - name: PROXY_KINESIS_REQUEST_STREAM
+        #   value: "rig-proxy-request"
+        # - name: PROXY_KINESIS_REQUEST_REGION
+        #   value: "eu-west-1"
+        # - name: PROXY_KINESIS_RESPONSE_TIMEOUT
+        #   value: "5000"
+        ## Extractors
+        # - name: EXTRACTORS
+        #   value: '{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/name"}}}}'
+        ## JWT
+        # - name: JWT_SECRET_KEY
+        #   value: "asdf"
+        # - name: JWT_ALG
+        #   value: "HS256"
+        # - name: JWT_SESSION_FIELD
+        #   value: "/userId"
+        ## Logging
+        # - name: REQUEST_LOG
+        #   value: "console,kafka"
+        - name: LOG_LEVEL
+          value: "info"
+        ## SSE, WS
+        # - name: SUBSCRIPTION_CHECK
+        #   value: "jwt_validation"
+        ## HTTP events endpoint
+        # - name: SUBMISSION_CHECK
+        #   value: "jwt_validation"

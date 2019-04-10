@@ -1,7 +1,3 @@
-# Default values for reactive-interaction-gateway.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 ## --- Operator's Guide ---
 ## To see full list of environemnt variables with values check: https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html
 ## ------------------------
@@ -14,12 +10,6 @@ image:
   repository: accenture/reactive-interaction-gateway
   tag: latest
   pullPolicy: IfNotPresent
-
-## HTTP ports
-# Port for reverse proxy and sse/ws
-apiPort: 4010
-# Port for internal API, such as REST API to change APIs for proxy
-inboundPort: 4000
 
 ## Service type - here you decide if RIG should be exposed outside of the cluster
 service:
@@ -35,17 +25,17 @@ deployment:
   env:
     ## Ports
     API_HTTP_PORT: 4010
-    # API_HTTPS_PORT: 4011
+    API_HTTPS_PORT: 4011
     INBOUND_PORT: 4000
-    # INBOUND_HTTPS_PORT: 4001
+    INBOUND_HTTPS_PORT: 4001
 
     ## Hostname for HTTP endpoints
     # HOST: localhost
 
     ## HTTPS
-    # HTTPS_CERTFILE: ""
-    # HTTPS_KEYFILE: ""
-    # HTTPS_KEYFILE_PASS: ""
+    # HTTPS_CERTFILE: cert/signed.pem
+    # HTTPS_KEYFILE: cert/signed_key.pem
+    # HTTPS_KEYFILE_PASS: asdf
 
     ## CORS (Access-Control-Allow-Origin) for "inbound" port
     # CORS: *
@@ -55,9 +45,7 @@ deployment:
     ## Change "default" if you are using different namespace
     DNS_NAME: reactive-interaction-gateway-headless.default.svc.cluster.local
     NODE_COOKIE: magiccookie
-    ## NODE_HOST - you shouldn't set this value by yourself unless you know how
-    ## - it's set dynamically in  "deployment.yaml"
-    # NODE_HOST: ""
+    ## NODE_HOST is set dynamically in "deployment.yaml"
 
     ## Kafka
     ## Setting "KAFKA_BROKERS" automatically enables usage of Kafka in RIG
@@ -82,13 +70,7 @@ deployment:
     # KINESIS_STREAM: RIG-outbound
     # KINESIS_APP_NAME: Reactive-Interaction-Gateway
     # KINESIS_AWS_REGION: eu-west-1
-    # KINESIS_CLIENT_JAR: ./kinesis-client/target/rig-kinesis-client-1.0-SNAPSHOT.jar
-    # KINESIS_OTP_JAR: ""
     # KINESIS_LOG_LEVEL: INFO
-
-    ## Kinesis internal endpoints - you shouldn't really set these values - they are mostly intended for local testing using e.g. "Localstack"
-    # KINESIS_DYNAMODB_ENDPOINT: ""
-    # KINESIS_ENDPOINT: ""
 
     ## Proxy
     # PROXY_CONFIG_FILE: /proxy.json
@@ -114,7 +96,7 @@ deployment:
 
     ## Logging
     # REQUEST_LOG: console,kafka
-    LOG_LEVEL: debug
+    LOG_LEVEL: info
 
     ## SSE, WS
     # SUBSCRIPTION_CHECK: jwt_validation

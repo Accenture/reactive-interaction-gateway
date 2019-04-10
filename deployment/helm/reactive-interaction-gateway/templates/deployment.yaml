@@ -33,9 +33,15 @@ spec:
                 fieldRef:
                   fieldPath: status.podIP
           ports:
-            - name: api-port
-              containerPort: {{ .Values.apiPort }}
+            - name: api-port-http
+              containerPort: {{ .Values.deployment.env.API_HTTP_PORT }}
               protocol: TCP
-            - name: inbound-port
-              containerPort: {{ .Values.inboundPort }}
+            - name: api-port-https
+              containerPort: {{ .Values.deployment.env.API_HTTPS_PORT }}
+              protocol: TCP
+            - name: inbound-port-http
+              containerPort: {{ .Values.deployment.env.INBOUND_PORT }}
+              protocol: TCP
+            - name: inbound-port-https
+              containerPort: {{ .Values.deployment.env.INBOUND_HTTPS_PORT }}
               protocol: TCP
