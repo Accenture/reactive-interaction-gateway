@@ -174,15 +174,45 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
     assert conn.resp_body =~ "{\"response\": \"file uploaded successfully\"}"
   end
 
-  test_with_server "Any request should include forward headers", @env do
-    route("/myapi/direct", Response.ok!(~s<{"status":"ok"}>))
+  test_with_server "Any request should include a forward header", @env do
+    # The backend service sees a forwarded header:
+    route("/myapi/direct", fn %{headers: %{"forwarded" => forwarded_header}} ->
+      assert forwarded_header =~ ~r/for=[^;]+;by=.*/
+      Response.ok!()
+    end)
 
-    conn = call(Router, build_conn(:get, "/myapi/direct"))
+    # The request typically doesn't have this header:
+    conn =
+      build_conn(:get, "/myapi/direct")
+      |> Map.put(:req_headers, [])
 
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"status\":\"ok\"}"
-    assert [forwarded_header] = get_req_header(conn, "forwarded")
-    assert forwarded_header =~ ~r/for=[^;]+;by=.*/
+    call(Router, conn)
+
+    # If the request has it set anyway, it's value is ignored and replaced:
+    conn =
+      build_conn(:get, "/myapi/direct")
+      |> Map.put(:req_headers, [{"forwarded", "RIG should replace this"}])
+
+    call(Router, conn)
+  end
+
+  test_with_server """
+                   When forwarding a request, the Host header should point to \
+                   the distination rather than RIG itself.\
+                   """,
+                   @env do
+    route("/myapi/direct", fn %{headers: %{"host" => host_header}} ->
+      # The test endpoint runs on localhost:
+      assert host_header == "localhost:#{@env[:port]}"
+      Response.ok!()
+    end)
+
+    # The request's host header points to RIG, e.g. `rig.local`:
+    conn =
+      build_conn(:get, "/myapi/direct")
+      |> Map.put(:req_headers, [{"host", "rig.local"}])
+
+    call(Router, conn)
   end
 
   test_with_server "should skip auth if no auth method is set", @env do
@@ -193,7 +223,10 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
     assert conn.resp_body =~ "{\"status\":\"ok\"}"
   end
 
-  test_with_server "transform_req_headers should update existing and add new request headers, if requested",
+  test_with_server """
+                   transform_req_headers should update existing and add new \
+                   request headers, if requested.\
+                   """,
                    @env do
     route("/myapi/transform-headers", fn %{method: "POST"} ->
       Response.ok!(~s<{"status":"ok"}>)
