@@ -292,3 +292,27 @@ With URL rewriting you can set how the incoming and outgoing request urls should
 ```
 
 In first case, sending GET request to `/` RIG will forward the request to GET `/different-endpoint`. In second case we are using `path_regex` instead of `path` (this is alternative to `## Dynamic URL parameters`). As you send GET request to `/foo/1/bar/2` RIG will forward it to GET `/bar/1/foo/2`.
+
+## CORS
+
+Quite often you need to deal with cross origin requests. CORS itself is configured via `CORS` environment variable, which defaults to `*`. In addition RIG requires to configure OPTIONS pre-flight endpoints:
+
+```json
+[{
+  "id": "my-service",
+  "version_data": {
+    "default": {
+      "endpoints": [{
+        "id": "my-endpoint",
+        "method": "GET",
+        "path": "/"
+      },{
+        "id": "my-endpoint-preflight",
+        "method": "OPTIONS",
+        "path": "/"
+      }]
+    }
+  },
+  ...
+}]
+```
