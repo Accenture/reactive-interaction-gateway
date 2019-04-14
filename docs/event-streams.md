@@ -69,9 +69,9 @@ accenture/reactive-interaction-gateway
 
 ### Change producer topics
 
-Rig can produce "monitoring" events as an HTTP endpoint is called in proxy and as a target of HTTP endpoint itself, see [API Gateway docs](./api-gateway#sync). Request are by default using `console` as an output.
+Rig can produce "monitoring" events when HTTP endpoint is called in proxy and as a target of HTTP endpoint itself, see [API Gateway docs](./api-gateway#sync).
 
-Producing "monitoring" events as you call API Gateway endpoints is by default using `rig-request-log` topic.
+Producing "monitoring" events is by default using `rig-request-log` topic.
 
 Change topic:
 
@@ -157,7 +157,7 @@ docker run \
 accenture/reactive-interaction-gateway
 ```
 
-In addition to stream, you can configure also app name. Kinesis is using value of `KINESIS_APP_NAME` as a name for DynamoDB table. DynamoDB is internally used to handle leases and consumer groups. It's similar to group ID in Kafka.
+In addition to stream, you can configure also app name. Kinesis is using value of `KINESIS_APP_NAME` as a name for DynamoDB table. DynamoDB is internally used by Amazon to handle leases and consumer groups. It's similar to group ID in Kafka.
 
 Change app name:
 

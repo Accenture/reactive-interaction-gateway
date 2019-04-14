@@ -174,7 +174,7 @@ spec:
         # - name: REQUEST_LOG
         #   value: "console,kafka"
         - name: LOG_LEVEL
-          value: "info"
+          value: "debug"
         ## SSE, WS
         # - name: SUBSCRIPTION_CHECK
         #   value: "jwt_validation"

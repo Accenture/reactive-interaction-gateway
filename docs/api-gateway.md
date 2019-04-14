@@ -13,6 +13,7 @@ The configuration should be passed at startup. Additionally, RIG provides an API
 To pass the configuration at startup, RIG uses an environment variable called `PROXY_CONFIG_FILE`. This variable can be used to either pass the _path_ to an existing JSON file, or to directly pass the configuration as a JSON string. Let's configure a simple endpoint to show how this works.
 
 > The configuration JSON (file) holds a list of API definitions. Refer to the [API Gateway Management](./api-gateway-management.md) for details.
+> You can also utilize [small playground](https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples/api-gateway) in examples
 
 We define an endpoint configuration like this:
 
@@ -59,7 +60,7 @@ Using Docker, our configuration can be put into a file and mounted into the cont
 $ cat <<EOF >config.json
 <paste the configuration from above>
 EOF
-$ docker run \
+$ docker run -d \
   -e API_HOST=http://host.docker.internal \
   -v "$(pwd)"/config.json:/config.json \
   -e PROXY_CONFIG_FILE=/config.json \
@@ -231,6 +232,8 @@ API configuration is following:
 Important blocks are `auth_type` and `auth`. `auth_type` sets which auth mechanism to use -- currently `jwt` or `none`. `auth` sets where to find token that should be used. It's possible to send token in 2 places -- HTTP headers (`use_header`) and as URL query parameter (`use_query`). `header_name` and `query_name` define lookup key in headers/query. You can use headers and query at the same time.
 
 Once you set how to use auth, you can simply define which API endpoint should be secured via `secured` property. Auth check is by default disabled and `secured` field set to `false`.
+
+> Make sure to use `Bearer ...` form as a value for auth header.
 
 ## Headers transformations
 

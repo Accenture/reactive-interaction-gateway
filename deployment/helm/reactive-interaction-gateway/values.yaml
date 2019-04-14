@@ -96,7 +96,7 @@ deployment:
 
     ## Logging
     # REQUEST_LOG: console,kafka
-    LOG_LEVEL: info
+    LOG_LEVEL: debug
 
     ## SSE, WS
     # SUBSCRIPTION_CHECK: jwt_validation

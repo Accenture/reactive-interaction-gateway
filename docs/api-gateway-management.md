@@ -15,6 +15,7 @@ Easiest way how to work with internal REST API is via Swagger.
 ```bash
 docker run -p 4000:4000 -p 4010:4010 accenture/reactive-interaction-gateway
 
+## Notice the "Schemes" field to select between http and https
 # Visit http://localhost:4010/swagger-ui
 ```
 

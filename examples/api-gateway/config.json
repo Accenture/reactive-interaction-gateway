@@ -7,8 +7,7 @@
           {
             "id": "my-endpoint",
             "method": "GET",
-            "path": "/",
-            "path_replacement": "/different-endpoint"
+            "path": "/"
           }
         ]
       }

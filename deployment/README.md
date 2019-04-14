@@ -14,7 +14,7 @@ Reactive Interaction Gateway (RIG) uses [Peerage library](https://github.com/mrl
 
 ### DNS discovery
 
-RIG currently supports distributed deployment via DNS discovery. To make it work, you need to set two things:
+RIG currently supports distributed deployment via DNS discovery. To make it work, you need to set two environment variables:
 
 1. Discovery type - Currently RIG supports only DNS discovery. To use DNS, set `DISCOVERY_TYPE` to `dns`.
 
@@ -27,4 +27,4 @@ DNS discovery is executed every 5 seconds.
 When running in distributed mode, additional variables may be passed to the deployment in order to run the proper configuration.
 Changes to these variables are required in most production circumstances.
 
-For more information on configuration variables, please view the [Operators Guide to the RIG](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html)
+For more information on configuration variables, please view the [Operator's Guide to the RIG](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html)
