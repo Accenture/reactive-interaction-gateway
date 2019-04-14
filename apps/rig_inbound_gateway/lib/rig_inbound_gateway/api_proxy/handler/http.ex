@@ -16,6 +16,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
   alias RigInboundGateway.ApiProxy.Base
 
   alias RigInboundGateway.ApiProxy.Handler
+  alias RigInboundGateway.ApiProxy.Handler.HttpHeader
   @behaviour Handler
 
   # ---
@@ -33,6 +34,13 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
     url =
       build_url(api["proxy"], request_path)
       |> possibly_add_correlation_id(response_from)
+
+    host_ip = Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:url][:host]
+
+    req_headers =
+      req_headers
+      |> HttpHeader.put_host_header(url)
+      |> HttpHeader.put_forward_header(conn.remote_ip, host_ip)
 
     result = do_request(method, url, params, req_headers)
 
