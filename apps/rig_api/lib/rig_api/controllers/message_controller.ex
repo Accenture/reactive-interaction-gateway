@@ -78,6 +78,16 @@ defmodule RigApi.MessageController do
               example: "0.2"
             )
 
+            source(
+              :string,
+              "This describes the event producer. Often this will include information such \
+              as the type of the event source, the organization publishing the event, the \
+              process that produced the event, and some unique identifiers. The exact syntax \
+              and semantics behind the data encoded in the URI is event producer defined.",
+              required: true,
+              example: "/cloudevents/spec/pull/123"
+            )
+
             type(
               :string,
               "Type of occurrence which has happened. Often this attribute is used for \
