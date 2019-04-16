@@ -1,6 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>API Gateway · Reactive Interaction Gateway</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;RIG includes a basic API Gateway implementation (a configurable, distributed HTTP reverse proxy). Provided a route is configured, RIG will forward any matching HTTP request to the respective service, wait for the reply and forward that reply to the original caller.&lt;/p&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="API Gateway · Reactive Interaction Gateway"/><meta property="og:type" content="website"/><meta property="og:url" content="https://accenture.github.io/reactive-interaction-gateway/index.html"/><meta property="og:description" content="&lt;p&gt;RIG includes a basic API Gateway implementation (a configurable, distributed HTTP reverse proxy). Provided a route is configured, RIG will forward any matching HTTP request to the respective service, wait for the reply and forward that reply to the original caller.&lt;/p&gt;
-"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/reactive-interaction-gateway/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/reactive-interaction-gateway/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/reactive-interaction-gateway/"><img class="logo" src="/reactive-interaction-gateway/img/icon.svg" alt="Reactive Interaction Gateway"/><h2 class="headerTitleWithLogo">Reactive Interaction Gateway</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/reactive-interaction-gateway/docs/intro.html" target="_self">User Documentation</a></li><li class=""><a href="/reactive-interaction-gateway/source_docs/index.html" target="_self">Source Documentation</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Main Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/intro.html">Intro</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/tutorial.html">Tutorial</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/faq.html">FAQ</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Main Concepts</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/architecture.html">Architecture</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway.html">API Gateway</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/user-authentication.html">User authentication</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced Guides</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-synchronization.html">API Gateway Synchronization</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-subscription.html">Event Subscription</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-serialization.html">Event Serialization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">RIG in Production</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator&#x27;s Guide</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/metrics-details.html">Metrics Details</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/https.html">HTTPS</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Hacking the Source</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-dev-guide.html">Developer&#x27;s Guide</a></li></ul></div></div></section></div><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>API Gateway · Reactive Interaction Gateway</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;RIG includes a basic API Gateway implementation (a configurable, distributed HTTP reverse proxy). Provided a route is configured, RIG will forward any matching HTTP request to the respective service or event stream, wait for the reply and forward that reply to the original caller.&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="API Gateway · Reactive Interaction Gateway"/><meta property="og:type" content="website"/><meta property="og:url" content="https://accenture.github.io/reactive-interaction-gateway/index.html"/><meta property="og:description" content="&lt;p&gt;RIG includes a basic API Gateway implementation (a configurable, distributed HTTP reverse proxy). Provided a route is configured, RIG will forward any matching HTTP request to the respective service or event stream, wait for the reply and forward that reply to the original caller.&lt;/p&gt;
+"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/reactive-interaction-gateway/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/reactive-interaction-gateway/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/reactive-interaction-gateway/"><img class="logo" src="/reactive-interaction-gateway/img/icon.svg" alt="Reactive Interaction Gateway"/><h2 class="headerTitleWithLogo">Reactive Interaction Gateway</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/reactive-interaction-gateway/docs/intro.html" target="_self">User Documentation</a></li><li class=""><a href="/reactive-interaction-gateway/source_docs/index.html" target="_self">Source Documentation</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Main Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/intro.html">Intro</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/tutorial.html">Tutorial</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/faq.html">FAQ</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Main Concepts</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/architecture.html">Architecture</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway.html">API Gateway</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-streams.html">Event Streams</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-subscription.html">Event Subscription</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/user-authentication.html">User authentication</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced Guides</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-management.html">API Gateway Management</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-synchronization.html">API Gateway Synchronization</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-serialization.html">Event Serialization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">RIG in Production</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator&#x27;s Guide</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/metrics-details.html">Metrics Details</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/https.html">HTTPS</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/scaling.html">Scaling</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Hacking the Source</h3><ul><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-dev-guide.html">Developer&#x27;s Guide</a></li></ul></div></div></section></div><script>
             document.addEventListener('DOMContentLoaded', function() {
               createToggler('#navToggler', '#docsNav', 'docsSliderActive');
               createToggler('#tocToggler', 'body', 'tocActive');
@@ -27,12 +27,13 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">API Gateway</h1></header><article><div><span><p>RIG includes a basic API Gateway implementation (a configurable, distributed HTTP reverse proxy). Provided a route is configured, RIG will forward any matching HTTP request to the respective service, wait for the reply and forward that reply to the original caller.</p>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">API Gateway</h1></header><article><div><span><p>RIG includes a basic API Gateway implementation (a configurable, distributed HTTP reverse proxy). Provided a route is configured, RIG will forward any matching HTTP request to the respective service or event stream, wait for the reply and forward that reply to the original caller.</p>
 <h2><a class="anchor" aria-hidden="true" id="api-endpoint-configuration"></a><a href="#api-endpoint-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>API Endpoint Configuration</h2>
-<p>The configuration should be passed at startup. Additionally, RIG provides an API to add, change or remove routes at runtime. These changes are replicated throughout the cluster, but they are not persisted; that is, if all RIG nodes are shut down, any changes to the proxy configuration are lost. Check out the <a href="/reactive-interaction-gateway/docs/api-gateway-synchronization.html">Advanced API documentation</a> to learn more.</p>
+<p>The configuration should be passed at startup. Additionally, RIG provides an API to add, change or remove routes at runtime. These changes are replicated throughout the cluster, but they are not persisted; that is, if all RIG nodes are shut down, any changes to the proxy configuration are lost. Check out the <a href="/reactive-interaction-gateway/docs/api-gateway-synchronization.html">API Gateway Synchronization</a> to learn more.</p>
 <p>To pass the configuration at startup, RIG uses an environment variable called <code>PROXY_CONFIG_FILE</code>. This variable can be used to either pass the <em>path</em> to an existing JSON file, or to directly pass the configuration as a JSON string. Let's configure a simple endpoint to show how this works.</p>
 <blockquote>
-<p>The configuration JSON (file) holds a list of API definitions. Refer to the <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/guides/configuration.md#api-gateway">API documentation</a> for details.</p>
+<p>The configuration JSON (file) holds a list of API definitions. Refer to the <a href="/reactive-interaction-gateway/docs/api-gateway-management.html">API Gateway Management</a> for details.
+You can also utilize <a href="https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples/api-gateway">small playground</a> in examples</p>
 </blockquote>
 <p>We define an endpoint configuration like this:</p>
 <pre><code class="hljs css language-json">[{
@@ -70,7 +71,7 @@ server.listen(port, err =&gt; {
 <pre><code class="hljs css language-bash">$ cat &lt;&lt;EOF &gt;config.json
 &lt;paste the configuration from above&gt;
 EOF
-$ docker run \
+$ docker run -d \
   -e API_HOST=http://host.docker.internal \
   -v <span class="hljs-string">"<span class="hljs-variable">$(pwd)</span>"</span>/config.json:/config.json \
   -e PROXY_CONFIG_FILE=/config.json \
@@ -93,4 +94,192 @@ $ docker run \
 <pre><code class="hljs css language-bash">$ curl localhost:4000
 Hi, I<span class="hljs-string">'m a demo service!
 </span></code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/architecture.html"><span class="arrow-prev">← </span><span>Architecture</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/event-subscription.html"><span>Event Subscription</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#api-endpoint-configuration">API Endpoint Configuration</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div></body></html>
+<h2><a class="anchor" aria-hidden="true" id="dynamic-url-parameters"></a><a href="#dynamic-url-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Dynamic URL parameters</h2>
+<p>It's a common case that you want to fetch detail for some entity e.g. <code>/books/123</code>. To make sure the dynamic value <code>123</code> is correctly matched and forwarded API endpoint can be configured like this:</p>
+<pre><code class="hljs css language-json">[{
+  "id": "my-service",
+  "version_data": {
+    "default": {
+      "endpoints": [{
+        "id": "my-detail-endpoint",
+        "method": "GET",
+        "path": "/books/{book_id}"
+      }]
+    }
+  },
+  ...
+}]
+</code></pre>
+<p>Dynamic values in <code>path</code> have to be wrapped in curly braces. Value inside curly braces is up to you.</p>
+<h2><a class="anchor" aria-hidden="true" id="publishing-to-event-streams"></a><a href="#publishing-to-event-streams" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Publishing to event streams</h2>
+<p>As an alternative to standard HTTP to HTTP communication, we offer a way how to produce event to Kafka/Kinesis via HTTP request. This means, that frontend can still send regular HTTP request and RIG will publish content of this request to Kafka topic or Kinesis stream.</p>
+<p>In this case, client receives response immediately (fire and forget).</p>
+<p>Configuration of such API endpoint might look like this:</p>
+<pre><code class="hljs css language-json">[{
+  ...
+  "version_data": {
+    "default": {
+      "endpoints": [{
+        "id": "my-endpoint",
+        "method": "POST",
+        "path": "/",
+        "target": "kafka"
+      }]
+    }
+  },
+  ...
+}]
+</code></pre>
+<blockquote>
+<p>Important field is <code>target</code>. <code>target</code> describes what event stream to use. Currently it's either Kafka or Kinesis. HTTP method and <code>path</code> name are up to your choice.</p>
+</blockquote>
+<p>This type of endpoint requires specific HTTP request body:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"event"</span>: {
+    <span class="hljs-attr">"id"</span>: <span class="hljs-string">"069711bf-3946-4661-984f-c667657b8d85"</span>,
+    <span class="hljs-attr">"type"</span>: <span class="hljs-string">"com.example"</span>,
+    <span class="hljs-attr">"time"</span>: <span class="hljs-string">"2018-04-05T17:31:00Z"</span>,
+    <span class="hljs-attr">"specversion"</span>: <span class="hljs-string">"0.2"</span>,
+    <span class="hljs-attr">"source"</span>: <span class="hljs-string">"/cli"</span>,
+    <span class="hljs-attr">"contenttype"</span>: <span class="hljs-string">"application/json"</span>,
+    <span class="hljs-attr">"data"</span>:{
+      <span class="hljs-attr">"foo"</span>: <span class="hljs-string">"bar"</span>
+    }
+  },
+  <span class="hljs-attr">"partition"</span>: <span class="hljs-string">"your_partition_key"</span>
+}
+</code></pre>
+<p>As you can see, it needs 2 fields -- <code>event</code> and <code>partition</code>. <code>event</code> holds event itself (have to comply with Cloud events spec) and <code>partition</code> describes partition key to use.</p>
+<p>Topic/stream configuration is handled by environment variables. See <code>PROXY_KAFKA_*</code> and <code>PROXY_KINESIS_*</code> variables in <a href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator's Guide</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="wait-for-response"></a><a href="#wait-for-response" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Wait for response</h3>
+<p>Sometimes it makes sense to provide a simple request-response API to something that runs asynchronously on the backend. For example, let's say there's a ticket reservation process that takes 10 seconds in total and involves three different services that communicate via message passing. For an external client, it may be simpler to wait 10 seconds for the response instead of polling for a response every other second.
+A behavior like this can be configured using an endpoints' <code>response_from</code> property. When set to <code>kafka</code>, the response to the request is not taken from the <code>target</code> (e.g., for <code>target</code> = <code>http</code> this means the backend's HTTP response is ignored), but instead it's read from a Kafka topic. In order to enable RIG to correlate the response from the topic with the original request, RIG adds a correlation ID to the request (using a query parameter in case of <code>target</code> = <code>http</code>, or backed into the produced CloudEvent otherwise). Backend services that work with the request need to include that correlation ID in their response; otherwise, RIG won't be able to forward it to the client (and times out).</p>
+<p>Configuration of such API endpoint might look like this:</p>
+<pre><code class="hljs css language-json">[{
+  ...
+  "version_data": {
+    "default": {
+      "endpoints": [{
+        "id": "my-endpoint",
+        "method": "POST",
+        "path": "/",
+        "target": "kafka",
+        "response_from": "kafka"
+      }]
+    }
+  },
+  ...
+}]
+</code></pre>
+<blockquote>
+<p>Note the presence of <code>response_from</code> field. This tells RIG to wait for different event with the same correlation ID.</p>
+</blockquote>
+<blockquote>
+<p><strong>NOTE:</strong> Kinesis doesn't support <code>response_from</code> field yet.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="auth"></a><a href="#auth" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Auth</h2>
+<p>RIG can do simple auth check for endpoints. Currently supports JWT.</p>
+<p>API configuration is following:</p>
+<pre><code class="hljs css language-json">[{
+  "id": "my-service",
+  "auth_type": "jwt",
+  "auth": {
+    "use_header": true,
+    "header_name": "Authorization",
+    "use_query": false,
+    "query_name": ""
+  },
+  "version_data": {
+    "default": {
+      "endpoints": [{
+        "id": "my-unsecured-endpoint",
+        "method": "GET",
+        "path": "/unsecured"
+      },{
+        "id": "my-secured-endpoint",
+        "method": "GET",
+        "path": "/secured",
+        "secured": true
+      }]
+    }
+  },
+  ...
+}]
+</code></pre>
+<p>Important blocks are <code>auth_type</code> and <code>auth</code>. <code>auth_type</code> sets which auth mechanism to use -- currently <code>jwt</code> or <code>none</code>. <code>auth</code> sets where to find token that should be used. It's possible to send token in 2 places -- HTTP headers (<code>use_header</code>) and as URL query parameter (<code>use_query</code>). <code>header_name</code> and <code>query_name</code> define lookup key in headers/query. You can use headers and query at the same time.</p>
+<p>Once you set how to use auth, you can simply define which API endpoint should be secured via <code>secured</code> property. Auth check is by default disabled and <code>secured</code> field set to <code>false</code>.</p>
+<blockquote>
+<p>Make sure to use <code>Bearer ...</code> form as a value for auth header.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="headers-transformations"></a><a href="#headers-transformations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Headers transformations</h2>
+<p>Headers transformations are supported in a very simple way. Assume following API configuration:</p>
+<pre><code class="hljs css language-json">[{
+  "id": "my-service",
+  "version_data": {
+    "default": {
+      "transform_request_headers": {
+        "add_headers": {
+          "host": "my-very-different-host.com",
+          "custom-header": "custom-value"
+        }
+      },
+      "endpoints": [{
+        "id": "my-endpoint",
+        "method": "GET",
+        "path": "/"
+      },{
+        "id": "my-transformed-endpoint",
+        "method": "GET",
+        "path": "/transformed",
+        "transform_request_headers": true
+      }]
+    }
+  },
+  ...
+}]
+</code></pre>
+<p>Via <code>transform_request_headers</code> you can set which headers should be overridden or added. In this case RIG would override <code>host</code> header and add completely new header <code>custom-header</code>. Same as with auth, you can define per endpoint if you want to transform headers using <code>transform_request_headers</code> property. Headers transformation is by default disabled and <code>transform_request_headers</code> field set to <code>false</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="url-rewriting"></a><a href="#url-rewriting" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>URL rewriting</h2>
+<p>With URL rewriting you can set how the incoming and outgoing request urls should look like.</p>
+<pre><code class="hljs css language-json">[{
+  "id": "my-service",
+  "version_data": {
+    "default": {
+      "endpoints": [{
+        "id": "my-endpoint",
+        "method": "GET",
+        "path": "/",
+        "path_replacement": "/different-endpoint"
+      },{
+        "id": "my-transformed-endpoint",
+        "method": "GET",
+        "path_regex": "/foo/([^/]+)/bar/([^/]+)",
+        "path_replacement": "/bar/\1/foo/\2"
+      }]
+    }
+  },
+  ...
+}]
+</code></pre>
+<p>In first case, sending GET request to <code>/</code> RIG will forward the request to GET <code>/different-endpoint</code>. In second case we are using <code>path_regex</code> instead of <code>path</code> (this is alternative to <code>## Dynamic URL parameters</code>). As you send GET request to <code>/foo/1/bar/2</code> RIG will forward it to GET <code>/bar/1/foo/2</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="cors"></a><a href="#cors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>CORS</h2>
+<p>Quite often you need to deal with cross origin requests. CORS itself is configured via <code>CORS</code> environment variable, which defaults to <code>*</code>. In addition RIG requires to configure OPTIONS pre-flight endpoints:</p>
+<pre><code class="hljs css language-json">[{
+  "id": "my-service",
+  "version_data": {
+    "default": {
+      "endpoints": [{
+        "id": "my-endpoint",
+        "method": "GET",
+        "path": "/"
+      },{
+        "id": "my-endpoint-preflight",
+        "method": "OPTIONS",
+        "path": "/"
+      }]
+    }
+  },
+  ...
+}]
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/architecture.html"><span class="arrow-prev">← </span><span>Architecture</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/event-streams.html"><span>Event Streams</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#api-endpoint-configuration">API Endpoint Configuration</a></li><li><a href="#dynamic-url-parameters">Dynamic URL parameters</a></li><li><a href="#publishing-to-event-streams">Publishing to event streams</a><ul class="toc-headings"><li><a href="#wait-for-response">Wait for response</a></li></ul></li><li><a href="#auth">Auth</a></li><li><a href="#headers-transformations">Headers transformations</a></li><li><a href="#url-rewriting">URL rewriting</a></li><li><a href="#cors">CORS</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div></body></html>
