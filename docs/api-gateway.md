@@ -167,7 +167,8 @@ Topic/stream configuration is handled by environment variables. See `PROXY_KAFKA
 
 ### Wait for response
 
-Publishing to event stream is asynchronous action (it's not request/response mechanism like HTTP is). Endpoint above can be configured, so that RIG waits for different event with the same correlation ID as the published event had. If such event is consumed, HTTP process is notified and client gets back response, otherwise it's timeout. The correlation ID is attached to Cloud events extension in published event called `rig`. In your backend systems you have to make sure that this extension field will be included also in the event that should be consumed by RIG and finish the process.
+Sometimes it makes sense to provide a simple request-response API to something that runs asynchronously on the backend. For example, let's say there's a ticket reservation process that takes 10 seconds in total and involves three different services that communicate via message passing. For an external client, it may be simpler to wait 10 seconds for the response instead of polling for a response every other second.
+A behavior like this can be configured using an endpoints' `response_from` property. When set to `kafka`, the response to the request is not taken from the `target` (e.g., for `target` = `http` this means the backend's HTTP response is ignored), but instead it's read from a Kafka topic. In order to enable RIG to correlate the response from the topic with the original request, RIG adds a correlation ID to the request (using a query parameter in case of `target` = `http`, or backed into the produced CloudEvent otherwise). Backend services that work with the request need to include that correlation ID in their response; otherwise, RIG won't be able to forward it to the client (and times out).
 
 Configuration of such API endpoint might look like this:
 
