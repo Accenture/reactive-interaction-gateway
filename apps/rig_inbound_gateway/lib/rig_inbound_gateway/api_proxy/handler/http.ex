@@ -41,6 +41,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
       req_headers
       |> HttpHeader.put_host_header(url)
       |> HttpHeader.put_forward_header(conn.remote_ip, host_ip)
+      |> drop_connection_related_headers()
 
     result = do_request(method, url, params, req_headers)
 
@@ -213,7 +214,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
            body: body
          }
        ) do
-    headers = for {k, v} <- headers, do: {String.downcase(k), v}
+    headers =
+      headers
+      |> Enum.map(fn {k, v} -> {String.downcase(k), v} end)
+      |> drop_connection_related_headers()
+
     conn = %{conn | resp_headers: headers}
 
     # only possibility for "response_from" = "http", therefore hardcoded here
@@ -266,5 +271,31 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
       response_from,
       "unreachable"
     )
+  end
+
+  # ---
+
+  defp drop_connection_related_headers(headers) do
+    # Connection related headers break HTTP/2
+    # (and it doesn't make sense to forward them anyway).
+    # See https://tools.ietf.org/html/rfc7540#section-8.1.2.2
+
+    headers
+    |> Enum.map(fn {k, v} -> {String.downcase(k), v} end)
+    |> Enum.filter(fn
+      {k, _}
+      when k in [
+             "connection",
+             "keep-alive",
+             "proxy-connection",
+             "transfer-encoding",
+             "upgrade",
+             "http2-settings"
+           ] ->
+        false
+
+      _ ->
+        true
+    end)
   end
 end
