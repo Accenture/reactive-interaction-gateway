@@ -8,7 +8,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
       app: {{ template "reactive-interaction-gateway.name" . }}
@@ -32,14 +32,16 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-            - name: API_PORT
-              value: {{ .Values.apiPort | quote }}
-            - name: INBOUND_PORT
-              value: {{ .Values.inboundPort | quote }}
           ports:
-            - name: api-port
-              containerPort: {{ .Values.apiPort }}
+            - name: internal-http
+              containerPort: {{ .Values.deployment.env.API_HTTP_PORT }}
               protocol: TCP
-            - name: inbound-port
-              containerPort: {{ .Values.inboundPort }}
+            - name: internal-https
+              containerPort: {{ .Values.deployment.env.API_HTTPS_PORT }}
+              protocol: TCP
+            - name: proxy-http
+              containerPort: {{ .Values.deployment.env.INBOUND_PORT }}
+              protocol: TCP
+            - name: proxy-https
+              containerPort: {{ .Values.deployment.env.INBOUND_HTTPS_PORT }}
               protocol: TCP

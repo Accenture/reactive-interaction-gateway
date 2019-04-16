@@ -1,0 +1,21 @@
+[
+  {
+    "id": "my-service",
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "my-endpoint",
+            "method": "GET",
+            "path": "/"
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "API_HOST",
+      "port": 3000
+    }
+  }
+]

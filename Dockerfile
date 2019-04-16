@@ -62,6 +62,7 @@ COPY apps/rig_metrics/config /opt/sites/rig/apps/rig_metrics/config
 COPY apps/rig_metrics/lib /opt/sites/rig/apps/rig_metrics/lib
 
 # Compile and release application production code
+RUN mix compile
 RUN mix release
 
 FROM erlang:21-alpine

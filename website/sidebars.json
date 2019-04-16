@@ -9,18 +9,20 @@
     "Main Concepts": [
       "architecture",
       "api-gateway",
+      "event-streams",
       "event-subscription",
       "user-authentication"
     ],
     "Advanced Guides": [
+      "api-gateway-management",
       "api-gateway-synchronization",
-      "event-subscription",
       "event-serialization"
     ],
     "RIG in Production": [
       "rig-ops-guide",
       "metrics-details",
-      "https"
+      "https",
+      "scaling"
     ],
     "Hacking the Source": [
       "rig-dev-guide"

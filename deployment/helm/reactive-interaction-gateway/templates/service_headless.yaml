@@ -11,14 +11,22 @@ spec:
   type: {{ .Values.service_headless.type }}
   clusterIP: {{ .Values.service_headless.clusterIP }}
   ports:
-    - port: {{ .Values.inboundPort }}
-      targetPort: {{ .Values.inboundPort }}
+    - port: {{ .Values.deployment.env.INBOUND_PORT }}
+      targetPort: {{ .Values.deployment.env.INBOUND_PORT }}
       protocol: TCP
-      name: proxy
-    - port: {{ .Values.apiPort }}
-      targetPort: {{ .Values.apiPort }}
+      name: proxy-http
+    - port: {{ .Values.deployment.env.INBOUND_HTTPS_PORT }}
+      targetPort: {{ .Values.deployment.env.INBOUND_HTTPS_PORT }}
       protocol: TCP
-      name: internal
+      name: proxy-https
+    - port: {{ .Values.deployment.env.API_HTTP_PORT }}
+      targetPort: {{ .Values.deployment.env.API_HTTP_PORT }}
+      protocol: TCP
+      name: internal-http
+    - port: {{ .Values.deployment.env.API_HTTPS_PORT }}
+      targetPort: {{ .Values.deployment.env.API_HTTPS_PORT }}
+      protocol: TCP
+      name: internal-https
   selector:
     app: {{ template "reactive-interaction-gateway.name" . }}
     release: {{ .Release.Name }}
