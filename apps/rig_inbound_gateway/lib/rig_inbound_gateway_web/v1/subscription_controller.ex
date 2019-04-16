@@ -71,7 +71,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
     with :ok <- SubscriptionAuthZ.check_authorization(conn),
          {:ok, socket_pid} <- Connection.Codec.deserialize(connection_id),
-         :ok <- connection_alive!(socket_pid) do
+         :ok <- check_connection_alive(socket_pid) do
       # Updating the session allows blacklisting it later on:
       Session.update(conn, socket_pid)
       do_set_subscriptions(conn, socket_pid, subscriptions)
@@ -118,8 +118,19 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
   # ---
 
-  defp connection_alive!(pid) do
-    if Process.alive?(pid), do: :ok, else: {:error, :process_dead}
+  defp check_connection_alive(pid) do
+    case :rpc.pinfo(pid) do
+      {:badrpc, :nodedown} ->
+        # The node the process was running on is no longer alive.
+        {:error, :process_dead}
+
+      :undefined ->
+        # The node is alive, but the process is down.
+        {:error, :process_dead}
+
+      _ ->
+        :ok
+    end
   end
 
   # ---

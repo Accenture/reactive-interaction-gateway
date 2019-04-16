@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Changed -->
 
+### Fixed
+
+- Fixed a bug that caused the subscriptions endpoint to return an internal server error when running RIG in a clustered setup. [#194](https://github.com/Accenture/reactive-interaction-gateway/issues/194)
+
 <!-- ### Deprecated -->
 
 <!-- ### Removed -->
