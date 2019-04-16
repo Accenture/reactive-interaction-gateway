@@ -15,7 +15,8 @@
     ],
     "Advanced Guides": [
       "api-gateway-management",
-      "api-gateway-synchronization"
+      "api-gateway-synchronization",
+      "event-serialization"
     ],
     "RIG in Production": [
       "rig-ops-guide",

@@ -17,6 +17,8 @@ defmodule Rig.KafkaConsumerSetup do
   defmacro __using__(additional_config_keys) do
     kafka_config_keys = [
       :brokers,
+      :serializer,
+      :schema_registry_host,
       :consumer_topics,
       :ssl_enabled?,
       :ssl_ca_certfile,
