@@ -117,11 +117,9 @@ Dynamic values in `path` have to be wrapped in curly braces. Value inside curly 
 
 ## Publishing to event streams
 
-As an alternative to standard HTTP to HTTP communication, we offer a way how to produce event to Kafka/Kinesis via HTTP request. This means, that frontend can still send regular HTTP request and RIG will publish content of this request to Kafka topic or Kinesis stream. We distinguish between two types of such request -- sync and async.
+As an alternative to standard HTTP to HTTP communication, we offer a way how to produce event to Kafka/Kinesis via HTTP request. This means, that frontend can still send regular HTTP request and RIG will publish content of this request to Kafka topic or Kinesis stream.
 
-### Sync
-
-Sync means that as you send HTTP request to RIG, it publishes event to Kafka/Kinesis and waits for the acknowledgment from consumer. Consumer has to receive event with the same correlation ID. If such event is consumed, HTTP process is notified and client gets back response, otherwise it's timeout. The correlation ID is attached to Cloud events extension in published event called `rig`. In your backend systems you have to make sure that this extension field will be included also in the event that should be consumed by RIG and finish the process.
+In this case, client receives response immediately (fire and forget).
 
 Configuration of such API endpoint might look like this:
 
@@ -134,8 +132,7 @@ Configuration of such API endpoint might look like this:
         "id": "my-endpoint",
         "method": "POST",
         "path": "/",
-        "target": "kafka",
-        "response_from": "kafka"
+        "target": "kafka"
       }]
     }
   },
@@ -143,7 +140,7 @@ Configuration of such API endpoint might look like this:
 }]
 ```
 
-> Important fields are `target` and `response_from`. Both of them describe what event stream to use. Currently it's either Kafka or Kinesis. It's recommended to use `POST` http method. `path` name is up to you.
+> Important field is `target`. `target` describes what event stream to use. Currently it's either Kafka or Kinesis. HTTP method and `path` name are up to your choice.
 
 This type of endpoint requires specific HTTP request body:
 
@@ -168,13 +165,11 @@ As you can see, it needs 2 fields -- `event` and `partition`. `event` holds even
 
 Topic/stream configuration is handled by environment variables. See `PROXY_KAFKA_*` and `PROXY_KINESIS_*` variables in [Operator's Guide](./rig-ops-guide.md).
 
-> __NOTE:__ Kinesis is not yet supporting `response_from` field.
+### Wait for response
 
-### Async
+Publishing to event stream is asynchronous action (it's not request/response mechanism like HTTP is). Endpoint above can be configured, so that RIG waits for different event with the same correlation ID as the published event had. If such event is consumed, HTTP process is notified and client gets back response, otherwise it's timeout. The correlation ID is attached to Cloud events extension in published event called `rig`. In your backend systems you have to make sure that this extension field will be included also in the event that should be consumed by RIG and finish the process.
 
-Async works in a similar way with a difference that **RIG won't wait for the response**. This means as HTTP requests hits RIG, event is published and response sent right away to client.
-
-Configuration of such API endpoint is almost the same, just this time **no `response_from` field**:
+Configuration of such API endpoint might look like this:
 
 ```json
 [{
@@ -185,7 +180,8 @@ Configuration of such API endpoint is almost the same, just this time **no `resp
         "id": "my-endpoint",
         "method": "POST",
         "path": "/",
-        "target": "kafka"
+        "target": "kafka",
+        "response_from": "kafka"
       }]
     }
   },
@@ -193,7 +189,9 @@ Configuration of such API endpoint is almost the same, just this time **no `resp
 }]
 ```
 
-HTTP request body and configuration is the same as for sync.
+> Note the presence of `response_from` field. This tells RIG to wait for different event with the same correlation ID.
+
+> __NOTE:__ Kinesis doesn't support `response_from` field yet.
 
 ## Auth
 

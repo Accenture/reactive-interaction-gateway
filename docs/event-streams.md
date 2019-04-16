@@ -6,7 +6,7 @@ sidebar_label: Event Streams
 
 Real time part of RIG is driven by events (Kafka/Kinesis) -- to make it work there is some configuration required.
 
-Where is RIG using event streams:
+Where RIG uses event streams:
 
 - publishing via API Gateway to specific topic/stream, see [Publishing to event streams](./api-gateway#publishing-to-event-streams) for more details
   - consuming of events from specific topic/stream to achieve sync requests
@@ -69,7 +69,7 @@ accenture/reactive-interaction-gateway
 
 ### Change producer topics
 
-Rig can produce "monitoring" events when HTTP endpoint is called in proxy and as a target of HTTP endpoint itself, see [API Gateway docs](./api-gateway#sync).
+RIG can produce "monitoring" events on incoming HTTP requests, see [API Gateway docs](./api-gateway#sync).
 
 Producing "monitoring" events is by default using `rig-request-log` topic.
 
@@ -133,9 +133,11 @@ accenture/reactive-interaction-gateway
 
 Similar as Kafka, Kinesis is by default disabled and can be enabled via `KINESIS_ENABLED` environment variable.
 
+> __NOTE:__ when using Kinesis we have to use image tag `aws`.
+
 ```bash
 # Kinesis disabled
-docker run accenture/reactive-interaction-gateway
+docker run accenture/reactive-interaction-gateway:aws
 
 # Kinesis enabled
 docker run -e KINESIS_ENABLED=1 accenture/reactive-interaction-gateway
@@ -154,7 +156,7 @@ Change stream:
 docker run \
 -e KINESIS_ENABLED=1 \
 -e KINESIS_STREAM=my-stream \
-accenture/reactive-interaction-gateway
+accenture/reactive-interaction-gateway:aws
 ```
 
 In addition to stream, you can configure also app name. Kinesis is using value of `KINESIS_APP_NAME` as a name for DynamoDB table. DynamoDB is internally used by Amazon to handle leases and consumer groups. It's similar to group ID in Kafka.
@@ -166,12 +168,12 @@ docker run \
 -e KINESIS_ENABLED=1 \
 -e KINESIS_STREAM=my-stream \
 -e KINESIS_APP_NAME=my-app_name \
-accenture/reactive-interaction-gateway
+accenture/reactive-interaction-gateway:aws
 ```
 
 ### Change producer streams
 
-Rig can produce events as a target of HTTP endpoint call, see [API Gateway docs](./api-gateway#sync).
+RIG can produce events as a target of HTTP endpoint call, see [API Gateway docs](./api-gateway#sync).
 
 Producing events from proxy as a target of a request is by default disabled.
 
@@ -182,5 +184,5 @@ docker run \
 -e KINESIS_ENABLED=1 \
 -e PROXY_KINESIS_REQUEST_STREAM=my-proxy-request-topic \
 -e PROXY_KINESIS_REQUEST_REGION=eu-west-3 \
-accenture/reactive-interaction-gateway
+accenture/reactive-interaction-gateway:aws
 ```
