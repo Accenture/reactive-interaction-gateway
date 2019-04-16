@@ -99,6 +99,8 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Http,
 config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
+  serializer: {:system, "KAFKA_SERIALIZER", nil},
+  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", "localhost:8081"},
   # The list of topics to consume messages from:
   consumer_topics: {:system, :list, "PROXY_KAFKA_RESPONSE_TOPICS", ["rig-proxy-response"]},
   # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored; otherwise, they're required.
@@ -112,6 +114,7 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
   sasl: {:system, "KAFKA_SASL", nil},
   request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", ""},
+  request_schema: {:system, "PROXY_KAFKA_REQUEST_AVRO", ""},
   cors: {:system, "CORS", "*"},
   response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000},
   group_id: {:system, "KAFKA_GROUP_ID", "rig"}
@@ -123,7 +126,8 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
   cors: {:system, "CORS", "*"}
 
 config :rig, RigInboundGateway.RequestLogger.Kafka,
-  log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"}
+  log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"},
+  log_schema: {:system, "KAFKA_LOG_SCHEMA", ""}
 
 # --------------------------------------
 # Authorization Token (JWT)

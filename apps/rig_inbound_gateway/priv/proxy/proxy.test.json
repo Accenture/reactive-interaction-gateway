@@ -25,7 +25,6 @@
             "method": "POST",
             "type": "async",
             "target": "kafka",
-            "topic": "test-topic",
             "secured": false
           },
           {
@@ -43,7 +42,6 @@
             "method": "POST",
             "type": "sync",
             "target": "kafka",
-            "topic": "test-topic",
             "secured": false
           },
           {

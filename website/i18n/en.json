@@ -17,6 +17,10 @@
         "title": "Architecture",
         "sidebar_label": "Architecture"
       },
+      "event-serialization": {
+        "title": "Event Serialization",
+        "sidebar_label": "Event Serialization"
+      },
       "event-subscription": {
         "title": "Event Subscription",
         "sidebar_label": "Event Subscription"

@@ -3,7 +3,7 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
   Kafka request logger implementation.
 
   """
-  use Rig.Config, [:log_topic]
+  use Rig.Config, [:log_topic, :log_schema]
   require Logger
   alias Rig.Kafka, as: RigKafka
   alias RigAuth.Jwt.Utils, as: Jwt
@@ -52,7 +52,7 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
     # If topic does not exist, it will be created automatically, provided the server is
     # configured that way. However, this call then returns with {:error, :LeaderNotAvailable},
     # as at that point there won't be a partition leader yet.
-    RigKafka.produce(conf.log_topic, _key = username, _plaintext = message_json)
+    RigKafka.produce(conf.log_topic, conf.log_schema, _key = username, _plaintext = message_json)
   rescue
     err ->
       case err do
