@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Docs] Added missing `id` field to swagger spec for `message` API.
 - [Kafka] Fixed random generation of group IDs. This led to wrong partition distribution when using multiple RIG nodes. Now consumers will have the same ID which can be changed via environment variable - defaults to `rig`.
 - [Proxy] When forwarding an HTTP request, the [`Host`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Host) request header is now set to the `target_url` defined by the proxy configuration. [#188](https://github.com/Accenture/reactive-interaction-gateway/issues/188)
+- [Proxy] Added missing CORS headers for Kafka/Kinesis target type when not using `response_from`.
 
 <!-- ### Security -->
 

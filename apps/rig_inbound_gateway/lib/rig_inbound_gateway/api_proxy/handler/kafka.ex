@@ -114,6 +114,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         _ -> false
       end
 
+    conn = with_cors(conn)
+
     if wait_for_response? do
       wait_for_response(conn, response_from)
     else
@@ -165,7 +167,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         )
 
         conn
-        |> with_cors()
         |> Conn.put_resp_content_type("application/json")
         |> Conn.send_resp(:ok, response)
     after
@@ -179,7 +180,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         )
 
         conn
-        |> with_cors()
         |> Conn.send_resp(:gateway_timeout, "")
     end
   end
