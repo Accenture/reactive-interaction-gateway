@@ -1,11 +1,3 @@
----
-name: Pull request
-about: Create a new pull request
-title: ''
-labels: pr
-
----
-
 ## Description
 
 > Hint: In most cases this should match the changelog entry.
