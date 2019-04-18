@@ -97,13 +97,18 @@ KAFKA_PORT_PLAIN=17092 KAFKA_PORT_SSL=17093 HOST=localhost docker-compose -f int
 # 2. Start Rig
 # Here we say to use Avro, consume on topic "rigRequest" and use "rigRequest-value" schema from Kafka Schema Registry
 # Proxy is turned on to be able to produce Kafka event with headers (needed for cloud events)
-KAFKA_BROKERS=localhost:17092 \
-KAFKA_SERIALIZER=avro \
-KAFKA_SOURCE_TOPICS=rigRequest \
-PROXY_CONFIG_FILE=proxy/proxy.test.json \
-PROXY_KAFKA_REQUEST_TOPIC=rigRequest \
-PROXY_KAFKA_REQUEST_AVRO=rigRequest-value \
-mix phx.server
+docker run -d --name rig \
+-e KAFKA_BROKERS=kafka:9292 \
+-e KAFKA_SERIALIZER=avro \
+-e KAFKA_SCHEMA_REGISTRY_HOST=kafka-schema-registry:8081 \
+-e KAFKA_SOURCE_TOPICS=rigRequest \
+-e PROXY_CONFIG_FILE=proxy/proxy.test.json \
+-e PROXY_KAFKA_REQUEST_TOPIC=rigRequest \
+-e PROXY_KAFKA_REQUEST_AVRO=rigRequest-value \
+-e LOG_LEVEL=debug \
+-p 4000:4000 -p 4010:4010 \
+--network kafka_tests_default \
+accenture/reactive-interaction-gateway
 
 # 3. Register Avro schema in Kafka Schema Registry
 curl -d '{"schema":"{\"name\":\"rigproducer\",\"type\":\"record\",\"fields\":[{\"name\":\"example\",\"type\":\"string\"}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rigRequest-value/versions

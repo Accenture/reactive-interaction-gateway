@@ -76,30 +76,37 @@ defmodule RigKafka.Client do
 
       content_type = get_content_type(headers_no_prefix, body)
 
-      decoded_body =
-        cond do
-          content_type == "avro/binary" ->
-            data =
+      try do
+        decoded_body =
+          case content_type do
+            "avro/binary" ->
+              data =
+                body
+                |> Serializer.decode_body!("avro", schema_registry_host: schema_registry_host)
+                |> Jason.decode!()
+
+              Map.merge(headers_no_prefix, %{data: data})
+
+            "application/json" ->
               body
-              |> Serializer.decode_body("avro", schema_registry_host)
-              |> Jason.decode!()
 
-            Map.merge(headers_no_prefix, %{data: data})
+            _ ->
+              body
+          end
 
-          content_type == "application/json" ->
-            body
+        case callback.(decoded_body) do
+          :ok ->
+            {:ok, :ack, state}
 
-          true ->
-            body
+          err ->
+            info = %{error: err, topic: topic, partition: partition, offset: offset}
+            Logger.error("Callback failed to handle message: #{inspect(info)}")
+            {:ok, :ack_no_commit, state}
         end
-
-      case callback.(decoded_body) do
-        :ok ->
-          {:ok, :ack, state}
-
+      rescue
         err ->
           info = %{error: err, topic: topic, partition: partition, offset: offset}
-          Logger.error("Callback failed to handle message: #{inspect(info)}")
+          Logger.error(fn -> {"failed to decode message: #{inspect(err)}", [info: info]} end)
           {:ok, :ack_no_commit, state}
       end
     end

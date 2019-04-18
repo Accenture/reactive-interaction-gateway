@@ -11,12 +11,17 @@ defmodule RigKafka.Serializer do
 
   @prefix "ce-"
 
-  @spec decode_body(any(), encode_type) :: any()
-  def decode_body(body, "avro", schema_registry_host) do
-    Avro.decode(body, schema_registry_host)
+  # ---
+
+  @spec decode_body!(any(), encode_type, opts :: []) :: any()
+  def decode_body!(body, "avro", opts) do
+    case opts[:schema_registry_host] do
+      nil -> raise "cannot decode avro message: schema registry host not set"
+      schema_registry_host -> Avro.decode(body, schema_registry_host)
+    end
   end
 
-  def decode_body(body, nil), do: body
+  def decode_body!(body, nil, _), do: body
 
   # ---
 
