@@ -13,12 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - _Beta_ - Added Apache Avro support for consumer and producer as well as Kafka Schema Registry.
 - [Docs] Added new set of topics in documentation about Api Gateway, even streams and scaling.
 
-<!-- ### Changed -->
+### Changed
+
+- The environment variable `KAFKA_GROUP_ID` has been replaced with the following environment variables, where each of them has a distinct default value: `KAFKATOFILTER_KAFKA_GROUP_ID`, `KAFKATOHTTP_KAFKA_GROUP_ID`, `PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID`. [#206](https://github.com/Accenture/reactive-interaction-gateway/issues/206)
+- The default Kafka source topic for the Kafka-to-HTTP event stream has been changed to `rig`. The feature was introduced to forward all incoming events to an (external) HTTP endpoint, so it makes sense to use the default topic for incoming events here too.
 
 ### Fixed
 
 - Fixed a bug that caused the subscriptions endpoint to return an internal server error when running RIG in a clustered setup. [#194](https://github.com/Accenture/reactive-interaction-gateway/issues/194)
 - Support for forwarding HTTP/1.1 responses over a HTTP/2 connection by dropping connection-related HTTP headers. [#193](https://github.com/Accenture/reactive-interaction-gateway/issues/193)
+- Forwarding events to HTTP did not contain (all) Kafka messages, as the Kafka consumer group ID was shared with the consumer for forwarding events to frontends. [#206](https://github.com/Accenture/reactive-interaction-gateway/pull/206)
 
 <!-- ### Deprecated -->
 
