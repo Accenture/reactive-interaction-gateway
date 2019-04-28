@@ -2,13 +2,20 @@ defmodule RigApi.Router do
   use RigApi, :router
 
   pipeline :api do
-    plug(:put_format, :json)
+    plug(Plug.Parsers,
+      parsers: [:urlencoded, :multipart, :json],
+      # return "415 Unsupported Media Type" if not handled by any parser
+      pass: [],
+      json_decoder: Poison
+    )
+  end
+
+  scope "/v1/messages", RigApi do
+    post("/", MessageController, :publish)
   end
 
   scope "/v1", RigApi do
     pipe_through(:api)
-
-    resources("/messages", MessageController, only: [:create])
 
     scope "/users" do
       get("/", ChannelsController, :list_channels)

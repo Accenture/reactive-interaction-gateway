@@ -6,6 +6,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
   alias Rig.Connection
   alias RIG.JWT
+  alias RIG.Plug.BodyReader
   alias Rig.Subscription
   alias RIG.Subscriptions
   alias RigAuth.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
@@ -61,14 +62,63 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   """
   @spec set_subscriptions(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
   def set_subscriptions(
-        %{method: "PUT", body_params: %{"subscriptions" => subscriptions}} = conn,
+        %{method: "PUT"} = conn,
         %{
           "connection_id" => connection_id
         }
-      )
-      when is_list(subscriptions) do
-    conn = with_allow_origin(conn)
+      ) do
+    conn
+    |> with_allow_origin()
+    |> accept_only_req_for(["application/json"])
+    |> decode_json_body()
+    |> do_set_subscriptions(connection_id)
+  end
 
+  # ---
+
+  defp decode_json_body(%{halted: true} = conn), do: conn
+
+  defp decode_json_body(conn) do
+    with {"application", "json"} <- content_type(conn),
+         {:ok, body, conn} <- BodyReader.read_full_body(conn),
+         {:ok, json} <- Jason.decode(body),
+         {:parse, %{"subscriptions" => subscriptions}} <- {:parse, json} do
+      Plug.Conn.assign(conn, :subscriptions, subscriptions)
+    else
+      {:parse, json} ->
+        message = """
+        Expected field "subscriptions" is not present.
+
+        Decoded request body:
+        #{inspect(json)}
+        """
+
+        conn
+        |> send_resp(:bad_request, message)
+        |> Plug.Conn.halt()
+
+      error ->
+        message = """
+        Expected JSON encoded body.
+
+        Technical info:
+        #{inspect(error)}
+        """
+
+        conn
+        |> send_resp(:bad_request, message)
+        |> Plug.Conn.halt()
+    end
+  end
+
+  # ---
+
+  defp do_set_subscriptions(%{halted: true} = conn, _connection_id), do: conn
+
+  defp do_set_subscriptions(
+         %{assigns: %{subscriptions: subscriptions}} = conn,
+         connection_id
+       ) do
     with :ok <- SubscriptionAuthZ.check_authorization(conn),
          {:ok, socket_pid} <- Connection.Codec.deserialize(connection_id),
          :ok <- check_connection_alive(socket_pid) do

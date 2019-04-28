@@ -3,7 +3,6 @@ defmodule RigInboundGatewayWeb.Router do
 
   pipeline :api do
     plug(Plug.Logger, log: :debug)
-    plug(:accepts, ~w(json event-stream))
     plug(Rig.Plug.AuthHeader)
   end
 

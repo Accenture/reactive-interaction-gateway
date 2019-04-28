@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - _Beta_ - Added Apache Avro support for consumer and producer as well as Kafka Schema Registry.
 - [Docs] Added new set of topics in documentation about Api Gateway, even streams and scaling.
 - [Docs] Added examples section to documentation website.
+- Implement [HTTP Transport Binding for CloudEvents v0.2](https://github.com/cloudevents/spec/blob/v0.2/http-transport-binding.md). A special fallback to "structured mode" in case the content type is "application/json" and the "ce-specversion" header is not set ensures this change is backward compatible with existing setups. [#153](https://github.com/Accenture/reactive-interaction-gateway/issues/153)
 
 <!-- ### Changed -->
 

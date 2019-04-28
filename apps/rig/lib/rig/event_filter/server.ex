@@ -140,6 +140,19 @@ defmodule Rig.EventFilter.Server do
       send(socket_pid, event)
     end
 
+    Logger.debug(fn ->
+      id = CloudEvent.id!(event)
+      type = CloudEvent.type!(event)
+      n_clients = MapSet.size(socket_pid_set)
+
+      if n_clients > 0 do
+        clients = if n_clients == 1, do: "1 client", else: "#{n_clients} clients"
+        ~s|Event "#{id}" of type "#{type}" forwarded to #{clients}|
+      else
+        ~s|Event "#{id}" of type "#{type}" not forwarded (there are no clients)|
+      end
+    end)
+
     {:noreply, state}
   end
 
