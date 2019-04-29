@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [API Gateway] New custom metric: `rig_proxy_requests_total`. For details see [`metrics-details.md`](docs/metrics-details.md). [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
 - _Beta_ - Added Apache Avro support for consumer and producer as well as Kafka Schema Registry.
 - [Docs] Added new set of topics in documentation about Api Gateway, even streams and scaling.
+- [Docs] Added examples section to documentation website.
 
 <!-- ### Changed -->
 
