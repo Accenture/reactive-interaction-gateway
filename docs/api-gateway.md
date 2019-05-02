@@ -1,10 +1,10 @@
 ---
 id: api-gateway
-title: API Gateway
-sidebar_label: API Gateway
+title: Forwarding Requests
+sidebar_label: Forwarding Requests
 ---
 
-RIG includes a basic API Gateway implementation (a configurable, distributed HTTP reverse proxy). Provided a route is configured, RIG will forward any matching HTTP request to the respective service or event stream, wait for the reply and forward that reply to the original caller.
+RIG includes a configurable, distributed HTTP reverse proxy. Depending on the configuration, RIG forwards incoming HTTP requests to backend services or to a Kafka topic, waits for the reply and forwards it to the original caller.
 
 ## API Endpoint Configuration
 

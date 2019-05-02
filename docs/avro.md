@@ -1,55 +1,10 @@
 ---
-id: event-serialization
-title: Event Serialization
-sidebar_label: Event Serialization
+id: avro
+title: Avro Implementation Details
+sidebar_label: Avro
 ---
 
-We support [Apache Avro](https://avro.apache.org/) and standard JSON (de)serialization of events for both Kafka consumers and producers. We aim at following the [CloudEvents specification](https://github.com/cloudevents/spec) as closely as possible (the related part of the spec is called _transport bindings_ and is, at the time of writing, still under development). For the Kafka transport binding, we utilize Kafka headers introduced in Kafka version `0.11`. CloudEvents currently defines two modes of operation; the related discussion can be followed on [Github](https://github.com/cloudevents/spec/pull/337/files).
-
-
-**Structured content mode**
-
-Includes context attributes in Kafka event value and `ce-contenttype` in headers.
-
-> ##### KAFKA EVENT HEADERS
->
-> ```
-> ce-contenttype: "application/json"
-> ```
->
-> ##### KAFKA EVENT VALUE
->
-> ```
-> {
->    "specversion" : "0.1",
->    "type" : "com.example.someevent",
->    "data": {},
->    ...
-> }
-> ```
-
-**Binary content mode**
-
-Includes all context attributes in Kafka headers and event value carries only data attribute.
-
-> ##### KAFKA EVENT HEADERS
->
-> ```
-> ce-contenttype: "avro/binary"
-> ce-specversion: "0.2"
-> ce-type: "com.example.someevent"
-> ...
-> ```
->
-> ##### KAFKA EVENT VALUE
->
-> ```
-> ... application data ...
-> ```
-
-## Apache Avro format
-
-To be compatible across the board Apache Avro is using specific [format](https://docs.confluent.io/current/schema-registry/docs/serializer-formatter.html#wire-format).
+Apache Avro format as adapted by the [Confluent Schema Registry](https://docs.confluent.io/current/schema-registry/docs/serializer-formatter.html#wire-format):
 
 ```bash
 # 0 - magic byte
@@ -60,14 +15,13 @@ To be compatible across the board Apache Avro is using specific [format](https:/
 <0, 0, 0, 0, 1, 5, 3, 8, ...>
 ```
 
-### Setup
+## Overview
 
 ![event-serialization-avro](assets/event-serialization-avro.png)
 
 Adopting Avro for event (de)serialization is fairly straightforward. First you need to run an instance of the `Kafka Schema Registry`, which is a central store for all Avro schemas in use. As an event is consumed from Kafka, RIG fetches the corresponding schema from the registry and deserializes the event with it, caching the schema in the process (in memory). As for producing, RIG again retrieves and caches the schemas used for serializing events.
 
-
-### Producer details
+## RIG as a Kafka producer
 
 - producer evaluates if serialization is turned on by checking `KAFKA_SERIALIZER` environment variable and if it's value is `avro`
 - If it is, creates headers for Kafka event by appending `ce-` prefix for every field, besides `data` field
@@ -77,18 +31,16 @@ Adopting Avro for event (de)serialization is fairly straightforward. First you n
 
 > If `KAFKA_SERIALIZER` is not set to `avro`, producer sets **only** `ce-contenttype` or `ce-contentType` for kafka event
 
-### Consumer details
+## RIG as a Kafka consumer
 
 - when consuming Kafka event, RIG checks headers of such event and removes `ce-` prefix
 - based on headers decides cloud events version and content type
 - In case content type is `avro/binary`, schema ID is taken from event value and deserialized
 - If content type is **not** present, RIG checks for Avro format (`<<0, 0, 0, 0, 1, 5, 3, 8, ...>>`) and attempts for deserialization, otherwise event is sent to client as it is without any deserialization
 
-### Example
+## Example 1: producing to and consuming from the same topic
 
-#### Self consuming
-
-In this example we'll try to communicate with ourselves which is naive, but quick check if producer and consumer works correctly. In nutshell RIG will produce serialized event via proxy and after few moments consume and deserialize it.
+In this example we'll have RIG send a message to itself to see whether RIG producing and consuming parts work correctly. The idea is that RIG produces a serialized event as a result to an HTTP request and, a few moments later, consumes that same event (and deserializes it correctly).
 
 ```bash
 # 1. Start Kafka with Zookeeper and Kafka Schema Registry
@@ -120,9 +72,9 @@ application=rig_kafka module=RigKafka.Avro function=decode/1 file=lib/rig_kafka/
 application=rig module=Rig.EventStream.KafkaToFilter function=kafka_handler/1 file=lib/rig/event_stream/kafka_to_filter.ex line=20 pid=<0.419.0>
 ```
 
-#### Kafka schema Registry cli
+## Example 2: Kafka schema Registry CLI
 
-To check if it works also with native serializer we can leverage cli in Kafka Schema Registry container.
+To check if it works also with native serializer we can leverage the CLI shipped with the Kafka Schema Registry image.
 
 ```bash
 # 1. Get inside Kafka Schema Registry container

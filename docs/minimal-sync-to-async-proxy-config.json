@@ -1,0 +1,27 @@
+[
+  {
+    "id": "async-service",
+    "name": "identity-service",
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "async-endpoint",
+            "path": "/submit",
+            "method": "POST",
+            "type": "async",
+            "target": "kafka",
+            "topic": "test-topic",
+            "not_secured": true
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "TARGET_HOST",
+      "port": "TARGET_PORT"
+    }
+  }
+]
