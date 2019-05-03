@@ -85,13 +85,15 @@ defmodule RigKafka.Client do
                 |> Serializer.decode_body!("avro", schema_registry_host: schema_registry_host)
                 |> Jason.decode!()
 
-              Map.merge(headers_no_prefix, %{data: data})
+              headers_no_prefix
+              |> Map.merge(%{data: data})
+              |> Jason.encode!()
 
             "application/json" ->
               body
 
             _ ->
-              body
+              {:error, {:unknown_content_type, content_type}}
           end
 
         case callback.(decoded_body) do

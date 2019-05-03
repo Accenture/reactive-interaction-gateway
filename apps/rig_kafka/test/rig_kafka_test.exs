@@ -46,23 +46,33 @@ defmodule RigKafkaTest do
 
     config = kafka_config([topic], serializer, schema_registry_host)
 
-    expected_msg = "this is a test message"
+    expected_msg =
+      Jason.encode!(%{
+        "specversion" => "0.2",
+        "type" => "com.example.test.simple",
+        "source" => "/rig-test",
+        "id" => "069711bf-3946-4661-984f-c667657b8d85",
+        "data" => %{
+          "foo" => "bar"
+        }
+      })
+
     test_pid = self()
 
     callback = fn
-      ^expected_msg ->
-        send(test_pid, :test_message_received)
+      msg ->
+        send(test_pid, msg)
         :ok
     end
 
     {:ok, pid} = RigKafka.start(config, callback)
 
+    :timer.sleep(5000)
     RigKafka.produce(config, topic, "", "test", expected_msg)
 
-    assert_receive :test_message_received, 10_000
+    assert_receive received_msg, 10_000
 
-    RigKafka.produce(config, topic, "", "test", expected_msg)
-    assert_receive :test_message_received, 10_000
+    assert received_msg == expected_msg
 
     DynamicSupervisor.terminate_child(@sup, pid)
   end

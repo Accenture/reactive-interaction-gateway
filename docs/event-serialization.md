@@ -91,13 +91,13 @@ Adopting Avro for event (de)serialization is fairly straightforward. First you n
 In this example we'll try to communicate with ourselves which is naive, but quick check if producer and consumer works correctly. In nutshell RIG will produce serialized event via proxy and after few moments consume and deserialize it.
 
 ```bash
-# 1. Start Kafka with Zookeeper and Kafka Schema Registry
+## 1. Start Kafka with Zookeeper and Kafka Schema Registry
 KAFKA_PORT_PLAIN=17092 KAFKA_PORT_SSL=17093 HOST=localhost docker-compose -f integration_tests/kafka_tests/docker-compose.yml up -d
 
-# 2. Start Rig
+## 2. Start Rig
 # Here we say to use Avro, consume on topic "rigRequest" and use "rigRequest-value" schema from Kafka Schema Registry
 # Proxy is turned on to be able to produce Kafka event with headers (needed for cloud events)
-docker run -d --name rig \
+docker run --name rig \
 -e KAFKA_BROKERS=kafka:9292 \
 -e KAFKA_SERIALIZER=avro \
 -e KAFKA_SCHEMA_REGISTRY_HOST=kafka-schema-registry:8081 \
@@ -110,14 +110,14 @@ docker run -d --name rig \
 --network kafka_tests_default \
 accenture/reactive-interaction-gateway
 
-# 3. Register Avro schema in Kafka Schema Registry
+## 3. Register Avro schema in Kafka Schema Registry
 curl -d '{"schema":"{\"name\":\"rigproducer\",\"type\":\"record\",\"fields\":[{\"name\":\"example\",\"type\":\"string\"}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rigRequest-value/versions
 
-# 4. Send HTTP request to RIG proxy
+## 4. Send HTTP request to RIG proxy
 # Request will produce serialized Kafka event to Kafka
 curl -d '{"event":{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"com.example","time":"2018-04-05T17:31:00Z","specversion":"0.2","source":"\/cli","contenttype":"avro\/binary","data":{"example":"test"}},"partition":"test_key"}' -H "Content-Type: application/json" -X POST http://localhost:4000/myapi/publish-async
 
-# 5. In terminal you should see something like below -- in nutshell it means event was successfully consumed, deserialized and forwarded to UI client
+## 5. In terminal you should see something like below -- in nutshell it means event was successfully consumed, deserialized and forwarded to UI client
 16:46:31.549 [debug] Decoded Avro message="{\"example\":\"test\"}"
 application=rig_kafka module=RigKafka.Avro function=decode/1 file=lib/rig_kafka/avro.ex line=28 pid=<0.419.0>
 

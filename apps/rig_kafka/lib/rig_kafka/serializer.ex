@@ -21,8 +21,6 @@ defmodule RigKafka.Serializer do
     end
   end
 
-  def decode_body!(body, nil, _), do: body
-
   # ---
 
   @spec encode_body(any(), encode_type, schema_name) :: any()
