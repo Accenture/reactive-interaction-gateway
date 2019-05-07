@@ -318,3 +318,9 @@ Quite often you need to deal with cross origin requests. CORS itself is configur
   ...
 }]
 ```
+
+## Request logger
+
+Every request going through reverse proxy can be tracked by loggers -- `console` and `kafka`. To enable such logging set [`REQUEST_LOG`]((./rig-ops-guide.md)) to one or both of them (comma separated).
+
+In case of Kafka you can also set which Avro schema to use via [`KAFKA_LOG_SCHEMA`](./rig-ops-guide.md).

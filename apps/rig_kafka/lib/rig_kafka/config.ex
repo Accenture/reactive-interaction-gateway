@@ -55,6 +55,8 @@ defmodule RigKafka.Config do
   def new(config) do
     uuid = UUID.uuid4()
 
+    IO.puts("RigKafka.Config=#{inspect(config)}")
+
     %__MODULE__{
       brokers: Map.get(config, :brokers, []),
       serializer: Map.get(config, :serializer),

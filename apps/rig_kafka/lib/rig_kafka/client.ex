@@ -343,13 +343,15 @@ defmodule RigKafka.Client do
            brod_client: brod_client,
            schema_registry_host: schema_registry_host,
            serializer: serializer
-         },
+         } = config,
          topic,
          schema,
          key,
          plaintext,
          retry_delay_divisor
        ) do
+    IO.puts("try_producing_message=#{inspect(config)} with plaintext=#{plaintext}")
+
     {constructed_headers, body} =
       case Jason.decode(plaintext) do
         {:ok, plaintext_map} ->

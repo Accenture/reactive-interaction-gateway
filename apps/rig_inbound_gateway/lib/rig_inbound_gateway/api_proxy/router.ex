@@ -67,6 +67,18 @@ defmodule RigInboundGateway.ApiProxy.Router do
           "kinesis" -> KinesisHandler
         end
 
+      %{active_loggers: active_loggers, logger_modules: logger_modules} = config()
+
+      Enum.each(active_loggers, fn l ->
+        ll = Map.get(logger_modules, l)
+
+        ll.log_call(
+          endpoint,
+          api,
+          conn
+        )
+      end)
+
       handler.handle_http_request(conn, api, endpoint, request_path)
     else
       {:error, :authentication_failed} -> send_resp(conn, :unauthorized, "Authentication failed.")

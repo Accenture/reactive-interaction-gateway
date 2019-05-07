@@ -1,14 +1,11 @@
 defmodule RigKafkaTest do
   @moduledoc """
   Test suite for RIG's Kafka client.
-
   The suite does not use any mocks, because RigKafka is, for the most part, glue code
   on top of brod, the underlying Kafka client. The tests make sure that the setup
   works in general and that the behaviour of brod stays the same.
-
   There is also a recovery tests that shows how RIG deals with a network outage; see
   `RigKafka.NetworkOutageTest`.
-
   """
   use ExUnit.Case, async: false
   doctest RigKafka
@@ -46,23 +43,32 @@ defmodule RigKafkaTest do
 
     config = kafka_config([topic], serializer, schema_registry_host)
 
-    expected_msg = "this is a test message"
+    expected_msg =
+      Jason.encode!(%{
+        "specversion" => "0.2",
+        "type" => "com.example.test.simple",
+        "source" => "/rig-test",
+        "id" => "069711bf-3946-4661-984f-c667657b8d85",
+        "data" => %{
+          "foo" => "bar"
+        }
+      })
+
     test_pid = self()
 
     callback = fn
-      ^expected_msg ->
-        send(test_pid, :test_message_received)
+      msg ->
+        send(test_pid, msg)
         :ok
     end
 
     {:ok, pid} = RigKafka.start(config, callback)
 
+    :timer.sleep(5000)
     RigKafka.produce(config, topic, "", "test", expected_msg)
 
-    assert_receive :test_message_received, 10_000
-
-    RigKafka.produce(config, topic, "", "test", expected_msg)
-    assert_receive :test_message_received, 10_000
+    assert_receive received_msg, 10_000
+    assert received_msg == expected_msg
 
     DynamicSupervisor.terminate_child(@sup, pid)
   end
