@@ -4,18 +4,14 @@ title: Examples
 sidebar_label: Examples
 ---
 
-To be able to quickly test and interact with RIG, we provide set of [examples](https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples).
+We provide set of examples that should give you an idea on how to integrate RIG into your current application.
 
-In root directory you can find several examples for Server-Sent Events (SSE) and Websockets (WS). Both versions are showcasing how to use them in a simplest way, but also in conjunction with JWT, constraints and extractors. These examples are very simple and don't require anything else, but RIG.
+In the [`examples`] directory you can find several examples for both Server-Sent Events (SSE) and WebSocket (WS) based connections. The examples show how to use them in a simple way, but also in conjunction with JWT, constraints and extractors. They are designed to be executable with RIG as their only dependency.
 
-## API Gateway
+Available examples:
 
-This is tiny playground where you can test various use cases from [API Gateway](./api-gateway.md) section.
+- **API Gateway:** This is a playground where you can test various use cases mentioned in the [API Gateway](./api-gateway.md) Section.
+- **Channels:** A slightly bigger example that uses Kafka, a small NodeJS microservice and a React based UI that lets you choose between an SSE and a WebSocket connection. The Channels example lets you see the entire communication flow from client, through RIG, to the microservice, to Kafka, to RIG again and finally back to the client. It's also lets you play around with public as well as with private subscriptions.
+- **Avro:** Find an example around Avro in the [advanced guide](avro) dedicated to the topic.
 
-## Channels
-
-Channels is slightly bigger example using Kafka, small NodeJS microservice and React UI (using both SSE and WS). Here you can see entire communication flow from client, through RIG, to microservice, to Kafka, to RIG and back to client. It's possible to try out public as well as private subscriptions.
-
-## Avro
-
-Avro example is located in [Event Serialization](./event-serialization.md#example) section.
+[`examples`]: https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples
