@@ -285,7 +285,7 @@ With URL rewriting you can set how the incoming and outgoing request urls should
         "id": "my-transformed-endpoint",
         "method": "GET",
         "path_regex": "/foo/([^/]+)/bar/([^/]+)",
-        "path_replacement": "/bar/\1/foo/\2"
+        "path_replacement": "/bar/\\1/foo/\\2"
       }]
     }
   },
