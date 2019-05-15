@@ -77,7 +77,7 @@ defmodule RigKafka.Client do
       content_type = get_content_type(headers_no_prefix, body)
 
       try do
-        decoded_body =
+        encoded_body =
           case content_type do
             "avro/binary" ->
               data =
@@ -96,7 +96,7 @@ defmodule RigKafka.Client do
               {:error, {:unknown_content_type, content_type}}
           end
 
-        case callback.(decoded_body) do
+        case callback.(encoded_body) do
           :ok ->
             {:ok, :ack, state}
 
