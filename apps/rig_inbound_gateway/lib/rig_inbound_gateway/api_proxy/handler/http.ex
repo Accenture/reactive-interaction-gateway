@@ -3,7 +3,13 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
   Handles requests for HTTP targets.
 
   """
-  use Rig.Config, [:cors, :kafka_response_timeout, :kinesis_response_timeout]
+  use Rig.Config, [
+    :cors,
+    :kafka_response_timeout,
+    :kinesis_response_timeout,
+    :http_response_timeout
+  ]
+
   require Logger
   alias HTTPoison
   alias Plug.Conn
@@ -97,6 +103,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
       case response_from do
         "kafka" -> conf.kafka_response_timeout
         "kinesis" -> conf.kinesis_response_timeout
+        "http_internal" -> conf.http_response_timeout
       end
 
     receive do

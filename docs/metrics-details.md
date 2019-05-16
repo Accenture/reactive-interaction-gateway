@@ -34,6 +34,7 @@ Following Labels are provided:
 - **response_from** - Where the response is provided from. Grabbed from proxy config. Following possible values:
   - `http`
   - `kafka`
+  - `http_internal`
   - `N/A` - Not applicable, e.g., the request path is not configured.
 - **status** - The *internal* status for the request. Attention: this status only tracks the internal rig process status. Once forwarded we track as "ok". We expect that called services are monitored on it's own. Following possible status codes:
   - `ok` - Forwarded successfully.

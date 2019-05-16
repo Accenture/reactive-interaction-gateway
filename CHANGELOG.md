@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - _Beta_ - Added Apache Avro support for consumer and producer as well as Kafka Schema Registry.
 - [Docs] Added new set of topics in documentation about Api Gateway, even streams and scaling.
 - [Docs] Added examples section to documentation website.
+- [API/Proxy] Added new `response_from` option -- `http_internal` together with new internal `POST` endpoint `/v1/responses`. You can send correlated response to `/v1/responses` and complete initial Proxy request.
 
 <!-- ### Changed -->
 
@@ -20,18 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed a bug that caused the subscriptions endpoint to return an internal server error when running RIG in a clustered setup. [#194](https://github.com/Accenture/reactive-interaction-gateway/issues/194)
 - Support for forwarding HTTP/1.1 responses over a HTTP/2 connection by dropping connection-related HTTP headers. [#193](https://github.com/Accenture/reactive-interaction-gateway/issues/193)
-
-<!-- ### Deprecated -->
-
-<!-- ### Removed -->
-
-### Fixed
-
 - [Docs] Added missing `id` field to swagger spec for `message` API.
 - [Kafka] Fixed random generation of group IDs. This led to wrong partition distribution when using multiple RIG nodes. Now consumers will have the same ID which can be changed via environment variable - defaults to `rig`.
 - [Proxy] When forwarding an HTTP request, the [`Host`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Host) request header is now set to the `target_url` defined by the proxy configuration. [#188](https://github.com/Accenture/reactive-interaction-gateway/issues/188)
 - [Docs] Fixed missing `swagger.json` file in production Docker image.
 - [Proxy] Added missing CORS headers for Kafka/Kinesis target type when not using `response_from`.
+
+<!-- ### Deprecated -->
+
+<!-- ### Removed -->
 
 <!-- ### Security -->
 
