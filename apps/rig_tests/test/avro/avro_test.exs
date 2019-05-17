@@ -63,13 +63,7 @@ defmodule RigTests.Avro.AvroTest do
 
     assert_receive received_msg, 10_000
 
-    assert received_msg == %{
-             data: %{"foo" => "avro required"},
-             eventID: "1",
-             source: "/test-producer",
-             cloudEventsVersion: "0.1",
-             eventType: "rig.avro.test1"
-           }
+    assert received_msg == event
 
     AvroConfig.restore()
   end
@@ -95,16 +89,7 @@ defmodule RigTests.Avro.AvroTest do
 
     assert_receive received_msg, 10_000
 
-    assert received_msg == %{
-             contentType: "avro/binary",
-             data: %{"foo" => "avro optional"},
-             eventID: "1",
-             source: "/test-producer",
-             cloudEventsVersion: "0.1",
-             eventTime: "2019-02-21T09:17:23.137Z",
-             eventType: "rig.avro",
-             rig: %{"a" => %{"b" => "c"}}
-           }
+    assert received_msg == event
 
     AvroConfig.restore()
   end
@@ -127,13 +112,7 @@ defmodule RigTests.Avro.AvroTest do
 
     assert_receive received_msg, 10_000
 
-    assert received_msg == %{
-             data: %{"foo" => "avro required"},
-             id: "1",
-             source: "/test-producer",
-             specversion: "0.2",
-             type: "rig.avro.test1"
-           }
+    assert received_msg == event
 
     AvroConfig.restore()
   end
@@ -159,16 +138,7 @@ defmodule RigTests.Avro.AvroTest do
 
     assert_receive received_msg, 10_000
 
-    assert received_msg == %{
-             contenttype: "avro/binary",
-             data: %{"foo" => "avro optional"},
-             id: "1",
-             source: "/test-producer",
-             specversion: "0.2",
-             time: "2019-02-21T09:17:23.137Z",
-             type: "rig.avro",
-             rig: %{"a" => %{"b" => "c"}}
-           }
+    assert received_msg == event
 
     AvroConfig.restore()
   end
@@ -187,22 +157,7 @@ defmodule RigTests.Avro.AvroTest do
 
     assert_receive received_msg, 10_000
 
-    assert received_msg == %{
-             data: %{"foo" => "avro just data"}
-           }
-
-    AvroConfig.restore()
-  end
-
-  @tag :kafka
-  test "Given avro is enabled, the producer and consumer should be able to fallback to non-encoding(decoding) behavior" do
-    event = "Simple unstructured event"
-
-    kafka_config = kafka_config()
-    assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
-
-    assert_receive received_msg, 10_000
-    assert received_msg == "Simple unstructured event"
+    assert received_msg == event
 
     AvroConfig.restore()
   end
