@@ -114,28 +114,33 @@
 <h3><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h3>
 <h4><a class="anchor" aria-hidden="true" id="self-consuming"></a><a href="#self-consuming" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Self consuming</h4>
 <p>In this example we'll try to communicate with ourselves which is naive, but quick check if producer and consumer works correctly. In nutshell RIG will produce serialized event via proxy and after few moments consume and deserialize it.</p>
-<pre><code class="hljs css language-bash"><span class="hljs-comment"># 1. Start Kafka with Zookeeper and Kafka Schema Registry</span>
+<pre><code class="hljs css language-bash"><span class="hljs-comment">## 1. Start Kafka with Zookeeper and Kafka Schema Registry</span>
 KAFKA_PORT_PLAIN=17092 KAFKA_PORT_SSL=17093 HOST=localhost docker-compose -f integration_tests/kafka_tests/docker-compose.yml up -d
 
-<span class="hljs-comment"># 2. Start Rig</span>
+<span class="hljs-comment">## 2. Start Rig</span>
 <span class="hljs-comment"># Here we say to use Avro, consume on topic "rigRequest" and use "rigRequest-value" schema from Kafka Schema Registry</span>
 <span class="hljs-comment"># Proxy is turned on to be able to produce Kafka event with headers (needed for cloud events)</span>
-KAFKA_BROKERS=localhost:17092 \
-KAFKA_SERIALIZER=avro \
-KAFKA_SOURCE_TOPICS=rigRequest \
-PROXY_CONFIG_FILE=proxy/proxy.test.json \
-PROXY_KAFKA_REQUEST_TOPIC=rigRequest \
-PROXY_KAFKA_REQUEST_AVRO=rigRequest-value \
-mix phx.server
+docker run --name rig \
+-e KAFKA_BROKERS=kafka:9292 \
+-e KAFKA_SERIALIZER=avro \
+-e KAFKA_SCHEMA_REGISTRY_HOST=kafka-schema-registry:8081 \
+-e KAFKA_SOURCE_TOPICS=rigRequest \
+-e PROXY_CONFIG_FILE=proxy/proxy.test.json \
+-e PROXY_KAFKA_REQUEST_TOPIC=rigRequest \
+-e PROXY_KAFKA_REQUEST_AVRO=rigRequest-value \
+-e LOG_LEVEL=debug \
+-p 4000:4000 -p 4010:4010 \
+--network kafka_tests_default \
+accenture/reactive-interaction-gateway
 
-<span class="hljs-comment"># 3. Register Avro schema in Kafka Schema Registry</span>
+<span class="hljs-comment">## 3. Register Avro schema in Kafka Schema Registry</span>
 curl -d <span class="hljs-string">'{"schema":"{\"name\":\"rigproducer\",\"type\":\"record\",\"fields\":[{\"name\":\"example\",\"type\":\"string\"}]}"}'</span> -H <span class="hljs-string">"Content-Type: application/vnd.schemaregistry.v1+json"</span> -X POST http://localhost:8081/subjects/rigRequest-value/versions
 
-<span class="hljs-comment"># 4. Send HTTP request to RIG proxy</span>
+<span class="hljs-comment">## 4. Send HTTP request to RIG proxy</span>
 <span class="hljs-comment"># Request will produce serialized Kafka event to Kafka</span>
 curl -d <span class="hljs-string">'{"event":{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"com.example","time":"2018-04-05T17:31:00Z","specversion":"0.2","source":"\/cli","contenttype":"avro\/binary","data":{"example":"test"}},"partition":"test_key"}'</span> -H <span class="hljs-string">"Content-Type: application/json"</span> -X POST http://localhost:4000/myapi/publish-async
 
-<span class="hljs-comment"># 5. In terminal you should see something like below -- in nutshell it means event was successfully consumed, deserialized and forwarded to UI client</span>
+<span class="hljs-comment">## 5. In terminal you should see something like below -- in nutshell it means event was successfully consumed, deserialized and forwarded to UI client</span>
 16:46:31.549 [debug] Decoded Avro message=<span class="hljs-string">"{\"example\":\"test\"}"</span>
 application=rig_kafka module=RigKafka.Avro <span class="hljs-keyword">function</span>=decode/1 file=lib/rig_kafka/avro.ex line=28 pid=&lt;0.419.0&gt;
 
