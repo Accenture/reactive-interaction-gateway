@@ -5,6 +5,7 @@ defmodule RigApi.ResponsesController do
   use PhoenixSwagger
 
   alias Rig.Connection.Codec
+  alias RigCloudEvents.CloudEvent
 
   action_fallback(RigApi.FallbackController)
 
@@ -33,15 +34,15 @@ defmodule RigApi.ResponsesController do
   Note that body has to contain following field `"rig": { "correlation": "_id_" }`.
   """
   def create(conn, message) do
-    with {:ok, rig_metadata} <- Map.fetch(message, "rig"),
+    with {:ok, cloud_event} <- CloudEvent.parse(message),
+         {:ok, rig_metadata} <- Map.fetch(message, "rig"),
          {:ok, correlation_id} <- Map.fetch(rig_metadata, "correlation"),
-         {:ok, deserialized_pid} <- Codec.deserialize(correlation_id),
-         {:ok, encoded_body} <- Jason.encode(message) do
+         {:ok, deserialized_pid} <- Codec.deserialize(correlation_id) do
       Logger.debug(fn ->
         "HTTP response via internal HTTP to #{inspect(deserialized_pid)}: #{inspect(message)}"
       end)
 
-      send(deserialized_pid, {:response_received, encoded_body})
+      send(deserialized_pid, {:response_received, cloud_event.json})
       send_resp(conn, :accepted, "message sent to correlated reverse proxy request")
     else
       err ->

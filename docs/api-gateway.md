@@ -196,9 +196,16 @@ As an alternative you can set `response_from` to `http_async`. This means that c
 
 ```json
 {
+  "id": "1",
+  "specversion": "0.2",
+  "source": "my-service",
+  "type": "com.example",
   "rig": {
     "correlation": "_id_"
   },
+  "data": {
+    ...
+  }
   ...
 }
 ```
