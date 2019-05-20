@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - _Beta_ - Added Apache Avro support for consumer and producer as well as Kafka Schema Registry.
 - [Docs] Added new set of topics in documentation about Api Gateway, even streams and scaling.
 - [Docs] Added examples section to documentation website.
-- [API/Proxy] Added new `response_from` option -- `http_internal` together with new internal `POST` endpoint `/v1/responses`. You can send correlated response to `/v1/responses` and complete initial Proxy request.
+- [API/Proxy] Added new `response_from` option -- `http_async` together with new internal `POST` endpoint `/v1/responses`. You can send correlated response to `/v1/responses` and complete initial Proxy request. [#213](https://github.com/Accenture/reactive-interaction-gateway/issues/213)
 
 <!-- ### Changed -->
 

@@ -95,7 +95,7 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Http,
   cors: {:system, "CORS", "*"},
   kafka_response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000},
   kinesis_response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000},
-  http_response_timeout: {:system, :integer, "PROXY_HTTP_RESPONSE_TIMEOUT", 5_000}
+  http_async_response_timeout: {:system, :integer, "PROXY_HTTP_ASYNC_RESPONSE_TIMEOUT", 5_000}
 
 config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   # The list of brokers, given by a comma-separated list of host:port items:

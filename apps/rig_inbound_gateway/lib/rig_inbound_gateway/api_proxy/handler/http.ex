@@ -7,7 +7,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
     :cors,
     :kafka_response_timeout,
     :kinesis_response_timeout,
-    :http_response_timeout
+    :http_async_response_timeout
   ]
 
   require Logger
@@ -103,7 +103,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
       case response_from do
         "kafka" -> conf.kafka_response_timeout
         "kinesis" -> conf.kinesis_response_timeout
-        "http_internal" -> conf.http_response_timeout
+        "http_async" -> conf.http_async_response_timeout
       end
 
     receive do

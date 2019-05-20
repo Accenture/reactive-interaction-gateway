@@ -17,8 +17,8 @@ defmodule RigApi.ResponsesController do
     parameters do
       messageBody(
         :body,
-        Schema.ref(:Response),
-        "Response",
+        Schema.ref(:CloudEvent),
+        "CloudEvent",
         required: true
       )
     end
@@ -57,10 +57,46 @@ defmodule RigApi.ResponsesController do
     %{
       Response:
         swagger_schema do
-          title("Response object")
-          description("A Response object that will be sent to correlated reverse proxy request.")
+          title("CloudEvent")
+          description("The CloudEvent that will be sent to correlated reverse proxy request.")
 
           properties do
+            id(
+              :string,
+              "ID of the event. The semantics of this string are explicitly undefined to ease \
+              the implementation of producers. Enables deduplication.",
+              required: true,
+              example: "A database commit ID"
+            )
+
+            specversion(
+              :string,
+              "The version of the CloudEvents specification which the event uses. This \
+              enables the interpretation of the context. Compliant event producers \
+              MUST use a value of 0.2 when referring to this version of the \
+              specification.",
+              required: true,
+              example: "0.2"
+            )
+
+            source(
+              :string,
+              "This describes the event producer. Often this will include information such \
+              as the type of the event source, the organization publishing the event, the \
+              process that produced the event, and some unique identifiers. The exact syntax \
+              and semantics behind the data encoded in the URI is event producer defined.",
+              required: true,
+              example: "/cloudevents/spec/pull/123"
+            )
+
+            type(
+              :string,
+              "Type of occurrence which has happened. Often this attribute is used for \
+              routing, observability, policy enforcement, etc.",
+              required: true,
+              example: "com.example.object.delete.v2"
+            )
+
             rig(
               Schema.new do
                 properties do
