@@ -197,6 +197,21 @@ A behavior like this can be configured using an endpoints' <code>response_from</
 <blockquote>
 <p>Note the presence of <code>response_from</code> field. This tells RIG to wait for different event with the same correlation ID.</p>
 </blockquote>
+<p>As an alternative you can set <code>response_from</code> to <code>http_async</code>. This means that correlated response has to be sent to internal <code>:4010/v1/responses</code> <code>POST</code> endpoint with a body like this:</p>
+<pre><code class="hljs css language-json">{
+  "id": "1",
+  "specversion": "0.2",
+  "source": "my-service",
+  "type": "com.example",
+  "rig": {
+    "correlation": "_id_"
+  },
+  "data": {
+    ...
+  }
+  ...
+}
+</code></pre>
 <blockquote>
 <p><strong>NOTE:</strong> Kinesis doesn't support <code>response_from</code> field yet.</p>
 </blockquote>
