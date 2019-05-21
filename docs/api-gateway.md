@@ -192,6 +192,24 @@ Configuration of such API endpoint might look like this:
 
 > Note the presence of `response_from` field. This tells RIG to wait for different event with the same correlation ID.
 
+As an alternative you can set `response_from` to `http_async`. This means that correlated response has to be sent to internal `:4010/v1/responses` `POST` endpoint with a body like this:
+
+```json
+{
+  "id": "1",
+  "specversion": "0.2",
+  "source": "my-service",
+  "type": "com.example",
+  "rig": {
+    "correlation": "_id_"
+  },
+  "data": {
+    ...
+  }
+  ...
+}
+```
+
 > __NOTE:__ Kinesis doesn't support `response_from` field yet.
 
 ## Auth

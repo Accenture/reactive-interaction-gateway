@@ -10,6 +10,8 @@ defmodule RigApi.Router do
 
     resources("/messages", MessageController, only: [:create])
 
+    resources("/responses", ResponsesController, only: [:create])
+
     scope "/users" do
       get("/", ChannelsController, :list_channels)
       get("/:user/sessions", ChannelsController, :list_channel_sessions)
