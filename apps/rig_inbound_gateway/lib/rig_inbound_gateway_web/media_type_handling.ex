@@ -45,7 +45,8 @@ defmodule RigInboundGatewayWeb.MediaTypeHandling do
   @spec accepted_media_types(Plug.Conn.t()) :: [media_type]
   def accepted_media_types(conn) do
     case extract_from_header(conn, "accept", &media_type/1) do
-      # "*/*" is the default in case the header is not set (according to MDN).
+      # "*/*" is the default in case the header is not set
+      # (see https://tools.ietf.org/html/rfc7231#section-5.3.2).
       [] -> [{"*", "*"}]
       media_types -> media_types
     end
