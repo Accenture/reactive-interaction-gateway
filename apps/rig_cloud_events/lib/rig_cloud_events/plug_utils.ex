@@ -18,39 +18,19 @@ defmodule RigCloudEvents.PlugUtils do
   # ---
 
   def handle_cloudevent(conn, handlers \\ []) do
-    case cloudevents_mode(conn) do
-      :binary ->
-        Logger.debug(fn -> "Received CloudEvent in binary mode" end)
+    mode = cloudevents_mode(conn)
+    do_handle_cloudevent(conn, handlers, mode)
+  end
 
-        handler = handlers[:binary]
+  # ---
 
-        if is_nil(handler),
-          do: Conn.send_resp(conn, :unsupported_media_type, not_implemented_message("binary")),
-          else: handler.(conn)
+  def do_handle_cloudevent(conn, handlers, mode) do
+    Logger.debug(fn -> "Received CloudEvent in #{mode} mode" end)
+    handler = handlers[mode]
 
-      :structured ->
-        Logger.debug(fn -> "Received CloudEvent in structured mode" end)
-
-        handler = handlers[:structured]
-
-        if is_nil(handler),
-          do:
-            Conn.send_resp(
-              conn,
-              :unsupported_media_type,
-              not_implemented_message("structured")
-            ),
-          else: handler.(conn)
-
-      :batched ->
-        Logger.debug(fn -> "Received CloudEvent in batched mode" end)
-
-        handler = handlers[:batched]
-
-        if is_nil(handler),
-          do: Conn.send_resp(conn, :unsupported_media_type, not_implemented_message("batched")),
-          else: handler.(conn)
-    end
+    if is_nil(handler),
+      do: Conn.send_resp(conn, :unsupported_media_type, not_implemented_message(mode)),
+      else: handler.(conn)
   end
 
   # ---
