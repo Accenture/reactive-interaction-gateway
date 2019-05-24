@@ -47,7 +47,8 @@ defmodule Rig.Connection.Codec do
     mode = :aes_gcm
     secret_key = :base64.decode(key)
     init_vector = :crypto.strong_rand_bytes(16)
-    {ciphertext, ciphertag} = :crypto.block_encrypt(mode, secret_key, init_vector, {@aad, to_string(val), 16})
+    {ciphertext, ciphertag} =
+      :crypto.block_encrypt(mode, secret_key, init_vector, {@aad, to_string(val), 16})
     init_vector <> ciphertag <> ciphertext
   end
 
@@ -57,7 +58,7 @@ defmodule Rig.Connection.Codec do
   Decrypts ciphertext using key.
   Ciphertext is init. vector, ciphertag (MAC) and the actual ciphertext concatenated.
   """
-  @spec encrypt(binary, binary) :: binary
+  @spec decrypt(binary, binary) :: binary
   def decrypt(ciphertext, key) do
     mode = :aes_gcm
     secret_key = :base64.decode(key)
