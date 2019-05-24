@@ -6,7 +6,7 @@ defmodule Rig.Connection.Codec do
   @doc "Turn a pid into an url-encoded string."
   @spec serialize(pid) :: binary
   def serialize(pid) do
-    key = "7tsf4Y6GTOfPY1iDo4PqZA=="
+    key = Confex.fetch_env!(:rig, Rig.Connection.Codec)[:secret_key]
     pid
     |> :erlang.term_to_binary()
     |> encrypt(key)
@@ -18,7 +18,7 @@ defmodule Rig.Connection.Codec do
   @doc "Convert a serialized string back into a pid."
   @spec deserialize(binary) :: {:ok, pid} | {:error, :not_base64 | :invalid_term}
   def deserialize(base64_encoded) do
-    key = "7tsf4Y6GTOfPY1iDo4PqZA=="
+    key = Confex.fetch_env!(:rig, Rig.Connection.Codec)[:secret_key]
     with {:ok, decoded_binary} <- decode64(base64_encoded) do
       decoded_binary
       |> decrypt(key)
