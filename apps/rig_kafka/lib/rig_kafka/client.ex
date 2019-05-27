@@ -73,7 +73,6 @@ defmodule RigKafka.Client do
         ) do
       %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
       headers_no_prefix = Serializer.remove_prefix(headers)
-
       content_type = get_content_type(headers_no_prefix, body)
 
       decoded_body =

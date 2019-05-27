@@ -136,42 +136,42 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
 
   test_with_server "forward_request should handle nested query params", @env do
     route("/myapi/books", fn %{query: query} ->
-      assert %{"page[limit]" => "10", "page[offset]" => "0"} = query
+      assert query == %{"page[limit]" => "10", "page[offset]" => "0"}
       Response.ok!(~s<{"response":"[]"}>)
     end)
 
-    request =
-      construct_request_with_jwt(:get, "/myapi/books", %{
-        "page" => %{"offset" => 0, "limit" => 10}
-      })
+    request = %{
+      construct_request_with_jwt(:get, "/myapi/books")
+      | query_string: "page[offset]=0&page[limit]=10"
+    }
 
     conn = call(Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"response\":\"[]\"}"
   end
 
-  test_with_server "forward_request should handle POST request with file body", @env do
+  test_with_server "forward_request should handle POST request with multipart file body", @env do
     route("/myapi/books", fn %{method: "POST", body: body} ->
-      assert String.contains?(body, "name=\"random_data\"\r\n\r\n123\r\n")
-      assert String.contains?(body, "filename=\"upload_example.txt\"\r\n\r\nHello\r\n")
-      Response.created!(~s<{"response": "file uploaded successfully"}>)
+      assert String.contains?(body, ~S<name="display_name">)
+      assert String.contains?(body, ~S<filename="upload_example.txt">)
+      # File content:
+      assert String.contains?(body, "Hello")
+      Response.created!(~S<{"response": "file uploaded successfully"}>)
     end)
 
-    upload = %Plug.Upload{
-      path: __DIR__ <> "/upload_example.txt",
-      filename: "upload_example.txt",
-      content_type: "plain/text"
-    }
+    displayname = "display_name"
+    filename = "upload_example.txt"
+    filepath = "#{__DIR__}/#{filename}"
+    file_part = {:file, filepath, displayname, [{"content-type", "plain/text"}]}
+    body = {:multipart, [file_part]}
+    headers = [{"authorization", "Bearer #{generate_jwt()}"}]
+    url = "http://localhost:#{@env[:port]}/myapi/books"
 
-    request =
-      construct_request_with_jwt(:post, "/myapi/books", %{
-        "qqfile" => upload,
-        "random_data" => "123"
-      })
-
-    conn = call(Router, request)
-    assert conn.status == 201
-    assert conn.resp_body =~ "{\"response\": \"file uploaded successfully\"}"
+    assert {:ok,
+            %HTTPoison.Response{
+              status_code: 201,
+              body: ~S<{"response": "file uploaded successfully"}>
+            }} = HTTPoison.post(url, body, headers)
   end
 
   test_with_server "Any request should include a forward header", @env do
