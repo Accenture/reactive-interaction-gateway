@@ -20,11 +20,12 @@ defmodule RigInboundGatewayWeb.Router do
       end
 
       scope "/connection/ws" do
-        # /connection/ws is configured in the Phoenix/Cowboy dispatch configuration
-
         subscription_url = "/:connection_id/subscriptions"
         options(subscription_url, SubscriptionController, :handle_preflight)
         put(subscription_url, SubscriptionController, :set_subscriptions)
+
+        # The WebSocket handler is implemented using Cowboy's loop handler behaviour and set
+        # up using the Cowboy dispatch configuration; see the `config.exs` file.
       end
 
       options("/events", EventController, :handle_preflight)

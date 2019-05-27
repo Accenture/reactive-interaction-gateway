@@ -17,6 +17,8 @@ defmodule RigApi.Router do
   scope "/v1", RigApi do
     pipe_through(:api)
 
+    resources("/responses", ResponsesController, only: [:create])
+
     scope "/users" do
       get("/", ChannelsController, :list_channels)
       get("/:user/sessions", ChannelsController, :list_channel_sessions)
