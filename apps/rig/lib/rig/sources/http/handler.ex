@@ -79,42 +79,52 @@ defmodule RIG.Sources.HTTP.Handler do
   # ---
 
   defp build_cloudevent_json(conn) do
-    event =
-      conn.req_headers
-      |> Enum.filter(fn {k, _} ->
-        k in [
-          "content-type",
-          "ce-specversion",
-          "ce-type",
-          "ce-source",
-          "ce-id",
-          "ce-time",
-          "ce-schemaurl"
-        ]
-      end)
-      |> Enum.into(%{}, fn
-        # Strip "ce-" prefix:
-        {"ce-" <> k, v} -> {k, v}
-        # Use HTTP content type:
-        {"content-type", v} -> {"contenttype", v}
-      end)
-
+    context_attributes = context_attributes_from_headers(conn.req_headers)
     {:ok, body, conn} = BodyReader.read_full_body(conn)
 
     event =
-      case MediaTypeHandling.media_type(event["contenttype"]) do
+      case MediaTypeHandling.media_type(context_attributes["contenttype"]) do
         {"application", "json"} ->
           # Decoding the body allows to use fields in `data` in subscriptions:
-          event
+          context_attributes
           |> Map.put("data", Jason.decode!(body))
           |> Map.delete("contenttype")
 
         _ ->
-          event
+          context_attributes
           |> Map.put("data", body)
       end
 
     {conn, Jason.encode!(event)}
+  end
+
+  # ---
+
+  @ce_standard_headers [
+    "specversion",
+    "type",
+    "source",
+    "id",
+    "time",
+    "schemaurl"
+  ]
+  defp context_attributes_from_headers(headers) do
+    [content_type] = for {"content-type", val} <- headers, do: val
+
+    for {"ce-" <> attr, val} <- headers, into: %{} do
+      case attr do
+        attr when attr in @ce_standard_headers ->
+          {attr, val}
+
+        _ ->
+          # If this is a CloudEvents extension field, it might be JSON encoded:
+          case Jason.decode(val) do
+            {:ok, val} -> {attr, val}
+            _ -> {attr, val}
+          end
+      end
+    end
+    |> Map.put("contenttype", content_type)
   end
 
   # ---
