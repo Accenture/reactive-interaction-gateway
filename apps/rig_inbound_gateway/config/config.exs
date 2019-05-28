@@ -153,6 +153,7 @@ cors = {:system, "CORS", "*"}
 config :rig, RigInboundGatewayWeb.V1.EventController, cors: cors
 config :rig, RigInboundGatewayWeb.V1.SubscriptionController, cors: cors
 config :rig, RigInboundGatewayWeb.V1.SSE, cors: cors
+config :rig, RigInboundGatewayWeb.V1.LongpollingController, cors: cors
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

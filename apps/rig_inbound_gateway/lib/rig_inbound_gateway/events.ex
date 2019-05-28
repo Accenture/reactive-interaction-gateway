@@ -19,6 +19,16 @@ defmodule RigInboundGateway.Events do
     )
   end
 
+  @spec welcome_event(pid) :: CloudEvent.t()
+  def welcome_event(pid) do
+    connection_token = Connection.Codec.serialize(pid)
+
+    rig_event(
+      "rig.connection.create",
+      %{connection_token: connection_token}
+    )
+  end
+
   @spec subscriptions_set([Subscription.t()]) :: CloudEvent.t()
   def subscriptions_set(subscriptions) do
     rig_event(
