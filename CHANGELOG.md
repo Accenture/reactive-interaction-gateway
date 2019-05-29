@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - _Beta_ - Added Apache Avro support for consumer and producer as well as Kafka Schema Registry.
 - [Docs] Added new set of topics in documentation about Api Gateway, even streams and scaling.
 - [Docs] Added examples section to documentation website.
+- [Connection] Added longpolling as new connection type  [#217](https://github.com/Accenture/reactive-interaction-gateway/issues/217)
 
 <!-- ### Changed -->
 

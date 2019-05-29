@@ -10,7 +10,7 @@ Where RIG uses event streams:
 
 - publishing via API Gateway to specific topic/stream, see [Publishing to event streams](./api-gateway#publishing-to-event-streams) for more details
   - consuming of events from specific topic/stream to achieve sync requests
-- consuming of events to be forwarded via SSE/WS
+- consuming of events to be forwarded via SSE/WS/Longpolling
 - publishing "monitoring" messages per API Gateway call
 
 Event stream functionality is by default disabled -- can be controlled via environment variables. All possible configuration can be found in [Operator's Guide](./rig-ops-guide.md)
@@ -33,7 +33,7 @@ docker run -e KAFKA_BROKERS=kafka:9092 accenture/reactive-interaction-gateway
 
 ### Change consumer topics and group ID
 
-As Kafka is enabled, RIG starts to consume events on 2 default topics `rig` and `rig-proxy-response`. `rig` topic is used to consume all events and forward them to client via SSE/WS. `rig-proxy-response` is used for HTTP sync publishing, see [API Gateway docs](./api-gateway#sync).
+As Kafka is enabled, RIG starts to consume events on 2 default topics `rig` and `rig-proxy-response`. `rig` topic is used to consume all events and forward them to client via SSE/WS/Longpolling. `rig-proxy-response` is used for HTTP sync publishing, see [API Gateway docs](./api-gateway#sync).
 
 Change topics:
 
@@ -148,7 +148,7 @@ docker run -e KINESIS_ENABLED=1 -e KINESIS_AWS_REGION=eu-west-3 accenture/reacti
 
 ### Change consumer stream and app name
 
-As Kinesis is enabled, RIG starts to consume events on default stream `RIG-outbound`. `RIG-outbound` topic is used to consume all events and forward them to client via SSE/WS.
+As Kinesis is enabled, RIG starts to consume events on default stream `RIG-outbound`. `RIG-outbound` topic is used to consume all events and forward them to client via SSE/WS/Longpolling.
 
 Change stream:
 

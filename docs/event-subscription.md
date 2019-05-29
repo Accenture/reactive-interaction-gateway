@@ -4,7 +4,7 @@ title: Event Subscription
 sidebar_label: Event Subscription
 ---
 
-There are **two ways to receive events**, either via [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events) (SSE) or via a [WebSocket](https://en.wikipedia.org/wiki/WebSocket) connection. We recommend SSE:
+There are **three ways to receive events**, either via [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events) (SSE), via a [WebSocket](https://en.wikipedia.org/wiki/WebSocket) connection or longpolling. We recommend SSE:
 
 - With HTTP/2, there is no (practical) limit to the number of SSE connections/streams that can be created.
 - SSE does not require dropping the HTTP protocol, which makes it firewall-friendly.
