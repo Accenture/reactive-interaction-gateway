@@ -78,31 +78,6 @@ defmodule Rig.EventFilter.Server do
 
   @impl GenServer
   def handle_call(
-        {:refresh_subscriptions, socket_pid, subscriptions},
-        _from,
-        %{
-          event_type: event_type,
-          subscription_table: subscription_table,
-          subscription_ttl_s: ttl_s,
-          fields: fields
-        } = state
-      ) do
-    # Only handle subscriptions that target the filter's event type:
-    subscriptions = Enum.filter(subscriptions, fn sub -> sub.event_type == event_type end)
-
-    refresh_subscriptions(
-      subscription_table,
-      socket_pid,
-      subscriptions,
-      fields,
-      ttl_s
-    )
-
-    {:reply, :ok, state}
-  end
-
-  @impl GenServer
-  def handle_call(
         {:reload_configuration, new_config},
         _from,
         %{subscription_table: subscription_table, fields: cur_fields} = state
@@ -119,6 +94,32 @@ defmodule Rig.EventFilter.Server do
         Logger.error("Not loading invalid config '#{inspect(new_config)}' due to #{inspect(err)}")
         {:reply, {:error, err}, state}
     end
+  end
+
+  # ---
+
+  @impl GenServer
+  def handle_cast(
+        {:refresh_subscriptions, subscriber_pid, subscriptions},
+        %{
+          event_type: event_type,
+          subscription_table: subscription_table,
+          subscription_ttl_s: ttl_s,
+          fields: fields
+        } = state
+      ) do
+    # Only handle subscriptions that target the filter's event type:
+    subscriptions = Enum.filter(subscriptions, fn sub -> sub.event_type == event_type end)
+
+    refresh_subscriptions(
+      subscription_table,
+      subscriber_pid,
+      subscriptions,
+      fields,
+      ttl_s
+    )
+
+    {:noreply, state}
   end
 
   # ---
