@@ -146,18 +146,18 @@ The endpoint expects the following request format:
 
 ```json
 {
-  "event": {
-    "id": "069711bf-3946-4661-984f-c667657b8d85",
-    "type": "com.example",
-    "time": "2018-04-05T17:31:00Z",
-    "specversion": "0.2",
-    "source": "/cli",
-    "contenttype": "application/json",
-    "data":{
-      "foo": "bar"
-    }
+  "id": "069711bf-3946-4661-984f-c667657b8d85",
+  "type": "com.example",
+  "time": "2018-04-05T17:31:00Z",
+  "specversion": "0.2",
+  "source": "/cli",
+  "contenttype": "application/json",
+  "rig": {
+    "target_partition": "the-partition-key"
   },
-  "partition": "your_partition_key"
+  "data":{
+    "foo": "bar"
+  }
 }
 ```
 
