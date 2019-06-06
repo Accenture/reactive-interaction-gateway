@@ -27,7 +27,7 @@ defmodule RigInboundGatewayWeb.Session do
   end
 
   def recv_events(server, last_event_id) do
-    GenServer.call(server, {:recv_events, last_event_id || "0", 0}, 20_000)
+    GenServer.call(server, {:recv_events, last_event_id || "first_event", 0}, 20_000)
   end
 
   # ---
@@ -82,7 +82,7 @@ defmodule RigInboundGatewayWeb.Session do
         case tries do
           @max_tries ->
             # in case we reached the max tries, we send an empty list
-            {:reply, %{last_event_id: last_event_id, events: [], status: :ok}, state}
+            {:reply, %{last_event_id: last_event_id, events: [], status: :no_events}, state}
 
           _ ->
             # There are no events, so we let the client wait @window_size_ms and check again:
@@ -96,7 +96,12 @@ defmodule RigInboundGatewayWeb.Session do
         end
 
       {:ok, [events: events, last_event_id: last_event_id]} ->
-        {:reply, %{last_event_id: last_event_id, events: events, status: :ok}, state}
+        {:reply,
+         %{
+           last_event_id: last_event_id,
+           events: Enum.map(events, fn x -> x.json end),
+           status: :ok
+         }, state}
 
       {:no_such_event, [not_found_id: _not_found_id, last_event_id: last_event_id]} ->
         # the event_id provided by the client was outdated - we send the newest event id
@@ -112,7 +117,7 @@ defmodule RigInboundGatewayWeb.Session do
         case tries do
           @max_tries ->
             # in case we reached the max tries, we send an empty list
-            {:reply, %{last_event_id: last_event_id, events: [], status: :ok}, state}
+            {:reply, %{last_event_id: last_event_id, events: [], status: :no_events}, state}
 
           _ ->
             # There are no events, so we let the client wait @window_size_ms and check again:
@@ -127,7 +132,12 @@ defmodule RigInboundGatewayWeb.Session do
 
       {:ok, [events: events, last_event_id: last_event_id]} ->
         # There are events, so we return all available events
-        GenServer.reply(from, %{last_event_id: last_event_id, events: events, status: :ok})
+        GenServer.reply(from, %{
+          last_event_id: last_event_id,
+          events: Enum.map(events, fn x -> x.json end),
+          status: :ok
+        })
+
         {:noreply, state}
 
       {:no_such_event, [not_found_id: _not_found_id, last_event_id: last_event_id]} ->
@@ -141,7 +151,7 @@ defmodule RigInboundGatewayWeb.Session do
   @impl true
   def handle_info(%CloudEvent{} = event, state) do
     Logger.debug(fn -> "event: " <> inspect(event) end)
-    event_buffer = state.event_buffer |> EventBuffer.add_event(event.json)
+    event_buffer = state.event_buffer |> EventBuffer.add_event(event)
     {:noreply, %{state | event_buffer: event_buffer}}
   end
 
@@ -151,7 +161,7 @@ defmodule RigInboundGatewayWeb.Session do
   def handle_info(:welcome_event, state) do
     # write the event to the event_buffer
     event = Events.welcome_event(self())
-    event_buffer = state.event_buffer |> EventBuffer.add_event(event.json)
+    event_buffer = state.event_buffer |> EventBuffer.add_event(event)
 
     {:noreply, %{state | event_buffer: event_buffer}}
   end
@@ -167,7 +177,7 @@ defmodule RigInboundGatewayWeb.Session do
 
     # write the event to the event_buffer
     event = Events.subscriptions_set(subscriptions)
-    event_buffer = state.event_buffer |> EventBuffer.add_event(event.json)
+    event_buffer = state.event_buffer |> EventBuffer.add_event(event)
 
     {:noreply, %{state | event_buffer: event_buffer, subscriptions: subscriptions}}
   end

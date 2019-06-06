@@ -52,7 +52,7 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
       conn
       |> with_allow_origin()
       |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize())
-      |> put_resp_cookie("last_event_id", Jason.encode!("0"))
+      |> put_resp_cookie("last_event_id", Jason.encode!("first_event"))
       |> put_resp_header("content-type", "application/json; charset=utf-8")
       |> put_resp_header("cache-control", "no-cache")
       |> send_resp(200, Jason.encode!("ok"))
@@ -70,12 +70,16 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   defp process_request(false, conn) do
     {:ok, session_pid} = Connection.Codec.deserialize(conn.req_cookies["connection_token"])
 
-    response = Session.recv_events(session_pid, conn.req_cookies["last_event_id"] || "0")
+    response =
+      Session.recv_events(
+        session_pid,
+        Jason.decode!(conn.req_cookies["last_event_id"] || "first_event")
+      )
 
     conn
     |> with_allow_origin()
     |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize())
-    |> put_resp_cookie("last_event_id", Jason.encode!(response[:last_event_id] || "0"))
+    |> put_resp_cookie("last_event_id", Jason.encode!(response[:last_event_id] || "first_event"))
     |> put_resp_header("content-type", "application/json; charset=utf-8")
     |> put_resp_header("cache-control", "no-cache")
     |> send_resp(

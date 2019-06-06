@@ -55,10 +55,6 @@ defmodule RigInboundGatewayWeb.EventBuffer do
     }
   end
 
-  @spec events_since(EventBuffer.t(), event_id) ::
-          {:ok, [events: events, last_event_id: event_id]}
-          | {:no_such_event, [not_found_id: event_id, last_event_id: event_id]}
-        when events: list(CloudEvent.t()), event_id: String.t()
   def events_since(
         %{
           capacity: capacity,
@@ -67,14 +63,9 @@ defmodule RigInboundGatewayWeb.EventBuffer do
         } = _event_buffer,
         event_id
       ) do
-    case Enum.find_index(events, fn x -> CloudEvent.id!(x) == event_id end) do
-      nil ->
-        next_event = Enum.at(events, 0)
-        {:no_such_event, [not_found_id: event_id, last_event_id: CloudEvent.id!(next_event)]}
-
-      event_index ->
-        read_pointer = rem(event_index + 1, capacity)
-        new_events = get_new_events(events, read_pointer, write_pointer, capacity)
+    case event_id do
+      "first_event" ->
+        new_events = get_new_events(events, 0, write_pointer, capacity)
 
         case new_events do
           [] ->
@@ -82,6 +73,26 @@ defmodule RigInboundGatewayWeb.EventBuffer do
 
           _ ->
             {:ok, [events: new_events, last_event_id: CloudEvent.id!(Enum.at(new_events, -1))]}
+        end
+
+      _ ->
+        case Enum.find_index(events, fn x -> CloudEvent.id!(x) == event_id end) do
+          nil ->
+            next_event = Enum.at(events, 0)
+            {:no_such_event, [not_found_id: event_id, last_event_id: CloudEvent.id!(next_event)]}
+
+          event_index ->
+            read_pointer = rem(event_index + 1, capacity)
+            new_events = get_new_events(events, read_pointer, write_pointer, capacity)
+
+            case new_events do
+              [] ->
+                {:ok, [events: [], last_event_id: event_id]}
+
+              _ ->
+                {:ok,
+                 [events: new_events, last_event_id: CloudEvent.id!(Enum.at(new_events, -1))]}
+            end
         end
     end
   end

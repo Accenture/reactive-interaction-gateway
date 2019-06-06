@@ -73,7 +73,7 @@ defmodule EventBufferTest do
       buffer |> EventBuffer.events_since("first")
 
     assert not_found_id == "first"
-    assert last_event_id == "second"
+    assert last_event_id == "third"
 
     # The capacity hasn't changed during the modifications:
     assert EventBuffer.capacity(buffer) == 2
