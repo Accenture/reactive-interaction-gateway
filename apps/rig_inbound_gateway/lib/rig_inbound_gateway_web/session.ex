@@ -71,7 +71,7 @@ defmodule RigInboundGatewayWeb.Session do
   # ---
   # Waits for events and replies them if available
   @impl true
-  def handle_call({:recv_events, last_event_id, tries}, from, state) do
+  def handle_call({:recv_events, last_event_id, _}, from, state) do
     state = %{
       state
       | session_valid_until: DateTime.add(DateTime.utc_now(), @session_timout_ms, :millisecond)
@@ -79,21 +79,14 @@ defmodule RigInboundGatewayWeb.Session do
 
     case EventBuffer.events_since(state.event_buffer, last_event_id) do
       {:ok, [events: [], last_event_id: last_event_id]} ->
-        case tries do
-          @max_tries ->
-            # in case we reached the max tries, we send an empty list
-            {:reply, %{last_event_id: last_event_id, events: [], status: :no_events}, state}
+        # There are no events, so we let the client wait @window_size_ms and check again:
+        Process.send_after(
+          self(),
+          {:recv_events, from, last_event_id, 1},
+          @window_size_ms
+        )
 
-          _ ->
-            # There are no events, so we let the client wait @window_size_ms and check again:
-            Process.send_after(
-              self(),
-              {:recv_events, from, last_event_id, tries + 1},
-              @window_size_ms
-            )
-
-            {:noreply, state}
-        end
+        {:noreply, state}
 
       {:ok, [events: events, last_event_id: last_event_id]} ->
         {:reply,
@@ -117,7 +110,13 @@ defmodule RigInboundGatewayWeb.Session do
         case tries do
           @max_tries ->
             # in case we reached the max tries, we send an empty list
-            {:reply, %{last_event_id: last_event_id, events: [], status: :no_events}, state}
+            GenServer.reply(from, %{
+              last_event_id: last_event_id,
+              events: [],
+              status: :no_events
+            })
+
+            {:noreply, state}
 
           _ ->
             # There are no events, so we let the client wait @window_size_ms and check again:
@@ -142,7 +141,13 @@ defmodule RigInboundGatewayWeb.Session do
 
       {:no_such_event, [not_found_id: _not_found_id, last_event_id: last_event_id]} ->
         # the event_id provided by the client was outdated - we send the newest event id
-        {:reply, %{last_event_id: last_event_id, events: [], status: :no_such_event}, state}
+        GenServer.reply(from, %{
+          last_event_id: last_event_id,
+          events: [],
+          status: :no_such_event
+        })
+
+        {:noreply, state}
     end
   end
 
