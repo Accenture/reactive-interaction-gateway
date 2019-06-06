@@ -2,132 +2,80 @@ defmodule EventBufferTest do
   use ExUnit.Case, async: true
 
   alias RigInboundGatewayWeb.EventBuffer
+  alias RigCloudEvents.CloudEvent
 
-  test "New EventBuffer starts with no events" do
-    buffer = EventBuffer.new(5)
-    assert buffer.events === []
-    assert buffer.max_size === 5
-    assert buffer.write_pointer === 0
-    assert buffer.read_pointer === 0
+  defp new_event(id) do
+    {:ok, event} =
+      CloudEvent.parse("""
+        {"specversion": "0.2", "id": "#{id}", "type": "test-event"}
+      """)
+
+    event
   end
 
-  test "returns events as they are added" do
-    buffer = EventBuffer.new(5)
-    buffer = EventBuffer.write(buffer, 1)
-    assert buffer.write_pointer === 1
-    assert buffer.read_pointer === 0
-    {:ok, buffer, value} = EventBuffer.read(buffer)
-    assert value === 1
-    assert buffer.write_pointer === 1
-    assert buffer.read_pointer === 1
-  end
+  test "Adding events leaves the capacity unchanged and overwrites old events as soon as the buffer is filled up to its capacity." do
+    # We create a new buffer that holds at most 2 events:
+    buffer = EventBuffer.new(2)
+    assert buffer |> EventBuffer.capacity() == 2
+    assert buffer |> EventBuffer.all_events() == []
 
-  test "An exceeding write overwrites the oldest value - edge-case no read at all" do
-    buffer = EventBuffer.new(5)
-    buffer = EventBuffer.write(buffer, 1)
-    buffer = EventBuffer.write(buffer, 2)
-    buffer = EventBuffer.write(buffer, 3)
-    buffer = EventBuffer.write(buffer, 4)
-    buffer = EventBuffer.write(buffer, 5)
-    buffer = EventBuffer.write(buffer, 6)
-    assert buffer.events === [6, 2, 3, 4, 5]
-  end
+    # We add a first event:
+    first_event = new_event("first")
+    buffer = buffer |> EventBuffer.add_event(first_event)
+    # The event is in the buffer:
+    assert buffer |> EventBuffer.all_events() == [first_event]
+    # There is no more recent event yet:
+    {:ok, [events: events, last_event_id: last_event_id]} =
+      buffer |> EventBuffer.events_since("first")
 
-  test "An exceeding write overwrites the oldest value" do
-    buffer = EventBuffer.new(5)
-    buffer = EventBuffer.write(buffer, 1)
-    {:ok, buffer, _value} = EventBuffer.read(buffer)
-    buffer = EventBuffer.write(buffer, 2)
-    buffer = EventBuffer.write(buffer, 3)
-    buffer = EventBuffer.write(buffer, 4)
-    buffer = EventBuffer.write(buffer, 5)
-    buffer = EventBuffer.write(buffer, 6)
-    assert buffer.events === [6, 2, 3, 4, 5]
-  end
+    assert events == []
+    assert last_event_id == "first"
 
-  test "Overtaking write, also pushes the read" do
-    buffer = EventBuffer.new(5)
-    buffer = EventBuffer.write(buffer, 1)
-    buffer = EventBuffer.write(buffer, 2)
-    buffer = EventBuffer.write(buffer, 3)
-    buffer = EventBuffer.write(buffer, 4)
-    buffer = EventBuffer.write(buffer, 5)
-    buffer = EventBuffer.write(buffer, 6)
-    assert buffer.write_pointer === 1
-    assert buffer.read_pointer === 2
-    {:ok, buffer, value} = EventBuffer.read(buffer)
-    assert value === 3
-    assert buffer.read_pointer === 3
-    {:ok, buffer, value} = EventBuffer.read(buffer)
-    assert value === 4
-    assert buffer.read_pointer === 4
-  end
+    # We add a second event to the buffer:
+    second_event = new_event("second")
+    buffer = buffer |> EventBuffer.add_event(second_event)
+    # Both events are now in the buffer:
+    assert buffer |> EventBuffer.all_events() == [first_event, second_event]
+    # "second" is now more recent than "first", but there is no event newer than "second":
+    {:ok, [events: events, last_event_id: last_event_id]} =
+      buffer |> EventBuffer.events_since("first")
 
-  test "empty eventbuffer provides an empty list" do
-    buffer = EventBuffer.new(5)
-    {:ok, _buffer, value} = EventBuffer.read(buffer)
-    assert value === []
-  end
+    assert events == [second_event]
+    assert last_event_id == "second"
 
-  test "if all events are read provide an empty list" do
-    buffer = EventBuffer.new(5)
-    buffer = EventBuffer.write(buffer, 1)
-    {:ok, buffer, value} = EventBuffer.read(buffer)
-    assert value === 1
-    {:ok, _buffer, value} = EventBuffer.read(buffer)
-    assert value === []
-  end
+    {:ok, [events: events, last_event_id: last_event_id]} =
+      buffer |> EventBuffer.events_since("second")
 
-  test "read_all provides a list of all unread events" do
-    buffer = EventBuffer.new(5)
-    buffer = EventBuffer.write(buffer, 1)
-    buffer = EventBuffer.write(buffer, 2)
-    buffer = EventBuffer.write(buffer, 3)
-    buffer = EventBuffer.write(buffer, 4)
-    buffer = EventBuffer.write(buffer, 5)
-    {:ok, _buffer, values} = EventBuffer.read_all(buffer)
-    assert values === [1, 2, 3, 4, 5]
-  end
+    assert events == []
+    assert last_event_id == "second"
 
-  test "read_all also provides a list of all unread events around the horn" do
-    buffer = EventBuffer.new(5)
-    buffer = EventBuffer.write(buffer, 1)
-    buffer = EventBuffer.write(buffer, 2)
-    buffer = EventBuffer.write(buffer, 3)
-    buffer = EventBuffer.write(buffer, 4)
-    buffer = EventBuffer.write(buffer, 5)
-    {:ok, buffer, _value} = EventBuffer.read(buffer)
-    {:ok, buffer, _value} = EventBuffer.read(buffer)
-    buffer = EventBuffer.write(buffer, 6)
-    buffer = EventBuffer.write(buffer, 7)
-    {:ok, _buffer, values} = EventBuffer.read_all(buffer)
-    assert values === [4, 5, 6, 7]
-  end
+    # Adding a third event should remove the first one:
+    third_event = new_event("third")
+    buffer = buffer |> EventBuffer.add_event(third_event)
 
-  test "read_at provides the value from the given position, ignoring current read_pointer" do
-    buffer = EventBuffer.new(5)
-    buffer = EventBuffer.write(buffer, 1)
-    buffer = EventBuffer.write(buffer, 2)
-    buffer = EventBuffer.write(buffer, 3)
-    buffer = EventBuffer.write(buffer, 4)
-    buffer = EventBuffer.write(buffer, 5)
-    {:ok, buffer, value} = EventBuffer.read(buffer)
-    assert value === 1
-    {:ok, _buffer, value} = EventBuffer.read_at(buffer, 0)
-    assert value === 1
-  end
+    # The first event is no longer in the buffer (all_events doesn't provide the correct order tho)
+    assert buffer |> EventBuffer.all_events() == [third_event, second_event]
+    # "third" is now more recent than "second", but there is no event newer than "third":
+    {:ok, [events: events, last_event_id: last_event_id]} =
+      buffer |> EventBuffer.events_since("second")
 
-  test "read_at overwrites current read_pointer" do
-    buffer = EventBuffer.new(5)
-    buffer = EventBuffer.write(buffer, 1)
-    buffer = EventBuffer.write(buffer, 2)
-    buffer = EventBuffer.write(buffer, 3)
-    buffer = EventBuffer.write(buffer, 4)
-    buffer = EventBuffer.write(buffer, 5)
-    {:ok, buffer, _value} = EventBuffer.read(buffer)
-    {:ok, buffer, _value} = EventBuffer.read(buffer)
-    assert buffer.read_pointer === 2
-    {:ok, buffer, _value} = EventBuffer.read_at(buffer, 0)
-    assert buffer.read_pointer === 1
+    assert events == [third_event]
+    assert last_event_id == "third"
+
+    {:ok, [events: events, last_event_id: last_event_id]} =
+      buffer |> EventBuffer.events_since("third")
+
+    assert events == []
+    assert last_event_id == "third"
+
+    # Since "first" is no longer in the buffer, _all_ events are newer than "first":
+    {:no_such_event, [not_found_id: not_found_id, last_event_id: last_event_id]} =
+      buffer |> EventBuffer.events_since("first")
+
+    assert not_found_id == "first"
+    assert last_event_id == "second"
+
+    # The capacity hasn't changed during the modifications:
+    assert EventBuffer.capacity(buffer) == 2
   end
 end

@@ -16,7 +16,6 @@ defmodule RigInboundGatewayWeb.Session do
 
   @window_size_ms 500
   @max_tries 10
-  @heartbeat_interval_ms 15_000
   @event_buffer_size 200
   @subscription_refresh_interval_ms 60_000
   @session_timeout_validation_interval_ms 60_000
@@ -28,7 +27,7 @@ defmodule RigInboundGatewayWeb.Session do
   end
 
   def recv_events(server, last_event_id) do
-    GenServer.call(server, {:recv_events, last_event_id || 0, 0}, 20_000)
+    GenServer.call(server, {:recv_events, last_event_id || "0", 0}, 20_000)
   end
 
   # ---
@@ -37,10 +36,6 @@ defmodule RigInboundGatewayWeb.Session do
 
   @impl true
   def init(%{query_params: query_params}) do
-    # Init Heatbeat: We're going to accept the connection, so let's set up the heartbeat:
-    # Currently heartbeat not scheduled
-    # Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
-
     # Init Subscriptions: Setup sulbscriptions for the token & also provided as query parameter
     with {:ok, jwt_subs} <- Subscriptions.from_token(query_params["jwt"]),
          {:ok, query_subs} <-
@@ -82,35 +77,62 @@ defmodule RigInboundGatewayWeb.Session do
       | session_valid_until: DateTime.add(DateTime.utc_now(), @session_timout_ms, :millisecond)
     }
 
-    if state.event_buffer.write_pointer === state.event_buffer.read_pointer && tries < @max_tries do
-      # There are no events, so we let the client wait @window_size_ms and check again:
-      Process.send_after(self(), {:recv_events, from, last_event_id, tries + 1}, @window_size_ms)
+    case EventBuffer.events_since(state.event_buffer, last_event_id) do
+      {:ok, [events: [], last_event_id: last_event_id]} ->
+        case tries do
+          @max_tries ->
+            # in case we reached the max tries, we send an empty list
+            {:reply, %{last_event_id: last_event_id, events: [], status: :ok}, state}
 
-      {:noreply, state}
-    else
-      # There are events, so we return all available events
-      {:ok, event_buffer, events} = EventBuffer.read_all_at(state.event_buffer, last_event_id)
+          _ ->
+            # There are no events, so we let the client wait @window_size_ms and check again:
+            Process.send_after(
+              self(),
+              {:recv_events, from, last_event_id, tries + 1},
+              @window_size_ms
+            )
 
-      {:reply, %{last_event_id: event_buffer.read_pointer, events: events},
-       %{state | event_buffer: event_buffer}}
+            {:noreply, state}
+        end
+
+      {:ok, [events: events, last_event_id: last_event_id]} ->
+        {:reply, %{last_event_id: last_event_id, events: events, status: :ok}, state}
+
+      {:no_such_event, [not_found_id: _not_found_id, last_event_id: last_event_id]} ->
+        # the event_id provided by the client was outdated - we send the newest event id
+        {:reply, %{last_event_id: last_event_id, events: [], status: :no_such_event}, state}
     end
   end
 
   # Waits for events and replies them if available (same as above, but as handle_info)
   @impl true
   def handle_info({:recv_events, from, last_event_id, tries}, state) do
-    if state.event_buffer.write_pointer === state.event_buffer.read_pointer && tries < @max_tries do
-      # There are no events, so we let the client wait @window_size_ms and check again:
-      Process.send_after(self(), {:recv_events, from, last_event_id, tries + 1}, @window_size_ms)
+    case EventBuffer.events_since(state.event_buffer, last_event_id) do
+      {:ok, [events: [], last_event_id: last_event_id]} ->
+        case tries do
+          @max_tries ->
+            # in case we reached the max tries, we send an empty list
+            {:reply, %{last_event_id: last_event_id, events: [], status: :ok}, state}
 
-      {:noreply, state}
-    else
-      # There are events, so we return all available events
-      {:ok, event_buffer, events} = EventBuffer.read_all_at(state.event_buffer, last_event_id)
+          _ ->
+            # There are no events, so we let the client wait @window_size_ms and check again:
+            Process.send_after(
+              self(),
+              {:recv_events, from, last_event_id, tries + 1},
+              @window_size_ms
+            )
 
-      GenServer.reply(from, %{last_event_id: event_buffer.read_pointer, events: events})
+            {:noreply, state}
+        end
 
-      {:noreply, %{state | event_buffer: event_buffer}}
+      {:ok, [events: events, last_event_id: last_event_id]} ->
+        # There are events, so we return all available events
+        GenServer.reply(from, %{last_event_id: last_event_id, events: events, status: :ok})
+        {:noreply, state}
+
+      {:no_such_event, [not_found_id: _not_found_id, last_event_id: last_event_id]} ->
+        # the event_id provided by the client was outdated - we send the newest event id
+        {:reply, %{last_event_id: last_event_id, events: [], status: :no_such_event}, state}
     end
   end
 
@@ -119,19 +141,7 @@ defmodule RigInboundGatewayWeb.Session do
   @impl true
   def handle_info(%CloudEvent{} = event, state) do
     Logger.debug(fn -> "event: " <> inspect(event) end)
-    event_buffer = EventBuffer.write(state.event_buffer, event.json)
-    {:noreply, %{state | event_buffer: event_buffer}}
-  end
-
-  # ---
-  # Adds a heartbeat to the event buffer & schedules itself
-  @impl true
-  def handle_info(:heartbeat, state) do
-    # Schedule next heartbeat
-    Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
-
-    event_buffer = EventBuffer.write(state.event_buffer, "\"heartbeat\"")
-
+    event_buffer = state.event_buffer |> EventBuffer.add_event(event.json)
     {:noreply, %{state | event_buffer: event_buffer}}
   end
 
@@ -141,7 +151,7 @@ defmodule RigInboundGatewayWeb.Session do
   def handle_info(:welcome_event, state) do
     # write the event to the event_buffer
     event = Events.welcome_event(self())
-    event_buffer = EventBuffer.write(state.event_buffer, event.json)
+    event_buffer = state.event_buffer |> EventBuffer.add_event(event.json)
 
     {:noreply, %{state | event_buffer: event_buffer}}
   end
@@ -157,7 +167,7 @@ defmodule RigInboundGatewayWeb.Session do
 
     # write the event to the event_buffer
     event = Events.subscriptions_set(subscriptions)
-    event_buffer = EventBuffer.write(state.event_buffer, event.json)
+    event_buffer = state.event_buffer |> EventBuffer.add_event(event.json)
 
     {:noreply, %{state | event_buffer: event_buffer, subscriptions: subscriptions}}
   end

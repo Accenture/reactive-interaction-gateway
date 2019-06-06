@@ -32,7 +32,7 @@ For more details take a look at the [documentation](https://accenture.github.io/
   - SSE implementation (browser) keeps track of connection drops and restores the connection automatically.
   - Polyfills available for older browsers.
 - WebSocket connections are supported, too.
-- Longpolling as a fallback solution, if SSE and WS is not supported.
+- HTTP long polling for situations where SSE and WS are not supported.
 - Uses the upcoming [**CloudEvents** specification](https://cloudevents.io/).
 - Flexible event subscription model based on event types.
 - Use existing services for authentication and authorization of users and subscriptions.

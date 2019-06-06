@@ -1,4 +1,4 @@
-defmodule RigInboundGateway.EventSubmissionTest do
+defmodule RigInboundGateway.LongpollingSubmissionTest do
   @moduledoc """
   Assures that RIG doesn't change events.
   """

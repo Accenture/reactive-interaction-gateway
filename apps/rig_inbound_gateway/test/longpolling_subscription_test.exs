@@ -1,4 +1,4 @@
-defmodule RigInboundGateway.EventSubscriptionTest do
+defmodule RigInboundGateway.LongpollingSubscriptionTest do
   @moduledoc """
   Clients need to be able to add and remove subscriptions to their connection.
   """
