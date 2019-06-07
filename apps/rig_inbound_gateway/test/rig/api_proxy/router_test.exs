@@ -4,6 +4,8 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
   use ExUnit.Case, async: false
   use RigInboundGatewayWeb.ConnCase
 
+  alias Plug.Conn
+
   import FakeServer
   alias FakeServer.Response
 
@@ -266,13 +268,6 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
   end
 
   @tag :smoke
-  test "POST request should be correctly proxied to external service" do
-    conn = call(Router, build_conn(:post, "/api"))
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"msg\":\"POST\"}"
-  end
-
-  @tag :smoke
   test "PUT request should be correctly proxied to external service" do
     conn = call(Router, build_conn(:put, "/api"))
     assert conn.status == 200
@@ -309,20 +304,56 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
 
   @tag :smoke
   test "POST request with file body should be correctly proxied to external service" do
-    upload = %Plug.Upload{
-      path: __DIR__ <> "/upload_example.txt",
-      filename: "upload_example.txt",
-      content_type: "plain/text"
-    }
+    body = """
+    -----------------------------9051914041544843365972754266\r
+    Content-Disposition: form-data; name="text"\r
+    \r
+    text default\r
+    -----------------------------9051914041544843365972754266\r
+    Content-Disposition: form-data; name="file1"; filename="a.txt"\r
+    Content-Type: text/plain\r
+    \r
+    Content of a.txt.\r
+    \r
+    -----------------------------9051914041544843365972754266\r
+    Content-Disposition: form-data; name="file2"; filename="a.html"\r
+    Content-Type: text/html\r
+    \r
+    <!DOCTYPE html><title>Content of a.html.</title>\r
+    \r
+    -----------------------------9051914041544843365972754266--\r
+    \r
+    """
 
-    conn = call(Router, build_conn(:post, "/api", %{"qqfile" => upload}))
+    request =
+      %Conn{}
+      |> Conn.put_req_header(
+        "content-type",
+        "multipart/form-data; boundary=---------------------------9051914041544843365972754266"
+      )
+      |> Plug.Adapters.Test.Conn.conn(:post, "/api", body)
+
+    conn = call(Router, request)
     assert conn.status == 200
-    assert conn.resp_body =~ "{\"msg\":\"POST FILE\"}"
+    # The first part is not a file and therefore doesn't count as "upload";
+    # the other two parts should be recognized as files:
+    assert {:ok,
+            %{
+              "uploads" => [
+                %{"fieldname" => "file1", "originalname" => "a.txt", "mimetype" => "text/plain"},
+                %{"fieldname" => "file2", "originalname" => "a.html", "mimetype" => "text/html"}
+              ]
+            }} = Jason.decode(conn.resp_body)
   end
 
   @tag :smoke
   test "GET request with queries should be correctly proxied to external service" do
-    conn = call(Router, build_conn(:get, "/api", %{"foo" => %{"bar" => "baz"}}))
+    request = %{
+      build_conn(:get, "/api")
+      | query_string: "foo[bar]=baz"
+    }
+
+    conn = call(Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"msg\":\"GET QUERY\"}"
   end
