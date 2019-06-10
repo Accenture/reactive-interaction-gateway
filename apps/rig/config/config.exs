@@ -7,7 +7,9 @@ extractor_path_or_json = {:system, "EXTRACTORS", nil}
 # }
 jwt_conf = %{
   key: {:system, "JWT_SECRET_KEY", ""},
-  alg: {:system, "JWT_ALG", "HS256"}
+  alg: {:system, "JWT_ALG", "HS256"},
+  rotation_flag: {:system, "JWKS_ROTATION_ENABLED", "false"},
+  jwks_uri: {:system, "JWKS_URI", ""}
 }
 
 config :rig, Rig.EventFilter.Sup, extractor_config_path_or_json: extractor_path_or_json

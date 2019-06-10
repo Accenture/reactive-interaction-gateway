@@ -70,7 +70,7 @@ defmodule Rig.MixProject do
       # For property-based testing:
       {:stream_data, "~> 0.1", only: :test},
       # For JSON Web Tokens:
-      {:joken, "~> 1.5"}
+      {:joken, "~> 2.0"}
     ]
   end
 

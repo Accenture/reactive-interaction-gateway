@@ -75,7 +75,7 @@ defmodule RigInboundGateway.Mixfile do
       # For backend service mocks:
       {:fake_server, "~> 2.0", only: :test},
       {:socket, "~> 0.3", only: :test},
-      {:joken, "~> 1.5"}
+      {:joken, "~> 2.0"}
     ]
   end
 
