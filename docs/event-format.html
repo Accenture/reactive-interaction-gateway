@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Event Format · Reactive Interaction Gateway</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;[CloudEvents] is an upcoming [CNCF] standard for describing events in a consistent and portable way. We believe that CloudEvents brings benefits at a very low adoption cost. After all, any custom-developed event envelope-format likely contains the same properties anyway; CloudEvents mostly just make sure they are named the same way.&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Event Format · Reactive Interaction Gateway"/><meta property="og:type" content="website"/><meta property="og:url" content="https://accenture.github.io/reactive-interaction-gateway/index.html"/><meta property="og:description" content="&lt;p&gt;[CloudEvents] is an upcoming [CNCF] standard for describing events in a consistent and portable way. We believe that CloudEvents brings benefits at a very low adoption cost. After all, any custom-developed event envelope-format likely contains the same properties anyway; CloudEvents mostly just make sure they are named the same way.&lt;/p&gt;
+"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/reactive-interaction-gateway/img/favicon.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/reactive-interaction-gateway/js/scrollSpy.js"></script><link rel="stylesheet" href="/reactive-interaction-gateway/css/main.css"/><script src="/reactive-interaction-gateway/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/reactive-interaction-gateway/"><img class="logo" src="/reactive-interaction-gateway/img/icon.svg" alt="Reactive Interaction Gateway"/><h2 class="headerTitleWithLogo">Reactive Interaction Gateway</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/reactive-interaction-gateway/docs/intro.html" target="_self">User Documentation</a></li><li class=""><a href="/reactive-interaction-gateway/source_docs/index.html" target="_self">Source Documentation</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Main Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/intro.html">Intro</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/tutorial.html">Tutorial</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/examples.html">Examples</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/faq.html">FAQ</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Main Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/architecture.html">Architecture</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/reactive-interaction-gateway/docs/event-format.html">Event Format</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-streams.html">Publishing Events</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-subscription.html">Receiving Events</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway.html">Forwarding Requests</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/user-authorization.html">User Authorization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-management.html">API Gateway Management</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-synchronization.html">API Gateway Synchronization</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/avro.html">Avro</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">RIG in Production</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator&#x27;s Guide</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/metrics-details.html">Metrics Details</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/https.html">HTTPS</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/scaling.html">Scaling</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Hacking the Source</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-dev-guide.html">Developer&#x27;s Guide</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Event Format</h1></header><article><div><span><p><a href="https://cloudevents.io/">CloudEvents</a> is an upcoming <a href="https://www.cncf.io/">CNCF</a> standard for describing events in a consistent and portable way. We believe that CloudEvents brings benefits at a very low adoption cost. After all, any custom-developed event envelope-format likely contains the same properties anyway; CloudEvents mostly just make sure they are named the same way.</p>
+<p>We aim at following the <a href="https://github.com/cloudevents/spec">CloudEvents specification</a> as closely as possible. This includes the event format itself, but also the way events are serialized on different transport, the so-called <em>transport bindings</em>.</p>
+<p><details>
+<summary>Example event</summary></p>
+<p>
+<pre><code class="hljs css language-json">{
+    <span class="hljs-attr">"specversion"</span> : <span class="hljs-string">"0.2"</span>,
+    <span class="hljs-attr">"type"</span> : <span class="hljs-string">"com.github.pull.create"</span>,
+    <span class="hljs-attr">"source"</span> : <span class="hljs-string">"https://github.com/cloudevents/spec/pull/123"</span>,
+    <span class="hljs-attr">"id"</span> : <span class="hljs-string">"A234-1234-1234"</span>,
+    <span class="hljs-attr">"time"</span> : <span class="hljs-string">"2018-04-05T17:31:00Z"</span>,
+    <span class="hljs-attr">"comexampleextension1"</span> : <span class="hljs-string">"value"</span>,
+    <span class="hljs-attr">"comexampleextension2"</span> : {
+        <span class="hljs-attr">"othervalue"</span>: <span class="hljs-number">5</span>
+    },
+    <span class="hljs-attr">"contenttype"</span> : <span class="hljs-string">"text/xml"</span>,
+    <span class="hljs-attr">"data"</span> : <span class="hljs-string">"&lt;much wow=\"xml\"/&gt;"</span>
+}
+</code></pre>
+</p>
+</details>
+<h2><a class="anchor" aria-hidden="true" id="encoding"></a><a href="#encoding" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Encoding</h2>
+<p>In addition to JSON encoding, RIG also supports publishing CloudEvents using the <a href="https://avro.apache.org/">Apache Avro</a> format. With Confluent recommending the use of Avro in combination with their Kafka distribution, Avro sees much adoption lately, especially when used alongside the <a href="https://docs.confluent.io/current/schema-registry/index.html">Confluent Schema Registry</a> (<a href="https://github.com/confluentinc/schema-registry">open source</a> under the <a href="https://www.confluent.io/confluent-community-license">Confluent Community License</a>). Consequently, RIG primarily supports the &quot;registry model&quot;, where the message schema is not sent alongside every message; instead, <a href="https://docs.confluent.io/current/schema-registry/serializer-formatter.html#wire-format">each message only contains a schema ID</a> and the schema itself is looked up (and cached) at runtime, using the Schema Registry.</p>
+<p>To enable Avro &amp; Schema Registry support, checkout the <a href="rig-ops-guide">Operator's Guide</a> and look for the environment variables <code>KAFKA_SCHEMA_REGISTRY_HOST</code> and <code>PROXY_KAFKA_REQUEST_AVRO</code>.</p>
+<p>For further details and examples, checkout the dedicated <a href="avro">Section on Avro</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="transport-bindings"></a><a href="#transport-bindings" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Transport Bindings</h2>
+<p>While the HTTP transport binding seems solid already, the Kafka transport mode is not yet available. To support Kafka anyway, we have adapted the HTTP transport modes for Kafka. Consequently, the Kafka transport mode implementation may change in the future, depending on the outcome of the <a href="https://github.com/cloudevents/spec/pull/337">standardization process</a>.</p>
+<p>When sending or receiving an event, you have a couple of options:</p>
+<ul>
+<li>Send the event as-is, or send only the &quot;data&quot; (= payload) in the &quot;body&quot; and the rest (the so-called &quot;context attributes&quot;) in headers. The former is called <em>structured</em> transport mode, while the latter is known as <em>binary</em> transport mode.</li>
+<li>When using structured transport mode, the event may be encoded using JSON or Avro.</li>
+<li>Regardless of transport mode, the event's payload (&quot;data&quot; field or body) may be encoded in a format different from the event's encoding. For example, you might want to send CloudEvents in JSON format, but have their &quot;data&quot; field encoded using Protobuf.</li>
+</ul>
+<p>Next we look at the HTTP and Kafka transport bindings in more detail.</p>
+<h2><a class="anchor" aria-hidden="true" id="http-transport-binding"></a><a href="#http-transport-binding" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>HTTP Transport Binding</h2>
+<p>RIG implements <a href="https://github.com/cloudevents/spec/blob/v0.2/http-transport-binding.md">HTTP Transport Binding for CloudEvents v0.2</a>, with the exception of <em>batched</em> mode. The two supported modes of operation, <em>structured</em> and <em>binary</em>, are described below.</p>
+<h3><a class="anchor" aria-hidden="true" id="structured"></a><a href="#structured" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Structured</h3>
+<p>In structured mode the event is encoded in full and sent in the request body. The <code>content-type</code> HTTP header is expected to be <code>application/cloudevents+json</code> (<code>application/cloudevents+avro</code> might be supported in future versions of RIG).</p>
+<p>While the specification defines that only the content type should be used to determine the transport mode, RIG also accepts messages with content type <code>application/json</code> as structured if, and only if, there is no <code>ce-specversion</code> HTTP header present in the request.</p>
+<p><details>
+<summary>Example HTTP request with event in structured mode</summary></p>
+<p>
+<p>HTTP header that announces a JSON-encoded CloudEvent:</p>
+<pre><code class="hljs css language-plaintext">Content-Type: application/cloudevents+json; charset=UTF-8
+</code></pre>
+<p>Request body:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"specversion"</span>: <span class="hljs-string">"0.2"</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"com.example.someevent"</span>,
+  <span class="hljs-attr">"source"</span>: <span class="hljs-string">"example"</span>,
+  <span class="hljs-attr">"id"</span>: <span class="hljs-string">"80dc037c-fb24-43e9-9759-94f91f310a4b1"</span>,
+  <span class="hljs-attr">"data"</span>: {
+    <span class="hljs-attr">"this is"</span>: <span class="hljs-string">"the payload"</span>
+  }
+}
+</code></pre>
+</p>
+</details>
+<h3><a class="anchor" aria-hidden="true" id="binary"></a><a href="#binary" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Binary</h3>
+<p>In binary mode the request body only contains the <code>data</code> value of the corresponding CloudEvent. The <em>context attributes</em> - i.e., all other fields - are moved into the HTTP header. The data/body encoding is determined by the <code>content-type</code> header. At the time of writing there are two content types supported: <code>application/json</code> and <code>avro/binary</code>.</p>
+<p><details>
+<summary>Same example event, sent using HTTP request in binary mode</summary></p>
+<p>
+<p>In binary mode the HTTP header contains all context attributes. It also announces the body encoding:</p>
+<pre><code class="hljs css language-plaintext">ce-specversion: 0.2
+ce-type: com.example.someevent
+ce-source: example
+ce-id: 80dc037c-fb24-43e9-9759-94f91f310a4b1
+Content-Type: application/json; charset=UTF-8
+</code></pre>
+<p>Request body:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"this is"</span>: <span class="hljs-string">"the payload"</span>
+}
+</code></pre>
+</p>
+</details>
+<h2><a class="anchor" aria-hidden="true" id="kafka-transport-binding"></a><a href="#kafka-transport-binding" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Kafka Transport Binding</h2>
+<p>As mentioned above, the corresponding CloudEvents transport binding specification is still under <a href="https://github.com/cloudevents/spec/pull/337/files">active development</a>. We follow an approach very similar to the HTTP transport binding outlined above. We utilize Kafka headers that have been introduced in Kafka version <code>0.11</code>. In order to support older Kafka versions as well, RIG defaults to structured mode and does not require any headers at all (see below).</p>
+<p>Like with the HTTP transport binding, we define two modes of operation: structured and binary.</p>
+<h3><a class="anchor" aria-hidden="true" id="structured-1"></a><a href="#structured-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Structured</h3>
+<p>In structured mode the event is encoded in full and sent as the message body. Structured mode is determined by parsing the <code>content-type</code> header, which defaults to <code>application/cloudevents+json</code>.</p>
+<p>The default value means that the body contains a CloudEvents-formatted event in JSON encoding. The related content type for Avro encoding is <code>application/cloudevents+avro</code>.</p>
+<p><details>
+<summary>Example event in structured mode</summary></p>
+<p>
+<p>Message header that announces a JSON-encoded CloudEvent:</p>
+<pre><code class="hljs css language-plaintext">Content-Type: application/cloudevents+json; charset=UTF-8
+</code></pre>
+<p>Message body:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"specversion"</span>: <span class="hljs-string">"0.2"</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"com.example.someevent"</span>,
+  <span class="hljs-attr">"source"</span>: <span class="hljs-string">"example"</span>,
+  <span class="hljs-attr">"id"</span>: <span class="hljs-string">"80dc037c-fb24-43e9-9759-94f91f310a4b1"</span>,
+  <span class="hljs-attr">"data"</span>: {
+    <span class="hljs-attr">"this is"</span>: <span class="hljs-string">"the payload"</span>
+  }
+}
+</code></pre>
+</p>
+</details>
+<h3><a class="anchor" aria-hidden="true" id="binary-1"></a><a href="#binary-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Binary</h3>
+<p>In binary mode the message body only contains the <code>data</code> value of the corresponding CloudEvent. The <em>context attributes</em> - i.e., all other fields - are moved into the message header. The data/body encoding is determined by the <code>content-type</code> header. In this mode there is no default for <code>content-type</code> and RIG rejects messages that come without it. At the time of writing there are two content types supported: <code>application/json</code> and <code>avro/binary</code>.</p>
+<p><details>
+<summary>Same example in binary mode</summary></p>
+<p>
+<p>In binary mode the message header contains all context attributes. It also announces the body encoding:</p>
+<pre><code class="hljs css language-plaintext">ce-specversion: 0.2
+ce-type: com.example.someevent
+ce-source: example
+ce-id: 80dc037c-fb24-43e9-9759-94f91f310a4b1
+Content-Type: application/json; charset=UTF-8
+</code></pre>
+<p>Message body:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"this is"</span>: <span class="hljs-string">"the payload"</span>
+}
+</code></pre>
+</p>
+</details>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/architecture.html"><span class="arrow-prev">← </span><span>Architecture</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/event-streams.html"><span>Publishing Events</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#encoding">Encoding</a></li><li><a href="#transport-bindings">Transport Bindings</a></li><li><a href="#http-transport-binding">HTTP Transport Binding</a><ul class="toc-headings"><li><a href="#structured">Structured</a></li><li><a href="#binary">Binary</a></li></ul></li><li><a href="#kafka-transport-binding">Kafka Transport Binding</a><ul class="toc-headings"><li><a href="#structured-1">Structured</a></li><li><a href="#binary-1">Binary</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '071fafffc3dde04e540162e0f3f68af4',
+                indexName: 'reactive-interaction-gateway',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

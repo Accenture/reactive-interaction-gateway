@@ -1,6 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Event Streams · Reactive Interaction Gateway</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Real time part of RIG is driven by events (Kafka/Kinesis) -- to make it work there is some configuration required.&lt;/p&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Event Streams · Reactive Interaction Gateway"/><meta property="og:type" content="website"/><meta property="og:url" content="https://accenture.github.io/reactive-interaction-gateway/index.html"/><meta property="og:description" content="&lt;p&gt;Real time part of RIG is driven by events (Kafka/Kinesis) -- to make it work there is some configuration required.&lt;/p&gt;
-"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/reactive-interaction-gateway/img/favicon.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/reactive-interaction-gateway/js/scrollSpy.js"></script><link rel="stylesheet" href="/reactive-interaction-gateway/css/main.css"/><script src="/reactive-interaction-gateway/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/reactive-interaction-gateway/"><img class="logo" src="/reactive-interaction-gateway/img/icon.svg" alt="Reactive Interaction Gateway"/><h2 class="headerTitleWithLogo">Reactive Interaction Gateway</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/reactive-interaction-gateway/docs/intro.html" target="_self">User Documentation</a></li><li class=""><a href="/reactive-interaction-gateway/source_docs/index.html" target="_self">Source Documentation</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Main Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/intro.html">Intro</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/tutorial.html">Tutorial</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/examples.html">Examples</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/faq.html">FAQ</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Main Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/architecture.html">Architecture</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway.html">API Gateway</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/reactive-interaction-gateway/docs/event-streams.html">Event Streams</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-subscription.html">Event Subscription</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/user-authentication.html">User authentication</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-management.html">API Gateway Management</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-synchronization.html">API Gateway Synchronization</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-serialization.html">Event Serialization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">RIG in Production</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator&#x27;s Guide</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/metrics-details.html">Metrics Details</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/https.html">HTTPS</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/scaling.html">Scaling</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Hacking the Source</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-dev-guide.html">Developer&#x27;s Guide</a></li></ul></div></div></section></div><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Publishing Events towards Frontends · Reactive Interaction Gateway</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;RIG supports various ways to publish an event towards frontends. The recommended way is to have RIG consume one or more Kafka topics, but RIG also support Kinesis as an alternative. For testing and low-traffic scenarios, RIG also provides an HTTP endpoint that can be used to send events to.&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Publishing Events towards Frontends · Reactive Interaction Gateway"/><meta property="og:type" content="website"/><meta property="og:url" content="https://accenture.github.io/reactive-interaction-gateway/index.html"/><meta property="og:description" content="&lt;p&gt;RIG supports various ways to publish an event towards frontends. The recommended way is to have RIG consume one or more Kafka topics, but RIG also support Kinesis as an alternative. For testing and low-traffic scenarios, RIG also provides an HTTP endpoint that can be used to send events to.&lt;/p&gt;
+"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/reactive-interaction-gateway/img/favicon.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/reactive-interaction-gateway/js/scrollSpy.js"></script><link rel="stylesheet" href="/reactive-interaction-gateway/css/main.css"/><script src="/reactive-interaction-gateway/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/reactive-interaction-gateway/"><img class="logo" src="/reactive-interaction-gateway/img/icon.svg" alt="Reactive Interaction Gateway"/><h2 class="headerTitleWithLogo">Reactive Interaction Gateway</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/reactive-interaction-gateway/docs/intro.html" target="_self">User Documentation</a></li><li class=""><a href="/reactive-interaction-gateway/source_docs/index.html" target="_self">Source Documentation</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Main Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/intro.html">Intro</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/tutorial.html">Tutorial</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/examples.html">Examples</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/faq.html">FAQ</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Main Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/architecture.html">Architecture</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-format.html">Event Format</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/reactive-interaction-gateway/docs/event-streams.html">Publishing Events</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-subscription.html">Receiving Events</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway.html">Forwarding Requests</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/user-authorization.html">User Authorization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-management.html">API Gateway Management</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-synchronization.html">API Gateway Synchronization</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/avro.html">Avro</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">RIG in Production</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator&#x27;s Guide</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/metrics-details.html">Metrics Details</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/https.html">HTTPS</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/scaling.html">Scaling</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Hacking the Source</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-dev-guide.html">Developer&#x27;s Guide</a></li></ul></div></div></section></div><script>
             var coll = document.getElementsByClassName('collapsible');
             var checkActiveCategory = true;
             for (var i = 0; i < coll.length; i++) {
@@ -56,20 +56,32 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Event Streams</h1></header><article><div><span><p>Real time part of RIG is driven by events (Kafka/Kinesis) -- to make it work there is some configuration required.</p>
-<p>Where RIG uses event streams:</p>
-<ul>
-<li>publishing via API Gateway to specific topic/stream, see <a href="./api-gateway#publishing-to-event-streams">Publishing to event streams</a> for more details
-<ul>
-<li>consuming of events from specific topic/stream to achieve sync requests</li>
-</ul></li>
-<li>consuming of events to be forwarded via SSE/WS</li>
-<li>publishing &quot;monitoring&quot; messages per API Gateway call</li>
-</ul>
-<p>Event stream functionality is by default disabled -- can be controlled via environment variables. All possible configuration can be found in <a href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator's Guide</a></p>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Publishing Events towards Frontends</h1></header><article><div><span><p>RIG supports various ways to publish an event towards frontends. The recommended way is to have RIG consume one or more Kafka topics, but RIG also support Kinesis as an alternative. For testing and low-traffic scenarios, RIG also provides an HTTP endpoint that can be used to send events to.</p>
+<h2><a class="anchor" aria-hidden="true" id="http"></a><a href="#http" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>HTTP</h2>
+<p>The HTTP endpoint is available on RIG's <a href="rig-ops-guide">internal port</a>. It supports JSON-encoded CloudEvents in <a href="event-format#http-transport-binding">structured and binary modes</a> (Avro is currently not supported).</p>
+<p>Example usage (taken from the <a href="tutorial#4-create-a-new-chatroom-message-event-backend">tutorial</a>):</p>
+<pre><code class="hljs css language-bash">$ http post :4000/_rig/v1/events \
+  specversion=0.2 \
+  <span class="hljs-built_in">type</span>=chatroom_message \
+  id=first-event \
+  <span class="hljs-built_in">source</span>=tutorial
+HTTP/1.1 202 Accepted
+content-type: application/json; charset=utf-8
+...
+
+{
+    <span class="hljs-string">"specversion"</span>: <span class="hljs-string">"0.2"</span>,
+    <span class="hljs-string">"id"</span>: <span class="hljs-string">"first-event"</span>,
+    <span class="hljs-string">"time"</span>: <span class="hljs-string">"2018-08-21T09:11:27.614970+00:00"</span>,
+    <span class="hljs-string">"type"</span>: <span class="hljs-string">"chatroom_message"</span>,
+    <span class="hljs-string">"source"</span>: <span class="hljs-string">"tutorial"</span>
+}
+
+</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="kafka"></a><a href="#kafka" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Kafka</h2>
-<h3><a class="anchor" aria-hidden="true" id="enable-kafka"></a><a href="#enable-kafka" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Enable Kafka</h3>
-<p>Kafka will be automatically enabled as soon as you set <code>KAFKA_BROKERS</code> environment variable.</p>
+<p>As described in the <a href="event-format#kafka-transport-binding">Event Format</a> Section, the Kafka consumer supports both structured and binary modes, each with JSON as well as Avro encoding (with details described in the <a href="avro">advanced guide on Avro</a>).</p>
+<p>All RIG nodes participate in the same Kafka consumer group and support automatic partition re-balancing in case new nodes are started or existing nodes go away.</p>
+<p>By default, there are no Kafka brokers configured. Look for Kafka related variables in the <a href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator's Guide</a> to enable the Kafka consumer.</p>
 <pre><code class="hljs css language-bash"><span class="hljs-comment"># Kafka disabled</span>
 docker run accenture/reactive-interaction-gateway
 
@@ -77,56 +89,10 @@ docker run accenture/reactive-interaction-gateway
 docker run -e KAFKA_BROKERS=kafka:9092 accenture/reactive-interaction-gateway
 </code></pre>
 <blockquote>
-<p><strong>NOTE:</strong> it's enough to set one Kafka broker, RIG will automatically discover rest of the Kafka cluster.</p>
+<p>Note that defining one Kafka broker is sufficient as RIG will automatically discover any connected brokers in the Kafka cluster.</p>
 </blockquote>
-<h3><a class="anchor" aria-hidden="true" id="change-consumer-topics-and-group-id"></a><a href="#change-consumer-topics-and-group-id" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Change consumer topics and group ID</h3>
-<p>As Kafka is enabled, RIG starts to consume events on 2 default topics <code>rig</code> and <code>rig-proxy-response</code>. <code>rig</code> topic is used to consume all events and forward them to client via SSE/WS. <code>rig-proxy-response</code> is used for HTTP sync publishing, see <a href="./api-gateway#sync">API Gateway docs</a>.</p>
-<p>Change topics:</p>
-<pre><code class="hljs css language-bash"><span class="hljs-comment"># Single topic</span>
-docker run \
--e KAFKA_BROKERS=kafka:9092 \
--e KAFKA_SOURCE_TOPICS=my-topic \
--e PROXY_KAFKA_RESPONSE_TOPICS=my-proxy-topic \
-accenture/reactive-interaction-gateway
-
-<span class="hljs-comment"># Multiple topics</span>
-docker run \
--e KAFKA_BROKERS=kafka:9092 \
--e KAFKA_SOURCE_TOPICS=my-topic1,my-topic2 \
--e PROXY_KAFKA_RESPONSE_TOPICS=my-proxy-topic1,my-proxy-topic2 \
-accenture/reactive-interaction-gateway
-</code></pre>
-<p>In addition to topics you can configure also consumer group ID.</p>
-<blockquote>
-<p><strong>NOTE:</strong> same group ID will be used for all topics.</p>
-</blockquote>
-<p>Change group ID:</p>
-<pre><code class="hljs css language-bash">docker run \
--e KAFKA_BROKERS=kafka:9092 \
--e KAFKA_SOURCE_TOPICS=my-topic \
--e PROXY_KAFKA_RESPONSE_TOPICS=my-proxy-topic \
--e KAFKA_GROUP_ID=my-group-id \
-accenture/reactive-interaction-gateway
-</code></pre>
-<h3><a class="anchor" aria-hidden="true" id="change-producer-topics"></a><a href="#change-producer-topics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Change producer topics</h3>
-<p>RIG can produce &quot;monitoring&quot; events on incoming HTTP requests, see <a href="./api-gateway#sync">API Gateway docs</a>.</p>
-<p>Producing &quot;monitoring&quot; events is by default using <code>rig-request-log</code> topic.</p>
-<p>Change topic:</p>
-<pre><code class="hljs css language-bash">docker run \
--e KAFKA_BROKERS=kafka:9092 \
--e REQUEST_LOG=console,kafka \
--e KAFKA_LOG_TOPIC=my-log-topic \
-accenture/reactive-interaction-gateway
-</code></pre>
-<p>Producing events from proxy as a target of a request is by default disabled.</p>
-<p>Change topic:</p>
-<pre><code class="hljs css language-bash">docker run \
--e KAFKA_BROKERS=kafka:9092 \
--e PROXY_KAFKA_REQUEST_TOPIC=my-proxy-request-topic \
-accenture/reactive-interaction-gateway
-</code></pre>
 <h3><a class="anchor" aria-hidden="true" id="ssl"></a><a href="#ssl" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>SSL</h3>
-<p>SSL for Kafka is by default disabled. To enable it and set certificates use following setup:</p>
+<p>SSL for Kafka is disabled by default. To enable it, set the corresponding environment variables, e.g.:</p>
 <pre><code class="hljs css language-bash">docker run \
 -e KAFKA_BROKERS=kafka:9092 \
 -e KAFKA_SSL_ENABLED=1 \
@@ -144,18 +110,16 @@ docker run \
 accenture/reactive-interaction-gateway
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="sasl"></a><a href="#sasl" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>SASL</h3>
-<p>SASL for Kafka is by default disabled. To enable it and set credentials use following setup:</p>
+<p>SASL for Kafka is disabled by default as well. To enable it, again make sure the corresponding environment variable is defined, e.g.:</p>
 <pre><code class="hljs css language-bash">docker run \
 -e KAFKA_BROKERS=kafka:9092 \
 -e KAFKA_SASL=plain:myusername:mypassword \
 accenture/reactive-interaction-gateway
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="kinesis"></a><a href="#kinesis" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Kinesis</h2>
-<h3><a class="anchor" aria-hidden="true" id="enable-kinesis"></a><a href="#enable-kinesis" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Enable Kinesis</h3>
-<p>Similar as Kafka, Kinesis is by default disabled and can be enabled via <code>KINESIS_ENABLED</code> environment variable.</p>
-<blockquote>
-<p><strong>NOTE:</strong> when using Kinesis we have to use image tag <code>aws</code>.</p>
-</blockquote>
+<p>The Kinesis consumer supports JSON-encoded CloudEvents in structured mode only.</p>
+<p>Internally, RIG uses Amazon's official Java client in order to support automatic re-balancing of shards in case of a changing network topology.</p>
+<p>In order to enable Kinesis, please make sure you're using an <code>-aws</code> tagged Docker image and refer to the <a href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator's Guide</a> for environment variables available to configure.</p>
 <pre><code class="hljs css language-bash"><span class="hljs-comment"># Kinesis disabled</span>
 docker run accenture/reactive-interaction-gateway:aws
 
@@ -165,33 +129,17 @@ docker run -e KINESIS_ENABLED=1 accenture/reactive-interaction-gateway
 <span class="hljs-comment"># Configure AWS region</span>
 docker run -e KINESIS_ENABLED=1 -e KINESIS_AWS_REGION=eu-west-3 accenture/reactive-interaction-gateway
 </code></pre>
-<h3><a class="anchor" aria-hidden="true" id="change-consumer-stream-and-app-name"></a><a href="#change-consumer-stream-and-app-name" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Change consumer stream and app name</h3>
-<p>As Kinesis is enabled, RIG starts to consume events on default stream <code>RIG-outbound</code>. <code>RIG-outbound</code> topic is used to consume all events and forward them to client via SSE/WS.</p>
-<p>Change stream:</p>
-<pre><code class="hljs css language-bash">docker run \
--e KINESIS_ENABLED=1 \
--e KINESIS_STREAM=my-stream \
-accenture/reactive-interaction-gateway:aws
-</code></pre>
-<p>In addition to stream, you can configure also app name. Kinesis is using value of <code>KINESIS_APP_NAME</code> as a name for DynamoDB table. DynamoDB is internally used by Amazon to handle leases and consumer groups. It's similar to group ID in Kafka.</p>
-<p>Change app name:</p>
+<p>The used consumer stream and the app name can be changed as well:</p>
 <pre><code class="hljs css language-bash">docker run \
 -e KINESIS_ENABLED=1 \
 -e KINESIS_STREAM=my-stream \
 -e KINESIS_APP_NAME=my-app_name \
 accenture/reactive-interaction-gateway:aws
 </code></pre>
-<h3><a class="anchor" aria-hidden="true" id="change-producer-streams"></a><a href="#change-producer-streams" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Change producer streams</h3>
-<p>RIG can produce events as a target of HTTP endpoint call, see <a href="./api-gateway#sync">API Gateway docs</a>.</p>
-<p>Producing events from proxy as a target of a request is by default disabled.</p>
-<p>Change topic:</p>
-<pre><code class="hljs css language-bash">docker run \
--e KINESIS_ENABLED=1 \
--e PROXY_KINESIS_REQUEST_STREAM=my-proxy-request-topic \
--e PROXY_KINESIS_REQUEST_REGION=eu-west-3 \
-accenture/reactive-interaction-gateway:aws
-</code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/api-gateway.html"><span class="arrow-prev">← </span><span>API Gateway</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/event-subscription.html"><span>Event Subscription</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#kafka">Kafka</a><ul class="toc-headings"><li><a href="#enable-kafka">Enable Kafka</a></li><li><a href="#change-consumer-topics-and-group-id">Change consumer topics and group ID</a></li><li><a href="#change-producer-topics">Change producer topics</a></li><li><a href="#ssl">SSL</a></li><li><a href="#sasl">SASL</a></li></ul></li><li><a href="#kinesis">Kinesis</a><ul class="toc-headings"><li><a href="#enable-kinesis">Enable Kinesis</a></li><li><a href="#change-consumer-stream-and-app-name">Change consumer stream and app name</a></li><li><a href="#change-producer-streams">Change producer streams</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<blockquote>
+<p>The app name is used as the name for the corresponding DynamoDB table. The DynamoDB table is used by Kinesis to handle leases and consumer groups. It is similar to the Group ID in Kafka.</p>
+</blockquote>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/event-format.html"><span class="arrow-prev">← </span><span>Event Format</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/event-subscription.html"><span>Receiving Events</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#http">HTTP</a></li><li><a href="#kafka">Kafka</a><ul class="toc-headings"><li><a href="#ssl">SSL</a></li><li><a href="#sasl">SASL</a></li></ul></li><li><a href="#kinesis">Kinesis</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;

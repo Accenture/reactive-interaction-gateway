@@ -1,0 +1,159 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Avro Implementation Details · Reactive Interaction Gateway</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Apache Avro format as adapted by the &lt;a href=&quot;https://docs.confluent.io/current/schema-registry/docs/serializer-formatter.html#wire-format&quot;&gt;Confluent Schema Registry&lt;/a&gt;:&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Avro Implementation Details · Reactive Interaction Gateway"/><meta property="og:type" content="website"/><meta property="og:url" content="https://accenture.github.io/reactive-interaction-gateway/index.html"/><meta property="og:description" content="&lt;p&gt;Apache Avro format as adapted by the &lt;a href=&quot;https://docs.confluent.io/current/schema-registry/docs/serializer-formatter.html#wire-format&quot;&gt;Confluent Schema Registry&lt;/a&gt;:&lt;/p&gt;
+"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/reactive-interaction-gateway/img/favicon.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/reactive-interaction-gateway/js/scrollSpy.js"></script><link rel="stylesheet" href="/reactive-interaction-gateway/css/main.css"/><script src="/reactive-interaction-gateway/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/reactive-interaction-gateway/"><img class="logo" src="/reactive-interaction-gateway/img/icon.svg" alt="Reactive Interaction Gateway"/><h2 class="headerTitleWithLogo">Reactive Interaction Gateway</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/reactive-interaction-gateway/docs/intro.html" target="_self">User Documentation</a></li><li class=""><a href="/reactive-interaction-gateway/source_docs/index.html" target="_self">Source Documentation</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Advanced Guides</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/intro.html">Intro</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/tutorial.html">Tutorial</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/examples.html">Examples</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/faq.html">FAQ</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Main Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/architecture.html">Architecture</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-format.html">Event Format</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-streams.html">Publishing Events</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-subscription.html">Receiving Events</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway.html">Forwarding Requests</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/user-authorization.html">User Authorization</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-management.html">API Gateway Management</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-synchronization.html">API Gateway Synchronization</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/reactive-interaction-gateway/docs/avro.html">Avro</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">RIG in Production</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator&#x27;s Guide</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/metrics-details.html">Metrics Details</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/https.html">HTTPS</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/scaling.html">Scaling</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Hacking the Source</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-dev-guide.html">Developer&#x27;s Guide</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Avro Implementation Details</h1></header><article><div><span><p>Apache Avro format as adapted by the <a href="https://docs.confluent.io/current/schema-registry/docs/serializer-formatter.html#wire-format">Confluent Schema Registry</a>:</p>
+<pre><code class="hljs css language-bash"><span class="hljs-comment"># 0 - magic byte</span>
+<span class="hljs-comment"># 1-4 - schema id - this is used by consumer to know which schema to use for deserialization</span>
+<span class="hljs-comment"># 5-... - data</span>
+
+<span class="hljs-comment"># Example</span>
+&lt;0, 0, 0, 0, 1, 5, 3, 8, ...&gt;
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="overview"></a><a href="#overview" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Overview</h2>
+<p><img src="/reactive-interaction-gateway/docs/assets/event-serialization-avro.png" alt="event-serialization-avro"></p>
+<p>Adopting Avro for event (de)serialization is fairly straightforward. First you need to run an instance of the <code>Kafka Schema Registry</code>, which is a central store for all Avro schemas in use. As an event is consumed from Kafka, RIG fetches the corresponding schema from the registry and deserializes the event with it, caching the schema in the process (in memory). As for producing, RIG again retrieves and caches the schemas used for serializing events.</p>
+<h2><a class="anchor" aria-hidden="true" id="rig-as-a-kafka-producer"></a><a href="#rig-as-a-kafka-producer" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>RIG as a Kafka producer</h2>
+<ul>
+<li>producer evaluates if serialization is turned on by checking <code>KAFKA_SERIALIZER</code> environment variable and if it's value is <code>avro</code></li>
+<li>If it is, creates headers for Kafka event by appending <code>ce-</code> prefix for every field, besides <code>data</code> field
+<ul>
+<li><strong>nested context attributes are stringified</strong>, since Kafka headers don't support nested values (this is common when using Cloud events extensions)</li>
+</ul></li>
+<li>after that, the <code>data</code> field is serialized using the schema name (function for getting schemas from registry is cached in-memory)</li>
+<li>producer sends event with created headers and data (in binary format <code>&lt;&lt;0, 0, 0, 0, 1, 5, 3, 8, ...&gt;&gt;</code>) to Kafka</li>
+</ul>
+<blockquote>
+<p>If <code>KAFKA_SERIALIZER</code> is not set to <code>avro</code>, producer sets <strong>only</strong> <code>ce-contenttype</code> or <code>ce-contentType</code> for kafka event</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="rig-as-a-kafka-consumer"></a><a href="#rig-as-a-kafka-consumer" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>RIG as a Kafka consumer</h2>
+<ul>
+<li>when consuming Kafka event, RIG checks headers of such event and removes <code>ce-</code> prefix</li>
+<li>based on headers decides cloud events version and content type</li>
+<li>In case content type is <code>avro/binary</code>, schema ID is taken from event value and deserialized</li>
+<li>If content type is <strong>not</strong> present, RIG checks for Avro format (<code>&lt;&lt;0, 0, 0, 0, 1, 5, 3, 8, ...&gt;&gt;</code>) and attempts for deserialization, otherwise event is sent to client as it is without any deserialization</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="example-1-producing-to-and-consuming-from-the-same-topic"></a><a href="#example-1-producing-to-and-consuming-from-the-same-topic" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example 1: producing to and consuming from the same topic</h2>
+<p>In this example we'll have RIG send a message to itself to see whether RIG producing and consuming parts work correctly. The idea is that RIG produces a serialized event as a result to an HTTP request and, a few moments later, consumes that same event (and deserializes it correctly).</p>
+<pre><code class="hljs css language-bash"><span class="hljs-comment">## 1. Start Kafka with Zookeeper and Kafka Schema Registry</span>
+KAFKA_PORT_PLAIN=17092 KAFKA_PORT_SSL=17093 HOST=localhost docker-compose -f integration_tests/kafka_tests/docker-compose.yml up -d
+
+<span class="hljs-comment">## 2. Start Rig</span>
+<span class="hljs-comment"># Here we say to use Avro, consume on topic "rigRequest" and use "rigRequest-value" schema from Kafka Schema Registry</span>
+<span class="hljs-comment"># Proxy is turned on to be able to produce Kafka event with headers (needed for cloud events)</span>
+docker run --name rig \
+-e KAFKA_BROKERS=kafka:9292 \
+-e KAFKA_SERIALIZER=avro \
+-e KAFKA_SCHEMA_REGISTRY_HOST=kafka-schema-registry:8081 \
+-e KAFKA_SOURCE_TOPICS=rigRequest \
+-e PROXY_CONFIG_FILE=proxy/proxy.test.json \
+-e PROXY_KAFKA_REQUEST_TOPIC=rigRequest \
+-e PROXY_KAFKA_REQUEST_AVRO=rigRequest-value \
+-e LOG_LEVEL=debug \
+-p 4000:4000 -p 4010:4010 \
+--network kafka_tests_default \
+accenture/reactive-interaction-gateway
+
+<span class="hljs-comment">## 3. Register Avro schema in Kafka Schema Registry</span>
+curl -d <span class="hljs-string">'{"schema":"{\"name\":\"rigproducer\",\"type\":\"record\",\"fields\":[{\"name\":\"example\",\"type\":\"string\"}]}"}'</span> -H <span class="hljs-string">"Content-Type: application/vnd.schemaregistry.v1+json"</span> -X POST http://localhost:8081/subjects/rigRequest-value/versions
+
+<span class="hljs-comment">## 4. Send HTTP request to RIG proxy</span>
+<span class="hljs-comment"># Request will produce serialized Kafka event to Kafka</span>
+curl -d <span class="hljs-string">'{"event":{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"com.example","time":"2018-04-05T17:31:00Z","specversion":"0.2","source":"\/cli","contenttype":"avro\/binary","data":{"example":"test"}},"partition":"test_key"}'</span> -H <span class="hljs-string">"Content-Type: application/json"</span> -X POST http://localhost:4000/myapi/publish-async
+
+<span class="hljs-comment">## 5. In terminal you should see something like below -- in nutshell it means event was successfully consumed, deserialized and forwarded to UI client</span>
+16:46:31.549 [debug] Decoded Avro message=<span class="hljs-string">"{\"example\":\"test\"}"</span>
+application=rig_kafka module=RigKafka.Avro <span class="hljs-keyword">function</span>=decode/1 file=lib/rig_kafka/avro.ex line=28 pid=&lt;0.419.0&gt;
+
+16:46:31.550 [debug] [:start_object, {:string, <span class="hljs-string">"contenttype"</span>}, :colon, {:string, <span class="hljs-string">"avro/binary"</span>}, :comma, {:string, <span class="hljs-string">"data"</span>}, :colon, :start_object, {:string, <span class="hljs-string">"example"</span>}, :colon, {:string, <span class="hljs-string">"test"</span>}, :end_object, :comma, {:string, <span class="hljs-string">"id"</span>}, :colon, {:string, <span class="hljs-string">"069711bf-3946-4661-984f-c667657b8d85"</span>}, :comma, {:string, <span class="hljs-string">"rig"</span>}, :colon, :start_object, {:string, <span class="hljs-string">"correlation"</span>}, :colon, {:string, <span class="hljs-string">"g2dkAA1ub25vZGVAbm9ob3N0AAADzAAAAAAA"</span>}, :comma, {:string, <span class="hljs-string">"headers"</span>}, :colon, :start_array, :start_array, {:string, <span class="hljs-string">"accept"</span>}, :end_array, :comma, :start_array, {:string, <span class="hljs-string">"*/*"</span>}, :end_array, :comma, :start_array, {:string, <span class="hljs-string">"content-length"</span>}, :end_array, :comma, :start_array, {:string, <span class="hljs-string">"221"</span>}, :end_array, :comma, :start_array, {:string, <span class="hljs-string">"content-type"</span>}, :end_array, :comma, :start_array, {:string, ...}, :end_array, ...]
+application=rig module=Rig.EventStream.KafkaToFilter <span class="hljs-keyword">function</span>=kafka_handler/1 file=lib/rig/event_stream/kafka_to_filter.ex line=20 pid=&lt;0.419.0&gt;
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="example-2-kafka-schema-registry-cli"></a><a href="#example-2-kafka-schema-registry-cli" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example 2: Kafka schema Registry CLI</h2>
+<p>To check if it works also with native serializer we can leverage the CLI shipped with the Kafka Schema Registry image.</p>
+<pre><code class="hljs css language-bash"><span class="hljs-comment"># 1. Get inside Kafka Schema Registry container</span>
+docker <span class="hljs-built_in">exec</span> -it kafka-schema-registry bash
+
+<span class="hljs-comment"># 2. Start native consumer with Avro</span>
+kafka-avro-console-consumer --topic rigRequest \
+--bootstrap-server kafka:9292 \
+--property schema.registry.url=<span class="hljs-string">'http://kafka-schema-registry:8081'</span>
+
+<span class="hljs-comment"># 3. Send HTTP request to RIG proxy - same request as before</span>
+curl -d <span class="hljs-string">'{"event":{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"com.example","time":"2018-04-05T17:31:00Z","specversion":"0.2","source":"\/cli","contenttype":"avro\/binary","data":{"example":"test"}},"partition":"test_key"}'</span> -H <span class="hljs-string">"Content-Type: application/json"</span> -X POST http://localhost:4000/myapi/publish-async
+
+<span class="hljs-comment"># 4. Now there should be message also in this consumer</span>
+{<span class="hljs-string">"example"</span>:<span class="hljs-string">"test"</span>}
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/api-gateway-synchronization.html"><span class="arrow-prev">← </span><span>API Gateway Synchronization</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/rig-ops-guide.html"><span>Operator&#x27;s Guide</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#rig-as-a-kafka-producer">RIG as a Kafka producer</a></li><li><a href="#rig-as-a-kafka-consumer">RIG as a Kafka consumer</a></li><li><a href="#example-1-producing-to-and-consuming-from-the-same-topic">Example 1: producing to and consuming from the same topic</a></li><li><a href="#example-2-kafka-schema-registry-cli">Example 2: Kafka schema Registry CLI</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '071fafffc3dde04e540162e0f3f68af4',
+                indexName: 'reactive-interaction-gateway',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>
