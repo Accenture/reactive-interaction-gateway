@@ -37,7 +37,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `KAFKA_LOG_SCHEMA` | Avro schema name for events published by logger | ""
 `KAFKA_LOG_TOPIC` | Kafka topic for producer used to log HTTP requests going through RIG's API Proxy. | "rig-request-log"
 `KAFKA_RESTART_DELAY_MS` | If the connection to Kafka fails or cannot be established, RIG retries setting up the connection after `KAFKA_RESTART_DELAY_MS` milliseconds. | nil
-`KAFKA_SCHEMA_REGISTRY_HOST` | Host for Kafka Schema Registry. | "localhost:8081"
+`KAFKA_SCHEMA_REGISTRY_HOST` | Host for Kafka Schema Registry. | nil
 `KAFKA_SERIALIZER` | Serializer for Kafka events, currently supports Avro. By default uses JSON serialization. | nil
 `KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will consume, delimited by comma. | ["rig"]
 `KAFKATOFILTER_KAFKA_GROUP_ID` | Kafka group ID used for forwarding events according to subscriptions over SSE and WS connections. The default should be fine. | "rig-kafka-to-filter"
@@ -61,6 +61,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `NODE_COOKIE` | Erlang cookie used in distributed mode, so nodes in cluster can communicate between each other. | nil
 `NODE_HOST` | Erlang hostname for given node, used to build Erlang long-name `rig@NODE_HOST`. This value is used by Erlang's distributed mode, so nodes can see each other. | nil
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Use this variable to pass either a path to a JSON file, or the JSON string itself. A path can be given in absolute or in relative form (e.g., `proxy/your_json_file.json`). If given in relative form, the working directory is one of RIG's `priv` dirs (e.g., `/opt/sites/rig/lib/rig_inbound_gateway-2.0.2/priv/` in a Docker container). | nil
+`PROXY_HTTP_ASYNC_RESPONSE_TIMEOUT` | In case an endpoint has `target` set to `http` and `response_from` set to `http_async`, this is the maximum delay between an HTTP request and the corresponding async HTTP response message. | 5000
 `PROXY_RECV_TIMEOUT` | Timeout used when receiving a response for a forwarded/proxied request. | 5000
 `PROXY_KAFKA_RESPONSE_TOPICS` | Kafka topic for acknowledging Kafka sync events from proxy by correlation ID | ["rig-proxy-response"]
 `PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID` | Kafka group ID used for forwarding asynchronous HTTP responses to waiting HTTP clients. The default should be fine. | "rig-proxy-response"

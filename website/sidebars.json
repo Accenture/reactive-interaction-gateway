@@ -4,19 +4,21 @@
       "intro",
       "the-big-picture",
       "tutorial",
+      "examples",
       "faq"
     ],
     "Main Concepts": [
       "architecture",
-      "api-gateway",
+      "event-format",
       "event-streams",
       "event-subscription",
-      "user-authentication"
+      "api-gateway",
+      "user-authorization"
     ],
     "Advanced Guides": [
       "api-gateway-management",
       "api-gateway-synchronization",
-      "event-serialization"
+      "avro"
     ],
     "RIG in Production": [
       "rig-ops-guide",
@@ -24,8 +26,6 @@
       "https",
       "scaling"
     ],
-    "Hacking the Source": [
-      "rig-dev-guide"
-    ]
+    "Hacking the Source": ["rig-dev-guide"]
   }
 }

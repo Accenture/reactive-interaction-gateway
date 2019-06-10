@@ -1,9 +1,6 @@
 defmodule RigInboundGatewayWeb.V1.Websocket do
   @moduledoc """
   Cowboy WebSocket handler.
-
-  As soon as Phoenix pulls in Cowboy 2 this will have to be rewritten using the
-  :cowboy_websocket behaviour.
   """
 
   require Logger

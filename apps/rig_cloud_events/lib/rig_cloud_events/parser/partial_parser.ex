@@ -66,7 +66,12 @@ defmodule RigCloudEvents.Parser.PartialParser do
       for token <- String.split(json_pointer, "/"),
           do: token |> String.replace("~1", "/") |> String.replace("~0", "~")
 
-    do_find_value(json_tokens, reference_tokens)
+    # We can't do much if the pointer goes into data and data is encoded..
+    if points_into_encoded_data(json_tokens, reference_tokens) do
+      {:error, :cannot_extract_from_encoded_data}
+    else
+      do_find_value(json_tokens, reference_tokens)
+    end
   end
 
   def find_value(tokens, "" = _the_whole_document),
@@ -74,6 +79,26 @@ defmodule RigCloudEvents.Parser.PartialParser do
 
   def find_value(_tokens, "#" <> _),
     do: raise("The URI fragment identifier representation is not supported.")
+
+  # ---
+
+  defp points_into_encoded_data(json_tokens, reference_tokens)
+
+  defp points_into_encoded_data(json_tokens, [ref_token | rest])
+       when ref_token == "data" and rest != [] do
+    # `data` is encoded if, and only if, `contenttype` is set.
+    case value(json_tokens, "contenttype") do
+      {:error, {:not_found, _, _}} ->
+        # `contenttype` is not set, so `data` must be already parsed.
+        false
+
+      {:ok, _} ->
+        # `contenttype` is set, so `data` is still encoded.
+        true
+    end
+  end
+
+  defp points_into_encoded_data(_, _), do: false
 
   # ---
 

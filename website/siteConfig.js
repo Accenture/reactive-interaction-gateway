@@ -29,6 +29,7 @@ const siteConfig = {
       href: `${baseUrl}source_docs/index.html`,
       label: 'Source Documentation'
     },
+    { search: true },
     // { page: 'help', label: 'Help' },
     // { blog: true, label: 'Blog' },
   ],
@@ -66,6 +67,10 @@ const siteConfig = {
 
   // You may provide arbitrary config keys to be used as needed by your
   // template.
+  algolia: {
+    apiKey: '071fafffc3dde04e540162e0f3f68af4',
+    indexName: 'reactive-interaction-gateway',
+  }
 };
 
 module.exports = siteConfig;
