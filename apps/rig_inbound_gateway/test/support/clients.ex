@@ -49,7 +49,7 @@ defmodule SseClient do
     url = "http://#{hostname}:#{eventhub_port}/_rig/v1/connection/sse?#{URI.encode_query(params)}"
 
     %HTTPoison.AsyncResponse{id: client} =
-      HTTPoison.get!(url, %{},
+      HTTPoison.get!(url, %{accept: "text/event-stream"},
         stream_to: self(),
         recv_timeout: 20_000
       )
@@ -117,15 +117,17 @@ defmodule SseClient do
   end
 
   defp extract_cloud_event(sse_chunk) do
-    sse_chunk
-    |> String.split("\n", trim: true)
-    |> Enum.reduce_while(nil, fn
-      "data: " <> data, _acc -> {:halt, Jason.decode!(data)}
-      _x, _acc -> {:cont, nil}
-    end)
-    |> case do
-      nil -> raise "Failed to extract CloudEvent from chunk: #{inspect(sse_chunk)}"
-      cloud_event -> cloud_event
+    data =
+      sse_chunk
+      |> String.split("\n")
+      |> Enum.drop_while(&(not String.starts_with?(&1, "data: ")))
+      |> Enum.take_while(&String.starts_with?(&1, "data: "))
+      |> Enum.map(fn "data: " <> data -> data end)
+      |> Enum.join("\n")
+
+    case Jason.decode(data) do
+      {:ok, cloud_event} -> cloud_event
+      {:error, _} -> raise "Got non-JSON data: #{inspect(data)}"
     end
   end
 

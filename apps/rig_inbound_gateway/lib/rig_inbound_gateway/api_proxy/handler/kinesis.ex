@@ -52,14 +52,44 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   end
 
   @doc @help_text
+  def handle_http_request(conn, api, endpoint, request_path)
+
   def handle_http_request(
-        %{params: %{"partition" => partition, "event" => event}} = conn,
+        conn,
         _,
         %{"target" => "kinesis"} = endpoint,
         request_path
       ) do
     response_from = Map.get(endpoint, "response_from", "http")
 
+    conn.assigns[:body]
+    |> Jason.decode()
+    |> case do
+      # Deprecated way to pass events:
+      {:ok, %{"partition" => partition, "event" => event}} ->
+        do_handle_http_request(conn, request_path, partition, event, response_from)
+
+      # Preferred way to pass events, where the partition goes into the "rig" extension:
+      {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
+        do_handle_http_request(conn, request_path, partition, event, response_from)
+
+      {:ok, _} ->
+        respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
+
+      {:error, _} ->
+        respond_with_bad_request(conn, response_from, "expected a JSON encoded request body")
+    end
+  end
+
+  # ---
+
+  def do_handle_http_request(
+        conn,
+        request_path,
+        partition,
+        event,
+        response_from
+      ) do
     kinesis_message =
       event
       |> Map.put("rig", %{
@@ -100,9 +130,9 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     end
   end
 
-  def handle_http_request(conn, _, %{"target" => "kinesis"} = endpoint, _) do
+  def respond_with_bad_request(conn, response_from, description) do
     response = """
-    Bad request: missing expected body parameters.
+    Bad request: #{description}.
 
     # Usage
 
@@ -113,7 +143,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
       conn.method,
       conn.request_path,
       "kinesis",
-      Map.get(endpoint, "response_from", "http"),
+      response_from,
       "bad_request"
     )
 

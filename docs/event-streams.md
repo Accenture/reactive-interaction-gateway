@@ -1,25 +1,44 @@
 ---
 id: event-streams
-title: Event Streams
-sidebar_label: Event Streams
+title: Publishing Events towards Frontends
+sidebar_label: Publishing Events
 ---
 
-Real time part of RIG is driven by events (Kafka/Kinesis) -- to make it work there is some configuration required.
+RIG supports various ways to publish an event towards frontends. The recommended way is to have RIG consume one or more Kafka topics, but RIG also support Kinesis as an alternative. For testing and low-traffic scenarios, RIG also provides an HTTP endpoint that can be used to send events to.
 
-Where RIG uses event streams:
+## HTTP
 
-- publishing via API Gateway to specific topic/stream, see [Publishing to event streams](./api-gateway#publishing-to-event-streams) for more details
-  - consuming of events from specific topic/stream to achieve sync requests
-- consuming of events to be forwarded via SSE/WS
-- publishing "monitoring" messages per API Gateway call
+The HTTP endpoint is available on RIG's [internal port](rig-ops-guide). It supports JSON-encoded CloudEvents in [structured and binary modes](event-format#http-transport-binding) (Avro is currently not supported).
 
-Event stream functionality is by default disabled -- can be controlled via environment variables. All possible configuration can be found in [Operator's Guide](./rig-ops-guide.md)
+Example usage (taken from the [tutorial](tutorial#4-create-a-new-chatroom-message-event-backend)):
+
+```bash
+$ http post :4000/_rig/v1/events \
+  specversion=0.2 \
+  type=chatroom_message \
+  id=first-event \
+  source=tutorial
+HTTP/1.1 202 Accepted
+content-type: application/json; charset=utf-8
+...
+
+{
+    "specversion": "0.2",
+    "id": "first-event",
+    "time": "2018-08-21T09:11:27.614970+00:00",
+    "type": "chatroom_message",
+    "source": "tutorial"
+}
+
+```
 
 ## Kafka
 
-### Enable Kafka
+As described in the [Event Format](event-format#kafka-transport-binding) Section, the Kafka consumer supports both structured and binary modes, each with JSON as well as Avro encoding (with details described in the [advanced guide on Avro](avro)).
 
-Kafka will be automatically enabled as soon as you set `KAFKA_BROKERS` environment variable.
+All RIG nodes participate in the same Kafka consumer group and support automatic partition re-balancing in case new nodes are started or existing nodes go away.
+
+By default, there are no Kafka brokers configured. Look for Kafka related variables in the [Operator's Guide](./rig-ops-guide.md) to enable the Kafka consumer.
 
 ```bash
 # Kafka disabled
@@ -29,74 +48,11 @@ docker run accenture/reactive-interaction-gateway
 docker run -e KAFKA_BROKERS=kafka:9092 accenture/reactive-interaction-gateway
 ```
 
-> __NOTE:__ it's enough to set one Kafka broker, RIG will automatically discover rest of the Kafka cluster.
-
-### Change consumer topics and group ID
-
-As Kafka is enabled, RIG starts to consume events on 2 default topics `rig` and `rig-proxy-response`. `rig` topic is used to consume all events and forward them to client via SSE/WS. `rig-proxy-response` is used for HTTP sync publishing, see [API Gateway docs](./api-gateway#sync).
-
-Change topics:
-
-```bash
-# Single topic
-docker run \
--e KAFKA_BROKERS=kafka:9092 \
--e KAFKA_SOURCE_TOPICS=my-topic \
--e PROXY_KAFKA_RESPONSE_TOPICS=my-proxy-topic \
-accenture/reactive-interaction-gateway
-
-# Multiple topics
-docker run \
--e KAFKA_BROKERS=kafka:9092 \
--e KAFKA_SOURCE_TOPICS=my-topic1,my-topic2 \
--e PROXY_KAFKA_RESPONSE_TOPICS=my-proxy-topic1,my-proxy-topic2 \
-accenture/reactive-interaction-gateway
-```
-
-In addition to topics you can configure also consumer group ID.
-> __NOTE:__ same group ID will be used for all topics.
-
-Change group ID:
-
-```bash
-docker run \
--e KAFKA_BROKERS=kafka:9092 \
--e KAFKA_SOURCE_TOPICS=my-topic \
--e PROXY_KAFKA_RESPONSE_TOPICS=my-proxy-topic \
--e KAFKA_GROUP_ID=my-group-id \
-accenture/reactive-interaction-gateway
-```
-
-### Change producer topics
-
-RIG can produce "monitoring" events on incoming HTTP requests, see [API Gateway docs](./api-gateway#sync).
-
-Producing "monitoring" events is by default using `rig-request-log` topic.
-
-Change topic:
-
-```bash
-docker run \
--e KAFKA_BROKERS=kafka:9092 \
--e REQUEST_LOG=console,kafka \
--e KAFKA_LOG_TOPIC=my-log-topic \
-accenture/reactive-interaction-gateway
-```
-
-Producing events from proxy as a target of a request is by default disabled.
-
-Change topic:
-
-```bash
-docker run \
--e KAFKA_BROKERS=kafka:9092 \
--e PROXY_KAFKA_REQUEST_TOPIC=my-proxy-request-topic \
-accenture/reactive-interaction-gateway
-```
+> Note that defining one Kafka broker is sufficient as RIG will automatically discover any connected brokers in the Kafka cluster.
 
 ### SSL
 
-SSL for Kafka is by default disabled. To enable it and set certificates use following setup:
+SSL for Kafka is disabled by default. To enable it, set the corresponding environment variables, e.g.:
 
 ```bash
 docker run \
@@ -118,7 +74,7 @@ accenture/reactive-interaction-gateway
 
 ### SASL
 
-SASL for Kafka is by default disabled. To enable it and set credentials use following setup:
+SASL for Kafka is disabled by default as well. To enable it, again make sure the corresponding environment variable is defined, e.g.:
 
 ```bash
 docker run \
@@ -129,11 +85,11 @@ accenture/reactive-interaction-gateway
 
 ## Kinesis
 
-### Enable Kinesis
+The Kinesis consumer supports JSON-encoded CloudEvents in structured mode only.
 
-Similar as Kafka, Kinesis is by default disabled and can be enabled via `KINESIS_ENABLED` environment variable.
+Internally, RIG uses Amazon's official Java client in order to support automatic re-balancing of shards in case of a changing network topology.
 
-> __NOTE:__ when using Kinesis we have to use image tag `aws`.
+In order to enable Kinesis, please make sure you're using an `-aws` tagged Docker image and refer to the [Operator's Guide](./rig-ops-guide.md) for environment variables available to configure.
 
 ```bash
 # Kinesis disabled
@@ -146,22 +102,7 @@ docker run -e KINESIS_ENABLED=1 accenture/reactive-interaction-gateway
 docker run -e KINESIS_ENABLED=1 -e KINESIS_AWS_REGION=eu-west-3 accenture/reactive-interaction-gateway
 ```
 
-### Change consumer stream and app name
-
-As Kinesis is enabled, RIG starts to consume events on default stream `RIG-outbound`. `RIG-outbound` topic is used to consume all events and forward them to client via SSE/WS.
-
-Change stream:
-
-```bash
-docker run \
--e KINESIS_ENABLED=1 \
--e KINESIS_STREAM=my-stream \
-accenture/reactive-interaction-gateway:aws
-```
-
-In addition to stream, you can configure also app name. Kinesis is using value of `KINESIS_APP_NAME` as a name for DynamoDB table. DynamoDB is internally used by Amazon to handle leases and consumer groups. It's similar to group ID in Kafka.
-
-Change app name:
+The used consumer stream and the app name can be changed as well:
 
 ```bash
 docker run \
@@ -171,18 +112,4 @@ docker run \
 accenture/reactive-interaction-gateway:aws
 ```
 
-### Change producer streams
-
-RIG can produce events as a target of HTTP endpoint call, see [API Gateway docs](./api-gateway#sync).
-
-Producing events from proxy as a target of a request is by default disabled.
-
-Change topic:
-
-```bash
-docker run \
--e KINESIS_ENABLED=1 \
--e PROXY_KINESIS_REQUEST_STREAM=my-proxy-request-topic \
--e PROXY_KINESIS_REQUEST_REGION=eu-west-3 \
-accenture/reactive-interaction-gateway:aws
-```
+> The app name is used as the name for the corresponding DynamoDB table. The DynamoDB table is used by Kinesis to handle leases and consumer groups. It is similar to the Group ID in Kafka.

@@ -4,13 +4,11 @@ defmodule RigApi.MessageController do
   use RigApi, :controller
   use PhoenixSwagger
 
-  alias RigCloudEvents.CloudEvent
+  alias RIG.Sources.HTTP.Handler
 
   action_fallback(RigApi.FallbackController)
 
-  @event_filter Application.get_env(:rig, :event_filter)
-
-  swagger_path :create do
+  swagger_path :publish do
     post("/v1/messages")
     summary("Submit an event, to be forwarded to subscribed frontends.")
     description("Allows you to submit a single event to RIG using a simple, \
@@ -33,24 +31,12 @@ defmodule RigApi.MessageController do
 
   @doc """
   Accepts message to be sent to front-ends.
-
-  Note that `message` is _always_ a map. For example:
-
-  - Given '"foo"', the `:json` parser will pass '{"_json": "foo"}'.
-  - Given 'foo', the `:urlencoded` parser will pass '{"foo": nil}'.
   """
-  def create(conn, message) do
-    with {:ok, cloud_event} <- CloudEvent.parse(message) do
-      @event_filter.forward_event(cloud_event)
-
-      send_resp(conn, :accepted, "message queued for transport")
-    else
-      {:error, reason} ->
-        conn
-        |> put_status(:bad_request)
-        |> text("Failed to parse request body: #{inspect(reason)}")
-    end
+  def publish(%{method: "POST"} = conn, _params) do
+    Handler.handle_http_submission(conn, check_authorization?: false)
   end
+
+  # ---
 
   def swagger_definitions do
     %{

@@ -47,7 +47,9 @@ defmodule RigKafka.MixProject do
       {:memoize, "~> 1.3"},
       {:fake_server, "~> 2.0", only: :test},
       # For generating client_id:
-      {:uuid, "~> 1.1"}
+      {:uuid, "~> 1.1"},
+      # JSON parser:
+      {:jason, "~> 1.1"}
     ]
   end
 end

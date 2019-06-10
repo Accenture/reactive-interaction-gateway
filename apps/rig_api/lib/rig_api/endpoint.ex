@@ -13,13 +13,6 @@ defmodule RigApi.Endpoint do
   plug(Plug.RequestId)
   plug(Plug.Logger)
 
-  plug(Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json],
-    # return "415 Unsupported Media Type" if not handled by any parser
-    pass: [],
-    json_decoder: Poison
-  )
-
   plug(Plug.MethodOverride)
   plug(Plug.Head)
 

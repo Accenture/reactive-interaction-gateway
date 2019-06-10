@@ -4,6 +4,8 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
   use ExUnit.Case, async: false
   use RigInboundGatewayWeb.ConnCase
 
+  alias Plug.Conn
+
   import FakeServer
   alias FakeServer.Response
 
@@ -136,42 +138,42 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
 
   test_with_server "forward_request should handle nested query params", @env do
     route("/myapi/books", fn %{query: query} ->
-      assert %{"page[limit]" => "10", "page[offset]" => "0"} = query
+      assert query == %{"page[limit]" => "10", "page[offset]" => "0"}
       Response.ok!(~s<{"response":"[]"}>)
     end)
 
-    request =
-      construct_request_with_jwt(:get, "/myapi/books", %{
-        "page" => %{"offset" => 0, "limit" => 10}
-      })
+    request = %{
+      construct_request_with_jwt(:get, "/myapi/books")
+      | query_string: "page[offset]=0&page[limit]=10"
+    }
 
     conn = call(Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"response\":\"[]\"}"
   end
 
-  test_with_server "forward_request should handle POST request with file body", @env do
+  test_with_server "forward_request should handle POST request with multipart file body", @env do
     route("/myapi/books", fn %{method: "POST", body: body} ->
-      assert String.contains?(body, "name=\"random_data\"\r\n\r\n123\r\n")
-      assert String.contains?(body, "filename=\"upload_example.txt\"\r\n\r\nHello\r\n")
-      Response.created!(~s<{"response": "file uploaded successfully"}>)
+      assert String.contains?(body, ~S<name="display_name">)
+      assert String.contains?(body, ~S<filename="upload_example.txt">)
+      # File content:
+      assert String.contains?(body, "Hello")
+      Response.created!(~S<{"response": "file uploaded successfully"}>)
     end)
 
-    upload = %Plug.Upload{
-      path: __DIR__ <> "/upload_example.txt",
-      filename: "upload_example.txt",
-      content_type: "plain/text"
-    }
+    displayname = "display_name"
+    filename = "upload_example.txt"
+    filepath = "#{__DIR__}/#{filename}"
+    file_part = {:file, filepath, displayname, [{"content-type", "plain/text"}]}
+    body = {:multipart, [file_part]}
+    headers = [{"authorization", "Bearer #{generate_jwt()}"}]
+    url = "http://localhost:#{@env[:port]}/myapi/books"
 
-    request =
-      construct_request_with_jwt(:post, "/myapi/books", %{
-        "qqfile" => upload,
-        "random_data" => "123"
-      })
-
-    conn = call(Router, request)
-    assert conn.status == 201
-    assert conn.resp_body =~ "{\"response\": \"file uploaded successfully\"}"
+    assert {:ok,
+            %HTTPoison.Response{
+              status_code: 201,
+              body: ~S<{"response": "file uploaded successfully"}>
+            }} = HTTPoison.post(url, body, headers)
   end
 
   test_with_server "Any request should include a forward header", @env do
@@ -266,13 +268,6 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
   end
 
   @tag :smoke
-  test "POST request should be correctly proxied to external service" do
-    conn = call(Router, build_conn(:post, "/api"))
-    assert conn.status == 200
-    assert conn.resp_body =~ "{\"msg\":\"POST\"}"
-  end
-
-  @tag :smoke
   test "PUT request should be correctly proxied to external service" do
     conn = call(Router, build_conn(:put, "/api"))
     assert conn.status == 200
@@ -309,20 +304,56 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
 
   @tag :smoke
   test "POST request with file body should be correctly proxied to external service" do
-    upload = %Plug.Upload{
-      path: __DIR__ <> "/upload_example.txt",
-      filename: "upload_example.txt",
-      content_type: "plain/text"
-    }
+    body = """
+    -----------------------------9051914041544843365972754266\r
+    Content-Disposition: form-data; name="text"\r
+    \r
+    text default\r
+    -----------------------------9051914041544843365972754266\r
+    Content-Disposition: form-data; name="file1"; filename="a.txt"\r
+    Content-Type: text/plain\r
+    \r
+    Content of a.txt.\r
+    \r
+    -----------------------------9051914041544843365972754266\r
+    Content-Disposition: form-data; name="file2"; filename="a.html"\r
+    Content-Type: text/html\r
+    \r
+    <!DOCTYPE html><title>Content of a.html.</title>\r
+    \r
+    -----------------------------9051914041544843365972754266--\r
+    \r
+    """
 
-    conn = call(Router, build_conn(:post, "/api", %{"qqfile" => upload}))
+    request =
+      %Conn{}
+      |> Conn.put_req_header(
+        "content-type",
+        "multipart/form-data; boundary=---------------------------9051914041544843365972754266"
+      )
+      |> Plug.Adapters.Test.Conn.conn(:post, "/api", body)
+
+    conn = call(Router, request)
     assert conn.status == 200
-    assert conn.resp_body =~ "{\"msg\":\"POST FILE\"}"
+    # The first part is not a file and therefore doesn't count as "upload";
+    # the other two parts should be recognized as files:
+    assert {:ok,
+            %{
+              "uploads" => [
+                %{"fieldname" => "file1", "originalname" => "a.txt", "mimetype" => "text/plain"},
+                %{"fieldname" => "file2", "originalname" => "a.html", "mimetype" => "text/html"}
+              ]
+            }} = Jason.decode(conn.resp_body)
   end
 
   @tag :smoke
   test "GET request with queries should be correctly proxied to external service" do
-    conn = call(Router, build_conn(:get, "/api", %{"foo" => %{"bar" => "baz"}}))
+    request = %{
+      build_conn(:get, "/api")
+      | query_string: "foo[bar]=baz"
+    }
+
+    conn = call(Router, request)
     assert conn.status == 200
     assert conn.resp_body =~ "{\"msg\":\"GET QUERY\"}"
   end
