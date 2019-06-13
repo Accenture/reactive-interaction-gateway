@@ -41,6 +41,15 @@ defmodule Rig.Connection.Codec do
   # ---
 
   @doc """
+  The function processes any string or number and returns exactly 16 byte binary.
+  The hash produced by this function can be used as key by both encrypt and decrypt functions.
+  """
+  @spec hash(binary) :: binary
+  def hash(key) do
+    :crypto.hash(:md5, :erlang.term_to_binary(key))
+  end
+
+  @doc """
   Encrypts value using key and returns init. vector, ciphertag (MAC) and ciphertext concatenated.
   Additional authenticated data (AAD) adds parameters like protocol version num. to MAC
   """
@@ -48,7 +57,7 @@ defmodule Rig.Connection.Codec do
   @spec encrypt(binary, binary) :: binary
   def encrypt(val, key) do
     mode = :aes_gcm
-    secret_key = :base64.decode(key)
+    secret_key = hash(key)
     init_vector = :crypto.strong_rand_bytes(16)
     {ciphertext, ciphertag} =
       :crypto.block_encrypt(mode, secret_key, init_vector, {@aad, to_string(val), 16})
@@ -64,7 +73,7 @@ defmodule Rig.Connection.Codec do
   @spec decrypt(binary, binary) :: binary
   def decrypt(ciphertext, key) do
     mode = :aes_gcm
-    secret_key = :base64.decode(key)
+    secret_key = hash(key)
     <<init_vector::binary-16, tag::binary-16, ciphertext::binary>> = ciphertext
     :crypto.block_decrypt(mode, secret_key, init_vector, {@aad, ciphertext, tag})
   end
