@@ -17,7 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement [HTTP Transport Binding for CloudEvents v0.2](https://github.com/cloudevents/spec/blob/v0.2/http-transport-binding.md). A special fallback to "structured mode" in case the content type is "application/json" and the "ce-specversion" header is not set ensures this change is backward compatible with existing setups. [#153](https://github.com/Accenture/reactive-interaction-gateway/issues/153)
 - [API/Proxy] New request body format for endpoints with `kafka` and `kinesis` targets; see [Deprecated](#Deprecated) below.
 
-<!-- ### Changed -->
+### Changed
+
+- The environment variable `KAFKA_GROUP_ID` has been replaced with the following environment variables, where each of them has a distinct default value: `KAFKATOFILTER_KAFKA_GROUP_ID`, `KAFKATOHTTP_KAFKA_GROUP_ID`, `PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID`. [#206](https://github.com/Accenture/reactive-interaction-gateway/issues/206)
+- The default Kafka source topic for the Kafka-to-HTTP event stream has been changed to `rig`. The feature was introduced to forward all incoming events to an (external) HTTP endpoint, so it makes sense to use the default topic for incoming events here too.
 
 ### Fixed
 
@@ -29,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Docs] Fixed missing `swagger.json` file in production Docker image.
 - [Proxy] Added missing CORS headers for Kafka/Kinesis target type when not using `response_from`.
 - [Kafka] Fixed schema registry validation when using binary messages in Kafka consumer. [#202](https://github.com/Accenture/reactive-interaction-gateway/issues/202)
+- Forwarding events to HTTP did not contain (all) Kafka messages, as the Kafka consumer group ID was shared with the consumer for forwarding events to frontends. [#206](https://github.com/Accenture/reactive-interaction-gateway/pull/206)
 
 ### Deprecated
 
