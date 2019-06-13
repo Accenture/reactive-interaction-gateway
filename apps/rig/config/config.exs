@@ -35,7 +35,7 @@ config :rig, Rig.EventStream.KafkaToFilter,
   ssl_keyfile_pass: {:system, "KAFKA_SSL_KEYFILE_PASS", ""},
   # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
   sasl: {:system, "KAFKA_SASL", nil},
-  group_id: {:system, "KAFKA_GROUP_ID", "rig"}
+  group_id: {:system, "KAFKATOFILTER_KAFKA_GROUP_ID", "rig-kafka-to-filter"}
 
 config :rig, Rig.EventStream.KafkaToHttp,
   # The list of brokers, given by a comma-separated list of host:port items:
@@ -43,7 +43,7 @@ config :rig, Rig.EventStream.KafkaToHttp,
   serializer: {:system, "KAFKA_SERIALIZER", nil},
   schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", nil},
   # The list of topics to consume messages from:
-  consumer_topics: {:system, :list, "FIREHOSE_KAFKA_SOURCE_TOPICS", ["rig-firehose"]},
+  consumer_topics: {:system, :list, "FIREHOSE_KAFKA_SOURCE_TOPICS", ["rig"]},
   # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored; otherwise, they're required.
   ssl_enabled?: {:system, :boolean, "KAFKA_SSL_ENABLED", false},
   # If use_enabled?, the following paths are expected (relative to the `priv` directory):
@@ -56,7 +56,7 @@ config :rig, Rig.EventStream.KafkaToHttp,
   sasl: {:system, "KAFKA_SASL", nil},
   # HTTP endpoints to invoke for each Kafka message:
   targets: {:system, :list, "FIREHOSE_KAFKA_HTTP_TARGETS", []},
-  group_id: {:system, "KAFKA_GROUP_ID", "rig"}
+  group_id: {:system, "KAFKATOHTTP_KAFKA_GROUP_ID", "rig-kafka-to-http"}
 
 config :porcelain, driver: Porcelain.Driver.Basic
 

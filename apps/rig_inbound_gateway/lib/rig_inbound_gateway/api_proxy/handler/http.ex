@@ -29,16 +29,13 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
   @impl Handler
   def handle_http_request(conn, api, endpoint, request_path) do
-    %{
-      method: method,
-      params: params,
-      req_headers: req_headers
-    } = conn
-
+    %{method: method, req_headers: req_headers} = conn
+    body = conn.assigns[:body]
     response_from = Map.get(endpoint, "response_from", "http")
 
     url =
       build_url(api["proxy"], request_path)
+      |> add_query_params(conn.query_string)
       |> possibly_add_correlation_id(response_from)
 
     host_ip = Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:url][:host]
@@ -49,7 +46,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
       |> HttpHeader.put_forward_header(conn.remote_ip, host_ip)
       |> drop_connection_related_headers()
 
-    result = do_request(method, url, params, req_headers)
+    result = do_request(method, url, body, req_headers)
 
     case result do
       {:ok, res} ->
@@ -71,12 +68,12 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
   # ---
 
-  defp do_request(method, url, params, req_headers) do
+  defp do_request(method, url, body, req_headers) do
     case method do
-      "GET" -> Base.get(add_query_params(url, params), req_headers)
-      "POST" -> do_post_request(url, params, req_headers)
-      "PUT" -> Base.put(url, Poison.encode!(params), req_headers)
-      "PATCH" -> Base.patch(url, Poison.encode!(params), req_headers)
+      "GET" -> Base.get(url, req_headers)
+      "POST" -> Base.post(url, body, req_headers)
+      "PUT" -> Base.put(url, body, req_headers)
+      "PATCH" -> Base.patch(url, body, req_headers)
       "DELETE" -> Base.delete(url, req_headers)
       "HEAD" -> Base.head(url, req_headers)
       "OPTIONS" -> Base.options(url, req_headers)
@@ -138,31 +135,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
   # ---
 
-  # Format multipart body and set as POST HTTP method
-  @typep map_string_upload :: %{required(String.t()) => %Plug.Upload{}}
-  @typep headers :: [{String.t(), String.t()}]
-
-  @spec do_post_request(String.t(), map_string_upload, headers) :: Plug.Conn.t()
-  defp do_post_request(url, %{"qqfile" => %Plug.Upload{}} = params, headers) do
-    %{"qqfile" => file} = params
-    optional_params = params |> Map.delete("qqfile")
-
-    params_merged =
-      Enum.concat(
-        optional_params,
-        [{:file, file.path}, {"content-type", file.content_type}, {"filename", file.filename}]
-      )
-
-    Base.post(url, {:multipart, params_merged}, headers)
-  end
-
-  @spec do_post_request(String.t(), map, headers) :: Plug.Conn.t()
-  defp do_post_request(url, params, headers) do
-    Base.post(url, Poison.encode!(params), headers)
-  end
-
-  # ---
-
   @spec build_url(Proxy.api_definition() | %URI{}, String.t()) :: String.t()
 
   def build_url(%URI{} = proxy_uri, request_path) do
@@ -208,6 +180,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
     # Query supports nested query parameters - URI doesn't.
     query = (uri.query || "") |> Query.decode() |> Map.merge(params) |> Query.encode()
     %{uri | query: query} |> URI.to_string()
+  end
+
+  def add_query_params(uri_text, query_string) do
+    params = Query.decode(query_string)
+    add_query_params(uri_text, params)
   end
 
   # ---

@@ -1,10 +1,10 @@
 ---
 id: api-gateway
-title: API Gateway
-sidebar_label: API Gateway
+title: Forwarding Requests
+sidebar_label: Forwarding Requests
 ---
 
-RIG includes a basic API Gateway implementation (a configurable, distributed HTTP reverse proxy). Provided a route is configured, RIG will forward any matching HTTP request to the respective service or event stream, wait for the reply and forward that reply to the original caller.
+RIG includes a configurable, distributed HTTP reverse proxy. Depending on the configuration, RIG forwards incoming HTTP requests to backend services, to a Kafka topic or to a Kinesis stream, then waits for the reply and forwards that reply to the original caller.
 
 ## API Endpoint Configuration
 
@@ -117,11 +117,11 @@ Dynamic values in `path` have to be wrapped in curly braces. Value inside curly 
 
 ## Publishing to event streams
 
-As an alternative to standard HTTP to HTTP communication, we offer a way how to produce event to Kafka/Kinesis via HTTP request. This means, that frontend can still send regular HTTP request and RIG will publish content of this request to Kafka topic or Kinesis stream.
+Instead of forwarding an HTTP request to an internal HTTP endpoint, RIG can also produce an event to a Kafka topic (or Kinesis stream). What looks like a standard HTTP call to the frontend, actually produces an event for backend services to consume.
 
-In this case, client receives response immediately (fire and forget).
+Depending on the use case, the request may either return immediately or after a response has been produced to another Kafka topic (or Kinesis stream), as described below.
 
-Configuration of such API endpoint might look like this:
+For fire-and-forget style requests, the endpoint configuration looks like this:
 
 ```json
 [{
@@ -140,30 +140,28 @@ Configuration of such API endpoint might look like this:
 }]
 ```
 
-> Important field is `target`. `target` describes what event stream to use. Currently it's either Kafka or Kinesis. HTTP method and `path` name are up to your choice.
+Note that the `target` field is set to `kafka` (for Kinesis use `kinesis`).
 
-This type of endpoint requires specific HTTP request body:
+The endpoint expects the following request format:
 
 ```json
 {
-  "event": {
-    "id": "069711bf-3946-4661-984f-c667657b8d85",
-    "type": "com.example",
-    "time": "2018-04-05T17:31:00Z",
-    "specversion": "0.2",
-    "source": "/cli",
-    "contenttype": "application/json",
-    "data":{
-      "foo": "bar"
-    }
+  "id": "069711bf-3946-4661-984f-c667657b8d85",
+  "type": "com.example",
+  "time": "2018-04-05T17:31:00Z",
+  "specversion": "0.2",
+  "source": "/cli",
+  "contenttype": "application/json",
+  "rig": {
+    "target_partition": "the-partition-key"
   },
-  "partition": "your_partition_key"
+  "data":{
+    "foo": "bar"
+  }
 }
 ```
 
-As you can see, it needs 2 fields -- `event` and `partition`. `event` holds event itself (have to comply with Cloud events spec) and `partition` describes partition key to use.
-
-Topic/stream configuration is handled by environment variables. See `PROXY_KAFKA_*` and `PROXY_KINESIS_*` variables in [Operator's Guide](./rig-ops-guide.md).
+Topic/stream configuration is handled by environment variables, described by the `PROXY_KAFKA_*` and `PROXY_KINESIS_*` variables in the [Operator's Guide](./rig-ops-guide.md).
 
 ### Wait for response
 

@@ -14,8 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Docs] Added new set of topics in documentation about Api Gateway, even streams and scaling.
 - [Docs] Added examples section to documentation website.
 - [API/Proxy] Added new `response_from` option -- `http_async` together with new internal `POST` endpoint `/v1/responses`. You can send correlated response to `/v1/responses` and complete initial Proxy request. [#213](https://github.com/Accenture/reactive-interaction-gateway/issues/213)
+- Implement [HTTP Transport Binding for CloudEvents v0.2](https://github.com/cloudevents/spec/blob/v0.2/http-transport-binding.md). A special fallback to "structured mode" in case the content type is "application/json" and the "ce-specversion" header is not set ensures this change is backward compatible with existing setups. [#153](https://github.com/Accenture/reactive-interaction-gateway/issues/153)
+- [API/Proxy] New request body format for endpoints with `kafka` and `kinesis` targets; see [Deprecated](#Deprecated) below.
 
-<!-- ### Changed -->
+### Changed
+
+- The environment variable `KAFKA_GROUP_ID` has been replaced with the following environment variables, where each of them has a distinct default value: `KAFKATOFILTER_KAFKA_GROUP_ID`, `KAFKATOHTTP_KAFKA_GROUP_ID`, `PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID`. [#206](https://github.com/Accenture/reactive-interaction-gateway/issues/206)
+- The default Kafka source topic for the Kafka-to-HTTP event stream has been changed to `rig`. The feature was introduced to forward all incoming events to an (external) HTTP endpoint, so it makes sense to use the default topic for incoming events here too.
 
 ### Fixed
 
@@ -27,12 +32,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Docs] Fixed missing `swagger.json` file in production Docker image.
 - [Proxy] Added missing CORS headers for Kafka/Kinesis target type when not using `response_from`.
 - [Kafka] Fixed schema registry validation when using binary messages in Kafka consumer. [#202](https://github.com/Accenture/reactive-interaction-gateway/issues/202)
+- Forwarding events to HTTP did not contain (all) Kafka messages, as the Kafka consumer group ID was shared with the consumer for forwarding events to frontends. [#206](https://github.com/Accenture/reactive-interaction-gateway/pull/206)
 
-<!-- ### Deprecated -->
+### Deprecated
 
-<!-- ### Removed -->
+- [Proxy] Endpoints configured with target `kafka` or `kinesis` now expect a different body format (that is, the previous format is deprecated). This aligns the request body format with the other endpoints that accept CloudEvents.
 
-<!-- ### Deprecated -->
+  For example, instead of using this:
+
+  ```json
+  {
+    "partition": "the-partition-key",
+    "event": {
+      "specversion": "0.2",
+      "type": "what_has_happened",
+      "source": "ui",
+      "id": "123"
+    }
+  }
+  ```
+
+  you should put the partition key in the CloudEvent's "rig" extension instead:
+
+  ```json
+  {
+    "specversion": "0.2",
+    "rig": {
+      "target_partition": "the-partition-key"
+    },
+    "type": "what_has_happened",
+    "source": "ui",
+    "id": "123"
+  }
+  ```
 
 <!-- ### Removed -->
 
@@ -43,17 +75,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - When using the proxy, RIG will now add an additional [`Forwarded` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded).
-[#113](https://github.com/Accenture/reactive-interaction-gateway/issues/113)
+  [#113](https://github.com/Accenture/reactive-interaction-gateway/issues/113)
 - Increased length of header value in HTTP requests to 16384 to support long tokens for SAML.
 
 ### Changed
 
 - HTTPS certificates may now be passed using absolute paths. (Previously, the locations of the HTTPS certificates were limited to the OTP-applications' `priv` directories `rig_api/priv/cert` and `rig_inbound_gateway/priv/cert`.) Additionally, for security reasons we no longer include the self-signed certificate with the docker image. Please adapt your environment configuration accordingly.
-[#151](https://github.com/Accenture/reactive-interaction-gateway/issues/151)
-[#182](https://github.com/Accenture/reactive-interaction-gateway/issues/182)
+  [#151](https://github.com/Accenture/reactive-interaction-gateway/issues/151)
+  [#182](https://github.com/Accenture/reactive-interaction-gateway/issues/182)
 - Validation errors for SSE & WS connections and the subscriptions endpoint should now be a lot more helpful. Invalid JWTs, as well as invalid subscriptions, cause the endpoints to respond with an error immediately.
-[#54](https://github.com/Accenture/reactive-interaction-gateway/issues/54)
-[#164](https://github.com/Accenture/reactive-interaction-gateway/issues/164)
+  [#54](https://github.com/Accenture/reactive-interaction-gateway/issues/54)
+  [#164](https://github.com/Accenture/reactive-interaction-gateway/issues/164)
 
 ### Fixed
 

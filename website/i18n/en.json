@@ -14,24 +14,28 @@
         "sidebar_label": "API Gateway Synchronization"
       },
       "api-gateway": {
-        "title": "API Gateway",
-        "sidebar_label": "API Gateway"
+        "title": "Forwarding Requests",
+        "sidebar_label": "Forwarding Requests"
       },
       "architecture": {
         "title": "Architecture",
         "sidebar_label": "Architecture"
       },
-      "event-serialization": {
-        "title": "Event Serialization",
-        "sidebar_label": "Event Serialization"
+      "avro": {
+        "title": "Avro Implementation Details",
+        "sidebar_label": "Avro"
+      },
+      "event-format": {
+        "title": "Event Format",
+        "sidebar_label": "Event Format"
       },
       "event-streams": {
-        "title": "Event Streams",
-        "sidebar_label": "Event Streams"
+        "title": "Publishing Events towards Frontends",
+        "sidebar_label": "Publishing Events"
       },
       "event-subscription": {
-        "title": "Event Subscription",
-        "sidebar_label": "Event Subscription"
+        "title": "Receiving Events on Frontends",
+        "sidebar_label": "Receiving Events"
       },
       "examples": {
         "title": "Examples",
@@ -69,9 +73,9 @@
         "title": "Tutorial",
         "sidebar_label": "Tutorial"
       },
-      "user-authentication": {
-        "title": "User authentication",
-        "sidebar_label": "User authentication"
+      "user-authorization": {
+        "title": "User Authorization",
+        "sidebar_label": "User Authorization"
       }
     },
     "links": {
