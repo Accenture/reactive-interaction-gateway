@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.20.0">
+    <meta name="project" content="Reactive Interaction Gateway v2.1.1">
+    <title>Result — Reactive Interaction Gateway v2.1.1</title>
+    <link rel="stylesheet" href="dist/html-11fdd9cd6b7c7c3981df.css" />
+    <script src="dist/sidebar_items-c582a13280.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/html-11fdd9cd6b7c7c3981df.js"></script>
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+    <div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://accenture.github.io/reactive-interaction-gateway" class="sidebar-projectName">
+Reactive Interaction Gateway      </a>
+      <h2 class="sidebar-projectVersion">
+        v2.1.1
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+      <li><a id="exceptions-list" href="#full-list">Exceptions</a></li>
+
+      <li><a id="tasks-list" href="#full-list">Mix Tasks</a></li>
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="app-vsn">Reactive Interaction Gateway v2.1.1</small>
+Result        
+          <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Tools for working with result tuples.</p>
+<p>Influenced by the Rust Option/Result implementation.</p>
+        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:err/0">err()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:err/1">err(error_type)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:error/0">error()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:fmt_errors/0">fmt_errors()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:ok/0">ok()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:ok/1">ok(value_type)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:t/0">t()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:t/2">t(value_type, error_type)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:value/0">value()</a>
+  </div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#and_then/2">and_then(result, value_to_result_fn)</a>
+  </div>
+    <div class="summary-synopsis"><p>Maps a Result to another Result by applying a function to a contained value, leaving
+non-ok tuples untouched.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#err/1">err(error_or_err_result)</a>
+  </div>
+    <div class="summary-synopsis"><p>Turns an error into a result that contains that error.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#err?/1">err?(result)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns false if a result has a contained value and true otherwise.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#filter_and_unwrap/1">filter_and_unwrap(results)</a>
+  </div>
+    <div class="summary-synopsis"><p>Unwraps ok-results and rejects error-results.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#filter_and_unwrap_err/1">filter_and_unwrap_err(results)</a>
+  </div>
+    <div class="summary-synopsis"><p>Unwraps error-results and rejects ok-results.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_to_result/2">list_to_result(results, fmt_errors \\ &amp;(&amp;1))</a>
+  </div>
+    <div class="summary-synopsis"><p>Turns a list of results into a result with lists of either values or errors.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#map/2">map(result, value_to_value_fn)</a>
+  </div>
+    <div class="summary-synopsis"><p>Maps a Result to another Result by applying a function to a contained value, leaving
+non-ok tuples untouched.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#map_err/2">map_err(result, error_to_error_fn)</a>
+  </div>
+    <div class="summary-synopsis"><p>Maps a Result to another Result by applying a function to a contained error, leaving
+ok tuples untouched.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#ok/1">ok(value_or_ok_result)</a>
+  </div>
+    <div class="summary-synopsis"><p>Turns a value into a result that contains that value.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#ok?/1">ok?(result)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns true if a result has a contained value and false otherwise.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#or_else/2">or_else(result, error_to_result_fn)</a>
+  </div>
+    <div class="summary-synopsis"><p>Maps a Result to another Result by applying a function to a contained value, leaving
+ok tuples untouched.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#result_to_list/1">result_to_list(arg)</a>
+  </div>
+    <div class="summary-synopsis"><p>Turns a result that holds a list of values or errors into a list of results.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unwrap/2">unwrap(ok_result, expectation \\ nil)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the contained value or throw an error.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unwrap_err/1">unwrap_err(err_result)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the contained error or throw an error.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unwrap_err_or/2">unwrap_err_or(result, default_value)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the contained error or a default.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unwrap_or/2">unwrap_or(result, default_value)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the contained value or a default.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:err/0">
+    <div class="detail-header">
+    <a href="#t:err/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">err()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L13" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>err() :: <a href="#t:err/1">err</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>())</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:err/1">
+    <div class="detail-header">
+    <a href="#t:err/1" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">err(error_type)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L12" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>err(error_type) :: {:error, error_type}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:error/0">
+    <div class="detail-header">
+    <a href="#t:error/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">error()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L9" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>error() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:fmt_errors/0">
+    <div class="detail-header">
+    <a href="#t:fmt_errors/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">fmt_errors()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L290" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>fmt_errors() :: ([<a href="#t:error/0">error</a>()] -> <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>())</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:ok/0">
+    <div class="detail-header">
+    <a href="#t:ok/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">ok()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L11" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>ok() :: <a href="#t:ok/1">ok</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>())</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:ok/1">
+    <div class="detail-header">
+    <a href="#t:ok/1" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">ok(value_type)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L10" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>ok(value_type) :: {:ok, value_type}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:t/0">
+    <div class="detail-header">
+    <a href="#t:t/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">t()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L15" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>t() :: <a href="#t:t/2">t</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>())</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:t/2">
+    <div class="detail-header">
+    <a href="#t:t/2" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">t(value_type, error_type)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L14" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>t(value_type, error_type) :: <a href="#t:ok/1">ok</a>(value_type) | <a href="#t:err/1">err</a>(error_type)</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:value/0">
+    <div class="detail-header">
+    <a href="#t:value/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">value()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L8" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>value() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="and_then/2">
+    <div class="detail-header">
+    <a href="#and_then/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">and_then(result, value_to_result_fn)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L162" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>and_then(<a href="#t:t/0">t</a>(), (<a href="#t:value/0">value</a>() -> <a href="#t:t/0">t</a>())) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Maps a Result to another Result by applying a function to a contained value, leaving
+non-ok tuples untouched.</p>
+<p>Note that the given function is expected to return a result. See <a href="Result.html#map/2"><code class="inline">Result.map/2</code></a> if
+you want to pass a function that returns a value.</p>
+<h2 id="and_then/2-examples" class="section-heading">
+  <a href="#and_then/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="8440531453-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="8440531453-1">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">and_then</span><span class="p" data-group-id="8440531453-2">(</span><span class="k" data-group-id="8440531453-3">fn</span><span class="w"> </span><span class="ss">:a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p" data-group-id="8440531453-4">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="8440531453-4">}</span><span class="w"> </span><span class="k" data-group-id="8440531453-3">end</span><span class="p" data-group-id="8440531453-2">)</span><span class="w">
+</span><span class="p" data-group-id="8440531453-5">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="8440531453-5">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="8440531453-6">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="8440531453-6">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">and_then</span><span class="p" data-group-id="8440531453-7">(</span><span class="k" data-group-id="8440531453-8">fn</span><span class="w"> </span><span class="ss">:a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p" data-group-id="8440531453-9">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="8440531453-9">}</span><span class="w"> </span><span class="k" data-group-id="8440531453-8">end</span><span class="p" data-group-id="8440531453-7">)</span><span class="w">
+</span><span class="p" data-group-id="8440531453-10">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="8440531453-10">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="8440531453-11">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="8440531453-11">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">and_then</span><span class="p" data-group-id="8440531453-12">(</span><span class="k" data-group-id="8440531453-13">fn</span><span class="w"> </span><span class="ss">:a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p" data-group-id="8440531453-14">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="8440531453-14">}</span><span class="w"> </span><span class="k" data-group-id="8440531453-13">end</span><span class="p" data-group-id="8440531453-12">)</span><span class="w">
+</span><span class="p" data-group-id="8440531453-15">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="8440531453-15">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="err/1">
+    <div class="detail-header">
+    <a href="#err/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">err(error_or_err_result)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L57" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>err(<a href="#t:error/0">error</a>() | <a href="#t:err/0">err</a>()) :: <a href="#t:err/0">err</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Turns an error into a result that contains that error.</p>
+<p>If the error is already a result, it is returned unchanged.</p>
+<h2 id="err/1-examples" class="section-heading">
+  <a href="#err/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Result</span><span class="o">.</span><span class="n">err</span><span class="p" data-group-id="6774140266-1">(</span><span class="ss">:a</span><span class="p" data-group-id="6774140266-1">)</span><span class="w">
+</span><span class="p" data-group-id="6774140266-2">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="6774140266-2">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Result</span><span class="o">.</span><span class="n">err</span><span class="p" data-group-id="6774140266-3">(</span><span class="nc">Result</span><span class="o">.</span><span class="n">err</span><span class="p" data-group-id="6774140266-4">(</span><span class="ss">:a</span><span class="p" data-group-id="6774140266-4">)</span><span class="p" data-group-id="6774140266-3">)</span><span class="w">
+</span><span class="p" data-group-id="6774140266-5">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="6774140266-5">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="err?/1">
+    <div class="detail-header">
+    <a href="#err?/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">err?(result)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L91" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>err?(<a href="#t:t/0">t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns false if a result has a contained value and true otherwise.</p>
+<h2 id="err?/1-examples" class="section-heading">
+  <a href="#err?/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Enum</span><span class="o">.</span><span class="n">filter</span><span class="p" data-group-id="6097998279-1">(</span><span class="p" data-group-id="6097998279-2">[</span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">error</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="6097998279-2">]</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nc">Result</span><span class="o">.</span><span class="n">err?</span><span class="o">/</span><span class="mi">1</span><span class="p" data-group-id="6097998279-1">)</span><span class="w">
+</span><span class="p" data-group-id="6097998279-3">[</span><span class="ss">error</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="6097998279-3">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="filter_and_unwrap/1">
+    <div class="detail-header">
+    <a href="#filter_and_unwrap/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">filter_and_unwrap(results)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L250" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>filter_and_unwrap([<a href="#t:t/0">t</a>()]) :: [<a href="#t:value/0">value</a>()]</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Unwraps ok-results and rejects error-results.</p>
+<h2 id="filter_and_unwrap/1-examples" class="section-heading">
+  <a href="#filter_and_unwrap/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="0959819496-1">[</span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">error</span><span class="p">:</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="0959819496-1">]</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">filter_and_unwrap</span><span class="p" data-group-id="0959819496-2">(</span><span class="p" data-group-id="0959819496-2">)</span><span class="w">
+</span><span class="p" data-group-id="0959819496-3">[</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="0959819496-3">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="filter_and_unwrap_err/1">
+    <div class="detail-header">
+    <a href="#filter_and_unwrap_err/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">filter_and_unwrap_err(results)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L268" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>filter_and_unwrap_err([<a href="#t:t/0">t</a>()]) :: [<a href="#t:error/0">error</a>()]</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Unwraps error-results and rejects ok-results.</p>
+<h2 id="filter_and_unwrap_err/1-examples" class="section-heading">
+  <a href="#filter_and_unwrap_err/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="3288629145-1">[</span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">error</span><span class="p">:</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="3288629145-1">]</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">filter_and_unwrap_err</span><span class="p" data-group-id="3288629145-2">(</span><span class="p" data-group-id="3288629145-2">)</span><span class="w">
+</span><span class="p" data-group-id="3288629145-3">[</span><span class="ss">:c</span><span class="p" data-group-id="3288629145-3">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="list_to_result/2">
+  
+    <span id="list_to_result/1"></span>
+  <div class="detail-header">
+    <a href="#list_to_result/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_to_result(results, fmt_errors \\ &amp;(&amp;1))</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L292" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>list_to_result([<a href="#t:t/0">t</a>()], <a href="#t:fmt_errors/0">fmt_errors</a>()) :: <a href="#t:ok/1">ok</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">list</a>()) | <a href="#t:err/1">err</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">list</a>())</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Turns a list of results into a result with lists of either values or errors.</p>
+<p>As soon as there is at least one error in the given list, the result is an
+error-type Result.</p>
+<h2 id="list_to_result/2-example" class="section-heading">
+  <a href="#list_to_result/2-example" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Example
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="0476249701-1">[</span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="0476249701-1">]</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">list_to_result</span><span class="p" data-group-id="0476249701-2">(</span><span class="p" data-group-id="0476249701-2">)</span><span class="w">
+</span><span class="p" data-group-id="0476249701-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0476249701-4">[</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="0476249701-4">]</span><span class="p" data-group-id="0476249701-3">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="0476249701-5">[</span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">error</span><span class="p">:</span><span class="w"> </span><span class="ss">:c</span><span class="p">,</span><span class="w"> </span><span class="ss">error</span><span class="p">:</span><span class="w"> </span><span class="ss">:d</span><span class="p" data-group-id="0476249701-5">]</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">list_to_result</span><span class="p" data-group-id="0476249701-6">(</span><span class="p" data-group-id="0476249701-6">)</span><span class="w">
+</span><span class="p" data-group-id="0476249701-7">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0476249701-8">[</span><span class="ss">:c</span><span class="p">,</span><span class="w"> </span><span class="ss">:d</span><span class="p" data-group-id="0476249701-8">]</span><span class="p" data-group-id="0476249701-7">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="map/2">
+    <div class="detail-header">
+    <a href="#map/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">map(result, value_to_value_fn)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L114" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>map(<a href="#t:t/0">t</a>(), (<a href="#t:value/0">value</a>() -> <a href="#t:value/0">value</a>())) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Maps a Result to another Result by applying a function to a contained value, leaving
+non-ok tuples untouched.</p>
+<p>Note that the given function is expected to return a value. See <a href="Result.html#and_then/2"><code class="inline">Result.and_then/2</code></a>
+if you want to pass a function that returns a result.</p>
+<h2 id="map/2-examples" class="section-heading">
+  <a href="#map/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="4492053592-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="4492053592-1">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">map</span><span class="p" data-group-id="4492053592-2">(</span><span class="k" data-group-id="4492053592-3">fn</span><span class="w"> </span><span class="ss">:a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">:b</span><span class="w"> </span><span class="k" data-group-id="4492053592-3">end</span><span class="p" data-group-id="4492053592-2">)</span><span class="w">
+</span><span class="p" data-group-id="4492053592-4">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="4492053592-4">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="4492053592-5">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="4492053592-5">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">map</span><span class="p" data-group-id="4492053592-6">(</span><span class="k" data-group-id="4492053592-7">fn</span><span class="w"> </span><span class="ss">:a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">:b</span><span class="w"> </span><span class="k" data-group-id="4492053592-7">end</span><span class="p" data-group-id="4492053592-6">)</span><span class="w">
+</span><span class="p" data-group-id="4492053592-8">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="4492053592-8">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="map_err/2">
+    <div class="detail-header">
+    <a href="#map_err/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">map_err(result, error_to_error_fn)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L137" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>map_err(<a href="#t:t/0">t</a>(), (<a href="#t:error/0">error</a>() -> <a href="#t:error/0">error</a>())) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Maps a Result to another Result by applying a function to a contained error, leaving
+ok tuples untouched.</p>
+<p>This function can be used to compose the results of two functions, where the map
+function returns an error.</p>
+<h2 id="map_err/2-examples" class="section-heading">
+  <a href="#map_err/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="9543450514-1">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="9543450514-1">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">map_err</span><span class="p" data-group-id="9543450514-2">(</span><span class="k" data-group-id="9543450514-3">fn</span><span class="w"> </span><span class="ss">:a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">:b</span><span class="w"> </span><span class="k" data-group-id="9543450514-3">end</span><span class="p" data-group-id="9543450514-2">)</span><span class="w">
+</span><span class="p" data-group-id="9543450514-4">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="9543450514-4">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="9543450514-5">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="9543450514-5">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">map_err</span><span class="p" data-group-id="9543450514-6">(</span><span class="k" data-group-id="9543450514-7">fn</span><span class="w"> </span><span class="ss">:a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">:b</span><span class="w"> </span><span class="k" data-group-id="9543450514-7">end</span><span class="p" data-group-id="9543450514-6">)</span><span class="w">
+</span><span class="p" data-group-id="9543450514-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="9543450514-8">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="ok/1">
+    <div class="detail-header">
+    <a href="#ok/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">ok(value_or_ok_result)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L36" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>ok(<a href="#t:value/0">value</a>() | <a href="#t:ok/0">ok</a>()) :: <a href="#t:ok/0">ok</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Turns a value into a result that contains that value.</p>
+<p>If the value is already a result, it is returned unchanged.</p>
+<h2 id="ok/1-examples" class="section-heading">
+  <a href="#ok/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Result</span><span class="o">.</span><span class="n">ok</span><span class="p" data-group-id="2830493129-1">(</span><span class="ss">:a</span><span class="p" data-group-id="2830493129-1">)</span><span class="w">
+</span><span class="p" data-group-id="2830493129-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="2830493129-2">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Result</span><span class="o">.</span><span class="n">ok</span><span class="p" data-group-id="2830493129-3">(</span><span class="nc">Result</span><span class="o">.</span><span class="n">ok</span><span class="p" data-group-id="2830493129-4">(</span><span class="ss">:a</span><span class="p" data-group-id="2830493129-4">)</span><span class="p" data-group-id="2830493129-3">)</span><span class="w">
+</span><span class="p" data-group-id="2830493129-5">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="2830493129-5">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="ok?/1">
+    <div class="detail-header">
+    <a href="#ok?/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">ok?(result)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L77" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>ok?(<a href="#t:t/0">t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns true if a result has a contained value and false otherwise.</p>
+<h2 id="ok?/1-examples" class="section-heading">
+  <a href="#ok?/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Enum</span><span class="o">.</span><span class="n">filter</span><span class="p" data-group-id="8665555333-1">(</span><span class="p" data-group-id="8665555333-2">[</span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">error</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="8665555333-2">]</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nc">Result</span><span class="o">.</span><span class="n">ok?</span><span class="o">/</span><span class="mi">1</span><span class="p" data-group-id="8665555333-1">)</span><span class="w">
+</span><span class="p" data-group-id="8665555333-3">[</span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="8665555333-3">]</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Enum</span><span class="o">.</span><span class="n">split_with</span><span class="p" data-group-id="8665555333-4">(</span><span class="p" data-group-id="8665555333-5">[</span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">error</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="8665555333-5">]</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nc">Result</span><span class="o">.</span><span class="n">ok?</span><span class="o">/</span><span class="mi">1</span><span class="p" data-group-id="8665555333-4">)</span><span class="w">
+</span><span class="p" data-group-id="8665555333-6">{</span><span class="p" data-group-id="8665555333-7">[</span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="8665555333-7">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8665555333-8">[</span><span class="ss">error</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="8665555333-8">]</span><span class="p" data-group-id="8665555333-6">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="or_else/2">
+    <div class="detail-header">
+    <a href="#or_else/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">or_else(result, error_to_result_fn)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L187" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>or_else(<a href="#t:t/0">t</a>(), (<a href="#t:error/0">error</a>() -> <a href="#t:t/0">t</a>())) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Maps a Result to another Result by applying a function to a contained value, leaving
+ok tuples untouched.</p>
+<p>Note that the given function is expected to return a result. See <a href="Result.html#map_err/2"><code class="inline">Result.map_err/2</code></a>
+if you want to pass a function that returns a value.</p>
+<h2 id="or_else/2-examples" class="section-heading">
+  <a href="#or_else/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="5940273648-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="5940273648-1">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">or_else</span><span class="p" data-group-id="5940273648-2">(</span><span class="k" data-group-id="5940273648-3">fn</span><span class="w"> </span><span class="ss">:a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p" data-group-id="5940273648-4">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="5940273648-4">}</span><span class="w"> </span><span class="k" data-group-id="5940273648-3">end</span><span class="p" data-group-id="5940273648-2">)</span><span class="w">
+</span><span class="p" data-group-id="5940273648-5">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="5940273648-5">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="5940273648-6">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="5940273648-6">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">or_else</span><span class="p" data-group-id="5940273648-7">(</span><span class="k" data-group-id="5940273648-8">fn</span><span class="w"> </span><span class="ss">:a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p" data-group-id="5940273648-9">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="5940273648-9">}</span><span class="w"> </span><span class="k" data-group-id="5940273648-8">end</span><span class="p" data-group-id="5940273648-7">)</span><span class="w">
+</span><span class="p" data-group-id="5940273648-10">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="5940273648-10">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="5940273648-11">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p" data-group-id="5940273648-11">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">or_else</span><span class="p" data-group-id="5940273648-12">(</span><span class="k" data-group-id="5940273648-13">fn</span><span class="w"> </span><span class="ss">:a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p" data-group-id="5940273648-14">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="5940273648-14">}</span><span class="w"> </span><span class="k" data-group-id="5940273648-13">end</span><span class="p" data-group-id="5940273648-12">)</span><span class="w">
+</span><span class="p" data-group-id="5940273648-15">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="5940273648-15">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="result_to_list/1">
+    <div class="detail-header">
+    <a href="#result_to_list/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">result_to_list(arg)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L316" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>result_to_list(<a href="#t:t/0">t</a>()) :: [<a href="#t:ok/0">ok</a>()] | [<a href="#t:err/0">err</a>()]</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Turns a result that holds a list of values or errors into a list of results.</p>
+<h2 id="result_to_list/1-example" class="section-heading">
+  <a href="#result_to_list/1-example" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Example
+</h2>
+
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="5025123799-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5025123799-2">[</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="5025123799-2">]</span><span class="p" data-group-id="5025123799-1">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">result_to_list</span><span class="p" data-group-id="5025123799-3">(</span><span class="p" data-group-id="5025123799-3">)</span><span class="w">
+</span><span class="p" data-group-id="5025123799-4">[</span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">ok</span><span class="p">:</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="5025123799-4">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="5025123799-5">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5025123799-6">[</span><span class="ss">:c</span><span class="p">,</span><span class="w"> </span><span class="ss">:d</span><span class="p" data-group-id="5025123799-6">]</span><span class="p" data-group-id="5025123799-5">}</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Result</span><span class="o">.</span><span class="n">result_to_list</span><span class="p" data-group-id="5025123799-7">(</span><span class="p" data-group-id="5025123799-7">)</span><span class="w">
+</span><span class="p" data-group-id="5025123799-8">[</span><span class="ss">error</span><span class="p">:</span><span class="w"> </span><span class="ss">:c</span><span class="p">,</span><span class="w"> </span><span class="ss">error</span><span class="p">:</span><span class="w"> </span><span class="ss">:d</span><span class="p" data-group-id="5025123799-8">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="unwrap/2">
+  
+    <span id="unwrap/1"></span>
+  <div class="detail-header">
+    <a href="#unwrap/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unwrap(ok_result, expectation \\ nil)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L202" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>unwrap(<a href="#t:ok/0">ok</a>(), expectation :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil) :: <a href="#t:value/0">value</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the contained value or throw an error.</p>
+  </section>
+</section>
+<section class="detail" id="unwrap_err/1">
+    <div class="detail-header">
+    <a href="#unwrap_err/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unwrap_err(err_result)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L225" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>unwrap_err(<a href="#t:err/0">err</a>()) :: <a href="#t:error/0">error</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the contained error or throw an error.</p>
+  </section>
+</section>
+<section class="detail" id="unwrap_err_or/2">
+    <div class="detail-header">
+    <a href="#unwrap_err_or/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unwrap_err_or(result, default_value)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L236" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>unwrap_err_or(<a href="#t:t/0">t</a>(), default :: <a href="#t:value/0">value</a>() | <a href="#t:error/0">error</a>()) :: <a href="#t:value/0">value</a>() | <a href="#t:error/0">error</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the contained error or a default.</p>
+  </section>
+</section>
+<section class="detail" id="unwrap_or/2">
+    <div class="detail-header">
+    <a href="#unwrap_or/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unwrap_or(result, default_value)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/result.ex#L214" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>unwrap_or(<a href="#t:t/0">t</a>(), default :: <a href="#t:value/0">value</a>()) :: <a href="#t:value/0">value</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the contained value or a default.</p>
+  </section>
+</section>
+          </div>
+        </section>
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.20.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  
+  </body>
+</html>
+
