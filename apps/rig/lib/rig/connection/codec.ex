@@ -8,9 +8,10 @@ defmodule Rig.Connection.Codec do
   @spec serialize(pid) :: binary
   def serialize(pid) do
     conf = config()
+    secret_key = conf.codec_secret_key || conf.codec_default_key
     pid
     |> :erlang.term_to_binary()
-    |> encrypt(conf.codec_secret_key)
+    |> encrypt(secret_key)
     |> Base.url_encode64()
   end
 
@@ -20,9 +21,10 @@ defmodule Rig.Connection.Codec do
   @spec deserialize(binary) :: {:ok, pid} | {:error, :not_base64 | :invalid_term}
   def deserialize(base64_encoded) do
     conf = config()
+    secret_key = conf.codec_secret_key || conf.codec_default_key
     with {:ok, decoded_binary} <- decode64(base64_encoded) do
       decoded_binary
-      |> decrypt(conf.codec_secret_key)
+      |> decrypt(secret_key)
       |> binary_to_term()
     end
   end

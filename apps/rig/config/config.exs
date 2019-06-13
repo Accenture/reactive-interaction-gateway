@@ -59,7 +59,8 @@ config :rig, Rig.EventStream.KafkaToHttp,
   group_id: {:system, "KAFKA_GROUP_ID", "rig"}
 
 config :rig, Rig.Connection.Codec,
-  codec_secret_key: {:system, "NODE_COOKIE", "7tsf4Y6GTOfPY1iDo4PqZA=="}
+  codec_secret_key: {:system, "NODE_COOKIE", nil},
+  codec_default_key: "7tsf4Y6GTOfPY1iDo4PqZA=="
 
 config :porcelain, driver: Porcelain.Driver.Basic
 
