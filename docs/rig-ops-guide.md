@@ -57,7 +57,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `KINESIS_OTP_JAR` | Path to the `OtpErlang.jar` file that contains the `JInterface` implementation. If left empty, RIG picks the file from its Erlang environment (Erlang must be compiled with Java support enabled). | nil
 `KINESIS_STREAM` | The name of the Kinesis stream to consume. | "RIG-outbound"
 `LOG_LEVEL` | Controls logging level for RIG, available values are: "debug", "info", "warn", "error". Production is using "warn" level. | :warn
-`NODE_COOKIE` | Erlang cookie used in distributed mode, so nodes in cluster can communicate between each other. | nil
+`NODE_COOKIE` | Erlang cookie used in distributed mode, so nodes in cluster can communicate between each other.<br />Used also as secret key for integrity-check of correlation IDs (must be Base64 decodable). | nil
 `NODE_HOST` | Erlang hostname for given node, used to build Erlang long-name `rig@NODE_HOST`. This value is used by Erlang's distributed mode, so nodes can see each other. | nil
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Use this variable to pass either a path to a JSON file, or the JSON string itself. A path can be given in absolute or in relative form (e.g., `proxy/your_json_file.json`). If given in relative form, the working directory is one of RIG's `priv` dirs (e.g., `/opt/sites/rig/lib/rig_inbound_gateway-2.0.2/priv/` in a Docker container). | nil
 `PROXY_RECV_TIMEOUT` | Timeout used when receiving a response for a forwarded/proxied request. | 5000

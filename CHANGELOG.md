@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [API Gateway] New custom metric: `rig_proxy_requests_total`. For details see [`metrics-details.md`](docs/metrics-details.md). [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
+- [Rig] Integrity-check for the correlation ID [#208](https://github.com/Accenture/reactive-interaction-gateway/issues/208)
 - _Beta_ - Added Apache Avro support for consumer and producer as well as Kafka Schema Registry.
 - [Docs] Added new set of topics in documentation about Api Gateway, even streams and scaling.
 - [Docs] Added examples section to documentation website.
@@ -40,17 +41,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - When using the proxy, RIG will now add an additional [`Forwarded` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded).
-[#113](https://github.com/Accenture/reactive-interaction-gateway/issues/113)
+  [#113](https://github.com/Accenture/reactive-interaction-gateway/issues/113)
 - Increased length of header value in HTTP requests to 16384 to support long tokens for SAML.
 
 ### Changed
 
 - HTTPS certificates may now be passed using absolute paths. (Previously, the locations of the HTTPS certificates were limited to the OTP-applications' `priv` directories `rig_api/priv/cert` and `rig_inbound_gateway/priv/cert`.) Additionally, for security reasons we no longer include the self-signed certificate with the docker image. Please adapt your environment configuration accordingly.
-[#151](https://github.com/Accenture/reactive-interaction-gateway/issues/151)
-[#182](https://github.com/Accenture/reactive-interaction-gateway/issues/182)
+  [#151](https://github.com/Accenture/reactive-interaction-gateway/issues/151)
+  [#182](https://github.com/Accenture/reactive-interaction-gateway/issues/182)
 - Validation errors for SSE & WS connections and the subscriptions endpoint should now be a lot more helpful. Invalid JWTs, as well as invalid subscriptions, cause the endpoints to respond with an error immediately.
-[#54](https://github.com/Accenture/reactive-interaction-gateway/issues/54)
-[#164](https://github.com/Accenture/reactive-interaction-gateway/issues/164)
+  [#54](https://github.com/Accenture/reactive-interaction-gateway/issues/54)
+  [#164](https://github.com/Accenture/reactive-interaction-gateway/issues/164)
 
 ### Fixed
 
