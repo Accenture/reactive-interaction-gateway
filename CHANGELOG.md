@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The environment variable `KAFKA_GROUP_ID` has been replaced with the following environment variables, where each of them has a distinct default value: `KAFKATOFILTER_KAFKA_GROUP_ID`, `KAFKATOHTTP_KAFKA_GROUP_ID`, `PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID`. [#206](https://github.com/Accenture/reactive-interaction-gateway/issues/206)
 - The default Kafka source topic for the Kafka-to-HTTP event stream has been changed to `rig`. The feature was introduced to forward all incoming events to an (external) HTTP endpoint, so it makes sense to use the default topic for incoming events here too.
+- [Subscriptions] Changed `:refresh_subscriptions` GenServer handler from `call` to `cast` to improve performance. [#224](https://github.com/Accenture/reactive-interaction-gateway/pull/224/files)
 
 ### Fixed
 
