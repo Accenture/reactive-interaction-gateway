@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<!-- ### Added -->
+
+<!-- ### Changed -->
+
+<!-- ### Deprecated -->
+
+<!-- ### Removed -->
+
+<!-- ### Security -->
+
+## [2.2.0] - 2019-06-17
+
 ### Added
 
 - [API Gateway] New custom metric: `rig_proxy_requests_total`. For details see [`metrics-details.md`](docs/metrics-details.md). [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
@@ -67,10 +79,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     "id": "123"
   }
   ```
-
-<!-- ### Removed -->
-
-<!-- ### Security -->
 
 ## [2.1.1] - 2019-03-27
 
