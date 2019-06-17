@@ -58,6 +58,10 @@ config :rig, Rig.EventStream.KafkaToHttp,
   targets: {:system, :list, "FIREHOSE_KAFKA_HTTP_TARGETS", []},
   group_id: {:system, "KAFKATOHTTP_KAFKA_GROUP_ID", "rig-kafka-to-http"}
 
+config :rig, Rig.Connection.Codec,
+  codec_secret_key: {:system, "NODE_COOKIE", nil},
+  codec_default_key: "7tsf4Y6GTOfPY1iDo4PqZA=="
+
 config :porcelain, driver: Porcelain.Driver.Basic
 
 import_config "#{Mix.env()}.exs"
