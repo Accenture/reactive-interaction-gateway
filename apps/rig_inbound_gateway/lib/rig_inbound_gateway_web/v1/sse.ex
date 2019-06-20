@@ -1,9 +1,6 @@
 defmodule RigInboundGatewayWeb.V1.SSE do
   @moduledoc """
-  Cowboy WebSocket handler.
-
-  As soon as Phoenix pulls in Cowboy 2 this will have to be rewritten using the
-  :cowboy_websocket behaviour.
+  Server-Sent Events (SSE) handler.
   """
   @behaviour :cowboy_loop
 

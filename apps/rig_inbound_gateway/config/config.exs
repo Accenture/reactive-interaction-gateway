@@ -94,13 +94,14 @@ config :rig, RigInboundGateway.ApiProxy.Router,
 config :rig, RigInboundGateway.ApiProxy.Handler.Http,
   cors: {:system, "CORS", "*"},
   kafka_response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000},
-  kinesis_response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000}
+  kinesis_response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000},
+  http_async_response_timeout: {:system, :integer, "PROXY_HTTP_ASYNC_RESPONSE_TIMEOUT", 5_000}
 
 config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
   serializer: {:system, "KAFKA_SERIALIZER", nil},
-  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", "localhost:8081"},
+  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", nil},
   # The list of topics to consume messages from:
   consumer_topics: {:system, :list, "PROXY_KAFKA_RESPONSE_TOPICS", ["rig-proxy-response"]},
   # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored; otherwise, they're required.
@@ -117,7 +118,7 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   request_schema: {:system, "PROXY_KAFKA_REQUEST_AVRO", ""},
   cors: {:system, "CORS", "*"},
   response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000},
-  group_id: {:system, "KAFKA_GROUP_ID", "rig"}
+  group_id: {:system, "PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID", "rig-proxy-response"}
 
 config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
   kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},

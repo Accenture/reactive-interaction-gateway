@@ -42,4 +42,17 @@ defmodule RigKafka.SerializerTest do
              field2: %{"field22" => %{"field222" => "value2"}}
            }
   end
+
+  test "decode_body! should raise an error when schema registry is not set" do
+    assert_raise RuntimeError,
+                 "cannot decode avro message: schema registry host not set",
+                 fn ->
+                   Serializer.decode_body!(
+                     <<0, 0, 0, 0, 1, 38, 115, 105, 109, 112, 108, 101, 32, 116, 101, 115, 116,
+                       32, 109, 101, 115, 115, 97, 103, 101>>,
+                     "avro",
+                     nil
+                   )
+                 end
+  end
 end

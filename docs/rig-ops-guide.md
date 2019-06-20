@@ -24,7 +24,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `DNS_NAME` | Address where RIG will do DNS discovery for Node host addresses. | "localhost"
 `EXTRACTORS` | Extractor configuration, given either as path to a JSON file, or directly as JSON. The extractor configuration contains information about events' fields per event type, used to _extract_ information. For example, the following setting allows clients to specify a constraint on the `name` field of `greeting` events: `EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/name"}}}}'`. Note that `stable_field_index` and `event/json_pointer` are required for all configured fields. | nil
 `FIREHOSE_KAFKA_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KAFKA_SOURCE_TOPICS | []
-`FIREHOSE_KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will use as a firehose consumer, delimited by comma. Events will be sent to `FIREHOSE_KAFKA_HTTP_TARGETS | ["rig-firehose"]
+`FIREHOSE_KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will use as a firehose consumer, delimited by comma. Events will be sent to `FIREHOSE_KAFKA_HTTP_TARGETS | ["rig"]
 `FIREHOSE_KINESIS_APP_NAME` | Name for Firehose Kinesis consumer group -- DynamoDB table | "Reactive-Interaction-Gateway-Firehose"
 `FIREHOSE_KINESIS_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KINESIS_STREAM | ["http://localhost:4040/todo"]
 `FIREHOSE_KINESIS_STREAM` | Kinesis stream RIG will use as a firehose consumer. Events will be sent to `FIREHOSE_KINESIS_HTTP_TARGETS | "RIG-firehose"
@@ -34,13 +34,14 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `JWT_ALG` | Algorithm used to sign and verify JSON web tokens. | "HS256"
 `JWT_SESSION_FIELD` | The JWT field that defines a "session", which is used for listing and killing/blacklisting sessions. What a session is depends on your application. For example, one might set `JWT_SESSION_FIELD` to the users' ID field, which would group all connections that belong to the same user to a single session - this way, blacklisting a session would mean killing all connections of a single user. The `JWT_SESSION_FIELD` is specified using the [JSON Pointer](https://tools.ietf.org/html/rfc6901) notation. Given that the JWT contains a user ID in its "userId" field, the configuration could look like this: `JWT_SESSION_FIELD=/userId`. | nil
 `KAFKA_BROKERS` | List of Kafka brokers RIG should connect to, delimited by comma (e.g., `localhost:9092,localhost:9093`). Usually it's enough to specify one broker and RIG will auto-discover rest of the Kafka cluster. | []
-`KAFKA_GROUP_ID` | Kafka group ID that will be used for all consumers. Ensures nodes will correctly distribute partitions. | "rig"
 `KAFKA_LOG_SCHEMA` | Avro schema name for events published by logger | ""
 `KAFKA_LOG_TOPIC` | Kafka topic for producer used to log HTTP requests going through RIG's API Proxy. | "rig-request-log"
 `KAFKA_RESTART_DELAY_MS` | If the connection to Kafka fails or cannot be established, RIG retries setting up the connection after `KAFKA_RESTART_DELAY_MS` milliseconds. | nil
-`KAFKA_SCHEMA_REGISTRY_HOST` | Host for Kafka Schema Registry. | "localhost:8081"
+`KAFKA_SCHEMA_REGISTRY_HOST` | Host for Kafka Schema Registry. | nil
 `KAFKA_SERIALIZER` | Serializer for Kafka events, currently supports Avro. By default uses JSON serialization. | nil
 `KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will consume, delimited by comma. | ["rig"]
+`KAFKATOFILTER_KAFKA_GROUP_ID` | Kafka group ID used for forwarding events according to subscriptions over SSE and WS connections. The default should be fine. | "rig-kafka-to-filter"
+`KAFKATOHTTP_KAFKA_GROUP_ID` | Kafka group ID used for forwarding _all_ events over a HTTP connection. The default should be fine. | "rig-kafka-to-http"
 `KAFKA_SASL` | If set, SASL is used to authenticate RIG against the Kafka brokers. Use the following format for SASL/Plain authentication: "plain:myusername:mypassword". Note that setting `KAFKA_SASL` does *not* enable SSL (see `KAFKA_SSL_ENABLED` and related settings). | nil
 `KAFKA_SSL_ENABLED` | Enables encrypted communication to Kafka brokers. | false
 `KAFKA_SSL_CA_CERTFILE` | Path to the CA certificate (PEM format) that was used to sign the server and client certificates. Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "ca.crt.pem"
@@ -57,11 +58,13 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `KINESIS_OTP_JAR` | Path to the `OtpErlang.jar` file that contains the `JInterface` implementation. If left empty, RIG picks the file from its Erlang environment (Erlang must be compiled with Java support enabled). | nil
 `KINESIS_STREAM` | The name of the Kinesis stream to consume. | "RIG-outbound"
 `LOG_LEVEL` | Controls logging level for RIG, available values are: "debug", "info", "warn", "error". Production is using "warn" level. | :warn
-`NODE_COOKIE` | Erlang cookie used in distributed mode, so nodes in cluster can communicate between each other. | nil
+`NODE_COOKIE` | Erlang cookie used in distributed mode, so nodes in cluster can communicate between each other.<br />Used also as secret key for integrity-check of correlation IDs. | nil
 `NODE_HOST` | Erlang hostname for given node, used to build Erlang long-name `rig@NODE_HOST`. This value is used by Erlang's distributed mode, so nodes can see each other. | nil
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Use this variable to pass either a path to a JSON file, or the JSON string itself. A path can be given in absolute or in relative form (e.g., `proxy/your_json_file.json`). If given in relative form, the working directory is one of RIG's `priv` dirs (e.g., `/opt/sites/rig/lib/rig_inbound_gateway-2.0.2/priv/` in a Docker container). | nil
+`PROXY_HTTP_ASYNC_RESPONSE_TIMEOUT` | In case an endpoint has `target` set to `http` and `response_from` set to `http_async`, this is the maximum delay between an HTTP request and the corresponding async HTTP response message. | 5000
 `PROXY_RECV_TIMEOUT` | Timeout used when receiving a response for a forwarded/proxied request. | 5000
 `PROXY_KAFKA_RESPONSE_TOPICS` | Kafka topic for acknowledging Kafka sync events from proxy by correlation ID | ["rig-proxy-response"]
+`PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID` | Kafka group ID used for forwarding asynchronous HTTP responses to waiting HTTP clients. The default should be fine. | "rig-proxy-response"
 `PROXY_KAFKA_REQUEST_AVRO` | Avro schema name for events published from proxy. | ""
 `PROXY_KAFKA_REQUEST_TOPIC` | Kafka topic for publishing sync/async events from proxy. | ""
 `PROXY_KAFKA_RESPONSE_TIMEOUT` | In case an endpoint has `target` set to `http` and `response_from` set to `kafka`, this is the maximum delay between an HTTP request and the corresponding Kafka response message. | 5000

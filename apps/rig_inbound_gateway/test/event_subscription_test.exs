@@ -325,8 +325,8 @@ defmodule RigInboundGateway.EventSubscriptionTest do
             |> update_subscriptions([], invalid_jwt)
           end
 
-        assert error.code == 400
         assert error.body =~ ~r/invalid authorization header/
+        assert error.code == 400
 
         # The request has failed, so there should be no subscriptions_set event:
         :ok = client.refute_receive(ref)

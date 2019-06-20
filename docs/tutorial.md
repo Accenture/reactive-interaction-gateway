@@ -70,7 +70,11 @@ RIG expects to receive [CloudEvents](https://github.com/cloudevents/spec), so th
 Let's send a simple `chatroom_message` event:
 
 ```bash
-$ http post :4000/_rig/v1/events specversion=0.2 type=chatroom_message id=first-event source=tutorial
+$ http post :4000/_rig/v1/events \
+  specversion=0.2 \
+  type=chatroom_message \
+  id=first-event \
+  source=tutorial
 HTTP/1.1 202 Accepted
 content-type: application/json; charset=utf-8
 ...

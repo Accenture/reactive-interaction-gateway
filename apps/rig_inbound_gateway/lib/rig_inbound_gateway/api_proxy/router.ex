@@ -10,6 +10,9 @@ defmodule RigInboundGateway.ApiProxy.Router do
   use Plug.Router
   require Logger
 
+  alias Plug.Conn
+
+  alias RIG.Plug.BodyReader
   alias RigInboundGateway.ApiProxy.Api
   alias RigInboundGateway.ApiProxy.Auth
   alias RigInboundGateway.ApiProxy.Handler.Http, as: HttpHandler
@@ -79,7 +82,11 @@ defmodule RigInboundGateway.ApiProxy.Router do
         )
       end)
 
-      handler.handle_http_request(conn, api, endpoint, request_path)
+      {:ok, body, conn} = BodyReader.read_full_body(conn)
+
+      conn
+      |> Conn.assign(:body, body)
+      |> handler.handle_http_request(api, endpoint, request_path)
     else
       {:error, :authentication_failed} -> send_resp(conn, :unauthorized, "Authentication failed.")
     end
