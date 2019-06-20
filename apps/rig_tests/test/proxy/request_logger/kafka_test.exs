@@ -20,7 +20,6 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
   alias FakeServer.Response
   alias Rig.KafkaConfig, as: RigKafkaConfig
   alias RigKafka
-  alias RigTests.AvroConfig
 
   @api_port Confex.fetch_env!(:rig_api, RigApi.Endpoint)[:http][:port]
   @proxy_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][:port]
@@ -30,7 +29,6 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
 
   setup do
     System.put_env("REQUEST_LOG", "kafka")
-    # AvroConfig.set("avro")
     kafka_config = kafka_config()
 
     test_pid = self()
@@ -107,8 +105,6 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
 
     System.delete_env("REQUEST_LOG")
 
-    # assert get_in(received_msg_map, ["data", "api_definition", "id"]) == api_id
-
     # Endpoint
     assert get_in(received_msg_map, ["data", "endpoint", "id"]) == endpoint_id
     assert get_in(received_msg_map, ["data", "endpoint", "method"]) == "POST"
@@ -121,77 +117,71 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
     assert get_in(received_msg_map, ["data", "request_path"]) == endpoint_path
   end
 
-  # TODO: find out how to make it work with Avro config
-  # @tag :kafka
-  # test_with_server "Given request logger is set to Kafka and Avro enabled, the http request
-  # should publish message to Kafka topic",
-  #                  @env do
-  #   test_name = "proxy-logger-kafka-avro"
+  @tag :avro
+  test_with_server "Given request logger is set to Kafka and Avro enabled, the http request
+  should publish message to Kafka topic",
+                   @env do
+    test_name = "proxy-logger-kafka-avro"
 
-  #   api_id = "mock-#{test_name}-api"
-  #   endpoint_id = "mock-#{test_name}-endpoint"
-  #   endpoint_path = "/#{endpoint_id}"
+    api_id = "mock-#{test_name}-api"
+    endpoint_id = "mock-#{test_name}-endpoint"
+    endpoint_path = "/#{endpoint_id}"
 
-  #   # We register the endpoint with the proxy:
-  #   rig_api_url = "http://localhost:#{@api_port}/v1/apis"
-  #   rig_proxy_url = "http://localhost:#{@proxy_port}"
+    # We register the endpoint with the proxy:
+    rig_api_url = "http://localhost:#{@api_port}/v1/apis"
+    rig_proxy_url = "http://localhost:#{@proxy_port}"
 
-  #   route(endpoint_path, Response.ok!(~s<{"status":"ok"}>))
+    route(endpoint_path, Response.ok!(~s<{"status":"ok"}>))
 
-  #   body =
-  #     Jason.encode!(%{
-  #       id: api_id,
-  #       name: "Mock API",
-  #       version_data: %{
-  #         default: %{
-  #           endpoints: [
-  #             %{
-  #               id: endpoint_id,
-  #               method: "POST",
-  #               path: endpoint_path
-  #             }
-  #           ]
-  #         }
-  #       },
-  #       proxy: %{
-  #         target_url: "localhost",
-  #         port: 55_001
-  #       }
-  #     })
+    body =
+      Jason.encode!(%{
+        id: api_id,
+        name: "Mock API",
+        version_data: %{
+          default: %{
+            endpoints: [
+              %{
+                id: endpoint_id,
+                method: "POST",
+                path: endpoint_path
+              }
+            ]
+          }
+        },
+        proxy: %{
+          target_url: "localhost",
+          port: 55_001
+        }
+      })
 
-  #   headers = [{"content-type", "application/json"}]
-  #   HTTPoison.post!(rig_api_url, body, headers)
+    headers = [{"content-type", "application/json"}]
+    HTTPoison.post!(rig_api_url, body, headers)
 
-  #   # The client calls the proxy endpoint:
-  #   request_url = rig_proxy_url <> endpoint_path
+    # The client calls the proxy endpoint:
+    request_url = rig_proxy_url <> endpoint_path
 
-  #   :timer.sleep(5_000)
+    :timer.sleep(5_000)
 
-  #   %HTTPoison.Response{status_code: res_status, body: res_body} =
-  #     HTTPoison.post!(request_url, "", headers)
+    %HTTPoison.Response{status_code: res_status, body: res_body} =
+      HTTPoison.post!(request_url, "", headers)
 
-  #   assert res_status == 200
-  #   assert res_body == "{\"status\":\"ok\"}"
+    assert res_status == 200
+    assert res_body == "{\"status\":\"ok\"}"
 
-  #   assert_receive received_msg, 10_000
-  #   received_msg_map = Jason.decode!(received_msg)
+    assert_receive received_msg, 10_000
+    received_msg_map = Jason.decode!(received_msg)
 
-  #   System.delete_env("REQUEST_LOG")
-  #   # System.delete_env("KAFKA_SERIALIZER")
+    System.delete_env("REQUEST_LOG")
 
-  #   # assert get_in(received_msg_map, ["data", "api_definition", "id"]) == api_id
+    # Endpoint
+    assert get_in(received_msg_map, ["data", "endpoint", "id"]) == endpoint_id
+    assert get_in(received_msg_map, ["data", "endpoint", "method"]) == "POST"
+    assert get_in(received_msg_map, ["data", "endpoint", "path"]) == endpoint_path
 
-  #   # # Endpoint
-  #   # assert get_in(received_msg_map, ["data", "endpoint", "id"]) == endpoint_id
-  #   # assert get_in(received_msg_map, ["data", "endpoint", "method"]) == "POST"
-  #   # assert get_in(received_msg_map, ["data", "endpoint", "path"]) == endpoint_path
+    # IP
+    assert get_in(received_msg_map, ["data", "remote_ip"]) == "127.0.0.1"
 
-  #   # # IP
-  #   # assert get_in(received_msg_map, ["data", "remote_ip"]) == "127.0.0.1"
-
-  #   # # Path
-  #   # assert get_in(received_msg_map, ["data", "request_path"]) == endpoint_path
-
-  #   AvroConfig.restore()
-  # end
+    # Path
+    assert get_in(received_msg_map, ["data", "request_path"]) == endpoint_path
+  end
 end

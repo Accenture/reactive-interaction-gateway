@@ -20,12 +20,10 @@ defmodule RigTests.Avro.AvroTest do
 
   alias Rig.KafkaConfig, as: RigKafkaConfig
   alias RigKafka
-  alias RigTests.AvroConfig
 
   defp kafka_config, do: RigKafkaConfig.parse(config())
 
   setup do
-    AvroConfig.set("avro")
     kafka_config = kafka_config()
 
     test_pid = self()
@@ -45,7 +43,7 @@ defmodule RigTests.Avro.AvroTest do
     :ok
   end
 
-  @tag :kafka
+  @tag :avro
   test "Given avro is enabled, the producer should be able to encode message with required cloud events(0.1) fields and consumer decode message" do
     event =
       Jason.encode!(%{
@@ -59,16 +57,15 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
+    :timer.sleep(1000)
     assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
 
     assert received_msg == event
-
-    AvroConfig.restore()
   end
 
-  @tag :kafka
+  @tag :avro
   test "Given avro is enabled, the producer should be able to encode message with optional cloud events(0.1) fields and consumer decode message" do
     event =
       Jason.encode!(%{
@@ -85,16 +82,15 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
+    :timer.sleep(1000)
     assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
 
     assert received_msg == event
-
-    AvroConfig.restore()
   end
 
-  @tag :kafka
+  @tag :avro
   test "Given avro is enabled, the producer should be able to encode message with required cloud events(0.2) fields and consumer decode message" do
     event =
       Jason.encode!(%{
@@ -108,16 +104,15 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
+    :timer.sleep(1000)
     assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
 
     assert received_msg == event
-
-    AvroConfig.restore()
   end
 
-  @tag :kafka
+  @tag :avro
   test "Given avro is enabled, the producer should be able to encode message with optional cloud events(0.2) fields and consumer decode message" do
     event =
       Jason.encode!(%{
@@ -134,16 +129,15 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
+    :timer.sleep(1000)
     assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
 
     assert received_msg == event
-
-    AvroConfig.restore()
   end
 
-  @tag :kafka
+  @tag :avro
   test "Given avro is enabled, the producer should be able to encode message without any cloud events fields and consumer decode message" do
     event =
       Jason.encode!(%{
@@ -153,12 +147,11 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
+    :timer.sleep(1000)
     assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
 
     assert received_msg == event
-
-    AvroConfig.restore()
   end
 end

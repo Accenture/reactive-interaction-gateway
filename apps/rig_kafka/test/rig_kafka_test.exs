@@ -64,7 +64,7 @@ defmodule RigKafkaTest do
 
     {:ok, pid} = RigKafka.start(config, callback)
 
-    :timer.sleep(5000)
+    :timer.sleep(1000)
     RigKafka.produce(config, topic, "", "test", expected_msg)
 
     assert_receive received_msg, 10_000

@@ -27,7 +27,7 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
   @impl RequestLogger
   def log_call(
         endpoint,
-        api_definition,
+        _api_definition,
         conn
       ) do
     %{
@@ -50,7 +50,6 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
         specversion: "0.2",
         data: %{
           endpoint: endpoint,
-          # api_definition: api_definition, # TODO problem with Avro schema
           request_path: conn.request_path,
           remote_ip: conn.remote_ip |> format_ip
         }
@@ -71,7 +70,6 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
   @impl GenServer
   def handle_call({:produce, key, plaintext}, _from, %{kafka_config: kafka_config} = state) do
     %{log_topic: topic, log_schema: schema} = config()
-    IO.puts("request_logger=#{inspect(config)}")
     res = RigKafka.produce(kafka_config, topic, schema, key, plaintext)
     {:reply, res, state}
   end

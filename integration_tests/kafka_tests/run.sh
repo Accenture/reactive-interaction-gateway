@@ -1,9 +1,9 @@
-#!/bin/bash -e
+#!/bin/bash
 
 function section_header() {
   printf "\n"
   printf "╓─────[ $@ ]─────╖"
-  printf "\n"
+  printf "\n\n"
 }
 
 function is_kafka_ready() {
@@ -23,6 +23,7 @@ function is_kafka_ready() {
         section_header "Creating Kafka registry schemas"
         curl -d '{"schema":"{\"name\":\"basicAvro\",\"type\":\"record\",\"fields\":[{\"name\":\"foo\",\"type\":\"string\"}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rig-avro-value/versions
         curl -d '{"schema":"{\"name\":\"loggerAvro\",\"type\":\"record\",\"fields\":[{\"name\":\"request_path\",\"type\":\"string\"},{\"name\":\"remote_ip\",\"type\":\"string\"},{\"name\":\"endpoint\",\"type\":{\"name\":\"endpoint\",\"type\":\"record\",\"fields\":[{\"name\":\"path\",\"type\":\"string\"},{\"name\":\"method\",\"type\":\"string\"},{\"name\":\"id\",\"type\":\"string\"}]}}]}}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rig-request-logger-value/versions
+        printf "\n"
         return 0
     fi
 }
@@ -44,9 +45,16 @@ export KAFKA_SSL_ENABLED=0
 export KAFKA_SSL_KEYFILE_PASS=abcdefgh
 export LOG_LEVEL=warn
 export PROXY_KAFKA_REQUEST_TOPIC=rig-test
-export KAFKA_SOURCE_TOPICS=rig-test,rig-avro
-export KAFKA_LOG_SCHEMA=rig-request-log-value
+export KAFKA_SOURCE_TOPICS=rig-test
 
 cd "${RIG_DIR}"
-section_header "Running integration test suite"
+section_header "Running integration test suite for Kafka"
 mix test --only kafka "$@"
+
+export KAFKA_SOURCE_TOPICS=rig-avro
+export KAFKA_SERIALIZER=avro
+export KAFKA_SCHEMA_REGISTRY_HOST=localhost:8081
+export KAFKA_LOG_SCHEMA=rig-request-logger-value
+
+section_header "Running integration test suite for Kafka & Avro"
+mix test --only avro "$@"
