@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.20.0">
+    <meta name="project" content="Reactive Interaction Gateway v2.2.1">
+    <title>Rig.Connection.Codec — Reactive Interaction Gateway v2.2.1</title>
+    <link rel="stylesheet" href="dist/html-11fdd9cd6b7c7c3981df.css" />
+    <script src="dist/sidebar_items-45ca390d69.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/html-11fdd9cd6b7c7c3981df.js"></script>
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+    <div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://accenture.github.io/reactive-interaction-gateway" class="sidebar-projectName">
+Reactive Interaction Gateway      </a>
+      <h2 class="sidebar-projectVersion">
+        v2.2.1
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+      <li><a id="exceptions-list" href="#full-list">Exceptions</a></li>
+
+      <li><a id="tasks-list" href="#full-list">Mix Tasks</a></li>
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="app-vsn">Reactive Interaction Gateway v2.2.1</small>
+Rig.Connection.Codec        
+          <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/rig/connection/codec.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Encode and decode a connection token, e.g., for correlation.</p>
+        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#config/0">config()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns module configuration.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#decrypt/2">decrypt(ciphertext, key)</a>
+  </div>
+    <div class="summary-synopsis"><p>Decrypts ciphertext using key.
+Ciphertext is init. vector, ciphertag (MAC) and the actual ciphertext concatenated.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#deserialize/1">deserialize(base64_encoded)</a>
+  </div>
+    <div class="summary-synopsis"><p>Convert a serialized string back into a pid.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#deserialize!/1">deserialize!(bin)</a>
+  </div>
+    <div class="summary-synopsis"><p>Convert a serialized string back into a pid.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#encrypt/2">encrypt(val, key)</a>
+  </div>
+    <div class="summary-synopsis"><p>Encrypts value using key and returns init. vector, ciphertag (MAC) and ciphertext concatenated.
+Additional authenticated data (AAD) adds parameters like protocol version num. to MAC</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#hash/1">hash(key)</a>
+  </div>
+    <div class="summary-synopsis"><p>The function processes any string or number and returns exactly 16 byte binary.
+The hash produced by this function can be used as key by both encrypt and decrypt functions.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#serialize/1">serialize(pid)</a>
+  </div>
+    <div class="summary-synopsis"><p>Turn a pid into an url-encoded string.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="config/0">
+    <div class="detail-header">
+    <a href="#config/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">config()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/rig/connection/codec.ex#L5" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>config() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns module configuration.</p>
+<p>If application environment contains values in <a href="https://hexdocs.pm/elixir/Keyword.html"><code class="inline">Keyword</code></a> or <a href="https://hexdocs.pm/elixir/Map.html"><code class="inline">Map</code></a> struct,
+defaults from macro usage will be recursively merged with application configuration.</p>
+<p>If one of the configuration parameters does not exist or can not be resolved, raises <a href="https://hexdocs.pm/elixir/ArgumentError.html"><code class="inline">ArgumentError</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="decrypt/2">
+    <div class="detail-header">
+    <a href="#decrypt/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">decrypt(ciphertext, key)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/rig/connection/codec.ex#L74" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>decrypt(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Decrypts ciphertext using key.
+Ciphertext is init. vector, ciphertag (MAC) and the actual ciphertext concatenated.</p>
+  </section>
+</section>
+<section class="detail" id="deserialize/1">
+    <div class="detail-header">
+    <a href="#deserialize/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">deserialize(base64_encoded)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/rig/connection/codec.ex#L22" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>deserialize(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>()) :: {:ok, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>()} | {:error, :not_base64 | :invalid_term}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Convert a serialized string back into a pid.</p>
+  </section>
+</section>
+<section class="detail" id="deserialize!/1">
+    <div class="detail-header">
+    <a href="#deserialize!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">deserialize!(bin)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/rig/connection/codec.ex#L36" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>deserialize!(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Convert a serialized string back into a pid.</p>
+  </section>
+</section>
+<section class="detail" id="encrypt/2">
+    <div class="detail-header">
+    <a href="#encrypt/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">encrypt(val, key)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/rig/connection/codec.ex#L58" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>encrypt(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Encrypts value using key and returns init. vector, ciphertag (MAC) and ciphertext concatenated.
+Additional authenticated data (AAD) adds parameters like protocol version num. to MAC</p>
+  </section>
+</section>
+<section class="detail" id="hash/1">
+    <div class="detail-header">
+    <a href="#hash/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">hash(key)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/rig/connection/codec.ex#L48" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>hash(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>The function processes any string or number and returns exactly 16 byte binary.
+The hash produced by this function can be used as key by both encrypt and decrypt functions.</p>
+  </section>
+</section>
+<section class="detail" id="serialize/1">
+    <div class="detail-header">
+    <a href="#serialize/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">serialize(pid)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/apps/rig/lib/rig/connection/codec.ex#L9" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+        
+      <div class="specs">
+          <pre>serialize(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Turn a pid into an url-encoded string.</p>
+  </section>
+</section>
+          </div>
+        </section>
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.20.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  
+  </body>
+</html>
+
