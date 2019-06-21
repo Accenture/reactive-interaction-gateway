@@ -9,15 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Added -->
 
-### Changed
-
-- [Config] Increased maximum number of Erlang ports from 4096 to 65536 to allow more HTTP connections.
+<!-- ### Changed -->
 
 <!-- ### Deprecated -->
 
 <!-- ### Removed -->
 
 <!-- ### Security -->
+
+## [2.2.1] - 2019-06-21
+
+### Changed
+
+- [Config] Increased maximum number of Erlang ports from 4096 to 65536 to allow more HTTP connections.
 
 ## [2.2.0] - 2019-06-17
 
@@ -263,7 +267,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [Config] Disable Origin checking. [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
-[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.0...HEAD
+[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.1...HEAD
+[2.2.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.0...2.2.1
 [2.2.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.1...2.2.0
 [2.1.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.0.2...2.1.0
