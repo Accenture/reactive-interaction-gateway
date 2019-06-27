@@ -1,4 +1,4 @@
-describe('Subscriptions', () => {
+describe('Subscriptions with JWT auth', () => {
   ['sse', 'ws'].forEach(type => {
     it(`${type} Does subscription check when creating subscriptions`, () => {
       cy.visit(`/${type}-demo-jwt.html`);

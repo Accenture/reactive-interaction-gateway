@@ -1,4 +1,4 @@
-describe('Subscriptions', () => {
+describe('Subscriptions with no auth', () => {
   ['sse', 'ws'].forEach(type => {
     it(`${type} Creates connection and subscriptions`, () => {
       cy.visit(`/${type}-demo.html`);
