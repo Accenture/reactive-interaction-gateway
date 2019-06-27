@@ -52,7 +52,7 @@
         body: JSON.stringify({
           cloudEventsVersion: "0.1",
           eventID: randomString(),
-          eventType: "greeting",
+          eventType: "greeting.jwt",
           eventTime: new Date().toISOString(),
           source: "sse-demo-ui",
           contentType: "text/plain",
@@ -73,7 +73,7 @@
     }
 
     function createSubscription(connectionToken) {
-      const eventType = "greeting"
+      const eventType = "greeting.jwt"
       /**
        * JWT PAYLOAD DATA
        * {
@@ -124,7 +124,7 @@
         payload = cloudEvent.data
         connectionToken = payload["connection_token"]
         createSubscription(connectionToken)
-      } else if (cloudEvent.eventType === 'greeting') {
+      } else if (cloudEvent.eventType === 'greeting.jwt') {
         addEvent(cloudEvent)
       }
     }

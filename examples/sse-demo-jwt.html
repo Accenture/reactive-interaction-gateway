@@ -43,12 +43,12 @@
         method: "POST",
         mode: "cors",
         headers: {
-          "Content-Type": "application/json; charset=utf-8"
+          "Content-Type": "application/cloudevents+json; charset=utf-8"
         },
         body: JSON.stringify({
           cloudEventsVersion: "0.1",
           eventID: randomString(),
-          eventType: "greeting",
+          eventType: "greeting.simple",
           eventTime: new Date().toISOString(),
           source: "sse-demo-ui",
           contentType: "text/plain",
@@ -66,7 +66,7 @@
     }
 
     function createSubscription(connectionToken) {
-      const eventType = "greeting"
+      const eventType = "greeting.simple"
       /**
        * JWT PAYLOAD DATA
        * {
@@ -108,7 +108,7 @@
       createSubscription(connectionToken)
     }, false);
 
-    source.addEventListener("greeting", function (e) {
+    source.addEventListener("greeting.simple", function (e) {
       cloudEvent = JSON.parse(e.data)
       addEvent(cloudEvent)
     })

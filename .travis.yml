@@ -1,5 +1,6 @@
 stages:
-  - test
+  - unittest
+  - exampletest
   - name: dockerbuild
     if: branch = master
   - name: website
@@ -9,7 +10,7 @@ stages:
 
 jobs:
   include:
-    - stage: test
+    - stage: unittest
       language: elixir
       elixir: "1.7"
       otp_release: "21.0"
@@ -18,6 +19,40 @@ jobs:
       script:
         - mix test
         - mix credo --ignore-checks Design
+    - stage: exampletest
+      language: node_js
+      node_js:
+        - "10"
+      addons:
+        apt:
+          packages:
+            - libgconf-2-4
+      cache:
+        npm: true
+        directories:
+          - ~/.cache
+      # install:
+      #   - npm ci
+      script:
+        # - $(npm bin)/cypress run --record
+        - docker build -t rig .
+        - cd examples/tests
+        - npm ci
+        - |
+          docker run -d --name rig \
+          -e EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/data/name"}}},"greeting.jwt":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}},"nope":{"fullname":{"stable_field_index":1,"jwt":{"json_pointer":"/fullname"},"event":{"json_pointer":"/data/fullname"}}},"example":{"email":{"stable_field_index":1,"event":{"json_pointer":"/data/email"}}}}' \
+          -e JWT_SECRET_KEY=secret \
+          -p 4000:4000 \
+          rig
+        - npm run cypress:run:noauth
+        - |
+          docker run -d --name rig \
+          -e SUBSCRIPTION_CHECK=jwt_validation \
+          -e EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/data/name"}}},"greeting.jwt":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}},"nope":{"fullname":{"stable_field_index":1,"jwt":{"json_pointer":"/fullname"},"event":{"json_pointer":"/data/fullname"}}},"example":{"email":{"stable_field_index":1,"event":{"json_pointer":"/data/email"}}}}' \
+          -e JWT_SECRET_KEY=secret \
+          -p 4000:4000 \
+          rig
+        - npm run cypress:run:jwt
     - stage: dockerbuild
       language: minimal
       services:

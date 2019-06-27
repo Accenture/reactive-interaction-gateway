@@ -37,3 +37,7 @@ erl_crash.dump
 
 # mix docs
 /website/static/source_docs
+
+/examples/tests/node_modules
+/examples/tests/cypress/videos
+
