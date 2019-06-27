@@ -31,10 +31,7 @@ jobs:
         npm: true
         directories:
           - ~/.cache
-      # install:
-      #   - npm ci
       script:
-        # - $(npm bin)/cypress run --record
         - docker build -t rig .
         - cd examples/tests
         - npm ci
@@ -45,6 +42,7 @@ jobs:
           -p 4000:4000 \
           rig
         - npm run cypress:run:noauth
+        - docker rm -f rig
         - |
           docker run -d --name rig \
           -e SUBSCRIPTION_CHECK=jwt_validation \
