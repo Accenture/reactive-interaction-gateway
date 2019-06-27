@@ -51,8 +51,6 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
   @tag :kafka
   test_with_server "Given request logger is set to Kafka, the http request should publish message to Kafka topic",
                    @env do
-    System.put_env("REQUEST_LOG", "kafka")
-
     test_name = "proxy-logger-kafka"
 
     api_id = "mock-#{test_name}-api"

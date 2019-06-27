@@ -72,10 +72,10 @@ defmodule RigInboundGateway.ApiProxy.Router do
 
       %{active_loggers: active_loggers, logger_modules: logger_modules} = config()
 
-      Enum.each(active_loggers, fn l ->
-        ll = Map.get(logger_modules, l)
+      Enum.each(active_loggers, fn active_logger ->
+        logger_module = Map.get(logger_modules, active_logger)
 
-        ll.log_call(
+        logger_module.log_call(
           endpoint,
           api,
           conn

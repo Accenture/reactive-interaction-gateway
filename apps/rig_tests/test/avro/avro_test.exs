@@ -57,7 +57,7 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
-    :timer.sleep(1000)
+    :timer.sleep(5_000)
     assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
@@ -82,7 +82,7 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
-    :timer.sleep(1000)
+    :timer.sleep(5_000)
     assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
@@ -104,7 +104,7 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
-    :timer.sleep(1000)
+    :timer.sleep(5_000)
     assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
@@ -129,7 +129,7 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
-    :timer.sleep(1000)
+    :timer.sleep(5_000)
     assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000
@@ -147,7 +147,7 @@ defmodule RigTests.Avro.AvroTest do
       })
 
     kafka_config = kafka_config()
-    :timer.sleep(1000)
+    :timer.sleep(5_000)
     assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
 
     assert_receive received_msg, 10_000

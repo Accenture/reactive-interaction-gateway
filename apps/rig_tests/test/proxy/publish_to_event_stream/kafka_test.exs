@@ -160,7 +160,7 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
         "partition" => "test_key"
       })
 
-    :timer.sleep(1000)
+    :timer.sleep(5_000)
 
     %HTTPoison.Response{status_code: res_status, body: res_body} =
       HTTPoison.post!(request_url, req_body, headers)
