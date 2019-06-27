@@ -1,52 +1,31 @@
-# Functional tests
+#!/bin/bash
 
-Functional tests using [Cypress](https://www.cypress.io/) to cover all examples.
+function section_header() {
+  printf "\n"
+  printf "╓─────[ $@ ]─────╖"
+  printf "\n"
+}
 
-## Interactive mode vs. CI mode
+RIG_DIR=../..
+TESTS_DIR=examples/tests
+cd "${RIG_DIR}"
 
-Interactive mode is running tests in watch mode with visible UI interface -- ideal for development. CI mode runs tests only once and shows results -- ideal for pipelines.
+docker build -t rig .
 
-```sh
-# interactive mode
-npm run cypress:open
+cd "${TESTS_DIR}"
 
-# CI mode
-npm run cypress:run
-
-# run all tests
-npm run cypress:run:all
-```
-
-## Tests without authentication
-
-```sh
-# start RIG
-EXTRACTORS=examples/extractor.json \
-JWT_SECRET_KEY=secret \
-mix phx.server
-
-# or via Docker
+section_header "Running functional test suite for Examples with no auth"
+docker rm -f rig || true
 docker run -d --name rig \
 -e EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/data/name"}}},"greeting.jwt":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}},"nope":{"fullname":{"stable_field_index":1,"jwt":{"json_pointer":"/fullname"},"event":{"json_pointer":"/data/fullname"}}},"example":{"email":{"stable_field_index":1,"event":{"json_pointer":"/data/email"}}}}' \
 -e JWT_SECRET_KEY=secret \
 -p 4000:4000 \
 rig
 
-# run tests
-npm run cypress:open:noauth
 npm run cypress:run:noauth
-```
 
-## Tests with JWT authentication
-
-```sh
-# start RIG
-SUBSCRIPTION_CHECK=jwt_validation \
-EXTRACTORS=examples/extractor.json \
-JWT_SECRET_KEY=secret \
-mix phx.server
-
-# or via Docker
+section_header "Running functional test suite for Examples with JWT auth"
+docker rm -f rig || true
 docker run -d --name rig \
 -e SUBSCRIPTION_CHECK=jwt_validation \
 -e EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/data/name"}}},"greeting.jwt":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}},"nope":{"fullname":{"stable_field_index":1,"jwt":{"json_pointer":"/fullname"},"event":{"json_pointer":"/data/fullname"}}},"example":{"email":{"stable_field_index":1,"event":{"json_pointer":"/data/email"}}}}' \
@@ -54,7 +33,4 @@ docker run -d --name rig \
 -p 4000:4000 \
 rig
 
-# run tests
-npm run cypress:open:jwt
 npm run cypress:run:jwt
-```
