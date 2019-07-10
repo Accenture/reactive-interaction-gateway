@@ -34,3 +34,12 @@ docker run -d --name rig \
 rig
 
 npm run cypress:run:jwt
+
+section_header "Running functional test suite for Channels examples"
+docker rm -f rig || true
+
+cd "../channels-example"
+./run-compose.sh
+cd ../tests
+
+npm run cypress:run:channels

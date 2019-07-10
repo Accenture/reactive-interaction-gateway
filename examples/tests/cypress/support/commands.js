@@ -28,3 +28,36 @@ Cypress.Commands.add(
       .contains(event);
   }
 );
+
+Cypress.Commands.add(
+  'connectAndSendEvents',
+  (transportProtocol, name, eventType, message) => {
+    cy.get(`#${transportProtocol}-radio`).click();
+
+    cy.get('#username')
+      .type(name)
+      .should('have.value', name);
+    cy.get('#event-type-inbound')
+      .type(eventType)
+      .should('have.value', eventType);
+    cy.get('#connect-button').click();
+    cy.contains(
+      '#subscription-notification',
+      `You are now subscribed to ${eventType} event type. Try to send some event.`
+    );
+
+    cy.get('#event-type-outbound')
+      .type(eventType)
+      .should('have.value', eventType);
+    cy.get('#message')
+      .type(`{{}${message}}`)
+      .should('have.value', `{${message}}`);
+    cy.get('#send-button').click();
+
+    cy.get('#event-log div')
+      .should('have.length', 1)
+      .first()
+      .contains(message)
+      .contains(`"eventType":"${eventType}"`);
+  }
+);

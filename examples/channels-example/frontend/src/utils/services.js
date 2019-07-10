@@ -1,5 +1,4 @@
 import { sign } from 'jsonwebtoken';
-import { v4 } from 'uuid';
 import { JWT_SECRET_KEY } from '../constants';
 
 const randomString = () => {

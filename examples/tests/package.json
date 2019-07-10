@@ -7,9 +7,11 @@
     "cypress:open": "cypress open",
     "cypress:open:noauth": "cypress open --env fgrep='no-auth'",
     "cypress:open:jwt": "cypress open --env fgrep='jwt'",
+    "cypress:open:channels": "cypress open --env fgrep='channels'",
     "cypress:run": "cypress run",
     "cypress:run:noauth": "NO_COLOR=1 cypress run --env fgrep='no-auth'",
     "cypress:run:jwt": "NO_COLOR=1 cypress run --env fgrep='jwt'",
+    "cypress:run:channels": "NO_COLOR=1 cypress run --env fgrep='channels'",
     "cypress:run:all": "NO_COLOR=1 ./run_all_tests.sh"
   },
   "author": "",

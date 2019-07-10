@@ -24,19 +24,15 @@ class Channels extends PureComponent {
     const channels = protocols[type];
 
     // Create WS/SSE connection and join to user's Phoenix channel
-    channels.connect(
-      username,
-      subscriberEvent,
-      ({ status, response }) => {
-        // Listen to broadcasted messages in connected Phoenix channel
-        channels.listenForUserMessage(subscriberEvent, message => {
-          const updatedMessages = [message, ...this.state.messages];
-          this.setState({ messages: updatedMessages });
-        });
+    channels.connect(username, subscriberEvent, ({ status, response }) => {
+      // Listen to broadcasted messages in connected Phoenix channel
+      channels.listenForUserMessage(subscriberEvent, message => {
+        const updatedMessages = [message, ...this.state.messages];
+        this.setState({ messages: updatedMessages });
+      });
 
-        this.setState({ status, response });
-      }
-    );
+      this.setState({ status, response });
+    });
   };
 
   disconnectFromChannel = () => {
@@ -74,6 +70,7 @@ class Channels extends PureComponent {
             </label>
             <label className="radio" htmlFor="ws">
               <input
+                id="ws-radio"
                 type="radio"
                 name="type"
                 value="ws"
@@ -85,6 +82,7 @@ class Channels extends PureComponent {
 
             <label className="radio" htmlFor="sse">
               <input
+                id="sse-radio"
                 type="radio"
                 name="type"
                 value="sse"
@@ -94,8 +92,8 @@ class Channels extends PureComponent {
               Server-Sent Events
             </label>
             <p className="help">
-              Type of transport protocol by which we can establish connection to
-              RIG and communicate.
+              Type of transport protocol by which we can establish connection to RIG and
+              communicate.
             </p>
           </div>
 
@@ -105,6 +103,7 @@ class Channels extends PureComponent {
             </label>
             <div className="control">
               <input
+                id="username"
                 className="input"
                 type="text"
                 name="username"
@@ -113,11 +112,11 @@ class Channels extends PureComponent {
               />
             </div>
             <p className="help">
-              Username to be used in JWT claims to be able to recognize user.
-              RIG will automatically infer subscriptions from this value (if
-              EXTRACTORS are configured in RIG). You can think of it as private
-              subscriptions. In this example we'll use event type{' '}
-              <strong>message</strong> for this private behavior.
+              Username to be used in JWT claims to be able to recognize user. RIG will
+              automatically infer subscriptions from this value (if EXTRACTORS are
+              configured in RIG). You can think of it as private subscriptions. In this
+              example we'll use event type <strong>message</strong> for this private
+              behavior.
             </p>
           </div>
 
@@ -127,6 +126,7 @@ class Channels extends PureComponent {
             </label>
             <div className="control">
               <input
+                id="event-type-inbound"
                 className="input"
                 type="text"
                 name="subscriberEvent"
@@ -135,26 +135,26 @@ class Channels extends PureComponent {
               />
             </div>
             <p className="help">
-              Set additional event type you want to subscribe to. Events are
-              using cloud events specification.
+              Set additional event type you want to subscribe to. Events are using cloud
+              events specification.
               <strong>
-                You'll only get events you are subscribed to either by
-                subscription call or inferred from JWT.
+                You'll only get events you are subscribed to either by subscription call
+                or inferred from JWT.
               </strong>
             </p>
           </div>
 
           <div className="buttons is-right">
             <button
-              className={`button is-primary ${
-                status === 'ok' ? 'is-loading' : ''
-                }`}
+              id="connect-button"
+              className={`button is-primary ${status === 'ok' ? 'is-loading' : ''}`}
               onClick={this.connectToChannel}
               disabled={status === 'ok'}
             >
               Connect
             </button>
             <button
+              id="disconnect-button"
               className="button is-danger"
               onClick={this.disconnectFromChannel}
               disabled={status !== 'ok'}

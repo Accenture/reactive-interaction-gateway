@@ -58,10 +58,10 @@ export class Sse {
 
   listenForUserMessage(subscriberEvent, cb) {
     // Listener for all messages
-    this.socket.onmessage = ({ data }) => {
-      const message = JSON.parse(data);
-      cb(message);
-    };
+    // this.socket.onmessage = ({ data }) => {
+    //   const message = JSON.parse(data);
+    //   cb(message);
+    // };
 
     this.socket.addEventListener(subscriberEvent, ({ data }) => {
       const message = JSON.parse(data);

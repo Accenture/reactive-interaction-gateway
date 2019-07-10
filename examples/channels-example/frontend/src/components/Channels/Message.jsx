@@ -77,6 +77,7 @@ class Message extends PureComponent {
           </label>
           <div className="control">
             <input
+              id="event-type-outbound"
               className="input"
               type="text"
               name="sendEventType"
@@ -85,8 +86,8 @@ class Message extends PureComponent {
             />
           </div>
           <p className="help">
-            This will set event type for event and only users subscribed to it
-            will receive this event.
+            This will set event type for event and only users subscribed to it will
+            receive this event.
           </p>
         </div>
         <div className="field">
@@ -95,6 +96,7 @@ class Message extends PureComponent {
           </label>
           <div className="control">
             <input
+              id="message"
               className="input"
               type="text"
               name="message"
@@ -103,8 +105,8 @@ class Message extends PureComponent {
             />
           </div>
           <p className="help">
-            Construct message that will be sent to Kafka, consumed by RIG and
-            distributed to all subscribers of the given event type.{' '}
+            Construct message that will be sent to Kafka, consumed by RIG and distributed
+            to all subscribers of the given event type.{' '}
             <strong>
               Example: <code>&#123;"name":"username","foo":"bar"&#125;</code>
             </strong>
@@ -113,6 +115,7 @@ class Message extends PureComponent {
 
         <div className="buttons is-right">
           <button
+            id="send-button"
             className="button is-primary"
             onClick={this.handleProduceKafkaMessage}
           >

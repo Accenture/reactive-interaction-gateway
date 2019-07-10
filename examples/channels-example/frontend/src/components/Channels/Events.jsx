@@ -4,9 +4,7 @@ import PropTypes from 'proptypes';
 class Events extends PureComponent {
   noSubscription() {
     return (
-      <p className="notification is-warning">
-        You are not subscribed to any event type.
-      </p>
+      <p className="notification is-warning">You are not subscribed to any event type.</p>
     );
   }
 
@@ -14,8 +12,8 @@ class Events extends PureComponent {
     const { subscriberEvent, response } = this.props;
     return (
       <p className="notification is-danger">
-        Couldn't subscribe to <strong>{subscriberEvent}</strong> event type.
-        Error <strong>{response}</strong>.
+        Couldn't subscribe to <strong>{subscriberEvent}</strong> event type. Error{' '}
+        <strong>{response}</strong>.
       </p>
     );
   }
@@ -23,9 +21,9 @@ class Events extends PureComponent {
   existingSubscription() {
     const { subscriberEvent } = this.props;
     return (
-      <p className="notification is-success">
-        You are now subscribed to <strong>{subscriberEvent}</strong> event type.
-        Try to send some event.
+      <p id="subscription-notification" className="notification is-success">
+        You are now subscribed to <strong>{subscriberEvent}</strong> event type. Try to
+        send some event.
       </p>
     );
   }
@@ -55,7 +53,7 @@ class Events extends PureComponent {
           {events.map((ev, index) => {
             const { eventTime } = ev;
             return (
-              <div key={index}>
+              <div key={index} id="event-log">
                 <div>
                   {eventTime} - <code>{JSON.stringify(ev)}</code>
                 </div>
