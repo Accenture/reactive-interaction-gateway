@@ -10,7 +10,7 @@ RIG_DIR=../..
 TESTS_DIR=examples/tests
 cd "${RIG_DIR}"
 
-docker build -t rig .
+docker build -t accenture/reactive-interaction-gateway .
 
 cd "${TESTS_DIR}"
 
@@ -20,7 +20,7 @@ docker run -d --name rig \
 -e EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/data/name"}}},"greeting.jwt":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}},"nope":{"fullname":{"stable_field_index":1,"jwt":{"json_pointer":"/fullname"},"event":{"json_pointer":"/data/fullname"}}},"example":{"email":{"stable_field_index":1,"event":{"json_pointer":"/data/email"}}}}' \
 -e JWT_SECRET_KEY=secret \
 -p 4000:4000 \
-rig
+accenture/reactive-interaction-gateway
 
 npm run cypress:run:noauth
 
@@ -31,7 +31,7 @@ docker run -d --name rig \
 -e EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/data/name"}}},"greeting.jwt":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}},"nope":{"fullname":{"stable_field_index":1,"jwt":{"json_pointer":"/fullname"},"event":{"json_pointer":"/data/fullname"}}},"example":{"email":{"stable_field_index":1,"event":{"json_pointer":"/data/email"}}}}' \
 -e JWT_SECRET_KEY=secret \
 -p 4000:4000 \
-rig
+accenture/reactive-interaction-gateway
 
 npm run cypress:run:jwt
 
