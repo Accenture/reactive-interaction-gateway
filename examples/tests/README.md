@@ -58,3 +58,16 @@ rig
 npm run cypress:open:jwt
 npm run cypress:run:jwt
 ```
+
+## Channels tests
+
+```sh
+# start channels example
+cd ../channels-example
+./run-compose.sh
+cd ../tests
+
+# run tests
+npm run cypress:open:channels
+npm run cypress:run:channels
+```
