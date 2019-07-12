@@ -3,10 +3,16 @@ defmodule RigAuth.Jwt.TokenUtils do
 
   use Rig.Config, [:secret_key, :rotation_flag, :jwks_endpoint]
 
-  if rotation_flag do
+  @conf_var config()
+
+  def config_retrieval do
+    @conf_var
+  end
+
+  if conf_var.rotation_flag do
     # This hook implements a before_verify callback that checks whether it has a signer configuration
     # cached. If it does not, it tries to fetch it from the jwks_url.
-    add_hook(JokenJwks, jwks_url: "")
+    add_hook(JokenJwks, jwks_url: conf_var.jwks_endpoint)
   end
 
   def retrieve_signer do
