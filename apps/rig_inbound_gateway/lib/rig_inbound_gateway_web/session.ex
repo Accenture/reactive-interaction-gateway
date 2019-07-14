@@ -19,7 +19,7 @@ defmodule RigInboundGatewayWeb.Session do
   @event_buffer_size 200
   @subscription_refresh_interval_ms 60_000
   @session_timeout_validation_interval_ms 60_000
-  @session_timout_ms 3_600_000
+  @session_timeout_ms 3_600_000
 
   # ---
   def start(query_params, opts \\ []) do
@@ -36,7 +36,7 @@ defmodule RigInboundGatewayWeb.Session do
 
   @impl true
   def init(%{query_params: query_params}) do
-    # Init Subscriptions: Setup sulbscriptions for the token & also provided as query parameter
+    # Init Subscriptions: Setup subscriptions for the token & also provided as query parameter
     with {:ok, jwt_subs} <- Subscriptions.from_token(query_params["jwt"]),
          {:ok, query_subs} <-
            Map.get(query_params, "subscriptions") |> Subscriptions.from_json() do
@@ -60,7 +60,13 @@ defmodule RigInboundGatewayWeb.Session do
        %{
          subscriptions: [],
          event_buffer: EventBuffer.new(@event_buffer_size),
-         session_valid_until: DateTime.add(DateTime.utc_now(), @session_timout_ms, :millisecond)
+         session_valid_until:
+           DateTime.add(
+             DateTime.utc_now(),
+             @session_timeout_ms,
+             :millisecond,
+             Calendar.get_time_zone_database()
+           )
        }}
     else
       {:error, %Subscriptions.Error{} = e} ->
@@ -74,7 +80,7 @@ defmodule RigInboundGatewayWeb.Session do
   def handle_call({:recv_events, last_event_id, _}, from, state) do
     state = %{
       state
-      | session_valid_until: DateTime.add(DateTime.utc_now(), @session_timout_ms, :millisecond)
+      | session_valid_until: DateTime.add(DateTime.utc_now(), @session_timeout_ms, :millisecond)
     }
 
     case EventBuffer.events_since(state.event_buffer, last_event_id) do

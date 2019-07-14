@@ -22,7 +22,7 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   # Helpers
   # -----
 
-  # validates if a connection_token was given. If yes, it validates if corresponding session processes is still alive, ignoring invalid/timed out cookies
+  # validates if a connection_token was given. If yes, it validates if corresponding session processes are still alive, ignoring invalid/timed out cookies
   defp is_new_session?(connection_token) do
     case connection_token do
       nil ->
@@ -55,14 +55,13 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
       |> put_resp_cookie("last_event_id", Jason.encode!("first_event"))
       |> put_resp_header("content-type", "application/json; charset=utf-8")
       |> put_resp_header("cache-control", "no-cache")
-      |> send_resp(200, Jason.encode!("ok"))
+      |> put_status(200)
+      |> text(Jason.encode!("ok"))
     else
       {:error, message} ->
         conn
-        |> send_resp(
-          400,
-          "PARSE ERROR: #{inspect(message)}; SENT PARAMS: #{inspect(conn.query_params)})"
-        )
+        |> put_status(:bad_request)
+        |> text("PARSE ERROR: #{inspect(message)}; SENT PARAMS: #{inspect(conn.query_params)})")
     end
   end
 
@@ -82,8 +81,8 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
     |> put_resp_cookie("last_event_id", Jason.encode!(response[:last_event_id] || "first_event"))
     |> put_resp_header("content-type", "application/json; charset=utf-8")
     |> put_resp_header("cache-control", "no-cache")
-    |> send_resp(
-      200,
+    |> put_status(200)
+    |> text(
       ~s<{"last_event_id":"#{response.last_event_id}","events":[#{Enum.join(response.events, ",")}]}>
     )
   end

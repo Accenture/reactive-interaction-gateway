@@ -1,8 +1,8 @@
-defmodule EventBufferTest do
+defmodule RigInboundGatewayWeb.EventBufferTest do
   use ExUnit.Case, async: true
 
-  alias RigInboundGatewayWeb.EventBuffer
   alias RigCloudEvents.CloudEvent
+  alias RigInboundGatewayWeb.EventBuffer
 
   defp new_event(id) do
     {:ok, event} =
@@ -53,7 +53,7 @@ defmodule EventBufferTest do
     third_event = new_event("third")
     buffer = buffer |> EventBuffer.add_event(third_event)
 
-    # The first event is no longer in the buffer (all_events doesn't provide the correct order tho)
+    # The first event is no longer in the buffer due to max size of the buffer (all_events doesn't provide the correct order tho)
     assert buffer |> EventBuffer.all_events() == [third_event, second_event]
     # "third" is now more recent than "second", but there is no event newer than "third":
     {:ok, [events: events, last_event_id: last_event_id]} =

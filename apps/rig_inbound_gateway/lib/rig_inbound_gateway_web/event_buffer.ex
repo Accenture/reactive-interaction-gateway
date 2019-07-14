@@ -72,37 +72,39 @@ defmodule RigInboundGatewayWeb.EventBuffer do
             {:ok, [events: [], last_event_id: event_id]}
 
           _ ->
-            {:ok, [events: new_events, last_event_id: CloudEvent.id!(Enum.at(new_events, -1))]}
+            last_event_id =
+              new_events
+              |> Enum.at(-1)
+              |> CloudEvent.id!()
+
+            {:ok, [events: new_events, last_event_id: last_event_id]}
         end
 
       _ ->
         case Enum.find_index(events, fn x -> CloudEvent.id!(x) == event_id end) do
           nil ->
-            next_event = Enum.at(events, 0)
-            {:no_such_event, [not_found_id: event_id, last_event_id: CloudEvent.id!(next_event)]}
+            last_event_id =
+              events
+              |> Enum.at(0)
+              |> CloudEvent.id!()
+
+            {:no_such_event, [not_found_id: event_id, last_event_id: last_event_id]}
 
           event_index ->
             read_pointer = rem(event_index + 1, capacity)
             new_events = get_new_events(events, read_pointer, write_pointer, capacity)
 
-            case new_events do
-              [] ->
-                {:ok, [events: [], last_event_id: event_id]}
-
-              _ ->
-                {:ok,
-                 [events: new_events, last_event_id: CloudEvent.id!(Enum.at(new_events, -1))]}
-            end
+            new_events |> return_events(event_id)
         end
     end
   end
 
   @spec insert_or_update(List.t(), number, any()) :: List.t()
-  defp insert_or_update(list, index, element) do
-    if index >= length(list) do
-      List.insert_at(list, index, element)
+  defp insert_or_update(buffer, index, element) do
+    if index >= length(buffer) do
+      List.insert_at(buffer, index, element)
     else
-      List.replace_at(list, index, element)
+      List.replace_at(buffer, index, element)
     end
   end
 
@@ -121,15 +123,28 @@ defmodule RigInboundGatewayWeb.EventBuffer do
     []
   end
 
+  defp return_events(events, event_id) when events == [] do
+    {:ok, [events: [], last_event_id: event_id]}
+  end
+
+  defp return_events(events, _event_id) do
+    last_event_id =
+      events
+      |> Enum.at(-1)
+      |> CloudEvent.id!()
+
+    {:ok, [events: events, last_event_id: last_event_id]}
+  end
+
   @spec get_between(List.t(), number, number) :: List.t()
-  defp get_between(_list, _from_index, to_index) when to_index < 0 do
+  defp get_between(_buffer, _from_index, to_index) when to_index < 0 do
     []
   end
 
   @spec get_between(List.t(), number, number) :: List.t()
-  defp get_between(list, from_index, to_index) do
-    {front_list, _rest} = Enum.split(list, to_index)
-    {_rest, inbetween_list} = Enum.split(front_list, from_index)
-    inbetween_list
+  defp get_between(buffer, from_index, to_index) do
+    {front_buffer, _rest} = Enum.split(buffer, to_index)
+    {_rest, inbetween_buffer} = Enum.split(front_buffer, from_index)
+    inbetween_buffer
   end
 end
