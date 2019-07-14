@@ -81,21 +81,7 @@ defmodule RigInboundGatewayWeb.EventBuffer do
         end
 
       _ ->
-        case Enum.find_index(events, fn x -> CloudEvent.id!(x) == event_id end) do
-          nil ->
-            last_event_id =
-              events
-              |> Enum.at(0)
-              |> CloudEvent.id!()
-
-            {:no_such_event, [not_found_id: event_id, last_event_id: last_event_id]}
-
-          event_index ->
-            read_pointer = rem(event_index + 1, capacity)
-            new_events = get_new_events(events, read_pointer, write_pointer, capacity)
-
-            new_events |> return_events(event_id)
-        end
+        events |> return_events
     end
   end
 
@@ -118,16 +104,34 @@ defmodule RigInboundGatewayWeb.EventBuffer do
     get_between(events, read_pointer, capacity) ++ get_between(events, 0, read_pointer - 2)
   end
 
+  defp return_events(events) do
+    case Enum.find_index(events, fn x -> CloudEvent.id!(x) == event_id end) do
+      nil ->
+        last_event_id =
+          events
+          |> Enum.at(0)
+          |> CloudEvent.id!()
+
+        {:no_such_event, [not_found_id: event_id, last_event_id: last_event_id]}
+
+      event_index ->
+        read_pointer = rem(event_index + 1, capacity)
+        new_events = get_new_events(events, read_pointer, write_pointer, capacity)
+
+        new_events |> get_return_value(event_id)
+    end
+  end
+
   defp get_new_events(_events, read_pointer, write_pointer, _capacity)
        when read_pointer == write_pointer do
     []
   end
 
-  defp return_events(events, event_id) when events == [] do
+  defp get_return_value(events, event_id) when events == [] do
     {:ok, [events: [], last_event_id: event_id]}
   end
 
-  defp return_events(events, _event_id) do
+  defp get_return_value(events, _event_id) do
     last_event_id =
       events
       |> Enum.at(-1)

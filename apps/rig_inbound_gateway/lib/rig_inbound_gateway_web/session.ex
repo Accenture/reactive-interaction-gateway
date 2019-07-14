@@ -9,10 +9,10 @@ defmodule RigInboundGatewayWeb.Session do
   require Logger
 
   alias Rig.EventFilter
-  alias RigCloudEvents.CloudEvent
-  alias RigInboundGatewayWeb.EventBuffer
   alias RIG.Subscriptions
+  alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
+  alias RigInboundGatewayWeb.EventBuffer
 
   @window_size_ms 500
   @max_tries 10
@@ -167,7 +167,7 @@ defmodule RigInboundGatewayWeb.Session do
   end
 
   # ---
-  # Initially sets the subscriptions 
+  # Initially sets the subscriptions
   @impl true
   def handle_info(:welcome_event, state) do
     # write the event to the event_buffer
@@ -178,7 +178,7 @@ defmodule RigInboundGatewayWeb.Session do
   end
 
   # ---
-  # Initially sets the subscriptions 
+  # Initially sets the subscriptions
   @impl true
   def handle_info({:set_subscriptions, subscriptions}, state) do
     Logger.debug(fn -> "subscriptions: " <> inspect(subscriptions) end)
@@ -215,7 +215,7 @@ defmodule RigInboundGatewayWeb.Session do
         DateTime.utc_now()
       ) === :lt
 
-    if(is_timed_out) do
+    if is_timed_out do
       # kills the session process
       {:stop, :normal, state}
     else

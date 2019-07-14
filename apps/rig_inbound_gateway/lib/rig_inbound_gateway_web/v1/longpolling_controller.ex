@@ -7,9 +7,9 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
 
   use RigInboundGatewayWeb, :controller
 
-  alias RigOutboundGateway
-  alias RigInboundGatewayWeb.Session
   alias Rig.Connection
+  alias RigInboundGatewayWeb.Session
+  alias RigOutboundGateway
 
   @doc false
   def handle_connection(%{method: "GET"} = conn, _params) do
@@ -22,7 +22,9 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   # Helpers
   # -----
 
-  # validates if a connection_token was given. If yes, it validates if corresponding session processes are still alive, ignoring invalid/timed out cookies
+  # validates if a connection_token was given.
+  # If yes, it validates if corresponding session processes are still alive
+  # ignoring invalid/timed out cookies
   defp is_new_session?(connection_token) do
     case connection_token do
       nil ->
