@@ -1,20 +1,39 @@
 describe('Subscriptions with JWT auth', () => {
   ['sse', 'ws'].forEach(type => {
-    it(`${type} Does subscription check when creating subscriptions`, () => {
+    it(`Does ${type} subscription check when creating subscriptions`, () => {
       cy.visit(`/${type}-demo-jwt.html`);
-      cy.testWithNameAndGreeting();
+      cy.setAndVerifyInput('greeting', 'hello');
+      cy.submit();
+      cy.assertReceivedEvents('eventList', 'hello');
     });
 
-    it(`${type} Applies subscription constraints tied with JWT for given event type`, () => {
+    it(`Applies ${type} subscription constraints tied with JWT for given event type`, () => {
       cy.visit(`/${type}-demo-jwt-extractors.html`);
-      cy.testWithNameAndGreeting({ name: 'john' });
-      cy.testWithNameAndGreeting({ name: 'mike', ne: true });
+      cy.setAndVerifyInput('greeting', 'hello');
+      cy.setAndVerifyInput('name', 'john');
+      cy.submit();
+      cy.assertReceivedEvents('eventList', '"name":"john","greeting":"hello"');
+      // John shouldn't receive Mike's events
+      cy.setAndVerifyInput('greeting', 'hello');
+      cy.setAndVerifyInput('name', 'mike');
+      cy.submit();
+      cy.wait(2000).assertReceivedEvents('eventList', '"name":"john","greeting":"hello"');
     });
 
-    it(`${type} Creates subscriptions based on JWT in connection call and applies constraints`, () => {
+    it(`Creates ${type} subscriptions based on JWT in connection call and applies constraints`, () => {
       cy.visit(`/${type}-demo-jwt-extractors-conn.html`);
-      cy.testWithNameAndGreeting({ name: 'john.doe' });
-      cy.testWithNameAndGreeting({ name: 'mike', ne: true });
+      cy.setAndVerifyInput('greeting', 'hello');
+      cy.setAndVerifyInput('name', 'john.doe');
+      cy.submit();
+      cy.assertReceivedEvents('eventList', '"name":"john.doe","greeting":"hello"');
+      // John Doe shouldn't receive Mike's events
+      cy.setAndVerifyInput('greeting', 'hello');
+      cy.setAndVerifyInput('name', 'mike');
+      cy.submit();
+      cy.wait(2000).assertReceivedEvents(
+        'eventList',
+        '"name":"john.doe","greeting":"hello"'
+      );
     });
   });
 });

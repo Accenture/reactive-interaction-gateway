@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 function section_header() {
   printf "\n"

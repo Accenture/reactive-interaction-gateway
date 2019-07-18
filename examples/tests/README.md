@@ -33,7 +33,6 @@ docker run -d --name rig \
 rig
 
 # run tests
-npm run cypress:open:noauth
 npm run cypress:run:noauth
 ```
 
@@ -55,7 +54,6 @@ docker run -d --name rig \
 rig
 
 # run tests
-npm run cypress:open:jwt
 npm run cypress:run:jwt
 ```
 
@@ -68,6 +66,5 @@ cd ../channels-example
 cd ../tests
 
 # run tests
-npm run cypress:open:channels
 npm run cypress:run:channels
 ```

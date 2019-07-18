@@ -1,63 +1,55 @@
-Cypress.Commands.add(
-  'testWithNameAndGreeting',
-  ({ name, greeting = 'hello', ne = false } = {}) => {
-    if (name) {
-      cy.get('#name')
-        .type(name)
-        .should('have.value', name);
-    }
+Cypress.Commands.add('setAndVerifyInput', (id, value) => {
+  cy.get(`#${id}`)
+    .type(value)
+    .should('have.value', value);
+});
 
-    cy.get('#greeting')
-      .type(greeting)
-      .should('have.value', greeting);
+Cypress.Commands.add('submit', () => {
+  cy.get('[type="submit"]').click();
+});
 
-    cy.get('[type="submit"]').click();
+Cypress.Commands.add('connect', transportProtocol => {
+  // create connection to sse/ws
+  cy.get(`#${transportProtocol}-radio`).click();
+});
 
-    if (ne) {
-      // wait 2 seconds, there should be no new event
-      cy.wait(2000)
-        .get('#eventList li')
-        .should('have.length', 1);
-      return;
-    }
+Cypress.Commands.add('disconnect', () => {
+  // disconnect from sse/ws
+  cy.get('#disconnect-button').click();
+});
 
-    const event = name ? `{"name":"${name}","greeting":"${greeting}"}` : greeting;
-    cy.get('#eventList li').should('have.length', 1);
-    cy.get('#eventList li')
-      .first()
-      .contains(event);
-  }
-);
+Cypress.Commands.add('subscribe', (name, eventType) => {
+  // create subscription
+  cy.get('#username')
+    .type(name)
+    .should('have.value', name);
+  cy.get('#event-type-inbound')
+    .type(eventType)
+    .should('have.value', eventType);
+  cy.get('#connect-button').click();
+  cy.contains(
+    '#subscription-notification',
+    `You are now subscribed to ${eventType} event type. Try to send some event.`
+  );
+});
 
-Cypress.Commands.add(
-  'connectAndSendEvents',
-  (transportProtocol, name, eventType, message) => {
-    cy.get(`#${transportProtocol}-radio`).click();
+Cypress.Commands.add('sendEvent', (eventType, message) => {
+  // send event
+  cy.get('#event-type-outbound')
+    .clear()
+    .type(eventType)
+    .should('have.value', eventType);
+  cy.get('#message')
+    .clear()
+    .type(`{{}${message}}`)
+    .should('have.value', `{${message}}`);
+  cy.get('#send-button').click();
+});
 
-    cy.get('#username')
-      .type(name)
-      .should('have.value', name);
-    cy.get('#event-type-inbound')
-      .type(eventType)
-      .should('have.value', eventType);
-    cy.get('#connect-button').click();
-    cy.contains(
-      '#subscription-notification',
-      `You are now subscribed to ${eventType} event type. Try to send some event.`
-    );
-
-    cy.get('#event-type-outbound')
-      .type(eventType)
-      .should('have.value', eventType);
-    cy.get('#message')
-      .type(`{{}${message}}`)
-      .should('have.value', `{${message}}`);
-    cy.get('#send-button').click();
-
-    cy.get('#event-log div')
-      .should('have.length', 1)
-      .first()
-      .contains(message)
-      .contains(`"eventType":"${eventType}"`);
-  }
-);
+Cypress.Commands.add('assertReceivedEvents', (element, message) => {
+  // assert number and content of received events
+  cy.get(`#${element}`)
+    .should('have.length', 1)
+    .first()
+    .contains(new RegExp(message, 'g'));
+});

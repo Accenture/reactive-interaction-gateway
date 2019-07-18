@@ -1,19 +1,30 @@
 describe('Subscriptions with no auth', () => {
   ['sse', 'ws'].forEach(type => {
-    it(`${type} Creates connection and subscriptions`, () => {
+    it(`Creates ${type} connection and subscriptions`, () => {
       cy.visit(`/${type}-demo.html`);
-      cy.testWithNameAndGreeting();
+      cy.setAndVerifyInput('greeting', 'hello');
+      cy.submit();
+      cy.assertReceivedEvents('eventList', 'hello');
     });
 
-    it(`${type} Creates connection and subscriptions within a same call`, () => {
+    it(`Creates ${type} connection and subscriptions within a same call`, () => {
       cy.visit(`/${type}-demo-single-call.html`);
-      cy.testWithNameAndGreeting();
+      cy.setAndVerifyInput('greeting', 'hello');
+      cy.submit();
+      cy.assertReceivedEvents('eventList', 'hello');
     });
 
-    it(`${type} Applies subscription constraints for given event type`, () => {
+    it(`Applies ${type} subscription constraints for given event type`, () => {
       cy.visit(`/${type}-demo-simple-extractors.html`);
-      cy.testWithNameAndGreeting({ name: 'john' });
-      cy.testWithNameAndGreeting({ name: 'mike', ne: true });
+      cy.setAndVerifyInput('greeting', 'hello');
+      cy.setAndVerifyInput('name', 'john');
+      cy.submit();
+      cy.assertReceivedEvents('eventList', '"name":"john","greeting":"hello"');
+      // John shouldn't receive Mike's events
+      cy.setAndVerifyInput('greeting', 'hello');
+      cy.setAndVerifyInput('name', 'mike');
+      cy.submit();
+      cy.wait(2000).assertReceivedEvents('eventList', '"name":"john","greeting":"hello"');
     });
   });
 });

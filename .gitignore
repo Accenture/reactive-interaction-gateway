@@ -40,4 +40,5 @@ erl_crash.dump
 
 /examples/tests/node_modules
 /examples/tests/cypress/videos
+/examples/tests/cypress/screenshots
 
