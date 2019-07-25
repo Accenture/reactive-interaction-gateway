@@ -8,6 +8,7 @@ RIG supports various ways to publish an event towards frontends. The recommended
 
 ## HTTP
 
+The HTTP endpoint is available on RIG's [internal port](rig-ops-guide). It supports JSON-encoded CloudEvents in [structured and binary modes](event-format#http-transport-binding) (Avro is currently not supported).
 - publishing via API Gateway to specific topic/stream, see [Publishing to event streams](./api-gateway#publishing-to-event-streams) for more details
   - consuming of events from specific topic/stream to achieve sync requests
 - consuming of events to be forwarded via SSE/WS/Longpolling
@@ -35,6 +36,7 @@ content-type: application/json; charset=utf-8
 
 ```
 
+## Kafka
 > __NOTE:__ it's enough to set one Kafka broker, RIG will automatically discover rest of the Kafka cluster.
 
 ### Change consumer topics and group ID
@@ -119,6 +121,7 @@ docker run -e KINESIS_ENABLED=1 accenture/reactive-interaction-gateway
 docker run -e KINESIS_ENABLED=1 -e KINESIS_AWS_REGION=eu-west-3 accenture/reactive-interaction-gateway
 ```
 
+The used consumer stream and the app name can be changed as well:
 ### Change consumer stream and app name
 
 As Kinesis is enabled, RIG starts to consume events on default stream `RIG-outbound`. `RIG-outbound` topic is used to consume all events and forward them to client via SSE/WS/Longpolling.
