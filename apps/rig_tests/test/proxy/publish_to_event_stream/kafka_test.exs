@@ -115,7 +115,7 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     rig_api_url = "http://localhost:#{@api_port}/v1/apis"
     rig_proxy_url = "http://localhost:#{@proxy_port}"
 
-    body =
+    setup_req_body =
       Jason.encode!(%{
         id: api_id,
         name: "Mock API",
@@ -140,12 +140,12 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
       })
 
     headers = [{"content-type", "application/json"}]
-    HTTPoison.post!(rig_api_url, body, headers)
+    HTTPoison.post!(rig_api_url, setup_req_body, headers)
 
     # The client calls the proxy endpoint:
     request_url = rig_proxy_url <> endpoint_path
 
-    kafka_body =
+    req_body =
       Jason.encode!(%{
         "event" => %{
           "specversion" => "0.2",
@@ -161,9 +161,9 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
       })
 
     %HTTPoison.Response{status_code: res_status, body: res_body} =
-      HTTPoison.post!(request_url, kafka_body, headers)
+      HTTPoison.post!(request_url, req_body, headers)
 
-    assert res_status == 202
+    assert res_status == 202, "Unexpected status #{res_status}: #{res_body}"
     assert res_body == "Accepted."
 
     assert_receive received_msg, 10_000

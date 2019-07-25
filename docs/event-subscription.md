@@ -1,7 +1,7 @@
 ---
 id: event-subscription
-title: Event Subscription
-sidebar_label: Event Subscription
+title: Receiving Events on Frontends
+sidebar_label: Receiving Events
 ---
 
 There are **three ways to receive events**, either via [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events) (SSE), via a [WebSocket](https://en.wikipedia.org/wiki/WebSocket) connection or longpolling. We recommend SSE:
@@ -159,7 +159,7 @@ HTTP/1.1 204 No Content
 
 After this call, the client receives a new `rig.subscriptions_set` event:
 
-```plain
+```plaintext
 event: rig.subscriptions_set
 data: {"data":[{"eventType":"greeting2","oneOf":[]}],"id":"0ba84600-f5cc-4abb-b55d-f9e145cbd03d","source":"rig","specversion":"0.2","time":"2019-03-27T11:58:11.411963+00:00","type":"rig.subscriptions_set"}
 ```

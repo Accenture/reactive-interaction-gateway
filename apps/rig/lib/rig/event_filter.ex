@@ -274,8 +274,11 @@ defmodule Rig.EventFilter do
   def refresh_subscriptions(subscriptions, prev_subscriptions) do
     # There is one Filter Supervisor per node. Each of those supervisors forwards the
     # subscriptions to the right Filter processes on the node they're located on.
+
+    subscriber = self()
+
     for pid <- FilterSup.processes() do
-      GenServer.call(pid, {:refresh_subscriptions, subscriptions, prev_subscriptions})
+      GenServer.cast(pid, {:refresh_subscriptions, subscriber, subscriptions, prev_subscriptions})
     end
 
     :ok

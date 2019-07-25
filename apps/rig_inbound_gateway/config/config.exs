@@ -94,7 +94,8 @@ config :rig, RigInboundGateway.ApiProxy.Router,
 config :rig, RigInboundGateway.ApiProxy.Handler.Http,
   cors: {:system, "CORS", "*"},
   kafka_response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000},
-  kinesis_response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000}
+  kinesis_response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000},
+  http_async_response_timeout: {:system, :integer, "PROXY_HTTP_ASYNC_RESPONSE_TIMEOUT", 5_000}
 
 config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   # The list of brokers, given by a comma-separated list of host:port items:
@@ -117,7 +118,7 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   request_schema: {:system, "PROXY_KAFKA_REQUEST_AVRO", ""},
   cors: {:system, "CORS", "*"},
   response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000},
-  group_id: {:system, "KAFKA_GROUP_ID", "rig"}
+  group_id: {:system, "PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID", "rig-proxy-response"}
 
 config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
   kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},

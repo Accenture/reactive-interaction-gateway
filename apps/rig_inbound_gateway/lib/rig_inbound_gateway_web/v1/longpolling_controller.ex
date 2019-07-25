@@ -13,7 +13,7 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
 
   @doc false
   def handle_connection(%{method: "GET"} = conn, _params) do
-    conn = conn |> fetch_cookies
+    conn = conn |> fetch_cookies |> fetch_query_params
 
     conn.req_cookies["connection_token"] |> is_new_session? |> process_request(conn)
   end

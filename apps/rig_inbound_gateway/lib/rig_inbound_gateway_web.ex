@@ -21,6 +21,7 @@ defmodule RigInboundGatewayWeb do
     quote do
       use Phoenix.Controller, namespace: RigInboundGatewayWeb
       import RigInboundGatewayWeb.Router.Helpers
+      import RigInboundGatewayWeb.MediaTypeHandling
     end
   end
 

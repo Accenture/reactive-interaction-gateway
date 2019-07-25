@@ -49,9 +49,8 @@ defmodule Rig.EventFilter.Sup do
   # ---
 
   @impl GenServer
-  def handle_call(
-        {:refresh_subscriptions, subscriptions, prev_subscriptions},
-        _from = {socket_pid, _tag},
+  def handle_cast(
+        {:refresh_subscriptions, subscriber_pid, subscriptions, prev_subscriptions},
         %{extractor_map: extractor_map} = state
       )
       when is_list(subscriptions) and is_list(prev_subscriptions) do
@@ -62,7 +61,7 @@ defmodule Rig.EventFilter.Sup do
     for {event_type, subs} <- subs_by_eventtype do
       filter_config = Config.for_event_type(extractor_map, event_type)
       filter = find_or_start_filter_process(event_type, filter_config)
-      GenServer.call(filter, {:refresh_subscriptions, socket_pid, subs})
+      GenServer.cast(filter, {:refresh_subscriptions, subscriber_pid, subs})
     end
 
     # If a subscription for an event type has been removed completely, the respective
@@ -74,14 +73,15 @@ defmodule Rig.EventFilter.Sup do
     |> Enum.reject(fn event_type -> Map.has_key?(subs_by_eventtype, event_type) end)
     # Notify the respective filter processes:
     |> Enum.each(fn event_type ->
-      # If we can find a filter for this type, we ask it to clear all subscriptions for socket_pid:
+      # If we can find a filter for this type, we ask it to clear all subscriptions for
+      # the subscriber:
       case get_filter_pid(event_type) do
         nil -> :ignore
-        filter -> GenServer.call(filter, {:refresh_subscriptions, socket_pid, _subs = []})
+        filter -> GenServer.cast(filter, {:refresh_subscriptions, subscriber_pid, _subs = []})
       end
     end)
 
-    {:reply, :ok, state}
+    {:noreply, state}
   end
 
   @impl GenServer

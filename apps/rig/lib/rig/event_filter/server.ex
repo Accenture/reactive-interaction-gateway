@@ -78,31 +78,6 @@ defmodule Rig.EventFilter.Server do
 
   @impl GenServer
   def handle_call(
-        {:refresh_subscriptions, socket_pid, subscriptions},
-        _from,
-        %{
-          event_type: event_type,
-          subscription_table: subscription_table,
-          subscription_ttl_s: ttl_s,
-          fields: fields
-        } = state
-      ) do
-    # Only handle subscriptions that target the filter's event type:
-    subscriptions = Enum.filter(subscriptions, fn sub -> sub.event_type == event_type end)
-
-    refresh_subscriptions(
-      subscription_table,
-      socket_pid,
-      subscriptions,
-      fields,
-      ttl_s
-    )
-
-    {:reply, :ok, state}
-  end
-
-  @impl GenServer
-  def handle_call(
         {:reload_configuration, new_config},
         _from,
         %{subscription_table: subscription_table, fields: cur_fields} = state
@@ -125,6 +100,32 @@ defmodule Rig.EventFilter.Server do
 
   @impl GenServer
   def handle_cast(
+        {:refresh_subscriptions, subscriber_pid, subscriptions},
+        %{
+          event_type: event_type,
+          subscription_table: subscription_table,
+          subscription_ttl_s: ttl_s,
+          fields: fields
+        } = state
+      ) do
+    # Only handle subscriptions that target the filter's event type:
+    subscriptions = Enum.filter(subscriptions, fn sub -> sub.event_type == event_type end)
+
+    refresh_subscriptions(
+      subscription_table,
+      subscriber_pid,
+      subscriptions,
+      fields,
+      ttl_s
+    )
+
+    {:noreply, state}
+  end
+
+  # ---
+
+  @impl GenServer
+  def handle_cast(
         %CloudEvent{} = event,
         %{subscription_table: subscription_table, config: config, fields: fields} = state
       ) do
@@ -139,6 +140,19 @@ defmodule Rig.EventFilter.Server do
     for socket_pid <- socket_pid_set do
       send(socket_pid, event)
     end
+
+    Logger.debug(fn ->
+      id = CloudEvent.id!(event)
+      type = CloudEvent.type!(event)
+      n_clients = MapSet.size(socket_pid_set)
+
+      if n_clients > 0 do
+        clients = if n_clients == 1, do: "1 client", else: "#{n_clients} clients"
+        ~s|Event "#{id}" of type "#{type}" forwarded to #{clients}|
+      else
+        ~s|Event "#{id}" of type "#{type}" not forwarded (there are no clients)|
+      end
+    end)
 
     {:noreply, state}
   end
