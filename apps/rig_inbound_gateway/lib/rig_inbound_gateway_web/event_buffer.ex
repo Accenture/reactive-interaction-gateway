@@ -80,8 +80,8 @@ defmodule RigInboundGatewayWeb.EventBuffer do
             {:ok, [events: new_events, last_event_id: last_event_id]}
         end
 
-      _ ->
-        events |> return_events
+      event_id ->
+        events |> return_events(event_id, write_pointer, capacity)
     end
   end
 
@@ -104,7 +104,12 @@ defmodule RigInboundGatewayWeb.EventBuffer do
     get_between(events, read_pointer, capacity) ++ get_between(events, 0, read_pointer - 2)
   end
 
-  defp return_events(events) do
+  defp get_new_events(_events, read_pointer, write_pointer, _capacity)
+       when read_pointer == write_pointer do
+    []
+  end
+
+  defp return_events(events, event_id, write_pointer, capacity) do
     case Enum.find_index(events, fn x -> CloudEvent.id!(x) == event_id end) do
       nil ->
         last_event_id =
@@ -120,11 +125,6 @@ defmodule RigInboundGatewayWeb.EventBuffer do
 
         new_events |> get_return_value(event_id)
     end
-  end
-
-  defp get_new_events(_events, read_pointer, write_pointer, _capacity)
-       when read_pointer == write_pointer do
-    []
   end
 
   defp get_return_value(events, event_id) when events == [] do
@@ -145,7 +145,6 @@ defmodule RigInboundGatewayWeb.EventBuffer do
     []
   end
 
-  @spec get_between(List.t(), number, number) :: List.t()
   defp get_between(buffer, from_index, to_index) do
     {front_buffer, _rest} = Enum.split(buffer, to_index)
     {_rest, inbetween_buffer} = Enum.split(front_buffer, from_index)
