@@ -21,10 +21,10 @@ mix phx.server
 This example shows basic restriction with extractors based on sent data.
 
 > examples/sse-demo-simple-extractors.html
-> examples/simple-extractor.json
+> examples/extractor.json
 
 ```bash
-EXTRACTORS=examples/simple-extractor.json \
+EXTRACTORS=examples/extractor.json \
 mix phx.server
 ```
 
@@ -54,10 +54,10 @@ mix phx.server
 
 This example shows combination of restrictions with extractors and JWT auth check. Second scenario also shows automatic subscription to events based on JWT during connection phase.
 
-> examples/jwt-extractor.json
+> examples/extractor.json
 
 ```bash
-EXTRACTORS=examples/jwt-extractor.json \
+EXTRACTORS=examples/extractor.json \
 JWT_SECRET_KEY=secret \
 mix phx.server
 ```
@@ -95,10 +95,10 @@ mix phx.server
 This example shows basic restriction with extractors based on sent data.
 
 > examples/ws-demo-simple-extractors.html
-> examples/simple-extractor.json
+> examples/extractor.json
 
 ```bash
-EXTRACTORS=examples/simple-extractor.json \
+EXTRACTORS=examples/extractor.json \
 mix phx.server
 ```
 
@@ -128,10 +128,10 @@ mix phx.server
 
 This example shows combination of restrictions with extractors and JWT auth check. Second scenario also shows automatic subscription to events based on JWT during connection phase.
 
-> examples/jwt-extractor.json
+> examples/extractor.json
 
 ```bash
-EXTRACTORS=examples/jwt-extractor.json \
+EXTRACTORS=examples/extractor.json \
 JWT_SECRET_KEY=secret \
 mix phx.server
 ```

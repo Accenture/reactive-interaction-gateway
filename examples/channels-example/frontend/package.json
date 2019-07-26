@@ -3,12 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "bulma": "^0.7.2",
-    "jsonwebtoken": "^8.4.0",
+    "bulma": "^0.7.5",
+    "jsonwebtoken": "^8.5.1",
     "proptypes": "^1.1.0",
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
-    "uuid": "^3.3.2"
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
   },
   "devDependencies": {
     "react-scripts": "^3.0.1"

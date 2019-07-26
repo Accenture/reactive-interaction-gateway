@@ -1,0 +1,19 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:noauth": "NO_COLOR=1 cypress run --spec 'cypress/integration/subscriptions-no-auth.spec.js'",
+    "cypress:run:jwt": "NO_COLOR=1 cypress run --spec 'cypress/integration/subscriptions-jwt.spec.js'",
+    "cypress:run:channels": "NO_COLOR=1 cypress run --spec 'cypress/integration/channels.spec.js'",
+    "cypress:run:all": "NO_COLOR=1 ./run_all_tests.sh"
+  },
+  "author": "Accenture",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "cypress": "^3.4.0"
+  }
+}

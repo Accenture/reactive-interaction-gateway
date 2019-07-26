@@ -1,5 +1,6 @@
 stages:
-  - test
+  - unittest
+  - exampletest
   - name: dockerbuild
     if: branch = master
   - name: website
@@ -9,7 +10,7 @@ stages:
 
 jobs:
   include:
-    - stage: test
+    - stage: unittest
       language: elixir
       elixir: "1.7"
       otp_release: "21.0"
@@ -18,6 +19,22 @@ jobs:
       script:
         - mix test
         - mix credo --ignore-checks Design
+    - stage: exampletest
+      language: node_js
+      node_js:
+        - "10"
+      addons:
+        apt:
+          packages:
+            - libgconf-2-4
+      cache:
+        npm: true
+        directories:
+          - ~/.cache
+      script:
+        - cd examples/tests
+        - npm ci
+        - npm run cypress:run:all
     - stage: dockerbuild
       language: minimal
       services:

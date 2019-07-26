@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "main": "index.js",
   "dependencies": {
-    "hapi": "^17.7.0",
-    "no-kafka": "^3.3.4"
+    "hapi": "^18.1.0",
+    "no-kafka": "^3.4.3"
   },
   "devDependencies": {
-    "eslint": "^5.8.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0"
+    "eslint": "^6.0.1",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.18.0"
   },
   "scripts": {
     "start": "node index.js",
