@@ -76,6 +76,12 @@ config :mime, :types, %{
 # API Gateway (Proxy)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+# active_loggers = {:system, :list, "REQUEST_LOG", []}
+# active_loggers = []
+
+# real_loggers =
+#   if Enum.any?(active_loggers, &(&1 == "console" || "kafka")), do: active_loggers, else: []
+
 config :rig, RigInboundGateway.Proxy, config_path_or_json: {:system, "PROXY_CONFIG_FILE", nil}
 
 config :rig, RigInboundGateway.ApiProxy.Base,

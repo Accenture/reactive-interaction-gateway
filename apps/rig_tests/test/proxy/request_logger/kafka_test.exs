@@ -92,16 +92,15 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
 
     :timer.sleep(5_000)
 
-    %HTTPoison.Response{status_code: res_status, body: res_body} =
-      HTTPoison.post!(request_url, "", headers)
-
-    assert res_status == 200
-    assert res_body == "{\"status\":\"ok\"}"
+    HTTPoison.post!(request_url, "", headers)
 
     assert_receive received_msg, 10_000
     received_msg_map = Jason.decode!(received_msg)
 
     System.delete_env("REQUEST_LOG")
+
+    # Type
+    assert get_in(received_msg_map, ["type"]) == "com.rig.proxy.api.call"
 
     # Endpoint
     assert get_in(received_msg_map, ["data", "endpoint", "id"]) == endpoint_id
