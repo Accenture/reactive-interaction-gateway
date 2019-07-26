@@ -8,6 +8,9 @@ function section_header() {
 
 RIG_DIR=../..
 TESTS_DIR=examples/tests
+
+[[ -e node_modules ]] || npm install
+
 cd "${RIG_DIR}"
 
 docker build -t accenture/reactive-interaction-gateway .
