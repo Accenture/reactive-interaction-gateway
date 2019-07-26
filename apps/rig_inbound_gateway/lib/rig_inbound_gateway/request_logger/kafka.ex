@@ -62,16 +62,16 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
   # ---
 
   defp produce(server \\ __MODULE__, key, plaintext) do
-    GenServer.call(server, {:produce, key, plaintext})
+    GenServer.cast(server, {:produce, key, plaintext})
   end
 
   # ---
 
   @impl GenServer
-  def handle_call({:produce, key, plaintext}, _from, %{kafka_config: kafka_config} = state) do
+  def handle_cast({:produce, key, plaintext}, %{kafka_config: kafka_config} = state) do
     %{log_topic: topic, log_schema: schema} = config()
-    res = RigKafka.produce(kafka_config, topic, schema, key, plaintext)
-    {:reply, res, state}
+    RigKafka.produce(kafka_config, topic, schema, key, plaintext)
+    {:noreply, state}
   end
 
   # ---

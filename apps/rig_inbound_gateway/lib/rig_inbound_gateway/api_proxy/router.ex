@@ -6,12 +6,13 @@ defmodule RigInboundGateway.ApiProxy.Router do
   If endpoint needs authentication, it is automatically triggered.
   Valid HTTP requests are forwarded to given service and their response is sent back to client.
   """
-  use Rig.Config, [:logger_modules, :active_loggers]
+  use Rig.Config, :custom_validation
   use Plug.Router
   require Logger
 
   alias Plug.Conn
 
+  alias RIG.ConfigValidation
   alias RIG.Plug.BodyReader
   alias RigInboundGateway.ApiProxy.Api
   alias RigInboundGateway.ApiProxy.Auth
@@ -24,6 +25,21 @@ defmodule RigInboundGateway.ApiProxy.Router do
 
   plug(:match)
   plug(:dispatch)
+
+  # Confex callback
+  defp validate_config!(config) do
+    active_loggers = Keyword.fetch!(config, :active_loggers)
+    logger_modules = Keyword.fetch!(config, :logger_modules)
+
+    :ok =
+      ConfigValidation.validate_value_difference(
+        "REQUEST_LOG",
+        active_loggers,
+        Map.keys(logger_modules)
+      )
+
+    %{active_loggers: active_loggers, logger_modules: logger_modules}
+  end
 
   # Get all incoming HTTP requests, check if they are valid, provide authentication if needed
   match _ do
