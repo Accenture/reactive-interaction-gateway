@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-<!-- ### Added -->
+### Added
+
+- [Examples] Added functional tests for all examples using Cypress. [#227](https://github.com/Accenture/reactive-interaction-gateway/issues/227)
 
 <!-- ### Changed -->
 

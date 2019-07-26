@@ -2,6 +2,14 @@
   "greeting": {
     "name": {
       "stable_field_index": 1,
+      "event": {
+        "json_pointer": "/data/name"
+      }
+    }
+  },
+  "greeting.jwt": {
+    "name": {
+      "stable_field_index": 1,
       "jwt": {
         "json_pointer": "/username"
       },
