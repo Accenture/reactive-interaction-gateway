@@ -1,153 +1,56 @@
 defmodule RigInboundGatewayWeb.EventBuffer do
   @moduledoc """
-  Buffers events up to a configurable capacity.
+  A circular buffer for events.
 
-  As soon as the buffer's capacity is reached, newly added items overwrite the oldest ones.
+  Buffers events up to a configurable capacity. After that, every new item overwrites
+  the oldest one.
   """
-  alias __MODULE__
+
+  use TypedStruct
+
   alias RigCloudEvents.CloudEvent
 
-  defstruct [:capacity, :events, :write_pointer]
+  @typedoc "A circular event buffer."
+  typedstruct do
+    field(:capacity, pos_integer(), enforce: true)
+    field(:events, [CloudEvent.t()], default: [])
+  end
+
+  @doc "Creates a new EventBuffer with the given capacity."
+  @spec new(pos_integer()) :: __MODULE__.t()
+  def new(capacity), do: %__MODULE__{capacity: capacity}
+
+  @doc "The capacity is the maximum number of events this buffer can hold."
+  @spec capacity(__MODULE__.t()) :: pos_integer()
+  def capacity(%{capacity: capacity}), do: capacity
+
+  @doc "All events, sorted from oldest to newest event."
+  @spec all_events(__MODULE__.t()) :: [CloudEvent.t()]
+  def all_events(%{events: events}), do: Enum.reverse(events)
 
   @doc """
-  creates a new EventBuffer with the given capacity
+  Add an event to this buffer.
+
+  If the buffer runs at full capacity, this overwrites the oldest event in the buffer.
   """
-  @spec new(number) :: EventBuffer.t()
-  def new(capacity) do
-    %EventBuffer{capacity: capacity, events: [], write_pointer: 0}
+  @spec add_event(__MODULE__.t(), CloudEvent.t()) :: __MODULE__.t()
+  def add_event(%{capacity: capacity, events: events} = event_buffer, event) do
+    events = [event | events] |> Enum.take(capacity)
+    %__MODULE__{event_buffer | events: events}
   end
 
-  @doc """
-  provides the capacity of a given EventBuffer
-  """
-  @spec capacity(EventBuffer.t()) :: number
-  def capacity(buffer) do
-    buffer.capacity
-  end
+  @spec events_since(__MODULE__.t(), event_id :: String.t()) ::
+          {:ok, [events: [CloudEvent.t()], last_event_id: String.t()]}
+          | {:no_such_event, [not_found_id: String.t(), last_event_id: String.t()]}
+  def events_since(%{capacity: capacity, events: events}, event_id) do
+    last_event_id = events |> hd() |> CloudEvent.id!()
+    newer_events = Enum.take_while(events, fn event -> CloudEvent.id!(event) != event_id end)
 
-  @doc """
-  provides all events of a given EventBuffer
-  """
-  @spec all_events(EventBuffer.t()) :: List.t()
-  def all_events(buffer) do
-    buffer.events
-  end
-
-  @doc """
-  writes a value to the given EventBuffer, overwrites the oldest value if EventBuffer is full
-  """
-  @spec add_event(EventBuffer.t(), CloudEvent.t()) :: EventBuffer.t()
-  def add_event(
-        %{
-          write_pointer: write_pointer,
-          capacity: capacity,
-          events: events
-        } = event_buffer,
-        event
-      ) do
-    events = insert_or_update(events, write_pointer, event)
-    write_pointer = rem(write_pointer + 1, capacity)
-
-    %EventBuffer{
-      event_buffer
-      | write_pointer: write_pointer,
-        events: events
-    }
-  end
-
-  def events_since(
-        %{
-          capacity: capacity,
-          write_pointer: write_pointer,
-          events: events
-        } = _event_buffer,
-        event_id
-      ) do
-    case event_id do
-      "first_event" ->
-        new_events = get_new_events(events, 0, write_pointer, capacity)
-
-        case new_events do
-          [] ->
-            {:ok, [events: [], last_event_id: event_id]}
-
-          _ ->
-            last_event_id =
-              new_events
-              |> Enum.at(-1)
-              |> CloudEvent.id!()
-
-            {:ok, [events: new_events, last_event_id: last_event_id]}
-        end
-
-      event_id ->
-        events |> return_events(event_id, write_pointer, capacity)
-    end
-  end
-
-  @spec insert_or_update(List.t(), number, any()) :: List.t()
-  defp insert_or_update(buffer, index, element) do
-    if index >= length(buffer) do
-      List.insert_at(buffer, index, element)
+    if length(newer_events) == capacity do
+      {:no_such_event, [not_found_id: event_id, last_event_id: last_event_id]}
     else
-      List.replace_at(buffer, index, element)
+      newer_events_asc = Enum.reverse(newer_events)
+      {:ok, [events: newer_events_asc, last_event_id: last_event_id]}
     end
-  end
-
-  defp get_new_events(events, read_pointer, write_pointer, _capacity)
-       when read_pointer < write_pointer do
-    get_between(events, read_pointer, write_pointer)
-  end
-
-  defp get_new_events(events, read_pointer, write_pointer, capacity)
-       when read_pointer > write_pointer do
-    get_between(events, read_pointer, capacity) ++ get_between(events, 0, read_pointer - 2)
-  end
-
-  defp get_new_events(_events, read_pointer, write_pointer, _capacity)
-       when read_pointer == write_pointer do
-    []
-  end
-
-  defp return_events(events, event_id, write_pointer, capacity) do
-    case Enum.find_index(events, fn x -> CloudEvent.id!(x) == event_id end) do
-      nil ->
-        last_event_id =
-          events
-          |> Enum.at(0)
-          |> CloudEvent.id!()
-
-        {:no_such_event, [not_found_id: event_id, last_event_id: last_event_id]}
-
-      event_index ->
-        read_pointer = rem(event_index + 1, capacity)
-        new_events = get_new_events(events, read_pointer, write_pointer, capacity)
-
-        new_events |> get_return_value(event_id)
-    end
-  end
-
-  defp get_return_value(events, event_id) when events == [] do
-    {:ok, [events: [], last_event_id: event_id]}
-  end
-
-  defp get_return_value(events, _event_id) do
-    last_event_id =
-      events
-      |> Enum.at(-1)
-      |> CloudEvent.id!()
-
-    {:ok, [events: events, last_event_id: last_event_id]}
-  end
-
-  @spec get_between(List.t(), number, number) :: List.t()
-  defp get_between(_buffer, _from_index, to_index) when to_index < 0 do
-    []
-  end
-
-  defp get_between(buffer, from_index, to_index) do
-    {front_buffer, _rest} = Enum.split(buffer, to_index)
-    {_rest, inbetween_buffer} = Enum.split(front_buffer, from_index)
-    inbetween_buffer
   end
 end

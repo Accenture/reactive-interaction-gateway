@@ -69,6 +69,7 @@
   "stubr": {:hex, :stubr, "1.5.1", "6c710a66089c0b0393d29050b4294b46541baaae3ea7f8ff16925f13323e061e", [:mix], [], "hexpm"},
   "supervisor3": {:hex, :supervisor3, "1.1.8", "5cf95c95342b589ec8d74689eea0646c0a3eb92820241e0c2d0ca4c104df92bc", [:make, :rebar, :rebar3], [], "hexpm"},
   "timex": {:hex, :timex, "3.5.0", "b0a23167da02d0fe4f1a4e104d1f929a00d348502b52432c05de875d0b9cffa5", [:mix], [{:combine, "~> 0.10", [hex: :combine, repo: "hexpm", optional: false]}, {:gettext, "~> 0.10", [hex: :gettext, repo: "hexpm", optional: false]}, {:tzdata, "~> 0.1.8 or ~> 0.5", [hex: :tzdata, repo: "hexpm", optional: false]}], "hexpm"},
+  "typed_struct": {:hex, :typed_struct, "0.1.4", "25971ce73a8b336dedf2f80e4dafaab111af127ba4773955b66805c89e197f6a", [:mix], [], "hexpm"},
   "tzdata": {:hex, :tzdata, "0.5.20", "304b9e98a02840fb32a43ec111ffbe517863c8566eb04a061f1c4dbb90b4d84c", [:mix], [{:hackney, "~> 1.0", [hex: :hackney, repo: "hexpm", optional: false]}], "hexpm"},
   "unicode_util_compat": {:hex, :unicode_util_compat, "0.4.1", "d869e4c68901dd9531385bb0c8c40444ebf624e60b6962d95952775cac5e90cd", [:rebar3], [], "hexpm"},
   "uuid": {:hex, :uuid, "1.1.8", "e22fc04499de0de3ed1116b770c7737779f226ceefa0badb3592e64d5cfb4eb9", [:mix], [], "hexpm"},
