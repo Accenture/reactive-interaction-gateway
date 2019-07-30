@@ -53,9 +53,8 @@ defmodule RigInboundGatewayWeb.EventBufferTest do
     third_event = new_event("third")
     buffer = buffer |> EventBuffer.add_event(third_event)
 
-    # The first event is no longer in the buffer
-    # due to max size of the buffer (all_events doesn't provide the correct order tho)
-    assert buffer |> EventBuffer.all_events() == [third_event, second_event]
+    # The first event is no longer in the buffer, due to max size of the buffer:
+    assert buffer |> EventBuffer.all_events() == [second_event, third_event]
     # "third" is now more recent than "second", but there is no event newer than "third":
     {:ok, [events: events, last_event_id: last_event_id]} =
       buffer |> EventBuffer.events_since("second")
