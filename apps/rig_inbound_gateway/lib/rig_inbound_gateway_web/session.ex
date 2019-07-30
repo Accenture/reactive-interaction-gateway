@@ -27,7 +27,7 @@ defmodule RigInboundGatewayWeb.Session do
   end
 
   def recv_events(server, last_event_id) do
-    GenServer.call(server, {:recv_events, last_event_id || "first_event", 0}, 20_000)
+    GenServer.call(server, {:recv_events, last_event_id, 0}, 20_000)
   end
 
   # ---
@@ -111,6 +111,11 @@ defmodule RigInboundGatewayWeb.Session do
   # Waits for events and replies them if available (same as above, but as handle_info)
   @impl true
   def handle_info({:recv_events, from, last_event_id, tries}, state) do
+    state = %{
+      state
+      | session_valid_until: DateTime.add(DateTime.utc_now(), @session_timeout_ms, :millisecond)
+    }
+
     case EventBuffer.events_since(state.event_buffer, last_event_id) do
       {:ok, [events: [], last_event_id: last_event_id]} ->
         case tries do
