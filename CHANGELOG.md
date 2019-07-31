@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Security -->
 
+### Technical Improvements
+
+- Upgrade the Elixir and Erlang versions for source code and Docker images.
+
 ## [2.2.1] - 2019-06-21
 
 ### Changed
