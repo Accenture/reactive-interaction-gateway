@@ -60,10 +60,18 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
       |> put_status(200)
       |> text(Jason.encode!("ok"))
     else
-      {:error, message} ->
+      {:error, {:bad_request, message}} ->
         conn
         |> put_status(:bad_request)
-        |> text("PARSE ERROR: #{inspect(message)}; SENT PARAMS: #{inspect(conn.query_params)})")
+        |> text(message)
+
+      error ->
+        msg = "Failed to initialize long polling connection"
+        Logger.error(fn -> "#{msg}: #{inspect(error)}" end)
+
+        conn
+        |> put_status(:internal_server_error)
+        |> text("Internal server error: #{msg}.")
     end
   end
 

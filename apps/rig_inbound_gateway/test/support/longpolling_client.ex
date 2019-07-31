@@ -27,10 +27,10 @@ defmodule LongpollingClient do
         URI.encode_query(params)
       }"
 
-    response = HTTPoison.get!(url)
+    %{status_code: 200, headers: headers} = HTTPoison.get!(url)
 
     cookies =
-      for({"set-cookie", val} <- response.headers, do: val)
+      for({"set-cookie", val} <- headers, do: val)
       |> Enum.join("; ")
 
     {:ok, cookies}
@@ -44,15 +44,14 @@ defmodule LongpollingClient do
 
     url = "http://#{hostname}:#{eventhub_port}/_rig/v1/connection/longpolling"
 
-    response = HTTPoison.get!(url, %{}, hackney: [cookie: cookies], recv_timeout: 60_000)
+    %{status_code: 200, headers: headers, body: body} =
+      HTTPoison.get!(url, %{}, hackney: [cookie: cookies], recv_timeout: 60_000)
 
     cookies =
-      for({"set-cookie", val} <- response.headers, do: val)
+      for({"set-cookie", val} <- headers, do: val)
       |> Enum.join("; ")
 
-    response_body = response.body |> Jason.decode!()
-    events = response_body["events"]
-
+    %{"events" => events} = Jason.decode!(body)
     {:ok, events, cookies}
   end
 end

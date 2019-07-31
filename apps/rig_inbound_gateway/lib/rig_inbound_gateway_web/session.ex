@@ -70,7 +70,7 @@ defmodule RigInboundGatewayWeb.Session do
        }}
     else
       {:error, %Subscriptions.Error{} = e} ->
-        {:stop, Exception.message(e)}
+        {:stop, {:bad_request, Exception.message(e)}}
     end
   end
 
