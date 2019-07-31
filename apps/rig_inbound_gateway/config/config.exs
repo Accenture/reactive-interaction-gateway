@@ -146,6 +146,10 @@ config :rig, RigInboundGateway.RequestLogger.Kafka,
   log_topic: {:system, "KAFKA_LOG_TOPIC", "rig-request-log"},
   log_schema: {:system, "KAFKA_LOG_SCHEMA", ""}
 
+config :rig, RigInboundGateway.RequestLogger.ConfigValidation,
+  active_loggers: {:system, :list, "REQUEST_LOG", []},
+  brokers: {:system, :list, "KAFKA_BROKERS", []}
+
 # --------------------------------------
 # Authorization Token (JWT)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

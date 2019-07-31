@@ -1,4 +1,4 @@
-defmodule RIG.ConfigValidation do
+defmodule RigInboundGateway.RequestLogger.ConfigValidation do
   @moduledoc """
   Module responsible for global validation of environment variables and provides utility
   functions to validate configuration in respective modules.
@@ -20,18 +20,20 @@ defmodule RIG.ConfigValidation do
 
   # ---
 
-  @spec validate_value_difference(String.t(), [String.t(), ...], [String.t(), ...])
-   :: :ok | :shutdown
+  @spec validate_value_difference(String.t(), [String.t(), ...], [String.t(), ...]) ::
+          :ok | :shutdown
   def validate_value_difference(env_var_name, env_var_value, expected_value) do
+    filtered_env_var_value = Enum.filter(env_var_value, &(&1 != ""))
+
     is_empty? =
-      MapSet.new(env_var_value)
+      MapSet.new(filtered_env_var_value)
       |> MapSet.difference(MapSet.new(expected_value))
       |> Enum.empty?()
 
     if !is_empty? do
       Logger.error(fn ->
         "Invalid configuration for=#{env_var_name} expected=#{inspect(expected_value)} found=#{
-          inspect(env_var_value)
+          inspect(filtered_env_var_value)
         }"
       end)
 
@@ -43,16 +45,23 @@ defmodule RIG.ConfigValidation do
 
   # ---
 
-  @spec validate_dependent_value(String.t(), String.t(), String.t(), [String.t(), ...])
-   :: :ok | :shutdown
-  def validate_dependent_value(env_var_name, env_var_value, depedency_env_var_name, dependency_env_var_value) do
+  @spec validate_dependent_value(String.t(), String.t(), String.t(), [String.t(), ...]) ::
+          :ok | :shutdown
+  def validate_dependent_value(
+        env_var_name,
+        env_var_value,
+        depedency_env_var_name,
+        dependency_env_var_value
+      ) do
     is_empty? =
       dependency_env_var_value
       |> Enum.empty?()
 
     if is_empty? do
       Logger.error(fn ->
-        "Configuration for=#{env_var_name} is set to=#{env_var_value}, but required configuration=#{depedency_env_var_name} is empty"
+        "Configuration for=#{env_var_name} is set to=#{env_var_value}, but required configuration=#{
+          depedency_env_var_name
+        } is empty"
       end)
 
       exit(:shutdown)

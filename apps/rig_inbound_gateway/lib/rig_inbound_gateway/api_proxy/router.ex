@@ -12,7 +12,6 @@ defmodule RigInboundGateway.ApiProxy.Router do
 
   alias Plug.Conn
 
-  alias RIG.ConfigValidation
   alias RIG.Plug.BodyReader
   alias RigInboundGateway.ApiProxy.Api
   alias RigInboundGateway.ApiProxy.Auth
@@ -21,6 +20,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   alias RigInboundGateway.ApiProxy.Handler.Kinesis, as: KinesisHandler
   alias RigInboundGateway.ApiProxy.Serializer
   alias RigInboundGateway.Proxy
+  alias RigInboundGateway.RequestLogger.ConfigValidation
   alias RigMetrics.ProxyMetrics
 
   plug(:match)

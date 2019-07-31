@@ -62,10 +62,6 @@ config :rig, Rig.Connection.Codec,
   codec_secret_key: {:system, "NODE_COOKIE", nil},
   codec_default_key: "7tsf4Y6GTOfPY1iDo4PqZA=="
 
-config :rig, RIG.ConfigValidation,
-  active_loggers: {:system, :list, "REQUEST_LOG", []},
-  brokers: {:system, :list, "KAFKA_BROKERS", []}
-
 config :porcelain, driver: Porcelain.Driver.Basic
 
 import_config "#{Mix.env()}.exs"
