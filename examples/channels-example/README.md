@@ -56,7 +56,7 @@ RIG is now available on ports `7000` and `7010`.
 
 **Terminal 2:** Start Service (from service directory)
 
-```
+```sh
 # Go to service folder
 npm i
 npm start
@@ -66,7 +66,7 @@ Service is now available on port `8000`.
 
 **Terminal 3:** Start Frontend (from frontend directory)
 
-```
+```sh
 # Go to frontend folder
 npm i
 npm start # Should automatically open browser window with http://localhost:3000
@@ -74,7 +74,7 @@ npm start # Should automatically open browser window with http://localhost:3000
 
 Add new API to RIG. REST API calls from Frontend goes through RIG to external services, thus we need to tell RIG that such API exists (or define it in initial JSON file). At the same time by this we are testing proxy part of RIG.
 
-```
+```sh
 curl -X "POST" \
 -H "Content-Type: application/json" \
 -d "{\"id\":\"kafka-service\",\"name\":\"kafka-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kafka-producer-endpoint\",\"path\":\"/produce\",\"method\":\"POST\",\"secured\":false}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localhost\",\"port\":8000}}" \

@@ -17,4 +17,6 @@ guides/
 /kinesis-client/target/
 /logo/
 /smoke_tests/
+/deployment/
+/integration_tests/
 /website/
