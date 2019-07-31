@@ -48,7 +48,7 @@ defmodule RigInboundGateway.ProxyTest do
                 %{
                   "id" => id <> "1",
                   "method" => "GET",
-                  "not_secured" => true,
+                  "secured" => false,
                   "path" => "/foo"
                 }
               ]

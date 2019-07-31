@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Changed -->
 
+### Fixed
+
+- [Proxy] Fixed Kafka request logger in proxy -- now supports also Apache Avro. [#170](https://github.com/Accenture/reactive-interaction-gateway/issues/170)
+
 <!-- ### Deprecated -->
 
 <!-- ### Removed -->

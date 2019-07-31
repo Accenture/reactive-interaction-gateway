@@ -6,7 +6,7 @@ Application.put_env(:rig, RigApi.ApisController,
 {:ok, _} = Application.ensure_all_started(:fake_server)
 ExUnit.start()
 
-ExUnit.configure(exclude: [smoke: true, kafka: true, kinesis: true])
+ExUnit.configure(exclude: [smoke: true, kafka: true, kinesis: true, avro: true])
 
 # case Mix.env() do
 #   :prod ->
