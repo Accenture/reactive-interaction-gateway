@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Automated UI-tests using Cypress make sure that all examples work and that code changes do not introduce any unintended API changes.
   [#227](https://github.com/Accenture/reactive-interaction-gateway/issues/227)
+- Refactor JWT related code in favor of `RIG.JWT`.
+  [#244](https://github.com/Accenture/reactive-interaction-gateway/pull/244)
 
 ## [2.2.1] - 2019-06-21
 

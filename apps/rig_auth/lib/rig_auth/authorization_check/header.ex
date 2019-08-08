@@ -2,8 +2,9 @@ defmodule RigAuth.AuthorizationCheck.Header do
   @moduledoc false
 
   alias Plug
+
+  alias RIG.JWT
   alias RigAuth.AuthorizationCheck.Request
-  alias RigAuth.Jwt.Utils, as: Jwt
 
   # ---
 
@@ -11,7 +12,7 @@ defmodule RigAuth.AuthorizationCheck.Header do
   def any_valid_bearer_token?(request)
 
   def any_valid_bearer_token?(%{auth_info: %{auth_tokens: tokens}}) do
-    for({"bearer", token} <- tokens, do: Jwt.valid?(token))
+    for({"bearer", token} <- tokens, do: JWT.valid?(token))
     |> Enum.any?()
   end
 
