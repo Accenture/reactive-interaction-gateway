@@ -37,6 +37,25 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   @impl :cowboy_websocket
   def websocket_init(%{query_params: query_params} = state) do
+    jwt = query_params["jwt"]
+    subscriptions_json = query_params["subscriptions"]
+
+    auth_info =
+      case jwt do
+        jwt when byte_size(jwt) > 0 ->
+          %{auth_header: "Bearer #{jwt}", auth_tokens: [{"bearer", jwt}]}
+
+        _ ->
+          nil
+      end
+
+    request = %{
+      auth_info: auth_info,
+      query_params: "",
+      content_type: "application/json; charset=utf-8",
+      body: subscriptions_json
+    }
+
     on_success = fn subscriptions ->
       # Say "hi", enter the loop and wait for cloud events to forward to the client:
       state = %{subscriptions: subscriptions}
@@ -57,7 +76,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
     ConnectionInit.set_up(
       "WS",
-      query_params,
+      request,
       on_success,
       on_error,
       @heartbeat_interval_ms,

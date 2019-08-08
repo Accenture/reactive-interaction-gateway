@@ -25,8 +25,27 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   @impl :cowboy_loop
   def init(req, :ok = state) do
-    query_params = req |> :cowboy_req.parse_qs() |> Enum.into(%{})
     conf = config()
+
+    query_params = req |> :cowboy_req.parse_qs() |> Enum.into(%{})
+    jwt = query_params["jwt"]
+    subscriptions_json = query_params["subscriptions"]
+
+    auth_info =
+      case jwt do
+        jwt when byte_size(jwt) > 0 ->
+          %{auth_header: "Bearer #{jwt}", auth_tokens: [{"bearer", jwt}]}
+
+        _ ->
+          nil
+      end
+
+    request = %{
+      auth_info: auth_info,
+      query_params: "",
+      content_type: "application/json; charset=utf-8",
+      body: subscriptions_json
+    }
 
     on_success = fn subscriptions ->
       # Tell the client the request is good and the response is chunked:
@@ -58,7 +77,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
     ConnectionInit.set_up(
       "SSE",
-      query_params,
+      request,
       on_success,
       on_error,
       @heartbeat_interval_ms,
