@@ -5,8 +5,9 @@ defmodule RigApi.ChannelsController do
   """
   use RigApi, :controller
   require Logger
+
+  alias RIG.JWT
   alias RigAuth.Blacklist
-  alias RigAuth.Jwt
   alias RigInboundGatewayWeb.Endpoint
 
   def list_channels(conn, _params) do
@@ -44,7 +45,7 @@ defmodule RigApi.ChannelsController do
   defp jwt_expiry_from_tokens([]), do: nil
 
   defp jwt_expiry_from_tokens([token]) do
-    {:ok, %{"exp" => expiry}} = Jwt.Utils.decode(token)
+    {:ok, %{"exp" => expiry}} = JWT.parse_token(token)
 
     expiry
     # Comes as int, convert to string
