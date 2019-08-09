@@ -65,7 +65,6 @@ defmodule RigInboundGateway.EventSubscription.ExternalCheckTest do
     end
   end
 
-  @tag :wip
   test_with_server "The external service can accept a subscription.",
     port: @fake_validation_service_port do
     # The fake subscription-validation service accepts anything:
@@ -89,7 +88,6 @@ defmodule RigInboundGateway.EventSubscription.ExternalCheckTest do
     end
   end
 
-  @tag :wip
   test_with_server "The external service can deny a subscription.",
     port: @fake_validation_service_port do
     # The fake subscription-validation service denies anything:
@@ -115,7 +113,6 @@ defmodule RigInboundGateway.EventSubscription.ExternalCheckTest do
     end
   end
 
-  @tag :wip
   test_with_server "The external service receives the Authorization header.",
     port: @fake_validation_service_port do
     # The fake subscription-validation service accepts anything:
@@ -123,22 +120,48 @@ defmodule RigInboundGateway.EventSubscription.ExternalCheckTest do
       %{headers: %{"authorization" => "Bearer " <> jwt}} when byte_size(jwt) > 0 ->
         Response.ok!("Ok")
 
-      _ ->
-        Response.bad_request!("NO WAY!")
+      %{headers: headers} ->
+        Response.bad_request!(
+          "Expected a bearer token in the Authorization header, got: #{inspect(headers)}"
+        )
     end)
 
     jwt = JWT.encode(%{})
 
     for client <- @clients do
-      # Is accepted when passed immediately:
       {:ok, ref} = client.connect()
       {welcome_event, ref} = client.read_welcome_event(ref)
+
+      assert :ok =
+               welcome_event
+               |> connection_id()
+               |> update_subscriptions([%{"eventType" => "greeting"}], jwt)
+
+      {_, ref} = client.read_subscriptions_set_event(ref)
+
+      client.disconnect(ref)
+    end
+  end
+
+  test_with_server "The external service receives the subscriptions in the request body.",
+    port: @fake_validation_service_port do
+    # The fake subscription-validation service:
+    route("/", fn %{body: body} ->
+      %{"subscriptions" => [%{"eventType" => "greeting"}]} = body
+      Response.ok!()
+    end)
+
+    for client <- @clients do
+      # Is accepted when passed immediately:
+      {:ok, ref} = client.connect(subscriptions: [%{"eventType" => "greeting"}])
+      {welcome_event, ref} = client.read_welcome_event(ref)
+      {_, ref} = client.read_subscriptions_set_event(ref)
 
       # Is also accepted when using the subscriptions endpoint:
       assert :ok =
                welcome_event
                |> connection_id()
-               |> update_subscriptions([%{"eventType" => "greeting2"}], jwt)
+               |> update_subscriptions([%{"eventType" => "greeting"}])
 
       {_, ref} = client.read_subscriptions_set_event(ref)
 
