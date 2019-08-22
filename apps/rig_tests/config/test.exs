@@ -7,7 +7,6 @@ config :rig, :systest_kafka_config, %{
 
 config :rig, RigTests.Proxy.ResponseFrom.KafkaTest,
   server_id: :rig_proxy_responsefrom_kafkatest_genserver,
-  client_id: :rig_proxy_responsefrom_kafkatest_brod_client,
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
   serializer: {:system, "KAFKA_SERIALIZER", nil},
@@ -28,7 +27,6 @@ config :rig, RigTests.Proxy.ResponseFrom.KafkaTest,
 
 config :rig, RigTests.Proxy.PublishToEventStream.KafkaTest,
   server_id: :rig_proxy_publish_kafkatest_genserver,
-  client_id: :rig_proxy_publish_kafkatest_brod_client,
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
   serializer: {:system, "KAFKA_SERIALIZER", nil},
@@ -48,7 +46,6 @@ config :rig, RigTests.Proxy.PublishToEventStream.KafkaTest,
 
 config :rig, RigTests.Avro.AvroTest,
   server_id: :rig_avro_kafkatest_genserver,
-  client_id: :rig_avro_kafkatest_brod_client,
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
   serializer: {:system, "KAFKA_SERIALIZER", nil},
@@ -68,7 +65,6 @@ config :rig, RigTests.Avro.AvroTest,
 
 config :rig, RigTests.Proxy.RequestLogger.KafkaTest,
   server_id: :rig_proxy_logger_kafkatest_genserver,
-  client_id: :rig_proxy_logger_kafkatest_brod_client,
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
   serializer: {:system, "KAFKA_SERIALIZER", nil},

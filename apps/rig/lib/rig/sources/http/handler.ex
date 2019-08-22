@@ -40,31 +40,32 @@ defmodule RIG.Sources.HTTP.Handler do
   #
   # Well not so efficient in our case, since we have to transcode everything anyway..
   defp handle_binary_mode(conn) do
-    with ["0.2"] <- Conn.get_req_header(conn, "ce-specversion") do
-      {conn, json} = build_cloudevent_json(conn)
+    case Conn.get_req_header(conn, "ce-specversion") do
+      ["0.2"] ->
+        {conn, json} = build_cloudevent_json(conn)
 
-      json
-      |> CloudEvent.parse()
-      |> case do
-        {:ok, cloud_event} ->
-          handle_event(conn, cloud_event)
+        json
+        |> CloudEvent.parse()
+        |> case do
+          {:ok, cloud_event} ->
+            handle_event(conn, cloud_event)
 
-        {:error, reason} ->
-          conn
-          |> put_status(:bad_request)
-          |> text("""
-          Your request looks like it's using the CloudEvents binary content mode \
-          but can't be parsed (#{inspect(reason)}). Please make sure you're \
-          passing the headers according to the spec:
+          {:error, reason} ->
+            conn
+            |> put_status(:bad_request)
+            |> text("""
+            Your request looks like it's using the CloudEvents binary content mode \
+            but can't be parsed (#{inspect(reason)}). Please make sure you're \
+            passing the headers according to the spec:
 
-          HTTP Transport Binding for CloudEvents
-          https://github.com/cloudevents/spec/blob/master/http-transport-binding.md
+            HTTP Transport Binding for CloudEvents
+            https://github.com/cloudevents/spec/blob/master/http-transport-binding.md
 
-          Request headers:
-          #{for {k, v} <- conn.req_headers, into: "", do: "  #{k}: #{v}\n"}
-          """)
-      end
-    else
+            Request headers:
+            #{for {k, v} <- conn.req_headers, into: "", do: "  #{k}: #{v}\n"}
+            """)
+        end
+
       ce_specversion_headers ->
         conn
         |> put_status(:bad_request)

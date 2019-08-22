@@ -40,7 +40,7 @@ defmodule RigKafka.MixProject do
       # For Kafka, partition from MurmurHash(key):
       {:murmur, "~> 1.0"},
       # Apache Avro encoding/decoding library:
-      {:erlavro, "~> 2.6.3"},
+      {:erlavro, "~> 2.6"},
       # Apache Kafka Schema Registry wrapper library:
       {:schemex, "~> 0.1.1"},
       # Caching library using ETS:
