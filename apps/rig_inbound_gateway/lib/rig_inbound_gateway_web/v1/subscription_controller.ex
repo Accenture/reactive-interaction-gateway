@@ -85,8 +85,9 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
          {:ok, body, conn} <- BodyReader.read_full_body(conn),
          {:ok, json} <- Jason.decode(body),
          {:parse, %{"subscriptions" => subscriptions}} <- {:parse, json} do
-      Plug.Conn.assign(conn, :body, body)
-      Plug.Conn.assign(conn, :subscriptions, subscriptions)
+      conn
+      |> Plug.Conn.assign(:body, body)
+      |> Plug.Conn.assign(:subscriptions, subscriptions)
     else
       {:parse, json} ->
         message = """

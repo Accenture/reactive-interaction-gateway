@@ -29,9 +29,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
         subscription_refresh_interval_ms
       ) do
     Logger.debug(fn ->
-      "new #{conn_type} connection (pid=#{inspect(self())}, params=#{
-        inspect(request.query_params)
-      })"
+      "new #{conn_type} connection (pid=#{inspect(self())}, params=#{inspect(request)})"
     end)
 
     jwt =
@@ -64,4 +62,27 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
         on_error.("Subscription denied (not authorized).")
     end
   end
+
+  # ---
+
+  @spec subscriptions_query_param_to_body(map) :: {:ok, String.t()} | {:error, String.t()}
+  def subscriptions_query_param_to_body(query_params)
+
+  def subscriptions_query_param_to_body(%{"subscriptions" => json_list})
+      when byte_size(json_list) > 0 do
+    case Jason.decode(json_list) do
+      {:ok, list} ->
+        Jason.encode(%{"subscriptions" => list})
+        |> Result.map_err(fn ex ->
+          msg = "Failed to encode subscriptions body from query parameters"
+          Logger.warn("#{msg}: #{Exception.message(ex)}")
+          "#{msg} (please see server logs for details)."
+        end)
+
+      {:error, %Jason.DecodeError{} = ex} ->
+        {:error, "Failed to decode subscription list: #{Exception.message(ex)}"}
+    end
+  end
+
+  def subscriptions_query_param_to_body(_), do: {:ok, nil}
 end
