@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :rig_api, RigApi.Endpoint,
+config :rig, RigApi.Endpoint,
   env: :test,
   https: [
     certfile: "cert/selfsigned.pem",

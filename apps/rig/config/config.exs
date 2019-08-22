@@ -65,3 +65,5 @@ config :rig, Rig.Connection.Codec,
 config :porcelain, driver: Porcelain.Driver.Basic
 
 import_config "#{Mix.env()}.exs"
+
+import_config "rig_api/config.exs"

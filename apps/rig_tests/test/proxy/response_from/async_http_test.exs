@@ -15,7 +15,7 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
   alias FakeServer.Response
 
   @endpoint RigApi.Endpoint
-  @api_port Confex.fetch_env!(:rig_api, RigApi.Endpoint)[:http][:port]
+  @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
   @proxy_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][:port]
 
   test_with_server "Given response_from is set to http_async, the http response is taken from the internal HTTP endpoint." do

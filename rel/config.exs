@@ -54,7 +54,6 @@ release :rig do
     applications: [
       :runtime_tools,
       rig: :permanent,
-      rig_api: :permanent,
       rig_auth: :permanent,
       rig_cloud_events: :permanent,
       rig_kafka: :permanent,

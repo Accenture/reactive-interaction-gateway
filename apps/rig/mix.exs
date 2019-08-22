@@ -17,9 +17,13 @@ defmodule Rig.MixProject do
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
       aliases: aliases(),
+      elixirc_paths: elixirc_paths(Mix.env()),
       test_paths: test_paths(Mix.env())
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp test_paths(_), do: ["."]
 
@@ -27,7 +31,7 @@ defmodule Rig.MixProject do
   def application do
     [
       mod: {Rig.Application, []},
-      extra_applications: [:logger],
+      extra_applications: [:logger, :runtime_tools],
       included_applications: [:peerage]
     ]
   end
@@ -70,7 +74,13 @@ defmodule Rig.MixProject do
       # For property-based testing:
       {:stream_data, "~> 0.1", only: :test},
       # For JSON Web Tokens:
-      {:joken, "~> 1.5"}
+      {:joken, "~> 1.5"},
+      # Web framework, for all HTTP endpoints except SSE and WS:
+      {:phoenix, "~> 1.4"},
+      {:plug_cowboy, "~> 2.0"},
+      {:phoenix_swagger, "~> 0.8"},
+      # Mock library for testing:
+      {:mox, "~> 0.4", only: :test}
     ]
   end
 

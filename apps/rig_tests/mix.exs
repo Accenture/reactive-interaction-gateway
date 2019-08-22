@@ -36,7 +36,7 @@ defmodule RigTests.MixProject do
 
   defp deps do
     [
-      {:rig_api, in_umbrella: true},
+      {:rig, in_umbrella: true},
       {:rig_inbound_gateway, in_umbrella: true},
       {:rig_kafka, in_umbrella: true},
       {:fake_server, "~> 2.0", only: :test}

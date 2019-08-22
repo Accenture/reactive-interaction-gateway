@@ -49,7 +49,7 @@ defmodule RigApi.Router do
 
   scope "/swagger-ui" do
     forward("/", PhoenixSwagger.Plug.SwaggerUI,
-      otp_app: :rig_api,
+      otp_app: :rig,
       swagger_file: "rig_api_swagger.json"
     )
   end
@@ -57,7 +57,7 @@ defmodule RigApi.Router do
   def swagger_info do
     %{
       info: %{
-        version: RigApi.Mixfile.project()[:version],
+        version: Rig.MixProject.project()[:version],
         title: "Reactive Interaction Gateway: API",
         description: """
         The Reactive Interaction Gateway provides an API that allows backend services

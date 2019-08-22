@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :rig_api, RigApi.Endpoint,
+config :rig, RigApi.Endpoint,
   env: :prod,
   check_origin: false,
   https: [

@@ -13,7 +13,7 @@ defmodule RigTests.Proxy.ResponseFrom.KinesisTest do
   import FakeServer
   alias FakeServer.HTTP.Response
 
-  @api_port Confex.fetch_env!(:rig_api, RigApi.Endpoint)[:http][:port]
+  @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
   @proxy_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][:port]
 
   # TODO kinesis config

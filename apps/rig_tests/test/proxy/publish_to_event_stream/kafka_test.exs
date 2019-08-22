@@ -18,7 +18,7 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
   alias Rig.KafkaConfig, as: RigKafkaConfig
   alias RigKafka
 
-  @api_port Confex.fetch_env!(:rig_api, RigApi.Endpoint)[:http][:port]
+  @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
   @proxy_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][:port]
   @proxy_host Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:url][:host]
 

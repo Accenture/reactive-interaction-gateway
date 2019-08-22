@@ -5,7 +5,7 @@
 # is restricted to this project.
 use Mix.Config
 
-config :rig_api, :generators,
+config :rig, :generators,
   context_app: :rig_outbound_gateway,
   migration: false
 
@@ -18,7 +18,7 @@ cowboy_options = [
   max_header_value_length: 16_384
 ]
 
-config :rig_api, RigApi.Endpoint,
+config :rig, RigApi.Endpoint,
   server: true,
   url: [
     host: {:system, "HOST", "localhost"}
@@ -47,7 +47,7 @@ config :rig, RigApi.ApisController, rig_proxy: RigInboundGateway.Proxy
 
 config :rig, :event_filter, Rig.EventFilter
 
-config :rig_api, :phoenix_swagger,
+config :rig, :phoenix_swagger,
   swagger_files: %{
     "priv/static/rig_api_swagger.json" => [
       # phoenix routes will be converted to swagger paths

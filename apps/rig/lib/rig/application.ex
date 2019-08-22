@@ -16,10 +16,17 @@ defmodule Rig.Application do
       Spec.supervisor(Phoenix.PubSub.PG2, [Rig.PubSub, []]),
       Rig.EventFilter.Sup,
       Rig.EventStream.KafkaToFilter,
-      Rig.EventStream.KafkaToHttp
+      Rig.EventStream.KafkaToHttp,
+      RigApi.Endpoint
     ]
 
     opts = [strategy: :one_for_one, name: Rig.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  # Phoenix callback for RigApi
+  def config_change(changed, _new, removed) do
+    RigApi.Endpoint.config_change(changed, removed)
+    :ok
   end
 end

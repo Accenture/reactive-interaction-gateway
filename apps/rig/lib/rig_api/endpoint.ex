@@ -1,5 +1,5 @@
 defmodule RigApi.Endpoint do
-  use Phoenix.Endpoint, otp_app: :rig_api
+  use Phoenix.Endpoint, otp_app: :rig
   use Rig.Config
 
   alias Rig.Config

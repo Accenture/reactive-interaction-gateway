@@ -5,7 +5,7 @@ defmodule RigTests.SessionsTest do
   """
   use ExUnit.Case, async: false
 
-  @api_port Confex.fetch_env!(:rig_api, RigApi.Endpoint)[:http][:port]
+  @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
 
   describe "With the legacy API," do
     test "GET /v1/users returns the list of users." do
