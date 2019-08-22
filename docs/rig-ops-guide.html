@@ -64,7 +64,7 @@
 <tbody>
 <tr><td><code>API_HTTP_PORT</code></td><td>Port at which RIG exposes internal APIs such as API Proxy management or user connections management.</td><td>4010</td></tr>
 <tr><td><code>API_HTTPS_PORT</code></td><td>Same as <code>API_HTTP_PORT</code>, but encrypted. See <code>HTTPS_CERTFILE</code>, <code>HTTPS_KEYFILE</code>, <code>HTTPS_KEYFILE_PASS</code>.</td><td>4011</td></tr>
-<tr><td><code>INBOUND_PORT</code></td><td>Port at which RIG exposes proxy and websocket/sse communication.</td><td>4000</td></tr>
+<tr><td><code>INBOUND_PORT</code></td><td>Port at which RIG exposes proxy and websocket/sse/longpolling communication.</td><td>4000</td></tr>
 <tr><td><code>INBOUND_HTTPS_PORT</code></td><td>Same as <code>INBOUND_PORT</code>, but encrypted. See <code>HTTPS_CERTFILE</code>, <code>HTTPS_KEYFILE</code>, <code>HTTPS_KEYFILE_PASS</code>.</td><td>4001</td></tr>
 <tr><td><code>HTTPS_CERTFILE</code></td><td>Path to the public HTTPS certificate (PEM format). If set, HTTPS is enabled for all endpoints.</td><td>&quot;&quot;</td></tr>
 <tr><td><code>HTTPS_KEYFILE</code></td><td>Path to the HTTPS certificate's private key (PEM format). Also supports encrypted private keys; see <code>HTTPS_KEYFILE_PASS</code> and consult the Erlang documentation for supported ciphers (e.g. <a href="https://github.com/erlang/otp/blob/OTP-21.2/lib/public_key/src/pubkey_pbe.erl#L55">supported password ciphers in OTP 21.2</a>; note that as of OTP 21.1, using an unsupported cipher fails silently).</td><td>&quot;&quot;</td></tr>

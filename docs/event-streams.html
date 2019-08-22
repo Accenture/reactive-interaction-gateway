@@ -57,6 +57,14 @@
         </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Publishing Events towards Frontends</h1></header><article><div><span><p>RIG supports various ways to publish an event towards frontends. The recommended way is to have RIG consume one or more Kafka topics, but RIG also support Kinesis as an alternative. For testing and low-traffic scenarios, RIG also provides an HTTP endpoint that can be used to send events to.</p>
 <h2><a class="anchor" aria-hidden="true" id="http"></a><a href="#http" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>HTTP</h2>
 <p>The HTTP endpoint is available on RIG's <a href="rig-ops-guide">internal port</a>. It supports JSON-encoded CloudEvents in <a href="event-format#http-transport-binding">structured and binary modes</a> (Avro is currently not supported).</p>
+<ul>
+<li>publishing via API Gateway to specific topic/stream, see <a href="./api-gateway#publishing-to-event-streams">Publishing to event streams</a> for more details
+<ul>
+<li>consuming of events from specific topic/stream to achieve sync requests</li>
+</ul></li>
+<li>consuming of events to be forwarded via SSE/WS/Longpolling</li>
+<li>publishing &quot;monitoring&quot; messages per API Gateway call</li>
+</ul>
 <p>Example usage (taken from the <a href="tutorial#4-create-a-new-chatroom-message-event-backend">tutorial</a>):</p>
 <pre><code class="hljs css language-bash">$ http post :4000/_rig/v1/events \
   specversion=0.2 \
@@ -77,15 +85,32 @@ content-type: application/json; charset=utf-8
 
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="kafka"></a><a href="#kafka" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Kafka</h2>
-<p>As described in the <a href="event-format#kafka-transport-binding">Event Format</a> Section, the Kafka consumer supports both structured and binary modes, each with JSON as well as Avro encoding (with details described in the <a href="avro">advanced guide on Avro</a>).</p>
-<p>All RIG nodes participate in the same Kafka consumer group and support automatic partition re-balancing in case new nodes are started or existing nodes go away.</p>
-<p>By default, there are no Kafka brokers configured. Look for Kafka related variables in the <a href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator's Guide</a> to enable the Kafka consumer.</p>
-<pre><code class="hljs css language-bash"><span class="hljs-comment"># Kafka disabled</span>
+<blockquote>
+<p><strong>NOTE:</strong> it's enough to set one Kafka broker, RIG will automatically discover rest of the Kafka cluster.</p>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="change-consumer-topics-and-group-id"></a><a href="#change-consumer-topics-and-group-id" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Change consumer topics and group ID</h3>
+<p>As Kafka is enabled, RIG starts to consume events on 2 default topics <code>rig</code> and <code>rig-proxy-response</code>. <code>rig</code> topic is used to consume all events and forward them to client via SSE/WS/Longpolling. <code>rig-proxy-response</code> is used for HTTP sync publishing, see <a href="./api-gateway#sync">API Gateway docs</a>.</p>
+<p>Change topics:</p>
+<pre><code class="hljs css language-bash"><span class="hljs-comment"># Single topic</span>
+docker run \
+-e KAFKA_BROKERS=kafka:9092 \
+-e KAFKA_SOURCE_TOPICS=my-topic \
+-e PROXY_KAFKA_RESPONSE_TOPICS=my-proxy-topic \
+accenture/reactive-interaction-gateway
+
+As described <span class="hljs-keyword">in</span> the [Event Format](event-format<span class="hljs-comment">#kafka-transport-binding) Section, the Kafka consumer supports both structured and binary modes, each with JSON as well as Avro encoding (with details described in the [advanced guide on Avro](avro)).</span>
+
+All RIG nodes participate <span class="hljs-keyword">in</span> the same Kafka consumer group and support automatic partition re-balancing <span class="hljs-keyword">in</span> <span class="hljs-keyword">case</span> new nodes are started or existing nodes go away.
+
+By default, there are no Kafka brokers configured. Look <span class="hljs-keyword">for</span> Kafka related variables <span class="hljs-keyword">in</span> the [Operator<span class="hljs-string">'s Guide](./rig-ops-guide.md) to enable the Kafka consumer.
+
+```bash
+# Kafka disabled
 docker run accenture/reactive-interaction-gateway
 
-<span class="hljs-comment"># Kafka enabled</span>
+# Kafka enabled
 docker run -e KAFKA_BROKERS=kafka:9092 accenture/reactive-interaction-gateway
-</code></pre>
+</span></code></pre>
 <blockquote>
 <p>Note that defining one Kafka broker is sufficient as RIG will automatically discover any connected brokers in the Kafka cluster.</p>
 </blockquote>
@@ -117,7 +142,7 @@ accenture/reactive-interaction-gateway
 <h2><a class="anchor" aria-hidden="true" id="kinesis"></a><a href="#kinesis" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Kinesis</h2>
 <p>The Kinesis consumer supports JSON-encoded CloudEvents in structured mode only.</p>
 <p>Internally, RIG uses Amazon's official Java client in order to support automatic re-balancing of shards in case of a changing network topology.</p>
-<p>In order to enable Kinesis, please make sure you're using an <code>-aws</code> tagged Docker image and refer to the <a href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator's Guide</a> for environment variables available to configure.</p>
+<p>In order to enable Kinesis, please make sure you're using an <code>-aws</code> tagged Docker image and refer to the <a href="./rig-ops-guide.md">Operator's Guide</a> for environment variables available to configure.</p>
 <pre><code class="hljs css language-bash"><span class="hljs-comment"># Kinesis disabled</span>
 docker run accenture/reactive-interaction-gateway:aws
 
@@ -128,6 +153,16 @@ docker run -e KINESIS_ENABLED=1 accenture/reactive-interaction-gateway
 docker run -e KINESIS_ENABLED=1 -e KINESIS_AWS_REGION=eu-west-3 accenture/reactive-interaction-gateway
 </code></pre>
 <p>The used consumer stream and the app name can be changed as well:</p>
+<h3><a class="anchor" aria-hidden="true" id="change-consumer-stream-and-app-name"></a><a href="#change-consumer-stream-and-app-name" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Change consumer stream and app name</h3>
+<p>As Kinesis is enabled, RIG starts to consume events on default stream <code>RIG-outbound</code>. <code>RIG-outbound</code> topic is used to consume all events and forward them to client via SSE/WS/Longpolling.</p>
+<p>Change stream:</p>
+<pre><code class="hljs css language-bash">docker run \
+-e KINESIS_ENABLED=1 \
+-e KINESIS_STREAM=my-stream \
+accenture/reactive-interaction-gateway:aws
+</code></pre>
+<p>In addition to stream, you can configure also app name. Kinesis is using value of <code>KINESIS_APP_NAME</code> as a name for DynamoDB table. DynamoDB is internally used by Amazon to handle leases and consumer groups. It's similar to group ID in Kafka.</p>
+<p>Change app name:</p>
 <pre><code class="hljs css language-bash">docker run \
 -e KINESIS_ENABLED=1 \
 -e KINESIS_STREAM=my-stream \
@@ -137,7 +172,7 @@ accenture/reactive-interaction-gateway:aws
 <blockquote>
 <p>The app name is used as the name for the corresponding DynamoDB table. The DynamoDB table is used by Kinesis to handle leases and consumer groups. It is similar to the Group ID in Kafka.</p>
 </blockquote>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/event-format.html"><span class="arrow-prev">← </span><span>Event Format</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/event-subscription.html"><span>Receiving Events</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#http">HTTP</a></li><li><a href="#kafka">Kafka</a><ul class="toc-headings"><li><a href="#ssl">SSL</a></li><li><a href="#sasl">SASL</a></li></ul></li><li><a href="#kinesis">Kinesis</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/event-format.html"><span class="arrow-prev">← </span><span>Event Format</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/event-subscription.html"><span>Receiving Events</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#http">HTTP</a></li><li><a href="#kafka">Kafka</a><ul class="toc-headings"><li><a href="#change-consumer-topics-and-group-id">Change consumer topics and group ID</a></li><li><a href="#ssl">SSL</a></li><li><a href="#sasl">SASL</a></li></ul></li><li><a href="#kinesis">Kinesis</a><ul class="toc-headings"><li><a href="#change-consumer-stream-and-app-name">Change consumer stream and app name</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2019 Accenture</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
