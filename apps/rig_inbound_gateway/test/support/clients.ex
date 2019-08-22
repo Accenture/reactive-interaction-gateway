@@ -10,14 +10,14 @@ defmodule Client do
 end
 
 defmodule TestClient.ConnectionError do
-  defexception [:code, :mailbox]
+  defexception [:code, :reason]
 
-  def exception(code, mailbox),
-    do: %__MODULE__{code: code, mailbox: mailbox}
+  def exception(code, reason),
+    do: %__MODULE__{code: code, reason: reason}
 
-  def message(%__MODULE__{code: code, mailbox: mailbox}),
+  def message(%__MODULE__{code: code, reason: reason}),
     do:
-      "could not establish connection, server responded with #{inspect(code)}: #{inspect(mailbox)}"
+      "could not establish connection, server responded with #{inspect(code)}: #{inspect(reason)}"
 end
 
 defmodule SseClient do
@@ -59,7 +59,7 @@ defmodule SseClient do
         :ok
 
       %HTTPoison.AsyncStatus{code: code} ->
-        raise TestClient.ConnectionError, code: code, mailbox: flush_mailbox()
+        raise TestClient.ConnectionError, code: code, reason: flush_mailbox()
     after
       500 -> raise "No response"
     end
@@ -80,25 +80,28 @@ defmodule SseClient do
   end
 
   @impl true
-  def refute_receive(_client) do
+  def refute_receive(ignored_client_ref) do
     receive do
       %HTTPoison.AsyncChunk{} = async_chunk ->
         raise "Unexpectedly received: #{inspect(async_chunk)}"
     after
-      100 -> :ok
+      100 -> {:ok, ignored_client_ref}
     end
   end
 
   @impl true
-  def read_event(_client, event_type) do
+  def read_event(ignored_client_ref, event_type) do
     cloud_event =
       read_sse_chunk()
       |> extract_cloud_event()
 
-    case cloud_event do
-      %{"specversion" => "0.2", "type" => ^event_type} -> cloud_event
-      %{"cloudEventsVersion" => "0.1", "eventType" => ^event_type} -> cloud_event
-    end
+    cloud_event =
+      case cloud_event do
+        %{"specversion" => "0.2", "type" => ^event_type} -> cloud_event
+        %{"cloudEventsVersion" => "0.1", "eventType" => ^event_type} -> cloud_event
+      end
+
+    {cloud_event, ignored_client_ref}
   end
 
   @impl true
@@ -167,35 +170,52 @@ defmodule WsClient do
         params
       end
 
-    WebSocket.connect(hostname, eventhub_port, %{
-      path: "/_rig/v1/connection/ws?#{URI.encode_query(params)}",
-      protocol: ["ws"]
-    })
+    {:ok, client} =
+      WebSocket.connect(hostname, eventhub_port, %{
+        path: "/_rig/v1/connection/ws?#{URI.encode_query(params)}",
+        protocol: ["ws"]
+      })
+
+    # We need to check whether the connection has already been closed:
+    first_message =
+      case WebSocket.recv(client, timeout: 100) do
+        {:ok, {:close, code, reason}} ->
+          raise TestClient.ConnectionError, code: code, reason: reason
+
+        {:ok, message} ->
+          message
+      end
+
+    {:ok, %{client: client, first_message: first_message}}
   end
 
   @impl true
-  def disconnect(client) do
+  def disconnect(%{client: client}) do
     :ok = WebSocket.close(client)
   end
 
   @impl true
-  def refute_receive(client) do
-    case WebSocket.recv(client, timeout: 100) do
+  def refute_receive(%{client: client, first_message: first_message}) do
+    case first_message || WebSocket.recv(client, timeout: 100) do
       {:ping, _} -> client.refute_receive(client)
       {:ok, packet} -> raise "Unexpectedly received: #{inspect(packet)}"
-      {:error, _} -> :ok
+      {:error, _} -> {:ok, %{client: client, first_message: nil}}
     end
   end
 
   @impl true
-  def read_event(client, event_type) do
-    {:text, data} = WebSocket.recv!(client)
-    cloud_event = Jason.decode!(data)
+  def read_event(%{client: client, first_message: first_message}, event_type) do
+    {:text, data} = first_message || WebSocket.recv!(client)
 
-    case cloud_event do
-      %{"specversion" => "0.2", "type" => ^event_type} -> cloud_event
-      %{"cloudEventsVersion" => "0.1", "eventType" => ^event_type} -> cloud_event
-    end
+    cloud_event =
+      data
+      |> Jason.decode!()
+      |> case do
+        %{"specversion" => "0.2", "type" => ^event_type} = cloud_event -> cloud_event
+        %{"cloudEventsVersion" => "0.1", "eventType" => ^event_type} = cloud_event -> cloud_event
+      end
+
+    {cloud_event, %{client: client, first_message: nil}}
   end
 
   @impl true

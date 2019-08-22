@@ -4,19 +4,13 @@ defmodule RigAuth.AuthorizationCheck.External do
   """
   require Logger
   alias HTTPoison
-  alias Plug.Conn
 
-  @json_mimetype "application/json; charset=utf-8"
+  alias RigAuth.AuthorizationCheck.Request
 
-  @spec check(url :: String.t(), req_headers :: Conn.headers(), body :: binary) ::
+  @spec check(url :: String.t(), request :: Request.t()) ::
           true | false | {:error, url :: String.t(), error :: any()}
-  def check(url, req_headers, body) do
-    headers =
-      for {"authorization", _} = header <- req_headers,
-          into: %{"content-type" => @json_mimetype},
-          do: header
-
-    case HTTPoison.post(url, body, headers) do
+  def check(url, request) do
+    case HTTPoison.post(url, request.body || "", http_headers(request)) do
       {:ok, %HTTPoison.Response{status_code: status}} when status >= 200 and status < 300 -> true
       {:ok, %HTTPoison.Response{status_code: status}} when status == 401 or status == 403 -> false
       {:ok, unexpected_response} -> {:error, unexpected_response}
@@ -24,10 +18,10 @@ defmodule RigAuth.AuthorizationCheck.External do
     end
   end
 
-  @spec check_or_log(base_url :: String.t(), req_headers :: Conn.headers(), body :: binary) ::
+  @spec check_or_log(base_url :: String.t(), request :: Request.t()) ::
           :ok | {:error, :not_authorized}
-  def check_or_log(base_url, req_headers, body) do
-    case check(base_url, req_headers, body) do
+  def check_or_log(base_url, request) do
+    case check(base_url, request) do
       true ->
         :ok
 
@@ -41,5 +35,14 @@ defmodule RigAuth.AuthorizationCheck.External do
 
         {:error, :not_authorized}
     end
+  end
+
+  @spec http_headers(request :: Request.t()) :: [{String.t(), String.t()}]
+  defp http_headers(request) do
+    [{"content-type", request.content_type}] ++
+      case request do
+        %{auth_info: %{auth_header: auth_header}} -> [{"authorization", auth_header}]
+        _ -> []
+      end
   end
 end

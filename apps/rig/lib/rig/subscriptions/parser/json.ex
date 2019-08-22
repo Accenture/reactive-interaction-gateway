@@ -37,6 +37,11 @@ defmodule RIG.Subscriptions.Parser.JSON do
         %DecodeError{error: "invalid JSON encoding at position #{pos}", json: data}
         |> Result.err()
 
+      # In a request body, the subscriptions are put into a prop:
+      {:ok, %{"subscriptions" => decoded}} when is_list(decoded) ->
+        parse_subscriptions(decoded)
+
+      # In request params, the subscriptions are given directly:
       {:ok, decoded} when is_list(decoded) ->
         parse_subscriptions(decoded)
 

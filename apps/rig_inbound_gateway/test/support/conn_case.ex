@@ -21,7 +21,6 @@ defmodule RigInboundGatewayWeb.ConnCase do
       use Phoenix.ConnTest
 
       import RigInboundGatewayWeb.Router.Helpers
-      import Joken
 
       # The default endpoint for testing
       @endpoint RigInboundGatewayWeb.Endpoint
@@ -57,19 +56,6 @@ defmodule RigInboundGatewayWeb.ConnCase do
         "versioned" => false,
         "active" => true
       }
-
-      # The key for signing JWTs:
-      @jwt_secret_key Confex.fetch_env!(:rig, RigInboundGatewayWeb.ConnCase)
-                      |> Keyword.fetch!(:jwt_secret_key)
-
-      # Generation of JWT
-      def generate_jwt do
-        token()
-        |> with_exp
-        |> with_signer(@jwt_secret_key |> hs256)
-        |> sign
-        |> get_compact
-      end
     end
   end
 

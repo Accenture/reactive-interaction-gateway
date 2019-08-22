@@ -7,6 +7,7 @@ defmodule RigInboundGateway.ApiProxy.ProxyMetricsTest do
   import FakeServer
   alias FakeServer.Response
 
+  alias RIG.JWT
   alias RigMetrics.ProxyMetrics
 
   alias RigInboundGatewayWeb.Router
@@ -93,7 +94,7 @@ defmodule RigInboundGateway.ApiProxy.ProxyMetricsTest do
   # ---
 
   defp construct_request_with_jwt(method, url, query \\ %{}) do
-    jwt = generate_jwt()
+    jwt = JWT.encode(%{})
 
     build_conn(method, url, query)
     |> put_req_header("authorization", "Bearer #{jwt}")

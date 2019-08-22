@@ -82,6 +82,25 @@ defmodule RIG.JWT do
 
   # ---
 
+  @doc "Checks an encoded JWT for validity."
+  @callback valid?(token, jwt_conf, ensure_not_blacklisted) :: boolean()
+  def valid?(
+        token,
+        jwt_conf \\ config().jwt_conf,
+        ensure_not_blacklisted \\ &ensure_not_blacklisted/1
+      )
+
+  def valid?(token, jwt_conf, ensure_not_blacklisted) do
+    token
+    |> parse_token(jwt_conf, ensure_not_blacklisted)
+    |> case do
+      {:ok, _} -> true
+      _ -> false
+    end
+  end
+
+  # ---
+
   defp ensure_not_blacklisted(%{"jti" => jti} = claims) do
     if Blacklist.contains_jti?(Blacklist, jti) do
       {:error, "Ignoring blacklisted JWT with ID #{jti}."}

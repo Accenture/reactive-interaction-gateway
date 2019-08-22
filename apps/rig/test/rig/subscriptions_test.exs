@@ -2,8 +2,6 @@ defmodule RIG.SubscriptionsTest do
   @moduledoc false
   use ExUnit.Case, async: false
 
-  import Joken
-
   alias RIG.JWT
   alias RIG.Subscriptions
   alias RigInboundGateway.ExtractorConfig
@@ -79,13 +77,5 @@ defmodule RIG.SubscriptionsTest do
              Subscriptions.from_token("Bearer #{jwt}", @jwt_conf)
   end
 
-  defp generate_jwt do
-    token()
-    |> with_exp
-    |> with_signer(@jwt_secret_key |> hs256)
-    |> with_claim("username", "john")
-    |> with_claim("fullname", "John Doe")
-    |> sign
-    |> get_compact
-  end
+  defp generate_jwt, do: JWT.encode(%{"username" => "john", "fullname" => "John Doe"}, @jwt_conf)
 end
