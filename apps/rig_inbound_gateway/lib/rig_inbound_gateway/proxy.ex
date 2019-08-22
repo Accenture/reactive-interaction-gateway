@@ -69,13 +69,16 @@ defmodule RigInboundGateway.Proxy do
   end
 
   defp do_init_presence(config_path_or_json, state) do
-    with {:ok, config} when is_list(config) <- Config.parse_json_env(config_path_or_json) do
-      Enum.each(config, fn %{"id" => id} = api ->
-        Logger.info(fn -> "Reverse proxy: service #{id}" end)
-        api_with_default_values = set_default_api_values(api)
-        state.tracker_mod.track(api["id"], api_with_default_values)
-      end)
-    else
+    case Config.parse_json_env(config_path_or_json) do
+      {:ok, config} when is_list(config) ->
+        Enum.each(config, fn %{"id" => id} = api ->
+          # credo:disable-for-next-line Credo.Check.Refactor.Nesting
+          Logger.info(fn -> "Reverse proxy: service #{id}" end)
+
+          api_with_default_values = set_default_api_values(api)
+          state.tracker_mod.track(api["id"], api_with_default_values)
+        end)
+
       {:ok, not_a_list} ->
         {:error, "the proxy config must be a list", [not_a_list: not_a_list]}
 

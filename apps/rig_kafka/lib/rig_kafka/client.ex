@@ -13,7 +13,7 @@ defmodule RigKafka.Client do
   @reconnect_timeout_ms 20_000
   @supervisor RigKafka.DynamicSupervisor
 
-  use GenServer, shutdown: @reconnect_timeout_ms + 5_000
+  use GenServer, shutdown: @reconnect_timeout_ms + 5_000, restart: :permanent
 
   defmodule GroupSubscriber do
     @moduledoc """

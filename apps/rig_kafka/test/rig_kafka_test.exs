@@ -70,6 +70,6 @@ defmodule RigKafkaTest do
     assert_receive received_msg, 10_000
     assert received_msg == expected_msg
 
-    DynamicSupervisor.terminate_child(@sup, pid)
+    RigKafka.Client.stop_supervised(pid)
   end
 end

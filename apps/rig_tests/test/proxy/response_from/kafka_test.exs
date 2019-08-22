@@ -37,7 +37,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     {:ok, kafka_client} = RigKafka.start(kafka_config)
 
     on_exit(fn ->
-      RigKafka.Client.stop_supervised(kafka_client)
+      :ok = RigKafka.Client.stop_supervised(kafka_client)
     end)
 
     :ok

@@ -38,7 +38,7 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     {:ok, kafka_client} = RigKafka.start(kafka_config, callback)
 
     on_exit(fn ->
-      RigKafka.Client.stop_supervised(kafka_client)
+      :ok = RigKafka.Client.stop_supervised(kafka_client)
     end)
 
     :ok

@@ -26,9 +26,10 @@ defmodule RigCloudEvents.CloudEvent do
   """
   @spec parse(String.t()) :: {:ok, t} | {:error, any}
   def parse(json) when is_binary(json) do
-    with parsed = @parser.parse(json),
-         event = %__MODULE__{json: json, parsed: parsed},
-         {:ok, _} <- specversion(event),
+    parsed = @parser.parse(json)
+    event = %__MODULE__{json: json, parsed: parsed}
+
+    with {:ok, _} <- specversion(event),
          {:ok, _} <- type(event),
          {:ok, _} <- id(event) do
       {:ok, event}
