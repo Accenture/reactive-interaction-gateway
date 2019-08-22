@@ -263,7 +263,7 @@ defmodule RigApi.ApisController do
             )
 
             method(:string, "Endpoint HTTP method", required: true, example: "GET")
-            not_secured(:boolean, "Endpoint Security", default: true, example: true)
+            secured(:boolean, "Endpoint Security", default: false, example: false)
           end
         end,
       ProxyAPIResponse:

@@ -5,47 +5,59 @@ defmodule RigInboundGateway.ApiProxy.Auth.Jwt do
 
   import Plug.Conn, only: [get_req_header: 2]
 
-  alias RigAuth.Jwt
+  alias RIG.JWT
   alias RigInboundGateway.ApiProxy.Api
 
   # ---
 
   def check(conn, api) do
-    tokens =
-      pick_query_token(conn, api)
-      |> Enum.concat(pick_header_token(conn, api))
-      |> Enum.reject(&(&1 == ""))
+    valid_tokens =
+      tokens_from_query_params(conn, api) ++
+        tokens_from_req_header(conn, api)
 
-    if Enum.any?(tokens, &Jwt.Utils.valid?/1) do
-      :ok
-    else
-      {:error, :authentication_failed}
+    case valid_tokens do
+      [] -> {:error, :authentication_failed}
+      _ -> :ok
     end
   end
 
   # ---
 
-  # Pick JWT from query parameters
-  @spec pick_query_token(Plug.Conn.t(), Api.t()) :: [String.t()]
+  # Find and parse JWTs in request query params.
+  @spec tokens_from_query_params(Plug.Conn.t(), Api.t()) :: [JWT.claims()]
 
-  defp pick_query_token(conn, %{"auth" => %{"use_query" => true}} = api) do
-    conn
-    |> Map.get(:query_params)
-    |> Map.get(Kernel.get_in(api, ["auth", "query_name"]), "")
-    |> String.split()
+  defp tokens_from_query_params(conn, %{"auth" => %{"use_query" => true}} = api) do
+    selected_param = get_in(api, ["auth", "query_name"])
+    tokens_string = Map.get(conn.query_params, selected_param, "")
+
+    tokens_string
+    |> String.split(",", trim: true)
+    |> Enum.map(&JWT.parse_token/1)
+    |> Result.filter_and_unwrap()
   end
 
-  defp pick_query_token(_conn, %{"auth" => %{"use_query" => false}}), do: [""]
+  defp tokens_from_query_params(_conn, _), do: []
 
   # --
 
-  # Pick JWT from headers
-  @spec pick_header_token(Plug.Conn.t(), Api.t()) :: [String.t()]
+  # Find and parse JWTs in request headers.
+  @spec tokens_from_req_header(Plug.Conn.t(), Api.t()) :: [JWT.claims()]
 
-  defp pick_header_token(conn, %{"auth" => %{"use_header" => true}} = api) do
-    header_key = Kernel.get_in(api, ["auth", "header_name"]) |> String.downcase()
-    get_req_header(conn, header_key)
+  defp tokens_from_req_header(conn, %{"auth" => %{"use_header" => true}} = api) do
+    selected_auth_header = get_in(api, ["auth", "header_name"]) |> String.downcase()
+
+    case selected_auth_header do
+      "authorization" ->
+        JWT.parse_http_header(conn.req_headers)
+        |> Result.filter_and_unwrap()
+
+      "x-" <> _ = custom_header ->
+        conn
+        |> get_req_header(custom_header)
+        |> Enum.map(&JWT.parse_token/1)
+        |> Result.filter_and_unwrap()
+    end
   end
 
-  defp pick_header_token(_conn, %{"auth" => %{"use_header" => false}}), do: [""]
+  defp tokens_from_req_header(_conn, _), do: []
 end

@@ -9,6 +9,7 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
   import FakeServer
   alias FakeServer.Response
 
+  alias RIG.JWT
   alias RigInboundGatewayWeb.Router
 
   @env [port: 7070]
@@ -166,7 +167,7 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
     filepath = "#{__DIR__}/#{filename}"
     file_part = {:file, filepath, displayname, [{"content-type", "plain/text"}]}
     body = {:multipart, [file_part]}
-    headers = [{"authorization", "Bearer #{generate_jwt()}"}]
+    headers = [{"authorization", "Bearer #{JWT.encode(%{})}"}]
     url = "http://localhost:#{@env[:port]}/myapi/books"
 
     assert {:ok,
@@ -359,7 +360,7 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
   end
 
   defp construct_request_with_jwt(method, url, query \\ %{}) do
-    jwt = generate_jwt()
+    jwt = JWT.encode(%{})
 
     build_conn(method, url, query)
     |> put_req_header("authorization", "Bearer #{jwt}")

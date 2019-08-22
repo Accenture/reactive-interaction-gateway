@@ -1,4 +1,4 @@
-FROM elixir:1.7-alpine as build
+FROM elixir:1.9-alpine as build
 
 # Install Elixir & Erlang environment dependencies
 RUN mix local.hex --force
@@ -63,9 +63,9 @@ COPY apps/rig_metrics/lib /opt/sites/rig/apps/rig_metrics/lib
 
 # Compile and release application production code
 RUN mix compile
-RUN mix release
+RUN mix distillery.release
 
-FROM erlang:21-alpine
+FROM erlang:22-alpine
 
 LABEL org.label-schema.name="Reactive Interaction Gateway"
 LABEL org.label-schema.description="Reactive API Gateway and Event Hub"

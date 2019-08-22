@@ -8,12 +8,15 @@ stages:
   - name: sourcedocs
     if: branch = master AND type != pull_request
 
+.elixir-env: &elixir-env
+  language: elixir
+  elixir: "1.9"
+  otp_release: "22.0"
+
 jobs:
   include:
     - stage: unittest
-      language: elixir
-      elixir: "1.7"
-      otp_release: "21.0"
+      <<: *elixir-env
       env:
         - MIX_ENV=test
       script:
@@ -53,9 +56,7 @@ jobs:
         - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
         - cd website && yarn install && GIT_USER="${GH_NAME}" yarn run publish-gh-pages
     - stage: sourcedocs
-      language: elixir
-      elixir: "1.7"
-      otp_release: "21.0"
+      <<: *elixir-env
       script:
         - git config --global user.name "${GH_NAME}"
         - git config --global user.email "${GH_EMAIL}"

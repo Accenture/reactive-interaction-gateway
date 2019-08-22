@@ -18,23 +18,27 @@ To pass the configuration at startup, RIG uses an environment variable called `P
 We define an endpoint configuration like this:
 
 ```json
-[{
-  "id": "my-service",
-  "version_data": {
-    "default": {
-      "endpoints": [{
-        "id": "my-endpoint",
-        "method": "GET",
-        "path": "/"
-      }]
+[
+  {
+    "id": "my-service",
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "my-endpoint",
+            "method": "GET",
+            "path": "/"
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "API_HOST",
+      "port": 3000
     }
-  },
-  "proxy": {
-    "use_env": true,
-    "target_url": "API_HOST",
-    "port": 3000
   }
-}]
+]
 ```
 
 This defines a single service called "my-service". The URL is read from an given environment variable in this case (`use_env: true`). Because we want to run RIG inside a Docker container, we cannot use `localhost`. Instead, we can use `host.docker.internal` within the container to refer to the Docker host. This way, the service URL is resolved to `http://host.docker.internal:3000`. The service has one endpoint called "my-endpoint" at path `/`, which forwards `GET` requests to the same path (`http://host.docker.internal:3000/`).
@@ -42,7 +46,7 @@ This defines a single service called "my-service". The URL is read from an given
 As a demo service, we use a small Node.js script:
 
 ```js
-const http = require("http");
+const http = require('http');
 const port = 3000;
 const handler = (_req, res) => res.end("Hi, I'm a demo service!\n");
 const server = http.createServer(handler);
@@ -51,7 +55,7 @@ server.listen(port, err => {
     return console.error(err);
   }
   console.log(`server is listening on ${port}`);
-})
+});
 ```
 
 Using Docker, our configuration can be put into a file and mounted into the container. Also, we set `API_HOST` to the Docker host URL as mentioned above. On Linux or Mac, this looks like this:
@@ -155,7 +159,7 @@ The endpoint expects the following request format:
   "rig": {
     "target_partition": "the-partition-key"
   },
-  "data":{
+  "data": {
     "foo": "bar"
   }
 }
@@ -208,7 +212,7 @@ As an alternative you can set `response_from` to `http_async`. This means that c
 }
 ```
 
-> __NOTE:__ Kinesis doesn't support `response_from` field yet.
+> **NOTE:** Kinesis doesn't support `response_from` field yet.
 
 ## Auth
 
@@ -334,3 +338,9 @@ Quite often you need to deal with cross origin requests. CORS itself is configur
   ...
 }]
 ```
+
+## Request logger
+
+Every request going through reverse proxy can be tracked by loggers -- `console` or/and `kafka`. To enable such logging, set [`REQUEST_LOG`](./rig-ops-guide.md) to one or both of them (comma separated).
+
+In case of Kafka, you can also set which Avro schema to use via [`KAFKA_LOG_SCHEMA`](./rig-ops-guide.md).

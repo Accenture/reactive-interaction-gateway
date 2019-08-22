@@ -9,6 +9,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   alias RIG.Plug.BodyReader
   alias Rig.Subscription
   alias RIG.Subscriptions
+  alias RigAuth.AuthorizationCheck.Request
   alias RigAuth.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
   alias RigAuth.Session
 
@@ -70,6 +71,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
     conn
     |> with_allow_origin()
     |> accept_only_req_for(["application/json"])
+    |> Plug.Conn.fetch_query_params()
     |> decode_json_body()
     |> do_set_subscriptions(connection_id)
   end
@@ -83,7 +85,9 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
          {:ok, body, conn} <- BodyReader.read_full_body(conn),
          {:ok, json} <- Jason.decode(body),
          {:parse, %{"subscriptions" => subscriptions}} <- {:parse, json} do
-      Plug.Conn.assign(conn, :subscriptions, subscriptions)
+      conn
+      |> Plug.Conn.assign(:body, body)
+      |> Plug.Conn.assign(:subscriptions, subscriptions)
     else
       {:parse, json} ->
         message = """
@@ -119,7 +123,9 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
          %{assigns: %{subscriptions: subscriptions}} = conn,
          connection_id
        ) do
-    with :ok <- SubscriptionAuthZ.check_authorization(conn),
+    request = Request.from_plug_conn(conn)
+
+    with :ok <- SubscriptionAuthZ.check_authorization(request),
          {:ok, socket_pid} <- Connection.Codec.deserialize(connection_id),
          :ok <- check_connection_alive(socket_pid) do
       # Updating the session allows blacklisting it later on:

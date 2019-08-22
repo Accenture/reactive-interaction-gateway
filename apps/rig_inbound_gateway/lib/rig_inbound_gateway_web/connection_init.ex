@@ -10,31 +10,41 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
 
   alias Rig.Subscription
   alias RIG.Subscriptions
+  alias RigAuth.AuthorizationCheck.Request
+  alias RigAuth.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
 
   # ---
 
   @type handler_response :: any
   @type on_success :: ([Subscription.t()] -> handler_response)
   @type on_error :: (reason :: String.t() -> handler_response)
-  @spec set_up(String.t(), map, on_success, on_error, pos_integer(), pos_integer()) ::
+  @spec set_up(String.t(), Request.t(), on_success, on_error, pos_integer(), pos_integer()) ::
           handler_response
   def set_up(
         conn_type,
-        query_params,
+        request,
         on_success,
         on_error,
         heartbeat_interval_ms,
         subscription_refresh_interval_ms
       ) do
     Logger.debug(fn ->
-      "new #{conn_type} connection (pid=#{inspect(self())}, params=#{inspect(query_params)})"
+      "new #{conn_type} connection (pid=#{inspect(self())}, params=#{inspect(request)})"
     end)
 
-    with {:ok, jwt_subs} <- Subscriptions.from_token(query_params["jwt"]),
-         {:ok, query_subs} <-
-           Map.get(query_params, "subscriptions") |> Subscriptions.from_json() do
-      subscriptions = Enum.uniq(jwt_subs ++ query_subs)
+    jwt =
+      case request.auth_info do
+        nil -> nil
+        %{auth_tokens: [{"bearer", jwt}]} -> jwt
+      end
 
+    with {:ok, jwt_subs} <-
+           Subscriptions.from_token(jwt),
+         true = String.starts_with?(request.content_type, "application/json"),
+         {:ok, query_subs} <-
+           Subscriptions.from_json(request.body),
+         subscriptions = Enum.uniq(jwt_subs ++ query_subs),
+         :ok <- SubscriptionAuthZ.check_authorization(request) do
       # We're going to accept the connection, so let's set up the heartbeat too:
       Process.send_after(self(), :heartbeat, heartbeat_interval_ms)
 
@@ -47,6 +57,32 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
     else
       {:error, %Subscriptions.Error{} = e} ->
         on_error.(Exception.message(e))
+
+      {:error, :not_authorized} ->
+        on_error.("Subscription denied (not authorized).")
     end
   end
+
+  # ---
+
+  @spec subscriptions_query_param_to_body(map) :: {:ok, String.t()} | {:error, String.t()}
+  def subscriptions_query_param_to_body(query_params)
+
+  def subscriptions_query_param_to_body(%{"subscriptions" => json_list})
+      when byte_size(json_list) > 0 do
+    case Jason.decode(json_list) do
+      {:ok, list} ->
+        Jason.encode(%{"subscriptions" => list})
+        |> Result.map_err(fn ex ->
+          msg = "Failed to encode subscriptions body from query parameters"
+          Logger.warn("#{msg}: #{Exception.message(ex)}")
+          "#{msg} (please see server logs for details)."
+        end)
+
+      {:error, %Jason.DecodeError{} = ex} ->
+        {:error, "Failed to decode subscription list: #{Exception.message(ex)}"}
+    end
+  end
+
+  def subscriptions_query_param_to_body(_), do: {:ok, nil}
 end

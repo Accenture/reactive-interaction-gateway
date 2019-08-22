@@ -8,6 +8,20 @@ defmodule Rig.EventFilter.ServerTest do
   alias Rig.Subscription
   alias RigCloudEvents.CloudEvent
 
+  defp register_subscription_with_event_filter(subscription) do
+    test_pid = self()
+
+    # Set up the subscription:
+    EventFilter.refresh_subscriptions([subscription], [], fn ->
+      send(test_pid, :subscriptions_refreshed)
+    end)
+
+    # wait for it..
+    assert_receive :subscriptions_refreshed, 1_000
+
+    # Should be active now!
+  end
+
   test "subscribe & receive an event" do
     event_type = "test.event"
     field_config = %{}
@@ -24,9 +38,7 @@ defmodule Rig.EventFilter.ServerTest do
     opts = [debug?: true, subscription_ttl_s: 0]
     {:ok, filter_pid} = Server.start_link(event_type, field_config, opts)
 
-    EventFilter.refresh_subscriptions([subscription], [])
-    # wait for genserver cast
-    :sys.get_state(filter_pid)
+    register_subscription_with_event_filter(subscription)
     EventFilter.forward_event(event)
     EventFilter.forward_event(event)
 
@@ -107,9 +119,8 @@ defmodule Rig.EventFilter.ServerTest do
 
     for {subscription, event, match_expectation} <- specs do
       {:ok, filter_pid} = Server.start_link(event_type, field_config)
-      EventFilter.refresh_subscriptions([subscription], [])
-      # wait for genserver cast
-      :sys.get_state(filter_pid)
+
+      register_subscription_with_event_filter(subscription)
       EventFilter.forward_event(event)
 
       case match_expectation do
@@ -141,9 +152,7 @@ defmodule Rig.EventFilter.ServerTest do
     greetings_to_joe_subscription =
       Subscription.new!(%{event_type: event_type, constraints: [name_is_joe]})
 
-    EventFilter.refresh_subscriptions([greetings_to_joe_subscription], [])
-    # wait for genserver cast
-    :sys.get_state(filter_pid)
+    register_subscription_with_event_filter(greetings_to_joe_subscription)
 
     base_event = %{"specversion" => "0.2", "type" => event_type, "source" => "test"}
 
@@ -165,7 +174,7 @@ defmodule Rig.EventFilter.ServerTest do
     assert_receive ^greeting_to_sam
 
     # But after refreshing the subscriptions, a greeting to Sam is no longer forwarded:
-    EventFilter.refresh_subscriptions([greetings_to_joe_subscription], [])
+    register_subscription_with_event_filter(greetings_to_joe_subscription)
     # wait for genserver cast
     :sys.get_state(filter_pid)
     EventFilter.forward_event(greeting_to_sam)

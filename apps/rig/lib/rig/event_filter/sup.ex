@@ -50,7 +50,7 @@ defmodule Rig.EventFilter.Sup do
 
   @impl GenServer
   def handle_cast(
-        {:refresh_subscriptions, subscriber_pid, subscriptions, prev_subscriptions},
+        {:refresh_subscriptions, subscriber_pid, subscriptions, prev_subscriptions, done},
         %{extractor_map: extractor_map} = state
       )
       when is_list(subscriptions) and is_list(prev_subscriptions) do
@@ -61,7 +61,7 @@ defmodule Rig.EventFilter.Sup do
     for {event_type, subs} <- subs_by_eventtype do
       filter_config = Config.for_event_type(extractor_map, event_type)
       filter = find_or_start_filter_process(event_type, filter_config)
-      GenServer.cast(filter, {:refresh_subscriptions, subscriber_pid, subs})
+      GenServer.cast(filter, {:refresh_subscriptions, subscriber_pid, subs, done})
     end
 
     # If a subscription for an event type has been removed completely, the respective
@@ -76,8 +76,11 @@ defmodule Rig.EventFilter.Sup do
       # If we can find a filter for this type, we ask it to clear all subscriptions for
       # the subscriber:
       case get_filter_pid(event_type) do
-        nil -> :ignore
-        filter -> GenServer.cast(filter, {:refresh_subscriptions, subscriber_pid, _subs = []})
+        nil ->
+          :ignore
+
+        filter ->
+          GenServer.cast(filter, {:refresh_subscriptions, subscriber_pid, _subs = [], done})
       end
     end)
 

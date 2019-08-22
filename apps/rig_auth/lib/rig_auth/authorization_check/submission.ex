@@ -4,10 +4,9 @@ defmodule RigAuth.AuthorizationCheck.Submission do
   """
   use Rig.Config, :custom_validation
 
-  alias Plug.Conn
-
   alias RigAuth.AuthorizationCheck.External
   alias RigAuth.AuthorizationCheck.Header
+  alias RigAuth.AuthorizationCheck.Request
   alias RigCloudEvents.CloudEvent
 
   # Confex callback
@@ -28,8 +27,8 @@ defmodule RigAuth.AuthorizationCheck.Submission do
     }
   end
 
-  @spec check_authorization(Conn.t(), CloudEvent.t()) :: :ok | {:error, :not_authorized}
-  def check_authorization(conn, %CloudEvent{json: json}) do
+  @spec check_authorization(Request.t(), CloudEvent.t()) :: :ok | {:error, :not_authorized}
+  def check_authorization(request, %CloudEvent{}) do
     %{validation_type: validation_type} = config()
 
     case validation_type do
@@ -37,14 +36,14 @@ defmodule RigAuth.AuthorizationCheck.Submission do
         :ok
 
       :jwt_validation ->
-        if Header.any_valid_bearer_token?(conn) do
+        if Header.any_valid_bearer_token?(request) do
           :ok
         else
           {:error, :not_authorized}
         end
 
       {:url, base_url} ->
-        External.check_or_log(base_url, conn.req_headers, json)
+        External.check_or_log(base_url, request)
     end
   end
 end

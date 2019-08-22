@@ -66,7 +66,7 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
               %{
                 id: endpoint_id,
                 type: "http",
-                not_secured: true,
+                secured: false,
                 method: "OPTIONS",
                 path: endpoint_path,
                 target: "kafka"
@@ -125,7 +125,7 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
               %{
                 id: endpoint_id,
                 type: "http",
-                not_secured: true,
+                secured: false,
                 method: "POST",
                 path: endpoint_path,
                 target: "kafka"
@@ -159,6 +159,8 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
         },
         "partition" => "test_key"
       })
+
+    :timer.sleep(5_000)
 
     %HTTPoison.Response{status_code: res_status, body: res_body} =
       HTTPoison.post!(request_url, req_body, headers)

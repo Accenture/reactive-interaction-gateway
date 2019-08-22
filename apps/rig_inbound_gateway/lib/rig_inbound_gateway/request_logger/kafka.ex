@@ -1,95 +1,80 @@
 defmodule RigInboundGateway.RequestLogger.Kafka do
   @moduledoc """
   Kafka request logger implementation.
-
   """
-  use Rig.Config, [:log_topic, :log_schema]
-  require Logger
-  alias Rig.Kafka, as: RigKafka
-  alias RigAuth.Jwt.Utils, as: Jwt
+  use Rig.KafkaConsumerSetup, [:log_topic, :log_schema, :serializer]
+
+  alias RigInboundGateway.RequestLogger
+  @behaviour RequestLogger
   alias UUID
 
-  @behaviour RigInboundGateway.RequestLogger
+  require Logger
 
-  @impl RigInboundGateway.RequestLogger
+  # ---
+
+  @spec kafka_handler(any()) ::
+          :ok
+          | {:error, %{:__exception__ => true, :__struct__ => atom(), optional(atom()) => any()},
+             any()}
+  def kafka_handler(_message), do: :ok
+
+  # ---
+
+  @spec validate(any()) :: {:ok, any()}
+  def validate(conf), do: {:ok, conf}
+
   @spec log_call(Proxy.endpoint(), Proxy.api_definition(), %Plug.Conn{}) :: :ok
+  @impl RequestLogger
   def log_call(
-        %{"secured" => true} = endpoint,
-        %{"auth_type" => "jwt"} = api_definition,
+        endpoint,
+        _api_definition,
         conn
       ) do
-    claims = extract_claims!(conn)
-    username = Map.fetch!(claims, "username")
+    %{
+      serializer: serializer
+    } = config()
 
-    jti =
-      case Map.get(claims, "jti") do
-        nil ->
-          Logger.warn("jti not found in claims (#{inspect(claims)})")
-          nil
-
-        jti ->
-          jti
+    contenttype =
+      case serializer do
+        "avro" -> "avro/binary"
+        _ -> "application/json"
       end
 
-    message = %{
-      id: UUID.uuid4(),
-      username: username,
-      jti: jti,
-      type: "PROXY_API_CALL",
-      version: "1.0",
-      timestamp: Timex.now() |> Timex.to_unix(),
-      level: 0,
-      payload: %{
-        endpoint: inspect(endpoint),
-        api_definition: inspect(api_definition),
-        request_path: conn.request_path,
-        remote_ip: conn.remote_ip |> format_ip
+    kafka_message =
+      %{
+        id: UUID.uuid4(),
+        time: Timex.now() |> Timex.format!("{RFC3339}"),
+        source: "/rig",
+        type: "com.rig.proxy.api.call",
+        contenttype: contenttype,
+        specversion: "0.2",
+        data: %{
+          endpoint: endpoint,
+          request_path: conn.request_path,
+          remote_ip: conn.remote_ip |> format_ip
+        }
       }
-    }
+      |> Poison.encode!()
 
-    message_json = message |> Poison.encode!()
-    conf = config()
-    # If topic does not exist, it will be created automatically, provided the server is
-    # configured that way. However, this call then returns with {:error, :LeaderNotAvailable},
-    # as at that point there won't be a partition leader yet.
-    RigKafka.produce(conf.log_topic, conf.log_schema, _key = username, _plaintext = message_json)
-  rescue
-    err ->
-      case err do
-        %KeyError{key: "username", term: claims} ->
-          Logger.warn("""
-          A username is required for publishing to the right Kafka topic, \
-          but no such field is found in the given claims: #{inspect(claims)}
-          """)
-
-        _ ->
-          Logger.error("""
-          Failed to log API call: #{inspect(err)}
-            endpoint=#{inspect(endpoint)}
-            api_definition=#{inspect(api_definition)}
-          """)
-      end
-
-      {:error, err}
+    produce("partition", kafka_message)
   end
 
-  def log_call(_endpoint, _api_definition, _conn) do
-    # Unauthenticated calls are not sent to Kafka.
-    :ok
+  # ---
+
+  defp produce(server \\ __MODULE__, key, plaintext) do
+    GenServer.cast(server, {:produce, key, plaintext})
   end
 
-  @spec extract_claims!(%Plug.Conn{}) :: Jwt.claims()
-  defp extract_claims!(conn) do
-    # we assume there is exactly one valid token:
-    [token] =
-      conn
-      |> Plug.Conn.get_req_header("authorization")
-      |> Stream.filter(&Jwt.valid?/1)
-      |> Enum.take(1)
+  # ---
 
-    {:ok, claims} = Jwt.decode(token)
-    claims
+  @impl GenServer
+  def handle_cast({:produce, key, plaintext}, %{kafka_config: kafka_config} = state) do
+    %{log_topic: topic, log_schema: schema} = config()
+    RigKafka.produce(kafka_config, topic, schema, key, plaintext)
+    {:noreply, state}
   end
+
+  # ---
 
   @spec format_ip({integer, integer, integer, integer}) :: String.t()
   defp format_ip(ip_tuple) do

@@ -19,26 +19,6 @@ defmodule RigAuth.ConnCase do
     quote do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
-
-      import Joken
-
-      # Generation of JWT
-      def generate_jwt(priv_key \\ nil) do
-        jwt_secret_key = System.get_env("JWT_SECRET_KEY")
-        jwt_alg = System.get_env("JWT_ALG")
-
-        signer =
-          case jwt_alg do
-            "HS" <> _ = alg -> Joken.Signer.hs(alg, jwt_secret_key)
-            "RS" <> _ = alg -> Joken.Signer.rs(alg, JOSE.JWK.from_pem(priv_key))
-          end
-
-        token()
-        |> with_exp
-        |> with_signer(signer)
-        |> sign
-        |> get_compact
-      end
     end
   end
 end

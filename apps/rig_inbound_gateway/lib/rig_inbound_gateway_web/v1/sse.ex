@@ -24,8 +24,39 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   # ---
 
   @impl :cowboy_loop
-  def init(req, :ok = state) do
+  def init(req, _state) do
     query_params = req |> :cowboy_req.parse_qs() |> Enum.into(%{})
+    jwt = query_params["jwt"]
+
+    auth_info =
+      case jwt do
+        jwt when byte_size(jwt) > 0 ->
+          %{auth_header: "Bearer #{jwt}", auth_tokens: [{"bearer", jwt}]}
+
+        _ ->
+          nil
+      end
+
+    case ConnectionInit.subscriptions_query_param_to_body(query_params) do
+      {:ok, encoded_body_or_nil} ->
+        request = %{
+          auth_info: auth_info,
+          query_params: "",
+          content_type: "application/json; charset=utf-8",
+          body: encoded_body_or_nil
+        }
+
+        do_init(req, request)
+
+      {:error, reason} ->
+        req = :cowboy_req.reply(400, %{}, reason, req)
+        {:stop, req, :unknown_state}
+    end
+  end
+
+  # ---
+
+  def do_init(req, request) do
     conf = config()
 
     on_success = fn subscriptions ->
@@ -53,12 +84,12 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
     on_error = fn reason ->
       req = :cowboy_req.reply(400, %{}, reason, req)
-      {:stop, req, state}
+      {:stop, req, :no_state}
     end
 
     ConnectionInit.set_up(
       "SSE",
-      query_params,
+      request,
       on_success,
       on_error,
       @heartbeat_interval_ms,

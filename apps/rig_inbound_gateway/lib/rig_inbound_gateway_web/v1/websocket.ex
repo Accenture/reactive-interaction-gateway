@@ -36,7 +36,37 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   # ---
 
   @impl :cowboy_websocket
-  def websocket_init(%{query_params: query_params} = state) do
+  def websocket_init(%{query_params: query_params}) do
+    jwt = query_params["jwt"]
+
+    auth_info =
+      case jwt do
+        jwt when byte_size(jwt) > 0 ->
+          %{auth_header: "Bearer #{jwt}", auth_tokens: [{"bearer", jwt}]}
+
+        _ ->
+          nil
+      end
+
+    case ConnectionInit.subscriptions_query_param_to_body(query_params) do
+      {:ok, encoded_body_or_nil} ->
+        request = %{
+          auth_info: auth_info,
+          query_params: "",
+          content_type: "application/json; charset=utf-8",
+          body: encoded_body_or_nil
+        }
+
+        do_init(request)
+
+      {:error, reason} ->
+        {:reply, closing_frame(reason), :no_state}
+    end
+  end
+
+  # ---
+
+  def do_init(request) do
     on_success = fn subscriptions ->
       # Say "hi", enter the loop and wait for cloud events to forward to the client:
       state = %{subscriptions: subscriptions}
@@ -52,12 +82,12 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
       Logger.warn(fn -> "WS conn failed: #{reason}" end)
       reason = "Bad request."
       # This will close the connection:
-      {:reply, closing_frame(reason), state}
+      {:reply, closing_frame(reason), :no_state}
     end
 
     ConnectionInit.set_up(
       "WS",
-      query_params,
+      request,
       on_success,
       on_error,
       @heartbeat_interval_ms,

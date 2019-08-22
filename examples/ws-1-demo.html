@@ -9,7 +9,7 @@
 <body>
   <form onsubmit="sendGreeting(); return false;">
     <input type="text" id="greeting" placeholder="Your greeting here" autofocus>
-    <input type="submit">
+    <input type="submit" id="submit-button" disabled>
   </form>
   <ul id="eventList" style="list-style:none;padding-left:0">
 
@@ -96,6 +96,8 @@
         createSubscription(connectionToken)
       } else if (cloudEvent.eventType === 'greeting.simple') {
         addEvent(cloudEvent)
+      } else if (cloudEvent.type === 'rig.subscriptions_set') {
+        document.getElementById("submit-button").removeAttribute("disabled");
       }
     }
     source.onerror = (e) => console.log("error", e)
