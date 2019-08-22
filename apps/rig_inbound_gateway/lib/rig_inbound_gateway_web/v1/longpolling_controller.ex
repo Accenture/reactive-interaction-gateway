@@ -25,41 +25,39 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   # validates if a connection_token was given.
   # If yes, it validates if corresponding session processes are still alive
   # ignoring invalid/timed out cookies
-  defp is_new_session?(connection_token) do
-    case connection_token do
-      nil ->
-        true
+  defp is_new_session?(connection_token)
+  defp is_new_session?(nil), do: true
 
-      connection_token ->
-        with {:ok, session_pid} <- Connection.Codec.deserialize(connection_token) do
-          !Process.alive?(session_pid)
-        else
-          _ -> false
-        end
+  defp is_new_session?(connection_token) do
+    case Connection.Codec.deserialize(connection_token) do
+      {:ok, session_pid} -> !Process.alive?(session_pid)
+      _ -> false
     end
   end
 
   # ---
+
   defp process_request(is_new_session, conn)
 
   # starts a new session
   defp process_request(true, conn) do
-    with {:ok, session_pid} <- Session.start(conn.query_params) do
-      Logger.debug(fn ->
-        "new Longpolling connection (pid=#{inspect(session_pid)}, params=#{
-          inspect(conn.query_params)
-        })"
-      end)
+    case Session.start(conn.query_params) do
+      {:ok, session_pid} ->
+        Logger.debug(fn ->
+          "new Longpolling connection (pid=#{inspect(session_pid)}, params=#{
+            inspect(conn.query_params)
+          })"
+        end)
 
-      conn
-      |> with_allow_origin()
-      |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize())
-      |> put_resp_cookie("last_event_id", Jason.encode!("first_event"))
-      |> put_resp_header("content-type", "application/json; charset=utf-8")
-      |> put_resp_header("cache-control", "no-cache")
-      |> put_status(200)
-      |> text(Jason.encode!("ok"))
-    else
+        conn
+        |> with_allow_origin()
+        |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize())
+        |> put_resp_cookie("last_event_id", Jason.encode!("first_event"))
+        |> put_resp_header("content-type", "application/json; charset=utf-8")
+        |> put_resp_header("cache-control", "no-cache")
+        |> put_status(200)
+        |> text(Jason.encode!("ok"))
+
       {:error, {:bad_request, message}} ->
         conn
         |> put_status(:bad_request)
