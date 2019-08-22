@@ -31,7 +31,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
                    :port
                  ]
 
-  def setup do
+  setup do
     on_exit(&ExtractorConfig.restore/0)
   end
 
@@ -84,9 +84,9 @@ defmodule RigInboundGateway.EventSubscriptionTest do
     test "Connecting with no parameters causes empty subscription set." do
       for client <- @clients do
         {:ok, ref} = client.connect()
-        client.read_welcome_event(ref)
+        {_, ref} = client.read_welcome_event(ref)
 
-        assert %{"data" => []} = client.read_subscriptions_set_event(ref)
+        assert {%{"data" => []}, ref} = client.read_subscriptions_set_event(ref)
 
         client.disconnect(ref)
       end
@@ -97,9 +97,9 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
       for client <- @clients do
         {:ok, ref} = client.connect(subscriptions: subscriptions)
-        client.read_welcome_event(ref)
+        {_, ref} = client.read_welcome_event(ref)
 
-        assert %{"data" => ^subscriptions} = client.read_subscriptions_set_event(ref)
+        assert {%{"data" => ^subscriptions}, ref} = client.read_subscriptions_set_event(ref)
 
         client.disconnect(ref)
       end
@@ -125,9 +125,10 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
       for client <- @clients do
         {:ok, ref} = client.connect(jwt: jwt)
-        client.read_welcome_event(ref)
+        {_, ref} = client.read_welcome_event(ref)
 
-        assert %{"data" => ^expected_subscriptions} = client.read_subscriptions_set_event(ref)
+        assert {%{"data" => ^expected_subscriptions}, ref} =
+                 client.read_subscriptions_set_event(ref)
 
         client.disconnect(ref)
       end
@@ -154,9 +155,9 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
       for client <- @clients do
         {:ok, ref} = client.connect(jwt: jwt, subscriptions: [manual_subscription])
-        client.read_welcome_event(ref)
+        {_, ref} = client.read_welcome_event(ref)
 
-        %{"data" => actual_subscriptions} = client.read_subscriptions_set_event(ref)
+        {%{"data" => actual_subscriptions}, ref} = client.read_subscriptions_set_event(ref)
 
         assert actual_subscriptions in [
                  [automatic_subscription, manual_subscription],
@@ -189,17 +190,17 @@ defmodule RigInboundGateway.EventSubscriptionTest do
       for client <- @clients do
         # Connect with JWT but don't pass any subscriptions:
         {:ok, ref} = client.connect(jwt: jwt)
-        welcome_event = client.read_welcome_event(ref)
+        {welcome_event, ref} = client.read_welcome_event(ref)
 
         # According to the extractor config, the JWT gives us an automatic subscription:
-        %{"data" => [^automatic_subscription]} = client.read_subscriptions_set_event(ref)
+        {%{"data" => [^automatic_subscription]}, ref} = client.read_subscriptions_set_event(ref)
 
         # Use the connection ID to replace the subscriptions:
         connection_id(welcome_event)
         |> update_subscriptions([manual_subscription])
 
         # Because we haven't passed the JWT, the automatic subscription is gone:
-        %{"data" => [^manual_subscription]} = client.read_subscriptions_set_event(ref)
+        {%{"data" => [^manual_subscription]}, ref} = client.read_subscriptions_set_event(ref)
 
         client.disconnect(ref)
       end
@@ -226,17 +227,17 @@ defmodule RigInboundGateway.EventSubscriptionTest do
       for client <- @clients do
         # Connect without subscribing to anything:
         {:ok, ref} = client.connect()
-        welcome_event = client.read_welcome_event(ref)
+        {welcome_event, ref} = client.read_welcome_event(ref)
 
         # We shouldn't be subscribed to anything:
-        %{"data" => []} = client.read_subscriptions_set_event(ref)
+        {%{"data" => []}, ref} = client.read_subscriptions_set_event(ref)
 
         # Use the connection ID to obtain automatic subscriptions:
         connection_id(welcome_event)
         |> update_subscriptions([], jwt)
 
         # We haven't passed any subscriptions, but we should've got the JWT based one automatically:
-        %{"data" => [^automatic_subscription]} = client.read_subscriptions_set_event(ref)
+        {%{"data" => [^automatic_subscription]}, ref} = client.read_subscriptions_set_event(ref)
 
         client.disconnect(ref)
       end
@@ -264,15 +265,15 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
       for client <- @clients do
         {:ok, ref} = client.connect(subscriptions: [initial_subscription])
-        welcome_event = client.read_welcome_event(ref)
+        {welcome_event, ref} = client.read_welcome_event(ref)
 
-        %{"data" => [^initial_subscription]} = client.read_subscriptions_set_event(ref)
+        {%{"data" => [^initial_subscription]}, ref} = client.read_subscriptions_set_event(ref)
 
         connection_id(welcome_event)
         |> update_subscriptions([new_subscription], jwt)
 
         # We should no longer see the initial subscription, but the new one and the JWT based one:
-        %{"data" => actual_subscriptions} = client.read_subscriptions_set_event(ref)
+        {%{"data" => actual_subscriptions}, ref} = client.read_subscriptions_set_event(ref)
 
         assert actual_subscriptions in [
                  [automatic_subscription, new_subscription],
@@ -288,9 +289,9 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
       for client <- @clients do
         {:ok, ref} = client.connect(subscriptions: [])
-        welcome_event = client.read_welcome_event(ref)
+        {welcome_event, ref} = client.read_welcome_event(ref)
 
-        %{"data" => []} = client.read_subscriptions_set_event(ref)
+        {%{"data" => []}, ref} = client.read_subscriptions_set_event(ref)
 
         error =
           assert_raise SubscriptionError, fn ->
@@ -303,7 +304,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
         assert error.body =~ ~r/could not parse given subscriptions/
 
         # The request has failed, so there should be no subscriptions_set event:
-        :ok = client.refute_receive(ref)
+        {:ok, ref} = client.refute_receive(ref)
 
         client.disconnect(ref)
       end
@@ -314,9 +315,9 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
       for client <- @clients do
         {:ok, ref} = client.connect(subscriptions: [])
-        welcome_event = client.read_welcome_event(ref)
+        {welcome_event, ref} = client.read_welcome_event(ref)
 
-        %{"data" => []} = client.read_subscriptions_set_event(ref)
+        {%{"data" => []}, ref} = client.read_subscriptions_set_event(ref)
 
         error =
           assert_raise SubscriptionError, fn ->
@@ -329,7 +330,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
         assert error.code == 400
 
         # The request has failed, so there should be no subscriptions_set event:
-        :ok = client.refute_receive(ref)
+        {:ok, ref} = client.refute_receive(ref)
 
         client.disconnect(ref)
       end
@@ -351,12 +352,12 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
       for client <- @clients do
         {:ok, ref} = client.connect()
-        welcome_event = client.read_welcome_event(ref)
-        _ = client.read_subscriptions_set_event(ref)
+        {welcome_event, ref} = client.read_welcome_event(ref)
+        {_, ref} = client.read_subscriptions_set_event(ref)
 
         # By default, greetings to Alice are not forwarded:
         :ok = submit_event(greeting_for_alice())
-        assert :ok = client.refute_receive(ref)
+        assert {:ok, ref} = client.refute_receive(ref)
 
         # Subscribe to greetings for Alice:
         :ok =
@@ -365,26 +366,26 @@ defmodule RigInboundGateway.EventSubscriptionTest do
             %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
           ])
 
-        _ = client.read_subscriptions_set_event(ref)
+        {_, ref} = client.read_subscriptions_set_event(ref)
 
         # Now a greeting to Alice is forwarded:
         :ok = submit_event(greeting_for_alice())
-        assert %{"data" => %{"name" => "alice"}} = client.read_event(ref, "greeting")
+        assert {%{"data" => %{"name" => "alice"}}, ref} = client.read_event(ref, "greeting")
 
         # But a greeting to Bob is not:
         :ok = submit_event(greeting_for_bob())
-        assert :ok = client.refute_receive(ref)
+        assert {:ok, ref} = client.refute_receive(ref)
 
         # We remove the subscription again:
         :ok =
           connection_id(welcome_event)
           |> update_subscriptions([])
 
-        _ = client.read_subscriptions_set_event(ref)
+        {_, ref} = client.read_subscriptions_set_event(ref)
 
         # After this, greetings to Alice are no longer forwarded:
         :ok = submit_event(greeting_for_alice())
-        assert :ok = client.refute_receive(ref)
+        assert {:ok, ref} = client.refute_receive(ref)
       end
     end
   end

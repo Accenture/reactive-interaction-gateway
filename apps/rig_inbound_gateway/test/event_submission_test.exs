@@ -23,7 +23,7 @@ defmodule RigInboundGateway.EventSubmissionTest do
   @base_url "http://#{@hostname}:#{@eventhub_port}/_rig"
   @submission_url "#{@base_url}/v1/events"
 
-  def setup do
+  setup do
     on_exit(&ExtractorConfig.restore/0)
   end
 
@@ -48,12 +48,12 @@ defmodule RigInboundGateway.EventSubmissionTest do
 
     for client <- @clients do
       {:ok, ref} = client.connect()
-      welcome_event = client.read_welcome_event(ref)
-      _ = client.read_subscriptions_set_event(ref)
+      {welcome_event, ref} = client.read_welcome_event(ref)
+      {_, ref} = client.read_subscriptions_set_event(ref)
 
       # Subscribe to greeting events:
       :ok = connection_id(welcome_event) |> update_subscriptions([%{"eventType" => "greeting"}])
-      _ = client.read_subscriptions_set_event(ref)
+      {_, ref} = client.read_subscriptions_set_event(ref)
 
       # CloudEvents with extra top-level attributes not mentioned in any spec:
       event_0_1 = """
@@ -81,7 +81,8 @@ defmodule RigInboundGateway.EventSubmissionTest do
         %{status_code: status_code} = HTTPoison.post!(@submission_url, body, headers)
         assert status_code == 202
         # The received event still has that additional property:
-        assert %{"additional top-level property" => true} = client.read_event(ref, "greeting")
+        assert {%{"additional top-level property" => true}, _} =
+                 client.read_event(ref, "greeting")
       end
     end
   end
@@ -105,11 +106,11 @@ defmodule RigInboundGateway.EventSubmissionTest do
       # We use a client to ensure the data is interpreted the right way:
       [client | _] = @clients
       {:ok, ref} = client.connect()
-      welcome_event = client.read_welcome_event(ref)
-      _ = client.read_subscriptions_set_event(ref)
+      {welcome_event, ref} = client.read_welcome_event(ref)
+      {_, ref} = client.read_subscriptions_set_event(ref)
       subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
       :ok = connection_id(welcome_event) |> update_subscriptions([subscription])
-      _ = client.read_subscriptions_set_event(ref)
+      {_, ref} = client.read_subscriptions_set_event(ref)
 
       # The body is the data field:
       body = ~S({"name": "alice"})
@@ -127,15 +128,15 @@ defmodule RigInboundGateway.EventSubmissionTest do
       %{status_code: status_code, body: body} = HTTPoison.post!(@submission_url, body, headers)
       assert status_code == 202, "#{status_code} #{inspect(body)}"
       # We receive the event in structured mode:
-      assert %{
-               "specversion" => "0.2",
-               "type" => "greeting",
-               "source" => ^event_source,
-               "id" => ^event_id,
-               "data" => %{
-                 "name" => "alice"
-               }
-             } = client.read_event(ref, "greeting")
+      assert {%{
+                "specversion" => "0.2",
+                "type" => "greeting",
+                "source" => ^event_source,
+                "id" => ^event_id,
+                "data" => %{
+                  "name" => "alice"
+                }
+              }, _} = client.read_event(ref, "greeting")
     end
 
     test "Events of media types unknown to RIG are still forwarded." do
@@ -144,11 +145,11 @@ defmodule RigInboundGateway.EventSubmissionTest do
       # We use a client to ensure the data is interpreted the right way:
       [client | _] = @clients
       {:ok, ref} = client.connect()
-      welcome_event = client.read_welcome_event(ref)
-      _ = client.read_subscriptions_set_event(ref)
+      {welcome_event, ref} = client.read_welcome_event(ref)
+      {_, ref} = client.read_subscriptions_set_event(ref)
       subscription = %{"eventType" => "greeting"}
       :ok = connection_id(welcome_event) |> update_subscriptions([subscription])
-      _ = client.read_subscriptions_set_event(ref)
+      {_, ref} = client.read_subscriptions_set_event(ref)
 
       # The body is the data field and we "encode" it as plain text:
       req_body = "The name this event carries is »Alice«."
@@ -168,14 +169,14 @@ defmodule RigInboundGateway.EventSubmissionTest do
 
       assert status_code == 202, "#{status_code} #{inspect(resp_body)}"
       # We receive the event in structured mode:
-      assert %{
-               "specversion" => "0.2",
-               "type" => "greeting",
-               "source" => ^event_source,
-               "id" => ^event_id,
-               "contenttype" => "text/plain",
-               "data" => ^req_body
-             } = client.read_event(ref, "greeting")
+      assert {%{
+                "specversion" => "0.2",
+                "type" => "greeting",
+                "source" => ^event_source,
+                "id" => ^event_id,
+                "contenttype" => "text/plain",
+                "data" => ^req_body
+              }, _} = client.read_event(ref, "greeting")
     end
   end
 
@@ -198,11 +199,11 @@ defmodule RigInboundGateway.EventSubmissionTest do
       # We use a client to ensure the data is interpreted the right way:
       [client | _] = @clients
       {:ok, ref} = client.connect()
-      welcome_event = client.read_welcome_event(ref)
-      _ = client.read_subscriptions_set_event(ref)
+      {welcome_event, ref} = client.read_welcome_event(ref)
+      {_, ref} = client.read_subscriptions_set_event(ref)
       subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
       :ok = connection_id(welcome_event) |> update_subscriptions([subscription])
-      _ = client.read_subscriptions_set_event(ref)
+      {_, ref} = client.read_subscriptions_set_event(ref)
 
       event_source = Atom.to_string(__MODULE__)
       event_id = UUID.uuid4()
@@ -225,15 +226,15 @@ defmodule RigInboundGateway.EventSubmissionTest do
       %{status_code: status_code, body: body} = HTTPoison.post!(@submission_url, body, headers)
       assert status_code == 202, "#{status_code} #{inspect(body)}"
       # We receive the event in structured mode:
-      assert %{
-               "specversion" => "0.2",
-               "type" => "greeting",
-               "source" => ^event_source,
-               "id" => ^event_id,
-               "data" => %{
-                 "name" => "alice"
-               }
-             } = client.read_event(ref, "greeting")
+      assert {%{
+                "specversion" => "0.2",
+                "type" => "greeting",
+                "source" => ^event_source,
+                "id" => ^event_id,
+                "data" => %{
+                  "name" => "alice"
+                }
+              }, _} = client.read_event(ref, "greeting")
     end
 
     test """
@@ -254,11 +255,11 @@ defmodule RigInboundGateway.EventSubmissionTest do
       # We use a client to ensure the data is interpreted the right way:
       [client | _] = @clients
       {:ok, ref} = client.connect()
-      welcome_event = client.read_welcome_event(ref)
-      _ = client.read_subscriptions_set_event(ref)
+      {welcome_event, ref} = client.read_welcome_event(ref)
+      {_, ref} = client.read_subscriptions_set_event(ref)
       subscription = %{"eventType" => "greeting", "oneOf" => [%{"name" => "alice"}]}
       :ok = connection_id(welcome_event) |> update_subscriptions([subscription])
-      _ = client.read_subscriptions_set_event(ref)
+      {_, ref} = client.read_subscriptions_set_event(ref)
 
       # For proper binary mode we'd set the ce-* headers now, but we provide a fallback
       # for the way we did this before the transport spec came around: we allow
@@ -285,15 +286,15 @@ defmodule RigInboundGateway.EventSubmissionTest do
       %{status_code: status_code, body: body} = HTTPoison.post!(@submission_url, body, headers)
       assert status_code == 202, "#{status_code} #{inspect(body)}"
       # We receive the event in structured mode:
-      assert %{
-               "specversion" => "0.2",
-               "type" => "greeting",
-               "source" => ^event_source,
-               "id" => ^event_id,
-               "data" => %{
-                 "name" => "alice"
-               }
-             } = client.read_event(ref, "greeting")
+      assert {%{
+                "specversion" => "0.2",
+                "type" => "greeting",
+                "source" => ^event_source,
+                "id" => ^event_id,
+                "data" => %{
+                  "name" => "alice"
+                }
+              }, _} = client.read_event(ref, "greeting")
     end
   end
 end

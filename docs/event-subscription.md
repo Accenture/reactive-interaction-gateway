@@ -15,13 +15,68 @@ There are **three ways to receive events**, either via [Server-Sent Events](http
 - Frontend developers can set up **(manual) subscriptions** that refer to an event type and zero, one or more _named_ fields of an event. The fields that can be referred to have to be set up in advance using the so-called _extractor configuration_ (see below).
 - Backend developers/administrators can set up **automatic subscriptions**, where events are subscribed to according to the JWT the UI sends with its request.
 
-Both automatic and manual subscriptions can be used at the same time - they are simply merged into a single set of subscriptions. Below there are examples for both types, but first we introduce _constraints_ and _extractors_.
+Both automatic and manual subscriptions can be used at the same time - they are simply merged into a single set of subscriptions.
+
+## Authorization
+
+RIG can either allow **anyone** to subscribe to any events, restrict subscriptions to clients that send a **valid JWT**, or forward subscription requests to an **external endpoint** and let that endpoint decide whether or not to allow a particular subscription. This can be configured using the environment variable `SUBSCRIPTION_CHECK` - please consult the [Operator's Guide](rig-ops-guide) for details.
+
+## Subscriptions
+
+Subscriptions can be set up
+
+- when establishing the connection, and
+- using a `subscriptions` endpoint to update a connection's subscriptions after it has already been established.
+
+The following example works similarly for both SSE and WebSocket. We use HTTPie here to make the examples a bit shorter. See the [MDN web docs article on SSE](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) for an example on how to set up SSE in a browser.
+
+Example for setting up initial subscriptions:
+
+```bash
+$ http --stream ':4000/_rig/v1/connection/sse?subscriptions=[{"eventType":"greeting"}]'
+HTTP/1.1 200 OK
+content-type: text/event-stream
+transfer-encoding: chunked
+
+event: rig.connection.create
+data: {"data":{"connection_token":"g2dkAA1yaWdAMTI3LjAuMC4xAAAKNwAAAAAD","errors":[]},"id":"634b8420-010f-4430-870b-fb5ca8e02945","source":"rig","specversion":"0.2","time":"2019-03-27T11:53:18.435690+00:00","type":"rig.connection.create"}
+
+event: rig.subscriptions_set
+data: {"data":[{"eventType":"greeting","oneOf":[]}],"id":"ec4deb26-d2a7-46ed-806d-d1beaa2560f8","source":"rig","specversion":"0.2","time":"2019-03-27T11:53:18.438281+00:00","type":"rig.subscriptions_set"}
+
+```
+
+Note that the `rig.subscriptions_set` event includes the passed subscription.
+
+> **Subscriptions might not be effective immediately! Wait for the `rig.subscriptions_set` event if you need to know when they are ready.**
+
+Note that the `rig.connection.create` event includes a `connection_token`; this token can now be used to update the subscriptions after the connection has been established. Let's replace our initial subscription to "greeting" with a new one to "greeting2":
+
+```bash
+$ CONN_TOKEN=g2dkAA1yaWdAMTI3LjAuMC4xAAAKTAAAAAAD
+$ BODY='{"subscriptions": [{"eventType":"greeting2"}]}'
+$ echo "${BODY}" | http put :4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions
+HTTP/1.1 204 No Content
+
+```
+
+After this call, the client receives a new `rig.subscriptions_set` event:
+
+```plaintext
+event: rig.subscriptions_set
+data: {"data":[{"eventType":"greeting2","oneOf":[]}],"id":"0ba84600-f5cc-4abb-b55d-f9e145cbd03d","source":"rig","specversion":"0.2","time":"2019-03-27T11:58:11.411963+00:00","type":"rig.subscriptions_set"}
+```
+
+We see that the subscription to "greeting" has been replaced by a subscription to "greeting2".
+
+Note that if you want to retain any automatic subscriptions you got along with setting up the connection, you need to make sure you _include the same HTTP Authorization header in both requests_.
+
+Sometimes subscribing to events by their type is still too coarse-grained. Read on to find out how you can leverage constraints to filter down the events the frontends will receive.
 
 ## Constraints & Extractors
 
-If subscribing to events by their event type is all you need, you can skip this.
-
-For a larges example and more details take a look at [the source documentation of `EventFilter`](https://accenture.github.io/reactive-interaction-gateway/source_docs/Rig.EventFilter.html).
+If subscribing to events by their event-type is all you need, you can skip this.
+For a slightly bigger example and further details take a look at [the source documentation of `EventFilter`](https://accenture.github.io/reactive-interaction-gateway/source_docs/Rig.EventFilter.html).
 
 ### Constraints
 
@@ -124,51 +179,3 @@ In order to support automatic, JWT-based subscriptions, the extractor also needs
 </code></pre>
 
 With that configuration, a frontend receives all events of type "greeting" where the value of `/data/name` equals the value of `/username` in the JWT.
-
-## Manual subscriptions
-
-Manual subscriptions can be set up when establishing the connection. Additionally, RIG offers an endpoint to update a connection's subscriptions after the connection has already been established.
-
-The following example works similarly for both SSE and WebSocket. We use HTTPie here to make the examples a bit shorter. See the [MDN web docs article on SSE](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) for an example on how to set up SSE in a browser.
-
-Example for setting up initial subscriptions:
-
-```bash
-$ http --stream ':4000/_rig/v1/connection/sse?subscriptions=[{"eventType":"greeting"}]'
-HTTP/1.1 200 OK
-content-type: text/event-stream
-transfer-encoding: chunked
-
-event: rig.connection.create
-data: {"data":{"connection_token":"g2dkAA1yaWdAMTI3LjAuMC4xAAAKNwAAAAAD","errors":[]},"id":"634b8420-010f-4430-870b-fb5ca8e02945","source":"rig","specversion":"0.2","time":"2019-03-27T11:53:18.435690+00:00","type":"rig.connection.create"}
-
-event: rig.subscriptions_set
-data: {"data":[{"eventType":"greeting","oneOf":[]}],"id":"ec4deb26-d2a7-46ed-806d-d1beaa2560f8","source":"rig","specversion":"0.2","time":"2019-03-27T11:53:18.438281+00:00","type":"rig.subscriptions_set"}
-
-```
-
-Note that the `rig.subscriptions_set` event includes the passed subscription. Also, note that the `rig.connection.create` event includes a `connection_token`; this token can now be used to update the subscriptions after the connection has been established. Let's replace our initial subscription to "greeting" with a new one to "greeting2":
-
-```bash
-$ CONN_TOKEN=g2dkAA1yaWdAMTI3LjAuMC4xAAAKTAAAAAAD
-$ BODY='{"subscriptions": [{"eventType":"greeting2"}]}'
-$ echo "${BODY}" | http put :4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions
-HTTP/1.1 204 No Content
-
-```
-
-After this call, the client receives a new `rig.subscriptions_set` event:
-
-```plaintext
-event: rig.subscriptions_set
-data: {"data":[{"eventType":"greeting2","oneOf":[]}],"id":"0ba84600-f5cc-4abb-b55d-f9e145cbd03d","source":"rig","specversion":"0.2","time":"2019-03-27T11:58:11.411963+00:00","type":"rig.subscriptions_set"}
-```
-
-We see that the subscription to "greeting" has been replaced by a subscription to "greeting2".
-
-Note that if you want to retain any automatic subscriptions you got along with setting up the connection, you need to make sure you _include the same HTTP Authorization header in both requests_.
-
-## Subscription Authorization
-
-RIG can either allow anyone to subscribe to any events, restrict subscriptions to clients that send a valid JWT, or forward subscription requests to an external endpoint and let that endpoint decide whether or not to allow a particular subscription. This can be configured using the environment variable `SUBSCRIPTION_CHECK` - please consult the [Operator's Guide](rig-ops-guide) for details.
-

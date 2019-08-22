@@ -351,7 +351,7 @@ defmodule RigKafka.Client do
            brod_client: brod_client,
            schema_registry_host: schema_registry_host,
            serializer: serializer
-         },
+         } = config,
          topic,
          schema,
          key,
@@ -402,7 +402,15 @@ defmodule RigKafka.Client do
           end)
 
           :timer.sleep(retry_delay_ms)
-          try_producing_message(brod_client, topic, key, body, retry_delay_divisor / 2)
+
+          try_producing_message(
+            config,
+            topic,
+            schema,
+            key,
+            plaintext,
+            retry_delay_divisor / 2
+          )
         else
           {:error, :leader_not_available}
         end

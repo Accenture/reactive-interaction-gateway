@@ -62,7 +62,7 @@ defmodule Rig.MixProject do
       # Apache Kafka Erlang client library:
       {:brod, "~> 3.3"},
       # For distributed_set:
-      {:timex, "~> 3.4"},
+      {:timex, "~> 3.6"},
       {:ex2ms, "~> 1.5"},
       {:uuid, "~> 1.1"},
       # For doing HTTP requests, e.g., in kafka_as_http:

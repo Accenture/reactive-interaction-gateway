@@ -13,7 +13,8 @@ defmodule RigInboundGateway.Application do
       supervisor(RigInboundGatewayWeb.Endpoint, _args = []),
       supervisor(RigAuth.Blacklist.Sup, _args = []),
       supervisor(RigInboundGateway.ApiProxy.Sup, _args = []),
-      supervisor(RigInboundGateway.ApiProxy.Handler.Kafka, _args = [])
+      supervisor(RigInboundGateway.ApiProxy.Handler.Kafka, _args = []),
+      supervisor(RigInboundGateway.RequestLogger.Kafka, _args = [])
     ]
 
     opts = [strategy: :one_for_one, name: RigInboundGateway.Supervisor]
