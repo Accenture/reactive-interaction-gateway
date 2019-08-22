@@ -1,13 +1,11 @@
 version: "3"
 services:
   zookeeper:
-    container_name: zookeeper
     image: wurstmeister/zookeeper:3.4.6
     ports:
       - 2181:2181
 
   kafka:
-    container_name: kafka
     image: wurstmeister/kafka:0.10.0.1-2
     environment:
       - KAFKA_ADVERTISED_HOST_NAME=kafka
@@ -22,7 +20,6 @@ services:
       - zookeeper
 
   rig:
-    container_name: rig
     image: accenture/reactive-interaction-gateway
     environment:
       - JWT_SECRET_KEY=mysecret
@@ -39,7 +36,6 @@ services:
       - kafka
 
   channels-external-service:
-    container_name: channels-external-service
     image: channels-external-service
     environment:
       - KAFKA_HOSTS=kafka:9092
@@ -47,7 +43,6 @@ services:
       - 8000:8000
 
   channels-ui:
-    container_name: channels-ui
     image: channels-ui
     ports:
       - 3000:80

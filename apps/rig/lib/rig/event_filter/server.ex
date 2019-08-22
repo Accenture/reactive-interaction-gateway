@@ -100,7 +100,7 @@ defmodule Rig.EventFilter.Server do
 
   @impl GenServer
   def handle_cast(
-        {:refresh_subscriptions, subscriber_pid, subscriptions},
+        {:refresh_subscriptions, subscriber_pid, subscriptions, done},
         %{
           event_type: event_type,
           subscription_table: subscription_table,
@@ -118,6 +118,9 @@ defmodule Rig.EventFilter.Server do
       fields,
       ttl_s
     )
+
+    # Call the subscriber's callback, if present:
+    if done, do: done.()
 
     {:noreply, state}
   end
