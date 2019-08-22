@@ -62,7 +62,7 @@ defmodule RigKafka.Config do
       consumer_topics: Map.get(config, :consumer_topics, []),
       server_id: Map.get(config, :server_id) || String.to_atom("rig_kafka_#{uuid}"),
       client_id: Map.get(config, :client_id) || String.to_atom("brod_client_#{uuid}"),
-      group_id: Map.get(config, :group_id),
+      group_id: Map.get(config, :group_id) || "brod_group_#{uuid}",
       ssl: Map.get(config, :ssl),
       sasl: Map.get(config, :sasl)
     }
