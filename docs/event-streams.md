@@ -9,6 +9,10 @@ RIG supports various ways to publish an event towards frontends. The recommended
 ## HTTP
 
 The HTTP endpoint is available on RIG's [internal port](rig-ops-guide). It supports JSON-encoded CloudEvents in [structured and binary modes](event-format#http-transport-binding) (Avro is currently not supported).
+- publishing via API Gateway to specific topic/stream, see [Publishing to event streams](./api-gateway#publishing-to-event-streams) for more details
+  - consuming of events from specific topic/stream to achieve sync requests
+- consuming of events to be forwarded via SSE/WS/Longpolling
+- publishing "monitoring" messages per API Gateway call
 
 Example usage (taken from the [tutorial](tutorial#4-create-a-new-chatroom-message-event-backend)):
 
@@ -33,6 +37,21 @@ content-type: application/json; charset=utf-8
 ```
 
 ## Kafka
+> __NOTE:__ it's enough to set one Kafka broker, RIG will automatically discover rest of the Kafka cluster.
+
+### Change consumer topics and group ID
+
+As Kafka is enabled, RIG starts to consume events on 2 default topics `rig` and `rig-proxy-response`. `rig` topic is used to consume all events and forward them to client via SSE/WS/Longpolling. `rig-proxy-response` is used for HTTP sync publishing, see [API Gateway docs](./api-gateway#sync).
+
+Change topics:
+
+```bash
+# Single topic
+docker run \
+-e KAFKA_BROKERS=kafka:9092 \
+-e KAFKA_SOURCE_TOPICS=my-topic \
+-e PROXY_KAFKA_RESPONSE_TOPICS=my-proxy-topic \
+accenture/reactive-interaction-gateway
 
 As described in the [Event Format](event-format#kafka-transport-binding) Section, the Kafka consumer supports both structured and binary modes, each with JSON as well as Avro encoding (with details described in the [advanced guide on Avro](avro)).
 
@@ -103,6 +122,22 @@ docker run -e KINESIS_ENABLED=1 -e KINESIS_AWS_REGION=eu-west-3 accenture/reacti
 ```
 
 The used consumer stream and the app name can be changed as well:
+### Change consumer stream and app name
+
+As Kinesis is enabled, RIG starts to consume events on default stream `RIG-outbound`. `RIG-outbound` topic is used to consume all events and forward them to client via SSE/WS/Longpolling.
+
+Change stream:
+
+```bash
+docker run \
+-e KINESIS_ENABLED=1 \
+-e KINESIS_STREAM=my-stream \
+accenture/reactive-interaction-gateway:aws
+```
+
+In addition to stream, you can configure also app name. Kinesis is using value of `KINESIS_APP_NAME` as a name for DynamoDB table. DynamoDB is internally used by Amazon to handle leases and consumer groups. It's similar to group ID in Kafka.
+
+Change app name:
 
 ```bash
 docker run \

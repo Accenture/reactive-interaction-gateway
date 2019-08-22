@@ -75,7 +75,9 @@ defmodule RigInboundGateway.Mixfile do
       # For backend service mocks:
       {:fake_server, "~> 2.0", only: :test},
       {:socket, "~> 0.3", only: :test},
-      {:joken, "~> 1.5"}
+      {:joken, "~> 1.5"},
+      # Define structs without the boilerplate:
+      {:typed_struct, "~> 0.1.4"}
     ]
   end
 

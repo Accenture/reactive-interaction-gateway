@@ -1,7 +1,7 @@
 describe('Subscriptions with no auth', () => {
   ['sse', 'ws'].forEach(type => {
     it(`Creates ${type} connection and subscriptions`, () => {
-      cy.visit(`/${type}-demo.html`);
+      cy.visit(`/${type}-1-demo.html`);
       cy.setAndVerifyInput('greeting', 'hello');
       cy.submit();
       cy.assertReceivedEvents('eventList', 'hello');
@@ -15,7 +15,7 @@ describe('Subscriptions with no auth', () => {
     });
 
     it(`Applies ${type} subscription constraints for given event type`, () => {
-      cy.visit(`/${type}-demo-simple-extractors.html`);
+      cy.visit(`/${type}-2-demo-simple-extractors.html`);
       cy.setAndVerifyInput('greeting', 'hello');
       cy.setAndVerifyInput('name', 'john');
       cy.submit();

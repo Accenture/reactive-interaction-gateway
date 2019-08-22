@@ -64,13 +64,15 @@ Imaging yourself in a project where you're building a website that's composed of
 
 From an architectural standpoint, your app generates a lot of unnecessary load that must be handled by the server, which means that your app cannot scale well with the number of users. Finally, each connection attempt may affect battery life when running on a mobile device.
 
+Still, we offer HTTP Long-polling in case SSE and WS are not supported.
+
 ## Use Case: Real Time Updates
 
-You see a Twitter notification that The Glitch Mob is doing a pop-up concert two nights from now at a venue just a few blocks from your apartment. No way! Your long-distance partner loves The Glitch Mob and they’re in town for a visit this weekend.  
+You see a Twitter notification that The Glitch Mob is doing a pop-up concert two nights from now at a venue just a few blocks from your apartment. No way! Your long-distance partner loves The Glitch Mob and they’re in town for a visit this weekend.
 
-Working late at the client site, you quickly log on to the ticket vendor on your laptop and look to book tickets before your car to the airport arrives. 
+Working late at the client site, you quickly log on to the ticket vendor on your laptop and look to book tickets before your car to the airport arrives.
 
-You see the live map of the venue, seats disappearing before your eyes at an alarming rate. You grab two, get to payment processing, and the car pulls up. 
+You see the live map of the venue, seats disappearing before your eyes at an alarming rate. You grab two, get to payment processing, and the car pulls up.
 
 Switching to your phone, you pull up the app, continuing the checkout process, and book the tickets. The event sells out in the next few minutes. Success!
 
@@ -89,11 +91,11 @@ User Story
 ![simplest architecture](assets/simple-arch.png)
 
 Clearly, we’re missing the financial transaction. Let’s add that in as a microservice and use HTTP endpoints to handle the connection between the application.
- 
+
 ![add finance app](assets/simple-add-finance.png)
 
 We want to send an email to the user once the process is complete. It is common to stand up a microservice to handle sending emails. We’ll use HTTP connections from the main application to the email service.
- 
+
 ![add finance app](assets/simple-add-email.png)
 
 ## Microservices & The Challenge of Evolving Complexity
@@ -106,11 +108,11 @@ A microservice architecture has a lot of benefits but depending on the way that 
 ## Endpoints As Investment: Functionality Is Built on Data Sources
 Building endpoints between the applications means that as complexity grows, it becomes more difficult to change the overall system. Other application features are built around the data from an endpoint and this locks together application interfaces. Each endpoint represents a long-term investment in a static architecture.
 
-In this example, App1 exposes an endpoint `/foo`. App2 makes an API call for that data and builds a method `bar` on the received data. App2 then exposes an endpoint `/foobar4ever`that uses the `bar` method. It creates a method called `foobar`. 
+In this example, App1 exposes an endpoint `/foo`. App2 makes an API call for that data and builds a method `bar` on the received data. App2 then exposes an endpoint `/foobar4ever`that uses the `bar` method. It creates a method called `foobar`.
 
 While that's a simple and humorous example, this is a common situation in microservice architectures. As functionality is built out, each application is dependent on endpoints existing in another application.
 
-To change and adapt the system requires changing the whole chain of methods and endpoints. As systems grow in complexity they become ossified. 
+To change and adapt the system requires changing the whole chain of methods and endpoints. As systems grow in complexity they become ossified.
 
 ![endpoints as investment](assets/endpoints-as-investment.png)
 
@@ -126,32 +128,32 @@ Reactive Systems are:
 - Message Driven
 
 Here's a potential way of designing the previous architecture in line with Reactive principles by adding an event hub. Instead of using HTTP endpoints between individual applications, each application publishes the events they generate to a topic and subscribe to the topic with the event data they need. The data flow is organized with topics.
- 
+
 ![add event hub](assets/simple-add-event-hub.png)
 
 ## Streaming Data Enables Flexibility and Adaptibility
-Designing the architecture with message passing flows means that the structure of the architecture can be changed more freely. 
+Designing the architecture with message passing flows means that the structure of the architecture can be changed more freely.
 
-Imagining the flow of the data as representing the state of the system, applications can be inserted, added, or changed, rather than relying on HTTP endpoints between multiple applications that need updating at each new iteration. 
+Imagining the flow of the data as representing the state of the system, applications can be inserted, added, or changed, rather than relying on HTTP endpoints between multiple applications that need updating at each new iteration.
 
-The architectural design is centered on streams of data through the system rather than the relationships and connections between applications. Data is sent asynchronously and applications react to events as they occur. This ability to think abstractly about streams of data as the system evolves regardless of the technical implementation is very valuable. 
+The architectural design is centered on streams of data through the system rather than the relationships and connections between applications. Data is sent asynchronously and applications react to events as they occur. This ability to think abstractly about streams of data as the system evolves regardless of the technical implementation is very valuable.
 
 Say the tickets endpoint was initially written in a language and framework that can’t handle the increased volume as it scales. It can be easily replaced, with the new application simply taking over the event subscription and publication to the topic. Topics can be easily updated.
 
 A reactive architecture using an event hub like Kafka enables an increased flexibility and the ability to debug, monitor, and maintain the backend in a microservices architecture. Even so, something about this architecture feels disjointed and unaligned to Reactive principles because of the real time updates.
 
 ## Reactive Interaction Gateway
-The application maintaining the websocket connections in our diagram will have trouble handling thousands of concurrent users with real time updates, whether they be mobile or browser based. 
+The application maintaining the websocket connections in our diagram will have trouble handling thousands of concurrent users with real time updates, whether they be mobile or browser based.
 
 At scale, this poses problems in the infrastructure and architecture. Events will need to be sent via the event hub and an application has to function as an interface with the client side. Which application should do it? Should the application that handles the main business logic also handle connections?
 
-The Reactive Interaction Gateway (RIG) was designed to solve this problem elegantly and in line with Reactive principles. Using the Erlang VM, BEAM, we can model web socket connections using actors, which are much lighter weight than OS threads. 
+The Reactive Interaction Gateway (RIG) was designed to solve this problem elegantly and in line with Reactive principles. Using the Erlang VM, BEAM, we can model web socket connections using actors, which are much lighter weight than OS threads.
 
 RIG functions as an application interface layer and works as an event hub for the front end.  It powers real time updates and decouples the backend interface from the frontend while enabling many concurrent users. It handles asynchronous events streaming from the event hub or from the UI.
 
 This architecture can evolve in complexity as features are built, adding or subtracting services in order to reflect the problem domain. It enables the continuous deployment of backend services without effecting users' connections.
 
-RIG is designed to manage all connections to the front end and to be language agnostic. It does not matter in which framework or language a connecting application is written and developers do not need to know Elixir / Phoenix to use RIG. 
+RIG is designed to manage all connections to the front end and to be language agnostic. It does not matter in which framework or language a connecting application is written and developers do not need to know Elixir / Phoenix to use RIG.
 
 Routes are defined using a configuration file or by POSTing directly to the application. This gives an architect a great deal of flexibility to choose the tools they use to meet functional requirements.
 

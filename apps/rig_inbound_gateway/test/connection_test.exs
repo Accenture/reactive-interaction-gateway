@@ -53,6 +53,14 @@ defmodule RigInboundGateway.ConnectionTest do
     status_code
   end
 
+  defp try_longpolling(params) do
+    url = "http://localhost:#{@port}/_rig/v1/connection/longpolling?#{URI.encode_query(params)}"
+
+    %HTTPoison.Response{status_code: res_status} = HTTPoison.get!(url)
+
+    res_status
+  end
+
   defp try_ws(params) do
     {:ok, client} =
       WebSocket.connect("localhost", @port, %{
@@ -74,16 +82,19 @@ defmodule RigInboundGateway.ConnectionTest do
     test ~S(Neither "jwt" nor "subscriptions" are required to connect.") do
       assert 200 = try_sse(jwt: nil, subscriptions: nil)
       assert {:ok, _} = try_ws(jwt: nil, subscriptions: nil)
+      assert 200 == try_longpolling(jwt: nil, subscriptions: nil)
     end
 
     test "Passing an invalid JWT closes the connection with a request error." do
       assert 400 = try_sse(jwt: "foobar", subscriptions: nil)
       assert {:error, _} = try_ws(jwt: "foobar", subscriptions: nil)
+      assert 400 == try_longpolling(jwt: "foobar", subscriptions: nil)
     end
 
     test "Passing an invalid subscriptions value closes the connection with a request error." do
       assert 400 = try_sse(jwt: nil, subscriptions: "can't { be [ parsed.")
       assert {:error, _} = try_ws(jwt: nil, subscriptions: "can't { be [ parsed.")
+      assert 400 == try_longpolling(jwt: nil, subscriptions: "can't { be [ parsed.")
     end
   end
 end

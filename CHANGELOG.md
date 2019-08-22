@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-<!-- ### Added -->
+### Added
+
+- Added longpolling as new connection type [#217](https://github.com/Accenture/reactive-interaction-gateway/issues/217)
 
 <!-- ### Changed -->
 
