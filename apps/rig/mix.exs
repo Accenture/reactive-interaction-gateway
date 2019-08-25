@@ -46,6 +46,7 @@ defmodule Rig.MixProject do
     [
       {:rig_cloud_events, in_umbrella: true},
       {:rig_kafka, in_umbrella: true},
+      {:rig_metrics, in_umbrella: true},
       # Read and use application configuration from environment variables:
       {:confex, "~> 3.3"},
       # For providing the global Phx PubSub server:
@@ -79,8 +80,11 @@ defmodule Rig.MixProject do
       {:phoenix, "~> 1.4"},
       {:plug_cowboy, "~> 2.0"},
       {:phoenix_swagger, "~> 0.8"},
+      # A library for defining structs with a type without writing boilerplate code:
+      {:typed_struct, "~> 0.1.4"},
       # Mock library for testing:
-      {:mox, "~> 0.4", only: :test}
+      {:mox, "~> 0.4", only: :test},
+      {:stubr, "~> 1.5.0", only: :test}
     ]
   end
 

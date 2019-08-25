@@ -13,7 +13,6 @@ COPY version /opt/sites/rig/
 COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
 COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
-COPY apps/rig_auth/mix.exs /opt/sites/rig/apps/rig_auth/
 COPY apps/rig_cloud_events/mix.exs /opt/sites/rig/apps/rig_cloud_events/
 COPY apps/rig_inbound_gateway/mix.exs /opt/sites/rig/apps/rig_inbound_gateway/
 COPY apps/rig_kafka/mix.exs /opt/sites/rig/apps/rig_kafka/

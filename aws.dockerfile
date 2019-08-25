@@ -29,7 +29,6 @@ COPY vm.args /opt/sites/rig/
 COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
 COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
-COPY apps/rig_auth/mix.exs /opt/sites/rig/apps/rig_auth/
 COPY apps/rig_cloud_events/mix.exs /opt/sites/rig/apps/rig_cloud_events/
 COPY apps/rig_inbound_gateway/mix.exs /opt/sites/rig/apps/rig_inbound_gateway/
 COPY apps/rig_kafka/mix.exs /opt/sites/rig/apps/rig_kafka/
@@ -45,9 +44,6 @@ COPY config /opt/sites/rig/config
 
 COPY apps/rig/config /opt/sites/rig/apps/rig/config
 COPY apps/rig/lib /opt/sites/rig/apps/rig/lib
-
-COPY apps/rig_auth/config /opt/sites/rig/apps/rig_auth/config
-COPY apps/rig_auth/lib /opt/sites/rig/apps/rig_auth/lib
 
 COPY apps/rig_cloud_events/config /opt/sites/rig/apps/rig_cloud_events/config
 COPY apps/rig_cloud_events/lib /opt/sites/rig/apps/rig_cloud_events/lib

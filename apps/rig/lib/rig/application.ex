@@ -3,6 +3,7 @@ defmodule Rig.Application do
 
   use Application
   use Rig.Config, [:log_level]
+  use Supervisor
 
   def start(_type, _args) do
     alias Supervisor.Spec
@@ -17,7 +18,8 @@ defmodule Rig.Application do
       Rig.EventFilter.Sup,
       Rig.EventStream.KafkaToFilter,
       Rig.EventStream.KafkaToHttp,
-      RigApi.Endpoint
+      RigApi.Endpoint,
+      worker(Rig.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]])
     ]
 
     opts = [strategy: :one_for_one, name: Rig.Supervisor]

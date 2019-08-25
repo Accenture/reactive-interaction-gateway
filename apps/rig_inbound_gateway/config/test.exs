@@ -11,6 +11,6 @@ config :rig_inbound_gateway, RigInboundGatewayWeb.Endpoint,
 config :rig, RigInboundGateway.Kafka, log_topic: "rig"
 
 config :rig, RigInboundGateway.Proxy,
-  config_path_or_json: {:system, "PROXY_CONFIG_FILE", "proxy/proxy.test.json"}
+  config_path_or_json: {:system, "PROXY_CONFIG_FILE", "proxy/proxy.test.inbound.json"}
 
 config :fake_server, :port_range, Enum.to_list(55_000..65_000) ++ [7070, 8081]

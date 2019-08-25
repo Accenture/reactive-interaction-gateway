@@ -1,7 +1,7 @@
 defmodule RIG.JWTTest do
   @moduledoc false
   use ExUnit.Case, async: true
-  use RigAuth.ConnCase
+  use RigApi.ConnCase
 
   alias RIG.JWT
 
