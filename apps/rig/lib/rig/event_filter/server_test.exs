@@ -143,7 +143,7 @@ defmodule Rig.EventFilter.ServerTest do
     }
 
     # We start the server using an empty field config:
-    event_type = "greeting"
+    event_type = "greeting-29-08-2019"
     {:ok, filter_pid} = Server.start_link(event_type, empty_field_config)
 
     # Since no field is configured, any constraints are ignored:
