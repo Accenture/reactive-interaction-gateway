@@ -45,7 +45,6 @@ defmodule Rig.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:rig_cloud_events, in_umbrella: true},
       # Read and use application configuration from environment variables:
       {:confex, "~> 3.3"},
       # For providing the global Phx PubSub server:
@@ -61,6 +60,7 @@ defmodule Rig.MixProject do
       {:poison, "~> 3.0 or ~> 4.0"},
       # JSON parser that's supposedly faster than poison:
       {:jason, "~> 1.1"},
+      {:jaxon, "~> 1.0"},
       # JSON Pointer (RFC 6901) implementation for subscriptions:
       {:odgn_json_pointer, "~> 2.3"},
       # Apache Kafka Erlang client library:

@@ -53,8 +53,7 @@ release :rig do
   set(
     applications: [
       :runtime_tools,
-      rig: :permanent,
-      rig_cloud_events: :permanent
+      rig: :permanent
     ]
   )
 

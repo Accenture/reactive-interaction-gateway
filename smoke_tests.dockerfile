@@ -13,7 +13,6 @@ COPY version /opt/sites/rig/
 COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
 COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
-COPY apps/rig_cloud_events/mix.exs /opt/sites/rig/apps/rig_cloud_events/
 
 # Install project dependencies
 RUN mix deps.get

@@ -29,7 +29,6 @@ COPY vm.args /opt/sites/rig/
 COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
 COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
-COPY apps/rig_cloud_events/mix.exs /opt/sites/rig/apps/rig_cloud_events/
 
 # Install project dependencies
 RUN mix deps.get
@@ -40,9 +39,6 @@ COPY config /opt/sites/rig/config
 
 COPY apps/rig/config /opt/sites/rig/apps/rig/config
 COPY apps/rig/lib /opt/sites/rig/apps/rig/lib
-
-COPY apps/rig_cloud_events/config /opt/sites/rig/apps/rig_cloud_events/config
-COPY apps/rig_cloud_events/lib /opt/sites/rig/apps/rig_cloud_events/lib
 
 # Compile and release application production code
 RUN mix compile
