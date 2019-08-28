@@ -46,7 +46,6 @@ defmodule Rig.MixProject do
   defp deps do
     [
       {:rig_cloud_events, in_umbrella: true},
-      {:rig_kafka, in_umbrella: true},
       # Read and use application configuration from environment variables:
       {:confex, "~> 3.3"},
       # For providing the global Phx PubSub server:
@@ -66,6 +65,12 @@ defmodule Rig.MixProject do
       {:odgn_json_pointer, "~> 2.3"},
       # Apache Kafka Erlang client library:
       {:brod, "~> 3.3"},
+      # Apache Avro encoding/decoding library:
+      {:erlavro, "~> 2.6"},
+      # Apache Kafka Schema Registry wrapper library:
+      {:schemex, "~> 0.1.1"},
+      # Caching library using ETS:
+      {:memoize, "~> 1.3"},
       # For distributed_set:
       {:timex, "~> 3.6"},
       {:ex2ms, "~> 1.5"},
@@ -85,6 +90,7 @@ defmodule Rig.MixProject do
       # Mock library for testing:
       {:mox, "~> 0.4", only: :test},
       {:stubr, "~> 1.5.0", only: :test},
+      {:fake_server, "~> 2.0", only: :test},
       # Prometheus metrics
       {:prometheus_ex, "~> 3.0"},
       {:prometheus_plugs, "~> 1.1"}

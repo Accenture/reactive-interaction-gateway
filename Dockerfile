@@ -22,7 +22,6 @@ COPY mix.lock /opt/sites/rig/
 COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
 COPY apps/rig_cloud_events/mix.exs /opt/sites/rig/apps/rig_cloud_events/
 COPY apps/rig_inbound_gateway/mix.exs /opt/sites/rig/apps/rig_inbound_gateway/
-COPY apps/rig_kafka/mix.exs /opt/sites/rig/apps/rig_kafka/
 
 # Install project dependencies
 RUN mix deps.get
@@ -40,9 +39,6 @@ COPY apps/rig_cloud_events/lib /opt/sites/rig/apps/rig_cloud_events/lib
 COPY apps/rig_inbound_gateway/config /opt/sites/rig/apps/rig_inbound_gateway/config
 COPY apps/rig_inbound_gateway/lib /opt/sites/rig/apps/rig_inbound_gateway/lib
 COPY apps/rig_inbound_gateway/priv /opt/sites/rig/apps/rig_inbound_gateway/priv
-
-COPY apps/rig_kafka/config /opt/sites/rig/apps/rig_kafka/config
-COPY apps/rig_kafka/lib /opt/sites/rig/apps/rig_kafka/lib
 
 # Compile and release application production code
 RUN mix compile
