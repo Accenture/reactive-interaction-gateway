@@ -68,3 +68,4 @@ import_config "#{Mix.env()}.exs"
 
 import_config "rig_api/config.exs"
 import_config "rig_auth/config.exs"
+import_config "rig_outbound_gateway/config.exs"

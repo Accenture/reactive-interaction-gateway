@@ -228,7 +228,7 @@ defmodule RigKafka.Client do
 
   @spec resolve_path(path :: String.t()) :: String.t()
   defp resolve_path(path) do
-    working_dir = :code.priv_dir(:rig_outbound_gateway)
+    working_dir = :code.priv_dir(:rig)
     expanded_path = Path.expand(path, working_dir)
     true = File.regular?(expanded_path) || "#{path} is not a file"
     expanded_path

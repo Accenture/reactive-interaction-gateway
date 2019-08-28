@@ -5,6 +5,9 @@ defmodule Rig.Application do
   use Rig.Config, [:log_level]
   use Supervisor
 
+  alias RigOutboundGateway.Kinesis
+  alias RigOutboundGateway.KinesisFirehose
+
   def start(_type, _args) do
     alias Supervisor.Spec
 
@@ -19,7 +22,9 @@ defmodule Rig.Application do
       Rig.EventStream.KafkaToFilter,
       Rig.EventStream.KafkaToHttp,
       RigApi.Endpoint,
-      worker(Rig.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]])
+      worker(Rig.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
+      Kinesis.JavaClient,
+      KinesisFirehose.JavaClient
     ]
 
     opts = [strategy: :one_for_one, name: Rig.Supervisor]

@@ -57,7 +57,6 @@ release :rig do
       rig_cloud_events: :permanent,
       rig_kafka: :permanent,
       rig_inbound_gateway: :permanent,
-      rig_outbound_gateway: :permanent,
       rig_metrics: :permanent
     ]
   )
