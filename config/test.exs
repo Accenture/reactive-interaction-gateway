@@ -1,5 +1,9 @@
 use Mix.Config
 
+config :rig, Rig.Kafka, enabled?: true
+
+config :rig, Rig.KafkaTest, topic: "rig"
+
 # Print only warnings and errors during test
 config :rig, Rig.Application, log_level: {:system, :atom, "LOG_LEVEL", :warn}
 

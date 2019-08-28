@@ -19,7 +19,7 @@ defmodule Mix.Tasks.PublishGhPages do
            do: {:ok, git_user}
 
     source_url =
-      Rig.Umbrella.Mixfile.project()[:source_url]
+      RIG.MixProject.project()[:source_url]
       |> URI.parse()
       |> Map.put(:userinfo, git_user)
       |> URI.to_string()

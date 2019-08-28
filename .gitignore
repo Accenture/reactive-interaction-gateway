@@ -1,7 +1,26 @@
 # App artifacts
 /_build
 /_rig/
+/doc/
+/cover/
+
 /*.ez
+/deps/
+node_modules/
+
+# The Swagger JSON document is re-generated during `mix compile`:
+/priv/static/rig_api_swagger.json
+
+# Docusaurus
+/website/translated_docs
+/website/build/
+
+# mix docs
+/website/static/source_docs
+
+# Cypress
+/examples/tests/cypress/videos
+/examples/tests/cypress/screenshots
 
 # Generated on crash by the VM
 erl_crash.dump
@@ -12,7 +31,7 @@ erl_crash.dump
 # Alternatively, you may comment the line below and commit the
 # secrets file as long as you replace its contents by environment
 # variables.
-/config/prod.secret.exs
+*.secret.exs
 
 # Other
 .DS_Store
@@ -20,25 +39,3 @@ erl_crash.dump
 /.elixir_ls/
 *~
 *.orig
-
-/deps
-/apps/*/deps
-
-/doc/
-/apps/*/doc/
-
-/cover
-/apps/*/cover
-
-# Docusaurus
-/website/node_modules
-/website/translated_docs
-/website/build/
-
-# mix docs
-/website/static/source_docs
-
-/examples/tests/node_modules
-/examples/tests/cypress/videos
-/examples/tests/cypress/screenshots
-

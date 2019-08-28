@@ -13,7 +13,7 @@ cd "$(dirname "$0")"
 CUR_DIR="$(pwd)"
 CERTS_DIR="${CUR_DIR}/certs"
 PROJ_DIR="${CUR_DIR}/../.."
-RIG_PRIV_DIR="${PROJ_DIR}/apps/rig/priv"
+RIG_PRIV_DIR="${PROJ_DIR}/priv"
 
 
 rm -f "${CERTS_DIR}"/*.{jks,p12,crt,csr,key,srl}

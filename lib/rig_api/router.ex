@@ -48,7 +48,7 @@ defmodule RigApi.Router do
   def swagger_info do
     %{
       info: %{
-        version: Rig.MixProject.project()[:version],
+        version: RIG.MixProject.project()[:version],
         title: "Reactive Interaction Gateway: API",
         description: """
         The Reactive Interaction Gateway provides an API that allows backend services

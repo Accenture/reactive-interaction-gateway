@@ -28,7 +28,6 @@ COPY vm.args /opt/sites/rig/
 # Copy necessary files for dependencies
 COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
-COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
 
 # Install project dependencies
 RUN mix deps.get
@@ -36,9 +35,7 @@ RUN mix deps.get
 # Copy application files
 
 COPY config /opt/sites/rig/config
-
-COPY apps/rig/config /opt/sites/rig/apps/rig/config
-COPY apps/rig/lib /opt/sites/rig/apps/rig/lib
+COPY lib /opt/sites/rig/lib
 
 # Compile and release application production code
 RUN mix compile

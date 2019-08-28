@@ -12,7 +12,6 @@ COPY version /opt/sites/rig/
 # Copy necessary files for dependencies
 COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
-COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
 
 # Install project dependencies
 RUN mix deps.get
@@ -20,8 +19,7 @@ RUN mix deps.get
 # Copy application files
 
 COPY config /opt/sites/rig/config
-COPY apps /opt/sites/rig/apps
-# COPY guides /opt/sites/rig/guides
+COPY lib /opt/sites/rig/lib
 
 # Proxy
 EXPOSE 4000
