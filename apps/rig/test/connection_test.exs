@@ -42,7 +42,7 @@ defmodule RigInboundGateway.ConnectionTest do
       receive do
         %HTTPoison.AsyncStatus{code: code} -> code
       after
-        500 -> raise "No response"
+        2_000 -> raise "No response"
       end
 
     flush_mailbox()

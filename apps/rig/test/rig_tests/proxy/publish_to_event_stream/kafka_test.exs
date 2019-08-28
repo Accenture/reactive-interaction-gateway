@@ -16,6 +16,7 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
   use ExUnit.Case, async: false
 
   alias Rig.KafkaConfig, as: RigKafkaConfig
+  alias RigInboundGateway.ApiProxyInjection
   alias RigKafka
 
   @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
@@ -23,6 +24,14 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
   @proxy_host Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:url][:host]
 
   defp kafka_config, do: RigKafkaConfig.parse(config())
+
+  setup_all do
+    ApiProxyInjection.set()
+
+    on_exit(fn ->
+      ApiProxyInjection.restore()
+    end)
+  end
 
   setup do
     kafka_config = kafka_config()

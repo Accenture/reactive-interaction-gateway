@@ -51,4 +51,4 @@ Probe.wait_for_endpoint(endpoint_enabled?, port)
 
 ExUnit.start()
 # Exclude all smoke tests from running by default
-ExUnit.configure(exclude: [smoke: true, kafka: true, skip: true])
+ExUnit.configure(exclude: [smoke: true, kafka: true, kinesis: true, avro: true, skip: true])

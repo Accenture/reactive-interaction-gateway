@@ -12,8 +12,6 @@ defmodule RigKafkaTest do
   alias RigKafka
   alias RigKafka.Config
 
-  @sup RigKafka.DynamicSupervisor
-
   defp kafka_config(consumer_topics, serializer, schema_registry_host) do
     broker_env = System.get_env("KAFKA_BROKERS")
     assert not is_nil(broker_env), "KAFKA_BROKERS needs to be set for Kafka test to work"

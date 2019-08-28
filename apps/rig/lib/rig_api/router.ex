@@ -19,15 +19,6 @@ defmodule RigApi.Router do
 
     resources("/responses", ResponsesController, only: [:create])
 
-    scope "/users" do
-      get("/", ChannelsController, :list_channels)
-      get("/:user/sessions", ChannelsController, :list_channel_sessions)
-    end
-
-    scope "/tokens" do
-      delete("/:jti", ChannelsController, :disconnect_channel_session)
-    end
-
     scope "/session-blacklist" do
       post("/", SessionBlacklistController, :blacklist_session)
       get("/:session_id", SessionBlacklistController, :check_status)

@@ -79,7 +79,6 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
       # payload}` is silently converted to `{:close, :abnormal, nil}`. Since there is no
       # limit mentioned in the spec (RFC-6455), we opt for consistent responses,
       # omitting the detailed error.
-      Logger.warn(fn -> "WS conn failed: #{reason}" end)
       reason = "Bad request."
       # This will close the connection:
       {:reply, closing_frame(reason), :no_state}

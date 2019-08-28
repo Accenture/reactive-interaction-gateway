@@ -1,32 +1,61 @@
-defmodule RigTests.Proxy.ResponseFrom.HttpTest do
+defmodule RigTests.Proxy.ResponseFrom.KinesisTest do
   @moduledoc """
-  If `response_from` is not set, the response is taken from the proxied request.
+  With `response_from` set to Kinesis, the response is taken from a Kinesis stream.
+
+  In production, this may be used to hide asynchronous processing by one or more
+  backend services with a synchronous interface.
 
   Note that `test_with_server` sets up an HTTP server mock, which is then configured
   using the `route` macro.
   """
-  # cause FakeServer opens a port:
+  use Rig.Config, [:response_topic]
   use ExUnit.Case, async: false
 
   import FakeServer
 
-  alias FakeServer.Response
+  alias FakeServer.HTTP.Response
+  alias RigInboundGateway.ApiProxyInjection
 
   @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
   @proxy_port Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
 
-  test_with_server "Given response_from is not set, the http response is forwarded as-is." do
-    test_name = "proxy-http-sync-response"
+  # TODO kinesis config
+  # @kafka_config RigKafka.Config.new(Application.fetch_env!(:rig, :systest_kafka_config))
+
+  setup_all do
+    ApiProxyInjection.set()
+
+    on_exit(fn ->
+      ApiProxyInjection.restore()
+    end)
+  end
+
+  setup do
+    # TODO start kinesis client
+
+    on_exit(fn ->
+      nil
+      # TODO stop kinesis client
+    end)
+
+    :ok
+  end
+
+  @tag :kinesis
+  test_with_server "Given response_from is set to Kinesis, the http response is taken from the Kinesis response stream instead of forwarding the backend's original response." do
+    test_name = "proxy-http-response-from-kinesis"
 
     api_id = "mock-#{test_name}-api"
     endpoint_id = "mock-#{test_name}-endpoint"
+    %{response_topic: _kinesis_stream} = config()
     endpoint_path = "/#{endpoint_id}"
-    sync_response = %{"this response" => "is forwarded as-is to the client."}
+    sync_response = %{"the client" => "never sees this response"}
+    async_response = %{"this is the async response" => "that reaches the client instead"}
 
-    route(
-      endpoint_path,
+    route(endpoint_path, fn _ ->
+      # TODO produce async_response to Kinesis stream
       Response.ok!(sync_response, %{"content-type" => "application/json"})
-    )
+    end)
 
     # We register the endpoint with the proxy:
     rig_api_url = "http://localhost:#{@api_port}/v1/apis"
@@ -44,7 +73,8 @@ defmodule RigTests.Proxy.ResponseFrom.HttpTest do
                 type: "http",
                 secured: false,
                 method: "GET",
-                path: endpoint_path
+                path: endpoint_path,
+                response_from: "kinesis"
               }
             ]
           }
@@ -67,7 +97,9 @@ defmodule RigTests.Proxy.ResponseFrom.HttpTest do
     assert FakeServer.hits() == 1
     # ...the connection is closed and the status is OK:
     assert res_status == 200
-    # ...the response received is exactly what the service mock returned:
-    assert Jason.decode!(res_body) == sync_response
+    # ...the client never saw the http response:
+    assert Jason.decode!(res_body) != sync_response
+    # ...but the client got the response sent to the Kafka topic:
+    assert Jason.decode!(res_body) == async_response
   end
 end

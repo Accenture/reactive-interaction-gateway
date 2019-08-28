@@ -19,6 +19,7 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
 
   alias FakeServer.Response
   alias Rig.KafkaConfig, as: RigKafkaConfig
+  alias RigInboundGateway.ApiProxyInjection
   alias RigKafka
 
   @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
@@ -26,6 +27,14 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
   @env [port: 55_001]
 
   defp kafka_config, do: RigKafkaConfig.parse(config())
+
+  setup_all do
+    ApiProxyInjection.set()
+
+    on_exit(fn ->
+      ApiProxyInjection.restore()
+    end)
+  end
 
   setup do
     System.put_env("REQUEST_LOG", "kafka")

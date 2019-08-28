@@ -15,7 +15,7 @@ defmodule RIG.JWT do
   alias __MODULE__.Claims
   alias __MODULE__.HttpCredentials
 
-  alias RigAuth.Blacklist
+  alias RigAuth.Session
 
   @type token :: String.t()
   @type claims :: %{optional(String.t()) => String.t()}
@@ -102,7 +102,7 @@ defmodule RIG.JWT do
   # ---
 
   defp ensure_not_blacklisted(%{"jti" => jti} = claims) do
-    if Blacklist.contains_jti?(Blacklist, jti) do
+    if Session.blacklisted?(jti) do
       {:error, "Ignoring blacklisted JWT with ID #{jti}."}
     else
       {:ok, claims}
