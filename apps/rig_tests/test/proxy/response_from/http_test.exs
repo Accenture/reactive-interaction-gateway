@@ -13,7 +13,7 @@ defmodule RigTests.Proxy.ResponseFrom.HttpTest do
   alias FakeServer.Response
 
   @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
-  @proxy_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][:port]
+  @proxy_port Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
 
   test_with_server "Given response_from is not set, the http response is forwarded as-is." do
     test_name = "proxy-http-sync-response"

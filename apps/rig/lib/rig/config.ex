@@ -228,7 +228,7 @@ defmodule Rig.Config do
   # ---
 
   defp check_relative_to_priv(%{found?: false, path: path} = ctx) when byte_size(path) > 0 do
-    [:rig, :rig_inbound_gateway]
+    [:rig]
     |> Enum.map(&:code.priv_dir/1)
     # If the app is not yet loaded this errors, so let's ignore that:
     |> Enum.filter(fn

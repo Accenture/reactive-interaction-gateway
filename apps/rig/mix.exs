@@ -85,12 +85,18 @@ defmodule Rig.MixProject do
       {:phoenix, "~> 1.4"},
       {:plug_cowboy, "~> 2.0"},
       {:phoenix_swagger, "~> 0.8"},
+      # SSE serialization:
+      {:server_sent_event, "~> 1.0"},
       # A library for defining structs with a type without writing boilerplate code:
       {:typed_struct, "~> 0.1.4"},
+      # AWS SDK
+      {:ex_aws, "~> 2.0"},
+      {:ex_aws_kinesis, "~> 2.0"},
       # Mock library for testing:
       {:mox, "~> 0.4", only: :test},
       {:stubr, "~> 1.5.0", only: :test},
       {:fake_server, "~> 2.0", only: :test},
+      {:socket, "~> 0.3", only: :test},
       # Prometheus metrics
       {:prometheus_ex, "~> 3.0"},
       {:prometheus_plugs, "~> 1.1"}

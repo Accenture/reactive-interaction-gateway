@@ -28,7 +28,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
   alias RigKafka
 
   @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
-  @proxy_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][:port]
+  @proxy_port Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
 
   defp kafka_config, do: RigKafkaConfig.parse(config())
 

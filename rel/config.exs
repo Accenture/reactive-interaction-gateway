@@ -54,8 +54,7 @@ release :rig do
     applications: [
       :runtime_tools,
       rig: :permanent,
-      rig_cloud_events: :permanent,
-      rig_inbound_gateway: :permanent
+      rig_cloud_events: :permanent
     ]
   )
 

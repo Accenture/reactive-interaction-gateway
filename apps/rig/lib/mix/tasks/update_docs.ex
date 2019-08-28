@@ -31,7 +31,6 @@ defmodule Mix.Tasks.UpdateDocs do
 
   defp all_envs do
     Application.get_all_env(:rig)
-    |> Enum.concat(Application.get_all_env(:rig_inbound_gateway))
   end
 
   def update_file(filename, env \\ all_envs()) do

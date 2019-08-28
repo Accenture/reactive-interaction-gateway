@@ -21,9 +21,6 @@ defmodule RigApi.ChannelCase do
       use Phoenix.ChannelTest
       alias RigInboundGatewayWeb.Presence.Channel, as: PresenceChannel
 
-      # The default endpoint for testing
-      @endpoint RigApi.Endpoint
-
       # Roles definitions
       @support_role "support"
       @customer_role "customer"

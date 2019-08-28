@@ -3,7 +3,6 @@ defmodule Rig.Application do
 
   use Application
   use Rig.Config, [:log_level]
-  use Supervisor
 
   alias RigOutboundGateway.Kinesis
   alias RigOutboundGateway.KinesisFirehose
@@ -18,14 +17,27 @@ defmodule Rig.Application do
 
     children = [
       Spec.supervisor(Phoenix.PubSub.PG2, [Rig.PubSub, []]),
+      # Kafka:
       {DynamicSupervisor, strategy: :one_for_one, name: RigKafka.DynamicSupervisor},
+      # Event stream handling:
       Rig.EventFilter.Sup,
       Rig.EventStream.KafkaToFilter,
       Rig.EventStream.KafkaToHttp,
-      RigApi.Endpoint,
-      worker(Rig.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
+      # Blacklist:
+      Spec.worker(Rig.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
+      RigAuth.Blacklist.Sup,
+      # Kinesis event stream:
       Kinesis.JavaClient,
-      KinesisFirehose.JavaClient
+      KinesisFirehose.JavaClient,
+      # RIG API (internal port):
+      RigApi.Endpoint,
+      # Request logger for proxy:
+      RigInboundGateway.RequestLogger.Kafka,
+      # API proxy:
+      RigInboundGateway.ApiProxy.Sup,
+      RigInboundGateway.ApiProxy.Handler.Kafka,
+      # RIG public-facing endpoint:
+      RigInboundGatewayWeb.Endpoint
     ]
 
     # Prometheus
@@ -41,9 +53,18 @@ defmodule Rig.Application do
     Supervisor.start_link(children, opts)
   end
 
-  # Phoenix callback for RigApi
+  @doc """
+  This function is called by an application after a code replacement, if the configuration parameters have changed.
+
+  Changed is a list of parameter-value tuples including all configuration parameters with changed values.
+
+  New is a list of parameter-value tuples including all added configuration parameters.
+
+  Removed is a list of all removed parameters.
+  """
   def config_change(changed, _new, removed) do
     RigApi.Endpoint.config_change(changed, removed)
+    RigInboundGatewayWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 end

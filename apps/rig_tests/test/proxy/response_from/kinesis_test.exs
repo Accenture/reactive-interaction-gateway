@@ -14,7 +14,7 @@ defmodule RigTests.Proxy.ResponseFrom.KinesisTest do
   alias FakeServer.HTTP.Response
 
   @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
-  @proxy_port Confex.fetch_env!(:rig_inbound_gateway, RigInboundGatewayWeb.Endpoint)[:http][:port]
+  @proxy_port Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
 
   # TODO kinesis config
   # @kafka_config RigKafka.Config.new(Application.fetch_env!(:rig, :systest_kafka_config))
