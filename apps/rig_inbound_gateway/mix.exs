@@ -49,7 +49,6 @@ defmodule RigInboundGateway.Mixfile do
       {:rig_cloud_events, in_umbrella: true},
       {:rig, in_umbrella: true},
       {:rig_kafka, in_umbrella: true},
-      {:rig_metrics, in_umbrella: true},
       {:phoenix, "~> 1.4.0"},
       {:phoenix_pubsub, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},

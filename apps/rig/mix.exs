@@ -18,7 +18,8 @@ defmodule Rig.MixProject do
       test_coverage: [tool: ExCoveralls],
       aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
-      test_paths: test_paths(Mix.env())
+      test_paths: test_paths(Mix.env()),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers()
     ]
   end
 
@@ -31,7 +32,7 @@ defmodule Rig.MixProject do
   def application do
     [
       mod: {Rig.Application, []},
-      extra_applications: [:logger, :runtime_tools],
+      extra_applications: [:logger, :runtime_tools, :prometheus_ex, :prometheus_plugs],
       included_applications: [:peerage]
     ]
   end
@@ -46,7 +47,6 @@ defmodule Rig.MixProject do
     [
       {:rig_cloud_events, in_umbrella: true},
       {:rig_kafka, in_umbrella: true},
-      {:rig_metrics, in_umbrella: true},
       # Read and use application configuration from environment variables:
       {:confex, "~> 3.3"},
       # For providing the global Phx PubSub server:
@@ -84,7 +84,10 @@ defmodule Rig.MixProject do
       {:typed_struct, "~> 0.1.4"},
       # Mock library for testing:
       {:mox, "~> 0.4", only: :test},
-      {:stubr, "~> 1.5.0", only: :test}
+      {:stubr, "~> 1.5.0", only: :test},
+      # Prometheus metrics
+      {:prometheus_ex, "~> 3.0"},
+      {:prometheus_plugs, "~> 1.1"}
     ]
   end
 

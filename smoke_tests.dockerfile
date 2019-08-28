@@ -16,7 +16,6 @@ COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
 COPY apps/rig_cloud_events/mix.exs /opt/sites/rig/apps/rig_cloud_events/
 COPY apps/rig_inbound_gateway/mix.exs /opt/sites/rig/apps/rig_inbound_gateway/
 COPY apps/rig_kafka/mix.exs /opt/sites/rig/apps/rig_kafka/
-COPY apps/rig_metrics/mix.exs /opt/sites/rig/apps/rig_metrics/
 
 # Install project dependencies
 RUN mix deps.get
