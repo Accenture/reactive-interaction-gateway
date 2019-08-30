@@ -160,11 +160,18 @@ Routes are defined using a configuration file or by POSTing directly to the appl
 ![simple-add-rig](assets/simple-add-rig.png)
 
 ## Another Architectural Option: Using RIG for Publish / Subscribe Communication with the Backend
-As we saw in the architectural diagram above, RIG enables sending REST calls through the interface to backend services. As another option that further decouples the backend from the front end, it is possible to send an HTTP request to RIG and have it publish and subscribe to Kafka with server sent events
+It is possible to send an HTTP request to RIG and have it publish and subscribe to Kafka, decoupling the front end from the backend entirely.
 
 ![rig-kafka-pure-pub-sub](assets/rig-kafka-pure-pub-sub.png)
 
-## Next Layer of Complexity: A Reference Architecture
-In the [/examples](https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples) folder, there is an example architecture made with a React frontend, RIG, a Node backend, and a Kafka instance. Here's a chart demonstrating that reference architecture in abstract. Go to [/examples](https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples) for more depth:
+## Reference Architectures
+In the [/examples](https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples) folder, we have two example architectures:
+
+One, we have an example architecture made with a React frontend, RIG, a Node backend, and a Kafka instance. Here's a chart demonstrating that reference architecture in abstract. Go to [/examples](https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples) for more depth, it is called `channels-example`:
 
 ![demo architecture abstract](assets/demo-architecture-abstract.png)
+
+Another shows the above publish and subscribe architecture, called `rig-kafka-pub-sub-example`. It uses Springboot for the backend microservice. Here's a diagram demonstrating that example in abstract:
+
+![examples-rig-kafka-pub-sub](assets/examples-rig-kafka-pub-sub.png)
+
