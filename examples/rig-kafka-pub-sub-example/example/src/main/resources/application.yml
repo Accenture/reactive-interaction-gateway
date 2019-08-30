@@ -1,0 +1,15 @@
+
+spring:
+  profiles:
+    active: "local"
+---
+
+spring:
+  profiles: local
+  kafka:
+    properties:
+      security.protocol: PLAINTEXT
+    consumer:
+      bootstrap-servers: 127.0.0.1:9094
+    producer:
+      bootstrap-servers: 127.0.0.1:9094
