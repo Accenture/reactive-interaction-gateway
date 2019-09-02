@@ -30,7 +30,7 @@ defmodule RIG.MixProject do
       deps: deps(),
       aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers() ++ [:phoenix_swagger],
 
       # Test and test coverage:
       test_paths: test_paths(Mix.env()),
