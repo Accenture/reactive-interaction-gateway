@@ -13,7 +13,7 @@ cd "$(dirname "$0")"
 CUR_DIR="$(pwd)"
 CERTS_DIR="${CUR_DIR}/certs"
 PROJ_DIR="${CUR_DIR}/../.."
-RIG_OUTBOUND_GATEWAY_PRIV_DIR="${PROJ_DIR}/apps/rig_outbound_gateway/priv"
+RIG_PRIV_DIR="${PROJ_DIR}/priv"
 
 
 rm -f "${CERTS_DIR}"/*.{jks,p12,crt,csr,key,srl}
@@ -88,8 +88,8 @@ openssl x509 -req -CA ca.crt.pem -CAkey ca.key.pem -passin "pass:$CA_PASS" \
 -days $VALIDITY_DAYS
 
 
-# Copy CA and client certificates to :rig_outbound_gateway's priv dir
+# Copy CA and client certificates to :rig's priv dir
 
-cp ca.crt.pem "${RIG_OUTBOUND_GATEWAY_PRIV_DIR}/ca.crt.pem"
-cp client.crt.pem "${RIG_OUTBOUND_GATEWAY_PRIV_DIR}/client.crt.pem"
-cp client.key.pem "${RIG_OUTBOUND_GATEWAY_PRIV_DIR}/client.key.pem"
+cp ca.crt.pem "${RIG_PRIV_DIR}/ca.crt.pem"
+cp client.crt.pem "${RIG_PRIV_DIR}/client.crt.pem"
+cp client.key.pem "${RIG_PRIV_DIR}/client.key.pem"

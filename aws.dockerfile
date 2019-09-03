@@ -28,14 +28,6 @@ COPY vm.args /opt/sites/rig/
 # Copy necessary files for dependencies
 COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
-COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
-COPY apps/rig_api/mix.exs /opt/sites/rig/apps/rig_api/
-COPY apps/rig_auth/mix.exs /opt/sites/rig/apps/rig_auth/
-COPY apps/rig_cloud_events/mix.exs /opt/sites/rig/apps/rig_cloud_events/
-COPY apps/rig_inbound_gateway/mix.exs /opt/sites/rig/apps/rig_inbound_gateway/
-COPY apps/rig_kafka/mix.exs /opt/sites/rig/apps/rig_kafka/
-COPY apps/rig_outbound_gateway/mix.exs /opt/sites/rig/apps/rig_outbound_gateway/
-COPY apps/rig_metrics/mix.exs /opt/sites/rig/apps/rig_metrics/
 
 # Install project dependencies
 RUN mix deps.get
@@ -43,32 +35,7 @@ RUN mix deps.get
 # Copy application files
 
 COPY config /opt/sites/rig/config
-
-COPY apps/rig/config /opt/sites/rig/apps/rig/config
-COPY apps/rig/lib /opt/sites/rig/apps/rig/lib
-
-COPY apps/rig_api/config /opt/sites/rig/apps/rig_api/config
-COPY apps/rig_api/lib /opt/sites/rig/apps/rig_api/lib
-COPY apps/rig_api/priv /opt/sites/rig/apps/rig_api/priv
-
-COPY apps/rig_auth/config /opt/sites/rig/apps/rig_auth/config
-COPY apps/rig_auth/lib /opt/sites/rig/apps/rig_auth/lib
-
-COPY apps/rig_cloud_events/config /opt/sites/rig/apps/rig_cloud_events/config
-COPY apps/rig_cloud_events/lib /opt/sites/rig/apps/rig_cloud_events/lib
-
-COPY apps/rig_inbound_gateway/config /opt/sites/rig/apps/rig_inbound_gateway/config
-COPY apps/rig_inbound_gateway/lib /opt/sites/rig/apps/rig_inbound_gateway/lib
-COPY apps/rig_inbound_gateway/priv /opt/sites/rig/apps/rig_inbound_gateway/priv
-
-COPY apps/rig_kafka/config /opt/sites/rig/apps/rig_kafka/config
-COPY apps/rig_kafka/lib /opt/sites/rig/apps/rig_kafka/lib
-
-COPY apps/rig_outbound_gateway/config /opt/sites/rig/apps/rig_outbound_gateway/config
-COPY apps/rig_outbound_gateway/lib /opt/sites/rig/apps/rig_outbound_gateway/lib
-
-COPY apps/rig_metrics/config /opt/sites/rig/apps/rig_metrics/config
-COPY apps/rig_metrics/lib /opt/sites/rig/apps/rig_metrics/lib
+COPY lib /opt/sites/rig/lib
 
 # Compile and release application production code
 RUN mix compile

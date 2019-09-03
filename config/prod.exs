@@ -1,8 +1,7 @@
 use Mix.Config
 
 # Do not print debug messages in production
-config :rig, Rig.Application,
-  log_level: {:system, :atom, "LOG_LEVEL", :warn}
+config :rig, Rig.Application, log_level: {:system, :atom, "LOG_LEVEL", :warn}
 
 # --------------------------------------
 # Peerage

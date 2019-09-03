@@ -12,14 +12,6 @@ COPY version /opt/sites/rig/
 # Copy necessary files for dependencies
 COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
-COPY apps/rig/mix.exs /opt/sites/rig/apps/rig/
-COPY apps/rig_api/mix.exs /opt/sites/rig/apps/rig_api/
-COPY apps/rig_auth/mix.exs /opt/sites/rig/apps/rig_auth/
-COPY apps/rig_cloud_events/mix.exs /opt/sites/rig/apps/rig_cloud_events/
-COPY apps/rig_inbound_gateway/mix.exs /opt/sites/rig/apps/rig_inbound_gateway/
-COPY apps/rig_kafka/mix.exs /opt/sites/rig/apps/rig_kafka/
-COPY apps/rig_outbound_gateway/mix.exs /opt/sites/rig/apps/rig_outbound_gateway/
-COPY apps/rig_metrics/mix.exs /opt/sites/rig/apps/rig_metrics/
 
 # Install project dependencies
 RUN mix deps.get
@@ -27,8 +19,7 @@ RUN mix deps.get
 # Copy application files
 
 COPY config /opt/sites/rig/config
-COPY apps /opt/sites/rig/apps
-# COPY guides /opt/sites/rig/guides
+COPY lib /opt/sites/rig/lib
 
 # Proxy
 EXPOSE 4000
