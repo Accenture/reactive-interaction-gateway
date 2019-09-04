@@ -8,10 +8,12 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
 
   require Logger
 
+  alias RIG.AuthorizationCheck.Request
+  alias RIG.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
+  alias RIG.JWT
+  alias RIG.Session
   alias Rig.Subscription
   alias RIG.Subscriptions
-  alias RigAuth.AuthorizationCheck.Request
-  alias RigAuth.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
 
   # ---
 
@@ -45,6 +47,18 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
            Subscriptions.from_json(request.body),
          subscriptions = Enum.uniq(jwt_subs ++ query_subs),
          :ok <- SubscriptionAuthZ.check_authorization(request) do
+      # If the JWT is valid and points to a session, we associate this connection with
+      # it. If that doesn't work out, we log a warning but don't tell the frontend -
+      # it's not the frontend's fault anyway.
+      check_and_register_session(jwt)
+      |> Result.or_else(fn error ->
+        Logger.warn(fn ->
+          "Failed to associate the #{conn_type} connection #{inspect(self())} to its session: #{
+            inspect(error)
+          }"
+        end)
+      end)
+
       # We're going to accept the connection, so let's set up the heartbeat too:
       Process.send_after(self(), :heartbeat, heartbeat_interval_ms)
 
@@ -65,6 +79,25 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
 
         on_error.("Subscription denied (not authorized).")
     end
+  end
+
+  # ---
+
+  @spec check_and_register_session(map()) ::
+          Result.t(
+            any,
+            {:failed_to_associate_to_session, %RIG.JWT.DecodeError{} | String.t()}
+          )
+  defp check_and_register_session(jwt)
+
+  defp check_and_register_session(nil), do: {:ok, nil}
+
+  defp check_and_register_session(jwt) do
+    jwt
+    |> JWT.parse_token()
+    |> Result.and_then(fn claims -> Session.from_claims(claims) end)
+    |> Result.map(fn session_name -> Session.register_connection(session_name, self()) end)
+    |> Result.map_err(fn err -> {:failed_to_associate_to_session, err} end)
   end
 
   # ---

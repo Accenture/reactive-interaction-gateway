@@ -130,7 +130,7 @@ config :rig, RigInboundGateway.RequestLogger.Kafka,
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},
   serializer: {:system, "KAFKA_SERIALIZER", nil},
-  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", "localhost:8081"},
+  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", nil},
   # The list of topics to consume messages from:
   consumer_topics: [],
   # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored; otherwise, they're required.
@@ -149,21 +149,6 @@ config :rig, RigInboundGateway.RequestLogger.Kafka,
 config :rig, RigInboundGateway.RequestLogger.ConfigValidation,
   active_loggers: {:system, :list, "REQUEST_LOG", []},
   brokers: {:system, :list, "KAFKA_BROKERS", []}
-
-# --------------------------------------
-# Authorization Token (JWT)
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-config :rig, RigAuth.Session, jwt_session_field: {:system, "JWT_SESSION_FIELD", nil}
-
-config :rig, RigAuth.AuthorizationCheck.Subscription,
-  validation_type: {:system, "SUBSCRIPTION_CHECK", "NO_CHECK"}
-
-config :rig, RigAuth.AuthorizationCheck.Submission,
-  validation_type: {:system, "SUBMISSION_CHECK", "NO_CHECK"}
-
-config :rig, RigInboundGateway.AutomaticSubscriptions.Jwt,
-  extractor_config_path_or_json: {:system, "EXTRACTORS", nil}
 
 # --------------------------------------
 # Transports, Channels, etc

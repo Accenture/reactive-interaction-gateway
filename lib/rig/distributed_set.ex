@@ -1,4 +1,4 @@
-defmodule Rig.DistributedSet do
+defmodule RIG.DistributedSet do
   @moduledoc """
   Distributed grow-only set with per key time-to-live support.
   """
@@ -258,10 +258,11 @@ defmodule Rig.DistributedSet do
 
     n_deleted = :ets.select_delete(ets_table, match_spec)
 
-    if n_deleted > 0 do
-      Logger.debug(fn -> "Removed #{n_deleted} expired records" end)
-      RigMetrics.ControlInstrumenter.delete_blacklisted_session(n_deleted)
-    end
+    Logger.debug(fn ->
+      if n_deleted > 0,
+        do: "Removed #{n_deleted} expired records",
+        else: :skip
+    end)
 
     n_deleted
   end

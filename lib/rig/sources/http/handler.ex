@@ -11,9 +11,9 @@ defmodule RIG.Sources.HTTP.Handler do
   alias Jason
   alias Plug.Conn
 
+  alias RIG.AuthorizationCheck.Submission
   alias Rig.EventFilter
   alias RIG.Plug.BodyReader
-  alias RigAuth.AuthorizationCheck.Submission
   alias RigCloudEvents.CloudEvent
   alias RigCloudEvents.PlugUtils
   alias RigInboundGatewayWeb.MediaTypeHandling

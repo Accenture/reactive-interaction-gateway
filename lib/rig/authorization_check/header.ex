@@ -1,10 +1,10 @@
-defmodule RigAuth.AuthorizationCheck.Header do
+defmodule RIG.AuthorizationCheck.Header do
   @moduledoc false
 
   alias Plug
 
+  alias RIG.AuthorizationCheck.Request
   alias RIG.JWT
-  alias RigAuth.AuthorizationCheck.Request
 
   # ---
 

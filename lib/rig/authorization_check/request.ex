@@ -1,4 +1,4 @@
-defmodule RigAuth.AuthorizationCheck.Request do
+defmodule RIG.AuthorizationCheck.Request do
   @moduledoc false
 
   defmodule AuthInfo do

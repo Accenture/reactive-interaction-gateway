@@ -11,7 +11,7 @@ defmodule RigApi.SessionBlacklistController do
   use PhoenixSwagger
   require Logger
 
-  alias RigAuth.Session
+  alias RIG.Session
 
   @cors_origins "*"
 

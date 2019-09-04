@@ -23,7 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Removed -->
 
-<!-- ### Security -->
+### Security
+
+- A connection is now associated to its session right after the connection is established, given the request carries a JWT in its authorization header. Previously, this was only done by the subscriptions endpoint, which could cause a connection to remain active even after blacklisting its authorization token.
 
 ### Technical Improvements
 
