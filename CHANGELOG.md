@@ -21,7 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Deprecated -->
 
-<!-- ### Removed -->
+### Removed
+
+- Removed the `JWT_BLACKLIST_DEFAULT_EXPIRY_HOURS` environment variable ([deprecated since 2.0.0-beta.2](https://github.com/Accenture/reactive-interaction-gateway/commit/f974533455aa3ebc550ee95bf291585925a406d5)).
 
 ### Security
 
