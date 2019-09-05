@@ -1,10 +1,17 @@
 defmodule RIG.Session do
   @moduledoc """
-  A session is defined by a user's JWT jti claim.
+  A session is defined by a user's JWT.
+
+  Client connections with the same JWT are associated to the same session. That is, if
+  a user uses the same JWT to connect to RIG multiple times (e.g., using multiple
+  devices), all of those connections are associated to the same session.
 
   Sessions can be blacklisted, which makes them illegal to use for a specified amount
   of time. Established connections related to a blacklisted session are terminated
   automatically.
+
+  By default, the session identifier within a JWT is the `jti` claim. You can change
+  this using the `JWT_SESSION_FIELD` environment variable.
   """
   use Rig.Config, [:jwt_session_field]
 
