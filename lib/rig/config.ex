@@ -113,6 +113,12 @@ defmodule Rig.Config do
 
     case set_https(config, certfile, keyfile, password) do
       {:ok, {config, :https_enabled}} ->
+        Logger.debug(fn ->
+          certfile = "certfile=" <> (config |> get_in([:https, :certfile]) |> inspect())
+          keyfile = "keyfile=" <> (config |> get_in([:https, :keyfile]) |> inspect())
+          "SSL enabled: #{certfile} #{keyfile}"
+        end)
+
         config
 
       {:ok, {config, :https_disabled}} ->
@@ -198,7 +204,13 @@ defmodule Rig.Config do
 
       {:error, {:not_found, path}} ->
         Logger.error("Could not resolve #{var_name}: #{inspect(path)}")
+        # Under normal circumstances this stops the VM:
         System.stop(1)
+        # When running in mix test, the code will simply continue, which leads to
+        # strange errors down the road :( Instead, we're gonna wait for the log message
+        # to print out and then forcefully stop the world.
+        :timer.sleep(1_000)
+        System.halt(1)
     end
   end
 
@@ -228,22 +240,30 @@ defmodule Rig.Config do
   # ---
 
   defp check_relative_to_priv(%{found?: false, path: path} = ctx) when byte_size(path) > 0 do
-    [:rig]
-    |> Enum.map(&:code.priv_dir/1)
-    # If the app is not yet loaded this errors, so let's ignore that:
-    |> Enum.filter(fn
-      {:error, _} -> false
-      _ -> true
+    priv_dir()
+    |> Result.map(fn priv_dir ->
+      path = Path.join(priv_dir, path)
+
+      if File.exists?(path) do
+        %{found?: true, path: path}
+      else
+        ctx
+      end
     end)
-    |> Enum.map(fn priv_dir -> Path.join(priv_dir, path) end)
-    |> Enum.find(&File.exists?/1)
-    |> case do
-      nil -> ctx
-      path -> %{found?: true, path: path}
-    end
+    # If the app is not yet loaded this errors, so let's ignore that:
+    |> Result.unwrap_or(ctx)
   end
 
   defp check_relative_to_priv(ctx), do: ctx
+
+  # ---
+
+  defp priv_dir do
+    case :code.priv_dir(:rig) do
+      {:error, _} = err -> err
+      priv_dir -> {:ok, priv_dir}
+    end
+  end
 
   # ---
 
