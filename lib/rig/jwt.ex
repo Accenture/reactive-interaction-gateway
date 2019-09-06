@@ -15,7 +15,7 @@ defmodule RIG.JWT do
   alias __MODULE__.Claims
   alias __MODULE__.HttpCredentials
 
-  alias RigAuth.Session
+  alias RIG.Session
 
   @type token :: String.t()
   @type claims :: %{optional(String.t()) => String.t()}

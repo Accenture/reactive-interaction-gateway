@@ -1,12 +1,12 @@
-defmodule RigAuth.AuthorizationCheck.Submission do
+defmodule RIG.AuthorizationCheck.Submission do
   @moduledoc """
   Decides whether to accept or deny a request for publishing an event.
   """
   use Rig.Config, :custom_validation
 
-  alias RigAuth.AuthorizationCheck.External
-  alias RigAuth.AuthorizationCheck.Header
-  alias RigAuth.AuthorizationCheck.Request
+  alias RIG.AuthorizationCheck.External
+  alias RIG.AuthorizationCheck.Header
+  alias RIG.AuthorizationCheck.Request
   alias RigCloudEvents.CloudEvent
 
   # Confex callback

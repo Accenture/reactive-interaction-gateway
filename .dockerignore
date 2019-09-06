@@ -5,9 +5,6 @@ deps/
 Dockerfile
 Makefile
 README*
-test/
-priv/static/
-priv/cert/
 .vscode/
 .elixir_ls/
 docs/

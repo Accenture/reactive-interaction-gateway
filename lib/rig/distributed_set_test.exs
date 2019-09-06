@@ -1,9 +1,9 @@
-defmodule Rig.DistributedSetTest do
+defmodule RIG.DistributedSetTest do
   @moduledoc false
   use ExUnit.Case, async: true
-  doctest Rig.DistributedSet
+  doctest RIG.DistributedSet
 
-  alias Rig.DistributedSet
+  alias RIG.DistributedSet
 
   test "starting a set with no OTP name set" do
     {:ok, pid} = DistributedSet.start_link(MySet)

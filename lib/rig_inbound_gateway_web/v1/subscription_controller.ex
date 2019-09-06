@@ -4,14 +4,14 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
 
   alias Result
 
+  alias RIG.AuthorizationCheck.Request
+  alias RIG.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
   alias Rig.Connection
   alias RIG.JWT
   alias RIG.Plug.BodyReader
+  alias RIG.Session
   alias Rig.Subscription
   alias RIG.Subscriptions
-  alias RigAuth.AuthorizationCheck.Request
-  alias RigAuth.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
-  alias RigAuth.Session
 
   require Logger
 
@@ -128,8 +128,16 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
     with :ok <- SubscriptionAuthZ.check_authorization(request),
          {:ok, socket_pid} <- Connection.Codec.deserialize(connection_id),
          :ok <- check_connection_alive(socket_pid) do
-      # Updating the session allows blacklisting it later on:
-      Session.update(conn, socket_pid)
+      # If the JWT is valid and points to a session, we associate this connection with
+      # it. If that doesn't work out, we log a warning but don't tell the frontend -
+      # it's not the frontend's fault anyway.
+      refresh_associated_sessions(socket_pid, Map.get(conn.assigns, :auth_tokens, []))
+      |> Result.or_else(fn {:failed_to_associate_to_session, errors} ->
+        Logger.warn(fn ->
+          "failed to associate to session: " <> inspect(for error <- errors, do: inspect(error))
+        end)
+      end)
+
       do_set_subscriptions(conn, socket_pid, subscriptions)
     else
       {:error, :not_authorized} ->
@@ -151,6 +159,30 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
         |> put_status(:bad_request)
         |> text("Could not parse subscriptions: #{inspect(bad_subscriptions)}")
     end
+  end
+
+  # ---
+
+  defp refresh_associated_sessions(socket_pid, auth_tokens) do
+    auth_tokens
+    # Extract the JWT claims from bearer tokens and ignore any other tokens:
+    |> Enum.map(fn
+      {"bearer", token} -> JWT.parse_token(token)
+      _ -> {:ok, %{}}
+    end)
+    |> Result.list_to_result()
+    |> Result.map_err(fn decode_errors -> {:failed_to_associate_to_session, decode_errors} end)
+    # Infer the session name from each token:
+    |> Result.and_then(fn list_of_claims ->
+      list_of_claims
+      |> Enum.map(&Session.from_claims/1)
+      |> Result.list_to_result()
+      |> Result.map_err(fn reasons -> {:failed_to_associate_to_session, reasons} end)
+    end)
+    # Register the connection process to each session:
+    |> Result.map(fn session_names ->
+      Enum.each(session_names, &Session.register_connection(&1, socket_pid))
+    end)
   end
 
   # ---

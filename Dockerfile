@@ -1,14 +1,11 @@
 FROM elixir:1.9-alpine as build
 
 # Install Elixir & Erlang environment dependencies
+RUN apk add --no-cache make gcc g++
 RUN mix local.hex --force
 RUN mix local.rebar --force
-RUN apk add --no-cache make \
-  gcc \
-  g++
 
 ENV MIX_ENV=prod
-
 WORKDIR /opt/sites/rig
 
 # Copy release config
@@ -20,11 +17,10 @@ COPY vm.args /opt/sites/rig/
 COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
 
-# Install project dependencies
-RUN mix deps.get
+# Install project dependencies and compile them
+RUN mix deps.get && mix deps.compile && mix deps.clean mime --build
 
 # Copy application files
-
 COPY config /opt/sites/rig/config
 COPY lib /opt/sites/rig/lib
 

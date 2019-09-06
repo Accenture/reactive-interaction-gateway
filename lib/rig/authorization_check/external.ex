@@ -1,11 +1,11 @@
-defmodule RigAuth.AuthorizationCheck.External do
+defmodule RIG.AuthorizationCheck.External do
   @moduledoc """
   Uses an external endpoint for deciding authorization.
   """
   require Logger
   alias HTTPoison
 
-  alias RigAuth.AuthorizationCheck.Request
+  alias RIG.AuthorizationCheck.Request
 
   @spec check(url :: String.t(), request :: Request.t()) ::
           true | false | {:error, url :: String.t(), error :: any()}

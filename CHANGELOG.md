@@ -21,9 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Deprecated -->
 
-<!-- ### Removed -->
+### Removed
 
-<!-- ### Security -->
+- Removed the `JWT_BLACKLIST_DEFAULT_EXPIRY_HOURS` environment variable ([deprecated since 2.0.0-beta.2](https://github.com/Accenture/reactive-interaction-gateway/commit/f974533455aa3ebc550ee95bf291585925a406d5)).
+
+### Security
+
+- A connection is now associated to its session right after the connection is established, given the request carries a JWT in its authorization header. Previously, this was only done by the subscriptions endpoint, which could cause a connection to remain active even after blacklisting its authorization token.
 
 ### Technical Improvements
 

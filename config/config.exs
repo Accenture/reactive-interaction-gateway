@@ -10,6 +10,10 @@ jwt_conf = %{
   alg: {:system, "JWT_ALG", "HS256"}
 }
 
+config :rig, TodoFakeModuleCauseUpdateDocsCannotHandleNestedTuples,
+  key: {:system, "JWT_SECRET_KEY", ""},
+  alg: {:system, "JWT_ALG", "HS256"}
+
 config :rig, Rig.EventFilter.Sup, extractor_config_path_or_json: extractor_path_or_json
 
 config :rig, RIG.JWT, jwt_conf: jwt_conf
@@ -94,19 +98,16 @@ config :logger, :console,
 config :rig, Rig.Application, log_level: {:system, :atom, "LOG_LEVEL", :debug}
 
 # --------------------------------------
-# Authorization Token (JWT)
+# Session and Authorization
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-jwt_secret_key = {:system, "JWT_SECRET_KEY", ""}
-jwt_alg = {:system, "JWT_ALG", "HS256"}
+config :rig, RIG.Session, jwt_session_field: {:system, "JWT_SESSION_FIELD", "/jti"}
 
-config :rig, RigAuth,
-  secret_key: jwt_secret_key,
-  alg: jwt_alg
+config :rig, RIG.AuthorizationCheck.Subscription,
+  validation_type: {:system, "SUBSCRIPTION_CHECK", "NO_CHECK"}
 
-config :rig, RigAuth.Jwt.Utils,
-  secret_key: jwt_secret_key,
-  alg: jwt_alg
+config :rig, RIG.AuthorizationCheck.Submission,
+  validation_type: {:system, "SUBMISSION_CHECK", "NO_CHECK"}
 
 # --------------------------------------
 # Peerage
@@ -119,7 +120,6 @@ config :rig, Rig.Discovery,
 import_config "#{Mix.env()}.exs"
 
 import_config "rig_api/config.exs"
-import_config "rig_auth/config.exs"
 import_config "rig_inbound_gateway/config.exs"
 import_config "rig_metrics/config.exs"
 import_config "rig_outbound_gateway/config.exs"

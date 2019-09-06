@@ -73,7 +73,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
       {:reply, frame(Events.welcome_event()), state, :hibernate}
     end
 
-    on_error = fn reason ->
+    on_error = fn _reason ->
       # WebSocket close frames may include a payload to indicate the error, but we found
       # that error message must be really short; if it isn't, the `{:close, :normal,
       # payload}` is silently converted to `{:close, :abnormal, nil}`. Since there is no

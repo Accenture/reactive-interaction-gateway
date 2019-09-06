@@ -24,7 +24,7 @@ defmodule Rig.Application do
       Rig.EventStream.KafkaToFilter,
       Rig.EventStream.KafkaToHttp,
       # Blacklist:
-      Spec.worker(Rig.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
+      Spec.worker(RIG.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
       # Kinesis event stream:
       Kinesis.JavaClient,
       KinesisFirehose.JavaClient,

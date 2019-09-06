@@ -6,8 +6,6 @@ defmodule Mix.Tasks.UpdateDocs do
   use Mix.Task
   require Logger
 
-  alias Mix.Project
-
   @header """
   -------- | ----------- | -------
   """
@@ -18,9 +16,8 @@ defmodule Mix.Tasks.UpdateDocs do
 
   @shortdoc "Uses actual configuration defaults for updating the operator's guide."
   def run(_) do
-    # Only run when compiling the whole umbrella application in PROD
-    # (as only then we'll find the correct default values):
-    if Project.umbrella?() and Mix.env() == :prod do
+    # Only run when MIX_ENV=PROD for correct default values:
+    if Mix.env() == :prod do
       if File.exists?(@target_path) do
         update_file(@target_path)
       else

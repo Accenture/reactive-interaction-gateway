@@ -1,10 +1,12 @@
-FROM elixir:1.9
-
-# Install Elixir & Erlang environment dependencies
-RUN mix local.hex --force
-RUN mix local.rebar --force
+FROM elixir:1.9-alpine
 
 WORKDIR /opt/sites/rig
+ENV MIX_ENV=test
+
+# Install Elixir & Erlang environment dependencies
+RUN apk add --no-cache make gcc g++
+RUN mix local.hex --force
+RUN mix local.rebar --force
 
 # Copy release config
 COPY version /opt/sites/rig/
@@ -13,13 +15,14 @@ COPY version /opt/sites/rig/
 COPY mix.exs /opt/sites/rig/
 COPY mix.lock /opt/sites/rig/
 
-# Install project dependencies
-RUN mix deps.get
+# Install project dependencies and compile them
+RUN mix deps.get && mix deps.compile && mix deps.clean mime --build
 
 # Copy application files
-
+COPY priv /opt/sites/rig/priv
 COPY config /opt/sites/rig/config
 COPY lib /opt/sites/rig/lib
+COPY test /opt/sites/rig/test
 
 # Proxy
 EXPOSE 4000
@@ -27,6 +30,6 @@ EXPOSE 4000
 EXPOSE 4010
 
 # Precompile
-RUN MIX_ENV=test mix compile
+RUN mix compile
 
 CMD ["mix", "test", "--only", "smoke"]
