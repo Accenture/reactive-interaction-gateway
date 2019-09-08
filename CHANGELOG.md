@@ -10,8 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added longpolling as new connection type [#217](https://github.com/Accenture/reactive-interaction-gateway/issues/217)
+- When terminating an SSE connection after its associated session has been blacklisted, RIG now sends out a `rig.session_killed` event before closing the socket.
 
-<!-- ### Changed -->
+### Changed
+
+- When a session has been added to the session blacklist successfully, the endpoint now uses the correct HTTP status code "201 Created" instead of "200 Ok".
+- When using the API to blacklist a session, the `validityInSeconds` should now be passed as an integer value (see `Deprecated` below).
 
 ### Fixed
 
@@ -19,7 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Logging incoming HTTP request to Kafka works again and now also supports Apache Avro.
   [#170](https://github.com/Accenture/reactive-interaction-gateway/issues/170)
 
-<!-- ### Deprecated -->
+### Deprecated
+
+- When using the API to blacklist a session, passing the `validityInSeconds` field as a string is deprecated (but supported until the 3.0 release). Please use an integer instead.
 
 ### Removed
 

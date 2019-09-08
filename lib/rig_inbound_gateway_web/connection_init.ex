@@ -70,11 +70,19 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
       on_success.(subscriptions)
     else
       {:error, %Subscriptions.Error{} = e} ->
+        Logger.warn(fn ->
+          pid = inspect(self())
+          msg = Exception.message(e)
+          "Cannot accept #{conn_type} connection #{pid}: #{msg}"
+        end)
+
         on_error.(Exception.message(e))
 
       {:error, :not_authorized} ->
-        Logger.debug(fn ->
-          "Not authorized #{conn_type} with pid=#{inspect(self())}"
+        Logger.warn(fn ->
+          pid = inspect(self())
+          msg = "not authorized"
+          "Cannot accept #{conn_type} connection #{pid}: #{msg}"
         end)
 
         on_error.("Subscription denied (not authorized).")

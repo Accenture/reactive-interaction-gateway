@@ -75,7 +75,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
       # Say hello to the client:
       Events.welcome_event()
       |> to_server_sent_event()
-      |> :cowboy_req.stream_events(:nofin, req)
+      |> send_via(req)
 
       # Enter the loop and wait for cloud events to forward to the client:
       state = %{subscriptions: subscriptions}
@@ -104,7 +104,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     # We send a heartbeat now:
     :heartbeat
     |> to_server_sent_event()
-    |> :cowboy_req.stream_events(:nofin, req)
+    |> send_via(req)
 
     # And schedule the next one:
     Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
@@ -119,7 +119,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     # Forward the event to the client:
     event
     |> to_server_sent_event()
-    |> :cowboy_req.stream_events(:nofin, req)
+    |> send_via(req)
 
     {:ok, req, state, :hibernate}
   end
@@ -137,7 +137,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     # Notify the client:
     Events.subscriptions_set(subscriptions)
     |> to_server_sent_event()
-    |> :cowboy_req.stream_events(:nofin, req)
+    |> send_via(req)
 
     {:ok, req, state, :hibernate}
   end
@@ -150,13 +150,13 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   end
 
   @impl :cowboy_loop
-  def info({:session_killed, group}, req, state) do
-    Logger.info("session killed: #{inspect(group)}")
+  def info({:session_killed, session_id}, req, state) do
+    Logger.info("Session killed: #{inspect(session_id)} - terminating SSE/#{inspect(self())}..")
 
     # We tell the client:
     :session_killed
     |> to_server_sent_event()
-    |> :cowboy_req.stream_events(:nofin, req)
+    |> send_via(req)
 
     # And close the connection:
     {:stop, req, state}
@@ -164,12 +164,43 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   # ---
 
+  @impl :cowboy_loop
+  def terminate(reason, _req, _state) do
+    Logger.debug(fn ->
+      pid = inspect(self())
+      reason = "reason=" <> inspect(reason)
+      "Closing SSE connection (#{pid}, #{reason})"
+    end)
+
+    :ok
+  end
+
+  # ---
+
   defp to_server_sent_event(:heartbeat), do: %{comment: "heartbeat"}
-  defp to_server_sent_event(:session_killed), do: %{comment: "Session killed."}
+
+  defp to_server_sent_event(:session_killed) do
+    %{
+      specversion: "0.2",
+      type: "rig.session_killed",
+      source: "rig",
+      id: UUID.uuid4(),
+      time: Timex.now() |> Timex.format!("{RFC3339}")
+    }
+    |> CloudEvent.parse!()
+    |> to_server_sent_event()
+  end
 
   defp to_server_sent_event(%CloudEvent{} = event),
     do: %{
       data: event.json,
       event: CloudEvent.type!(event)
     }
+
+  # ---
+
+  defp send_via(event, cowboy_req) do
+    :cowboy_req.stream_events(event, :nofin, cowboy_req)
+    Logger.debug(fn -> "Sent via SSE: " <> inspect(event) end)
+  end
 end

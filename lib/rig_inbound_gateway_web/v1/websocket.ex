@@ -98,9 +98,13 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   @doc ~S"The client may send this as the response to the :ping heartbeat."
   @impl :cowboy_websocket
-  def websocket_handle({:pong, _}, state), do: {:ok, state, :hibernate}
+  def websocket_handle({:pong, _app_data}, state), do: {:ok, state, :hibernate}
   @impl :cowboy_websocket
   def websocket_handle(:pong, state), do: {:ok, state, :hibernate}
+
+  @doc ~S"Allow the client to send :ping messages to test connectivity."
+  @impl :cowboy_websocket
+  def websocket_handle({:ping, app_data}, state), do: {:reply, {:pong, app_data}, :hibernate}
 
   @impl :cowboy_websocket
   def websocket_handle(in_frame, state) do
@@ -146,10 +150,23 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   end
 
   @impl :cowboy_websocket
-  def websocket_info({:session_killed, group}, state) do
-    Logger.info("session killed: #{inspect(group)}")
+  def websocket_info({:session_killed, session_id}, state) do
+    Logger.info("Session killed: #{inspect(session_id)} - terminating WS/#{inspect(self())}..")
     # This will close the connection:
     {:reply, closing_frame("Session killed."), state}
+  end
+
+  # ---
+
+  @impl :cowboy_websocket
+  def terminate(reason, _req, _state) do
+    Logger.debug(fn ->
+      pid = inspect(self())
+      reason = "reason=" <> inspect(reason)
+      "Closing WebSocket connection (#{pid}, #{reason})"
+    end)
+
+    :ok
   end
 
   # ---

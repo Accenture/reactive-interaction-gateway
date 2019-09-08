@@ -66,8 +66,8 @@ defmodule RigApi.SessionBlacklistController do
     the token's expiration timestamp. This has the following consequences:
 
     - Any existing connection related to the session is terminated immediately.
-    - The related authorization token is ignored when a client establishes a connection.
-    - The related authorization token is ignored when a client creates a subscription.
+    - The related authorization token is no longer valid when a client establishes a connection.
+    - The related authorization token is no longer valid when a client creates a subscription.
     """)
 
     parameters do
@@ -79,7 +79,7 @@ defmodule RigApi.SessionBlacklistController do
       )
     end
 
-    response(200, "Ok", Schema.ref(:SessionBlacklistResponse))
+    response(201, "Ok", Schema.ref(:SessionBlacklistResponse))
     response(400, "Missing value for 'x'")
   end
 
@@ -94,30 +94,58 @@ defmodule RigApi.SessionBlacklistController do
       {:ok, %{session_id: session_id, ttl_s: ttl_s}} ->
         Session.blacklist(session_id, ttl_s)
 
-        json(conn, %{
-          "sessionId" => session_id,
-          "validityInSeconds" => ttl_s,
-          "isBlacklisted" => true
-        })
+        send_resp(
+          conn,
+          :created,
+          Jason.encode!(%{
+            "sessionId" => session_id,
+            "validityInSeconds" => ttl_s,
+            "isBlacklisted" => true
+          })
+        )
     end
   end
 
   # ---
 
   defp parse(body) do
-    {:ok,
-     %{
-       session_id: Map.fetch!(body, "sessionId"),
-       ttl_s: body |> Map.fetch!("validityInSeconds") |> String.to_integer()
-     }}
-  rescue
-    e in KeyError ->
-      {:error, "Missing value for '#{e.key}'"}
-
-    e in ArgumentError ->
-      # This is likely String.to_integer/1, but we don't know for sure.
-      {:error, "Invalid request body: #{inspect(e)}"}
+    Result.ok(%{})
+    |> Result.and_then(&parse_and_add_session_id(&1, body))
+    |> Result.and_then(&parse_and_add_ttl_s(&1, body))
   end
+
+  # ---
+
+  defp parse_and_add_session_id(into, from) do
+    case Map.fetch(from, "sessionId") do
+      {:ok, value} when byte_size(value) > 0 -> {:ok, Map.merge(into, %{session_id: value})}
+      {:ok, value} -> {:error, "Expected non-empty string, got #{inspect(value)}"}
+      :error -> {:error, "Missing value for \"sessionId\""}
+    end
+  end
+
+  # ---
+
+  defp parse_and_add_ttl_s(into, from) do
+    case Map.fetch(from, "validityInSeconds") do
+      {:ok, value} when is_number(value) and value > 0 ->
+        {:ok, Map.merge(into, %{ttl_s: value})}
+
+      {:ok, value} when byte_size(value) > 0 ->
+        case Integer.parse(value) do
+          {value, ""} -> parse_and_add_ttl_s(into, Map.put(from, "validityInSeconds", value))
+          not_a_number -> {:error, "Expected a number, got #{inspect(not_a_number)}"}
+        end
+
+      {:ok, value} ->
+        {:error, "Expected a number, got #{inspect(value)}"}
+
+      :error ->
+        {:error, "Missing value for \"validityInSeconds\""}
+    end
+  end
+
+  # ---
 
   def swagger_definitions do
     %{
@@ -129,7 +157,7 @@ defmodule RigApi.SessionBlacklistController do
             sessionId(:string, "JWT ID (jti) claim", required: true)
 
             validityInSeconds(
-              :string,
+              :number,
               "Defines how long the JWT ID should be considered invalid. Typically set to the token's remaining life time.",
               required: true
             )
@@ -137,7 +165,7 @@ defmodule RigApi.SessionBlacklistController do
 
           example(%{
             sessionId: "SomeSessionID123",
-            validityInSeconds: "60"
+            validityInSeconds: 60
           })
         end,
       SessionBlacklistResponse:
@@ -147,7 +175,7 @@ defmodule RigApi.SessionBlacklistController do
           properties do
             sessionId(:string, "JWT ID (jti) claim", required: true)
 
-            validityInSeconds(:string, "Seconds how long a session should be blacklisted",
+            validityInSeconds(:number, "Seconds how long a session should be blacklisted",
               required: true
             )
 
@@ -156,7 +184,7 @@ defmodule RigApi.SessionBlacklistController do
 
           example(%{
             sessionId: "SomeSessionID123",
-            validityInSeconds: "60",
+            validityInSeconds: 60,
             isBlacklisted: true
           })
         end,
