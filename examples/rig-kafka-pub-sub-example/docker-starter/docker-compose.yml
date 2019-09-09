@@ -26,23 +26,34 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_NUM_PARTITIONS: 4
+      KAFKA_ADVERTISED_HOST_NAME: kafka
     restart: on-failure:5
 
   reactive-interaction-gateway:
     container_name: reactive-interaction-gateway
-    image: accenture/reactive-interaction-gateway:2.1.1
+    image: accenture/reactive-interaction-gateway:latest
     environment:
       - LOG_LEVEL=debug
       - KAFKA_SOURCE_TOPICS=rig,rig-consumed
       - PROXY_KAFKA_REQUEST_TOPIC=rig
-      # - PROXY_KAFKA_RESPONSE_TOPICS=rig
       - KAFKA_BROKERS=kafka:9092
       - API_HTTP_PORT=7010
       - INBOUND_PORT=7000
-      - PROXY_CONFIG_FILE=proxy/rig-proxy.json
+      # - PROXY_CONFIG_FILE=proxy/rig-proxy.json
+      - PROXY_CONFIG_FILE=/rig-proxy.json
     ports:
       - 7000:7000
       - 7010:7010
     volumes:
-      - ./rig-proxy.json:/opt/sites/rig/lib/rig_inbound_gateway-2.1.1/priv/proxy/rig-proxy.json
+      # - ./rig-proxy.json:/opt/sites/rig/lib/rig_inbound_gateway-2.1.1/priv/rig-proxy.json
+      - ./rig-proxy.json:/rig-proxy.json
     restart: on-failure:5
+
+  example:
+    image: example:latest
+    container_name: example
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+      - zk

@@ -5,8 +5,16 @@ We send a POST request to the Reactive Gateway (RIG), which publishes to Kafka, 
 This demo is currently showing this flow from the commandline.
 
 ### Setting Up The Environment 
-Clone and run the docker-starter repo. This creates an instance of Kafka, Zookeeper, and RIG.
+Clone and run the docker-starter repo. This creates an instance of Kafka, Zookeeper, RIG, and the example Springboot application.
 
+First, we have to build the Springboot app's Docker image.
+
+```bash
+cd example
+docker build -t example -f Dockerfile .
+```
+
+Then run the simple start script.
 ```bash
 cd docker-starter
 ./start.sh
@@ -18,7 +26,7 @@ Notes:
 ```yml
   reactive-interaction-gateway:
     container_name: reactive-interaction-gateway
-    image: accenture/reactive-interaction-gateway:2.1.1
+    image: accenture/reactive-interaction-gateway
     environment:
       - LOG_LEVEL=debug
       - KAFKA_SOURCE_TOPICS=rig,rig-consumed
@@ -26,12 +34,12 @@ Notes:
       - KAFKA_BROKERS=kafka:9092
       - API_HTTP_PORT=7010
       - INBOUND_PORT=7000
-      - PROXY_CONFIG_FILE=proxy/rig-proxy.json
+      - PROXY_CONFIG_FILE=/rig-proxy.json
 ```
 
 - The internal and the external ports for Kafka are different. 
 
-In the dockerfile
+In the Dockerfile
 ```yml
  kafka:
     image: confluentinc/cp-kafka:5.0.0
@@ -59,18 +67,6 @@ spring:
       bootstrap-servers: 127.0.0.1:9094
     producer:
       bootstrap-servers: 127.0.0.1:9094
-```
-
-### Starting the Java App
-
-Build the app
-```bash
-mvn clean package
-```
-
-Run the app 
-```bash
-java -jar target/example-0.0.1-SNAPSHOT.jar
 ```
 
 ### Setup the Routes in RIG
