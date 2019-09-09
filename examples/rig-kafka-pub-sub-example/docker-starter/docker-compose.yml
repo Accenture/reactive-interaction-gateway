@@ -52,8 +52,10 @@ services:
   example:
     image: example:latest
     container_name: example
-    ports:
-      - "8080:8080"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    links:
+     - kafka
     depends_on:
       - kafka
       - zk
