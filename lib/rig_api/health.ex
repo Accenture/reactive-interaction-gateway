@@ -1,4 +1,5 @@
 defmodule RigApi.Health do
+  @moduledoc "Controller for the health endpoint."
   require Logger
 
   use RigApi, :controller

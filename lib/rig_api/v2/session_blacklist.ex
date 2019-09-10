@@ -1,11 +1,10 @@
 defmodule RigApi.V2.SessionBlacklist do
   @moduledoc """
-  Allows for blocking "sessions" for a specific period of time.
+  Controller that allows blocking "sessions" for a specific period of time.
 
   What a session is depends on your business context and the `JWT_SESSION_FIELD`
   setting. For example, a session ID could be a random ID assigned to a token upon
   login, or the id of the user the token belongs to.
-
   """
   use RigApi, :controller
   use PhoenixSwagger

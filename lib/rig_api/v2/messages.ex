@@ -1,4 +1,5 @@
 defmodule RigApi.V2.Messages do
+  @moduledoc "Controller for submitting (backend) events to potential (frontend) subscribers."
   require Logger
 
   use RigApi, :controller

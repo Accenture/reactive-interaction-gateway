@@ -1,8 +1,5 @@
 defmodule RigApi.V1.APIs do
-  @moduledoc """
-  HTTP-accessible API for managing PROXY APIs.
-
-  """
+  @moduledoc "CRUD controller for the reverse-proxy settings."
   use Rig.Config, [:rig_proxy]
   use RigApi, :controller
   use PhoenixSwagger

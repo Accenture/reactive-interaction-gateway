@@ -1,4 +1,5 @@
 defmodule RigApi.V1.Responses do
+  @moduledoc "Controller for submitting (backend) responses to asynchronous (frontend) requests."
   require Logger
 
   use RigApi, :controller
