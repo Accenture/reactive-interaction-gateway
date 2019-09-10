@@ -65,17 +65,6 @@ defmodule BlacklistTest do
     end
   end
 
-  test "In RIG 2.x, the session API supports passing validityInSeconds as a string." do
-    body =
-      %{validityInSeconds: "123", sessionId: "some session name"}
-      |> Jason.encode!()
-
-    {:ok, %HTTPoison.Response{status_code: 200}} =
-      HTTPoison.post("#{@rig_api_url}/v1/session-blacklist", body, [
-        {"content-type", "application/json"}
-      ])
-  end
-
   # ---
 
   defp blacklist(session_id) do

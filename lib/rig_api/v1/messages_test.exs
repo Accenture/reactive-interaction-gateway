@@ -1,4 +1,4 @@
-defmodule RigApi.V1.MessageControllerTest do
+defmodule RigApi.V1.MessagesTest do
   @moduledoc false
   use RigApi.ConnCase, async: true
 
