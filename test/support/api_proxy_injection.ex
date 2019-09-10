@@ -1,16 +1,21 @@
 defmodule RigInboundGateway.ApiProxyInjection do
   @moduledoc false
 
-  @orig_val Application.get_env(:rig, RigApi.ApisController)
+  @mods [RigApi.V1.APIs, RigApi.V2.APIs]
+  @orig_vals for mod <- @mods, do: {mod, Application.get_env(:rig, mod)}
 
   def set do
-    Application.put_env(:rig, RigApi.ApisController,
-      rig_proxy: RigInboundGateway.Proxy,
-      persistent: true
-    )
+    for mod <- @mods do
+      Application.put_env(:rig, mod,
+        rig_proxy: RigInboundGateway.Proxy,
+        persistent: true
+      )
+    end
   end
 
   def restore do
-    Application.put_env(:rig, RigApi.ApisController, @orig_val, persistent: true)
+    for {mod, orig_val} <- @orig_vals do
+      Application.put_env(:rig, mod, orig_val, persistent: true)
+    end
   end
 end

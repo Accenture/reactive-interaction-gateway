@@ -1,4 +1,4 @@
-defmodule RigApi.ApisControllerTest do
+defmodule RigApi.V1.ApisControllerTest do
   @moduledoc false
   require Logger
   use ExUnit.Case, async: true

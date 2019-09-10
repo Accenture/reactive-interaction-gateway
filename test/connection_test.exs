@@ -4,7 +4,6 @@ defmodule RigInboundGateway.ConnectionTest do
   require Logger
 
   alias HTTPoison
-  alias Socket.Web, as: WebSocket
 
   @dispatch Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:https][:dispatch]
   @port 47_210

@@ -70,7 +70,7 @@ defmodule BlacklistTest do
       %{validityInSeconds: "123", sessionId: "some session name"}
       |> Jason.encode!()
 
-    {:ok, %HTTPoison.Response{status_code: 201}} =
+    {:ok, %HTTPoison.Response{status_code: 200}} =
       HTTPoison.post("#{@rig_api_url}/v1/session-blacklist", body, [
         {"content-type", "application/json"}
       ])
@@ -84,7 +84,7 @@ defmodule BlacklistTest do
       |> Jason.encode!()
 
     {:ok, %HTTPoison.Response{status_code: 201}} =
-      HTTPoison.post("#{@rig_api_url}/v1/session-blacklist", body, [
+      HTTPoison.post("#{@rig_api_url}/v2/session-blacklist", body, [
         {"content-type", "application/json"}
       ])
   end
@@ -92,11 +92,10 @@ defmodule BlacklistTest do
   # ---
 
   defp blacklisted?(jti) do
-    {:ok, %HTTPoison.Response{status_code: 200, body: body}} =
-      HTTPoison.get("#{@rig_api_url}/v1/session-blacklist/#{URI.encode(jti)}")
-
-    %{"isBlacklisted" => blacklisted?} = Jason.decode!(body)
-    blacklisted?
+    case HTTPoison.get("#{@rig_api_url}/v2/session-blacklist/#{URI.encode(jti)}") do
+      {:ok, %HTTPoison.Response{status_code: 200}} -> true
+      {:ok, %HTTPoison.Response{status_code: 404}} -> false
+    end
   end
 
   # ---

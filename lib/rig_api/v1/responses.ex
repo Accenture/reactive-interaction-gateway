@@ -1,4 +1,4 @@
-defmodule RigApi.ResponsesController do
+defmodule RigApi.V1.Responses do
   require Logger
 
   use RigApi, :controller
@@ -7,10 +7,12 @@ defmodule RigApi.ResponsesController do
   alias Rig.Connection.Codec
   alias RigCloudEvents.CloudEvent
 
-  action_fallback(RigApi.FallbackController)
+  @prefix "/v1"
+
+  action_fallback(RigApi.Fallback)
 
   swagger_path :create do
-    post("/v1/responses")
+    post(@prefix <> "/responses")
     summary("Submit a message, to be sent to correlated reverse proxy request.")
     description("Allows you to submit a message to RIG using a simple, \
     synchronous call. Message will be sent to correlated reverse proxy request.")

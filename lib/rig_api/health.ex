@@ -1,4 +1,4 @@
-defmodule RigApi.HealthController do
+defmodule RigApi.Health do
   require Logger
 
   use RigApi, :controller
