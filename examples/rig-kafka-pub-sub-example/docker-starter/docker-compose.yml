@@ -50,8 +50,8 @@ services:
     restart: on-failure:5
 
   example:
-    image: example:latest
     container_name: example
+    image: example:latest
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     links:
@@ -59,3 +59,4 @@ services:
     depends_on:
       - kafka
       - zk
+    restart: on-failure:5

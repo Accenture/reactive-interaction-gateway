@@ -159,8 +159,8 @@ Routes are defined using a configuration file or by POSTing directly to the appl
 
 ![simple-add-rig](assets/simple-add-rig.png)
 
-## Another Architectural Option: Using RIG for Publish / Subscribe Communication with the Backend
-It is possible to send an HTTP request to RIG and have it publish and subscribe to Kafka, decoupling the front end from the backend entirely.
+## The Next Step in Decoupling: Using RIG for Publish / Subscribe Communication with the Backend
+We do not have to expose endpoints on back-end services at all. It is possible to send an HTTP request to RIG and have it publish and subscribe to Kafka, decoupling the frontend from the backend entirely.
 
 ![rig-kafka-pure-pub-sub](assets/rig-kafka-pure-pub-sub.png)
 
