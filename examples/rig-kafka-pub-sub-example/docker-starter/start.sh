@@ -7,6 +7,7 @@ docker build -t example -f Dockerfile .
 # build RIG docker image from project root
 # cd ../../../
 # docker build -t reactive-interaction-gateway -f Dockerfile .
+# docker build -t accenture/reactive-interaction-gateway -f Dockerfile
 
 cd ../docker-starter
 
