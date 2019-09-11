@@ -51,15 +51,6 @@ services:
     container_name: example
     image: example:latest
     environment:
-      SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS: kafka:9094
-      SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS: kafka:9094
-    ports:
-      - 8080:8080
-    links:
-      - kafka
-      - zk
-    depends_on:
-      - kafka
-      - zk
-    # command: java -jar app.jar
+      SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS: kafka:9092
     restart: on-failure:5

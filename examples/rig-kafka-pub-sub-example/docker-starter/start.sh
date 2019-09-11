@@ -5,11 +5,13 @@ cd ../example
 docker build -t example -f Dockerfile .
 
 # build RIG docker image from project root
-cd ../../../
-docker build -t example -f Dockerfile .
+# cd ../../../
+# docker build -t reactive-interaction-gateway -f Dockerfile .
+
+cd ../docker-starter
 
 # back to docker starter
-cd examples/rig-kafka-pub-sub-example/docker-starter/
+# cd examples/rig-kafka-pub-sub-example/docker-starter/
 
 # run docker compose
 set -e
