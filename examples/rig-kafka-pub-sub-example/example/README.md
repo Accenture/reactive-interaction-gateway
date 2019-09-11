@@ -7,14 +7,7 @@ This demo is currently showing this flow from the commandline.
 ### Setting Up The Environment 
 Clone and run the docker-starter repo. This creates an instance of Kafka, Zookeeper, RIG, and the example Springboot application.
 
-First, we have to build the Springboot app's Docker image.
-
-```bash
-cd example
-docker build -t example -f Dockerfile .
-```
-
-Then run the simple start script.
+Run the simple start script. This will build the Springboot docker image and also RIG's docker image from the source code.
 ```bash
 cd docker-starter
 ./start.sh
