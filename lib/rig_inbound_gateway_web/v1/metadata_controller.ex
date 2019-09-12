@@ -14,7 +14,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
 
   require Logger
 
-  @spec set_metadata( conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
+  @spec set_metadata(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
   def set_metadata(
       %{method: "PUT"} = conn,
       %{
