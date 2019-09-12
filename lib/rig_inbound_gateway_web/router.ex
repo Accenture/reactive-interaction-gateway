@@ -19,6 +19,9 @@ defmodule RigInboundGatewayWeb.Router do
 
         # The SSE handler is implemented using Cowboy's loop handler behaviour and set
         # up using the Cowboy dispatch configuration; see the `config.exs` file.
+
+        metadata_url = "/:connection_id/metadata"
+        put(metadata_url, MetadataController, :set_metadata)
       end
 
       # Unlike SSE & WS handlers, the LP handler is implemented using plug
