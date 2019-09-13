@@ -63,19 +63,46 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
          "connection_id" => connection_id
       }
   ) do
-    # Decode JSON
-    metadata = Jason.decode(
-                  BodyReader.read_full_body(conn)
-                  |> elem(1))
 
-    # Check if there was a decode error
-    case metadata do
-      {:ok, %{"metadata" => data}} ->
-        IO.inspect data
-      {_, %Jason.DecodeError{}} -> 
-        IO.puts "Error!"
+    with {"application", "json"} <- content_type(conn),
+         {:ok, body, conn} <- BodyReader.read_full_body(conn),
+         {:ok, json} <- Jason.decode(body),
+         {:parse, %{"metadata" => metadata}} <- {:parse, json},
+         {:idx, true} <- {:idx, contains_idx(metadata)} do
+
+      IO.inspect metadata
+
+      send_resp(conn, :no_content, "")
+    else
+      {:idx, false} ->
+        
+        send_resp(conn, :bad_request, """
+        Metadata doesn't contain indexed fields.
+        """)
+
+      {:parse, json} ->
+
+        send_resp(conn, :bad_request, """
+        Expected field "metadata" is not present.
+
+        Decoded request body:
+        #{inspect(json)}
+        """)
+
+      error ->
+
+        send_resp(conn, :bad_request, """
+        Expected JSON encoded body.
+
+        Technical info:
+        #{inspect(error)}
+        """)
     end
-
-    send_resp(conn, :no_content, "")
   end
+
+  def contains_idx(metadata) do
+    # TODO: Actually check this by configuration
+    Enum.any?(metadata, fn x -> (x |> elem(0)) === "userid" end)
+  end
+
 end
