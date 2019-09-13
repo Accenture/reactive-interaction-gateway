@@ -16,7 +16,3 @@ spring:
       bootstrap-servers: ${spring.embedded.kafka.brokers}
       topic:
         receiver: receiver.t
-#    consumer:
-#      bootstrap-servers: 127.0.0.1:9094
-#    producer:
-#      bootstrap-servers: 127.0.0.1:9094
