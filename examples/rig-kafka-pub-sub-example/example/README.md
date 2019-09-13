@@ -7,7 +7,7 @@ This demo is currently showing this flow from the commandline.
 ### Setting Up The Environment 
 Clone and run the docker-starter repo. This creates an instance of Kafka, Zookeeper, RIG, and the example Springboot application.
 
-Run the simple start script. This will build the Springboot docker image and also RIG's docker image from the source code.
+Run the simple start script. This will build the Springboot docker image and run the Docker Compose.
 ```bash
 cd docker-starter
 ./start.sh
@@ -46,9 +46,9 @@ In the Dockerfile
       KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
 ```
 
-You'll see below when we ssh into the container, from the CLI there we use 9092.
+You'll see below when we ssh into the container, from the CLI there we use 9092. We also use 9092 for our example app's web container.
 
-However our Springboot application yaml is the public facing 9094
+However if we run our Springboot application locally, the application yaml is the public facing 9094.
 
 ```yml
 spring:
@@ -63,6 +63,9 @@ spring:
 ```
 
 ### Setup the Routes in RIG
+These routes are set up in the `rig-proxy.json`. It is also possible to set these up by hitting an endpoint. This is not necessary, but is documented below for reference.
+
+
 We set up the routes in RIG by hitting the `/apis` endpoint.
 
 POST
@@ -194,7 +197,7 @@ Response
 Accepted.
 ```
 
-You should see both the outgoing and the transformed message in the RIG subscriptions tab (below). The latter is truncated for length.
+You should see both the outgoing and the transformed message in the RIG subscriptions tab (below). They are truncated for length.
 
 ```JSON
 {
@@ -210,48 +213,7 @@ You should see both the outgoing and the transformed message in the RIG subscrip
     "path": "/api/async-publish",
     "method": "POST",
     "host": "localhost",
-    "headers": [
-      [
-        "accept",
-        "*/*"
-      ],
-      [
-        "accept-encoding",
-        "gzip, deflate"
-      ],
-      [
-        "cache-control",
-        "no-cache"
-      ],
-      [
-        "connection",
-        "keep-alive"
-      ],
-      [
-        "content-length",
-        "331"
-      ],
-      [
-        "content-type",
-        "application/json"
-      ],
-      [
-        "host",
-        "localhost:7000"
-      ],
-      [
-        "postman-token",
-        "6a440d1e-e4fd-448a-84c5-d31a9e3c5f2e"
-      ],
-      [
-        "user-agent",
-        "PostmanRuntime/7.15.2"
-      ],
-      [
-        "forwarded",
-        "for=172.18.0.1;by=127.0.0.1"
-      ]
-    ],
+    "headers": [...]
     "correlation": "g2dkAA1yaWdAMTI3LjAuMC4xAAARCAAAAAAD"
   },
   "id": "069711bf-3946-4661-984f-c667657b8d85",
