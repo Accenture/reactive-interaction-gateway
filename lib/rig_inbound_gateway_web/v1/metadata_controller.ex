@@ -63,8 +63,18 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
          "connection_id" => connection_id
       }
   ) do
-    IO.puts "REACHED SET METADATA"
-    IO.puts(inspect(BodyReader.read_full_body(conn)))
+    # Decode JSON
+    metadata = Jason.decode(
+                  BodyReader.read_full_body(conn)
+                  |> elem(1))
+
+    # Check if there was a decode error
+    case metadata do
+      {:ok, %{"metadata" => data}} ->
+        IO.inspect data
+      {_, %Jason.DecodeError{}} -> 
+        IO.puts "Error!"
+    end
 
     send_resp(conn, :no_content, "")
   end
