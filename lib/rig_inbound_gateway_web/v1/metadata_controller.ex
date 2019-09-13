@@ -70,18 +70,16 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
          {:parse, %{"metadata" => metadata}} <- {:parse, json},
          {:idx, true} <- {:idx, contains_idx(metadata)} do
 
-      IO.inspect metadata
+      IO.puts inspect(metadata)
 
       send_resp(conn, :no_content, "")
     else
       {:idx, false} ->
-        
         send_resp(conn, :bad_request, """
         Metadata doesn't contain indexed fields.
         """)
 
       {:parse, json} ->
-
         send_resp(conn, :bad_request, """
         Expected field "metadata" is not present.
 
@@ -90,7 +88,6 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
         """)
 
       error ->
-
         send_resp(conn, :bad_request, """
         Expected JSON encoded body.
 
