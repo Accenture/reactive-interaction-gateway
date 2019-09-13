@@ -44,7 +44,7 @@ erl_crash.dump
 
 # java
 HELP.md
-!**/target/
+!**/target/**
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**
 !**/src/test/**
@@ -63,14 +63,6 @@ HELP.md
 *.iws
 *.iml
 *.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
 
 ### VS Code ###
 .vscode/
