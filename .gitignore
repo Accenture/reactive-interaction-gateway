@@ -39,3 +39,9 @@ erl_crash.dump
 /.elixir_ls/
 *~
 *.orig
+
+*.iml___jb_old___
+
+*.iml
+
+.idea/
