@@ -7,14 +7,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
 
   alias Result
 
-  alias RIG.AuthorizationCheck.Request
-  alias RIG.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
-  alias Rig.Connection
-  alias RIG.JWT
   alias RIG.Plug.BodyReader
-  alias RIG.Session
-  alias Rig.Subscription
-  alias RIG.Subscriptions
 
   require Logger
 
@@ -30,7 +23,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
       {
         "metadata": {
           "userid": "9ab1bff2-a8d8-455c-b48a-50145d7d8e30",
-          "locale": "de-AT",+
+          "locale": "de-AT",
           "timezone": "GMT+1"
         }
       }
@@ -64,44 +57,75 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
          "connection_id" => connection_id
       }
   ) do
+    conn
+    |> accept_only_req_for(["application/json"])
+    |> decode_metadata()
+    |> do_set_metadata(connection_id)
+  end
 
+  def decode_metadata(conn) do
     with {"application", "json"} <- content_type(conn),
          {:ok, body, conn} <- BodyReader.read_full_body(conn),
          {:ok, json} <- Jason.decode(body),
          {:parse, %{"metadata" => metadata}} <- {:parse, json},
-         {:idx, true} <- {:idx, contains_idx(metadata)} do
+         {:idx, true} <- {:idx, contains_idx?(metadata)} do
 
-      IO.puts inspect(metadata)
-
-      send_resp(conn, :no_content, "")
+      conn
+      |> Plug.Conn.assign(:metadata, metadata)
     else
       {:idx, false} ->
-        send_resp(conn, :bad_request, """
+        message = """
         Metadata doesn't contain indexed fields.
-        """)
+        """
+
+        fail!(conn, message)
 
       {:parse, json} ->
-        send_resp(conn, :bad_request, """
+        message = """
         Expected field "metadata" is not present.
 
         Decoded request body:
         #{inspect(json)}
-        """)
+        """
+
+        fail!(conn, message)
 
       error ->
-        send_resp(conn, :bad_request, """
+        message = """
         Expected JSON encoded body.
 
         Technical info:
         #{inspect(error)}
-        """)
+        """
+
+        fail!(conn, message)
     end
   end
 
-  def contains_idx(metadata) do
+  def do_set_metadata(%{halted: true} = conn, _connection_id), do: conn
+  
+  def do_set_metadata(%{assigns: %{metadata: metadata}} = conn, connection_id) do
+    Logger.info inspect(metadata)
+    
+    conf = config()
+    indexed_fields = Enum.map(conf.indexed_metadata, fn x -> 
+      {x, metadata[x]}
+    end)
+
+    Logger.info inspect(indexed_fields)
+
+    send_resp(conn, :no_content, "")
+  end
+
+  def contains_idx?(metadata) do
     conf = config()
     metadata_keys = Enum.map(metadata, fn x -> x |> elem(0) end)
     Enum.all?(conf.indexed_metadata, fn x -> Enum.member?(metadata_keys, x) end)
+  end
+
+  def fail!(conn, msg) do
+    send_resp(conn, :bad_request, msg)
+    Plug.Conn.halt(conn)
   end
 
 end

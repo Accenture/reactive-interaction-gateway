@@ -118,7 +118,7 @@ config :rig, Rig.Discovery,
   dns_name: {:system, "DNS_NAME", "localhost"}
 
 config :rig, RigInboundGatewayWeb.V1.MetadataController,
-  indexed_metadata: ["userid"]
+  indexed_metadata: ["userid", "locale"]
 
 import_config "#{Mix.env()}.exs"
 
