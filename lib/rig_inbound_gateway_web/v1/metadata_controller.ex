@@ -3,6 +3,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
   Handles inbound metadata sets and the indexing and distribution of metadata
   """
   use RigInboundGatewayWeb, :controller
+  use Rig.Config, [:indexed_metadata]
 
   alias Result
 
@@ -98,8 +99,9 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
   end
 
   def contains_idx(metadata) do
-    # TODO: Actually check this by configuration
-    Enum.any?(metadata, fn x -> (x |> elem(0)) === "userid" end)
+    conf = config()
+    metadata_keys = Enum.map(metadata, fn x -> x |> elem(0) end)
+    Enum.all?(conf.indexed_metadata, fn x -> Enum.member?(metadata_keys, x) end)
   end
 
 end
