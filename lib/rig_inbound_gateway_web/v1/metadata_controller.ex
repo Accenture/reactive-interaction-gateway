@@ -74,8 +74,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
     with {"application", "json"} <- content_type(conn),
          {:ok, body, conn} <- BodyReader.read_full_body(conn),
          {:ok, json} <- Jason.decode(body),
-         {:parse, %{"metadata" => metadata}} <- {:parse, json},
-         {:idx, true} <- {:idx, contains_idx?(metadata)} do
+         {:parse, %{"metadata" => metadata}} <- {:parse, json} do
 
       conf = config()
       jwt_fields = conf.jwt_fields
@@ -113,13 +112,6 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
           |> Plug.Conn.assign(:metadata, metadata)
       end
     else
-      {:idx, false} ->
-        message = """
-        Metadata doesn't contain indexed fields.
-        """
-
-        fail!(conn, message)
-
       {:parse, json} ->
         message = """
         Expected field "metadata" is not present.
@@ -145,18 +137,28 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
   defp do_set_metadata(%{halted: true} = conn, _connection_id), do: conn
 
   defp do_set_metadata(%{assigns: %{metadata: metadata}} = conn, connection_id) do
-    Logger.info("Metadata: " <> inspect(metadata))
+    # Check if metadata contains all the indexed fields; if not: send back a bad request
+    # This needs to be done here because now the values from the JWT got inserted
+    if contains_idx?(metadata) === false do
+      message = """
+        Metadata doesn't contain indexed fields.
+        """
 
-    conf = config()
+      fail!(conn, message)
+    else
+      Logger.info("Metadata: " <> inspect(metadata))
 
-    indexed_fields =
-      Enum.map(conf.indexed_metadata, fn x ->
-        {x, metadata[x]}
-      end)
+      conf = config()
 
-    Logger.info("Indexed fields: " <> inspect(indexed_fields))
+      indexed_fields =
+        Enum.map(conf.indexed_metadata, fn x ->
+          {x, metadata[x]}
+        end)
 
-    send_resp(conn, :no_content, "")
+      Logger.info("Indexed fields: " <> inspect(indexed_fields))
+
+      send_resp(conn, :no_content, "")
+    end
   end
 
   defp contains_idx?(metadata) do
