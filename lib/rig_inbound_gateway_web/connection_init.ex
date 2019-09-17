@@ -40,6 +40,8 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
         %{auth_tokens: [{"bearer", jwt}]} -> jwt
       end
 
+    # TODO: EVENT: SETUP 
+
     with {:ok, jwt_subs} <-
            Subscriptions.from_token(jwt),
          true = String.starts_with?(request.content_type, "application/json"),

@@ -72,14 +72,18 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
 
       conf = config()
       jwt_fields = conf.jwt_fields
-      
-      jwt_fields 
-      |> Enum.each(fn x ->
-        key = x |> elem(1)
-        metadata = Map.replace!(metadata, key, "!")
-        # TODO: Fix
-        IO.inspect metadata
+      jwt_keys = Map.values(jwt_fields)
+
+      metadata = metadata
+      |> Enum.map(fn x ->
+        if Enum.member?(jwt_keys, x |> elem(0)) do
+          # TODO: Replace with value from JWT
+          {x |> elem(0), "!"}
+        else
+          x
+        end
       end)
+      |> Enum.into(%{})
 
       conn
       |> Plug.Conn.assign(:metadata, metadata)
