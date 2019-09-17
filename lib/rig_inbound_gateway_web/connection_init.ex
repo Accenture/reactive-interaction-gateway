@@ -40,7 +40,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
         %{auth_tokens: [{"bearer", jwt}]} -> jwt
       end
 
-    # TODO: EVENT: SETUP 
+    # TODO: EVENT: SETUP
 
     with {:ok, jwt_subs} <-
            Subscriptions.from_token(jwt),
