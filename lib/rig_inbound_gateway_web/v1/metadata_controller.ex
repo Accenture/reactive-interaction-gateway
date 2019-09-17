@@ -6,7 +6,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
   use Rig.Config, [:indexed_metadata]
 
   alias Result
-
+  alias RIG.JWT
   alias RIG.Plug.BodyReader
 
   require Logger
@@ -49,6 +49,12 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
   A user connects to RIG 1 and sends the metadata fields from above to RIG 1. RIG 1 would propagate the connection token and the userid along with the RIG instance ID to all other RIG instances.
   If someone were to access the metadata of a user from RIG 3, RIG 3 would know where to find the metadata, ask RIG 1 for it and return the metadata set.
 
+  ## Dirty testing
+
+      AUTH='Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTY4NzEzMzYxLCJleHAiOjQxMDMyNTgxNDN9.mvoW9aM-IiO6J78IMGTnXCUuspxnNe7BVAlKZr89ka4'
+      META='{ "metadata": { "userid": "9ab1bff2-a8d8-455c-b48a-50145d7d8e30", "locale": "de-AT", "timezone": "GMT+2" } }'
+      http put ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/metadata" <<< "$META" "$AUTH"
+
   """
   @spec set_metadata(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
   def set_metadata(
@@ -57,6 +63,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
           "connection_id" => connection_id
         }
       ) do
+
     conn
     |> accept_only_req_for(["application/json"])
     |> decode_metadata()
@@ -72,21 +79,39 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
 
       conf = config()
       jwt_fields = conf.jwt_fields
-      jwt_keys = Map.values(jwt_fields)
 
-      metadata = metadata
-      |> Enum.map(fn x ->
-        if Enum.member?(jwt_keys, x |> elem(0)) do
-          # TODO: Replace with value from JWT
-          {x |> elem(0), "!"}
-        else
-          x
-        end
+      with {:ok, auth_tokens} <- Map.get(conn.assigns, :auth_tokens, [])
+      |> Enum.map(fn
+        {"bearer", token} -> JWT.parse_token(token)
+        _ -> {:ok, %{}}
       end)
-      |> Enum.into(%{})
+      |> Result.list_to_result()
+      |> Result.map_err(fn decode_errors -> {:error, decode_errors} end) do
 
-      conn
-      |> Plug.Conn.assign(:metadata, metadata)
+        # Merge the list of maps into a single map
+        auth_tokens = Enum.reduce(auth_tokens, fn x, y ->
+          Map.merge(x, y, fn _k, v1, v2 -> v2 ++ v1 end)
+        end)
+
+        # Get values from JWT
+        jwt_vals = jwt_fields
+        |> Enum.map(fn x ->
+          key = x |> elem(0)
+          jwt_key = x |> elem(1)
+          {key, auth_tokens[jwt_key]}
+        end)
+        |> Enum.into(%{})
+
+        # Merge values from metadata with the values from JWT, prioritizing JWT values
+        metadata = Map.merge(metadata, jwt_vals)
+
+        conn
+        |> Plug.Conn.assign(:metadata, metadata)
+      else
+        {:error, _} ->
+          conn
+          |> Plug.Conn.assign(:metadata, metadata)
+      end
     else
       {:idx, false} ->
         message = """
@@ -120,7 +145,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
   defp do_set_metadata(%{halted: true} = conn, _connection_id), do: conn
 
   defp do_set_metadata(%{assigns: %{metadata: metadata}} = conn, connection_id) do
-    Logger.info(inspect(metadata))
+    Logger.info("Metadata: " <> inspect(metadata))
 
     conf = config()
 
@@ -129,7 +154,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
         {x, metadata[x]}
       end)
 
-    Logger.info(inspect(indexed_fields))
+    Logger.info("Indexed fields: " <> inspect(indexed_fields))
 
     send_resp(conn, :no_content, "")
   end
