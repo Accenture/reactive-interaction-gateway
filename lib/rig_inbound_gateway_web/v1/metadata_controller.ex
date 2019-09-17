@@ -49,11 +49,15 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
   A user connects to RIG 1 and sends the metadata fields from above to RIG 1. RIG 1 would propagate the connection token and the userid along with the RIG instance ID to all other RIG instances.
   If someone were to access the metadata of a user from RIG 3, RIG 3 would know where to find the metadata, ask RIG 1 for it and return the metadata set.
 
-  ## Dirty testing
+  ## Dirty testing with JWT
 
-      AUTH='Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTY4NzEzMzYxLCJleHAiOjQxMDMyNTgxNDN9.mvoW9aM-IiO6J78IMGTnXCUuspxnNe7BVAlKZr89ka4'
-      META='{ "metadata": { "userid": "9ab1bff2-a8d8-455c-b48a-50145d7d8e30", "locale": "de-AT", "timezone": "GMT+2" } }'
+      AUTH='Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YWIxYmZmMi1hOGQ4LTQ1NWMtYjQ4YS01MDE0NWQ3ZDhlMzAiLCJuYW1lIjoiSm9obiBEb2UiLCJpYXQiOjE1Njg3MTMzNjEsImV4cCI6NDEwMzI1ODE0M30.kjiR7kFyOEeMJaY1zPCctut39eEWmKswUCNZdK5Q3-w'
+      META='{ "metadata": { "locale": "de-AT", "timezone": "GMT+2" } }'
       http put ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/metadata" <<< "$META" "$AUTH"
+
+  ## Dirty testing without JWT
+      META='{ "metadata": { "userid": "9ab1bff2-a8d8-455c-b48a-50145d7d8e30", "locale": "de-AT", "timezone": "GMT+2" } }'
+      http put ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/metadata" <<< "$META"
 
   """
   @spec set_metadata(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
