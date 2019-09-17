@@ -21,7 +21,7 @@ defmodule BlacklistTest do
       blacklist(session_id)
 
       # try to connect and verify it doesn't work
-      jwt = new_jwt(%{"jti" => session_id})
+      jwt = JWT.encode(%{"jti" => session_id})
       assert {:error, %{code: 400}} = SseClient.try_connect_then_disconnect(jwt: jwt)
       assert {:error, _} = WsClient.try_connect_then_disconnect(jwt: jwt)
     end
@@ -30,7 +30,7 @@ defmodule BlacklistTest do
       # Connect to RIG using a JWT:
 
       session_id = "some random string 8902731973190231212"
-      jwt = new_jwt(%{"jti" => session_id})
+      jwt = JWT.encode(%{"jti" => session_id})
 
       assert {:ok, sse} = SseClient.connect(jwt: jwt)
       {_, sse} = SseClient.read_welcome_event(sse)
@@ -43,7 +43,7 @@ defmodule BlacklistTest do
       # Create an additional connection using a different JWT:
 
       other_session_id = "some random string 97123689684290890423312"
-      other_jwt = new_jwt(%{"jti" => other_session_id})
+      other_jwt = JWT.encode(%{"jti" => other_session_id})
 
       assert {:ok, other_sse} = SseClient.connect(jwt: other_jwt)
       {_, other_sse} = SseClient.read_welcome_event(other_sse)
@@ -85,11 +85,5 @@ defmodule BlacklistTest do
       {:ok, %HTTPoison.Response{status_code: 200}} -> true
       {:ok, %HTTPoison.Response{status_code: 404}} -> false
     end
-  end
-
-  # ---
-
-  defp new_jwt(claims) do
-    JWT.encode(claims)
   end
 end
