@@ -100,7 +100,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
         message = """
         Metadata doesn't contain indexed fields.
         """
-        {:error, metadata}
+        {:error, message}
       end
     end
   end
@@ -124,7 +124,10 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
       end)
 
       # Get values from JWT
-      for {key, jwt_key} <- metadata_from_jwt, jwt_val = claims[jwt_key], into: %{}, do: {key, jwt_val}
+      for {key, jwt_key} <- metadata_from_jwt,
+        jwt_val = claims[jwt_key],
+        into: %{},
+        do: {key, jwt_val}
     else
       {:error, _} ->
         %{}
@@ -135,7 +138,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
 
   defp extract_metadata_from_json(conn) do
     with {"application", "json"} <- content_type(conn),
-         {:ok, body, conn} <- BodyReader.read_full_body(conn),
+         {:ok, body, _conn} <- BodyReader.read_full_body(conn),
          {:ok, json} <- Jason.decode(body),
          {:parse, %{"metadata" => metadata}} <- {:parse, json} do
       {:ok, metadata}
