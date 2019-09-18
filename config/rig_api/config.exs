@@ -43,7 +43,8 @@ config :rig, RigApi.Endpoint,
 # Always start the HTTP endpoints on application startup:
 config :phoenix, :serve_endpoints, true
 
-config :rig, RigApi.ApisController, rig_proxy: RigInboundGateway.Proxy
+config :rig, RigApi.V1.APIs, rig_proxy: RigInboundGateway.Proxy
+config :rig, RigApi.V2.APIs, rig_proxy: RigInboundGateway.Proxy
 
 config :rig, :event_filter, Rig.EventFilter
 

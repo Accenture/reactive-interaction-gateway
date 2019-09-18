@@ -1,15 +1,14 @@
-defmodule RigApi.ApisController do
-  @moduledoc """
-  HTTP-accessible API for managing PROXY APIs.
-
-  """
+defmodule RigApi.V2.APIs do
+  @moduledoc "CRUD controller for the reverse-proxy settings."
   use Rig.Config, [:rig_proxy]
   use RigApi, :controller
   use PhoenixSwagger
   require Logger
 
+  @prefix "/v2"
+
   swagger_path :list_apis do
-    get("/v1/apis")
+    get(@prefix <> "/apis")
     summary("List current proxy API-definitions.")
     response(200, "Ok", Schema.ref(:ProxyAPIList))
   end
@@ -22,7 +21,7 @@ defmodule RigApi.ApisController do
   end
 
   swagger_path :get_api_detail do
-    get("/v1/apis/{apiId}")
+    get(@prefix <> "/apis/{apiId}")
     summary("Obtain details on a proxy API-definition.")
 
     parameters do
@@ -46,7 +45,7 @@ defmodule RigApi.ApisController do
   end
 
   swagger_path :add_api do
-    post("/v1/apis")
+    post(@prefix <> "/apis")
     summary("Register a new proxy API-definition.")
 
     parameters do
@@ -80,7 +79,7 @@ defmodule RigApi.ApisController do
   end
 
   swagger_path :update_api do
-    put("/v1/apis/{apiId}")
+    put(@prefix <> "/apis/{apiId}")
     summary("Update a proxy API-definition.")
 
     parameters do
@@ -111,7 +110,7 @@ defmodule RigApi.ApisController do
   end
 
   swagger_path :deactivate_api do
-    delete("/v1/apis/{apiId}")
+    delete(@prefix <> "/apis/{apiId}")
     summary("Deactivate a proxy API-definition.")
 
     parameters do

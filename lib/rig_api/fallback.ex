@@ -1,4 +1,4 @@
-defmodule RigApi.FallbackController do
+defmodule RigApi.Fallback do
   @moduledoc """
   Translates controller action results into valid `Plug.Conn` responses.
 

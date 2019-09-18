@@ -1,4 +1,5 @@
-defmodule RigApi.MessageController do
+defmodule RigApi.V1.Messages do
+  @moduledoc "Controller for submitting (backend) events to potential (frontend) subscribers."
   require Logger
 
   use RigApi, :controller
@@ -6,10 +7,12 @@ defmodule RigApi.MessageController do
 
   alias RIG.Sources.HTTP.Handler
 
-  action_fallback(RigApi.FallbackController)
+  @prefix "/v1"
+
+  action_fallback(RigApi.Fallback)
 
   swagger_path :publish do
-    post("/v1/messages")
+    post(@prefix <> "/messages")
     summary("Submit an event, to be forwarded to subscribed frontends.")
     description("Allows you to submit a single event to RIG using a simple, \
     synchronous call. While for production setups we recommend ingesting events \

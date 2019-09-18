@@ -23,7 +23,7 @@ You'll right away see list of all internal APIs.
 
 ## Create new API
 
-`POST /v1/apis`
+`POST /v2/apis`
 
 ```json
 {
@@ -59,17 +59,17 @@ You'll right away see list of all internal APIs.
 
 ## Read list of APIs
 
-`GET /v1/apis`
+`GET /v2/apis`
 
 This is also way how to check if your APIs were loaded properly.
 
 ## Read detail of specific API
 
-`GET /v1/apis/:api_id`
+`GET /v2/apis/:api_id`
 
 ## Update API
 
-`PUT /v1/apis/:api_id`
+`PUT /v2/apis/:api_id`
 
 ```json
 {
@@ -105,4 +105,4 @@ This is also way how to check if your APIs were loaded properly.
 
 ## Delete API
 
-`DELETE /v1/apis/:api_id`
+`DELETE /v2/apis/:api_id`

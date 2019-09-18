@@ -57,8 +57,4 @@ defmodule RigApi.ConnCase do
       @endpoint RigApi.Endpoint
     end
   end
-
-  setup _tags do
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
-  end
 end

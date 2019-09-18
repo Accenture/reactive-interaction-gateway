@@ -8,6 +8,7 @@ config :rig, RigApi.Endpoint,
     password: "test"
   ]
 
-config :rig, RigApi.ApisController, rig_proxy: RigInboundGateway.ProxyMock
+config :rig, RigApi.V1.APIs, rig_proxy: RigInboundGateway.ProxyMock
+config :rig, RigApi.V2.APIs, rig_proxy: RigInboundGateway.ProxyMock
 
 config :rig, :event_filter, Rig.EventFilterMock

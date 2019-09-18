@@ -23,6 +23,6 @@ curl -X "POST" \
 -H "Content-Type: application/json" \
 -d "{\"id\":\"kafka-service\",\"name\":\"kafka-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kafka-producer-endpoint\",\"path\":\"/produce\",\"method\":\"POST\",\"secured\":false}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"channels-external-service\",\"port\":8000}}" \
 --silent \
-"http://localhost:7010/v1/apis"
+"http://localhost:7010/v2/apis"
 
 printf "\n===> Application is ready <===\n"
