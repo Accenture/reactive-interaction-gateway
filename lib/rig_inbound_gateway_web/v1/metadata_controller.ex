@@ -81,9 +81,9 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
          {:parse, %{"metadata" => metadata}} <- {:parse, json} do
 
       conf = config()
-      jwt_fields = conf.jwt_fields
+      metadata_from_jwt = conf.jwt_fields
 
-      with {:ok, auth_tokens} <- Map.get(conn.assigns, :auth_tokens, [])
+      with {:ok, claims} <- Map.get(conn.assigns, :auth_tokens, [])
       |> Enum.map(fn
         {"bearer", token} -> JWT.parse_token(token)
         _ -> {:ok, %{}}
@@ -91,19 +91,13 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
       |> Result.list_to_result()
       |> Result.map_err(fn decode_errors -> {:error, decode_errors} end) do
 
-        # Merge the list of maps into a single map
-        auth_tokens = Enum.reduce(auth_tokens, fn x, y ->
+        # Merge the list of claims into a single map
+        claims = Enum.reduce(claims, fn x, y ->
           Map.merge(x, y, fn _k, v1, v2 -> v2 ++ v1 end)
         end)
 
         # Get values from JWT
-        jwt_vals = jwt_fields
-        |> Enum.map(fn x ->
-          key = x |> elem(0)
-          jwt_key = x |> elem(1)
-          {key, auth_tokens[jwt_key]}
-        end)
-        |> Enum.into(%{})
+        for {key, jwt_key} <- metadata_from_jwt, jwt_val = claims[jwt_key], into: %{}, do: {key, jwt_val}
 
         # Merge values from metadata with the values from JWT, prioritizing JWT values
         metadata = Map.merge(metadata, jwt_vals)
@@ -138,28 +132,22 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
     end
   end
 
-  defp do_set_metadata(%{halted: true} = conn, _connection_id), do: conn
-
   defp do_set_metadata(%{assigns: %{metadata: metadata}} = conn, connection_id) do
     # Check if metadata contains all the indexed fields; if not: send back a bad request
     # This needs to be done here because now the values from the JWT got inserted
-    if contains_idx?(metadata) === false do
+    unless contains_idx?(metadata) do
       message = """
         Metadata doesn't contain indexed fields.
         """
 
       fail!(conn, message)
     else
-      Logger.info("Metadata: " <> inspect(metadata))
+      Logger.debug(fn -> "Metadata: " <> inspect(metadata) end)
 
       conf = config()
+      for x <- conf.indexed_metadata, do: {x, metadata[x]}
 
-      indexed_fields =
-        Enum.map(conf.indexed_metadata, fn x ->
-          {x, metadata[x]}
-        end)
-
-      Logger.info("Indexed fields: " <> inspect(indexed_fields))
+      Logger.debug(fn -> "Indexed fields: " <> inspect(indexed_fields) end)
 
       send_resp(conn, :no_content, "")
     end
