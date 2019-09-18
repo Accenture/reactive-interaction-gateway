@@ -68,47 +68,77 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
         }
       ) do
 
-    conn
+    {err, data} = conn
     |> accept_only_req_for(["application/json"])
-    |> decode_metadata()
-    |> do_set_metadata(connection_id)
+    |> extract_metadata()
+
+    if err === :error do
+      fail!(conn, data)
+    else
+      persist_metadata(data, connection_id)
+      send_resp(conn, :no_content, "")
+    end
   end
 
-  defp decode_metadata(conn) do
+  # ---
+
+  defp extract_metadata(conn) do
+    {json_metadata_err, json_metadata} = extract_metadata_from_json(conn)
+    jwt_metadata = extract_metadata_from_jwt(conn)
+
+    if json_metadata_err === :error do
+      {:error, json_metadata}
+    else
+      # Merge values from metadata with the values from JWT, prioritizing JWT values
+      metadata = Map.merge(json_metadata, jwt_metadata)
+
+      # Check if metadata contains all the indexed fields; if not: send back a bad request
+      # This needs to be done here because now the values from the JWT got inserted
+      if has_required_indices?(metadata) do
+        {:ok, metadata}
+      else
+        message = """
+        Metadata doesn't contain indexed fields.
+        """
+        {:error, metadata}
+      end
+    end
+  end
+
+  # ---
+
+  defp extract_metadata_from_jwt(conn) do
+    with {:ok, claims} <- Map.get(conn.assigns, :auth_tokens, [])
+    |> Enum.map(fn
+      {"bearer", token} -> JWT.parse_token(token)
+      _ -> {:ok, %{}}
+    end)
+    |> Result.list_to_result()
+    |> Result.map_err(fn decode_errors -> {:error, decode_errors} end) do
+      conf = config()
+      metadata_from_jwt = conf.jwt_fields
+
+      # Merge the list of claims into a single map
+      claims = Enum.reduce(claims, fn x, y ->
+        Map.merge(x, y, fn _k, v1, v2 -> v2 ++ v1 end)
+      end)
+
+      # Get values from JWT
+      for {key, jwt_key} <- metadata_from_jwt, jwt_val = claims[jwt_key], into: %{}, do: {key, jwt_val}
+    else
+      {:error, _} ->
+        %{}
+    end
+  end
+
+  # ---
+
+  defp extract_metadata_from_json(conn) do
     with {"application", "json"} <- content_type(conn),
          {:ok, body, conn} <- BodyReader.read_full_body(conn),
          {:ok, json} <- Jason.decode(body),
          {:parse, %{"metadata" => metadata}} <- {:parse, json} do
-
-      conf = config()
-      metadata_from_jwt = conf.jwt_fields
-
-      with {:ok, claims} <- Map.get(conn.assigns, :auth_tokens, [])
-      |> Enum.map(fn
-        {"bearer", token} -> JWT.parse_token(token)
-        _ -> {:ok, %{}}
-      end)
-      |> Result.list_to_result()
-      |> Result.map_err(fn decode_errors -> {:error, decode_errors} end) do
-
-        # Merge the list of claims into a single map
-        claims = Enum.reduce(claims, fn x, y ->
-          Map.merge(x, y, fn _k, v1, v2 -> v2 ++ v1 end)
-        end)
-
-        # Get values from JWT
-        for {key, jwt_key} <- metadata_from_jwt, jwt_val = claims[jwt_key], into: %{}, do: {key, jwt_val}
-
-        # Merge values from metadata with the values from JWT, prioritizing JWT values
-        metadata = Map.merge(metadata, jwt_vals)
-
-        conn
-        |> Plug.Conn.assign(:metadata, metadata)
-      else
-        {:error, _} ->
-          conn
-          |> Plug.Conn.assign(:metadata, metadata)
-      end
+      {:ok, metadata}
     else
       {:parse, json} ->
         message = """
@@ -118,7 +148,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
         #{inspect(json)}
         """
 
-        fail!(conn, message)
+        {:error, message}
 
       error ->
         message = """
@@ -128,36 +158,32 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
         #{inspect(error)}
         """
 
-        fail!(conn, message)
+        {:error, message}
     end
   end
 
-  defp do_set_metadata(%{assigns: %{metadata: metadata}} = conn, connection_id) do
-    # Check if metadata contains all the indexed fields; if not: send back a bad request
-    # This needs to be done here because now the values from the JWT got inserted
-    unless contains_idx?(metadata) do
-      message = """
-        Metadata doesn't contain indexed fields.
-        """
+  # ---
 
-      fail!(conn, message)
-    else
-      Logger.debug(fn -> "Metadata: " <> inspect(metadata) end)
+  defp persist_metadata(metadata, connection_id) do
+    Logger.debug(fn -> "Metadata: " <> inspect(metadata) end)
 
-      conf = config()
-      for x <- conf.indexed_metadata, do: {x, metadata[x]}
+    conf = config()
+    indexed_fields = for x <- conf.indexed_metadata, do: {x, metadata[x]}
 
-      Logger.debug(fn -> "Indexed fields: " <> inspect(indexed_fields) end)
+    Logger.debug(fn -> "Indexed fields: " <> inspect(indexed_fields) end)
 
-      send_resp(conn, :no_content, "")
-    end
+    # TODO: Actually set metadata
   end
 
-  defp contains_idx?(metadata) do
+  # ---
+
+  defp has_required_indices?(metadata) do
     conf = config()
     metadata_keys = Enum.map(metadata, fn x -> x |> elem(0) end)
     Enum.all?(conf.indexed_metadata, fn x -> Enum.member?(metadata_keys, x) end)
   end
+
+  # ---
 
   defp fail!(conn, msg) do
     send_resp(conn, :bad_request, msg)
