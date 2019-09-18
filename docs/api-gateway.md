@@ -136,7 +136,9 @@ For fire-and-forget style requests, the endpoint configuration looks like this:
         "id": "my-endpoint",
         "method": "POST",
         "path": "/",
-        "target": "kafka"
+        "target": "kafka",
+        "topic": "my-topic",
+        "schema": "my-avro-schema"
       }]
     }
   },
@@ -144,7 +146,9 @@ For fire-and-forget style requests, the endpoint configuration looks like this:
 }]
 ```
 
-Note that the `target` field is set to `kafka` (for Kinesis use `kinesis`).
+Note that the `target` field is set to `kafka` (for Kinesis use `kinesis`). The `topic` field is mandatory, but the `schema` field is optional. Alternatively (fallback to the previously used solution), you can define these values via environment variables, described by the `PROXY_KAFKA_*` and `PROXY_KINESIS_*` variables in the [Operator's Guide](./rig-ops-guide.md). Note that the `topic` and `schema` fields are just about publishing to event stream and have nothing to do with events consumption.
+
+> Beware, that the fallback method is deprecated and will be removed in the version 3.0.
 
 The endpoint expects the following request format:
 
@@ -165,7 +169,7 @@ The endpoint expects the following request format:
 }
 ```
 
-Topic/stream configuration is handled by environment variables, described by the `PROXY_KAFKA_*` and `PROXY_KINESIS_*` variables in the [Operator's Guide](./rig-ops-guide.md).
+> `target_partition` is optional, if not set -- RIG produces event to random Kafka/Kinesis partition.
 
 ### Wait for response
 
@@ -184,6 +188,7 @@ Configuration of such API endpoint might look like this:
         "method": "POST",
         "path": "/",
         "target": "kafka",
+        "topic": "my-topic",
         "response_from": "kafka"
       }]
     }

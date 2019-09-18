@@ -113,6 +113,7 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
   end
 
   @tag :kafka
+  # TODO - update to use new proxy configuration
   test "Given target is set to Kafka, the http request should publish message to Kafka topic" do
     test_name = "proxy-publish-to-kafka"
 
@@ -194,5 +195,15 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
 
     assert get_in(received_msg_map, ["rig", "headers"])
            |> Enum.member?(["host", "#{@proxy_host}:#{@proxy_port}"])
+  end
+
+  @tag :avro
+  test "Given target is set to Kafka and schema field is set as well, the http request should publish encoded message to Kafka topic" do
+    # TODO
+  end
+
+  @tag :kafka
+  test "Given topic and schema fields are not set, the http request should publish message to Kafka topic using fallback method" do
+    # TODO
   end
 end
