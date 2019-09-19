@@ -88,6 +88,45 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   def handle_http_request(
         conn,
         _,
+        %{"target" => "kafka", "topic" => topic} = endpoint,
+        request_path
+      )
+      when byte_size(topic) > 0 do
+    response_from = Map.get(endpoint, "response_from", "http")
+    schema = Map.get(endpoint, "schema")
+
+    conn.assigns[:body]
+    |> Jason.decode()
+    |> case do
+      # Deprecated way to pass events:
+      {:ok, %{"partition" => partition, "event" => event}} ->
+        do_handle_http_request(conn, request_path, partition, event, response_from, topic, schema)
+
+      # Preferred way to pass events, where the partition goes into the "rig" extension:
+      {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
+        do_handle_http_request(conn, request_path, partition, event, response_from, topic, schema)
+
+      # Deprecated way to pass events, partition not set -> will be randomized:
+      {:ok, %{"event" => event}} ->
+        do_handle_http_request(conn, request_path, nil, event, response_from)
+
+      # Preferred way to pass events, partition not set -> will be randomized:
+      {:ok, %{"specversion" => _} = event} ->
+        do_handle_http_request(conn, request_path, nil, event, response_from)
+
+      {:ok, _} ->
+        respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
+
+      {:error, _} ->
+        respond_with_bad_request(conn, response_from, "expected a JSON encoded request body")
+    end
+  end
+
+  @deprecated "Using environemnt variables to set Kafka proxy request topic and schema is deprecated.
+  Set these values directly in proxy json file"
+  def handle_http_request(
+        conn,
+        _,
         %{"target" => "kafka"} = endpoint,
         request_path
       ) do
@@ -104,6 +143,14 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
       {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
         do_handle_http_request(conn, request_path, partition, event, response_from)
 
+      # Deprecated way to pass events, partition not set -> will be randomized:
+      {:ok, %{"event" => event}} ->
+        do_handle_http_request(conn, request_path, <<>>, event, response_from)
+
+      # Preferred way to pass events, partition not set -> will be randomized:
+      {:ok, %{"specversion" => _} = event} ->
+        do_handle_http_request(conn, request_path, <<>>, event, response_from)
+
       {:ok, _} ->
         respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
 
@@ -119,7 +166,9 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         request_path,
         partition,
         event,
-        response_from
+        response_from,
+        topic \\ nil,
+        schema \\ nil
       ) do
     kafka_message =
       event
@@ -136,7 +185,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
       })
       |> Poison.encode!()
 
-    produce(partition, kafka_message)
+    produce(partition, kafka_message, topic, schema)
 
     wait_for_response? =
       case response_from do
@@ -218,16 +267,29 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
   # ---
 
-  defp produce(server \\ __MODULE__, key, plaintext) do
-    GenServer.call(server, {:produce, key, plaintext})
+  defp produce(server \\ __MODULE__, key, plaintext, topic, schema) do
+    GenServer.call(server, {:produce, key, plaintext, topic, schema})
   end
 
   # ---
 
   @impl GenServer
-  def handle_call({:produce, key, plaintext}, _from, %{kafka_config: kafka_config} = state) do
-    %{request_topic: topic, request_schema: schema} = config()
-    res = RigKafka.produce(kafka_config, topic, schema, key, plaintext)
+  def handle_call(
+        {:produce, key, plaintext, topic, schema},
+        _from,
+        %{kafka_config: kafka_config} = state
+      ) do
+    %{request_topic: request_topic, request_schema: request_schema} = config()
+
+    res =
+      RigKafka.produce(
+        kafka_config,
+        topic || request_topic,
+        schema || request_schema,
+        key || <<>>,
+        plaintext
+      )
+
     {:reply, res, state}
   end
 
