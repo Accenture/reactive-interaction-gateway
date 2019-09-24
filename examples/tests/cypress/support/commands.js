@@ -48,7 +48,15 @@ Cypress.Commands.add('sendEvent', (eventType, message) => {
 
 Cypress.Commands.add('assertReceivedEvents', (element, message) => {
   // assert number and content of received events
-  cy.get(`#${element}`)
+  cy.get(`#${element} > li`, {timeout: 30000})
+    .should('be.visible')
+    .first()
+    .contains(message)
+});
+
+Cypress.Commands.add('assertReceivedEventLog', (element, message) => {
+  // assert number and content of received events
+  cy.get(`#${element}`, {timeout: 30000})
     .should('have.length', 1)
     .first()
     .contains(new RegExp(message, 'g'));

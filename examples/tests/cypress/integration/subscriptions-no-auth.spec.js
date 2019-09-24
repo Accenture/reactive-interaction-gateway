@@ -24,7 +24,7 @@ describe('Subscriptions with no auth', () => {
       cy.setAndVerifyInput('greeting', 'hello');
       cy.setAndVerifyInput('name', 'mike');
       cy.submit();
-      cy.wait(2000).assertReceivedEvents('eventList', '"name":"john","greeting":"hello"');
+      cy.assertReceivedEvents('eventList', '"name":"john","greeting":"hello"');
     });
   });
 });

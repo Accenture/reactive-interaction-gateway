@@ -17,7 +17,7 @@ describe('Subscriptions with JWT auth', () => {
       cy.setAndVerifyInput('greeting', 'hello');
       cy.setAndVerifyInput('name', 'mike');
       cy.submit();
-      cy.wait(2000).assertReceivedEvents('eventList', '"name":"john","greeting":"hello"');
+      cy.assertReceivedEvents('eventList', '"name":"john","greeting":"hello"');
     });
 
     it(`Creates ${type} subscriptions based on JWT in connection call and applies constraints`, () => {
@@ -30,7 +30,7 @@ describe('Subscriptions with JWT auth', () => {
       cy.setAndVerifyInput('greeting', 'hello');
       cy.setAndVerifyInput('name', 'mike');
       cy.submit();
-      cy.wait(2000).assertReceivedEvents(
+      cy.assertReceivedEvents(
         'eventList',
         '"name":"john.doe","greeting":"hello"'
       );
