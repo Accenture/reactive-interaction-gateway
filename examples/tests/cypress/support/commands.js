@@ -46,7 +46,7 @@ Cypress.Commands.add('sendEvent', (eventType, message) => {
   cy.get('#send-button').click();
 });
 
-Cypress.Commands.add('assertReceivedEvents', (element, message) => {
+Cypress.Commands.add('assertNewestEventContainsMessage', (element, message) => {
   // assert number and content of received events
   cy.get(`#${element} > li`, {timeout: 30000})
     .should('be.visible')
@@ -54,7 +54,7 @@ Cypress.Commands.add('assertReceivedEvents', (element, message) => {
     .contains(message)
 });
 
-Cypress.Commands.add('assertReceivedEventLog', (element, message) => {
+Cypress.Commands.add('assertSingleNewEventContainsMessage', (element, message) => {
   // assert number and content of received events
   cy.get(`#${element}`, {timeout: 30000})
     .should('have.length', 1)

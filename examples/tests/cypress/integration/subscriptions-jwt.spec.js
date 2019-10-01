@@ -4,7 +4,7 @@ describe('Subscriptions with JWT auth', () => {
       cy.visit(`/${type}-3-demo-jwt.html`);
       cy.setAndVerifyInput('greeting', 'hello');
       cy.submit();
-      cy.assertReceivedEvents('eventList', 'hello');
+      cy.assertNewestEventContainsMessage('eventList', 'hello');
     });
 
     it(`Applies ${type} subscription constraints tied with JWT for given event type`, () => {
@@ -12,12 +12,12 @@ describe('Subscriptions with JWT auth', () => {
       cy.setAndVerifyInput('greeting', 'hello');
       cy.setAndVerifyInput('name', 'john');
       cy.submit();
-      cy.assertReceivedEvents('eventList', '"name":"john","greeting":"hello"');
+      cy.assertNewestEventContainsMessage('eventList', '"name":"john","greeting":"hello"');
       // John shouldn't receive Mike's events
       cy.setAndVerifyInput('greeting', 'hello');
       cy.setAndVerifyInput('name', 'mike');
       cy.submit();
-      cy.assertReceivedEvents('eventList', '"name":"john","greeting":"hello"');
+      cy.assertNewestEventContainsMessage('eventList', '"name":"john","greeting":"hello"');
     });
 
     it(`Creates ${type} subscriptions based on JWT in connection call and applies constraints`, () => {
@@ -25,12 +25,12 @@ describe('Subscriptions with JWT auth', () => {
       cy.setAndVerifyInput('greeting', 'hello');
       cy.setAndVerifyInput('name', 'john.doe');
       cy.submit();
-      cy.assertReceivedEvents('eventList', '"name":"john.doe","greeting":"hello"');
+      cy.assertNewestEventContainsMessage('eventList', '"name":"john.doe","greeting":"hello"');
       // John Doe shouldn't receive Mike's events
       cy.setAndVerifyInput('greeting', 'hello');
       cy.setAndVerifyInput('name', 'mike');
       cy.submit();
-      cy.assertReceivedEvents(
+      cy.assertNewestEventContainsMessage(
         'eventList',
         '"name":"john.doe","greeting":"hello"'
       );
