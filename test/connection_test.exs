@@ -5,20 +5,7 @@ defmodule RigInboundGateway.ConnectionTest do
 
   alias HTTPoison
 
-  @dispatch Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:https][:dispatch]
-  @port 47_210
-
-  setup_all do
-    dispatch = :cowboy_router.compile(@dispatch)
-    server_name = __MODULE__
-    {:ok, _pid} = :cowboy.start_clear(server_name, [port: @port], %{env: %{dispatch: dispatch}})
-
-    on_exit(fn ->
-      :cowboy.stop_listener(server_name)
-    end)
-
-    :ok
-  end
+  @event_hub_http_port Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
 
   defp try_sse(params \\ []) do
     SseClient.try_connect_then_disconnect(params)
@@ -29,7 +16,7 @@ defmodule RigInboundGateway.ConnectionTest do
   end
 
   defp try_longpolling(params) do
-    url = "http://localhost:#{@port}/_rig/v1/connection/longpolling?#{URI.encode_query(params)}"
+    url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/longpolling?#{URI.encode_query(params)}"
     %HTTPoison.Response{status_code: status_code} = HTTPoison.get!(url)
     status_code
   end

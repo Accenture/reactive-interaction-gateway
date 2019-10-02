@@ -4,8 +4,8 @@ defmodule RigInboundGatewayWeb.V1.EventController do
   """
   require Logger
   use Rig.Config, [:cors]
-
   use RigInboundGatewayWeb, :controller
+  use RigInboundGatewayWeb.Cors, :cors
 
   alias RIG.Sources.HTTP.Handler
 
@@ -16,13 +16,6 @@ defmodule RigInboundGatewayWeb.V1.EventController do
     |> put_resp_header("access-control-allow-methods", "POST")
     |> put_resp_header("access-control-allow-headers", "content-type")
     |> send_resp(:no_content, "")
-  end
-
-  # ---
-
-  defp with_allow_origin(conn) do
-    %{cors: origins} = config()
-    put_resp_header(conn, "access-control-allow-origin", origins)
   end
 
   # ---

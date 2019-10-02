@@ -4,8 +4,8 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   """
   require Logger
   use Rig.Config, [:cors]
-
   use RigInboundGatewayWeb, :controller
+  use RigInboundGatewayWeb.Cors, :cors
 
   alias Rig.Connection
   alias RigInboundGatewayWeb.Session
@@ -93,11 +93,5 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
     |> text(
       ~s<{"last_event_id":"#{response.last_event_id}","events":[#{Enum.join(response.events, ",")}]}>
     )
-  end
-
-  # ---
-  defp with_allow_origin(conn) do
-    %{cors: origins} = config()
-    put_resp_header(conn, "access-control-allow-origin", origins)
   end
 end
