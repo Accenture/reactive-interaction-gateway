@@ -172,6 +172,12 @@ defmodule RigInboundGatewayWeb.VConnection do
   end
 
   @impl true
+  def handle_info(:kill_connection, state) do
+    send! state.target_pid, :close
+    {:noreply, state}
+  end
+
+  @impl true
   def handle_info({:DOWN, _ref, :process, pid, _}, state) do
     Logger.debug(fn -> "Connection went down #{inspect(pid)}" end)
 

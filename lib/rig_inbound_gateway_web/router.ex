@@ -22,6 +22,9 @@ defmodule RigInboundGatewayWeb.Router do
 
           put("/destroy", ConnectionController, :destroy)
           options("/destroy", ConnectionController, :handle_preflight)
+
+          put("/destroy/connection", ConnectionController, :destroy_connection)
+          options("/destroy/connection", ConnectionController, :handle_preflight)
         end
 
         scope "/sse" do

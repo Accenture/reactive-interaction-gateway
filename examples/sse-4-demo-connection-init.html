@@ -11,7 +11,8 @@
   <form onsubmit="sendGreeting(); return false;">
     <input type="text" id="greeting" placeholder="Your greeting here" autofocus>
     <input type="submit" id="submit-button" disabled>
-    <button type="button" id="disconnect-button" onclick="disconnect()">Disconnect</button>
+    <button type="button" id="disconnect-connection-button" onclick="disconnect_connection()">Disconnect connection</button>
+    <button type="button" id="disconnect-button" onclick="disconnect()">Disconnect VConnection</button>
   </form>
   <ul id="eventList" style="list-style:none;padding-left:0">
 
@@ -96,6 +97,10 @@
 
     function disconnect() {
       fetch(`${baseUrl}/connection/${connectionToken}/destroy`, {method: "PUT", mode: "cors"}).then(msg => { return msg.text() })
+    }
+
+    function disconnect_connection() {
+      fetch(`${baseUrl}/connection/${connectionToken}/destroy/connection`, {method: "PUT", mode: "cors"}).then(msg => { return msg.text() })
     }
 
     var source;
