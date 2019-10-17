@@ -20,11 +20,11 @@ defmodule RigInboundGatewayWeb.Router do
           put("/metadata", MetadataController, :set_metadata)
           options("/metadata", MetadataController, :handle_preflight)
 
-          put("/destroy", ConnectionController, :destroy)
-          options("/destroy", ConnectionController, :handle_preflight)
+          delete("/", ConnectionController, :destroy_connection)
+          options("/", ConnectionController, :handle_preflight)
 
-          put("/destroy/connection", ConnectionController, :destroy_connection)
-          options("/destroy/connection", ConnectionController, :handle_preflight)
+          delete("/vconnection", ConnectionController, :destroy)
+          options("/vconnection", ConnectionController, :handle_preflight)
         end
 
         scope "/sse" do

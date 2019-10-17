@@ -2,7 +2,7 @@ defmodule RigInboundGatewayWeb.VConnection do
   @moduledoc """
   The VConnection acts as an abstraction for the actual connections.
 
-  It monitors the processes, sends out heartbeats and subscription refreshes and sends out events to the serverless engine when intialized, connection is lost or connection is re-established.
+  It monitors the processes, sends out heartbeats and subscription refreshes, handles heartbeat and the general state of each connection.
   """
 
   alias Rig.EventFilter
@@ -14,10 +14,7 @@ defmodule RigInboundGatewayWeb.VConnection do
 
   use GenServer
 
-  # TODO: Discuss a reasonable kill delay
-  @vconnection_kill_delay 120_000
-
-  # TODO: Discuss a reasonable buffer size
+  @vconnection_kill_delay_ms 600_000
   @buffer_size 100
 
   def start(pid, subscriptions, heartbeat_interval_ms, subscription_refresh_interval_ms) do
@@ -74,14 +71,14 @@ defmodule RigInboundGatewayWeb.VConnection do
     # In case an old connection exists, kill it off before replacing it
     send! state.target_pid, :close
 
-    {pid, _} = from
+    {from_pid, _} = from
 
     # Switch target pid
-    state = Map.put(state, :target_pid, pid)
+    state = Map.put(state, :target_pid, from_pid)
     # Register new monitor
     |> create_monitor
 
-    Logger.debug(fn -> "Client #{inspect(pid)} reconnected" end)
+    Logger.debug(fn -> "Client #{inspect(from_pid)} reconnected" end)
 
     # TODO: Schedule send of all missed events
     # TODO: Publish reconnect event
@@ -165,7 +162,7 @@ defmodule RigInboundGatewayWeb.VConnection do
   end
 
   @impl true
-  def handle_info(:timeout, state) do
+  def handle_info(:vconnection_timeout, state) do
     Logger.debug(fn -> "Connection initialized, timeout starting..." end)
 
     {:noreply, start_timer(state)}
@@ -188,8 +185,7 @@ defmodule RigInboundGatewayWeb.VConnection do
 
   defp create_monitor(state) do
     monitor = Process.monitor(state.target_pid)
-    state = Map.put(state, :monitor, monitor)
-    state
+    Map.put(state, :monitor, monitor)
   end
 
   defp send!(pid, data)
@@ -197,8 +193,7 @@ defmodule RigInboundGatewayWeb.VConnection do
   defp send!(pid, data), do: send pid, data
 
   defp start_timer(state) do
-    timer = Process.send_after(self(), :kill, @vconnection_kill_delay)
-    state = Map.put(state, :kill_timer, timer)
-    state
+    timer = Process.send_after(self(), :kill, @vconnection_kill_delay_ms)
+    Map.put(state, :kill_timer, timer)
   end
 end

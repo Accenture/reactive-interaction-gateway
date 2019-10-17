@@ -17,7 +17,7 @@ defmodule Rig.Connection.Codec do
 
   # ---
 
-  def deserialize(nil), do: {:error, nil}
+  def deserialize(nil), do: {:error, :invalid_term}
 
   @doc "Convert a serialized string back into a pid."
   @spec deserialize(binary) :: {:ok, pid} | {:error, :not_base64 | :invalid_term}

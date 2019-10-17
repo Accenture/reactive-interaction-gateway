@@ -3,7 +3,9 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
   use Rig.Config, [:cors]
   use RigInboundGatewayWeb, :controller
   use RigInboundGatewayWeb.Cors, :cors
-  use RigInboundGatewayWeb.Cors, :preflight_put
+
+  # TODO: Find a nicer way to do this...maybe `use RigInboundGatewayWeb.Cors, :put, :delete` ?
+  use RigInboundGatewayWeb.Cors, :preflight_all
 
   alias Result
   alias Rig.Connection.Codec
@@ -23,7 +25,7 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
   @spec init(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
   def init(%{method: "GET"} = conn, _) do
     {:ok, vconnection_pid} = VConnection.start(@heartbeat_interval_ms, @subscription_refresh_interval_ms)
-    send vconnection_pid, :timeout
+    send vconnection_pid, :vconnection_timeout
 
     conn
     |> with_allow_origin
@@ -34,11 +36,11 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
   ### Dirty Testing
 
       CONN_TOKEN=$(http :4000/_rig/v1/connection/init)
-      http put ":4000/_rig/v1/connection/$CONN_TOKEN/destroy"
+      http delete ":4000/_rig/v1/connection/$CONN_TOKEN/vconnection"
   """
   @spec init(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
   def destroy(
-    %{method: "PUT"} = conn,
+    %{method: "DELETE"} = conn,
     %{
       "connection_id" => connection_id
     }
@@ -55,11 +57,11 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
   ### Dirty Testing
 
       CONN_TOKEN=$(http :4000/_rig/v1/connection/init)
-      http put ":4000/_rig/v1/connection/$CONN_TOKEN/destroy/connection"
+      http delete ":4000/_rig/v1/connection/$CONN_TOKEN/"
   """
   @spec init(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
   def destroy_connection(
-    %{method: "PUT"} = conn,
+    %{method: "DELETE"} = conn,
     %{
       "connection_id" => connection_id
     }

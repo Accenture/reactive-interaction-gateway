@@ -26,8 +26,9 @@ defmodule RigInboundGatewayWeb.ConnectionInitTest do
       url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/init"
       %HTTPoison.Response{body: body} = HTTPoison.get!(url)
   
-      # Here, we actually want to test the timeout and not destroy the VConnection
-      :timer.sleep(125_000)
+      # Destroy the VConnection
+      delUrl = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/#{body}/vconnection"
+      %HTTPoison.Response{} = HTTPoison.delete!(delUrl)
   
       assert {:ok, client} = SseClient.connect([connection_token: body])
       {event, _} = SseClient.read_welcome_event(client)

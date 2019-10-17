@@ -26,4 +26,17 @@ defmodule RigInboundGatewayWeb.Cors do
       end
     end
   end
+
+  def preflight_all do
+    quote do
+      @doc false
+      def handle_preflight(%{method: "OPTIONS"} = conn, _params) do
+        conn
+        |> with_allow_origin()
+        |> put_resp_header("access-control-allow-methods", "*")
+        |> put_resp_header("access-control-allow-headers", "content-type,authorization")
+        |> send_resp(:no_content, "")
+      end
+    end
+  end
 end

@@ -42,17 +42,16 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
         %{auth_tokens: [{"bearer", jwt}]} -> jwt
       end
 
-    with {:ok, jwt_subs} <-
-           Subscriptions.from_token(jwt),
+    with {:ok, jwt_subs} <- Subscriptions.from_token(jwt),
          true = String.starts_with?(request.content_type, "application/json"),
-         {:ok, query_subs} <-
-           Subscriptions.from_json(request.body),
+         {:ok, query_subs} <- Subscriptions.from_json(request.body),
          subscriptions = Enum.uniq(jwt_subs ++ query_subs),
          :ok <- SubscriptionAuthZ.check_authorization(request) do
 
-      {:ok, vconnection_pid} = Codec.deserialize(request.connection_token)
+      {:ok, vconnection_pid} = request.connection_token
+      |> Codec.deserialize
       |> case do
-        {:error, nil} ->
+        {:error, _} ->
           # We're going to accept the connection
           # and let VConnection handle subscription refresh and heartbeat
           VConnection.start(self(), subscriptions, heartbeat_interval_ms, subscription_refresh_interval_ms)
@@ -62,8 +61,13 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
             # Try a reconnect
             vpid = GenServer.call(pid, :reconnect)
 
-            # Re-register subscriptions
-            send pid, :set_subscriptions
+            if subscriptions != [] do
+              # If the client reconnects with new subscriptions, replace the existing subscriptions
+              send pid, {:set_subscriptions, subscriptions}
+            else
+              # Re-register subscriptions
+              send pid, :set_subscriptions
+            end
 
             vpid
           else

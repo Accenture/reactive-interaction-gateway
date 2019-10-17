@@ -96,11 +96,11 @@
     }
 
     function disconnect() {
-      fetch(`${baseUrl}/connection/${connectionToken}/destroy`, {method: "PUT", mode: "cors"}).then(msg => { return msg.text() })
+      fetch(`${baseUrl}/connection/${connectionToken}/vconnection`, {method: "DELETE", mode: "cors"}).then(msg => { return msg.text() })
     }
 
     function disconnect_connection() {
-      fetch(`${baseUrl}/connection/${connectionToken}/destroy/connection`, {method: "PUT", mode: "cors"}).then(msg => { return msg.text() })
+      fetch(`${baseUrl}/connection/${connectionToken}/`, {method: "DELETE", mode: "cors"}).then(msg => { return msg.text() })
     }
 
     var source;
