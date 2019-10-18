@@ -188,7 +188,7 @@ Body:
     "partition": "the-partition-key"
   },
     "data": { 
-              "payload": { "payload": "payload", "number": 50 }
+              "payload": { "payload": "payload", "number": 2 }
             }
     
   },

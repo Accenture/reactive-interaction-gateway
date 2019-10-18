@@ -1,16 +1,4 @@
-
 spring:
-  profiles:
-    active: "test"
-  kafka:
-    producer:
-        bootstrap-servers: 127.0.0.1:9094
-    consumer:
-        bootstrap-servers: 127.0.0.1:9094
----
-
-spring:
-  profiles: test
   kafka:
     producer:
       bootstrap-servers: ${spring.embedded.kafka.brokers}
