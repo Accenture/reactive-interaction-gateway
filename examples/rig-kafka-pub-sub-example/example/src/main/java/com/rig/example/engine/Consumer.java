@@ -10,18 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.CountDownLatch;
-
 @Service
 public class Consumer {
     private static final Logger logger = LoggerFactory.getLogger(Consumer.class);
-
-    // these are here for testing
-    private CountDownLatch latch = new CountDownLatch(1);
-
-    public CountDownLatch getLatch() {
-        return latch;
-    }
 
     @Autowired
     private Producer producer;
@@ -43,6 +34,5 @@ public class Consumer {
         producer.send(transformed);
 
         logger.debug("consumed input message and produced output message");
-        latch.countDown();
     }
 }

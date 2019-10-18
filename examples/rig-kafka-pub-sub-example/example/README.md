@@ -177,6 +177,7 @@ http://localhost:7000/api/async-publish
 Body:
 ```JSON
 {
+  "event": {
     "id":"069711bf-3946-4661-984f-c667657b8d85",
     "type":"com.example",
     "time":"2018-04-05T17:31:00Z",
@@ -184,11 +185,14 @@ Body:
     "source":"/cli",
     "contenttype":"application/json",
     "rig": {
-    "target_partition": "the-partition-key"
+    "partition": "the-partition-key"
   },
     "data": { 
-              "payload": { "payload": "payload", "number": 2 }
+              "payload": { "payload": "payload", "number": 50 }
             }
+    
+  },
+    "partition": "the-partition-key"
   }
 ```
 
