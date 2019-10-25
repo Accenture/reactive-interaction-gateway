@@ -11,9 +11,25 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   alias RigInboundGatewayWeb.Session
   alias RigOutboundGateway
 
+  # ---
+
+  @doc false
+  def handle_preflight(%{method: "OPTIONS"} = conn, _params) do
+    IO.inspect("handle_preflight")
+
+    conn
+    |> with_allow_origin()
+    |> put_resp_header("access-control-allow-methods", "GET")
+    |> put_resp_header("access-control-allow-headers", "*")
+    |> send_resp(:no_content, "")
+  end
+
+  # ---
+
   @doc false
   def handle_connection(%{method: "GET"} = conn, _params) do
     conn = conn |> fetch_cookies |> fetch_query_params
+    IO.inspect(conn, label: "handle_connection")
 
     conn.req_cookies["connection_token"] |> is_new_session? |> process_request(conn)
   end
@@ -51,8 +67,20 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
 
         conn
         |> with_allow_origin()
-        |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize())
-        |> put_resp_cookie("last_event_id", Jason.encode!("first_event"))
+        |> put_resp_cookie(
+          "connection_token",
+          session_pid |> Connection.Codec.serialize()
+        )
+        |> put_resp_cookie(
+          "last_event_id",
+          Jason.encode!("first_event")
+        )
+        # |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize(), [
+        #   {:domain, "http://127.0.0.1:8080"}
+        # ])
+        # |> put_resp_cookie("last_event_id", Jason.encode!("first_event"), [
+        #   {:domain, "http://127.0.0.1:8080"}
+        # ])
         |> put_resp_header("content-type", "application/json; charset=utf-8")
         |> put_resp_header("cache-control", "no-cache")
         |> put_status(200)
@@ -98,6 +126,8 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   # ---
   defp with_allow_origin(conn) do
     %{cors: origins} = config()
-    put_resp_header(conn, "access-control-allow-origin", origins)
+
+    put_resp_header(conn, "access-control-allow-origin", "http://127.0.0.1:8080")
+    |> put_resp_header("access-control-allow-credentials", "true")
   end
 end

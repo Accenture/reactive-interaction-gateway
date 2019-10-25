@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>RIG-Longpolling-Demo</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+
+  <body>
+    <form onsubmit="sendGreeting(); return false;">
+      <input type="text" id="greeting" placeholder="Your greeting here" autofocus />
+      <input type="submit" id="submit-button" />
+    </form>
+    <ul id="eventList" style="list-style:none;padding-left:0"></ul>
+    <script>
+      const eventList = document.getElementById('eventList');
+
+      function addEvent(cloudEvent) {
+        const { eventTime, data } = cloudEvent;
+
+        const li = document.createElement('li');
+        li.textContent = `[${new Date(eventTime).toLocaleTimeString()}] ${data}`;
+        eventList.appendChild(li);
+      }
+
+      const baseUrl = 'http://localhost:4000/_rig/v1';
+
+      function randomString() {
+        return (
+          Math.random()
+            .toString(36)
+            .substring(2, 15) +
+          Math.random()
+            .toString(36)
+            .substring(2, 15)
+        );
+      }
+
+      function sendGreeting() {
+        const input = document.getElementById('greeting');
+        const greeting = input.value;
+        input.value = '';
+        return fetch(`${baseUrl}/events`, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/cloudevents+json; charset=utf-8'
+          },
+          body: JSON.stringify({
+            cloudEventsVersion: '0.1',
+            eventID: randomString(),
+            eventType: 'greeting.simple',
+            eventTime: new Date().toISOString(),
+            source: 'longpolling-demo-ui',
+            contentType: 'text/plain',
+            data: greeting
+          })
+        })
+          .then(response => response.json())
+          .then(json => {
+            console.log('CloudEvent sent:', json);
+            return json;
+          })
+          .catch(err => {
+            console.log('Failed to send CloudEvent:', err);
+          });
+      }
+
+      function createSubscription(connectionToken) {
+        // const eventType = 'greeting.simple';
+        // return fetch(
+        //   `${baseUrl}/connection/longpolling/${connectionToken}/subscriptions`,
+        //   {
+        //     method: 'PUT',
+        //     mode: 'cors',
+        //     headers: {
+        //       'Content-Type': 'application/json; charset=utf-8'
+        //     },
+        //     body: JSON.stringify({
+        //       subscriptions: [
+        //         {
+        //           eventType: eventType
+        //         }
+        //       ]
+        //     })
+        //   }
+        // )
+        //   .then(json => {
+        //     console.log('Subscription created:', json);
+        setInterval(() => {
+          console.log('FETCHING DATA');
+          axios({
+            method: 'GET',
+            url: `${baseUrl}/connection/longpolling`,
+            withCredentials: true
+          })
+            .then(response => {
+              console.log('response', response.data);
+              // console.log(response.headers.get('set-cookies'));
+              //   return response.json();
+              // })
+              // .then(json => {
+              //   console.log('Data:', json);
+              //   // connectionToken = json.data.connection_token;
+              //   // console.log('connectionToken', connectionToken);
+              //   // return createSubscription(json);
+              //   // return json;
+            })
+            .catch(err => {
+              console.log('Failed to create subscription:', err);
+            });
+        }, 1000);
+        //   return json;
+        // })
+        // .catch(err => {
+        //   console.log('Failed to create subscription:', err);
+        // });
+      }
+
+      // const source = fetch(`${baseUrl}/connection/longpolling`, {
+      //   method: 'GET',
+      //   // mode: 'cors',
+      //   // headers: {
+      //   //   'Content-Type': 'application/json; charset=utf-8'
+      //   // },
+      //   credentials: 'include'
+      //   // headers: {
+      //   //   'Content-Type': 'application/json; charset=utf-8'
+      //   // },
+      //   // mode: 'cors'
+      //   // credentials: 'include'
+      // });
+      const source = axios({
+        method: 'GET',
+        url: `${baseUrl}/connection/longpolling?subscriptions=[{\"eventType\":\"greeting.simple\"}]`,
+        withCredentials: true
+      });
+
+      source
+        .then(response => {
+          console.log('>> response', response);
+          console.log('HEADER', response.headers['set-cookie']);
+          // console.log('set-cookies', response.headers.get('set-cookies'));
+          // return response.json();
+          // })
+          // .then(json => {
+          //   console.log('Connection created:', json);
+          console.log('cookies', document.cookie);
+          // connectionToken = json.data.connection_token;
+          // console.log('connectionToken', connectionToken);
+          return createSubscription();
+          // return json;
+        })
+        .catch(err => {
+          console.log('Failed to create subscription:', err);
+        });
+
+      // source.onopen = e => console.log('open', e);
+      // source.onmessage = e => console.log('message', e);
+      // source.onerror = e => console.log('error', e);
+
+      // source.addEventListener(
+      //   'rig.connection.create',
+      //   function(e) {
+      //     cloudEvent = JSON.parse(e.data);
+      //     payload = cloudEvent.data;
+      //     connectionToken = payload['connection_token'];
+      //     createSubscription(connectionToken);
+      //   },
+      //   false
+      // );
+
+      // source.addEventListener('greeting.simple', function(e) {
+      //   cloudEvent = JSON.parse(e.data);
+      //   addEvent(cloudEvent);
+      // });
+
+      // source.addEventListener('rig.subscriptions_set', function(e) {
+      //   document.getElementById('submit-button').removeAttribute('disabled');
+      // });
+
+      // source.addEventListener(
+      //   'error',
+      //   function(e) {
+      //     if (e.readyState == EventSource.CLOSED) {
+      //       console.log('Connection was closed.');
+      //     } else {
+      //       console.log('Connection error:', e);
+      //     }
+      //   },
+      //   false
+      // );
+    </script>
+  </body>
+</html>

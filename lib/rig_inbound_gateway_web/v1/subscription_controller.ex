@@ -68,6 +68,8 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
           "connection_id" => connection_id
         }
       ) do
+    IO.inspect(connection_id, label: "TOKEN")
+
     conn
     |> with_allow_origin()
     |> accept_only_req_for(["application/json"])
@@ -124,6 +126,9 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
          connection_id
        ) do
     request = Request.from_plug_conn(conn)
+    IO.inspect(request, label: "BEFORE WITH")
+    IO.inspect(connection_id, label: "CONNECTION ID")
+    IO.inspect(Connection.Codec.deserialize(connection_id), label: "PID")
 
     with :ok <- SubscriptionAuthZ.check_authorization(request),
          {:ok, socket_pid} <- Connection.Codec.deserialize(connection_id),
@@ -131,6 +136,8 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
       # If the JWT is valid and points to a session, we associate this connection with
       # it. If that doesn't work out, we log a warning but don't tell the frontend -
       # it's not the frontend's fault anyway.
+      IO.puts("START")
+
       refresh_associated_sessions(socket_pid, Map.get(conn.assigns, :auth_tokens, []))
       |> Result.or_else(fn {:failed_to_associate_to_session, errors} ->
         Logger.warn(fn ->
@@ -138,6 +145,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
         end)
       end)
 
+      IO.inspect(subscriptions, label: "SUBSCRIPTIONS 1")
       do_set_subscriptions(conn, socket_pid, subscriptions)
     else
       {:error, :not_authorized} ->
@@ -194,6 +202,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
            |> Result.and_then(fn claims -> Subscriptions.from_jwt_claims(claims) end),
          {:ok, passed_subscriptions} <- parse_subscriptions(subscriptions_param) do
       subscriptions = jwt_subscriptions ++ passed_subscriptions
+      IO.inspect(subscriptions, label: "SUBSCRIPTIONS 2")
       send(socket_pid, {:set_subscriptions, subscriptions})
       send_resp(conn, :no_content, "")
     else
