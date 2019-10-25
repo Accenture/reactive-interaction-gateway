@@ -113,7 +113,6 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
   end
 
   @tag :kafka
-  # TODO - update to use new proxy configuration
   test "Given target is set to Kafka, the http request should publish message to Kafka topic" do
     test_name = "proxy-publish-to-kafka"
 

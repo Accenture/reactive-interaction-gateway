@@ -152,7 +152,7 @@ defmodule RigKafka.Client do
   # ---
 
   def produce(%{server_id: server_id}, topic, schema, key, plaintext)
-      when is_binary(topic) and is_binary(plaintext) do
+      when is_binary(topic) and is_binary(key) and is_binary(plaintext) do
     GenServer.call(server_id, {:produce, topic, schema, key, plaintext})
   end
 
@@ -423,7 +423,7 @@ defmodule RigKafka.Client do
   # ---
 
   defp compute_kafka_partition(_topic, n_partitions, key, _value)
-       when is_binary(key) and byte_size(key) > 0 do
+       when byte_size(key) > 0 do
     partition =
       key
       |> Murmur.hash_x86_32()

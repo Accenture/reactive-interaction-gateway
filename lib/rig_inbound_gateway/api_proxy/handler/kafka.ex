@@ -108,11 +108,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
       # Deprecated way to pass events, partition not set -> will be randomized:
       {:ok, %{"event" => event}} ->
-        do_handle_http_request(conn, request_path, nil, event, response_from)
+        do_handle_http_request(conn, request_path, <<>>, event, response_from)
 
       # Preferred way to pass events, partition not set -> will be randomized:
       {:ok, %{"specversion" => _} = event} ->
-        do_handle_http_request(conn, request_path, nil, event, response_from)
+        do_handle_http_request(conn, request_path, <<>>, event, response_from)
 
       {:ok, _} ->
         respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
@@ -286,7 +286,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         kafka_config,
         topic || request_topic,
         schema || request_schema,
-        key || <<>>,
+        key,
         plaintext
       )
 
