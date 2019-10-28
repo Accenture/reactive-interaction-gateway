@@ -61,7 +61,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
             # Try a reconnect
             vpid = GenServer.call(pid, :reconnect)
 
-            if subscriptions != [] do
+            if request.body != nil || jwt != nil do
               # If the client reconnects with new subscriptions, replace the existing subscriptions
               send pid, {:set_subscriptions, subscriptions}
             else
