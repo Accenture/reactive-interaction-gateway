@@ -105,7 +105,8 @@ defmodule Rig.EventFilter.Server do
           event_type: event_type,
           subscription_table: subscription_table,
           subscription_ttl_s: ttl_s,
-          fields: fields
+          fields: fields,
+          config: config
         } = state
       ) do
     # Only handle subscriptions that target the filter's event type:
@@ -116,7 +117,8 @@ defmodule Rig.EventFilter.Server do
       subscriber_pid,
       subscriptions,
       fields,
-      ttl_s
+      ttl_s,
+      config
     )
 
     # Call the subscriber's callback, if present:
@@ -209,8 +211,37 @@ defmodule Rig.EventFilter.Server do
          socket_pid,
          subscriptions,
          fields,
-         subscription_ttl_s
+         subscription_ttl_s,
+         config
        ) do
+
+    pattern = [socket_pid, :_] ++ (Range.new(1,
+      config
+      |> Map.to_list
+      |> Enum.count)
+    |> Enum.map(fn x -> String.to_atom("$" <> inspect(x)) end))
+    |> List.to_tuple
+
+    previous_constraints = :ets.match(subscription_table, pattern)
+    |> Enum.map(fn x -> List.to_tuple(x) end)
+
+    IO.inspect previous_constraints
+
+    new_constraints = []
+    for %Subscription{constraints: constraints} <- subscriptions do
+      for constraint <- constraints do
+        ordered_constraints = for field <- fields, do: Map.get(constraint, field)
+        List.to_tuple(ordered_constraints)
+
+        #TODO: Fix this. Scoping issues. Needs to be refactored to Enum.map/2
+        new_constraints = new_constraints ++ [ordered_constraints]
+      end
+    end
+
+    #TODO: Apply diff algo here. We could get rid of add_to_table/5 (or at least the logic behind it)
+    #      as the diff already returns 3 maps that specifically tell us what to do with the data
+    IO.inspect new_constraints
+
     # Start with clearing all previous subscriptions (prevents duplicates and removes
     # subscriptions that are not being refreshed immediately):
     :ets.delete(subscription_table, socket_pid)
