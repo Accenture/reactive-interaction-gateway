@@ -8,7 +8,7 @@ defmodule RigInboundGatewayWeb.ReconnectTest do
 
   @event_hub_http_port Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
 
-  test "Initialize connection, then disconnect and reconnect" do
+  test "Passing a connection token when connecting via SSE returns the passed connection token." do
     assert {:ok, client1} = SseClient.connect()
     {event1, _} = SseClient.read_welcome_event(client1)
 

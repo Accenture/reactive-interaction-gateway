@@ -9,7 +9,7 @@ defmodule RigInboundGatewayWeb.ConnectionInitTest do
   @event_hub_http_port Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
 
   describe "Initialize connection" do
-    test "then connect to it" do
+    test "An SSE connection can be initialized in advance." do
       url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/init"
       %HTTPoison.Response{body: body} = HTTPoison.get!(url)
   
@@ -22,7 +22,7 @@ defmodule RigInboundGatewayWeb.ConnectionInitTest do
     end
   
     @tag timeout: 130_000
-    test "then wait for it to time out and connect to it" do
+    test "A client can connect to a destroyed VConnection and will get assigned a new VConnection." do
       url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/init"
       %HTTPoison.Response{body: body} = HTTPoison.get!(url)
   

@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New API for querying and updating the session blacklist: `/v2/session-blacklist`, which introduces the following breaking changes:
   - When a session has been added to the session blacklist successfully, the endpoint now uses the correct HTTP status code "201 Created" instead of "200 Ok".
   - When using the API to blacklist a session, the `validityInSeconds` should now be passed as an integer value (using a string still works though).
+- Added abstraction over SSE and WS (VConnection). This abstraction keeps track of state, manages timers, can be initialized before a client connects to RIG and can be used for reconnects (client can pick up where they left of). This means that for SSE and WS connections, the connection token now refers to the VConnection.
+  - With `GET /v1/connection/init`, one can now pre-initialize this connection
+  - `DELETE /v1/connection/<connection_pid>/vconnection` gracefully destroys this abstraction
+  - `DELETE /v1/connection/<connection_pid>` destroys the actual (WS/SSE) connection
 
 <!-- ### Changed -->
 
