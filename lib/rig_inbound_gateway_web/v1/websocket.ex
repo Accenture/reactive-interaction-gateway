@@ -85,7 +85,6 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
       {:reply, closing_frame(reason), :no_state}
     end
 
-     # TODO: Handle existing connection token in connection_init; use GenServer.call with a timeout of 500ms to check if VConnection is alive
     ConnectionInit.set_up(
       "WS",
       request,
@@ -138,7 +137,6 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   @impl :cowboy_websocket
   def websocket_info(:close, state) do
-    # TODO: Test
     {:reply, closing_frame("Connection closed."), state}
   end
 

@@ -88,7 +88,6 @@ defmodule RigInboundGatewayWeb.V1.SSE do
       {:stop, req, :no_state}
     end
 
-    # TODO: Handle existing connection token in connection_init
     ConnectionInit.set_up(
       "SSE",
       request,
