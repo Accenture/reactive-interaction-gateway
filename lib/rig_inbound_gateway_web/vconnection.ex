@@ -6,9 +6,9 @@ defmodule RigInboundGatewayWeb.VConnection do
   """
 
   alias Rig.EventFilter
-  alias Rig.RingBuffer
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
+  alias RigInboundGatewayWeb.EventBuffer
 
   require Logger
 
@@ -26,7 +26,7 @@ defmodule RigInboundGatewayWeb.VConnection do
       subscription_refresh_interval_ms: subscription_refresh_interval_ms,
       kill_timer: nil,
       monitor: nil,
-      event_buffer: RingBuffer.new(@buffer_size)
+      event_buffer: EventBuffer.new(@buffer_size)
     })
   end
 
@@ -124,7 +124,7 @@ defmodule RigInboundGatewayWeb.VConnection do
     send! state.target_pid, {:forward, event}
 
     # Buffer event so we can send it to the client as soon as there's a reconnect
-    state = Map.put(state, :event_buffer, RingBuffer.add(state.event_buffer, event))
+    state = Map.put(state, :event_buffer, state.event_buffer |> EventBuffer.add_event(event))
     {:noreply, state}
   end
 
