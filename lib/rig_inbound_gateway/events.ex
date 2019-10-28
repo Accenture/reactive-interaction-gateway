@@ -28,14 +28,6 @@ defmodule RigInboundGateway.Events do
     )
   end
 
-  @spec metadata_set(%{}) :: CloudEvent.t()
-  def metadata_set(metadata) do
-    rig_event(
-      "rig.metadata_set",
-      metadata
-    )
-  end
-
   defp rig_event(type, data) do
     CloudEvent.parse!(%{
       specversion: "0.2",

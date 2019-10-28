@@ -137,15 +137,6 @@ defmodule RigInboundGatewayWeb.VConnection do
   end
 
   @impl true
-  def handle_info({:set_metadata, metadata}, state) do
-    event = Events.metadata_set(metadata)
-
-    send! state.target_pid, {:forward, event}
-
-    {:noreply, state}
-  end
-
-  @impl true
   def handle_info({:session_killed, session_id}, state) do
     # Session kill must be handled by the connection
     send! state.target_pid, {:session_killed, session_id}

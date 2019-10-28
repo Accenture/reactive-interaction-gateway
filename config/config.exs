@@ -117,13 +117,6 @@ config :rig, Rig.Discovery,
   discovery_type: {:system, "DISCOVERY_TYPE", nil},
   dns_name: {:system, "DNS_NAME", "localhost"}
 
-config :rig, RigInboundGatewayWeb.V1.MetadataController,
-  jwt_fields: %{"userid" => "sub"},
-  indexed_metadata: ["userid"]
-  # TODO: If needed, check jwt values against metadata values; error and return 404 if they don't match; lo prio; current state: if fields don't match, jwt is prio and metadata value for a specific key gets overwritten
-  # has_compare: false
-  # compare_strict: %{"jwt/userid" => "meta/userid"}
-
 import_config "#{Mix.env()}.exs"
 
 import_config "rig_api/config.exs"

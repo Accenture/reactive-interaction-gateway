@@ -17,9 +17,6 @@ defmodule RigInboundGatewayWeb.Router do
         get("/init", ConnectionController, :init)
 
         scope "/:connection_id" do
-          put("/metadata", MetadataController, :set_metadata)
-          options("/metadata", MetadataController, :handle_preflight)
-
           delete("/", ConnectionController, :destroy_connection)
           options("/", ConnectionController, :handle_preflight)
 
