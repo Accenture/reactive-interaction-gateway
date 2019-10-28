@@ -14,7 +14,7 @@ defmodule RigInboundGatewayWeb.ConnectionInitTest do
       %HTTPoison.Response{body: body} = HTTPoison.get!(url)
   
       assert {:ok, client} = SseClient.connect([connection_token: body])
-      {event, _} = SseClient.read_welcome_event(client)
+      {event, client} = SseClient.read_welcome_event(client)
   
       assert Codec.deserialize(event["data"]["connection_token"]) == Codec.deserialize(body)
   
@@ -31,7 +31,7 @@ defmodule RigInboundGatewayWeb.ConnectionInitTest do
       %HTTPoison.Response{} = HTTPoison.delete!(delUrl)
   
       assert {:ok, client} = SseClient.connect([connection_token: body])
-      {event, _} = SseClient.read_welcome_event(client)
+      {event, client} = SseClient.read_welcome_event(client)
   
       assert Codec.deserialize(event["data"]["connection_token"]) != Codec.deserialize(body)
   
