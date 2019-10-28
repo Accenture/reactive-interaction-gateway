@@ -34,6 +34,13 @@ defmodule RigInboundGatewayWeb.VConnection do
     start(nil, [], heartbeat_interval_ms, subscription_refresh_interval_ms)
   end
 
+  def start_with_timeout(heartbeat_interval_ms, subscription_refresh_interval_ms) do
+    {:ok, vconnection_pid} = VConnection.start(@heartbeat_interval_ms, @subscription_refresh_interval_ms)
+    send vconnection_pid, :vconnection_timeout
+
+    {:ok, vconnection_pid}
+  end
+
   @impl true
   def init(state) do
     # TODO: Publish connect event
