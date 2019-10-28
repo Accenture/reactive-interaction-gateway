@@ -24,7 +24,8 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
   """
   @spec init(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
   def init(%{method: "GET"} = conn, _) do
-    {:ok, vconnection_pid} = VConnection.start_with_timeout(@heartbeat_interval_ms, @subscription_refresh_interval_ms)
+    {:ok, vconnection_pid} =
+      VConnection.start_with_timeout(@heartbeat_interval_ms, @subscription_refresh_interval_ms)
 
     conn
     |> with_allow_origin
