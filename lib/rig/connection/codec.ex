@@ -21,7 +21,7 @@ defmodule Rig.Connection.Codec do
 
   @doc "Convert a serialized string back into a pid."
   @spec deserialize(binary) :: {:ok, pid} | {:error, :not_base64 | :invalid_term}
-  def deserialize(base64_encoded) do
+  def deserialize(base64_encoded) when byte_size(base64_encoded) > 0 do
     conf = config()
     secret_key = conf.codec_secret_key || conf.codec_default_key
     with {:ok, decoded_binary} <- decode64(base64_encoded) do
