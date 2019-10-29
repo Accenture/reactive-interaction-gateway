@@ -5,6 +5,10 @@ defmodule RigInboundGatewayWeb.Cors do
     __MODULE__.cors_preflight(which)
   end
 
+  defmacro __using__(_) do
+    __MODULE__.cors_preflight([:*])
+  end
+
   def cors_preflight(which) do
     methods = which
     |> Enum.map(fn x ->
