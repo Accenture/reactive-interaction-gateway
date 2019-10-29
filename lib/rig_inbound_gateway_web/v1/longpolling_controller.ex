@@ -5,7 +5,7 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   require Logger
   use Rig.Config, [:cors]
   use RigInboundGatewayWeb, :controller
-  use RigInboundGatewayWeb.Cors, :cors
+  use RigInboundGatewayWeb.Cors, [:get]
 
   alias Rig.Connection
   alias RigInboundGatewayWeb.Session

@@ -1,8 +1,7 @@
 defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   use Rig.Config, [:cors]
   use RigInboundGatewayWeb, :controller
-  use RigInboundGatewayWeb.Cors, :cors
-  use RigInboundGatewayWeb.Cors, :preflight_put
+  use RigInboundGatewayWeb.Cors, [:put]
 
   alias Result
 
