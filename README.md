@@ -1,4 +1,5 @@
 ![Logo](./logo/Reactive-Interaction-Gateway-logo-cropped.png)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FAccenture%2Freactive-interaction-gateway.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FAccenture%2Freactive-interaction-gateway?ref=badge_shield)
 
 # RIG - Reactive Interaction Gateway
 
@@ -71,6 +72,9 @@ See the [developer's guide](https://accenture.github.io/reactive-interaction-gat
 
 The Reactive Interaction Gateway [(patent: granted)](https://patents.google.com/patent/US10193992B2/en) is licensed under the Apache License 2.0 - see
 [LICENSE](LICENSE) for details.
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FAccenture%2Freactive-interaction-gateway.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FAccenture%2Freactive-interaction-gateway?ref=badge_large)
 
 ## Acknowledgments
 
