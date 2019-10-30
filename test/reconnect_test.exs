@@ -23,7 +23,7 @@ defmodule RigInboundGatewayWeb.ReconnectTest do
     assert Codec.deserialize(event1["data"]["connection_token"]) == Codec.deserialize(event2["data"]["connection_token"])  
   end
 
-  test "Initialize connection, disconnect, destroy the VConnection and reconnect" do
+  test "Passing a dead VConnection pid to the SSE endpoint will result in RIG ignoring it and returning a different token." do
     assert {:ok, client1} = SseClient.connect()
     {event1, client1} = SseClient.read_welcome_event(client1)
 
