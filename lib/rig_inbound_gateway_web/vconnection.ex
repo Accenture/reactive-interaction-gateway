@@ -13,9 +13,10 @@ defmodule RigInboundGatewayWeb.VConnection do
   require Logger
 
   use GenServer
+  use Rig.Config, [:idle_connection_timeout]
 
-  @vconnection_kill_delay_ms 600_000
-  @buffer_size 100
+  #TEMP UNTIL WE ACTUALLY IMPLEMENT lasteventid
+  @buffer_size 1
 
   def start(pid, subscriptions, heartbeat_interval_ms, subscription_refresh_interval_ms) do
     GenServer.start(__MODULE__,
@@ -191,7 +192,9 @@ defmodule RigInboundGatewayWeb.VConnection do
   defp send!(pid, data), do: send pid, data
 
   defp start_timer(state) do
-    timer = Process.send_after(self(), :kill, @vconnection_kill_delay_ms)
+    %{idle_connection_timeout: delay} = config()
+    delay = String.to_integer(delay)
+    timer = Process.send_after(self(), :kill, delay)
     Map.put(state, :kill_timer, timer)
   end
 end
