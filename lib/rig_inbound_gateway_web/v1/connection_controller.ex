@@ -33,7 +33,7 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
   ### Dirty Testing
 
       CONN_TOKEN=$(http :4000/_rig/v1/connection/init)
-      http delete ":4000/_rig/v1/connection/$CONN_TOKEN/vconnection"
+      http delete ":4000/_rig/v1/connection/$CONN_TOKEN/"
   """
   @spec init(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
   def destroy(
@@ -54,7 +54,7 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
   ### Dirty Testing
 
       CONN_TOKEN=$(http :4000/_rig/v1/connection/init)
-      http delete ":4000/_rig/v1/connection/$CONN_TOKEN/"
+      http delete ":4000/_rig/v1/connection/$CONN_TOKEN/socket"
   """
   @spec init(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
   def destroy_connection(

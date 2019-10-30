@@ -30,7 +30,7 @@ defmodule RigInboundGatewayWeb.ReconnectTest do
     SseClient.disconnect(client1)
     
     # Destroy the VConnection, this simulates a timeout
-    url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/#{event1["data"]["connection_token"]}/vconnection"
+    url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/#{event1["data"]["connection_token"]}"
     %HTTPoison.Response{status_code: 200} = HTTPoison.delete!(url)
 
     SseClient.flush_mailbox()

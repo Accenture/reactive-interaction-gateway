@@ -17,11 +17,11 @@ defmodule RigInboundGatewayWeb.Router do
         get("/init", ConnectionController, :init)
 
         scope "/:connection_id" do
-          delete("/", ConnectionController, :destroy_connection)
+          delete("/", ConnectionController, :destroy)
           options("/", ConnectionController, :handle_preflight)
 
-          delete("/vconnection", ConnectionController, :destroy)
-          options("/vconnection", ConnectionController, :handle_preflight)
+          delete("/socket", ConnectionController, :destroy_connection)
+          options("/socket", ConnectionController, :handle_preflight)
         end
 
         scope "/sse" do
