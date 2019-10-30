@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - With `GET /v1/connection/init`, one can now pre-initialize this connection
   - `DELETE /v1/connection/<connection_pid>` gracefully destroys this abstraction. This is recommended! 
   - `DELETE /v1/connection/<connection_pid>/socket` destroys the actual (WS/SSE) connection
+  - Added new configuration option via `IDLE_CONNECTION_TIMEOUT` environment variable. This determines when the connection abstraction should die after the actual socket has disconnected/closed.
 
 <!-- ### Changed -->
 
