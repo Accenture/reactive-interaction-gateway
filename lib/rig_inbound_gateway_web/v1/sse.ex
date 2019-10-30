@@ -130,7 +130,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   end
 
   @impl :cowboy_loop
-  def info({:DOWN, _ref, :process, pid, _}, req, state) do
+  def info({:DOWN, _ref, :process, _pid, _}, req, state) do
     send self(), :close
     {:ok, req, state, :hibernate}
   end
