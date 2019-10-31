@@ -48,6 +48,6 @@ curl -X "POST" \
 --silent \
 "http://localhost:4000/kinesis"
 
-# get Kinesis shard iterator and record -> should list 2 records ... you can also monitor RIG logs and see consumed events
+# get Kinesis shard iterator and record -> should list several records ... you can also monitor RIG logs and see consumed events
 docker-compose exec localstack bash -c 'export SHARD_ITERATOR=$(awslocal kinesis get-shard-iterator --stream-name RIG-outbound --shard-id 0 --shard-iterator-type TRIM_HORIZON --region eu-west-1 --query ShardIterator --output text) && awslocal kinesis get-records --shard-iterator $SHARD_ITERATOR --region eu-west-1'
 ```

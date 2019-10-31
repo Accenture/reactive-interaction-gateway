@@ -17,7 +17,7 @@ services:
       - DEFAULT_REGION=eu-west-1
 
   rig:
-    image: rig #accenture/reactive-interaction-gateway:aws
+    image: accenture/reactive-interaction-gateway:aws
     container_name: reactive-interaction-gateway
     ports:
       - 4000:4000
