@@ -70,6 +70,7 @@ defmodule RigCloudEvents.CloudEvent do
 
   def specversion(%__MODULE__{parsed: parsed}) do
     cond do
+      specversion_1_0?(parsed) -> {:ok, "1.0"}
       specversion_0_2?(parsed) -> {:ok, "0.2"}
       specversion_0_1?(parsed) -> {:ok, "0.1"}
       true -> {:error, :not_a_cloud_event}
@@ -85,9 +86,9 @@ defmodule RigCloudEvents.CloudEvent do
 
   # ---
 
-  defp specversion_0_1?(parsed) do
-    case @parser.context_attribute(parsed, "cloudEventsVersion") do
-      {:ok, "0.1"} -> true
+  defp specversion_1_0?(parsed) do
+    case @parser.context_attribute(parsed, "specversion") do
+      {:ok, "1.0"} -> true
       _ -> false
     end
   end
@@ -103,8 +104,18 @@ defmodule RigCloudEvents.CloudEvent do
 
   # ---
 
+  defp specversion_0_1?(parsed) do
+    case @parser.context_attribute(parsed, "cloudEventsVersion") do
+      {:ok, "0.1"} -> true
+      _ -> false
+    end
+  end
+
+  # ---
+
   def type(%__MODULE__{parsed: parsed} = event) do
     case specversion(event) do
+      {:ok, "1.0"} -> @parser.context_attribute(parsed, "type")
       {:ok, "0.2"} -> @parser.context_attribute(parsed, "type")
       {:ok, "0.1"} -> @parser.context_attribute(parsed, "eventType")
     end
@@ -121,6 +132,7 @@ defmodule RigCloudEvents.CloudEvent do
 
   def id(%__MODULE__{parsed: parsed} = event) do
     case specversion(event) do
+      {:ok, "1.0"} -> @parser.context_attribute(parsed, "id")
       {:ok, "0.2"} -> @parser.context_attribute(parsed, "id")
       {:ok, "0.1"} -> @parser.context_attribute(parsed, "eventID")
     end

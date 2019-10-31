@@ -41,4 +41,27 @@ defmodule CloudEventTest do
     refute is_nil(json)
     refute is_nil(parsed)
   end
+
+  test "An event is parsed as type CloudEvents 1.0 according to the spec." do
+    # The official example:
+    event_json = """
+    {
+      "specversion" : "1.0",
+      "type" : "com.github.pull.create",
+      "source" : "https://github.com/cloudevents/spec/pull",
+      "subject" : "123",
+      "id" : "A234-1234-1234",
+      "time" : "2018-04-05T17:31:00Z",
+      "comexampleextension1" : "value",
+      "comexampleothervalue" : 5,
+      "datacontenttype" : "text/xml",
+      "data" : "<much wow=\"xml\"/>"
+    }
+    """
+
+    assert {:ok, %CloudEvent{json: ^event_json} = cloud_event} = CloudEvent.parse(event_json)
+    assert CloudEvent.specversion!(cloud_event) == "1.0"
+    assert CloudEvent.id!(cloud_event) == "A234-1234-1234"
+    assert CloudEvent.type!(cloud_event) == "com.github.pull.create"
+  end
 end
