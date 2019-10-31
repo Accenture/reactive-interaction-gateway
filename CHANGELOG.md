@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - When a session has been added to the session blacklist successfully, the endpoint now uses the correct HTTP status code "201 Created" instead of "200 Ok".
   - When using the API to blacklist a session, the `validityInSeconds` should now be passed as an integer value (using a string still works though).
 - Added possibility to define Kafka/Kinesis topic and schema per reverse proxy endpoint. The current solution using environment variables is deprecated, but still used as a fallback -- will be removed in the version 3.0. [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+- Added Kinesis + Localstack example [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
 
 <!-- ### Changed -->
 
