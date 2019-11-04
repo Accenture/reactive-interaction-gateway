@@ -9,13 +9,12 @@ defmodule RigInboundGatewayWeb.Cors do
     __MODULE__.cors_preflight([:*])
   end
 
-  def cors_preflight(which) do
-    methods = which
-    |> Enum.map(fn x ->
-      Atom.to_string(x)
-      |> String.upcase
-    end)
-    |> Enum.join(",")
+  def cors_preflight(methods) do
+    methods =
+      methods
+      |> Enum.map(&Atom.to_string/1)
+      |> Enum.map(&String.upcase/1)
+      |> Enum.join(",")
 
     quote do
       @doc false
