@@ -5,7 +5,21 @@ defmodule RigInboundGateway.ConnectionTest do
 
   alias HTTPoison
 
+  @dispatch Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:https][:dispatch]
   @event_hub_http_port Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
+  @port 47_210	
+
+  setup_all do
+    dispatch = :cowboy_router.compile(@dispatch)
+    server_name = __MODULE__
+    {:ok, _pid} = :cowboy.start_clear(server_name, [port: @port], %{env: %{dispatch: dispatch}})
+
+    on_exit(fn ->
+      :cowboy.stop_listener(server_name)
+    end)
+
+    :ok
+  end
 
   defp try_sse(params \\ []) do
     SseClient.try_connect_then_disconnect(params)
