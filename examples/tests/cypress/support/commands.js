@@ -46,17 +46,17 @@ Cypress.Commands.add('sendEvent', (eventType, message) => {
   cy.get('#send-button').click();
 });
 
-Cypress.Commands.add('assertNewestEventContainsMessage', (element, message) => {
+Cypress.Commands.add('assertNewestEventInEventList', (message) => {
   // assert number and content of received events
-  cy.get(`#${element} > li`, {timeout: 30000})
+  cy.get(`#eventList > li`, {timeout: 30000})
     .should('be.visible')
     .first()
     .contains(message)
 });
 
-Cypress.Commands.add('assertSingleNewEventContainsMessage', (element, message) => {
+Cypress.Commands.add('assertEventLogHasMatch', (message) => {
   // assert number and content of received events
-  cy.get(`#${element}`, {timeout: 30000})
+  cy.get(`#event-log`, {timeout: 30000})
     .should('have.length', 1)
     .first()
     .contains(new RegExp(message, 'g'));
