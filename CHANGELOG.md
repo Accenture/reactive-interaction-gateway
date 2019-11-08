@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed usage of external check for `SUBMISSION_CHECK` and `SUBSCRIPTION_CHECK`. [#241](https://github.com/Accenture/reactive-interaction-gateway/issues/241)
 - Logging incoming HTTP request to Kafka works again and now also supports Apache Avro.
   [#170](https://github.com/Accenture/reactive-interaction-gateway/issues/170)
+- Fixed HTTP response for `DELETE 4010/v1/apis/api_id` and `DELETE 4010/v2/apis/api_id` to correctly return `204` and no content.
 
 <!-- ### Deprecated -->
 

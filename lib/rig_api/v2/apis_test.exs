@@ -76,8 +76,8 @@ defmodule RigApi.V2.APIsTest do
   describe "DELETE /v2/apis/:id" do
     test "should delete requested API" do
       conn = build_conn() |> delete("/v2/apis/new-service")
-      response = json_response(conn, 204)
-      assert response == %{}
+      response = text_response(conn, :no_content)
+      assert response == ""
     end
 
     test "should return 404 if requested API doesn't exist" do
