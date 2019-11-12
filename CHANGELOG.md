@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [#227](https://github.com/Accenture/reactive-interaction-gateway/issues/227)
 - Refactor JWT related code in favor of `RIG.JWT`.
   [#244](https://github.com/Accenture/reactive-interaction-gateway/pull/244)
+- Fix flaky cypress tests; this shouldn't be an issue anymore when running Travis builds.
 
 ## [2.2.1] - 2019-06-21
 
