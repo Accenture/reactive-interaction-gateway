@@ -21,7 +21,6 @@ defmodule RigInboundGatewayWeb.ConnectionInitTest do
       SseClient.disconnect(client)
     end
   
-    @tag timeout: 130_000
     test "A client can connect to a destroyed VConnection and will get assigned a new VConnection." do
       url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/init"
       %HTTPoison.Response{body: body} = HTTPoison.get!(url)
