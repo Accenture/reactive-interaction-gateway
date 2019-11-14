@@ -37,11 +37,11 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
   """
   @spec init(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
   def destroy(
-    %{method: "DELETE"} = conn,
-    %{
-      "connection_id" => connection_id
-    }
-  ) do
+        %{method: "DELETE"} = conn,
+        %{
+          "connection_id" => connection_id
+        }
+      ) do
     {:ok, pid} = Codec.deserialize(connection_id)
     Process.exit(pid, :kill)
 
@@ -58,13 +58,13 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
   """
   @spec init(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
   def destroy_connection(
-    %{method: "DELETE"} = conn,
-    %{
-      "connection_id" => connection_id
-    }
-  ) do
+        %{method: "DELETE"} = conn,
+        %{
+          "connection_id" => connection_id
+        }
+      ) do
     {:ok, pid} = Codec.deserialize(connection_id)
-    send pid, :kill_connection
+    send(pid, :kill_connection)
 
     conn
     |> with_allow_origin

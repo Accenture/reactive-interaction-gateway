@@ -7,7 +7,7 @@ defmodule RigInboundGateway.ConnectionTest do
 
   @dispatch Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:https][:dispatch]
   @event_hub_http_port Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
-  @port 47_210	
+  @port 47_210
 
   setup_all do
     dispatch = :cowboy_router.compile(@dispatch)
@@ -30,7 +30,11 @@ defmodule RigInboundGateway.ConnectionTest do
   end
 
   defp try_longpolling(params) do
-    url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/longpolling?#{URI.encode_query(params)}"
+    url =
+      "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/longpolling?#{
+        URI.encode_query(params)
+      }"
+
     %HTTPoison.Response{status_code: status_code} = HTTPoison.get!(url)
     status_code
   end

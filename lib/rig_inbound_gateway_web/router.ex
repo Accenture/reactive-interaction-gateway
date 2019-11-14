@@ -12,7 +12,6 @@ defmodule RigInboundGatewayWeb.Router do
     get("/health", HealthController, :check_health)
 
     scope "/v1", V1 do
-
       scope "/connection" do
         get("/init", ConnectionController, :init)
 

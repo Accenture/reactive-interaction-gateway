@@ -39,8 +39,7 @@ defmodule LongpollingClient do
   def read_events(cookies) do
     hostname = "localhost"
 
-    eventhub_port =
-      Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
+    eventhub_port = Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
 
     url = "http://#{hostname}:#{eventhub_port}/_rig/v1/connection/longpolling"
 

@@ -47,34 +47,46 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
          {:ok, query_subs} <- Subscriptions.from_json(request.body),
          subscriptions = Enum.uniq(jwt_subs ++ query_subs),
          :ok <- SubscriptionAuthZ.check_authorization(request) do
+      {:ok, vconnection_pid} =
+        request.connection_token
+        |> Codec.deserialize()
+        |> case do
+          {:error, _} ->
+            # We're going to accept the connection
+            # and let VConnection handle subscription refresh and heartbeat
+            VConnection.start(
+              self(),
+              subscriptions,
+              heartbeat_interval_ms,
+              subscription_refresh_interval_ms
+            )
 
-      {:ok, vconnection_pid} = request.connection_token
-      |> Codec.deserialize
-      |> case do
-        {:error, _} ->
-          # We're going to accept the connection
-          # and let VConnection handle subscription refresh and heartbeat
-          VConnection.start(self(), subscriptions, heartbeat_interval_ms, subscription_refresh_interval_ms)
-        {:ok, pid} ->
-          # We're going to try to reconnect
-          if Process.alive?(pid) do
-            # Try a reconnect
-            vpid = GenServer.call(pid, :reconnect)
+          {:ok, pid} ->
+            # We're going to try to reconnect
+            if Process.alive?(pid) do
+              # Try a reconnect
+              vpid = GenServer.call(pid, :reconnect)
 
-            if request.body != nil || jwt != nil do
-              # If the client reconnects with new subscriptions, replace the existing subscriptions
-              send pid, {:set_subscriptions, subscriptions}
+              if request.body != nil || jwt != nil do
+                # If the client reconnects with new subscriptions,
+                # replace the existing subscriptions
+                send(pid, {:set_subscriptions, subscriptions})
+              else
+                # Re-register subscriptions
+                send(pid, :set_subscriptions)
+              end
+
+              vpid
             else
-              # Re-register subscriptions
-              send pid, :set_subscriptions
+              # If the reconnect failed, proceed as usual
+              VConnection.start(
+                self(),
+                subscriptions,
+                heartbeat_interval_ms,
+                subscription_refresh_interval_ms
+              )
             end
-
-            vpid
-          else
-            # If the reconnect failed, proceed as usual
-            VConnection.start(self(), subscriptions, heartbeat_interval_ms, subscription_refresh_interval_ms)
-          end
-      end
+        end
 
       Process.monitor(vconnection_pid)
 

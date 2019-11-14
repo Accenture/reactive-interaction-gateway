@@ -15,20 +15,22 @@ defmodule RigInboundGatewayWeb.VConnection do
   use GenServer
   use Rig.Config, [:idle_connection_timeout]
 
-  #TEMP UNTIL WE ACTUALLY IMPLEMENT lasteventid
+  # TEMP UNTIL WE ACTUALLY IMPLEMENT lasteventid
   @buffer_size 1
 
   def start(pid, subscriptions, heartbeat_interval_ms, subscription_refresh_interval_ms) do
-    GenServer.start(__MODULE__,
-    %{
-      target_pid: pid,
-      subscriptions: subscriptions,
-      heartbeat_interval_ms: heartbeat_interval_ms,
-      subscription_refresh_interval_ms: subscription_refresh_interval_ms,
-      kill_timer: nil,
-      monitor: nil,
-      event_buffer: EventBuffer.new(@buffer_size)
-    })
+    GenServer.start(
+      __MODULE__,
+      %{
+        target_pid: pid,
+        subscriptions: subscriptions,
+        heartbeat_interval_ms: heartbeat_interval_ms,
+        subscription_refresh_interval_ms: subscription_refresh_interval_ms,
+        kill_timer: nil,
+        monitor: nil,
+        event_buffer: EventBuffer.new(@buffer_size)
+      }
+    )
   end
 
   def start(heartbeat_interval_ms, subscription_refresh_interval_ms) do
@@ -37,7 +39,7 @@ defmodule RigInboundGatewayWeb.VConnection do
 
   def start_with_timeout(heartbeat_interval_ms, subscription_refresh_interval_ms) do
     {:ok, vconnection_pid} = start(heartbeat_interval_ms, subscription_refresh_interval_ms)
-    send vconnection_pid, :vconnection_timeout
+    send(vconnection_pid, :vconnection_timeout)
 
     {:ok, vconnection_pid}
   end
@@ -49,7 +51,7 @@ defmodule RigInboundGatewayWeb.VConnection do
     Logger.debug(fn -> "New VConnection initialized #{inspect(self())}" end)
 
     # We register subscriptions:
-    send self(), {:set_subscriptions, state.subscriptions}
+    send(self(), {:set_subscriptions, state.subscriptions})
 
     # We schedule the initial heartbeat:
     Process.send_after(self(), :heartbeat, state.heartbeat_interval_ms)
@@ -77,14 +79,15 @@ defmodule RigInboundGatewayWeb.VConnection do
     end
 
     # In case an old connection exists, kill it off before replacing it
-    send! state.target_pid, :close
+    send!(state.target_pid, :close)
 
     {from_pid, _} = from
 
     # Switch target pid
-    state = Map.put(state, :target_pid, from_pid)
-    # Register new monitor
-    |> create_monitor
+    state =
+      Map.put(state, :target_pid, from_pid)
+      # Register new monitor
+      |> create_monitor
 
     Logger.debug(fn -> "Client #{inspect(from_pid)} reconnected" end)
 
@@ -96,14 +99,14 @@ defmodule RigInboundGatewayWeb.VConnection do
   @impl true
   def handle_info(:set_subscriptions, state) do
     # Register subscriptions
-    send self(), {:set_subscriptions, state.subscriptions}
+    send(self(), {:set_subscriptions, state.subscriptions})
     {:noreply, state}
   end
 
   @impl true
   def handle_info(:heartbeat, state) do
     # Send heartbeat to the connection
-    send! state.target_pid, {:forward, :heartbeat}
+    send!(state.target_pid, {:forward, :heartbeat})
 
     # And schedule the next one:
     Process.send_after(self(), :heartbeat, state.heartbeat_interval_ms)
@@ -122,7 +125,7 @@ defmodule RigInboundGatewayWeb.VConnection do
   @impl true
   def handle_info(%CloudEvent{} = event, state) do
     Logger.debug(fn -> "event: " <> inspect(event) end)
-    send! state.target_pid, {:forward, event}
+    send!(state.target_pid, {:forward, event})
 
     # Buffer event so we can send it to the client as soon as there's a reconnect
     state = Map.put(state, :event_buffer, state.event_buffer |> EventBuffer.add_event(event))
@@ -139,7 +142,7 @@ defmodule RigInboundGatewayWeb.VConnection do
     # Replace current subscriptions:
     state = Map.put(state, :subscriptions, subscriptions)
 
-    send! state.target_pid, {:forward, Events.subscriptions_set(subscriptions)}
+    send!(state.target_pid, {:forward, Events.subscriptions_set(subscriptions)})
 
     {:noreply, state}
   end
@@ -147,10 +150,10 @@ defmodule RigInboundGatewayWeb.VConnection do
   @impl true
   def handle_info({:session_killed, session_id}, state) do
     # Session kill must be handled by the connection
-    send! state.target_pid, {:session_killed, session_id}
+    send!(state.target_pid, {:session_killed, session_id})
 
     # Since the session was killed, there's no need for a VConnection anymore
-    send self(), :kill
+    send(self(), :kill)
     {:noreply, state}
   end
 
@@ -169,7 +172,7 @@ defmodule RigInboundGatewayWeb.VConnection do
 
   @impl true
   def handle_info(:kill_connection, state) do
-    send! state.target_pid, :close
+    send!(state.target_pid, :close)
     {:noreply, state}
   end
 
@@ -189,7 +192,7 @@ defmodule RigInboundGatewayWeb.VConnection do
 
   defp send!(pid, data)
   defp send!(nil, _data), do: nil
-  defp send!(pid, data), do: send pid, data
+  defp send!(pid, data), do: send(pid, data)
 
   defp start_timer(state) do
     %{idle_connection_timeout: delay} = config()

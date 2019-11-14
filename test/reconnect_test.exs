@@ -16,11 +16,14 @@ defmodule RigInboundGatewayWeb.ReconnectTest do
 
     SseClient.flush_mailbox()
 
-    assert {:ok, client2} = SseClient.connect([connection_token: event1["data"]["connection_token"]])
+    assert {:ok, client2} =
+             SseClient.connect(connection_token: event1["data"]["connection_token"])
+
     {event2, client2} = SseClient.read_welcome_event(client2)
     SseClient.disconnect(client2)
 
-    assert Codec.deserialize(event1["data"]["connection_token"]) == Codec.deserialize(event2["data"]["connection_token"])  
+    assert Codec.deserialize(event1["data"]["connection_token"]) ==
+             Codec.deserialize(event2["data"]["connection_token"])
   end
 
   test "Passing a dead VConnection pid to the SSE endpoint will result in RIG ignoring it and returning a different token." do
@@ -28,17 +31,24 @@ defmodule RigInboundGatewayWeb.ReconnectTest do
     {event1, client1} = SseClient.read_welcome_event(client1)
 
     SseClient.disconnect(client1)
-    
+
     # Destroy the VConnection, this simulates a timeout
-    url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/#{event1["data"]["connection_token"]}"
+    url =
+      "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/#{
+        event1["data"]["connection_token"]
+      }"
+
     %HTTPoison.Response{status_code: 200} = HTTPoison.delete!(url)
 
     SseClient.flush_mailbox()
 
-    assert {:ok, client2} = SseClient.connect([connection_token: event1["data"]["connection_token"]])
+    assert {:ok, client2} =
+             SseClient.connect(connection_token: event1["data"]["connection_token"])
+
     {event2, client2} = SseClient.read_welcome_event(client2)
     SseClient.disconnect(client2)
 
-    assert Codec.deserialize(event1["data"]["connection_token"]) != Codec.deserialize(event2["data"]["connection_token"])  
+    assert Codec.deserialize(event1["data"]["connection_token"]) !=
+             Codec.deserialize(event2["data"]["connection_token"])
   end
 end

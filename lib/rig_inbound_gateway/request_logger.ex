@@ -3,5 +3,5 @@ defmodule RigInboundGateway.RequestLogger do
   Interface for request logging backends.
   """
 
-  @callback log_call(Proxy.endpoint, Proxy.api_definition, %Plug.Conn{}) :: :ok
+  @callback log_call(Proxy.endpoint(), Proxy.api_definition(), %Plug.Conn{}) :: :ok
 end
