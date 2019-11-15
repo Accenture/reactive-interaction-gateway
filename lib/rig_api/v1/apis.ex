@@ -20,6 +20,8 @@ defmodule RigApi.V1.APIs do
     send_response(conn, 200, active_apis)
   end
 
+  # ---
+
   swagger_path :get_api_detail do
     get(@prefix <> "/apis/{apiId}")
     summary("Obtain details on a proxy API-definition.")
@@ -43,6 +45,8 @@ defmodule RigApi.V1.APIs do
         send_response(conn, 200, api)
     end
   end
+
+  # ---
 
   swagger_path :add_api do
     post(@prefix <> "/apis")
@@ -78,6 +82,8 @@ defmodule RigApi.V1.APIs do
     end
   end
 
+  # ---
+
   swagger_path :update_api do
     put(@prefix <> "/apis/{apiId}")
     summary("Update a proxy API-definition.")
@@ -109,6 +115,8 @@ defmodule RigApi.V1.APIs do
     end
   end
 
+  # ---
+
   swagger_path :deactivate_api do
     delete(@prefix <> "/apis/{apiId}")
     summary("Deactivate a proxy API-definition.")
@@ -117,7 +125,7 @@ defmodule RigApi.V1.APIs do
       apiId(:path, :string, "API definition identifier", required: true, example: "new-service")
     end
 
-    response(204, "Deleted")
+    response(204, "")
     response(404, "Doesn't exist", Schema.ref(:ProxyAPIResponse))
   end
 
@@ -127,12 +135,14 @@ defmodule RigApi.V1.APIs do
 
     with {_id, _current_api} <- get_active_api(id),
          {:ok, _phx_ref} <- proxy.deactivate_api(proxy, id) do
-      send_response(conn, 204)
+      send_response(conn, :no_content)
     else
       api when api == nil or api == :inactive ->
         send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
     end
   end
+
+  # ---
 
   defp get_active_api(id) do
     %{rig_proxy: proxy} = config()
@@ -147,10 +157,20 @@ defmodule RigApi.V1.APIs do
     end
   end
 
+  # ---
+
   defp merge_and_update(id, current_api, updated_api) do
     %{rig_proxy: proxy} = config()
     merged_api = current_api |> Map.merge(updated_api)
     proxy.update_api(proxy, id, merged_api)
+  end
+
+  # ---
+
+  defp send_response(conn, :no_content) do
+    conn
+    |> put_status(:no_content)
+    |> text("")
   end
 
   defp send_response(conn, status_code, body \\ %{}) do
@@ -158,6 +178,8 @@ defmodule RigApi.V1.APIs do
     |> put_status(status_code)
     |> json(body)
   end
+
+  # ---
 
   def swagger_definitions do
     %{
