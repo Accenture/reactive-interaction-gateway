@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <title>RIG-Longpolling-Demo</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   </head>
 
   <body>
@@ -43,8 +44,8 @@
         const inputName = document.getElementById('name');
         const greeting = inputGreeting.value;
         const name = inputName.value;
-        inputGreeting.value = '';
-        inputName.value = '';
+        // inputGreeting.value = '';
+        // inputName.value = '';
         return fetch(`${baseUrl}/events`, {
           method: 'POST',
           mode: 'cors',
@@ -74,85 +75,49 @@
           });
       }
 
-      /**
-      {
-        "eventType": "greeting",
-        "oneOf": [
-          { "name": "john" }
-        ]
-      }
-    */
-
-      function createSubscription(connectionToken) {
-        const eventType = 'greeting';
-        return fetch(
-          `${baseUrl}/connection/longpolling/${connectionToken}/subscriptions`,
-          {
-            method: 'PUT',
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json; charset=utf-8'
-            },
-            body: JSON.stringify({
-              subscriptions: [
-                {
-                  eventType: eventType,
-                  oneOf: [
-                    {
-                      name: 'john'
-                    }
-                  ]
+      function fetchEvents() {
+        document.getElementById('submit-button').removeAttribute('disabled');
+        console.log('document.cookie', document.cookie);
+        axios({
+          method: 'GET',
+          url: `${baseUrl}/connection/longpolling`,
+          withCredentials: true
+        })
+          .then(response => {
+            console.log('message', response.data);
+            if (response.data && response.data.events) {
+              response.data.events.forEach(event => {
+                if (event.type === 'rig.connection.create') {
+                  console.log('Connection created:', event);
+                  return;
                 }
-              ]
-            })
-          }
-        )
-          .then(json => {
-            console.log('Subscription created:', json);
-            return json;
+
+                if (event.type === 'rig.subscriptions_set') {
+                  console.log('Subscription created:', event);
+                  return;
+                }
+
+                addEvent(event);
+              });
+            }
+            setTimeout(fetchEvents, 10000);
           })
           .catch(err => {
-            console.log('Failed to create subscription:', err);
+            console.log('Failed to fetch events:', err);
           });
       }
 
-      const source = new EventSource(`${baseUrl}/connection/longpolling`);
-
-      source.onopen = e => console.log('open', e);
-      source.onmessage = e => console.log('message', e);
-      source.onerror = e => console.log('error', e);
-
-      source.addEventListener(
-        'rig.connection.create',
-        function(e) {
-          cloudEvent = JSON.parse(e.data);
-          payload = cloudEvent.data;
-          connectionToken = payload['connection_token'];
-          createSubscription(connectionToken);
-        },
-        false
-      );
-
-      source.addEventListener('greeting', function(e) {
-        cloudEvent = JSON.parse(e.data);
-        addEvent(cloudEvent);
+      const source = axios({
+        method: 'GET',
+        url: `${baseUrl}/connection/longpolling?subscriptions=[{\"eventType\":\"greeting\",\"oneOf\":[{\"name\":\"john\"}]}]`,
+        withCredentials: true
       });
 
-      source.addEventListener('rig.subscriptions_set', function(e) {
-        document.getElementById('submit-button').removeAttribute('disabled');
-      });
-
-      source.addEventListener(
-        'error',
-        function(e) {
-          if (e.readyState == EventSource.CLOSED) {
-            console.log('Connection was closed.');
-          } else {
-            console.log('Connection error:', e);
-          }
-        },
-        false
-      );
+      source
+        .then(response => fetchEvents())
+        .catch(err => {
+          console.log('Failed to create subscription:', err);
+        });
     </script>
   </body>
 </html>

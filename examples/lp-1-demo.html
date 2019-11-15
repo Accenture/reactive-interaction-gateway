@@ -44,12 +44,12 @@
           method: 'POST',
           mode: 'cors',
           headers: {
-            'Content-Type': 'application/json; charset=utf-8'
+            'Content-Type': 'application/cloudevents+json; charset=utf-8'
           },
           body: JSON.stringify({
             cloudEventsVersion: '0.1',
             eventID: randomString(),
-            eventType: 'greeting.jwt',
+            eventType: 'greeting.simple',
             eventTime: new Date().toISOString(),
             source: 'longpolling-demo-ui',
             contentType: 'text/plain',
@@ -66,21 +66,8 @@
           });
       }
 
-      /**
-       * JWT PAYLOAD DATA
-       * {
-       *   "sub": "1234567890",
-       *   "name": "John Doe",
-       *   "iat": 4103258143,
-       *   "exp": 4103258143
-       * }
-       */
-      const jwt =
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTczODI2NzE1LCJleHAiOjIyMDQ5Nzg3MTV9.cE9jsKLWAhGJBwIa2bR8WLCd4heiYLO6S2DSwl0s4sQ';
-
       function fetchEvents() {
         document.getElementById('submit-button').removeAttribute('disabled');
-        console.log('document.cookie', document.cookie);
         axios({
           method: 'GET',
           url: `${baseUrl}/connection/longpolling`,
@@ -112,7 +99,7 @@
 
       const source = axios({
         method: 'GET',
-        url: `${baseUrl}/connection/longpolling?subscriptions=[]&jwt=${jwt}`,
+        url: `${baseUrl}/connection/longpolling?subscriptions=[{\"eventType\":\"greeting.simple\"}]`,
         withCredentials: true
       });
 

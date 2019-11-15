@@ -163,6 +163,9 @@ This example shows simplest scenario when all messages will arrive to UI.
 > examples/lp-1-demo.html
 
 ```bash
+node staticServer.js
+
+CORS="http://127.0.0.1:8080" \
 mix phx.server
 ```
 
@@ -175,10 +178,13 @@ mix phx.server
 This example shows basic restriction with extractors based on sent data.
 
 > examples/lp-2-demo-simple-extractors.html
-> examples/simple-extractor.json
+> examples/extractor.json
 
 ```bash
-EXTRACTORS=examples/simple-extractor.json \
+node staticServer.js ./lp-2-simple-extractors.html
+
+CORS="http://127.0.0.1:8080" \
+EXTRACTORS=examples/extractor.json \
 mix phx.server
 ```
 
@@ -194,6 +200,9 @@ This example shows simple scenario when all messages will arrive to UI, but RIG 
 > examples/lp-demo-jwt.html
 
 ```bash
+node staticServer.js ./lp-3-demo-jwt.html
+
+CORS="http://127.0.0.1:8080" \
 SUBSCRIPTION_CHECK=jwt_validation \
 JWT_SECRET_KEY=secret \
 mix phx.server
