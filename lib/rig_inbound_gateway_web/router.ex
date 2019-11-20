@@ -12,42 +12,30 @@ defmodule RigInboundGatewayWeb.Router do
     get("/health", HealthController, :check_health)
 
     scope "/v1", V1 do
-      scope "/connection" do
-        get("/init", ConnectionController, :init)
+      scope "/connection/sse" do
+        subscription_url = "/:connection_id/subscriptions"
+        options(subscription_url, SubscriptionController, :handle_preflight)
+        put(subscription_url, SubscriptionController, :set_subscriptions)
 
-        scope "/:connection_id" do
-          delete("/", ConnectionController, :destroy)
-          options("/", ConnectionController, :handle_preflight)
+        # The SSE handler is implemented using Cowboy's loop handler behaviour and set
+        # up using the Cowboy dispatch configuration; see the `config.exs` file.
+      end
 
-          delete("/socket", ConnectionController, :destroy_connection)
-          options("/socket", ConnectionController, :handle_preflight)
-        end
+      # Unlike SSE & WS handlers, the LP handler is implemented using plug
+      scope "/connection/longpolling" do
+        subscription_url = "/:connection_id/subscriptions"
+        get("/", LongpollingController, :handle_connection)
+        options(subscription_url, SubscriptionController, :handle_preflight)
+        put(subscription_url, SubscriptionController, :set_subscriptions)
+      end
 
-        scope "/sse" do
-          subscription_url = "/:connection_id/subscriptions"
-          options(subscription_url, SubscriptionController, :handle_preflight)
-          put(subscription_url, SubscriptionController, :set_subscriptions)
+      scope "/connection/ws" do
+        subscription_url = "/:connection_id/subscriptions"
+        options(subscription_url, SubscriptionController, :handle_preflight)
+        put(subscription_url, SubscriptionController, :set_subscriptions)
 
-          # The SSE handler is implemented using Cowboy's loop handler behaviour and set
-          # up using the Cowboy dispatch configuration; see the `config.exs` file.
-        end
-
-        scope "/ws" do
-          subscription_url = "/:connection_id/subscriptions"
-          options(subscription_url, SubscriptionController, :handle_preflight)
-          put(subscription_url, SubscriptionController, :set_subscriptions)
-
-          # The WebSocket handler is implemented using Cowboy's loop handler behaviour and set
-          # up using the Cowboy dispatch configuration; see the `config.exs` file.
-        end
-
-        # Unlike SSE & WS handlers, the LP handler is implemented using plug
-        scope "/longpolling" do
-          subscription_url = "/:connection_id/subscriptions"
-          get("/", LongpollingController, :handle_connection)
-          options(subscription_url, SubscriptionController, :handle_preflight)
-          put(subscription_url, SubscriptionController, :set_subscriptions)
-        end
+        # The WebSocket handler is implemented using Cowboy's loop handler behaviour and set
+        # up using the Cowboy dispatch configuration; see the `config.exs` file.
       end
 
       options("/events", EventController, :handle_preflight)

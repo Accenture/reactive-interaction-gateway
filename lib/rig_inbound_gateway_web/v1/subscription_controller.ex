@@ -1,7 +1,6 @@
 defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   use Rig.Config, [:cors]
   use RigInboundGatewayWeb, :controller
-  use RigInboundGatewayWeb.Cors, [:put]
 
   alias Result
 
@@ -15,6 +14,26 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   alias RIG.Subscriptions
 
   require Logger
+
+  # ---
+
+  @doc false
+  def handle_preflight(%{method: "OPTIONS"} = conn, _params) do
+    conn
+    |> with_allow_origin()
+    |> put_resp_header("access-control-allow-methods", "PUT")
+    |> put_resp_header("access-control-allow-headers", "content-type,authorization")
+    |> send_resp(:no_content, "")
+  end
+
+  # ---
+
+  defp with_allow_origin(conn) do
+    %{cors: origins} = config()
+    put_resp_header(conn, "access-control-allow-origin", origins)
+  end
+
+  # ---
 
   @doc """
   Sets subscriptions for an existing connection, replacing previous subscriptions.
