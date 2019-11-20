@@ -10,10 +10,12 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
 
   alias RIG.AuthorizationCheck.Request
   alias RIG.AuthorizationCheck.Subscription, as: SubscriptionAuthZ
+  alias Rig.Connection.Codec
   alias RIG.JWT
   alias RIG.Session
   alias Rig.Subscription
   alias RIG.Subscriptions
+  alias RigInboundGatewayWeb.VConnection
 
   # ---
 
@@ -40,17 +42,58 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
         %{auth_tokens: [{"bearer", jwt}]} -> jwt
       end
 
-    with {:ok, jwt_subs} <-
-           Subscriptions.from_token(jwt),
+    with {:ok, jwt_subs} <- Subscriptions.from_token(jwt),
          true = String.starts_with?(request.content_type, "application/json"),
-         {:ok, query_subs} <-
-           Subscriptions.from_json(request.body),
+         {:ok, query_subs} <- Subscriptions.from_json(request.body),
          subscriptions = Enum.uniq(jwt_subs ++ query_subs),
          :ok <- SubscriptionAuthZ.check_authorization(request) do
+      {:ok, vconnection_pid} =
+        request.connection_token
+        |> Codec.deserialize()
+        |> case do
+          {:error, _} ->
+            # We're going to accept the connection
+            # and let VConnection handle subscription refresh and heartbeat
+            VConnection.start(
+              self(),
+              subscriptions,
+              heartbeat_interval_ms,
+              subscription_refresh_interval_ms
+            )
+
+          {:ok, pid} ->
+            # We're going to try to reconnect
+            if Process.alive?(pid) do
+              # Try a reconnect
+              vpid = GenServer.call(pid, :reconnect)
+
+              if request.body != nil || jwt != nil do
+                # If the client reconnects with new subscriptions,
+                # replace the existing subscriptions
+                send(pid, {:set_subscriptions, subscriptions})
+              else
+                # Re-register subscriptions
+                send(pid, :set_subscriptions)
+              end
+
+              vpid
+            else
+              # If the reconnect failed, proceed as usual
+              VConnection.start(
+                self(),
+                subscriptions,
+                heartbeat_interval_ms,
+                subscription_refresh_interval_ms
+              )
+            end
+        end
+
+      Process.monitor(vconnection_pid)
+
       # If the JWT is valid and points to a session, we associate this connection with
       # it. If that doesn't work out, we log a warning but don't tell the frontend -
       # it's not the frontend's fault anyway.
-      check_and_register_session(jwt)
+      check_and_register_session(jwt, vconnection_pid)
       |> Result.or_else(fn error ->
         Logger.warn(fn ->
           "Failed to associate the #{conn_type} connection #{inspect(self())} to its session: #{
@@ -59,15 +102,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
         end)
       end)
 
-      # We're going to accept the connection, so let's set up the heartbeat too:
-      Process.send_after(self(), :heartbeat, heartbeat_interval_ms)
-
-      # We register subscriptions:
-      send(self(), {:set_subscriptions, subscriptions})
-      # ..and schedule periodic refresh:
-      Process.send_after(self(), :refresh_subscriptions, subscription_refresh_interval_ms)
-
-      on_success.(subscriptions)
+      on_success.(subscriptions, vconnection_pid)
     else
       {:error, %Subscriptions.Error{} = e} ->
         Logger.warn(fn ->
@@ -91,20 +126,20 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
 
   # ---
 
-  @spec check_and_register_session(map()) ::
+  @spec check_and_register_session(map(), pid) ::
           Result.t(
             any,
             {:failed_to_associate_to_session, %RIG.JWT.DecodeError{} | String.t()}
           )
-  defp check_and_register_session(jwt)
+  defp check_and_register_session(jwt, pid)
 
-  defp check_and_register_session(nil), do: {:ok, nil}
+  defp check_and_register_session(nil, _pid), do: {:ok, nil}
 
-  defp check_and_register_session(jwt) do
+  defp check_and_register_session(jwt, pid) do
     jwt
     |> JWT.parse_token()
     |> Result.and_then(fn claims -> Session.from_claims(claims) end)
-    |> Result.map(fn session_name -> Session.register_connection(session_name, self()) end)
+    |> Result.map(fn session_name -> Session.register_connection(session_name, pid) end)
     |> Result.map_err(fn err -> {:failed_to_associate_to_session, err} end)
   end
 

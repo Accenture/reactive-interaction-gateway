@@ -11,7 +11,6 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   alias Result
 
-  alias Rig.EventFilter
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
   alias RigInboundGatewayWeb.ConnectionInit
@@ -27,6 +26,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   def init(req, _state) do
     query_params = req |> :cowboy_req.parse_qs() |> Enum.into(%{})
     jwt = query_params["jwt"]
+    connection_token = query_params["connection_token"]
 
     auth_info =
       case jwt do
@@ -43,7 +43,8 @@ defmodule RigInboundGatewayWeb.V1.SSE do
           auth_info: auth_info,
           query_params: "",
           content_type: "application/json; charset=utf-8",
-          body: encoded_body_or_nil
+          body: encoded_body_or_nil,
+          connection_token: connection_token
         }
 
         do_init(req, request)
@@ -59,7 +60,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   def do_init(req, request) do
     conf = config()
 
-    on_success = fn subscriptions ->
+    on_success = fn subscriptions, vconnection_pid ->
       # Tell the client the request is good and the response is chunked:
       req =
         :cowboy_req.stream_reply(
@@ -73,7 +74,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
         )
 
       # Say hello to the client:
-      Events.welcome_event()
+      Events.welcome_event(vconnection_pid)
       |> to_server_sent_event()
       |> send_via(req)
 
@@ -100,52 +101,11 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   # ---
 
   @impl :cowboy_loop
-  def info(:heartbeat, req, state) do
-    # We send a heartbeat now:
-    :heartbeat
+  def info({:forward, data}, req, state) do
+    data
     |> to_server_sent_event()
     |> send_via(req)
 
-    # And schedule the next one:
-    Process.send_after(self(), :heartbeat, @heartbeat_interval_ms)
-
-    {:ok, req, state, :hibernate}
-  end
-
-  @impl :cowboy_loop
-  def info(%CloudEvent{} = event, req, state) do
-    Logger.debug(fn -> "event: " <> inspect(event) end)
-
-    # Forward the event to the client:
-    event
-    |> to_server_sent_event()
-    |> send_via(req)
-
-    {:ok, req, state, :hibernate}
-  end
-
-  @impl :cowboy_loop
-  def info({:set_subscriptions, subscriptions}, req, state) do
-    Logger.debug(fn -> "subscriptions: " <> inspect(subscriptions) end)
-
-    # Trigger immediate refresh:
-    EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
-
-    # Replace current subscriptions:
-    state = Map.put(state, :subscriptions, subscriptions)
-
-    # Notify the client:
-    Events.subscriptions_set(subscriptions)
-    |> to_server_sent_event()
-    |> send_via(req)
-
-    {:ok, req, state, :hibernate}
-  end
-
-  @impl :cowboy_loop
-  def info(:refresh_subscriptions, req, state) do
-    EventFilter.refresh_subscriptions(state.subscriptions, [])
-    Process.send_after(self(), :refresh_subscriptions, @subscription_refresh_interval_ms)
     {:ok, req, state, :hibernate}
   end
 
@@ -160,6 +120,19 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
     # And close the connection:
     {:stop, req, state}
+  end
+
+  @impl :cowboy_loop
+  def info(:close, req, state) do
+    # TODO: Send event instead of comment
+    :cowboy_req.stream_events(%{comment: "Connection closed."}, :fin, req)
+    {:stop, req, state}
+  end
+
+  @impl :cowboy_loop
+  def info({:DOWN, _ref, :process, _pid, _}, req, state) do
+    send self(), :close
+    {:ok, req, state, :hibernate}
   end
 
   # ---
