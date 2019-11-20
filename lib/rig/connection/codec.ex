@@ -9,7 +9,6 @@ defmodule Rig.Connection.Codec do
   def serialize(pid) do
     conf = config()
     secret_key = conf.codec_secret_key || conf.codec_default_key
-
     pid
     |> :erlang.term_to_binary()
     |> encrypt(secret_key)
@@ -20,18 +19,15 @@ defmodule Rig.Connection.Codec do
 
   @doc "Convert a serialized string back into a pid."
   @spec deserialize(binary) :: {:ok, pid} | {:error, :not_base64 | :invalid_term}
-  def deserialize(base64_encoded) when byte_size(base64_encoded) > 0 do
+  def deserialize(base64_encoded) do
     conf = config()
     secret_key = conf.codec_secret_key || conf.codec_default_key
-
     with {:ok, decoded_binary} <- decode64(base64_encoded) do
       decoded_binary
       |> decrypt(secret_key)
       |> binary_to_term()
     end
   end
-
-  def deserialize(_), do: {:error, :invalid_term}
 
   # ---
 
@@ -63,10 +59,8 @@ defmodule Rig.Connection.Codec do
     mode = :aes_gcm
     secret_key = hash(key)
     init_vector = :crypto.strong_rand_bytes(16)
-
     {ciphertext, ciphertag} =
       :crypto.block_encrypt(mode, secret_key, init_vector, {@aad, to_string(val), 16})
-
     init_vector <> ciphertag <> ciphertext
   end
 

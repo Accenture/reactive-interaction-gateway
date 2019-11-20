@@ -11,10 +11,8 @@ defmodule Rig.ConnectionCodecTest do
     # `check all id <- integer(0..0x7FFF)` does not work on a single node.
     id = 0
 
-    check all(
-            serial <- integer(0..0x1FFF),
-            creation <- integer(0..0x03)
-          ) do
+    check all serial <- integer(0..0x1FFF),
+              creation <- integer(0..0x03) do
       pid = :c.pid(id, serial, creation)
       assert pid == pid |> serialize() |> deserialize!()
     end
@@ -26,10 +24,8 @@ defmodule Rig.ConnectionCodecTest do
     # `check all id <- integer(0..0x7FFF)` does not work on a single node.
     id = 0
 
-    check all(
-            serial <- integer(0..0x1FFF),
-            creation <- integer(0..0x03)
-          ) do
+    check all serial <- integer(0..0x1FFF),
+              creation <- integer(0..0x03) do
       refute :c.pid(id, serial, creation) |> serialize() |> String.contains?(bad_chars)
     end
   end
@@ -38,11 +34,9 @@ defmodule Rig.ConnectionCodecTest do
     id = 0
     key = "magiccookie"
 
-    check all(
-            serial <- integer(0..0x1FFF),
-            creation <- integer(0..0x03)
-          ) do
-      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary()
+    check all serial <- integer(0..0x1FFF),
+              creation <- integer(0..0x03) do
+      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary
       assert pid == pid |> encrypt(key) |> decrypt(key)
     end
   end
@@ -51,11 +45,9 @@ defmodule Rig.ConnectionCodecTest do
     id = 0
     key = ""
 
-    check all(
-            serial <- integer(0..0x1FFF),
-            creation <- integer(0..0x03)
-          ) do
-      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary()
+    check all serial <- integer(0..0x1FFF),
+              creation <- integer(0..0x03) do
+      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary
       assert pid == pid |> encrypt(key) |> decrypt(key)
     end
   end
@@ -64,11 +56,9 @@ defmodule Rig.ConnectionCodecTest do
     id = 0
     key = "a"
 
-    check all(
-            serial <- integer(0..0x1FFF),
-            creation <- integer(0..0x03)
-          ) do
-      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary()
+    check all serial <- integer(0..0x1FFF),
+              creation <- integer(0..0x03) do
+      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary
       assert pid == pid |> encrypt(key) |> decrypt(key)
     end
   end
@@ -77,11 +67,9 @@ defmodule Rig.ConnectionCodecTest do
     id = 0
     key = "QWErty1234QWErty1234QWErty1234QWErty1234QWErty1234QWErty1234QWErty1234QWErty1234"
 
-    check all(
-            serial <- integer(0..0x1FFF),
-            creation <- integer(0..0x03)
-          ) do
-      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary()
+    check all serial <- integer(0..0x1FFF),
+              creation <- integer(0..0x03) do
+      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary
       assert pid == pid |> encrypt(key) |> decrypt(key)
     end
   end
@@ -90,11 +78,9 @@ defmodule Rig.ConnectionCodecTest do
     id = 0
     key = 0
 
-    check all(
-            serial <- integer(0..0x1FFF),
-            creation <- integer(0..0x03)
-          ) do
-      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary()
+    check all serial <- integer(0..0x1FFF),
+              creation <- integer(0..0x03) do
+      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary
       assert pid == pid |> encrypt(key) |> decrypt(key)
     end
   end
@@ -103,11 +89,9 @@ defmodule Rig.ConnectionCodecTest do
     id = 0
     key = -123
 
-    check all(
-            serial <- integer(0..0x1FFF),
-            creation <- integer(0..0x03)
-          ) do
-      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary()
+    check all serial <- integer(0..0x1FFF),
+              creation <- integer(0..0x03) do
+      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary
       assert pid == pid |> encrypt(key) |> decrypt(key)
     end
   end
@@ -116,11 +100,9 @@ defmodule Rig.ConnectionCodecTest do
     id = 0
     key = 12_345_678_901_234_567_890
 
-    check all(
-            serial <- integer(0..0x1FFF),
-            creation <- integer(0..0x03)
-          ) do
-      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary()
+    check all serial <- integer(0..0x1FFF),
+              creation <- integer(0..0x03) do
+      pid = :c.pid(id, serial, creation) |> :erlang.term_to_binary
       assert pid == pid |> encrypt(key) |> decrypt(key)
     end
   end

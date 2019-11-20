@@ -161,7 +161,7 @@ defmodule SseClient do
     end
   end
 
-  def flush_mailbox do
+  defp flush_mailbox do
     receive do
       msg -> [msg | flush_mailbox()]
     after

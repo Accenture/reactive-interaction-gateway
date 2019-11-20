@@ -66,9 +66,6 @@ config :rig, Rig.Connection.Codec,
   codec_secret_key: {:system, "NODE_COOKIE", nil},
   codec_default_key: "7tsf4Y6GTOfPY1iDo4PqZA=="
 
-config :rig, RigInboundGatewayWeb.VConnection,
-  idle_connection_timeout: {:system, "IDLE_CONNECTION_TIMEOUT", "300000"}
-
 config :porcelain, driver: Porcelain.Driver.Basic
 
 # --------------------------------------
