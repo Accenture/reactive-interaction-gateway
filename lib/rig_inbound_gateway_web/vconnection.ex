@@ -16,7 +16,8 @@ defmodule RigInboundGatewayWeb.VConnection do
   use Rig.Config, [:idle_connection_timeout]
 
   # TEMP UNTIL WE ACTUALLY IMPLEMENT lasteventid
-  @buffer_size 1
+  @buffer_size 10
+  @send_interval 20
 
   def start(pid, subscriptions, heartbeat_interval_ms, subscription_refresh_interval_ms) do
     GenServer.start(
@@ -91,9 +92,48 @@ defmodule RigInboundGatewayWeb.VConnection do
 
     Logger.debug(fn -> "Client #{inspect(from_pid)} reconnected" end)
 
-    # TODO: Schedule send of all missed events
     # TODO: Publish reconnect event
     {:reply, {:ok, self()}, state}
+  end
+
+  @impl true
+  def handle_info({:schedule_missing, last_event_id}, state) do
+    case EventBuffer.events_since(state.event_buffer, last_event_id) do
+      {:ok, [events: []]} ->
+        Logger.debug(fn -> "Received last_event_id but have no events to return #{inspect(self())}" end)
+
+      {:ok, [events: events, last_event_id: _last_event_id]} ->
+        Logger.debug(fn -> "Scheduling resending of buffered events #{inspect(self())}" end)
+        Process.send_after(self(), {:send_missing, events}, @send_interval)
+
+      {:no_such_event, [not_found_id: _not_found_id, last_event_id: _last_event_id]} ->
+        Logger.debug(fn -> "Received last_event_id but it is unknown #{inspect(self())}" end)
+    end
+
+    {:noreply, state}
+  end
+
+  @doc """
+  ### Dirty testing
+
+    CONN_TOKEN=$(http :4000/_rig/v1/connection/init)
+    SUBSCRIPTIONS='{"subscriptions":[{"eventType":"chatroom_message"}]}'
+    http put ":4000/_rig/v1/connection/sse/${CONN_TOKEN}/subscriptions" <<<"$SUBSCRIPTIONS"
+    http post :4000/_rig/v1/events specversion=0.2 type=chatroom_message id=eventa source=tutorial
+    http post :4000/_rig/v1/events specversion=0.2 type=chatroom_message id=eventb source=tutorial
+    http post :4000/_rig/v1/events specversion=0.2 type=chatroom_message id=eventc source=tutorial
+    http post :4000/_rig/v1/events specversion=0.2 type=chatroom_message id=eventd source=tutorial
+    http --stream ":4000/_rig/v1/connection/sse?last_event_id=eventb&connection_token=$CONN_TOKEN"
+  """
+  @impl true
+  def handle_info({:send_missing, [event | events]}, state) do
+    send self(), event
+
+    if events != [] do
+      # Schedule send of events that are left
+      Process.send_after(self(), {:send_missing, events}, @send_interval)
+    end
+    {:noreply, state}
   end
 
   @impl true

@@ -76,6 +76,11 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
                 send(pid, :set_subscriptions)
               end
 
+              if request.last_event_id != nil do
+                IO.puts "Last event id received!"
+                send pid, {:schedule_missing, request.last_event_id}
+              end
+
               vpid
             else
               # If the reconnect failed, proceed as usual

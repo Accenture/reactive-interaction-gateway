@@ -38,6 +38,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   def websocket_init(%{query_params: query_params}) do
     jwt = query_params["jwt"]
     connection_token = query_params["connection_token"]
+    last_event_id = query_params["last_event_id"]
 
     auth_info =
       case jwt do
@@ -55,7 +56,8 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
           query_params: "",
           content_type: "application/json; charset=utf-8",
           body: encoded_body_or_nil,
-          connection_token: connection_token
+          connection_token: connection_token,
+          last_event_id: last_event_id
         }
 
         do_init(request)
