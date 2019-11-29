@@ -6,11 +6,11 @@ defmodule RigInboundGatewayWeb.ConnectionInitTest do
   alias HTTPoison
   alias Rig.Connection.Codec
 
-  @base_url "http://localhost:4010/v2/connection"
+  @event_hub_http_port Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:http][:port]
 
   describe "Initialize connection" do
     test "An SSE connection can be initialized in advance." do
-      url = "#{@base_url}/init"
+      url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/init"
       %HTTPoison.Response{body: body} = HTTPoison.get!(url)
 
       assert {:ok, client} = SseClient.connect(connection_token: body)
@@ -22,11 +22,11 @@ defmodule RigInboundGatewayWeb.ConnectionInitTest do
     end
 
     test "A client can connect to a destroyed VConnection and will get assigned a new VConnection." do
-      url = "#{@base_url}/init"
+      url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/init"
       %HTTPoison.Response{body: body} = HTTPoison.get!(url)
 
       # Destroy the VConnection
-      del_url = "#{@base_url}/#{body}"
+      del_url = "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/#{body}"
       %HTTPoison.Response{} = HTTPoison.delete!(del_url)
 
       assert {:ok, client} = SseClient.connect(connection_token: body)
