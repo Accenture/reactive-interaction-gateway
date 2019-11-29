@@ -73,6 +73,16 @@ defmodule RigApi.Router do
       post("/", SessionBlacklist, :blacklist_session)
       get("/:session_id", SessionBlacklist, :check_status)
     end
+
+    scope "/connection" do
+      scope "/:connection_id" do
+        delete("/", ConnectionController, :destroy)
+        options("/", ConnectionController, :handle_preflight)
+
+        delete("/socket", ConnectionController, :destroy_connection)
+        options("/socket", ConnectionController, :handle_preflight)
+      end
+    end
   end
 
   def swagger_info do

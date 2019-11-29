@@ -28,46 +28,4 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
     |> with_allow_origin
     |> send_resp(:ok, Codec.serialize(vconnection_pid))
   end
-
-  @doc """
-  ### Dirty Testing
-
-      CONN_TOKEN=$(http :4000/_rig/v1/connection/init)
-      http delete ":4000/_rig/v1/connection/$CONN_TOKEN/"
-  """
-  @spec init(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
-  def destroy(
-        %{method: "DELETE"} = conn,
-        %{
-          "connection_id" => connection_id
-        }
-      ) do
-    {:ok, pid} = Codec.deserialize(connection_id)
-    Process.exit(pid, :kill)
-
-    conn
-    |> with_allow_origin
-    |> send_resp(:ok, "")
-  end
-
-  @doc """
-  ### Dirty Testing
-
-      CONN_TOKEN=$(http :4000/_rig/v1/connection/init)
-      http delete ":4000/_rig/v1/connection/$CONN_TOKEN/socket"
-  """
-  @spec init(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
-  def destroy_connection(
-        %{method: "DELETE"} = conn,
-        %{
-          "connection_id" => connection_id
-        }
-      ) do
-    {:ok, pid} = Codec.deserialize(connection_id)
-    send(pid, :kill_connection)
-
-    conn
-    |> with_allow_origin
-    |> send_resp(:ok, "")
-  end
 end

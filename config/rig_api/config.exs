@@ -46,6 +46,10 @@ config :phoenix, :serve_endpoints, true
 config :rig, RigApi.V1.APIs, rig_proxy: RigInboundGateway.Proxy
 config :rig, RigApi.V2.APIs, rig_proxy: RigInboundGateway.Proxy
 
+cors = {:system, "CORS", "*"}
+
+config :rig, RigApi.V2.ConnectionController, cors: cors
+
 config :rig, :event_filter, Rig.EventFilter
 
 config :rig, :phoenix_swagger,

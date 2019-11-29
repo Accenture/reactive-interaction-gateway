@@ -97,12 +97,14 @@
         })
     }
 
+    const apiBaseUrl = "http://localhost:4010/v2";
+
     function disconnect() {
-      fetch(`${baseUrl}/connection/${connectionToken}/`, {method: "DELETE", mode: "cors"}).then(msg => { return msg.text() })
+      fetch(`${apiBaseUrl}/connection/${connectionToken}/`, {method: "DELETE", mode: "cors"}).then(msg => { return msg.text() })
     }
 
     function disconnect_connection() {
-      fetch(`${baseUrl}/connection/${connectionToken}/socket`, {method: "DELETE", mode: "cors"}).then(msg => { return msg.text() })
+      fetch(`${apiBaseUrl}/connection/${connectionToken}/socket`, {method: "DELETE", mode: "cors"}).then(msg => { return msg.text() })
     }
 
     var source;
