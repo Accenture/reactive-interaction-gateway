@@ -34,9 +34,7 @@ defmodule RigInboundGatewayWeb.ReconnectTest do
 
     # Destroy the VConnection, this simulates a timeout
     url =
-      "http://localhost:#{@event_hub_http_port}/_rig/v1/connection/#{
-        event1["data"]["connection_token"]
-      }"
+      "http://localhost:4010/v2/connection/#{event1["data"]["connection_token"]}"
 
     %HTTPoison.Response{status_code: 200} = HTTPoison.delete!(url)
 
