@@ -1,6 +1,6 @@
 # Simple examples
 
-Following examples are show casing using of live updates via Server-sent events (SSE), Longpolling and Websocket (WS). Shows how to use public as well as private delivery.
+Following examples are show casing using of live updates via Server-sent events (SSE), Longpolling (LP) and Websocket (WS). Shows how to use public as well as private delivery.
 
 ## SSE
 
@@ -17,6 +17,8 @@ mix phx.server
 **Steps:**
 
 - Fill some message to `greeting` input => update should be displayed below after few moments
+
+> `sse-demo-single-call` is the same, just doing connection and subscriptions in a single call.
 
 ### Example 2: SSE with constraints
 
@@ -94,6 +96,8 @@ mix phx.server
 
 - Fill some message to `greeting` input => update should be displayed below after few moments
 
+> `ws-demo-single-call` is the same, just doing connection and subscriptions in a single call.
+
 ### Example 2: WS with constraints
 
 This example shows basic restriction with extractors based on sent data.
@@ -154,9 +158,11 @@ This time we are not calling subscription call, but they are automatically creat
 - Fill `john.doe` (this is set in JWT) to first input and some message to second input => update should be displayed below after few moments
 - Fill any other name to first input => this time no update should arrive
 
-## Longpolling
+## LP
 
-### Example 1: Longpolling
+The main difference with LP is, that it's using cookies and thus requires proper domain (e.g. `127.0.0.1`). We can't just open html file in browser. For that we have small NodeJS server - `examples/staticServer.js`. HTML is accessible at <http://127.0.0.1:8080/>.
+
+### Example 1: LP
 
 This example shows simplest scenario when all messages will arrive to UI.
 
@@ -173,7 +179,9 @@ mix phx.server
 
 - Fill some message to `greeting` input => update should be displayed below after few moments
 
-### Example 2: Longpolling with constraints
+> `lp-demo-single-call` is the same, just doing connection and subscriptions in a single call.
+
+### Example 2: LP with constraints
 
 This example shows basic restriction with extractors based on sent data.
 
@@ -181,7 +189,7 @@ This example shows basic restriction with extractors based on sent data.
 > examples/extractor.json
 
 ```bash
-node staticServer.js ./lp-2-simple-extractors.html
+node staticServer.js ./lp-2-demo-simple-extractors.html
 
 CORS="http://127.0.0.1:8080" \
 EXTRACTORS=examples/extractor.json \
@@ -193,7 +201,7 @@ mix phx.server
 - Fill `john` to first input and some message to second input => update should be displayed below after few moments
 - Fill any other name to first input => this time no update should arrive
 
-### Longpolling with JWT auth
+### Example 3: LP with JWT auth
 
 This example shows simple scenario when all messages will arrive to UI, but RIG will do JWT auth.
 
@@ -213,26 +221,35 @@ mix phx.server
 - Fill some message to `greeting` input => update should be displayed below after few moments
 - You can try comment out line `85` in examples/sse-demo-jwt.html => after page refresh you'll see 403 error in console and no message will arrive
 
-### Longpolling with constraints & JWT
+### Example 4: LP with constraints & JWT
 
 This example shows combination of restrictions with extractors and JWT auth check. Second scenario also shows automatic subscription to events based on JWT during connection phase.
 
 > examples/jwt-extractor.json
 
 ```bash
-EXTRACTORS=examples/jwt-extractor.json \
+node staticServer.js ./lp-demo-jwt-extractors.html
+
+CORS="http://127.0.0.1:8080" \
+EXTRACTORS=examples/extractor.json \
 JWT_SECRET_KEY=secret \
 mix phx.server
 ```
 
 **Steps:**
 
-> via create subscription call: examples/ws-demo-jwt-extractors.html
+> via create subscription call: examples/lp-demo-jwt-extractors.html
 
 - Fill `john` to first input and some message to second input => update should be displayed below after few moments
 - Fill any other name to first input => this time no update should arrive
 
-> via initial connection: examples/ws-demo-jwt-extractors-conn.html
+> via initial connection: examples/lp-demo-jwt-extractors-conn.html
+
+```bash
+node staticServer.js ./lp-demo-jwt-extractors-conn.html
+
+...
+```
 
 This time we are not calling subscription call, but they are automatically created from JWT when connection happens.
 

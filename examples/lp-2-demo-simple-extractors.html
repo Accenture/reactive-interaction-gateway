@@ -9,24 +9,29 @@
   <body>
     <form onsubmit="sendGreeting(); return false;">
       <input type="text" id="name" placeholder="Your name here" autofocus />
-      <input type="text" id="greeting" placeholder="Your greeting here" autofocus />
+      <input
+        type="text"
+        id="greeting"
+        placeholder="Your greeting here"
+        autofocus
+      />
       <input type="submit" id="submit-button" disabled />
     </form>
     <ul id="eventList" style="list-style:none;padding-left:0"></ul>
     <script>
-      const eventList = document.getElementById('eventList');
+      const eventList = document.getElementById("eventList");
 
       function addEvent(cloudEvent) {
         const { eventTime, data } = cloudEvent;
 
-        const li = document.createElement('li');
-        li.textContent = `[${new Date(eventTime).toLocaleTimeString()}] ${JSON.stringify(
-          data
-        )}`;
+        const li = document.createElement("li");
+        li.textContent = `[${new Date(
+          eventTime
+        ).toLocaleTimeString()}] ${JSON.stringify(data)}`;
         eventList.appendChild(li);
       }
 
-      const baseUrl = 'http://localhost:4000/_rig/v1';
+      const baseUrl = "http://localhost:4000/_rig/v1";
 
       function randomString() {
         return (
@@ -40,25 +45,25 @@
       }
 
       function sendGreeting() {
-        const inputGreeting = document.getElementById('greeting');
-        const inputName = document.getElementById('name');
+        const inputGreeting = document.getElementById("greeting");
+        const inputName = document.getElementById("name");
         const greeting = inputGreeting.value;
         const name = inputName.value;
-        // inputGreeting.value = '';
-        // inputName.value = '';
+        inputGreeting.value = "";
+        inputName.value = "";
         return fetch(`${baseUrl}/events`, {
-          method: 'POST',
-          mode: 'cors',
+          method: "POST",
+          mode: "cors",
           headers: {
-            'Content-Type': 'application/json; charset=utf-8'
+            "Content-Type": "application/json; charset=utf-8"
           },
           body: JSON.stringify({
-            cloudEventsVersion: '0.1',
+            cloudEventsVersion: "0.1",
             eventID: randomString(),
-            eventType: 'greeting',
+            eventType: "greeting",
             eventTime: new Date().toISOString(),
-            source: 'longpolling-demo-ui',
-            contentType: 'text/plain',
+            source: "longpolling-demo-ui",
+            contentType: "text/plain",
             data: {
               name,
               greeting
@@ -67,33 +72,32 @@
         })
           .then(response => response.json())
           .then(json => {
-            console.log('CloudEvent sent:', json);
+            console.log("CloudEvent sent:", json);
             return json;
           })
           .catch(err => {
-            console.log('Failed to send CloudEvent:', err);
+            console.log("Failed to send CloudEvent:", err);
           });
       }
 
       function fetchEvents() {
-        document.getElementById('submit-button').removeAttribute('disabled');
-        console.log('document.cookie', document.cookie);
+        document.getElementById("submit-button").removeAttribute("disabled");
         axios({
-          method: 'GET',
+          method: "GET",
           url: `${baseUrl}/connection/longpolling`,
           withCredentials: true
         })
           .then(response => {
-            console.log('message', response.data);
+            console.log("message", response.data);
             if (response.data && response.data.events) {
               response.data.events.forEach(event => {
-                if (event.type === 'rig.connection.create') {
-                  console.log('Connection created:', event);
+                if (event.type === "rig.connection.create") {
+                  console.log("Connection created:", event);
                   return;
                 }
 
-                if (event.type === 'rig.subscriptions_set') {
-                  console.log('Subscription created:', event);
+                if (event.type === "rig.subscriptions_set") {
+                  console.log("Subscription created:", event);
                   return;
                 }
 
@@ -103,12 +107,12 @@
             setTimeout(fetchEvents, 10000);
           })
           .catch(err => {
-            console.log('Failed to fetch events:', err);
+            console.log("Failed to fetch events:", err);
           });
       }
 
       const source = axios({
-        method: 'GET',
+        method: "GET",
         url: `${baseUrl}/connection/longpolling?subscriptions=[{\"eventType\":\"greeting\",\"oneOf\":[{\"name\":\"john\"}]}]`,
         withCredentials: true
       });
@@ -116,7 +120,7 @@
       source
         .then(response => fetchEvents())
         .catch(err => {
-          console.log('Failed to create subscription:', err);
+          console.log("Failed to create subscription:", err);
         });
     </script>
   </body>

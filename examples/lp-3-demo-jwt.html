@@ -8,22 +8,29 @@
 
   <body>
     <form onsubmit="sendGreeting(); return false;">
-      <input type="text" id="greeting" placeholder="Your greeting here" autofocus />
+      <input
+        type="text"
+        id="greeting"
+        placeholder="Your greeting here"
+        autofocus
+      />
       <input type="submit" id="submit-button" disabled />
     </form>
     <ul id="eventList" style="list-style:none;padding-left:0"></ul>
     <script>
-      const eventList = document.getElementById('eventList');
+      const eventList = document.getElementById("eventList");
 
       function addEvent(cloudEvent) {
         const { eventTime, data } = cloudEvent;
 
-        const li = document.createElement('li');
-        li.textContent = `[${new Date(eventTime).toLocaleTimeString()}] ${data}`;
+        const li = document.createElement("li");
+        li.textContent = `[${new Date(
+          eventTime
+        ).toLocaleTimeString()}] ${data}`;
         eventList.appendChild(li);
       }
 
-      const baseUrl = 'http://localhost:4000/_rig/v1';
+      const baseUrl = "http://localhost:4000/_rig/v1";
 
       function randomString() {
         return (
@@ -37,32 +44,32 @@
       }
 
       function sendGreeting() {
-        const input = document.getElementById('greeting');
+        const input = document.getElementById("greeting");
         const greeting = input.value;
-        input.value = '';
+        input.value = "";
         return fetch(`${baseUrl}/events`, {
-          method: 'POST',
-          mode: 'cors',
+          method: "POST",
+          mode: "cors",
           headers: {
-            'Content-Type': 'application/json; charset=utf-8'
+            "Content-Type": "application/json; charset=utf-8"
           },
           body: JSON.stringify({
-            cloudEventsVersion: '0.1',
+            cloudEventsVersion: "0.1",
             eventID: randomString(),
-            eventType: 'greeting.jwt',
+            eventType: "greeting.simple",
             eventTime: new Date().toISOString(),
-            source: 'longpolling-demo-ui',
-            contentType: 'text/plain',
+            source: "longpolling-demo-ui",
+            contentType: "text/plain",
             data: greeting
           })
         })
           .then(response => response.json())
           .then(json => {
-            console.log('CloudEvent sent:', json);
+            console.log("CloudEvent sent:", json);
             return json;
           })
           .catch(err => {
-            console.log('Failed to send CloudEvent:', err);
+            console.log("Failed to send CloudEvent:", err);
           });
       }
 
@@ -76,27 +83,65 @@
        * }
        */
       const jwt =
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTczODI2NzE1LCJleHAiOjIyMDQ5Nzg3MTV9.cE9jsKLWAhGJBwIa2bR8WLCd4heiYLO6S2DSwl0s4sQ';
+        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0Ijo0MTAzMjU4MTQzLCJleHAiOjQxMDMyNTgxNDN9.t2xx23iYDvzTEJzsl_OTyDA0PLhr7TmvHkIEJZvtj5U";
+
+      function createSubscription() {
+        const eventType = "greeting.simple";
+        const connectionToken = localStorage.getItem("connection_token");
+        console.log("Existing connectionToken", connectionToken);
+        if (!connectionToken) {
+          console.error("Missing connectionToken > can't do subscriptions");
+        }
+        return fetch(
+          `${baseUrl}/connection/sse/${connectionToken}/subscriptions`,
+          {
+            method: "PUT",
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json; charset=utf-8",
+              Authorization: jwt
+            },
+            body: JSON.stringify({
+              subscriptions: [
+                {
+                  eventType: eventType
+                }
+              ]
+            })
+          }
+        )
+          .then(json => {
+            console.log("Subscription created:", json);
+            return json;
+          })
+          .catch(err => {
+            console.log("Failed to create subscription:", err);
+          });
+      }
 
       function fetchEvents() {
-        document.getElementById('submit-button').removeAttribute('disabled');
-        console.log('document.cookie', document.cookie);
         axios({
-          method: 'GET',
+          method: "GET",
           url: `${baseUrl}/connection/longpolling`,
           withCredentials: true
         })
           .then(response => {
-            console.log('message', response.data);
+            console.log("message", response.data);
             if (response.data && response.data.events) {
               response.data.events.forEach(event => {
-                if (event.type === 'rig.connection.create') {
-                  console.log('Connection created:', event);
+                if (event.type === "rig.connection.create") {
+                  console.log("Connection created:", event);
+                  localStorage.setItem(
+                    "connection_token",
+                    event.data.connection_token
+                  );
+                  // re-subscribe when connection is new
+                  createSubscription();
                   return;
                 }
 
-                if (event.type === 'rig.subscriptions_set') {
-                  console.log('Subscription created:', event);
+                if (event.type === "rig.subscriptions_set") {
+                  console.log("Subscription created:", event);
                   return;
                 }
 
@@ -106,20 +151,24 @@
             setTimeout(fetchEvents, 10000);
           })
           .catch(err => {
-            console.log('Failed to fetch events:', err);
+            console.log("Failed to fetch events:", err);
           });
       }
 
       const source = axios({
-        method: 'GET',
-        url: `${baseUrl}/connection/longpolling?subscriptions=[]&jwt=${jwt}`,
+        method: "GET",
+        url: `${baseUrl}/connection/longpolling`,
         withCredentials: true
       });
 
       source
-        .then(response => fetchEvents())
+        .then(() => createSubscription())
+        .then(() => {
+          document.getElementById("submit-button").removeAttribute("disabled");
+          return fetchEvents();
+        })
         .catch(err => {
-          console.log('Failed to create subscription:', err);
+          console.log("Failed to create subscription:", err);
         });
     </script>
   </body>
