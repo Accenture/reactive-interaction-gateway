@@ -25,6 +25,8 @@ defmodule Rig.Application do
       Rig.EventStream.KafkaToHttp,
       # Blacklist:
       Spec.worker(RIG.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
+      #Metadata:
+      Spec.worker(RIG.DistributedMap, _args = [Metadata, [name: Metadata]]),
       # Kinesis event stream:
       Kinesis.JavaClient,
       KinesisFirehose.JavaClient,

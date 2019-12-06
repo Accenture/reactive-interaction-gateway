@@ -6,6 +6,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
   use Rig.Config, [:jwt_fields, :indexed_metadata]
 
   alias Result
+  alias RIG.DistributedMap
   alias RIG.JWT
   alias RIG.Plug.BodyReader
 
@@ -185,7 +186,10 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
 
     Logger.debug(fn -> "Indexed fields: " <> inspect(indexed_fields) end)
 
-    # TODO: Actually set metadata
+    indexed_fields
+    |> Enum.each(fn x ->
+      DistributedMap.add(Metadata, x, metadata)
+    end)
   end
 
   # ---
