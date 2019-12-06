@@ -1,6 +1,6 @@
 defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
   @moduledoc """
-  If `response_from` is set to http_async, the response is taken from internal HTTP endpoint /v1/responses
+  If `response_from` is set to http_async, the response is taken from internal HTTP endpoint /v2/responses
 
   Note that `test_with_server` sets up an HTTP server mock, which is then configured
   using the `route` macro.
@@ -49,13 +49,13 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
 
       build_conn()
       |> put_req_header("content-type", "application/json;charset=utf-8")
-      |> post("/v1/responses", event)
+      |> post("/v2/responses", event)
 
       Response.ok!(sync_response, %{"content-type" => "application/json"})
     end)
 
     # We register the endpoint with the proxy:
-    rig_api_url = "http://localhost:#{@api_port}/v1/apis"
+    rig_api_url = "http://localhost:#{@api_port}/v2/apis"
     rig_proxy_url = "http://localhost:#{@proxy_port}"
 
     body =

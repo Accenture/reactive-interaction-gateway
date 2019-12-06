@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>RIG-SSE-Demo</title>
+  <script src="https://unpkg.com/event-source-polyfill/src/eventsource.min.js"></script>
+</head>
+
+<body>
+  <form onsubmit="sendGreeting(); return false;">
+    <input type="text" id="greeting" placeholder="Your greeting here" autofocus>
+    <input type="submit" id="submit-button" disabled>
+
+    <!--WS does NOT autoreconnect!-->
+    <button type="button" id="disconnect-connection-button" onclick="disconnect_connection()">Disconnect connection</button>
+    <button type="button" id="disconnect-button" onclick="disconnect()">Disconnect VConnection</button>
+  </form>
+  <ul id="eventList" style="list-style:none;padding-left:0">
+
+  </ul>
+  <script async>
+    const eventList = document.getElementById("eventList")
+    const baseUrl = "http://localhost:4000/_rig/v1"
+
+    function addEvent(cloudEvent) {
+      const {
+        eventTime,
+        data
+      } = cloudEvent
+
+      const li = document.createElement("li")
+      li.textContent = `[${new Date(eventTime).toLocaleTimeString()}] ${data}`
+      eventList.appendChild(li)
+    }
+
+    function addNonEvent(data) {
+      const li = document.createElement("li")
+      li.textContent = `${data}`
+      eventList.appendChild(li)
+    }
+
+    function randomString() {
+      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    }
+
+    function sendGreeting() {
+      const input = document.getElementById("greeting")
+      const greeting = input.value
+      input.value = ""
+      return fetch(`${baseUrl}/events`, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/cloudevents+json; charset=utf-8"
+          },
+          body: JSON.stringify({
+            cloudEventsVersion: "0.1",
+            eventID: randomString(),
+            eventType: "greeting.simple",
+            eventTime: new Date().toISOString(),
+            source: "ws-demo-ui",
+            contentType: "text/plain",
+            data: greeting
+          })
+        })
+        .then(response => response.json())
+        .then(json => {
+          console.log("CloudEvent sent:", json)
+          return json
+        })
+        .catch(err => {
+          console.log("Failed to send CloudEvent:", err)
+        })
+    }
+
+    function createSubscription(connectionToken) {
+      const eventType = "greeting.simple"
+      return fetch(`${baseUrl}/connection/ws/${connectionToken}/subscriptions`, {
+          method: "PUT",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json; charset=utf-8"
+          },
+          body: JSON.stringify({
+            "subscriptions": [{
+              "eventType": eventType
+            }]
+          })
+        })
+        .then(json => {
+          console.log("Subscription created:", json)
+          return json
+        })
+        .catch(err => {
+          console.log("Failed to create subscription:", err)
+        })
+    }
+
+    const apiBaseUrl = "http://localhost:4010/v2";
+
+    function disconnect() {
+      fetch(`${apiBaseUrl}/connection/${connectionToken}/`, {method: "DELETE", mode: "cors"}).then(msg => { return msg.text() })
+    }
+
+    function disconnect_connection() {
+      fetch(`${apiBaseUrl}/connection/${connectionToken}/socket`, {method: "DELETE", mode: "cors"}).then(msg => { return msg.text() })
+    }
+
+    var source;
+
+    (async function(){
+    
+    var response = await fetch(`${baseUrl}/connection/init`, {
+      method: "GET",
+      mode: "cors"
+    })
+    const token = await response.text()
+
+    const connection_token = response.status == 200 ? `?connection_token=${token}` : ""
+    const eventUrl = `ws://localhost:4000/_rig/v1/connection/ws${connection_token}`
+
+    const source = new WebSocket(eventUrl)
+
+    source.onopen = (e) => console.log("open", e)
+    source.onmessage = (e) => {
+      console.log("message", e)
+      const cloudEvent = JSON.parse(e.data)
+      if (cloudEvent.type === 'rig.connection.create') {
+        payload = cloudEvent.data
+        connectionToken = payload["connection_token"]
+        createSubscription(connectionToken)
+      } else if (cloudEvent.eventType === 'greeting.simple') {
+        addEvent(cloudEvent)
+      } else if (cloudEvent.type === 'rig.subscriptions_set') {
+        document.getElementById("submit-button").removeAttribute("disabled");
+      }
+    }
+    source.onerror = (e) => console.log("error", e)
+    })()
+  </script>
+</body>
+
+</html>

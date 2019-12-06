@@ -1,0 +1,31 @@
+defmodule RigInboundGatewayWeb.V1.ConnectionController do
+  @moduledoc false
+  use Rig.Config, [:cors]
+  use RigInboundGatewayWeb, :controller
+  use RigInboundGatewayWeb.Cors, [:put, :delete]
+
+  alias Result
+  alias Rig.Connection.Codec
+  alias RigInboundGatewayWeb.VConnection
+
+  require Logger
+
+  @heartbeat_interval_ms 15_000
+  @subscription_refresh_interval_ms 60_000
+
+  @doc """
+  ### Dirty Testing
+
+      CONN_TOKEN=$(http :4000/_rig/v1/connection/init)
+      http --stream ":4000/_rig/v1/connection/sse?connection_token=$CONN_TOKEN"
+  """
+  @spec init(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
+  def init(%{method: "GET"} = conn, _) do
+    {:ok, vconnection_pid} =
+      VConnection.start_with_timeout(@heartbeat_interval_ms, @subscription_refresh_interval_ms)
+
+    conn
+    |> with_allow_origin
+    |> send_resp(:ok, Codec.serialize(vconnection_pid))
+  end
+end

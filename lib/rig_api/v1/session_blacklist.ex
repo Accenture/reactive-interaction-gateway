@@ -1,11 +1,10 @@
-defmodule RigApi.SessionBlacklistController do
+defmodule RigApi.V1.SessionBlacklist do
   @moduledoc """
-  Allows for blocking "sessions" for a specific period of time.
+  Controller that allows blocking "sessions" for a specific period of time.
 
   What a session is depends on your business context and the `JWT_SESSION_FIELD`
   setting. For example, a session ID could be a random ID assigned to a token upon
   login, or the id of the user the token belongs to.
-
   """
   use RigApi, :controller
   use PhoenixSwagger
@@ -13,6 +12,7 @@ defmodule RigApi.SessionBlacklistController do
 
   alias RIG.Session
 
+  @prefix "/v1"
   @cors_origins "*"
 
   # ---
@@ -35,7 +35,7 @@ defmodule RigApi.SessionBlacklistController do
   # ---
 
   swagger_path :check_status do
-    get("/v1/session-blacklist/{sessionId}")
+    get(@prefix <> "/session-blacklist/{sessionId}")
     summary("Check whether a given session is currently blacklisted.")
 
     parameters do
@@ -58,7 +58,7 @@ defmodule RigApi.SessionBlacklistController do
   # ---
 
   swagger_path :blacklist_session do
-    post("/v1/session-blacklist")
+    post(@prefix <> "/session-blacklist")
     summary("Add a session to the session blacklist.")
 
     description("""
@@ -66,8 +66,8 @@ defmodule RigApi.SessionBlacklistController do
     the token's expiration timestamp. This has the following consequences:
 
     - Any existing connection related to the session is terminated immediately.
-    - The related authorization token is ignored when a client establishes a connection.
-    - The related authorization token is ignored when a client creates a subscription.
+    - The related authorization token is no longer valid when a client establishes a connection.
+    - The related authorization token is no longer valid when a client creates a subscription.
     """)
 
     parameters do
@@ -105,19 +105,40 @@ defmodule RigApi.SessionBlacklistController do
   # ---
 
   defp parse(body) do
-    {:ok,
-     %{
-       session_id: Map.fetch!(body, "sessionId"),
-       ttl_s: body |> Map.fetch!("validityInSeconds") |> String.to_integer()
-     }}
-  rescue
-    e in KeyError ->
-      {:error, "Missing value for '#{e.key}'"}
-
-    e in ArgumentError ->
-      # This is likely String.to_integer/1, but we don't know for sure.
-      {:error, "Invalid request body: #{inspect(e)}"}
+    Result.ok(%{})
+    |> Result.and_then(&parse_and_add_session_id(&1, body))
+    |> Result.and_then(&parse_and_add_ttl_s(&1, body))
   end
+
+  # ---
+
+  defp parse_and_add_session_id(into, from) do
+    case Map.fetch(from, "sessionId") do
+      {:ok, value} when byte_size(value) > 0 -> {:ok, Map.merge(into, %{session_id: value})}
+      {:ok, value} -> {:error, "Expected non-empty string, got #{inspect(value)}"}
+      :error -> {:error, "Missing value for \"sessionId\""}
+    end
+  end
+
+  # ---
+
+  defp parse_and_add_ttl_s(into, from) do
+    case Map.fetch(from, "validityInSeconds") do
+      {:ok, value} when byte_size(value) > 0 ->
+        case Integer.parse(value) do
+          {value, ""} when value > 0 -> {:ok, Map.merge(into, %{ttl_s: value})}
+          _ -> {:error, "Expected a positive number in a string, got #{inspect(value)}"}
+        end
+
+      {:ok, value} ->
+        {:error, "Expected a positive number in a string, got #{inspect(value)}"}
+
+      :error ->
+        {:error, "Missing value for \"validityInSeconds\""}
+    end
+  end
+
+  # ---
 
   def swagger_definitions do
     %{

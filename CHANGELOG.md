@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added longpolling as new connection type [#217](https://github.com/Accenture/reactive-interaction-gateway/issues/217)
+- When terminating an SSE connection after its associated session has been blacklisted, RIG now sends out a `rig.session_killed` event before closing the socket. For WebSocket connections, the closing frame contains "Session killed." as its payload.
+- New API for querying and updating the session blacklist: `/v2/session-blacklist`, which introduces the following breaking changes:
+  - When a session has been added to the session blacklist successfully, the endpoint now uses the correct HTTP status code "201 Created" instead of "200 Ok".
+  - When using the API to blacklist a session, the `validityInSeconds` should now be passed as an integer value (using a string still works though).
+- Added abstraction over SSE and WS. This abstraction keeps track of state, manages timers, can be initialized before a client connects to RIG and can be used for reconnects (client can pick up where they left of). This means that for SSE and WS connections, the connection token now refers to this connection abstraction.
+  - With `GET /v1/connection/init`, one can now pre-initialize this connection
+  - `DELETE /v1/connection/<connection_pid>` gracefully destroys this abstraction. This is recommended! 
+  - `DELETE /v1/connection/<connection_pid>/socket` destroys the actual (WS/SSE) connection
+  - Added new configuration option via `IDLE_CONNECTION_TIMEOUT` environment variable. This determines when the connection abstraction should die after the actual socket has disconnected/closed.
 
 <!-- ### Changed -->
 

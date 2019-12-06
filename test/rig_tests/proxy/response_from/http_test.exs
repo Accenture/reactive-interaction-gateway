@@ -38,7 +38,7 @@ defmodule RigTests.Proxy.ResponseFrom.HttpTest do
     )
 
     # We register the endpoint with the proxy:
-    rig_api_url = "http://localhost:#{@api_port}/v1/apis"
+    rig_api_url = "http://localhost:#{@api_port}/v2/apis"
     rig_proxy_url = "http://localhost:#{@proxy_port}"
 
     body =

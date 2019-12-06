@@ -103,7 +103,7 @@ defmodule RIG.JWT do
 
   defp ensure_not_blacklisted(%{"jti" => jti} = claims) do
     if Session.blacklisted?(jti) do
-      {:error, "Ignoring blacklisted JWT with ID #{jti}."}
+      {:error, "Ignoring blacklisted JWT with ID #{inspect(jti)}."}
     else
       {:ok, claims}
     end

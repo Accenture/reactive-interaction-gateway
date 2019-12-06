@@ -6,6 +6,7 @@ defmodule RigInboundGateway.ApiProxy.Plug do
   """
 
   def init(opts), do: opts
+
   def call(conn, opts) do
     conn
     |> RigInboundGateway.ApiProxy.Router.call(opts)

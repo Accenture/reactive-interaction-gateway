@@ -42,7 +42,7 @@ defmodule RigInboundGatewayWeb.EventBuffer do
   @spec events_since(__MODULE__.t(), event_id :: String.t()) ::
           {:ok, [events: [CloudEvent.t()], last_event_id: String.t()]}
           | {:no_such_event, [not_found_id: String.t(), last_event_id: String.t()]}
-  def events_since(%{capacity: capacity, events: events}, event_id) do
+  def events_since(%{capacity: capacity, events: events}, event_id) when events != [] do
     last_event_id = events |> hd() |> CloudEvent.id!()
     newer_events = Enum.take_while(events, fn event -> CloudEvent.id!(event) != event_id end)
 
@@ -52,5 +52,9 @@ defmodule RigInboundGatewayWeb.EventBuffer do
       newer_events_asc = Enum.reverse(newer_events)
       {:ok, [events: newer_events_asc, last_event_id: last_event_id]}
     end
+  end
+
+  def events_since(_, _) do
+    {:ok, [events: []]}
   end
 end

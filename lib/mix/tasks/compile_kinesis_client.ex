@@ -13,9 +13,11 @@ defmodule Mix.Tasks.CompileKinesisClient do
     stream = IO.binstream(:stdio, :line)
 
     case Porcelain.exec("mvn", ["package"], out: stream, err: :out, dir: "kinesis-client") do
-      %Porcelain.Result{status: 0} -> Logger.info("kinesis-client jar successfully compiled.")
-      %Porcelain.Result{status: s} -> Logger.warn("kinesis-client jar failed to build (status #{s}).")
+      %Porcelain.Result{status: 0} ->
+        Logger.info("kinesis-client jar successfully compiled.")
+
+      %Porcelain.Result{status: s} ->
+        Logger.warn("kinesis-client jar failed to build (status #{s}).")
     end
   end
-
 end
