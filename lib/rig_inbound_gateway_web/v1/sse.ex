@@ -13,6 +13,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
+  alias RigInboundGateway.Metadata
   alias RigInboundGatewayWeb.ConnectionInit
 
   require Logger
@@ -28,6 +29,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     jwt = query_params["jwt"]
     connection_token = query_params["connection_token"]
     last_event_id = query_params["last_event_id"]
+    metadata_json = query_params["metadata"]
 
     auth_info =
       case jwt do
@@ -46,7 +48,8 @@ defmodule RigInboundGatewayWeb.V1.SSE do
           content_type: "application/json; charset=utf-8",
           body: encoded_body_or_nil,
           connection_token: connection_token,
-          last_event_id: last_event_id
+          last_event_id: last_event_id,
+          metadata: Metadata.extract(metadata_json, auth_info.auth_tokens)
         }
 
         do_init(req, request)

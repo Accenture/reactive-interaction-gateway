@@ -5,6 +5,8 @@ defmodule RigInboundGatewayWeb.VConnection do
   It monitors the processes, sends out heartbeats and subscription refreshes, handles heartbeat and the general state of each connection.
   """
 
+  alias RIG.DistributedMap
+
   alias Rig.EventFilter
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
@@ -15,16 +17,25 @@ defmodule RigInboundGatewayWeb.VConnection do
   use GenServer
   use Rig.Config, [:idle_connection_timeout]
 
-  # TEMP UNTIL WE ACTUALLY IMPLEMENT lasteventid
+  # TODO: Discuss sensible defaults, move to config or ENV variable
   @buffer_size 10
   @send_interval 20
+  @metadata_ttl 60_000
 
-  def start(pid, subscriptions, heartbeat_interval_ms, subscription_refresh_interval_ms) do
+  def start(pid, subscriptions, metadata, heartbeat_interval_ms, subscription_refresh_interval_ms) do
+    {_, data} = metadata
+    {metadata, indexed_fields} = case data do
+      {a,b} -> {a, b}
+      _ -> {nil, nil}
+    end
+
     GenServer.start(
       __MODULE__,
       %{
         target_pid: pid,
         subscriptions: subscriptions,
+        metadata: metadata,
+        indexed_fields: indexed_fields,
         heartbeat_interval_ms: heartbeat_interval_ms,
         subscription_refresh_interval_ms: subscription_refresh_interval_ms,
         kill_timer: nil,
@@ -35,7 +46,7 @@ defmodule RigInboundGatewayWeb.VConnection do
   end
 
   def start(heartbeat_interval_ms, subscription_refresh_interval_ms) do
-    start(nil, [], heartbeat_interval_ms, subscription_refresh_interval_ms)
+    start(nil, [], {:error, nil}, heartbeat_interval_ms, subscription_refresh_interval_ms)
   end
 
   def start_with_timeout(heartbeat_interval_ms, subscription_refresh_interval_ms) do
@@ -47,18 +58,22 @@ defmodule RigInboundGatewayWeb.VConnection do
 
   @impl true
   def init(state) do
-    # TODO: Publish connect event
-
     Logger.debug(fn -> "New VConnection initialized #{inspect(self())}" end)
 
     # We register subscriptions:
     send(self(), {:set_subscriptions, state.subscriptions})
+
+    # And metadata:
+    send(self(), {:set_metadata, state.metadata, state.indexed_fields, true})
 
     # We schedule the initial heartbeat:
     Process.send_after(self(), :heartbeat, state.heartbeat_interval_ms)
 
     # And the initial subscription refresh:
     Process.send_after(self(), :refresh_subscriptions, state.subscription_refresh_interval_ms)
+
+    # And the initial metadata refresh:
+    Process.send_after(self(), :refresh_metadata, @metadata_ttl)
 
     if state.target_pid do
       {:ok, create_monitor(state)}
@@ -92,7 +107,6 @@ defmodule RigInboundGatewayWeb.VConnection do
 
     Logger.debug(fn -> "Client #{inspect(from_pid)} reconnected" end)
 
-    # TODO: Publish reconnect event
     {:reply, {:ok, self()}, state}
   end
 
@@ -137,6 +151,37 @@ defmodule RigInboundGatewayWeb.VConnection do
   end
 
   @impl true
+  def handle_info({:set_metadata, metadata, indexed_fields, msg}, state) do
+    unless metadata == nil or indexed_fields == nil do
+      # Store metadata
+      indexed_fields
+      |> Enum.each(fn x ->
+        DistributedMap.add(Metadata, x, metadata, @metadata_ttl)
+      end)
+
+      if msg do
+        event = Events.metadata_set(metadata)
+  
+        send! state.target_pid, {:forward, event}
+      end
+    end
+
+    # Replace current Metadata
+    state = Map.put(state, :metadata, metadata)
+    state = Map.put(state, :indexed_fields, indexed_fields)
+    
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info({:set_metadata, msg}, state) do
+    # Register metadata
+    send(self(), {:set_metadata, state.metadata, state.indexed_fields, msg})
+
+    {:noreply, state}
+  end
+
+  @impl true
   def handle_info(:set_subscriptions, state) do
     # Register subscriptions
     send(self(), {:set_subscriptions, state.subscriptions})
@@ -159,6 +204,16 @@ defmodule RigInboundGatewayWeb.VConnection do
 
     # And schedule the next one:
     Process.send_after(self(), :refresh_subscriptions, state.subscription_refresh_interval_ms)
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info(:refresh_metadata, state) do
+    IO.puts "Metadata refresh!"
+    send self(), {:set_metadata, false}
+
+    # And schedule the next one:
+    Process.send_after(self(), :refresh_metadata, @metadata_ttl)
     {:noreply, state}
   end
 
@@ -206,7 +261,6 @@ defmodule RigInboundGatewayWeb.VConnection do
   @impl true
   def handle_info(:vconnection_timeout, state) do
     Logger.debug(fn -> "Connection initialized, timeout starting..." end)
-
     {:noreply, start_timer(state)}
   end
 
@@ -219,9 +273,6 @@ defmodule RigInboundGatewayWeb.VConnection do
   @impl true
   def handle_info({:DOWN, _ref, :process, pid, _}, state) do
     Logger.debug(fn -> "Connection went down #{inspect(pid)}" end)
-
-    # TODO: Publish down event
-
     {:noreply, start_timer(state)}
   end
 

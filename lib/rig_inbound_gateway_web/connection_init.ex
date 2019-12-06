@@ -59,6 +59,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
             VConnection.start(
               self(),
               subscriptions,
+              request.metadata,
               heartbeat_interval_ms,
               subscription_refresh_interval_ms
             )
@@ -73,9 +74,21 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
                 # If the client reconnects with new subscriptions,
                 # replace the existing subscriptions
                 send(pid, {:set_subscriptions, subscriptions})
+
+                # Replace existing metadata if there is new one
+                with {:ok, data} <- request.metadata,
+                    {metadata, indexed_fields} <- data do
+                
+                  send(pid, {:set_metadata, metadata, indexed_fields, true})
+                else
+                  err -> err
+                end
               else
                 # Re-register subscriptions
                 send(pid, :set_subscriptions)
+                
+                # Re-register metadata
+                send(pid, {:set_metadata, true})
               end
 
               if request.last_event_id != nil do
@@ -89,6 +102,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
               VConnection.start(
                 self(),
                 subscriptions,
+                request.metadata,
                 heartbeat_interval_ms,
                 subscription_refresh_interval_ms
               )

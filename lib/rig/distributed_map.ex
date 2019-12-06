@@ -2,6 +2,9 @@ defmodule RIG.DistributedMap do
   @moduledoc """
   Distributed grow-only map with per key-value pair time-to-live support.
   """
+
+  # TODO: Removal of old entries seems broken
+
   require Logger
   use GenServer
   import Ex2ms
@@ -114,6 +117,7 @@ defmodule RIG.DistributedMap do
         {_, value, _, _, _} = x
         value
       end)
+      |> Enum.uniq()
     else
       []
     end

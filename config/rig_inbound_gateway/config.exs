@@ -161,6 +161,7 @@ config :rig, RigInboundGatewayWeb.V1.SubscriptionController, cors: cors
 config :rig, RigInboundGatewayWeb.V1.SSE, cors: cors
 config :rig, RigInboundGatewayWeb.V1.LongpollingController, cors: cors
 config :rig, RigInboundGatewayWeb.V1.ConnectionController, cors: cors
+config :rig, RigInboundGatewayWeb.V1.MetadataController, cors: cors
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
