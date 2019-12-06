@@ -19,7 +19,7 @@ defmodule RigInboundGatewayWeb.Router do
           subscription_url = "/:connection_id/subscriptions"
           options(subscription_url, SubscriptionController, :handle_preflight)
           put(subscription_url, SubscriptionController, :set_subscriptions)
-          
+
           metadata_url = "/:connection_id/metadata"
           options(metadata_url, MetadataController, :handle_preflight)
           put(metadata_url, MetadataController, :set_metadata)

@@ -42,8 +42,6 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
         %{auth_tokens: [{"bearer", jwt}]} -> jwt
       end
 
-    # TODO: EVENT: SETUP
-
     with {:ok, jwt_subs} <- Subscriptions.from_token(jwt),
          true = String.starts_with?(request.content_type, "application/json"),
          {:ok, query_subs} <- Subscriptions.from_json(request.body),
@@ -78,7 +76,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
                 # Replace existing metadata if there is new one
                 with {:ok, data} <- request.metadata,
                     {metadata, indexed_fields} <- data do
-                
+
                   send(pid, {:set_metadata, metadata, indexed_fields, true})
                 else
                   err -> err
@@ -86,7 +84,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
               else
                 # Re-register subscriptions
                 send(pid, :set_subscriptions)
-                
+
                 # Re-register metadata
                 send(pid, {:set_metadata, true})
               end

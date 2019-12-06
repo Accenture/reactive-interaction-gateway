@@ -1,4 +1,7 @@
 defmodule RigInboundGateway.Metadata do
+  @moduledoc """
+  Utils to extract metadata from JSON and JWT
+  """
 
   use Rig.Config, [:jwt_fields, :indexed_metadata]
 
@@ -53,7 +56,7 @@ defmodule RigInboundGateway.Metadata do
   def extract_metadata_from_jwt(auth_tokens) do
     with {:ok, claims} <- auth_tokens
     |> Enum.map(fn
-      {"bearer", token} -> JWT.parse_token(token)
+      {"bearer", token} -> JWT.parse_token(token || "")
       _ -> {:ok, %{}}
     end)
     |> Result.list_to_result()
@@ -78,6 +81,8 @@ defmodule RigInboundGateway.Metadata do
   end
 
   # ---
+
+  def extract_metadata_from_json(nil), do: {:error, nil}
 
   def extract_metadata_from_json(body) do
     with {:ok, json} <- Jason.decode(body),

@@ -49,7 +49,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
           body: encoded_body_or_nil,
           connection_token: connection_token,
           last_event_id: last_event_id,
-          metadata: Metadata.extract(metadata_json, auth_info.auth_tokens)
+          metadata: Metadata.extract(metadata_json, [{"bearer", jwt}])
         }
 
         do_init(req, request)

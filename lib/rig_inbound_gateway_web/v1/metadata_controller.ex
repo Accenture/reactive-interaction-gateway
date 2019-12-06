@@ -7,9 +7,9 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
   use Rig.Config, [:cors]
 
   alias Result
-  alias RigInboundGateway.Metadata
   alias Rig.Connection.Codec
   alias RIG.Plug.BodyReader
+  alias RigInboundGateway.Metadata
 
   require Logger
 

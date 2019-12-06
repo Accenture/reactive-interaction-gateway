@@ -25,7 +25,7 @@ defmodule RigInboundGatewayWeb.VConnection do
   def start(pid, subscriptions, metadata, heartbeat_interval_ms, subscription_refresh_interval_ms) do
     {_, data} = metadata
     {metadata, indexed_fields} = case data do
-      {a,b} -> {a, b}
+      {a, b} -> {a, b}
       _ -> {nil, nil}
     end
 
@@ -161,7 +161,7 @@ defmodule RigInboundGatewayWeb.VConnection do
 
       if msg do
         event = Events.metadata_set(metadata)
-  
+
         send! state.target_pid, {:forward, event}
       end
     end
@@ -169,7 +169,7 @@ defmodule RigInboundGatewayWeb.VConnection do
     # Replace current Metadata
     state = Map.put(state, :metadata, metadata)
     state = Map.put(state, :indexed_fields, indexed_fields)
-    
+
     {:noreply, state}
   end
 
