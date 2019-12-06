@@ -20,7 +20,7 @@ defmodule RigInboundGatewayWeb.VConnection do
   # TODO: Discuss sensible defaults, move to config or ENV variable
   @buffer_size 10
   @send_interval 20
-  @metadata_ttl 60_000
+  @metadata_ttl_s 60
 
   def start(pid, subscriptions, metadata, heartbeat_interval_ms, subscription_refresh_interval_ms) do
     {_, data} = metadata
@@ -73,7 +73,7 @@ defmodule RigInboundGatewayWeb.VConnection do
     Process.send_after(self(), :refresh_subscriptions, state.subscription_refresh_interval_ms)
 
     # And the initial metadata refresh:
-    Process.send_after(self(), :refresh_metadata, @metadata_ttl)
+    Process.send_after(self(), :refresh_metadata, @metadata_ttl_s * 1000)
 
     if state.target_pid do
       {:ok, create_monitor(state)}
@@ -156,7 +156,9 @@ defmodule RigInboundGatewayWeb.VConnection do
       # Store metadata
       indexed_fields
       |> Enum.each(fn x ->
-        DistributedMap.add(Metadata, x, metadata, @metadata_ttl)
+        # TODO: Can we replace `metadata` with `self()`
+        # How would this work in clustered mode, tho?
+        DistributedMap.add(Metadata, x, metadata, @metadata_ttl_s)
       end)
 
       if msg do
@@ -209,11 +211,13 @@ defmodule RigInboundGatewayWeb.VConnection do
 
   @impl true
   def handle_info(:refresh_metadata, state) do
-    IO.puts "Metadata refresh!"
-    send self(), {:set_metadata, false}
+    unless state.metadata == nil or state.indexed_fields == nil do
+      Logger.debug(fn -> "Metadata was refreshed! #{inspect(self())}" end)
+      send self(), {:set_metadata, false}
+    end
 
     # And schedule the next one:
-    Process.send_after(self(), :refresh_metadata, @metadata_ttl)
+    Process.send_after(self(), :refresh_metadata, @metadata_ttl_s * 1000)
     {:noreply, state}
   end
 
