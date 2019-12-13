@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.20.0">
+    <meta name="project" content="Reactive Interaction Gateway v2.3.0">
+    <title>RigInboundGateway.ApiProxy.Handler.Kafka — Reactive Interaction Gateway v2.3.0</title>
+    <link rel="stylesheet" href="dist/html-11fdd9cd6b7c7c3981df.css" />
+    <script src="dist/sidebar_items-ea2b2efc39.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/html-11fdd9cd6b7c7c3981df.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://accenture.github.io/reactive-interaction-gateway" class="sidebar-projectName">
+Reactive Interaction Gateway      </a>
+      <h2 class="sidebar-projectVersion">
+        v2.3.0
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+      <li><a id="exceptions-list" href="#full-list">Exceptions</a></li>
+
+      <li><a id="tasks-list" href="#full-list">Mix Tasks</a></li>
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Reactive Interaction Gateway v2.3.0</small>
+RigInboundGateway.ApiProxy.Handler.Kafka          <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/handler/kafka.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Handles requests for Kafka targets.</p>
+        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#child_spec/1">child_spec(init_arg)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a specification to start this module under a supervisor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#config/0">config()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns module configuration.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#do_handle_http_request/5">do_handle_http_request(conn, request_path, partition, event, response_from)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#handle_http_request/4">handle_http_request(conn, api, endpoint, request_path)</a>
+  </div>
+    <div class="summary-synopsis"><p>Produce the request to a Kafka topic and optionally wait for the (correlated) response.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#kafka_handler/1">kafka_handler(message)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#respond_with_bad_request/3">respond_with_bad_request(conn, response_from, description)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/1">start_link(opts \\ [])</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate/1">validate(conf)</a>
+  </div>
+</div>
+  </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="child_spec/1">
+  <div class="detail-header">
+    <a href="#child_spec/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">child_spec(init_arg)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/handler/kafka.ex#L6" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+  <section class="docstring">
+<p>Returns a specification to start this module under a supervisor.</p>
+<p>See <a href="https://hexdocs.pm/elixir/Supervisor.html"><code class="inline">Supervisor</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="config/0">
+  <div class="detail-header">
+    <a href="#config/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">config()</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/handler/kafka.ex#L6" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>config() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns module configuration.</p>
+<p>If application environment contains values in <a href="https://hexdocs.pm/elixir/Keyword.html"><code class="inline">Keyword</code></a> or <a href="https://hexdocs.pm/elixir/Map.html"><code class="inline">Map</code></a> struct,
+defaults from macro usage will be recursively merged with application configuration.</p>
+<p>If one of the configuration parameters does not exist or can not be resolved, raises <a href="https://hexdocs.pm/elixir/ArgumentError.html"><code class="inline">ArgumentError</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="do_handle_http_request/5">
+  <div class="detail-header">
+    <a href="#do_handle_http_request/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">do_handle_http_request(conn, request_path, partition, event, response_from)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/handler/kafka.ex#L117" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="handle_http_request/4">
+  <div class="detail-header">
+    <a href="#handle_http_request/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">handle_http_request(conn, api, endpoint, request_path)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/handler/kafka.ex#L63" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+  <section class="docstring">
+<p>Produce the request to a Kafka topic and optionally wait for the (correlated) response.</p>
+<p>Expects a JSON encoded HTTP body with the following fields:</p>
+<ul>
+<li><code class="inline">event</code>: The published CloudEvent &gt;= v0.2. The event is extended by metadata
+written to the &quot;rig&quot; extension field (following the CloudEvents v0.2 spec).
+</li>
+<li><code class="inline">partition</code>: The targetted Kafka partition.
+</li>
+</ul>
+  </section>
+</section>
+<section class="detail" id="kafka_handler/1">
+  <div class="detail-header">
+    <a href="#kafka_handler/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">kafka_handler(message)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/handler/kafka.ex#L39" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>kafka_handler(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()) ::
+  :ok
+  | {:error, %<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(){:__exception__ => true, optional(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) => <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()},
+     <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="respond_with_bad_request/3">
+  <div class="detail-header">
+    <a href="#respond_with_bad_request/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">respond_with_bad_request(conn, response_from, description)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/handler/kafka.ex#L166" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="start_link/1">
+    <span id="start_link/0"></span>
+  <div class="detail-header">
+    <a href="#start_link/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link(opts \\ [])</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/handler/kafka.ex#L6" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate/1">
+  <div class="detail-header">
+    <a href="#validate/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate(conf)</span>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/handler/kafka.ex#L31" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()) :: {:ok, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.20.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>
