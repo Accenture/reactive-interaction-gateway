@@ -8,6 +8,7 @@ defmodule RigInboundGatewayWeb.VConnection do
   alias RIG.DistributedMap
 
   alias Rig.EventFilter
+  alias Rig.Connection.Codec
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
   alias RigInboundGatewayWeb.EventBuffer
@@ -156,9 +157,9 @@ defmodule RigInboundGatewayWeb.VConnection do
       # Store metadata
       indexed_fields
       |> Enum.each(fn x ->
-        # TODO: Can we replace `metadata` with `self()`
-        # How would this work in clustered mode, tho?
-        DistributedMap.add(Metadata, x, metadata, @metadata_ttl_s)
+        # When accessing metadata, the controller sends a request to the VConnection PID
+        # This way, we can also see if a user is online
+        DistributedMap.add(Metadata, x, Codec.serialize(self()) , @metadata_ttl_s)
       end)
 
       if msg do

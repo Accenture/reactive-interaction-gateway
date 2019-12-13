@@ -31,15 +31,13 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
       }
 
   In this example, the field "userid" might be indexed. In this case, the connection token would get associated with the value of the "userid" field (it will be possible to automatically take the user id from the JWT token (so that it cannot be changed by any other way) and index that; this will be serverside configuration).
-  In addition to that, the value of the "userid", "locale" and "timezone" fields would get associated to the connection token.
-
-  To sum it up: the connection token is indexed by default, while all other fields can be indexed by configuration.
+  In addition to that, the value of the "userid", "locale" and "timezone" are stored in the VConnection. So when someone requests metadata from a user by a specific userid, RIG asks the VConnection(s) of that user to return it.
 
   So the association would look like so:
 
       userid -> connection token
 
-      conection token ->
+      VConnection ->
         userid
         locale
         timezone
@@ -79,8 +77,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
 
     {:ok, pid} = Codec.deserialize(connection_id)
 
-    # TODO: What if this pid is on another machine??
-    send pid, {:set_metadata, metadata, indexed_fields}
+    send pid, {:set_metadata, metadata, indexed_fields, true}
   end
 
   # ---
