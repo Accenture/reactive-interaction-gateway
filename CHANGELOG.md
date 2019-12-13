@@ -28,7 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - In addition to SSE and WebSocket, RIG now also supports HTTP long-polling for listening to events. Frontends should only use this as a fallback in situations where neither SSE nor WebSocket is supported by the network.
   [#217](https://github.com/Accenture/reactive-interaction-gateway/issues/217)
 - When terminating an SSE connection after its associated session has been blacklisted, RIG now sends out a `rig.session_killed` event before closing the socket. For WebSocket connections, the closing frame contains "Session killed." as its payload.
-- New API for querying and updating the session blacklist: `/v2/session-blacklist`, which introduces the following breaking changes (`/v1/session-blacklist` is unaffected):
+  [#261](https://github.com/Accenture/reactive-interaction-gateway/pull/261)
+- New API for querying and updating the session blacklist: `/v2/session-blacklist`, which introduces the following breaking changes (`/v1/session-blacklist` is unaffected) [#261](https://github.com/Accenture/reactive-interaction-gateway/pull/261):
   - When a session has been added to the session blacklist successfully, the endpoint now uses the correct HTTP status code "201 Created" instead of "200 Ok".
   - When using the API to blacklist a session, the `validityInSeconds` should now be passed as an integer value (using a string still works though).
 
