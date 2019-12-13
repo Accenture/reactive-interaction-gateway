@@ -55,6 +55,8 @@ export KAFKA_SOURCE_TOPICS=rig-avro
 export KAFKA_SERIALIZER=avro
 export KAFKA_SCHEMA_REGISTRY_HOST=localhost:8081
 export KAFKA_LOG_SCHEMA=rig-request-logger-value
+export PROXY_KAFKA_REQUEST_TOPIC=rig-avro
+export PROXY_KAFKA_REQUEST_AVRO=rig-avro-value
 
 section_header "Running integration test suite for Kafka & Avro"
 mix test --only avro "$@"
