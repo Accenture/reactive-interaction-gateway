@@ -89,8 +89,9 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
   <a href="https://github.com/Accenture/reactive-interaction-gateway/issues/217">#217</a>
 </li>
 <li>When terminating an SSE connection after its associated session has been blacklisted, RIG now sends out a <code class="inline">rig.session_killed</code> event before closing the socket. For WebSocket connections, the closing frame contains &quot;Session killed.&quot; as its payload.
+  <a href="https://github.com/Accenture/reactive-interaction-gateway/pull/261">#261</a>
 </li>
-<li><p>New API for querying and updating the session blacklist: <code class="inline">/v2/session-blacklist</code>, which introduces the following breaking changes (<code class="inline">/v1/session-blacklist</code> is unaffected):</p>
+<li><p>New API for querying and updating the session blacklist: <code class="inline">/v2/session-blacklist</code>, which introduces the following breaking changes (<code class="inline">/v1/session-blacklist</code> is unaffected) <a href="https://github.com/Accenture/reactive-interaction-gateway/pull/261">#261</a>:</p>
 <ul>
 <li>When a session has been added to the session blacklist successfully, the endpoint now uses the correct HTTP status code &quot;201 Created&quot; instead of &quot;200 Ok&quot;.
 </li>
