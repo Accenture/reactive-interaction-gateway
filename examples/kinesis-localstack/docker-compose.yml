@@ -17,7 +17,9 @@ services:
       - DEFAULT_REGION=eu-west-1
 
   rig:
-    image: accenture/reactive-interaction-gateway:aws
+    build:
+      context: ../../
+      dockerfile: aws.dockerfile
     container_name: reactive-interaction-gateway
     ports:
       - 4000:4000

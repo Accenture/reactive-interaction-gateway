@@ -2,6 +2,10 @@
 
 Example showing how to use RIG with AWS Kinesis and [Localstack](https://github.com/localstack/localstack).
 
+## Setup local Kinesis with RIG
+
+> In case you still want to use deprecated version, uncomment line `examples/kinesis-localstack/docker-compose.yml:37`
+
 ```sh
 # run Localstack and RIG
 docker-compose up -d
@@ -18,22 +22,36 @@ docker logs -f reactive-interaction-gateway
 
 # send event via AWS CLI
 docker-compose exec localstack bash -c 'awslocal kinesis put-record --stream-name RIG-outbound --data "{\"specversion\":\"0.2\",\"type\":\"com.github.pull.create\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"data\":\"hello\"}" --partition-key test --region eu-west-1'
+```
 
-# send event via RIG's proxy -> register API in RIG's proxy and send HTTP request
-# Deprecated way, endpoint should set also "topic" property, will be removed in version 3.0
-curl -X "POST" \
--H "Content-Type: application/json" \
--d "{\"id\":\"kinesis-service\",\"name\":\"kinesis-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kinesis-producer-endpoint\",\"path\":\"/kinesis\",\"method\":\"POST\",\"secured\":false,\"target\":\"kinesis\"}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localstack\",\"port\":4568}}" \
---silent \
-"http://localhost:4010/v2/apis"
+## Setup Proxy API endpoint
 
-# Recommended way
+### Recommended way
+
+```sh
 curl -X "POST" \
 -H "Content-Type: application/json" \
 -d "{\"id\":\"kinesis-service\",\"name\":\"kinesis-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kinesis-producer-endpoint\",\"path\":\"/kinesis\",\"method\":\"POST\",\"secured\":false,\"target\":\"kinesis\",\"topic\":\"RIG-outbound\"}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localstack\",\"port\":4568}}" \
 --silent \
 "http://localhost:4010/v2/apis"
+```
 
+### Deprecated way
+
+> Will be removed in version 3.0.
+
+```sh
+# send event via RIG's proxy -> register API in RIG's proxy and send HTTP request
+curl -X "POST" \
+-H "Content-Type: application/json" \
+-d "{\"id\":\"kinesis-service\",\"name\":\"kinesis-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kinesis-producer-endpoint\",\"path\":\"/kinesis\",\"method\":\"POST\",\"secured\":false,\"target\":\"kinesis\"}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localstack\",\"port\":4568}}" \
+--silent \
+"http://localhost:4010/v2/apis"
+```
+
+## Produce messages
+
+```sh
 # setting partition key manually
 curl -X "POST" \
 -H "Content-Type: application/json" \

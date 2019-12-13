@@ -21,7 +21,14 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
 
   - `event`: The published CloudEvent >= v0.2. The event is extended by metadata
   written to the "rig" extension field (following the CloudEvents v0.2 spec).
-  - `partition`: The targetted Kafka partition.
+  - `partition`: The targetted Kinesis partition.
+
+  or
+
+  ...
+  CloudEvent
+  ...
+  `rig`: {\"target_partition\":\"the-partition-key\"}
 
   """
   # ---

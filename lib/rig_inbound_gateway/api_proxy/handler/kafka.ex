@@ -23,6 +23,13 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   written to the "rig" extension field (following the CloudEvents v0.2 spec).
   - `partition`: The targetted Kafka partition.
 
+  or
+
+  ...
+  CloudEvent
+  ...
+  `rig`: {\"target_partition\":\"the-partition-key\"}
+
   """
 
   # ---
