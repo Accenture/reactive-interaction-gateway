@@ -75,6 +75,9 @@ defmodule RigApi.V2.MetadataController do
       #TODO: should we also return empty metadata sets?
       x != nil
     end)
+    #HACK: In CI, RIG sometimes returns duplicate data
+    #I cannot reproduce this on my machine but this fixes it.
+    |> Enum.uniq()
 
     send_resp(conn, :ok, Jason.encode!(data))
   end
