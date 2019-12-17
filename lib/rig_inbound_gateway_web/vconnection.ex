@@ -29,7 +29,7 @@ defmodule RigInboundGatewayWeb.VConnection do
 
     %{connection_buffer_size: buffer_size} = config()
     buffer_size = String.to_integer(buffer_size)
-    
+
     GenServer.start(
       __MODULE__,
       %{

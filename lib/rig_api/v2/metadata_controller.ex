@@ -6,8 +6,8 @@ defmodule RigApi.V2.MetadataController do
 
   alias Result
   alias Rig.Connection.Codec
-  alias RIG.Plug.BodyReader
   alias RIG.DistributedMap
+  alias RIG.Plug.BodyReader
 
   @doc """
   
