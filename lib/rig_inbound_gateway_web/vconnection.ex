@@ -7,8 +7,8 @@ defmodule RigInboundGatewayWeb.VConnection do
 
   alias RIG.DistributedMap
 
-  alias Rig.EventFilter
   alias Rig.Connection.Codec
+  alias Rig.EventFilter
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
   alias RigInboundGatewayWeb.EventBuffer

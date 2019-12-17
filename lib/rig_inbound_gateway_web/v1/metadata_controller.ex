@@ -7,10 +7,9 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
   use Rig.Config, [:cors]
 
   alias Result
+  alias Rig.Connection.Codec
   alias RIG.DistributedMap
-  alias Rig.Connection.Codec
   alias RIG.Plug.BodyReader
-  alias Rig.Connection.Codec
   alias RigInboundGateway.Metadata
 
   require Logger
@@ -88,7 +87,7 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
     value = conn.query_params["query_value"]
 
     online = DistributedMap.get(:metadata, {field, value})
-    |> Enum.map(fn x -> 
+    |> Enum.map(fn x ->
       Codec.deserialize!(x)
     end)
     |> Enum.uniq()
