@@ -75,6 +75,7 @@ defmodule RigApi.Router do
     end
 
     scope "/connection" do
+      get("/metadata", MetadataController, :get_metadata)
       get("/online", MetadataController, :is_online)
 
       scope "/:connection_id" do

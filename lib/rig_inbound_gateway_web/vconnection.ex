@@ -121,6 +121,11 @@ defmodule RigInboundGatewayWeb.VConnection do
   end
 
   @impl true
+  def handle_call(:get_metadata, _from, state) do
+    {:reply, state.metadata, state}
+  end
+
+  @impl true
   def handle_info({:schedule_missing, last_event_id}, state) do
     %{resend_interval: interval} = config()
     interval = String.to_integer(interval)
