@@ -26,7 +26,7 @@ defmodule RigInboundGatewayWeb.ConnectionInitTest do
       %HTTPoison.Response{body: body} = HTTPoison.get!(url)
 
       # Destroy the VConnection
-      del_url = "http://localhost:4010/v2/connection/#{body}"
+      del_url = "http://localhost:4000/_rig/v1/connection/#{body}"
       %HTTPoison.Response{} = HTTPoison.delete!(del_url)
 
       assert {:ok, client} = SseClient.connect(connection_token: body)
