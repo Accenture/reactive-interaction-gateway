@@ -2,7 +2,7 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
   @moduledoc false
   use Rig.Config, [:cors]
   use RigInboundGatewayWeb, :controller
-  use RigInboundGatewayWeb.Cors, [:put, :delete]
+  use RigInboundGatewayWeb.Cors, [:put, :delete, :get]
 
   alias Result
   alias Rig.Connection.Codec

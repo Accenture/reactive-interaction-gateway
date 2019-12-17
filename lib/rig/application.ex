@@ -26,7 +26,7 @@ defmodule Rig.Application do
       # Blacklist:
       Spec.worker(RIG.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
       #Metadata:
-      Spec.worker(RIG.DistributedMap, _args = [Metadata, [name: Metadata]]),
+      Spec.worker(RIG.DistributedMap, _args = [:metadata, [name: :metadata]]),
       # Kinesis event stream:
       Kinesis.JavaClient,
       KinesisFirehose.JavaClient,

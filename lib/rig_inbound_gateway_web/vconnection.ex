@@ -112,6 +112,15 @@ defmodule RigInboundGatewayWeb.VConnection do
   end
 
   @impl true
+  def handle_call(:is_online, from, state) do
+    if state.target_pid != nil do
+      {:reply, Process.alive?(state.target_pid), state}
+    else
+      {:reply, false, state}
+    end
+  end
+
+  @impl true
   def handle_info({:schedule_missing, last_event_id}, state) do
     case EventBuffer.events_since(state.event_buffer, last_event_id) do
       {:ok, [events: []]} ->
@@ -159,7 +168,7 @@ defmodule RigInboundGatewayWeb.VConnection do
       |> Enum.each(fn x ->
         # When accessing metadata, the controller sends a request to the VConnection PID
         # This way, we can also see if a user is online
-        DistributedMap.add(Metadata, x, Codec.serialize(self()) , @metadata_ttl_s)
+        DistributedMap.add(:metadata, x, Codec.serialize(self()) , @metadata_ttl_s)
       end)
 
       if msg do

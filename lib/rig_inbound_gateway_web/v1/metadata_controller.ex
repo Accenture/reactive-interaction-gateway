@@ -3,12 +3,14 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
   Handles inbound metadata sets and the indexing and distribution of metadata
   """
   use RigInboundGatewayWeb, :controller
-  use RigInboundGatewayWeb.Cors, [:put]
+  use RigInboundGatewayWeb.Cors, [:put, :get]
   use Rig.Config, [:cors]
 
   alias Result
+  alias RIG.DistributedMap
   alias Rig.Connection.Codec
   alias RIG.Plug.BodyReader
+  alias Rig.Connection.Codec
   alias RigInboundGateway.Metadata
 
   require Logger
@@ -66,6 +68,41 @@ defmodule RigInboundGatewayWeb.V1.MetadataController do
     else
       persist_metadata(data, connection_id)
       send_resp(conn, :no_content, "")
+    end
+  end
+
+  # ---
+
+  @doc """
+  
+  ### Dirty testing
+
+      FIELD_VALUE="9ab1bff2-a8d8-455c-b48a-50145d7d8e30"
+      FIELD_NAME="userid"
+      http get ":4000/_rig/v1/connection/online?query_value=$FIELD_VALUE&query_field=$FIELD_NAME"
+  """
+  @spec is_online(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
+  def is_online(%{method: "GET"} = conn, params) do
+    conn = Plug.Conn.fetch_query_params(conn)
+    field = conn.query_params["query_field"]
+    value = conn.query_params["query_value"]
+
+    online = DistributedMap.get(:metadata, {field, value})
+    |> Enum.map(fn x -> 
+      Codec.deserialize!(x)
+    end)
+    |> Enum.uniq()
+    |> Enum.map(fn x ->
+      GenServer.call(x, :is_online)
+    end)
+    |> Enum.any?(fn x ->
+      x
+    end)
+
+    if online do
+      send_resp(conn, :ok, "ok")
+    else
+      send_resp(conn, :ok, "error")
     end
   end
 

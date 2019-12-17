@@ -15,6 +15,8 @@ defmodule RigInboundGatewayWeb.Router do
       scope "/connection" do
         get("/init", ConnectionController, :init)
 
+        get("/online", MetadataController, :is_online)
+
         scope "/sse" do
           subscription_url = "/:connection_id/subscriptions"
           options(subscription_url, SubscriptionController, :handle_preflight)
