@@ -18,6 +18,8 @@ defmodule RigInboundGatewayWeb.VConnection do
   use GenServer
   use Rig.Config, [:idle_connection_timeout, :connection_buffer_size, :resend_interval]
 
+  @metadata_ttl_s 60
+
   def start(pid, subscriptions, metadata, heartbeat_interval_ms, subscription_refresh_interval_ms) do
     {_, data} = metadata
     {metadata, indexed_fields} = case data do
@@ -110,7 +112,7 @@ defmodule RigInboundGatewayWeb.VConnection do
   end
 
   @impl true
-  def handle_call(:is_online, from, state) do
+  def handle_call(:is_online, _from, state) do
     if state.target_pid != nil do
       {:reply, Process.alive?(state.target_pid), state}
     else

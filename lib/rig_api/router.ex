@@ -75,6 +75,8 @@ defmodule RigApi.Router do
     end
 
     scope "/connection" do
+      get("/online", MetadataController, :is_online)
+
       scope "/:connection_id" do
         delete("/socket", ConnectionController, :destroy_connection)
         options("/socket", ConnectionController, :handle_preflight)
