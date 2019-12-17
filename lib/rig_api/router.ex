@@ -76,9 +76,6 @@ defmodule RigApi.Router do
 
     scope "/connection" do
       scope "/:connection_id" do
-        delete("/", ConnectionController, :destroy)
-        options("/", ConnectionController, :handle_preflight)
-
         delete("/socket", ConnectionController, :destroy_connection)
         options("/socket", ConnectionController, :handle_preflight)
       end

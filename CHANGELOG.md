@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added possibility to define Kafka/Kinesis topic and schema per reverse proxy endpoint. The current solution using environment variables is deprecated, but still used as a fallback -- will be removed in the version 3.0. [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
 - Added Kinesis + Localstack example [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+- Added abstraction over SSE and WS. This abstraction keeps track of state, manages timers, can be initialized before a client connects to RIG and can be used for reconnects (client can pick up where they left of). This means that for SSE and WS connections, the connection token now refers to this connection abstraction.
+  - With `GET :4000/_rig/v1/connection/init`, one can now pre-initialize this connection
+  - `DELETE :4000/_rig/v1/connection/<connection_pid>` gracefully destroys this abstraction. This is recommended! 
+  - `DELETE :4010/v2/connection/<connection_pid>/socket` destroys the actual (WS/SSE) connection. This is not a public API and should only be used for debug purposes.
+  - Added new configuration option via `IDLE_CONNECTION_TIMEOUT_MS` environment variable. This determines when the connection abstraction should die after the actual socket has disconnected/closed. Default: 300000
+  - RIG now implements a `last_event_id`. This feature can be utilized when reconnecting after the connection to RIG has been lost. All events which were received (and buffered) in the meantime, by the previously mentioned connection abstraction, will be resent.
+  - Added new configuration option via `CONNECTION_BUFFER_SIZE` which determines how many messages this connection abstraction can store while a client is disconnected. Default: 50
+  - Added new configuration option via `RESEND_INTERVAL_MS` which determines the interval in which unreceived messages will be resent when the client reconnects to RIG. Default: 500
 
 <!-- ### Changed -->
 

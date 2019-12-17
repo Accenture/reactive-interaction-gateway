@@ -67,7 +67,9 @@ config :rig, Rig.Connection.Codec,
   codec_default_key: "7tsf4Y6GTOfPY1iDo4PqZA=="
 
 config :rig, RigInboundGatewayWeb.VConnection,
-  idle_connection_timeout: {:system, "IDLE_CONNECTION_TIMEOUT", "300000"}
+  idle_connection_timeout: {:system, "IDLE_CONNECTION_TIMEOUT_MS", "300000"},
+  connection_buffer_size: {:system, "CONNECTION_BUFFER_SIZE", "50"},
+  resend_interval: {:system, "RESEND_INTERVAL_MS", "500"}
 
 config :porcelain, driver: Porcelain.Driver.Basic
 

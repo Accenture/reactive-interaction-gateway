@@ -2,7 +2,7 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
   @moduledoc false
   use Rig.Config, [:cors]
   use RigInboundGatewayWeb, :controller
-  use RigInboundGatewayWeb.Cors, [:put, :delete]
+  use RigInboundGatewayWeb.Cors, [:get, :delete]
 
   alias Result
   alias Rig.Connection.Codec
@@ -27,5 +27,26 @@ defmodule RigInboundGatewayWeb.V1.ConnectionController do
     conn
     |> with_allow_origin
     |> send_resp(:ok, Codec.serialize(vconnection_pid))
+  end
+
+  @doc """
+  ### Dirty Testing
+
+      CONN_TOKEN=$(http :4000/_rig/v1/connection/init)
+      http delete ":4010/v2/connection/$CONN_TOKEN/"
+  """
+  @spec destroy(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
+  def destroy(
+        %{method: "DELETE"} = conn,
+        %{
+          "connection_id" => connection_id
+        }
+      ) do
+    {:ok, pid} = Codec.deserialize(connection_id)
+    Process.exit(pid, :kill)
+
+    conn
+    |> with_allow_origin
+    |> send_resp(:ok, "")
   end
 end
