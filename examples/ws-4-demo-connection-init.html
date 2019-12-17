@@ -100,7 +100,7 @@
     const apiBaseUrl = "http://localhost:4010/v2";
 
     function disconnect() {
-      fetch(`${apiBaseUrl}/connection/${connectionToken}/`, {method: "DELETE", mode: "cors"}).then(msg => { return msg.text() })
+      fetch(`${baseUrl}/connection/${connectionToken}/`, {method: "DELETE", mode: "cors"}).then(msg => { return msg.text() })
     }
 
     function disconnect_connection() {

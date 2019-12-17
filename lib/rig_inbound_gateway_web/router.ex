@@ -15,7 +15,8 @@ defmodule RigInboundGatewayWeb.Router do
       scope "/connection" do
         get("/init", ConnectionController, :init)
 
-        get("/online", MetadataController, :is_online)
+        delete("/:connection_id", ConnectionController, :destroy)
+        options("/:connection_id", ConnectionController, :handle_preflight)
 
         scope "/sse" do
           subscription_url = "/:connection_id/subscriptions"

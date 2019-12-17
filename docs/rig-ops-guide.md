@@ -29,7 +29,9 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `FIREHOSE_KINESIS_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KINESIS_STREAM | ["http://localhost:4040/todo"]
 `FIREHOSE_KINESIS_STREAM` | Kinesis stream RIG will use as a firehose consumer. Events will be sent to `FIREHOSE_KINESIS_HTTP_TARGETS | "RIG-firehose"
 `HOST` | Hostname for Phoenix endpoints (HTTP communication). | "localhost"
-`IDLE_CONNECTION_TIMEOUT` | Timeout used to determine when the connection abstraction should die (thus be unable to accept reconnects) after the actual socket has disconnected. | 300000
+`IDLE_CONNECTION_TIMEOUT_MS` | Timeout used to determine when the connection abstraction should die (thus be unable to accept reconnects) after the actual socket has disconnected. | 300000
+`CONNECTION_BUFFER_SIZE` | Determines how many messages the connection abstraction can store while a client is disconnected. | 50 
+`RESEND_INTERVAL_MS` | Determines the interval in which unreceived messages will be resent by the connection abstraction when the client reconnects to RIG. | 500 
 `JWT_SECRET_KEY` | The secret key used to sign and verify the JSON web tokens. | ""
 `JWT_ALG` | Algorithm used to sign and verify JSON web tokens. | "HS256"
 `JWT_SESSION_FIELD` | The JWT claim that defines a "session", which is used for listing and killing/blacklisting sessions. The default is to use a JWT's `jti` claim, which ["provides a unique identifier for the JWT"](https://tools.ietf.org/html/rfc7519#section-4.1.7). This way, when blacklisting a session, the user cannot use the respective token anymore, but is able to create a new one by re-authenticating with the backend. The `JWT_SESSION_FIELD` is specified using the [JSON Pointer](https://tools.ietf.org/html/rfc6901) notation. For example, this is how you would use a custom `sessionId` claim instead of the `jti`: `JWT_SESSION_FIELD=/sessionId`. | "/jti"

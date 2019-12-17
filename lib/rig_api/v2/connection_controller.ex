@@ -10,28 +10,6 @@ defmodule RigApi.V2.ConnectionController do
 
   alias Rig.Connection.Codec
 
-  # TODO: Evaluate if `destroy` can become a public API.
-  @doc """
-  ### Dirty Testing
-
-      CONN_TOKEN=$(http :4000/_rig/v1/connection/init)
-      http delete ":4010/v2/connection/$CONN_TOKEN/"
-  """
-  @spec destroy(conn :: Plug.Conn.t(), params :: map) :: Plug.Conn.t()
-  def destroy(
-        %{method: "DELETE"} = conn,
-        %{
-          "connection_id" => connection_id
-        }
-      ) do
-    {:ok, pid} = Codec.deserialize(connection_id)
-    Process.exit(pid, :kill)
-
-    conn
-    |> with_allow_origin
-    |> send_resp(:ok, "")
-  end
-
   @doc """
   ### Dirty Testing
 

@@ -16,12 +16,7 @@ defmodule RigInboundGatewayWeb.VConnection do
   require Logger
 
   use GenServer
-  use Rig.Config, [:idle_connection_timeout]
-
-  # TODO: Discuss sensible defaults, move to config or ENV variable
-  @buffer_size 10
-  @send_interval 20
-  @metadata_ttl_s 60
+  use Rig.Config, [:idle_connection_timeout, :connection_buffer_size, :resend_interval]
 
   def start(pid, subscriptions, metadata, heartbeat_interval_ms, subscription_refresh_interval_ms) do
     {_, data} = metadata
@@ -30,6 +25,9 @@ defmodule RigInboundGatewayWeb.VConnection do
       _ -> {nil, nil}
     end
 
+    %{connection_buffer_size: buffer_size} = config()
+    buffer_size = String.to_integer(buffer_size)
+    
     GenServer.start(
       __MODULE__,
       %{
@@ -41,7 +39,7 @@ defmodule RigInboundGatewayWeb.VConnection do
         subscription_refresh_interval_ms: subscription_refresh_interval_ms,
         kill_timer: nil,
         monitor: nil,
-        event_buffer: EventBuffer.new(@buffer_size)
+        event_buffer: EventBuffer.new(buffer_size)
       }
     )
   end
@@ -122,13 +120,16 @@ defmodule RigInboundGatewayWeb.VConnection do
 
   @impl true
   def handle_info({:schedule_missing, last_event_id}, state) do
+    %{resend_interval: interval} = config()
+    interval = String.to_integer(interval)
+
     case EventBuffer.events_since(state.event_buffer, last_event_id) do
       {:ok, [events: []]} ->
         Logger.debug(fn -> "Received last_event_id but have no events to return #{inspect(self())}" end)
 
       {:ok, [events: events, last_event_id: _last_event_id]} ->
         Logger.debug(fn -> "Scheduling resending of buffered events #{inspect(self())}" end)
-        Process.send_after(self(), {:send_missing, events}, @send_interval)
+        Process.send_after(self(), {:send_missing, events}, interval)
 
       {:no_such_event, [not_found_id: _not_found_id, last_event_id: _last_event_id]} ->
         Logger.debug(fn -> "Received last_event_id but it is unknown #{inspect(self())}" end)
@@ -151,11 +152,14 @@ defmodule RigInboundGatewayWeb.VConnection do
   """
   @impl true
   def handle_info({:send_missing, [event | events]}, state) do
+    %{resend_interval: interval} = config()
+    interval = String.to_integer(interval)
+
     send self(), event
 
     if events != [] do
       # Schedule send of events that are left
-      Process.send_after(self(), {:send_missing, events}, @send_interval)
+      Process.send_after(self(), {:send_missing, events}, interval)
     end
     {:noreply, state}
   end
