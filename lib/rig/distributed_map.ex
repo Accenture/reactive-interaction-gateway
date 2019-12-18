@@ -121,6 +121,23 @@ defmodule RIG.DistributedMap do
     end
   end
 
+  @spec get_all(pid | atom, key, list) :: list(value)
+  def get_all(name, key, opts \\ [])
+
+  def get_all(name, key, opts) when is_atom(name) do
+    pid = Process.whereis(name)
+    get_all(pid, key, opts)
+  end
+
+  def get_all(pid, key, opts) do
+    ms = [{{{key, :"$1"}, :"$2", :_, :_, :_}, [], [{{:"$1", :"$2"}}]}]
+
+    ets_table = ets_table_name(pid)
+
+    :ets.select(ets_table, ms)
+    |> Enum.uniq()
+  end
+
   # callbacks
 
   @impl GenServer
