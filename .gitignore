@@ -39,3 +39,5 @@ erl_crash.dump
 /.elixir_ls/
 *~
 *.orig
+
+perf_tests/src/.idea/

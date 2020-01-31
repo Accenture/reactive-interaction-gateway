@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+  zk:
+    image: confluentinc/cp-zookeeper:5.0.0
+    container_name: zk
+    ports:
+      - 2181:2181
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    restart: on-failure:5
+  kafka:
+    image: confluentinc/cp-kafka:5.0.0
+    container_name: kafka
+    ports:
+      - 9092:9092
+      - 9094:9094
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zk:2181
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9094
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 4
+    restart: on-failure:5
+  clients:
+    ports: 
+      - 9999:9999
+    build:
+      context: ..
+      dockerfile: run1/client.Dockerfile
+    depends_on:
+      - rig
+    environment:
+      CLIENTS: 1
+      TIMEOUT: 30m
+      RIG_HOST: rig
+  loader:
+    build:
+      context: ..
+      dockerfile: run1/loader.Dockerfile
+    depends_on: 
+      - clients
+    environment:
+      KAFKA_HOST: kafka:9092
+      CLIENTS: clients
+  rig:
+    image: "accenture/reactive-interaction-gateway:latest"
+    depends_on: 
+      - zk
+      - kafka
+    environment: 
+      KAFKA_BROKERS: kafka:9092
+      LOG_LEVEL: error

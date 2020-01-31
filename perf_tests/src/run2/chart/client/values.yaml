@@ -1,0 +1,18 @@
+replicaCount: 1
+
+image:
+  repository: run2_clients
+  tag: latest
+  pullPolicy: Never # needed for local Kubernetes cluster (docker desktop)
+
+service:
+  port: 9999
+  targetPort: 9999
+  type: ClusterIP
+
+deployment:
+  port: 9999
+  env:
+    CLIENTS: 1
+    TIMEOUT: 30m
+    RIG_HOST: reactive-interaction-gateway
