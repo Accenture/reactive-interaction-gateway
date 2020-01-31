@@ -56,8 +56,3 @@ RIG_HOST=rig
 ```bash
 ./start_run6.sh
 ```
-
-## Run 7
-
-Not on k8s yet. 
-
