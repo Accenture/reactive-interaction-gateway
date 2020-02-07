@@ -21,6 +21,7 @@ defmodule RigInboundGateway.Proxy do
 
   alias Rig.Config
   alias RigInboundGateway.ApiProxy.Api
+  alias RigInboundGateway.ApiProxy.Validations
 
   @typep state_t :: map
   @typep server_t :: pid | atom
@@ -75,7 +76,8 @@ defmodule RigInboundGateway.Proxy do
           # credo:disable-for-next-line Credo.Check.Refactor.Nesting
           Logger.info(fn -> "Reverse proxy: service #{id}" end)
 
-          api_with_default_values = set_default_api_values(api)
+          api_with_default_values = api |> Validations.validate() |> set_default_api_values
+
           state.tracker_mod.track(api["id"], api_with_default_values)
         end)
 

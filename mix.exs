@@ -141,6 +141,7 @@ defmodule RIG.MixProject do
       {:phoenix, "~> 1.4"},
       {:plug_cowboy, "~> 2.0"},
       {:phoenix_swagger, "~> 0.8"},
+      {:vex, "~> 0.8.0"},
       # SSE serialization:
       {:server_sent_event, "~> 1.0"},
       # A library for defining structs with a type without writing boilerplate code:
