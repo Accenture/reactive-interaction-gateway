@@ -73,7 +73,7 @@ defmodule RigInboundGateway.ApiProxy.Validations do
     if all_errors == [], do: errors, else: errors ++ [{id, all_errors}]
   end
 
-  def validate_auth(_, _), do: true
+  def validate_auth(_, _), do: []
 
   # ---
 
@@ -135,14 +135,12 @@ defmodule RigInboundGateway.ApiProxy.Validations do
         if all_errors == [], do: acc, else: acc ++ [{"#{id}/#{endpoint["id"]}", all_errors}]
       end)
 
-    # IO.inspect(res, label: "ENDPOINTS")
-
     errors ++ res
   end
 
   # ---
 
-  def validate(api) do
+  def validate!(api) do
     errors =
       []
       |> validate_auth(api)
@@ -168,5 +166,41 @@ defmodule RigInboundGateway.ApiProxy.Validations do
     end
 
     api
+  end
+
+  def validate(api) do
+    errors =
+      []
+      |> validate_auth(api)
+      |> validate_endpoints(api)
+      |> Enum.dedup()
+
+    # |> Enum.map(fn a ->
+    #   IO.inspect(a)
+    #   {:error, key, _, message} = a
+    #   IO.inspect(key)
+    #   IO.inspect(message)
+    #   "#{key}=#{message}"
+    # end)
+
+    # IO.inspect(errors, label: "ALL ERRORS")
+
+    if errors != [] do
+      Logger.error(fn ->
+        "Wrong reverse proxy configuration: #{inspect(errors)}"
+      end)
+
+      {:error, errors}
+    else
+      {:ok, api}
+    end
+  end
+
+  def to_map(errors) do
+    errors
+    |> Enum.map(fn {key, value} ->
+      {key, Enum.map(value, fn {_, key, _, reason} -> %{key => reason} end)}
+    end)
+    |> Enum.into(%{})
   end
 end

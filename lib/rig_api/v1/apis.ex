@@ -3,7 +3,10 @@ defmodule RigApi.V1.APIs do
   use Rig.Config, [:rig_proxy]
   use RigApi, :controller
   use PhoenixSwagger
+
   require Logger
+
+  alias RigInboundGateway.ApiProxy.Validations
 
   @prefix "/v1"
 
@@ -69,12 +72,16 @@ defmodule RigApi.V1.APIs do
     %{"id" => id} = params
     %{rig_proxy: proxy} = config()
 
-    with nil <- proxy.get_api(proxy, id),
+    with {:ok, _api} <- Validations.validate(params),
+         nil <- proxy.get_api(proxy, id),
          {:ok, _phx_ref} <- proxy.add_api(proxy, id, params) do
       send_response(conn, 201, %{message: "ok"})
     else
       {_id, %{"active" => true}} ->
         send_response(conn, 409, %{message: "API with id=#{id} already exists."})
+
+      {:error, errors} ->
+        send_response(conn, 400, Validations.to_map(errors))
 
       {_id, %{"active" => false} = prev_api} ->
         {:ok, _phx_ref} = proxy.replace_api(proxy, id, prev_api, params)
@@ -106,10 +113,14 @@ defmodule RigApi.V1.APIs do
   def update_api(conn, params) do
     %{"id" => id} = params
 
-    with {_id, current_api} <- get_active_api(id),
+    with {:ok, _api} <- Validations.validate(params),
+         {_id, current_api} <- get_active_api(id),
          {:ok, _phx_ref} <- merge_and_update(id, current_api, params) do
       send_response(conn, 200, %{message: "ok"})
     else
+      {:error, errors} ->
+        send_response(conn, 400, Validations.to_map(errors))
+
       api when api == nil or api == :inactive ->
         send_response(conn, 404, %{message: "API with id=#{id} doesn't exists."})
     end

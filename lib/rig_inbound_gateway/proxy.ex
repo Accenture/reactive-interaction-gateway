@@ -76,7 +76,7 @@ defmodule RigInboundGateway.Proxy do
           # credo:disable-for-next-line Credo.Check.Refactor.Nesting
           Logger.info(fn -> "Reverse proxy: service #{id}" end)
 
-          api_with_default_values = api |> Validations.validate() |> set_default_api_values
+          api_with_default_values = api |> Validations.validate!() |> set_default_api_values
 
           state.tracker_mod.track(api["id"], api_with_default_values)
         end)
