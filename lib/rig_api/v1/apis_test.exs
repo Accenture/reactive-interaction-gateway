@@ -1,11 +1,11 @@
 defmodule RigApi.V1.APIsTest do
   @moduledoc false
-  require Logger
-
   use ExUnit.Case, async: true
   use RigApi.ConnCase
 
   alias RigInboundGateway.ProxyConfig
+
+  require Logger
 
   @invalid_config_id "invalid-config"
 
@@ -70,7 +70,7 @@ defmodule RigApi.V1.APIsTest do
 
       kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> post("/v1/apis", new_api)
       response = json_response(conn, 400)
 
@@ -81,7 +81,7 @@ defmodule RigApi.V1.APIsTest do
                ]
              }
 
-      ProxyConfig.restore_one("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
+      ProxyConfig.restore("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
 
       # kafka topic not set
       endpoints = [
@@ -95,7 +95,7 @@ defmodule RigApi.V1.APIsTest do
 
       kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> post("/v1/apis", new_api)
       response = json_response(conn, 400)
 
@@ -106,7 +106,7 @@ defmodule RigApi.V1.APIsTest do
                ]
              }
 
-      ProxyConfig.restore_one("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
+      ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
     end
 
     test "should return 400 when schema is set, but target is not kafka or kinesis" do
@@ -119,7 +119,7 @@ defmodule RigApi.V1.APIsTest do
         }
       ]
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> post("/v1/apis", new_api)
       response = json_response(conn, 400)
 
@@ -140,7 +140,7 @@ defmodule RigApi.V1.APIsTest do
         }
       ]
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> post("/v1/apis", new_api)
       response = json_response(conn, 400)
 
@@ -163,7 +163,7 @@ defmodule RigApi.V1.APIsTest do
       auth = %{"use_header" => true}
       auth_type = "jwt"
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
       conn = build_conn() |> post("/v1/apis", new_api)
       response = json_response(conn, 400)
 
@@ -184,9 +184,9 @@ defmodule RigApi.V1.APIsTest do
       auth = %{"use_query" => true}
       auth_type = "jwt"
 
-      set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
+      ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
       conn = build_conn() |> post("/v1/apis", new_api)
       response = json_response(conn, 400)
 
@@ -206,9 +206,9 @@ defmodule RigApi.V1.APIsTest do
 
       auth = %{"use_query" => true, "query_name" => "test"}
 
-      set_proxy_config(@invalid_config_id, endpoints, auth)
+      ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth)
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints, auth)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth)
       conn = build_conn() |> post("/v1/apis", new_api)
       response = json_response(conn, 400)
 
@@ -256,7 +256,7 @@ defmodule RigApi.V1.APIsTest do
 
       kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
@@ -267,7 +267,7 @@ defmodule RigApi.V1.APIsTest do
                ]
              }
 
-      ProxyConfig.restore_one("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
+      ProxyConfig.restore("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
 
       # kafka topic not set
       endpoints = [
@@ -281,7 +281,7 @@ defmodule RigApi.V1.APIsTest do
 
       kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
@@ -292,7 +292,7 @@ defmodule RigApi.V1.APIsTest do
                ]
              }
 
-      ProxyConfig.restore_one("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
+      ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
     end
 
     test "should return 400 when schema is set, but target is not kafka or kinesis" do
@@ -305,7 +305,7 @@ defmodule RigApi.V1.APIsTest do
         }
       ]
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
@@ -326,7 +326,7 @@ defmodule RigApi.V1.APIsTest do
         }
       ]
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
@@ -349,7 +349,7 @@ defmodule RigApi.V1.APIsTest do
       auth = %{"use_header" => true}
       auth_type = "jwt"
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
       conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
@@ -370,9 +370,9 @@ defmodule RigApi.V1.APIsTest do
       auth = %{"use_query" => true}
       auth_type = "jwt"
 
-      set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
+      ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
       conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
@@ -392,9 +392,9 @@ defmodule RigApi.V1.APIsTest do
 
       auth = %{"use_query" => true, "query_name" => "test"}
 
-      set_proxy_config(@invalid_config_id, endpoints, auth)
+      ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth)
 
-      new_api = set_proxy_config(@invalid_config_id, endpoints, auth)
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth)
       conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
@@ -422,26 +422,5 @@ defmodule RigApi.V1.APIsTest do
       response = json_response(conn, 404)
       assert response["message"] == "API with id=another-service doesn't exists."
     end
-  end
-
-  defp set_proxy_config(id, endpoints, auth \\ %{}, auth_type \\ nil) do
-    %{
-      "active" => true,
-      "id" => id,
-      "name" => id,
-      "proxy" => %{
-        "port" => 3000,
-        "target_url" => "http://localhost",
-        "use_env" => false
-      },
-      "version_data" => %{
-        "default" => %{
-          "endpoints" => endpoints
-        }
-      },
-      "versioned" => false,
-      "auth" => auth,
-      "auth_type" => auth_type
-    }
   end
 end

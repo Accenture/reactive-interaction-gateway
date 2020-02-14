@@ -3,11 +3,6 @@ defmodule RigInboundGateway.ProxyTest do
   use ExUnit.Case, async: false
   use RigApi.ConnCase
 
-  require Logger
-
-  alias RigInboundGateway.Proxy
-  alias RigInboundGateway.ProxyConfig
-
   import RigInboundGateway.Proxy,
     only: [
       list_apis: 1,
@@ -18,6 +13,11 @@ defmodule RigInboundGateway.ProxyTest do
       deactivate_api: 2,
       handle_join_api: 3
     ]
+
+  alias RigInboundGateway.Proxy
+  alias RigInboundGateway.ProxyConfig
+
+  require Logger
 
   @invalid_config_id "invalid-config"
 
@@ -36,7 +36,7 @@ defmodule RigInboundGateway.ProxyTest do
         }
       ]
 
-      set_proxy_config(@invalid_config_id, endpoints)
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
       kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
 
       Process.flag(:trap_exit, true)
@@ -48,7 +48,7 @@ defmodule RigInboundGateway.ProxyTest do
 
       assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
       ProxyConfig.restore()
-      ProxyConfig.restore_one("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
+      ProxyConfig.restore("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
 
       # kafka topic not set
       endpoints = [
@@ -60,7 +60,7 @@ defmodule RigInboundGateway.ProxyTest do
         }
       ]
 
-      set_proxy_config(@invalid_config_id, endpoints)
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
       kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
 
       Process.flag(:trap_exit, true)
@@ -72,7 +72,7 @@ defmodule RigInboundGateway.ProxyTest do
 
       assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
       ProxyConfig.restore()
-      ProxyConfig.restore_one("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
+      ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
     end
 
     test "should exit the process when schema is set, but target is not kafka or kinesis", ctx do
@@ -85,7 +85,7 @@ defmodule RigInboundGateway.ProxyTest do
         }
       ]
 
-      set_proxy_config(@invalid_config_id, endpoints)
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
 
       Process.flag(:trap_exit, true)
 
@@ -108,7 +108,7 @@ defmodule RigInboundGateway.ProxyTest do
         }
       ]
 
-      set_proxy_config(@invalid_config_id, endpoints)
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
 
       Process.flag(:trap_exit, true)
 
@@ -133,7 +133,7 @@ defmodule RigInboundGateway.ProxyTest do
       auth = %{"use_header" => true}
       auth_type = "jwt"
 
-      set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
 
       Process.flag(:trap_exit, true)
 
@@ -158,7 +158,7 @@ defmodule RigInboundGateway.ProxyTest do
       auth = %{"use_query" => true}
       auth_type = "jwt"
 
-      set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
 
       Process.flag(:trap_exit, true)
 
@@ -182,7 +182,7 @@ defmodule RigInboundGateway.ProxyTest do
 
       auth = %{"use_query" => true, "query_name" => "test"}
 
-      set_proxy_config(@invalid_config_id, endpoints, auth)
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints, auth)
 
       Process.flag(:trap_exit, true)
 
@@ -217,7 +217,7 @@ defmodule RigInboundGateway.ProxyTest do
         }
       ]
 
-      set_proxy_config(id, endpoints)
+      ProxyConfig.set_proxy_config(id, endpoints)
 
       {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
       apis = Proxy.list_apis(proxy)
@@ -598,29 +598,6 @@ defmodule RigInboundGateway.ProxyTest do
       :timer.sleep(25)
       assert ctx.tracker |> Stubr.called_once?(:update)
     end
-  end
-
-  defp set_proxy_config(id, endpoints, auth \\ %{}, auth_type \\ nil) do
-    ProxyConfig.set([
-      %{
-        "active" => true,
-        "id" => id,
-        "name" => id,
-        "proxy" => %{
-          "port" => 3000,
-          "target_url" => "http://localhost",
-          "use_env" => false
-        },
-        "version_data" => %{
-          "default" => %{
-            "endpoints" => endpoints
-          }
-        },
-        "versioned" => false,
-        "auth" => auth,
-        "auth_type" => auth_type
-      }
-    ])
   end
 
   defp with_tracker_mock_proxy(_ctx) do

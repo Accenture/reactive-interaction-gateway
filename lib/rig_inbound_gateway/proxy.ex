@@ -17,11 +17,12 @@ defmodule RigInboundGateway.Proxy do
   """
   # config file is not required
   use Rig.Config, []
-  require Logger
 
   alias Rig.Config
   alias RigInboundGateway.ApiProxy.Api
   alias RigInboundGateway.ApiProxy.Validations
+
+  require Logger
 
   @typep state_t :: map
   @typep server_t :: pid | atom

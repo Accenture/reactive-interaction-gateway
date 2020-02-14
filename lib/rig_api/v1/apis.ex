@@ -4,9 +4,9 @@ defmodule RigApi.V1.APIs do
   use RigApi, :controller
   use PhoenixSwagger
 
-  require Logger
-
   alias RigInboundGateway.ApiProxy.Validations
+
+  require Logger
 
   @prefix "/v1"
 
