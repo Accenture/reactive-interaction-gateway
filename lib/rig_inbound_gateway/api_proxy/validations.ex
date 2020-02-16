@@ -163,6 +163,7 @@ defmodule RigInboundGateway.ApiProxy.Validations do
     if errors != [] do
       log_error(errors)
       Process.exit(self(), :ReverseProxyConfigurationError)
+      # System.stop()
     end
 
     api

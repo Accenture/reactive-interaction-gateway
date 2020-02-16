@@ -40,6 +40,7 @@ while ! is_kafka_ready; do
     sleep 1
 done
 
+export PROXY_CONFIG_FILE="[]"
 export KAFKA_BROKERS="${HOST}:${KAFKA_PORT_PLAIN}"
 export KAFKA_SSL_ENABLED=0
 export KAFKA_SSL_KEYFILE_PASS=abcdefgh
