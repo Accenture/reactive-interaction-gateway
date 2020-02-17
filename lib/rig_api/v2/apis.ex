@@ -202,15 +202,15 @@ defmodule RigApi.V2.APIs do
           properties do
             id(:string, "Proxy API ID", required: true, example: "new-service")
             name(:string, "Proxy API Name", required: true, example: "new-service")
-            auth_type(:string, "Authorization type", required: true, example: "jwt")
+            auth_type(:string, "Authorization type", required: false, example: "jwt")
 
             auth(
               Schema.new do
                 properties do
-                  use_header(:boolean, "Authorization Header Usage", default: true, example: true)
+                  use_header(:boolean, "Authorization Header Usage", default: false, example: true)
 
                   header_name(:string, "Authorization Header Name",
-                    required: true,
+                    required: false,
                     example: "Authorization"
                   )
 
@@ -227,6 +227,20 @@ defmodule RigApi.V2.APIs do
             timestamp(:string, "creation timestamp",
               required: false,
               example: "2018-12-17T10:38:06.334013Z"
+            )
+
+            transform_request_headers(
+              Schema.new do
+                properties do
+                  add_headers(
+                    Schema.new do
+                      properties do
+                        my_header_name(:string, "New header value", example: "some header value")
+                      end
+                    end
+                  )
+                end
+              end
             )
 
             ref_number(:integer, "reference number", required: false, example: 0)
@@ -252,7 +266,13 @@ defmodule RigApi.V2.APIs do
             proxy(
               Schema.new do
                 properties do
-                  use_env(:boolean, "TBD", default: true, example: true)
+                  use_env(
+                    :boolean,
+                    "Whether to take the 'target_url' from environment variable or not",
+                    default: true,
+                    example: true
+                  )
+
                   target_url(:string, "Proxy Target URL", required: true, example: "IS_HOST")
                   port(:integer, "Proxy Port", required: true, example: 6666)
                 end
@@ -276,7 +296,7 @@ defmodule RigApi.V2.APIs do
             id(:string, "Endpoint ID", required: true, example: "get-auth-register")
 
             path(:string, "Endpoint path. Curly braces may be used to ignore parts of the path.",
-              required: false,
+              required: true,
               example: "/auth/register/{user}"
             )
 
@@ -296,6 +316,24 @@ defmodule RigApi.V2.APIs do
 
             method(:string, "Endpoint HTTP method", required: true, example: "GET")
             secured(:boolean, "Endpoint Security", default: false, example: false)
+
+            transform_request_headers(:boolean, "Transform request headers",
+              default: false,
+              example: false
+            )
+
+            target(:string, "Request target - HTTP, Kafka or Kinesis",
+              default: "http",
+              example: "http"
+            )
+
+            topic(:string, "Kafka/Kinesis topic", example: "kafka-topic")
+            schema(:string, "Kafka Avro schema", example: "avro-schema")
+
+            response_from(:string, "Wait for asynchronnous response from HTTP, Kafka or Kinesis",
+              default: "http",
+              example: "http"
+            )
           end
         end,
       ProxyAPIResponse:
