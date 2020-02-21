@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added possibility to define Kafka/Kinesis topic and schema per reverse proxy endpoint. The current solution using environment variables is deprecated, but still used as a fallback -- will be removed in the version 3.0. [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
 - Added Kinesis + Localstack example [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+- Added longpolling examples to `/examples` folder [#235](https://github.com/Accenture/reactive-interaction-gateway/issues/235)
 
 <!-- ### Changed -->
 
@@ -35,7 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New API for querying and updating the session blacklist: `/v2/session-blacklist`, which introduces the following breaking changes (`/v1/session-blacklist` is unaffected) [#261](https://github.com/Accenture/reactive-interaction-gateway/pull/261):
   - When a session has been added to the session blacklist successfully, the endpoint now uses the correct HTTP status code "201 Created" instead of "200 Ok".
   - When using the API to blacklist a session, the `validityInSeconds` should now be passed as an integer value (using a string still works though).
-- Added longpolling examples to `/examples` folder [#235](https://github.com/Accenture/reactive-interaction-gateway/issues/235)
 
 ### Fixed
 
