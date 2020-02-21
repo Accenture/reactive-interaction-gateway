@@ -118,7 +118,7 @@
       });
 
       source
-        .then(response => fetchEvents())
+        .then(() => fetchEvents())
         .catch(err => {
           console.log("Failed to create subscription:", err);
         });

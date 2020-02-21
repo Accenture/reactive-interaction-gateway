@@ -143,6 +143,7 @@
       }
 
       function fetchEvents() {
+        document.getElementById("submit-button").removeAttribute("disabled");
         axios({
           method: "GET",
           url: `${baseUrl}/connection/longpolling`,
@@ -186,10 +187,7 @@
 
       source
         .then(() => createSubscription())
-        .then(() => {
-          document.getElementById("submit-button").removeAttribute("disabled");
-          return fetchEvents();
-        })
+        .then(() => fetchEvents())
         .catch(err => {
           console.log("Failed to create subscription:", err);
         });

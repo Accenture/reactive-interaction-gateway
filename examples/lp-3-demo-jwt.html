@@ -91,9 +91,10 @@
         console.log("Existing connectionToken", connectionToken);
         if (!connectionToken) {
           console.error("Missing connectionToken > can't do subscriptions");
+          return;
         }
         return fetch(
-          `${baseUrl}/connection/sse/${connectionToken}/subscriptions`,
+          `${baseUrl}/connection/longpolling/${connectionToken}/subscriptions`,
           {
             method: "PUT",
             mode: "cors",
@@ -120,6 +121,7 @@
       }
 
       function fetchEvents() {
+        document.getElementById("submit-button").removeAttribute("disabled");
         axios({
           method: "GET",
           url: `${baseUrl}/connection/longpolling`,
@@ -163,10 +165,7 @@
 
       source
         .then(() => createSubscription())
-        .then(() => {
-          document.getElementById("submit-button").removeAttribute("disabled");
-          return fetchEvents();
-        })
+        .then(() => fetchEvents())
         .catch(err => {
           console.log("Failed to create subscription:", err);
         });

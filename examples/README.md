@@ -179,7 +179,7 @@ mix phx.server
 
 - Fill some message to `greeting` input => update should be displayed below after few moments
 
-> `lp-demo-single-call` is the same, just doing connection and subscriptions in a single call.
+> `lp-demo-single-call` is the same, just doing connection and subscriptions in a single call. You can try it out with `node staticServer.js ./lp-demo-single-call.html`
 
 ### Example 2: LP with constraints
 
@@ -205,7 +205,7 @@ mix phx.server
 
 This example shows simple scenario when all messages will arrive to UI, but RIG will do JWT auth.
 
-> examples/lp-demo-jwt.html
+> examples/lp-3-demo-jwt.html
 
 ```bash
 node staticServer.js ./lp-3-demo-jwt.html
