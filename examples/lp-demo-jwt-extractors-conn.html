@@ -80,50 +80,6 @@
           });
       }
 
-      /**
-      {
-        "eventType": eventType,
-        "oneOf": [
-          {
-            "name": "first.user.sk"
-          }
-        ]
-      }
-    */
-
-      function createSubscription(connectionToken) {
-        const eventType = "greeting.jwt";
-        return fetch(
-          `${baseUrl}/connection/longpolling/${connectionToken}/subscriptions`,
-          {
-            method: "PUT",
-            mode: "cors",
-            headers: {
-              "Content-Type": "application/json; charset=utf-8"
-            },
-            body: JSON.stringify({
-              subscriptions: [
-                {
-                  eventType: eventType,
-                  oneOf: [
-                    {
-                      name: "john"
-                    }
-                  ]
-                }
-              ]
-            })
-          }
-        )
-          .then(json => {
-            console.log("Subscription created:", json);
-            return json;
-          })
-          .catch(err => {
-            console.log("Failed to create subscription:", err);
-          });
-      }
-
       function fetchEvents() {
         document.getElementById("submit-button").removeAttribute("disabled");
         axios({

@@ -109,6 +109,7 @@
         console.log("Existing connectionToken", connectionToken);
         if (!connectionToken) {
           console.error("Missing connectionToken > can't do subscriptions");
+          return;
         }
         return fetch(
           `${baseUrl}/connection/longpolling/${connectionToken}/subscriptions`,

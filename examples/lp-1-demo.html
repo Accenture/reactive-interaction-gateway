@@ -82,7 +82,7 @@
           return;
         }
         return fetch(
-          `${baseUrl}/connection/sse/${connectionToken}/subscriptions`,
+          `${baseUrl}/connection/longpolling/${connectionToken}/subscriptions`,
           {
             method: "PUT",
             mode: "cors",
