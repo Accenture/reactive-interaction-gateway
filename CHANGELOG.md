@@ -9,40 +9,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added longpolling as new connection type [#217](https://github.com/Accenture/reactive-interaction-gateway/issues/217)
+- Added possibility to define Kafka/Kinesis topic and schema per reverse proxy endpoint. The current solution using environment variables is deprecated, but still used as a fallback -- will be removed in the version 3.0. [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+- Added Kinesis + Localstack example [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+
+<!-- ### Changed -->
+
+<!-- ### Fixed -->
+
+<!-- ### Deprecated -->
+
+<!-- ### Removed -->
+
+<!-- ### Security -->
+
+<!-- ### Technical Improvements -->
+
+## [2.3.0] - 2019-12-13
+
+### Added
+
+- In addition to SSE and WebSocket, RIG now also supports HTTP long-polling for listening to events. Frontends should only use this as a fallback in situations where neither SSE nor WebSocket is supported by the network.
+  [#217](https://github.com/Accenture/reactive-interaction-gateway/issues/217)
 - When terminating an SSE connection after its associated session has been blacklisted, RIG now sends out a `rig.session_killed` event before closing the socket. For WebSocket connections, the closing frame contains "Session killed." as its payload.
-- New API for querying and updating the session blacklist: `/v2/session-blacklist`, which introduces the following breaking changes:
+  [#261](https://github.com/Accenture/reactive-interaction-gateway/pull/261)
+- New API for querying and updating the session blacklist: `/v2/session-blacklist`, which introduces the following breaking changes (`/v1/session-blacklist` is unaffected) [#261](https://github.com/Accenture/reactive-interaction-gateway/pull/261):
   - When a session has been added to the session blacklist successfully, the endpoint now uses the correct HTTP status code "201 Created" instead of "200 Ok".
   - When using the API to blacklist a session, the `validityInSeconds` should now be passed as an integer value (using a string still works though).
 - Added longpolling examples to `/examples` folder [#235](https://github.com/Accenture/reactive-interaction-gateway/issues/235)
 
-<!-- ### Changed -->
-
 ### Fixed
 
-- Fixed usage of external check for `SUBMISSION_CHECK` and `SUBSCRIPTION_CHECK`. [#241](https://github.com/Accenture/reactive-interaction-gateway/issues/241)
+- Fixed usage of external check for `SUBMISSION_CHECK` and `SUBSCRIPTION_CHECK`.
+  [#241](https://github.com/Accenture/reactive-interaction-gateway/issues/241)
 - Logging incoming HTTP request to Kafka works again and now also supports Apache Avro.
   [#170](https://github.com/Accenture/reactive-interaction-gateway/issues/170)
 - Fixed HTTP response for `DELETE 4010/v1/apis/api_id` and `DELETE 4010/v2/apis/api_id` to correctly return `204` and no content.
 
-<!-- ### Deprecated -->
-
 ### Removed
 
 - Removed the `JWT_BLACKLIST_DEFAULT_EXPIRY_HOURS` environment variable ([deprecated since 2.0.0-beta.2](https://github.com/Accenture/reactive-interaction-gateway/commit/f974533455aa3ebc550ee95bf291585925a406d5)).
+  [#260](https://github.com/Accenture/reactive-interaction-gateway/pull/260)
 
 ### Security
 
 - A connection is now associated to its session right after the connection is established, given the request carries a JWT in its authorization header. Previously, this was only done by the subscriptions endpoint, which could cause a connection to remain active even after blacklisting its authorization token.
+  [#260](https://github.com/Accenture/reactive-interaction-gateway/pull/260)
 
 ### Technical Improvements
 
 - Upgrade the Elixir and Erlang versions for source code and Docker images.
+  [#211](https://github.com/Accenture/reactive-interaction-gateway/issues/211)
 - Automated UI-tests using Cypress make sure that all examples work and that code changes do not introduce any unintended API changes.
   [#227](https://github.com/Accenture/reactive-interaction-gateway/issues/227)
 - Refactor JWT related code in favor of `RIG.JWT`.
   [#244](https://github.com/Accenture/reactive-interaction-gateway/pull/244)
 - Fix flaky cypress tests; this shouldn't be an issue anymore when running Travis builds.
+  [#265](https://github.com/Accenture/reactive-interaction-gateway/pull/265)
 
 ## [2.2.1] - 2019-06-21
 
@@ -237,7 +259,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Flaky tests in `router_test.exs` -- switching from `Bypass` to `Fakeserver`.
   [#74](https://github.com/Accenture/reactive-interaction-gateway/issues/74)
-- Channels example. [#64]https://github.com/Accenture/reactive-interaction-gateway/issues/64
+- Channels example. [#64](https://github.com/Accenture/reactive-interaction-gateway/issues/64)
 
 ## [2.0.0-beta.1] - 2018-06-21
 
@@ -348,7 +370,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Disable Origin checking.
   [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
-[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.1...HEAD
+[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.3.0...HEAD
+[2.3.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.1...2.3.0
 [2.2.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.0...2.2.1
 [2.2.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.1...2.2.0
 [2.1.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.0...2.1.1

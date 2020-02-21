@@ -124,7 +124,8 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
   kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},
   kinesis_request_region: {:system, "PROXY_KINESIS_REQUEST_REGION", "eu-west-1"},
   response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000},
-  cors: {:system, "CORS", "*"}
+  cors: {:system, "CORS", "*"},
+  kinesis_endpoint: {:system, "KINESIS_ENDPOINT", ""}
 
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   # The list of brokers, given by a comma-separated list of host:port items:

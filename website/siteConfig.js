@@ -17,7 +17,7 @@ const baseUrl = '/reactive-interaction-gateway/';
 
 const siteConfig = {
   title: 'Reactive Interaction Gateway',
-  tagline: 'Your UI deserves an API, too!',
+  tagline: 'Create low-latency, interactive user experiences for stateless microservices.',
   url: 'https://accenture.github.io',
   baseUrl,
   projectName: 'reactive-interaction-gateway',

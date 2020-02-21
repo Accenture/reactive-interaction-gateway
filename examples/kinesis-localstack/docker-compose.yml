@@ -1,0 +1,37 @@
+version: "2.1"
+
+services:
+  localstack:
+    image: localstack/localstack
+    container_name: localstack
+    ports:
+      - "4567-4597:4567-4597"
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+    environment:
+      - SERVICES=${SERVICES-dynamodb,kinesis,cloudwatch}
+      - DEBUG=${DEBUG- }
+      - DATA_DIR=${DATA_DIR- }
+      - PORT_WEB_UI=${PORT_WEB_UI- }
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+      - DEFAULT_REGION=eu-west-1
+
+  rig:
+    build:
+      context: ../../
+      dockerfile: aws.dockerfile
+    container_name: reactive-interaction-gateway
+    ports:
+      - 4000:4000
+      - 4010:4010
+    environment:
+      - LOG_LEVEL=debug
+      - AWS_ACCESS_KEY_ID=foobar
+      - AWS_SECRET_ACCESS_KEY=foobar
+      - KINESIS_APP_NAME=rig
+      - KINESIS_DYNAMODB_ENDPOINT=http://localstack:4569
+      - KINESIS_ENABLED=1
+      - KINESIS_ENDPOINT=http://localstack:4568
+      - AWS_CBOR_DISABLE=1
+      # Using env var to set stream name is deprecated and will be removed in version 3.0!
+      # - PROXY_KINESIS_REQUEST_STREAM=RIG-outbound
