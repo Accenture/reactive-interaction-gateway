@@ -6,7 +6,7 @@ defmodule RigInboundGateway.ApiProxy.Validations do
   When any error occurs during RIG start -> process will exit.
   When any error occurs during REST API request -> process won't exit, but instead API returns 400 -- bad request.
   """
-  use Rig.Config, [:kinesis_request_stream, :kafka_request_topic, :kafka_request_avro]
+  use Rig.Config, [:kinesis_request_stream, :kafka_request_topic, :kafka_request_avro, :system]
 
   alias RigInboundGateway.ApiProxy.Api
 
@@ -16,9 +16,9 @@ defmodule RigInboundGateway.ApiProxy.Validations do
   @type error_list_t :: [{String.t(), error_t()}]
   @type error_map_t :: %{String.t() => [%{(String.t() | atom) => String.t()}]}
 
-  @spec validate_endpoint_target(Api.endpoint()) :: boolean
-  def validate_endpoint_target(endpoint) do
-    Vex.valid?(endpoint, %{"target" => [inclusion: ["kafka", "kinesis"]]})
+  @spec validate_endpoint_target(Api.endpoint(), [String.t()]) :: boolean
+  def validate_endpoint_target(endpoint, targets) do
+    Vex.valid?(endpoint, %{"target" => [inclusion: targets]})
   end
 
   # ---
@@ -105,20 +105,20 @@ defmodule RigInboundGateway.ApiProxy.Validations do
     Enum.reduce(endpoints, [], fn endpoint, acc ->
       topic_presence_config =
         endpoint
-        |> validate_endpoint_target()
+        |> validate_endpoint_target(["kafka", "kinesis"])
         |> with_nested_presence("topic", endpoint)
 
       # DEPRECATED. (Will be removed with the version 3.0.)
       topic_presence =
         endpoint
-        |> validate_endpoint_target()
+        |> validate_endpoint_target(["kafka"])
         |> with_nested_presence(:kafka_request_topic, conf)
         |> Enum.concat(topic_presence_config)
 
       # DEPRECATED. (Will be removed with the version 3.0.)
       stream_presence =
         endpoint
-        |> validate_endpoint_target()
+        |> validate_endpoint_target(["kinesis"])
         |> with_nested_presence(:kinesis_request_stream, conf)
         |> Enum.concat(topic_presence_config)
 
@@ -158,12 +158,12 @@ defmodule RigInboundGateway.ApiProxy.Validations do
 
   @spec validate!(Api.t()) :: Api.t()
   def validate!(api) do
+    conf = config()
     errors = validate_all(api)
 
     if errors != [] do
       log_error(errors)
-      Process.exit(self(), :ReverseProxyConfigurationError)
-      # System.stop()
+      conf.system.stop()
     end
 
     api

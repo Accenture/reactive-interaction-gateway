@@ -81,7 +81,8 @@ config :rig, RigInboundGateway.Proxy, config_path_or_json: {:system, "PROXY_CONF
 config :rig, RigInboundGateway.ApiProxy.Validations,
   kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},
   kafka_request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", ""},
-  kafka_request_avro: {:system, "PROXY_KAFKA_REQUEST_AVRO", ""}
+  kafka_request_avro: {:system, "PROXY_KAFKA_REQUEST_AVRO", ""},
+  system: System
 
 config :rig, RigInboundGateway.ApiProxy.Base,
   recv_timeout: {:system, :integer, "PROXY_RECV_TIMEOUT", 5_000}
