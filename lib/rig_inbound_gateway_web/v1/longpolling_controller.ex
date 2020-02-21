@@ -63,14 +63,8 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
 
         conn
         |> with_allow_origin()
-        |> put_resp_cookie(
-          "connection_token",
-          session_pid |> Connection.Codec.serialize()
-        )
-        |> put_resp_cookie(
-          "last_event_id",
-          Jason.encode!("first_event")
-        )
+        |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize())
+        |> put_resp_cookie("last_event_id", Jason.encode!("first_event"))
         |> put_resp_header("content-type", "application/json; charset=utf-8")
         |> put_resp_header("cache-control", "no-cache")
         |> put_status(200)
