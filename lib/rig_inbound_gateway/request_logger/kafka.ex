@@ -12,11 +12,11 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
 
   # ---
 
-  @spec kafka_handler(any()) ::
+  @spec kafka_handler(any(), String.t()) ::
           :ok
           | {:error, %{:__exception__ => true, :__struct__ => atom(), optional(atom()) => any()},
              any()}
-  def kafka_handler(_message), do: :ok
+  def kafka_handler(_message, _topic), do: :ok
 
   # ---
 

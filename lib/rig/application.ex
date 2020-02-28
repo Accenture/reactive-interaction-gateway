@@ -43,9 +43,10 @@ defmodule Rig.Application do
     # TODO: setup currently commented out, as metrics are not yet implemented and
     # therefore shouldn't be exposed yet to the endpoint
 
-    # RigMetrics.ControlInstrumenter.setup()
-    # RigMetrics.EventhubInstrumenter.setup()
+    RigMetrics.BlacklistMetrics.setup()
+    RigMetrics.EventhubMetrics.setup()
     RigMetrics.ProxyMetrics.setup()
+    RigMetrics.SubscriptionsMetrics.setup()
     RigMetrics.MetricsPlugExporter.setup()
 
     opts = [strategy: :one_for_one, name: Rig.Supervisor]

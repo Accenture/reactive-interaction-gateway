@@ -15,11 +15,11 @@ defmodule Rig.EventStream.KinesisToFilter do
 
   # ---
 
-  def kinesis_handler(message) do
+  def kinesis_handler(message, topic) do
     case CloudEvent.parse(message) do
       {:ok, %CloudEvent{} = cloud_event} ->
         Logger.debug(fn -> inspect(cloud_event.parsed) end)
-        EventFilter.forward_event(cloud_event)
+        EventFilter.forward_event(cloud_event, "kinesis", topic)
         :ok
 
       {:error, :parse_error} ->

@@ -260,6 +260,7 @@ defmodule Rig.EventFilter do
   alias Rig.EventFilter.Sup, as: FilterSup
   alias Rig.Subscription
   alias RigCloudEvents.CloudEvent
+  alias RigMetrics.SubscriptionsMetrics
 
   @doc """
   Refresh an existing subscription.
@@ -284,6 +285,8 @@ defmodule Rig.EventFilter do
         pid,
         {:refresh_subscriptions, subscriber, subscriptions, prev_subscriptions, done_callback}
       )
+
+      SubscriptionsMetrics.set_subscriptions(length(subscriptions))
     end
 
     :ok
@@ -291,14 +294,14 @@ defmodule Rig.EventFilter do
 
   # ---
 
-  @callback forward_event(CloudEvent.t()) :: :ok
-  @spec forward_event(CloudEvent.t()) :: :ok
-  def forward_event(%CloudEvent{} = event) do
+  @callback forward_event(CloudEvent.t(), String.t(), String.t()) :: :ok
+  @spec forward_event(CloudEvent.t(), String.t(), String.t()) :: :ok
+  def forward_event(%CloudEvent{} = event, eventhub, topic) do
     event_type = CloudEvent.type!(event)
     # On any node, there is only one Filter process for a given event type, or none, if
     # there are no subscriptions for the event type.
     with name <- Filter.process(event_type) do
-      GenServer.cast(name, event)
+      GenServer.cast(name, [event, eventhub, topic])
     end
 
     :ok

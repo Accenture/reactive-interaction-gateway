@@ -14,11 +14,11 @@ defmodule Rig.EventStream.KafkaToFilter do
 
   # ---
 
-  def kafka_handler(message) do
+  def kafka_handler(message, topic) do
     case CloudEvent.parse(message) do
       {:ok, %CloudEvent{} = cloud_event} ->
         Logger.debug(fn -> inspect(cloud_event.parsed) end)
-        EventFilter.forward_event(cloud_event)
+        EventFilter.forward_event(cloud_event, "kafka", topic)
         :ok
 
       {:error, :parse_error} ->

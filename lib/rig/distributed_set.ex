@@ -8,6 +8,7 @@ defmodule RIG.DistributedSet do
 
   alias Timex
   alias UUID
+  alias RigMetrics.BlacklistMetrics
 
   @type key :: String.t()
   @type uuid :: String.t()
@@ -174,6 +175,7 @@ defmodule RIG.DistributedSet do
     |> save(record)
     |> broadcast_update(pg2_group, last_record_id)
 
+    BlacklistMetrics.add_blacklisted_session()
     {:reply, :ok, %{state | last_record_id: uuid}}
   end
 
@@ -208,6 +210,7 @@ defmodule RIG.DistributedSet do
           local_last_record_id
       end
 
+    BlacklistMetrics.add_blacklisted_session()
     {:noreply, %{state | last_record_id: synced_record_id}}
   end
 
@@ -264,6 +267,7 @@ defmodule RIG.DistributedSet do
         else: :skip
     end)
 
+    BlacklistMetrics.delete_blacklisted_session(n_deleted)
     n_deleted
   end
 

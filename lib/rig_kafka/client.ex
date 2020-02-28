@@ -5,6 +5,7 @@ defmodule RigKafka.Client do
 
   alias RigKafka.Config
   alias RigKafka.Serializer
+  alias RigMetrics.EventhubMetrics
 
   require Logger
 
@@ -21,6 +22,7 @@ defmodule RigKafka.Client do
 
     """
     @behaviour :brod_group_subscriber
+    @metrics_eventhub_label "kafka"
 
     import Record, only: [defrecord: 2, extract: 2]
 
@@ -71,6 +73,7 @@ defmodule RigKafka.Client do
           message,
           %{callback: callback, schema_registry_host: schema_registry_host} = state
         ) do
+      start = Time.utc_now()
       %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
       headers_no_prefix = Serializer.remove_prefix(headers)
       content_type = get_content_type(headers_no_prefix, body)
@@ -95,19 +98,29 @@ defmodule RigKafka.Client do
               {:error, {:unknown_content_type, content_type}}
           end
 
-        case callback.(encoded_body) do
+        case callback.(encoded_body, topic) do
           :ok ->
+            EventhubMetrics.measure_event_processing(
+              @metrics_eventhub_label,
+              topic,
+              Time.diff(Time.utc_now(), start, :milliseconds)
+            )
+
+            EventhubMetrics.count_event(@metrics_eventhub_label, topic)
+
             {:ok, :ack, state}
 
           err ->
             info = %{error: err, topic: topic, partition: partition, offset: offset}
             Logger.error("Callback failed to handle message: #{inspect(info)}")
+            EventhubMetrics.count_failed_event(@metrics_eventhub_label, topic)
             {:ok, :ack_no_commit, state}
         end
       rescue
         err ->
           info = %{error: err, topic: topic, partition: partition, offset: offset}
           Logger.error(fn -> {"failed to decode message: #{inspect(err)}", [info: info]} end)
+          EventhubMetrics.count_dropped_event(@metrics_eventhub_label, topic)
           {:ok, :ack_no_commit, state}
       end
     end

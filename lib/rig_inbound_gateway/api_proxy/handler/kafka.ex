@@ -39,11 +39,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
   # ---
 
-  @spec kafka_handler(any()) ::
+  @spec kafka_handler(any(), String.t()) ::
           :ok
           | {:error, %{:__exception__ => true, :__struct__ => atom(), optional(atom()) => any()},
              any()}
-  def kafka_handler(message) do
+  def kafka_handler(message, _topic) do
     with {:ok, body} <- Jason.decode(message),
          {:ok, rig_metadata} <- Map.fetch(body, "rig"),
          {:ok, correlation_id} <- Map.fetch(rig_metadata, "correlation"),

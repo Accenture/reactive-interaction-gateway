@@ -1,0 +1,24 @@
+[
+  {
+    "id": "kafka-service",
+    "name": "kafka-service",
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "kafka",
+            "path": "/api/kafka",
+            "method": "POST",
+            "target": "kafka"
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "KAFKA_HOST",
+      "port": 9092
+    }
+  }
+]

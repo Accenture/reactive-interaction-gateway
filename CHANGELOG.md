@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added possibility to define Kafka/Kinesis topic and schema per reverse proxy endpoint. The current solution using environment variables is deprecated, but still used as a fallback -- will be removed in the version 3.0. [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
 - Added Kinesis + Localstack example [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+- Added Prometheus metrics for events and blacklist, TODO link [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
+- Added Grafana dashboard, TODO link [#222](https://github.com/Accenture/reactive-interaction-gateway/issues/222)
 
 <!-- ### Changed -->
 

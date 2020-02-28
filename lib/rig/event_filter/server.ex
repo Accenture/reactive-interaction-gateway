@@ -15,6 +15,7 @@ defmodule Rig.EventFilter.Server do
   alias Rig.EventFilter.MatchSpec.SubscriptionMatcher
   alias Rig.Subscription
   alias RigCloudEvents.CloudEvent
+  alias RigMetrics.EventhubMetrics
 
   @default_subscription_ttl_s 60
   @cleanup_interval_ms 90_000
@@ -129,7 +130,7 @@ defmodule Rig.EventFilter.Server do
 
   @impl GenServer
   def handle_cast(
-        %CloudEvent{} = event,
+        [%CloudEvent{} = event, eventhub, topic],
         %{subscription_table: subscription_table, config: config, fields: fields} = state
       ) do
     get_value_in_event = get_extractor(config, event)
@@ -152,6 +153,7 @@ defmodule Rig.EventFilter.Server do
       if n_clients > 0 do
         clients = if n_clients == 1, do: "1 client", else: "#{n_clients} clients"
         ~s|Event "#{id}" of type "#{type}" forwarded to #{clients}|
+        EventhubMetrics.count_forwarded_event(eventhub, topic)
       else
         ~s|Event "#{id}" of type "#{type}" not forwarded (there are no clients)|
       end

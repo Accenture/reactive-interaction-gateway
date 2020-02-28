@@ -60,7 +60,7 @@ defmodule Rig.KafkaConsumerSetup do
       defp do_start_link(conf, opts) do
         kafka_config = RigKafkaConfig.parse(conf)
 
-        case RigKafka.start(kafka_config, &__MODULE__.kafka_handler/1) do
+        case RigKafka.start(kafka_config, &__MODULE__.kafka_handler/2) do
           {:ok, _pid} ->
             Logger.info(fn -> "Kafka connection established for #{__MODULE__}" end)
             GenServer.start_link(__MODULE__, %{kafka_config: kafka_config}, opts)
