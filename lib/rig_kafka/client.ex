@@ -74,7 +74,6 @@ defmodule RigKafka.Client do
           message,
           %{callback: callback, schema_registry_host: schema_registry_host} = state
         ) do
-      # start = Time.utc_now()
       start_time_mono = System.monotonic_time()
       %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
       headers_no_prefix = Serializer.remove_prefix(headers)

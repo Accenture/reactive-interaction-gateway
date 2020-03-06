@@ -43,7 +43,7 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
     test_pid = self()
 
     callback = fn
-      msg ->
+      msg, _topic ->
         send(test_pid, msg)
         :ok
     end

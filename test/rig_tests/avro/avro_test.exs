@@ -29,7 +29,7 @@ defmodule RigTests.Avro.AvroTest do
     test_pid = self()
 
     callback = fn
-      msg ->
+      msg, _topic ->
         send(test_pid, msg)
         :ok
     end
