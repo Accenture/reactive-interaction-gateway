@@ -5,7 +5,7 @@ defmodule RigMetrics.SubscriptionsMetrics do
   use Prometheus.Metric
 
   # to be called at app startup.
-  def setup() do
+  def setup do
     Gauge.declare(
       name: :rig_subscriptions_total,
       help: "Total count of subscriptions"

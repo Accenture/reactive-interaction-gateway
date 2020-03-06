@@ -5,7 +5,7 @@ defmodule RigMetrics.DistributedSetMetrics do
   use Prometheus.Metric
 
   # to be called at app startup.
-  def setup() do
+  def setup do
     Gauge.declare(
       name: :rig_distributed_set_items_total,
       help: "Total count of items in distributed set",

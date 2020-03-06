@@ -5,7 +5,7 @@ defmodule RigMetrics.EventsMetrics do
   use Prometheus.Metric
 
   # to be called at app startup.
-  def setup() do
+  def setup do
     # consumer
 
     Counter.declare(

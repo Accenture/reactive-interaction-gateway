@@ -6,9 +6,9 @@ defmodule RIG.DistributedSet do
   use GenServer
   import Ex2ms
 
+  alias RigMetrics.DistributedSetMetrics
   alias Timex
   alias UUID
-  alias RigMetrics.DistributedSetMetrics
 
   @type key :: String.t()
   @type uuid :: String.t()
