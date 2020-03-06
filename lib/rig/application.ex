@@ -40,11 +40,8 @@ defmodule Rig.Application do
     ]
 
     # Prometheus
-    # TODO: setup currently commented out, as metrics are not yet implemented and
-    # therefore shouldn't be exposed yet to the endpoint
-
-    RigMetrics.BlacklistMetrics.setup()
-    RigMetrics.EventhubMetrics.setup()
+    RigMetrics.DistributedSetMetrics.setup()
+    RigMetrics.EventsMetrics.setup()
     RigMetrics.ProxyMetrics.setup()
     RigMetrics.SubscriptionsMetrics.setup()
     RigMetrics.MetricsPlugExporter.setup()

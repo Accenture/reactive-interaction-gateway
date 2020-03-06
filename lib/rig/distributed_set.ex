@@ -8,7 +8,7 @@ defmodule RIG.DistributedSet do
 
   alias Timex
   alias UUID
-  alias RigMetrics.BlacklistMetrics
+  alias RigMetrics.DistributedSetMetrics
 
   @type key :: String.t()
   @type uuid :: String.t()
@@ -169,13 +169,14 @@ defmodule RIG.DistributedSet do
   def handle_call(
         {:add_from_local, {_, uuid, _, _} = record},
         _from,
-        %{pg2_group: pg2_group, ets_table: ets_table, last_record_id: last_record_id} = state
+        %{pg2_group: pg2_group, ets_table: ets_table, last_record_id: last_record_id, name: name} =
+          state
       ) do
     ets_table
     |> save(record)
     |> broadcast_update(pg2_group, last_record_id)
 
-    BlacklistMetrics.add_blacklisted_session()
+    DistributedSetMetrics.add_item(name)
     {:reply, :ok, %{state | last_record_id: uuid}}
   end
 
@@ -183,7 +184,7 @@ defmodule RIG.DistributedSet do
   @impl GenServer
   def handle_info(
         {:add_from_remote, {_, incoming_record_id, _, _} = record, remote_previous_record_id},
-        %{ets_table: ets_table, last_record_id: local_last_record_id} = state
+        %{ets_table: ets_table, last_record_id: local_last_record_id, name: name} = state
       ) do
     save(ets_table, record)
 
@@ -210,7 +211,7 @@ defmodule RIG.DistributedSet do
           local_last_record_id
       end
 
-    BlacklistMetrics.add_blacklisted_session()
+    DistributedSetMetrics.add_item(name)
     {:noreply, %{state | last_record_id: synced_record_id}}
   end
 
@@ -243,15 +244,15 @@ defmodule RIG.DistributedSet do
 
   @doc "Remove expired records."
   @impl GenServer
-  def handle_info(:cleanup, %{ets_table: ets_table} = state) do
-    remove_expired_records(ets_table)
+  def handle_info(:cleanup, %{ets_table: ets_table, name: name} = state) do
+    remove_expired_records(ets_table, name)
     Process.send_after(self(), :cleanup, @cleanup_interval_s * 1_000)
     {:noreply, state}
   end
 
   # private
 
-  defp remove_expired_records(ets_table) do
+  defp remove_expired_records(ets_table, name) do
     now = Timex.now() |> serialize_datetime!()
 
     match_spec =
@@ -267,7 +268,7 @@ defmodule RIG.DistributedSet do
         else: :skip
     end)
 
-    BlacklistMetrics.delete_blacklisted_session(n_deleted)
+    DistributedSetMetrics.delete_item(name, n_deleted)
     n_deleted
   end
 

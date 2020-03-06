@@ -56,9 +56,10 @@ Counts all events forwarded to frontend.
 Following Labels are provided:
 
 - **topic**
-- **eventhub**
+- **source**
   - `kafka`
   - `kinesis`
+  - `http`
 
 #### `rig_processed_events_total`
 
@@ -67,7 +68,7 @@ Counts all events successfully processed by consumer.
 Following Labels are provided:
 
 - **topic**
-- **eventhub**
+- **source**
   - `kafka`
   - `kinesis`
 
@@ -76,7 +77,7 @@ Following Labels are provided:
 Counts all events that failed when handling the event.
 
 - **topic**
-- **eventhub**
+- **source**
   - `kafka`
   - `kinesis`
 
@@ -85,7 +86,7 @@ Counts all events that failed when handling the event.
 Counts all events that RIG couldn't parse and were skipped.
 
 - **topic**
-- **eventhub**
+- **source**
   - `kafka`
   - `kinesis`
 
@@ -94,7 +95,7 @@ Counts all events that RIG couldn't parse and were skipped.
 Histogram measuring how long it took to process the event (serialization, filtering & forwarding to frontend).
 
 - **topic**
-- **eventhub**
+- **source**
   - `kafka`
   - `kinesis`
 
@@ -103,7 +104,7 @@ Histogram measuring how long it took to process the event (serialization, filter
 Counts all successfully produced events.
 
 - **topic**
-- **eventhub**
+- **target**
   - `kafka`
   - `kinesis`
 
@@ -112,7 +113,7 @@ Counts all successfully produced events.
 Counts all events that failed to be produced.
 
 - **topic**
-- **eventhub**
+- **target**
   - `kafka`
   - `kinesis`
 
@@ -124,13 +125,15 @@ Counts current number of event subscriptions.
 
 ### Blacklist
 
-#### `rig_blacklist_total`
+#### `rig_distributed_set_items_total{name="Elixir.SessionBlacklist"}`
 
-Counts all JWTs that were blacklisted.
+Counts all JWTs that are blacklisted.
 
-#### `rig_blacklist_current`
+#### `rig_distributed_set_items_current{name="Elixir.SessionBlacklist"}`
 
 Counts current number of blacklisted JWTs.
+
+> `rig_distributed_set_items_*` is generic metric for all distributed sets, so you can create visualizations also for them.
 
 ## Standard Metrics
 
@@ -158,8 +161,14 @@ To use RIG-Metrics for monitoring in Grafana, following steps are required:
 
 ## Grafana Dashboard
 
-Some example Grafana dashboard for the standard metrics can be found [**here**](https://github.com/deadtrickster/beam-dashboards)
+Some example Grafana dashboard for the standard metrics can be found [**here**](https://github.com/deadtrickster/beam-dashboards).
 
-We provide also our own dashboard with RIG specific metrics. TODO
+### Provided Dashboard
+
+We provide also our own dashboard with RIG specific metrics. You can find it in the [**metrics folder**](https://github.com/Accenture/reactive-interaction-gateway/monitoring/metrics/rig-grafana.json). This folder includes also example setup using docker-compose.
+
+Dashboard looks like this:
+
+![simple-add-rig](assets/grafana-dashboard.png)
 
 _Kudus to [**deadtrickster**](https://github.com/deadtrickster) for his awesome prometheus integration package_

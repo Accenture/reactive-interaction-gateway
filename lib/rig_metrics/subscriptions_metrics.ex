@@ -12,6 +12,7 @@ defmodule RigMetrics.SubscriptionsMetrics do
     )
   end
 
+  @doc "Sets the Prometheus gauge rig_subscriptions_total"
   def set_subscriptions(subscriptions_amount) do
     Gauge.set([name: :rig_subscriptions_total], subscriptions_amount)
   end

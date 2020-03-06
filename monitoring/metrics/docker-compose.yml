@@ -28,6 +28,11 @@ services:
       KAFKA_NUM_PARTITIONS: 1
     restart: on-failure:5
 
+  kafkacat:
+    image: confluentinc/cp-kafkacat:5.0.0
+    container_name: kafkacat
+    command: sh -c "sleep 1000"
+
   prometheus:
     image: prom/prometheus
     container_name: prometheus

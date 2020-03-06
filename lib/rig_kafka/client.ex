@@ -5,13 +5,14 @@ defmodule RigKafka.Client do
 
   alias RigKafka.Config
   alias RigKafka.Serializer
-  alias RigMetrics.EventhubMetrics
+  alias RigMetrics.EventsMetrics
 
   require Logger
 
   @type callback :: (any -> :ok | any)
 
   @reconnect_timeout_ms 20_000
+  @metrics_target_label "kafka"
   @supervisor RigKafka.DynamicSupervisor
 
   use GenServer, shutdown: @reconnect_timeout_ms + 5_000, restart: :permanent
@@ -22,7 +23,7 @@ defmodule RigKafka.Client do
 
     """
     @behaviour :brod_group_subscriber
-    @metrics_eventhub_label "kafka"
+    @metrics_source_label "kafka"
 
     import Record, only: [defrecord: 2, extract: 2]
 
@@ -73,7 +74,8 @@ defmodule RigKafka.Client do
           message,
           %{callback: callback, schema_registry_host: schema_registry_host} = state
         ) do
-      start = Time.utc_now()
+      # start = Time.utc_now()
+      start_time_mono = System.monotonic_time()
       %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
       headers_no_prefix = Serializer.remove_prefix(headers)
       content_type = get_content_type(headers_no_prefix, body)
@@ -100,27 +102,25 @@ defmodule RigKafka.Client do
 
         case callback.(encoded_body, topic) do
           :ok ->
-            EventhubMetrics.measure_event_processing(
-              @metrics_eventhub_label,
+            EventsMetrics.measure_event_processing(
+              @metrics_source_label,
               topic,
-              Time.diff(Time.utc_now(), start, :milliseconds)
+              System.monotonic_time() - start_time_mono
             )
-
-            EventhubMetrics.count_event(@metrics_eventhub_label, topic)
 
             {:ok, :ack, state}
 
           err ->
             info = %{error: err, topic: topic, partition: partition, offset: offset}
             Logger.error("Callback failed to handle message: #{inspect(info)}")
-            EventhubMetrics.count_failed_event(@metrics_eventhub_label, topic)
+            EventsMetrics.count_failed_event(@metrics_source_label, topic)
             {:ok, :ack_no_commit, state}
         end
       rescue
         err ->
           info = %{error: err, topic: topic, partition: partition, offset: offset}
           Logger.error(fn -> {"failed to decode message: #{inspect(err)}", [info: info]} end)
-          EventhubMetrics.count_dropped_event(@metrics_eventhub_label, topic)
+          EventsMetrics.count_dropped_event(@metrics_source_label, topic)
           {:ok, :ack_no_commit, state}
       end
     end
@@ -402,10 +402,12 @@ defmodule RigKafka.Client do
            }
          ) do
       :ok ->
+        EventsMetrics.count_produced_event(@metrics_target_label, topic)
         :ok
 
       {:error, :leader_not_available} ->
         try_again? = retry_delay_divisor >= 1
+        EventsMetrics.count_failed_produce_event(@metrics_target_label, topic)
 
         if try_again? do
           retry_delay_ms = trunc(1_920 / retry_delay_divisor)
@@ -429,6 +431,7 @@ defmodule RigKafka.Client do
         end
 
       err ->
+        EventsMetrics.count_failed_produce_event(@metrics_target_label, topic)
         err
     end
   end

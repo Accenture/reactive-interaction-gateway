@@ -175,7 +175,7 @@ defmodule RIG.Sources.HTTP.Handler do
       end
 
     if authorized? do
-      :ok = EventFilter.forward_event(cloud_event, "http", "TODO")
+      :ok = EventFilter.forward_event(cloud_event, "http", nil)
 
       conn
       |> put_status(:accepted)

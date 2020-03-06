@@ -296,12 +296,12 @@ defmodule Rig.EventFilter do
 
   @callback forward_event(CloudEvent.t(), String.t(), String.t()) :: :ok
   @spec forward_event(CloudEvent.t(), String.t(), String.t()) :: :ok
-  def forward_event(%CloudEvent{} = event, eventhub, topic) do
+  def forward_event(%CloudEvent{} = event, source, topic) do
     event_type = CloudEvent.type!(event)
     # On any node, there is only one Filter process for a given event type, or none, if
     # there are no subscriptions for the event type.
     with name <- Filter.process(event_type) do
-      GenServer.cast(name, [event, eventhub, topic])
+      GenServer.cast(name, [event, source, topic])
     end
 
     :ok
