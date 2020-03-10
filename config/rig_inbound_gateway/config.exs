@@ -11,7 +11,7 @@ use Mix.Config
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:module, :request_id]
+  metadata: [:module, :request_id, :trace_id, :span_id]
 
 # --------------------------------------
 # Phoenix

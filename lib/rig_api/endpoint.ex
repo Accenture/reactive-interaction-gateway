@@ -4,6 +4,8 @@ defmodule RigApi.Endpoint do
 
   alias Rig.Config
 
+  plug(RigTracing.TracePlug)
+
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do
