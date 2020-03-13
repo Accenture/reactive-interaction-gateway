@@ -1,41 +1,41 @@
-## --- Operator's Guide ---
-## To see full list of environemnt variables with values check: https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html
-## ------------------------
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: reactive-interaction-gateway-service
-  labels:
-    app: reactive-interaction-gateway-service
-spec:
-  ports:
-    - port: 4000
-      targetPort: 4000
-      protocol: TCP
-      name: proxy-http
-    - port: 4001
-      targetPort: 4001
-      protocol: TCP
-      name: proxy-https
-    - port: 4010
-      targetPort: 4010
-      protocol: TCP
-      name: internal-http
-    - port: 4011
-      targetPort: 4011
-      protocol: TCP
-      name: internal-https
-  selector:
-    app: reactive-interaction-gateway-deployment
+# --- Operator's Guide ---
+# Full list of environment variables: https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html
+# ------------------------
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
-  name: reactive-interaction-gateway-service-headless
+  name: reactive-interaction-gateway
   labels:
-    app: reactive-interaction-gateway-service-headless
+    app: reactive-interaction-gateway
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4000
+      targetPort: proxy-http
+      protocol: TCP
+      name: proxy-http
+    - port: 4001
+      targetPort: proxy-https
+      protocol: TCP
+      name: proxy-https
+    - port: 4010
+      targetPort: internal-http
+      protocol: TCP
+      name: internal-http
+    - port: 4011
+      targetPort: internal-https
+      protocol: TCP
+      name: internal-https
+  selector:
+    app: reactive-interaction-gateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reactive-interaction-gateway-headless
+  labels:
+    app: reactive-interaction-gateway-headless
 spec:
   ports:
     - port: 4000
@@ -47,46 +47,63 @@ spec:
     - port: 4011
       name: internal-https
   selector:
-    app: reactive-interaction-gateway-deployment
+    app: reactive-interaction-gateway
   clusterIP: None
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: reactive-interaction-gateway-deployment
+  name: reactive-interaction-gateway
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: reactive-interaction-gateway-deployment
+      app: reactive-interaction-gateway
+  replicas: 1
   template:
     metadata:
       labels:
-        app: reactive-interaction-gateway-deployment
+        app: reactive-interaction-gateway
     spec:
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
+      nodeSelector: {}
+      affinity: {}
+      tolerations: []
       containers:
         - name: reactive-interaction-gateway
-          image: accenture/reactive-interaction-gateway
+          image: accenture/reactive-interaction-gateway:2.3.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 4000
+              name: proxy-http
+              protocol: TCP
             - containerPort: 4001
+              name: proxy-https
+              protocol: TCP
             - containerPort: 4010
+              name: internal-http
+              protocol: TCP
             - containerPort: 4011
+              name: internal-https
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: internal-http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: internal-http
+          resources: {}
           env:
-            ## Ports
-            - name: API_HTTP_PORT
-              value: "4010"
-            - name: API_HTTPS_PORT
-              value: "4011"
+            ## Proxy ports
             - name: INBOUND_PORT
               value: "4000"
             - name: INBOUND_HTTPS_PORT
               value: "4001"
+            ## Internal HTTP API ports
+            - name: API_HTTP_PORT
+              value: "4010"
+            - name: API_HTTPS_PORT
+              value: "4011"
             ## Hostname for HTTP endpoints
             # - name: HOST
             #   value: "localhost"
@@ -97,8 +114,9 @@ spec:
             #   value: "cert/signed_key.pem"
             # - name: HTTPS_KEYFILE_PASS
             #   value: "asdf"
-            ## CORS (Access-Control-Allow-Origin) for "inbound" port
-            # - name: CORS: "*"
+            ## CORS (Access-Control-Allow-Origin) for "inbound" port(s)
+            # - name: CORS
+            #   value: "*"
             ## Discovery & node
             - name: DISCOVERY_TYPE
               value: "dns"
@@ -112,15 +130,28 @@ spec:
                 fieldRef:
                   fieldPath: status.podIP
             ## Kafka
-            ## Setting "KAFKA_BROKERS" automatically enables usage of Kafka in RIG
+            ## Setting "KAFKA_BROKERS" automatically enables usage of Kafka
             # - name: KAFKA_BROKERS
             #   value: "localhost:9092"
             # - name: KAFKA_SOURCE_TOPICS
             #   value: "rig"
-            # - name: KAFKA_GROUP_ID
-            #   value: "rig"
+            ## Kafka group ID used for forwarding events according to subscriptions over SSE and WS connections. The default should be fine.
+            # - name: KAFKATOFILTER_KAFKA_GROUP_ID
+            #   value: "rig-kafka-to-filter"
+            ## Kafka group ID used for forwarding all events over a HTTP connection. The default should be fine.
+            # - name: KAFKATOHTTP_KAFKA_GROUP_ID
+            #   value: "rig-kafka-to-http"
             # - name: KAFKA_RESTART_DELAY_MS
             #   value: "10000"
+            ## Host for Kafka Schema Registry
+            # - name: KAFKA_SCHEMA_REGISTRY_HOST
+            #   value: "schema-registry:8081"
+            ## Serializer for Kafka events, currently supports Avro. By default uses JSON serialization
+            # - name: KAFKA_SERIALIZER
+            #   value: "avro"
+            ## Avro schema name for events published by logger
+            # - name: KAFKA_LOG_SCHEMA
+            #   value: "logger-schema"
             # - name: KAFKA_LOG_TOPIC
             #   value: "rig-request-log"
             ## Kafka SASL
@@ -149,15 +180,18 @@ spec:
             # - name: KINESIS_LOG_LEVEL
             #   value: "INFO"
             ## Proxy
+            ## Path to a JSON file or the JSON string itself
             # - name: PROXY_CONFIG_FILE
-            #   value: "/proxy.json"
+            #   value: "./proxy.json"
             # - name: PROXY_RECV_TIMEOUT
+            #   value: "5000"
+            # - name: PROXY_HTTP_ASYNC_RESPONSE_TIMEOUT
             #   value: "5000"
             ## Proxy Kafka
             # - name: PROXY_KAFKA_RESPONSE_TOPICS
             #   value: "rig-proxy-response"
-            # - name: PROXY_KAFKA_REQUEST_TOPIC
-            #   value: "rig-proxy-request"
+            # - name: PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID
+            #   value: "rig-proxy-response"
             # - name: PROXY_KAFKA_RESPONSE_TIMEOUT
             #   value: "5000"
             ## Proxy Kinesis
@@ -181,10 +215,10 @@ spec:
             # - name: REQUEST_LOG
             #   value: "console,kafka"
             - name: LOG_LEVEL
-              value: "debug"
-          ## SSE, WS
-          # - name: SUBSCRIPTION_CHECK
-          #   value: "jwt_validation"
-          ## HTTP events endpoint
-          # - name: SUBMISSION_CHECK
-          #   value: "jwt_validation"
+              value: "warn"
+            ## SSE, WS
+            # - name: SUBSCRIPTION_CHECK
+            #   value: "jwt_validation"
+            ## HTTP events endpoint
+            # - name: SUBMISSION_CHECK
+            #   value: "jwt_validation"

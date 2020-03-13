@@ -32,6 +32,19 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+Common labels
+*/}}
+{{- define "reactive-interaction-gateway.labels" -}}
+app.kubernetes.io/name: {{ include "reactive-interaction-gateway.name" . }}
+helm.sh/chart: {{ include "reactive-interaction-gateway.chart" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end -}}
+
+{{/*
 Return the appropriate apiVersion for deployment.
 */}}
 {{- define "deployment.apiVersion" -}}

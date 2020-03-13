@@ -1,30 +1,93 @@
-# Distributed deployment
+# Running RIG on Kubernetes
 
-Reactive Interaction Gateway (RIG) uses [Peerage library](https://github.com/mrluc/peerage) to do discovery in distributed mode (production Distillery release).
+## Kubectl
 
-**Note:** If you don't care about distributed mode and don't want to do discovery, follow just `General configuration` section and ignore rest of the text.
+```bash
+kubectl apply -f kubectl/rig.yaml
+```
+
+## Helm
+
+### Version 2
+
+```bash
+cd helm2
+# dry run to verify that everything is ok
+helm install --name=rig reactive-interaction-gateway --dry-run
+# install
+helm install --name=rig reactive-interaction-gateway
+```
+
+### Version 3
+
+```bash
+cd helm3
+# dry run to verify that everything is ok
+helm install rig reactive-interaction-gateway --dry-run
+# install
+helm install rig reactive-interaction-gateway
+```
+
+## Communication
+
+Both `kubectl` and `helm` deploy bunch of Kubernetes resources:
+
+- deployment - manages pod(s)
+- service - provides the main communication point for other applications
+- headless service - takes care of DNS discovery used internally
+
+To allow external communication (outside of your cluster) do:
+
+```bash
+# both helm versions
+helm upgrade --set service.type=LoadBalancer rig reactive-interaction-gateway
+# for kubectl update kubectl/rig.yaml to use a service of type LoadBalancer instead of ClusterIP
+```
+
+## Scaling
+
+Scale the deployment and create multiple pods
+
+```bash
+helm upgrade --set service.type=LoadBalancer --set replicaCount=<replicas> rig reactive-interaction-gateway
+# or
+kubectl scale deployment/<deployment_name> --replicas <replicas>
+```
+
+You can also inspect the logs of the pods with `kubectl logs <pod_name>` to see how they automatically re-balance Kafka consumers (if you are using Kafka) and adapt Proxy APIs from other nodes.
 
 ## Configuration
 
-### General configuration
+### Node host
 
-1. Node host - Every node in cluster needs to be discoverable by other nodes. For that Elixir/Erlang uses so called `long name` or `short name`. We are using `long name` which is formed in the following way `app_name@node_host`. `app_name` is in our case set to `rig`, but `node_host` is taken from environment variable `NODE_HOST`. This can be either IP or container alias or whatever that is routable in network by other nodes.
+Every node in cluster needs to be discoverable by other nodes. For that Elixir/Erlang uses so called `long name` or `short name`. We are using `long name` which is formed in the following way `app_name@node_host`. `app_name` is in our case set to `rig` and `node_host` is taken from environment variable `NODE_HOST`. This can be either IP or container alias or whatever that is routable in network by other nodes.
 
-1. Node cookie - Nodes in Erlang cluster use cookies as a form of authorization/authentication between them. Only nodes with the same cookie can communicate together. It should be ideally some generated hash, set it to `NODE_COOKIE` environment variable.
+We are using the pod IP with:
 
-### DNS discovery
+```yaml
+- name: NODE_HOST
+  valueFrom:
+    fieldRef:
+      fieldPath: status.podIP
+```
 
-RIG currently supports distributed deployment via DNS discovery. To make it work, you need to set two environment variables:
+### Node cookie
 
-1. Discovery type - Currently RIG supports only DNS discovery. To use DNS, set `DISCOVERY_TYPE` to `dns`.
-
-1. DNS name (address) - Address where peerage will do discovery for Node host addresses. Value is taken from environment variable `DNS_NAME`.
-
-DNS discovery is executed every 5 seconds.
+Nodes in Erlang cluster use cookies as a form of authorization/authentication between them. Only nodes with the same cookie can communicate together. Ideally, it is some generated hash, that's why we recommend adapting `NODE_COOKIE` environment variable in the `values.yaml`.
 
 ### Additional configuration
 
-When running in distributed mode, additional variables may be passed to the deployment in order to run the proper configuration.
-Changes to these variables are required in most production circumstances.
+You can configure bunch of environment variables, please check the [Operator's Guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html).
 
-For more information on configuration variables, please view the [Operator's Guide to the RIG](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html)
+## Cleanup
+
+```bash
+# kubectl
+kubectl delete -f kubectl/rig.yaml
+
+# Helm v3
+helm uninstall rig
+
+# Helm v2
+helm delete --purge rig
+```
