@@ -1,4 +1,4 @@
-FROM node:8-alpine
+FROM node:10-alpine
 
 # Set working directory
 WORKDIR /opt/service/
@@ -10,7 +10,7 @@ ENV NODE_ENV=production
 COPY package.json /opt/service/package.json
 
 # Install all dependencies
-RUN npm i
+RUN npm i --no-package-lock
 
 # Attach other files to container
 COPY kafka /opt/service/kafka

@@ -22,7 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Security -->
 
-<!-- ### Technical Improvements -->
+### Technical Improvements
+
+- Upgrade the Elixir version to 1.10 for source code and Docker images. Upgrade version for multiple dependencies.
+  [#285](https://github.com/Accenture/reactive-interaction-gateway/issues/285)
 
 ## [2.3.0] - 2019-12-13
 
