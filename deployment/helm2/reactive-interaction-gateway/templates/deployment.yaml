@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "reactive-interaction-gateway.fullname" . }}
+  labels:
+{{ include "reactive-interaction-gateway.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "reactive-interaction-gateway.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "reactive-interaction-gateway.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- range $key, $value := .Values.deployment.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+            - name: NODE_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          ports:
+            - name: proxy-http
+              containerPort: {{ .Values.deployment.env.INBOUND_PORT }}
+              protocol: TCP
+            - name: proxy-https
+              containerPort: {{ .Values.deployment.env.INBOUND_HTTPS_PORT }}
+              protocol: TCP
+            - name: internal-http
+              containerPort: {{ .Values.deployment.env.API_HTTP_PORT }}
+              protocol: TCP
+            - name: internal-https
+              containerPort: {{ .Values.deployment.env.API_HTTPS_PORT }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: internal-http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: internal-http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
