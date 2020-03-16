@@ -22,7 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Security -->
 
-<!-- ### Technical Improvements -->
+### Technical Improvements
+
+- Added [Slackin](https://rig-slackin.herokuapp.com/) integration for easier Slack access - check the main page badge! [#240](https://github.com/Accenture/reactive-interaction-gateway/issues/240)
 
 ## [2.3.0] - 2019-12-13
 
