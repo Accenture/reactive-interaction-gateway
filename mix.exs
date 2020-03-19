@@ -90,15 +90,15 @@ defmodule RIG.MixProject do
   defp deps do
     [
       # Test coverage reporting:
-      {:excoveralls, "~> 0.12", only: :test, runtime: false},
+      {:excoveralls, ">= 0.12.0", only: :test, runtime: false},
       # Linting:
-      {:credo, "~> 1.3", only: [:dev, :test], runtime: false},
+      {:credo, ">= 1.3.0", only: [:dev, :test], runtime: false},
       # Static type checks:
-      {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false},
+      {:dialyxir, ">= 1.0.0-rc.6", only: [:dev], runtime: false},
       # OTP releases:
       {:distillery, "~> 2.1", runtime: false},
       # Documentation generator:
-      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
+      {:ex_doc, ">= 0.21.0", only: :dev, runtime: false},
       # Automatically run tests on file changes:
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
       # Read and use application configuration from environment variables:
