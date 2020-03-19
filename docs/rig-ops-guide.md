@@ -24,7 +24,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `DNS_NAME` | Address where RIG will do DNS discovery for Node host addresses. | "localhost"
 `EXTRACTORS` | Extractor configuration, given either as path to a JSON file, or directly as JSON. The extractor configuration contains information about events' fields per event type, used to _extract_ information. For example, the following setting allows clients to specify a constraint on the `name` field of `greeting` events: `EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/name"}}}}'`. Note that `stable_field_index` and `event/json_pointer` are required for all configured fields. | nil
 `FIREHOSE_KAFKA_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KAFKA_SOURCE_TOPICS | []
-`FIREHOSE_KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will use as a firehose consumer, delimited by comma. Events will be sent to `FIREHOSE_KAFKA_HTTP_TARGETS | ["rig"]
+`FIREHOSE_KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will use as a firehose consumer, delimited by comma. Events will be sent to `FIREHOSE_KAFKA_HTTP_TARGETS | ["rig-firehose"]
 `FIREHOSE_KINESIS_APP_NAME` | Name for Firehose Kinesis consumer group -- DynamoDB table | "Reactive-Interaction-Gateway-Firehose"
 `FIREHOSE_KINESIS_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KINESIS_STREAM | ["http://localhost:4040/todo"]
 `FIREHOSE_KINESIS_STREAM` | Kinesis stream RIG will use as a firehose consumer. Events will be sent to `FIREHOSE_KINESIS_HTTP_TARGETS | "RIG-firehose"
