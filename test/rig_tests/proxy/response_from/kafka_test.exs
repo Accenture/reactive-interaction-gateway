@@ -21,9 +21,10 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
   ]
 
   use ExUnit.Case, async: false
-  import FakeServer
-  alias FakeServer.HTTP.Response
 
+  import FakeServer
+
+  alias FakeServer.Response
   alias Rig.KafkaConfig, as: RigKafkaConfig
   alias RigInboundGateway.ApiProxyInjection
   alias RigKafka

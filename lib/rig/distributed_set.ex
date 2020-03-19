@@ -258,11 +258,9 @@ defmodule RIG.DistributedSet do
 
     n_deleted = :ets.select_delete(ets_table, match_spec)
 
-    Logger.debug(fn ->
-      if n_deleted > 0,
-        do: "Removed #{n_deleted} expired records",
-        else: :skip
-    end)
+    if n_deleted > 0 do
+      Logger.debug(fn -> "Removed #{n_deleted} expired records" end)
+    end
 
     n_deleted
   end

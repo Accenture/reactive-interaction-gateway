@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Technical Improvements
 
+- Upgrade the Elixir version to 1.10 for source code and Docker images. Upgrade version for multiple dependencies.
+  [#285](https://github.com/Accenture/reactive-interaction-gateway/issues/285)
 - Added [Slackin](https://rig-slackin.herokuapp.com/) integration for easier Slack access - check the main page badge! [#240](https://github.com/Accenture/reactive-interaction-gateway/issues/240)
 
 ## [2.3.0] - 2019-12-13
