@@ -15,7 +15,7 @@ defmodule RigTracing.TracePlug do
     cloudevent
   end
 
-  def tracecontext_headers() do
+  def tracecontext_headers do
     for {k, v} <- :oc_propagation_http_tracecontext.to_headers(:ocp.current_span_ctx()) do
       {k, List.to_string(v)}
     end
