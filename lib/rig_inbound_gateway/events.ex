@@ -20,9 +20,6 @@ defmodule RigInboundGateway.Events do
     )
   end
 
-  def type(arg) when is_map(arg), do: IO.inspect("is map")
-  def type(arg) when is_tuple(arg), do: IO.inspect("is tuple")
-
   @spec subscriptions_set([Subscription.t()]) :: CloudEvent.t()
   def subscriptions_set(subscriptions) do
     rig_event(
