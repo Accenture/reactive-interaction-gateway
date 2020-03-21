@@ -47,7 +47,7 @@ config :rig, Rig.EventStream.KafkaToHttp,
   serializer: {:system, "KAFKA_SERIALIZER", nil},
   schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", nil},
   # The list of topics to consume messages from:
-  consumer_topics: {:system, :list, "FIREHOSE_KAFKA_SOURCE_TOPICS", ["rig"]},
+  consumer_topics: {:system, :list, "FIREHOSE_KAFKA_SOURCE_TOPICS", ["rig-firehose"]},
   # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored; otherwise, they're required.
   ssl_enabled?: {:system, :boolean, "KAFKA_SSL_ENABLED", false},
   # If use_enabled?, the following paths are expected (relative to the `priv` directory):

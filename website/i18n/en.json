@@ -3,7 +3,7 @@
   "localized-strings": {
     "next": "Next",
     "previous": "Previous",
-    "tagline": "Your UI deserves an API, too!",
+    "tagline": "Create low-latency, interactive user experiences for stateless microservices.",
     "docs": {
       "api-gateway-management": {
         "title": "API Gateway Management",
