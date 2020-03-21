@@ -38,7 +38,6 @@ config :rig, RigApi.Endpoint,
   ],
   render_errors: [view: RigApi.ErrorView, accepts: ~w(json)],
   pubsub: [name: Rig.PubSub],
-  # instrumenters: [OpencensusPhoenix.Instrumenter],
   check_origin: false
 
 # Always start the HTTP endpoints on application startup:

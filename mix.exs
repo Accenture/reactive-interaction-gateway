@@ -156,7 +156,9 @@ defmodule RIG.MixProject do
       # Prometheus metrics
       {:prometheus_ex, "~> 3.0"},
       {:prometheus_plugs, "~> 1.1"},
-      {:opencensus_plug, "~> 0.3"}
+      {:opencensus_plug, "~> 0.3"},
+      {:opencensus, "~> 0.9"},
+      {:opencensus_elixir, "~> 0.3.0"}
     ]
   end
 
