@@ -7,8 +7,7 @@ defmodule RigTracing.TracePlug do
   def append_distributed_tracing_context(cloudevent, tracecontext_headers) do
     cloudevent =
       Enum.reduce(tracecontext_headers, cloudevent, fn trace_header, acc ->
-        key = trace_header |> elem(0)
-        val = trace_header |> elem(1)
+        {key, val} = trace_header
         Map.put(acc, key, val)
       end)
 
