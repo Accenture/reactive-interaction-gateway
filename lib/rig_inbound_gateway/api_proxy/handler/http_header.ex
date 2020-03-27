@@ -32,6 +32,16 @@ defmodule RigInboundGateway.ApiProxy.Handler.HttpHeader do
 
   # ---
 
+  @spec put_tracecontext_header(Plug.Conn.headers(), tracecontext :: List) :: Plug.Conn.headers()
+  def put_tracecontext_header(req_headers, tracecontext) do
+    req_headers
+    |> Enum.reject(fn {k, _} -> k === "traceparent" end)
+    |> Enum.reject(fn {k, _} -> k === "tracestate" end)
+    |> Enum.concat(tracecontext)
+  end
+
+  # ---
+
   defp resolve_addr(ip_addr_or_hostname)
 
   defp resolve_addr(ip_addr) when is_tuple(ip_addr) do
