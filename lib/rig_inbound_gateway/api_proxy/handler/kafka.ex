@@ -14,6 +14,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
   alias Rig.Connection.Codec
 
+  alias RigTracing.TracePlug
+
   @help_text """
   Produce the request to a Kafka topic and optionally wait for the (correlated) response.
 
@@ -107,19 +109,43 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     |> case do
       # Deprecated way to pass events:
       {:ok, %{"partition" => partition, "event" => event}} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from, topic, schema)
+        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+          do_handle_http_request(
+            conn,
+            request_path,
+            partition,
+            event,
+            response_from,
+            topic,
+            schema
+          )
+        end
 
       # Preferred way to pass events, where the partition goes into the "rig" extension:
       {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from, topic, schema)
+        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+          do_handle_http_request(
+            conn,
+            request_path,
+            partition,
+            event,
+            response_from,
+            topic,
+            schema
+          )
+        end
 
       # Deprecated way to pass events, partition not set -> will be randomized:
       {:ok, %{"event" => event}} ->
-        do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
+        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+          do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
+        end
 
       # Preferred way to pass events, partition not set -> will be randomized:
       {:ok, %{"specversion" => _} = event} ->
-        do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
+        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+          do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
+        end
 
       {:ok, _} ->
         respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
@@ -144,19 +170,27 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     |> case do
       # Deprecated way to pass events:
       {:ok, %{"partition" => partition, "event" => event}} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from)
+        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+          do_handle_http_request(conn, request_path, partition, event, response_from)
+        end
 
       # Preferred way to pass events, where the partition goes into the "rig" extension:
       {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from)
+        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+          do_handle_http_request(conn, request_path, partition, event, response_from)
+        end
 
       # Deprecated way to pass events, partition not set -> will be randomized:
       {:ok, %{"event" => event}} ->
-        do_handle_http_request(conn, request_path, <<>>, event, response_from)
+        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+          do_handle_http_request(conn, request_path, <<>>, event, response_from)
+        end
 
       # Preferred way to pass events, partition not set -> will be randomized:
       {:ok, %{"specversion" => _} = event} ->
-        do_handle_http_request(conn, request_path, <<>>, event, response_from)
+        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+          do_handle_http_request(conn, request_path, <<>>, event, response_from)
+        end
 
       {:ok, _} ->
         respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
@@ -190,6 +224,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         path: request_path,
         query: conn.query_string
       })
+      |> TracePlug.append_distributed_tracing_context(TracePlug.tracecontext_headers())
       |> Poison.encode!()
 
     produce(partition, kafka_message, topic, schema)
