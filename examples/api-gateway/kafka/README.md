@@ -17,7 +17,7 @@ export PROXY_CONFIG_FILE="$config"
 mix run --no-halt
 ```
 
-[Download some quickstart scripts for Kafka](https://kafka.apache.org/quickstart) and run it:
+[Download some quickstart scripts for Kafka](https://kafka.apache.org/quickstart) and run a consumer:
 
 ```shell
 /path/to/download/folder/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic example --from-beginning
