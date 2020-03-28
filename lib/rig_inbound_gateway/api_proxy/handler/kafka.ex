@@ -5,6 +5,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   """
   use Rig.KafkaConsumerSetup, [:cors, :request_topic, :request_schema, :response_timeout]
 
+  import RigTracing.TracePlug
   alias Plug.Conn
 
   alias RigMetrics.ProxyMetrics
@@ -109,7 +110,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     |> case do
       # Deprecated way to pass events:
       {:ok, %{"partition" => partition, "event" => event}} ->
-        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+        with_child_span_from_cloudevent("KafkaHandler", event) do
           do_handle_http_request(
             conn,
             request_path,
@@ -123,7 +124,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
       # Preferred way to pass events, where the partition goes into the "rig" extension:
       {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
-        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+        with_child_span_from_cloudevent("KafkaHandler", event) do
           do_handle_http_request(
             conn,
             request_path,
@@ -137,13 +138,13 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
       # Deprecated way to pass events, partition not set -> will be randomized:
       {:ok, %{"event" => event}} ->
-        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+        with_child_span_from_cloudevent("KafkaHandler", event) do
           do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
         end
 
       # Preferred way to pass events, partition not set -> will be randomized:
       {:ok, %{"specversion" => _} = event} ->
-        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+        with_child_span_from_cloudevent("KafkaHandler", event) do
           do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
         end
 
@@ -170,25 +171,25 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     |> case do
       # Deprecated way to pass events:
       {:ok, %{"partition" => partition, "event" => event}} ->
-        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+        with_child_span_from_cloudevent("KafkaHandler", event) do
           do_handle_http_request(conn, request_path, partition, event, response_from)
         end
 
       # Preferred way to pass events, where the partition goes into the "rig" extension:
       {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
-        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+        with_child_span_from_cloudevent("KafkaHandler", event) do
           do_handle_http_request(conn, request_path, partition, event, response_from)
         end
 
       # Deprecated way to pass events, partition not set -> will be randomized:
       {:ok, %{"event" => event}} ->
-        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+        with_child_span_from_cloudevent("KafkaHandler", event) do
           do_handle_http_request(conn, request_path, <<>>, event, response_from)
         end
 
       # Preferred way to pass events, partition not set -> will be randomized:
       {:ok, %{"specversion" => _} = event} ->
-        TracePlug.with_child_span_from_cloudevent("KafkaHandler", event) do
+        with_child_span_from_cloudevent("KafkaHandler", event) do
           do_handle_http_request(conn, request_path, <<>>, event, response_from)
         end
 
