@@ -84,7 +84,9 @@ defmodule RigInboundGateway.ApiProxy.Router do
       handler =
         case target do
           "http" ->
-            HttpHandler
+            with_child_span "HttpHandler" do
+              HttpHandler
+            end
 
           "kafka" ->
             with_child_span "KafkaHandler" do

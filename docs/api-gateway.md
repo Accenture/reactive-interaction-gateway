@@ -75,7 +75,10 @@ $ docker run -d \
 After that we should be able to reach our small demo service through RIG:
 
 ```bash
-$ curl localhost:4000
+$ curl \
+    -H 'traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01' \
+    -H 'tracestate: hello=tracing' \
+    localhost:4000
 Hi, I'm a demo service!
 ```
 
@@ -93,7 +96,10 @@ $ docker run \
 Note that this way we don't need a Docker volume, which might work better in your environment. Again, we should be able to reach the demo service:
 
 ```bash
-$ curl localhost:4000
+$ curl \
+    -H 'traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01' \
+    -H 'tracestate: hello=tracing' \
+    localhost:4000
 Hi, I'm a demo service!
 ```
 
