@@ -12,6 +12,8 @@ defmodule RigInboundGateway.ApiProxy.Router do
 
   alias Plug.Conn
 
+  import Opencensus.Trace
+
   alias RIG.Plug.BodyReader
   alias RigInboundGateway.ApiProxy.Api
   alias RigInboundGateway.ApiProxy.Auth
@@ -81,9 +83,16 @@ defmodule RigInboundGateway.ApiProxy.Router do
 
       handler =
         case target do
-          "http" -> HttpHandler
-          "kafka" -> KafkaHandler
-          "kinesis" -> KinesisHandler
+          "http" ->
+            HttpHandler
+
+          "kafka" ->
+            with_child_span "KafkaHandler" do
+              KafkaHandler
+            end
+
+          "kinesis" ->
+            KinesisHandler
         end
 
       %{active_loggers: active_loggers, logger_modules: logger_modules} = config()

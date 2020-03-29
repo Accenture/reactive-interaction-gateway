@@ -110,43 +110,35 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     |> case do
       # Deprecated way to pass events:
       {:ok, %{"partition" => partition, "event" => event}} ->
-        with_child_span_from_cloudevent("KafkaHandler", event) do
-          do_handle_http_request(
-            conn,
-            request_path,
-            partition,
-            event,
-            response_from,
-            topic,
-            schema
-          )
-        end
+        do_handle_http_request(
+          conn,
+          request_path,
+          partition,
+          event,
+          response_from,
+          topic,
+          schema
+        )
 
       # Preferred way to pass events, where the partition goes into the "rig" extension:
       {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
-        with_child_span_from_cloudevent("KafkaHandler", event) do
-          do_handle_http_request(
-            conn,
-            request_path,
-            partition,
-            event,
-            response_from,
-            topic,
-            schema
-          )
-        end
+        do_handle_http_request(
+          conn,
+          request_path,
+          partition,
+          event,
+          response_from,
+          topic,
+          schema
+        )
 
       # Deprecated way to pass events, partition not set -> will be randomized:
       {:ok, %{"event" => event}} ->
-        with_child_span_from_cloudevent("KafkaHandler", event) do
-          do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
-        end
+        do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
 
       # Preferred way to pass events, partition not set -> will be randomized:
       {:ok, %{"specversion" => _} = event} ->
-        with_child_span_from_cloudevent("KafkaHandler", event) do
-          do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
-        end
+        do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
 
       {:ok, _} ->
         respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
@@ -171,27 +163,19 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     |> case do
       # Deprecated way to pass events:
       {:ok, %{"partition" => partition, "event" => event}} ->
-        with_child_span_from_cloudevent("KafkaHandler", event) do
-          do_handle_http_request(conn, request_path, partition, event, response_from)
-        end
+        do_handle_http_request(conn, request_path, partition, event, response_from)
 
       # Preferred way to pass events, where the partition goes into the "rig" extension:
       {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
-        with_child_span_from_cloudevent("KafkaHandler", event) do
-          do_handle_http_request(conn, request_path, partition, event, response_from)
-        end
+        do_handle_http_request(conn, request_path, partition, event, response_from)
 
       # Deprecated way to pass events, partition not set -> will be randomized:
       {:ok, %{"event" => event}} ->
-        with_child_span_from_cloudevent("KafkaHandler", event) do
-          do_handle_http_request(conn, request_path, <<>>, event, response_from)
-        end
+        do_handle_http_request(conn, request_path, <<>>, event, response_from)
 
       # Preferred way to pass events, partition not set -> will be randomized:
       {:ok, %{"specversion" => _} = event} ->
-        with_child_span_from_cloudevent("KafkaHandler", event) do
-          do_handle_http_request(conn, request_path, <<>>, event, response_from)
-        end
+        do_handle_http_request(conn, request_path, <<>>, event, response_from)
 
       {:ok, _} ->
         respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
