@@ -1,0 +1,33 @@
+version: '3'
+services:
+
+  zookeeper:
+    build: zookeeper/
+    container_name: zookeeper
+    hostname: zookeeper
+
+  kafka:
+    build: kafka/
+    container_name: kafka
+    environment:
+      - KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf 
+    depends_on: 
+      - zookeeper
+
+  rig:
+    image: accenture/reactive-interaction-gateway
+    container_name: rig
+    environment:
+      - LOG_LEVEL=debug
+      - KAFKA_SOURCE_TOPICS=test
+      - KAFKA_BROKERS=kafka:9093
+      - KAFKA_SASL=plain:kafka:kafka
+      - PROXY_CONFIG_FILE=/config.json
+      - API_HOST=http://host.docker.internal
+    ports:
+      - 4000:4000
+    depends_on:
+      - kafka
+    volumes:
+      - ./config.json:/config.json
+

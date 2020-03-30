@@ -1,0 +1,7 @@
+#!/bin/sh
+
+docker-compose up -d --build
+
+echo "Example configuration:"
+echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9093 --producer.config /etc/kafka/consumer.properties --topic test"
+echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9093 --consumer.config /etc/kafka/consumer.properties --topic test --from-beginning"
