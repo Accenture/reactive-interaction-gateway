@@ -1,7 +1,7 @@
 FROM elixir:1.10-alpine as build
 
 # Install Elixir & Erlang environment dependencies
-RUN apk add --no-cache make gcc g++
+RUN apk add --no-cache make gcc g++ git openssh cyrus-sasl-dev krb5 krb5-dev krb5-libs libsasl
 RUN mix local.hex --force
 RUN mix local.rebar --force
 
@@ -35,7 +35,7 @@ LABEL org.label-schema.description="Reactive API Gateway and Event Hub"
 LABEL org.label-schema.url="https://accenture.github.io/reactive-interaction-gateway/"
 LABEL org.label-schema.vcs-url="https://github.com/Accenture/reactive-interaction-gateway"
 
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash cyrus-sasl-dev krb5 krb5-dev krb5-libs libsasl
 
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8

@@ -38,7 +38,8 @@ config :rig, Rig.EventStream.KafkaToFilter,
   # In case the private key is password protected:
   ssl_keyfile_pass: {:system, "KAFKA_SSL_KEYFILE_PASS", ""},
   # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
-  sasl: {:system, "KAFKA_SASL", nil},
+  sasl: {:system, "g
+  ", nil},
   group_id: {:system, "KAFKATOFILTER_KAFKA_GROUP_ID", "rig-kafka-to-filter"}
 
 config :rig, Rig.EventStream.KafkaToHttp,

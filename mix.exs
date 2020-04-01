@@ -121,6 +121,8 @@ defmodule RIG.MixProject do
       {:odgn_json_pointer, "~> 2.5"},
       # Apache Kafka Erlang client library:
       {:brod, "~> 3.9"},
+      # gssapi plugin for Kerberos authentication
+      {:brod_gssapi, git: "git://github.com/ElMaxo/brod_gssapi.git"},
       # Apache Avro encoding/decoding library:
       {:erlavro, "~> 2.8"},
       # Apache Kafka Schema Registry wrapper library:

@@ -1,0 +1,85 @@
+version: "3.5"
+services:
+  kdc:
+    hostname: kdc.kerberos-demo.local
+    #domainname: kerberos_default
+    build: kdc/
+    container_name: kdc
+    ports:
+      - 88:88
+      - 749:749
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/kdc/krb5.conf
+
+  zookeeper:
+    build: zookeeper/
+    container_name: zookeeper
+    hostname: zookeeper.kerberos-demo.local
+    #domainname: kerberos_default
+    depends_on:
+      - kdc
+    # Required to wait for the keytab to get generated
+    restart: on-failure
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+
+  kafka:
+    build: kafka/
+    container_name: kafka
+    hostname: kafka.kerberos-demo.local
+    #domainname: kerberos_default
+    depends_on:
+      - zookeeper
+      - kdc
+    # Required to wait for the keytab to get generated
+    restart: on-failure
+    ports:
+      - 9093:9093
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+
+  client:
+    build: client/
+    container_name: client
+    hostname: client.kerberos-demo.local
+    #domainname: kerberos_default
+    environment:
+      - KAFKA_TOOLS_LOG4J_LOGLEVEL=DEBUG
+    depends_on:
+      - kafka
+      - kdc
+    # Required to wait for the keytab to get generated
+    volumes:
+      - secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+
+  rig:
+    image: accenture/reactive-interaction-gateway:local
+    container_name: rig
+    hostname: rig.kerberos-demo.local
+    environment:
+      - LOG_LEVEL=debug
+      - KAFKA_SOURCE_TOPICS=test
+      - KAFKA_BROKERS=kafka:9093
+      - KAFKA_SASL=gssapi:/var/lib/secret/rig.key:rig/rig.kerberos-demo.local@TEST.CONFLUENT.IO
+      - KRB5_CONFIG=/etc/krb5.conf
+      - PROXY_CONFIG_FILE=/config.json
+      - API_HOST=http://host.docker.internal
+    ports:
+      - 4000:4000
+    depends_on:
+      - client
+    volumes:
+      - secret:/var/lib/secret
+      - ./config.json:/config.json
+      - ./kdc/krb5.conf:/etc/krb5.conf
+
+volumes:
+  secret: {}
+
+networks:
+  default:
+    name: kerberos-demo.local

@@ -56,7 +56,12 @@ defmodule Rig.KafkaConfig do
   defp parse_sasl_config(nil), do: nil
 
   defp parse_sasl_config("plain:" <> plain) do
-    [username | password] = String.split(plain, ":", parts: 2)
+    [username, password] = String.split(plain, ":", parts: 2)
     {:plain, username, password}
+  end
+
+  defp parse_sasl_config("gssapi:" <> gssapi) do
+    [keytab, principal] = String.split(gssapi, ":", parts: 2)
+    {:callback, :brod_gssapi, {:gssapi, keytab, principal}}
   end
 end
