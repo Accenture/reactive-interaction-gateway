@@ -39,4 +39,3 @@ erl_crash.dump
 /.elixir_ls/
 *~
 *.orig
-yarn.lock
