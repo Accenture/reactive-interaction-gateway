@@ -20,6 +20,8 @@ COPY mix.lock /opt/sites/rig/
 # Install project dependencies and compile them
 RUN mix deps.get && mix deps.compile && mix deps.clean mime --build
 
+#COPY deps/brod_gssapi /opt/sites/rig/deps/brod_gssapi
+
 # Copy application files
 COPY config /opt/sites/rig/config
 COPY lib /opt/sites/rig/lib
@@ -35,7 +37,8 @@ LABEL org.label-schema.description="Reactive API Gateway and Event Hub"
 LABEL org.label-schema.url="https://accenture.github.io/reactive-interaction-gateway/"
 LABEL org.label-schema.vcs-url="https://github.com/Accenture/reactive-interaction-gateway"
 
-RUN apk add --no-cache bash cyrus-sasl-dev krb5 krb5-dev krb5-libs libsasl
+RUN apk add --no-cache bash cyrus-sasl-dev cyrus-sasl krb5 krb5-dev krb5-libs libsasl
+RUN apk add --no-cache cyrus-sasl-gssapiv2 dovecot-gssapi 
 
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
