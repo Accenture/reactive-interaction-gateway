@@ -1,0 +1,29 @@
+[req]
+prompt = no
+distinguished_name = dn
+default_md = sha256
+default_bits = 4096
+req_extensions = v3_req
+
+[ dn ]
+countryName = UK
+organizationName = Confluent
+localityName = London
+commonName=schema-registry.confluent.local
+
+[ v3_ca ]
+subjectKeyIdentifier=hash
+basicConstraints = critical,CA:true
+authorityKeyIdentifier=keyid:always,issuer:always
+keyUsage = critical,keyCertSign,cRLSign
+
+[ v3_req ]
+subjectKeyIdentifier = hash
+basicConstraints = CA:FALSE
+nsComment = "OpenSSL Generated Certificate"
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth, serverAuth
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1=schema-registry.confluent.local

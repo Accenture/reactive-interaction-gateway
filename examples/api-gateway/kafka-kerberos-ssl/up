@@ -1,0 +1,121 @@
+#!/bin/sh
+set -e
+
+# Starting kerberos,
+# Avoiding starting up all services at the begining to generate the keytab first
+
+docker-compose build
+docker-compose up -d kdc
+
+### Create the required identities:
+# Kafka service principal:
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka/kafka.kerberos-demo.local@TEST.CONFLUENT.IO"  > /dev/null
+
+# Zookeeper service principal:
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zookeeper/zookeeper.kerberos-demo.local@TEST.CONFLUENT.IO"  > /dev/null
+
+# Create a principal with which to connect to Zookeeper from brokers - NB use the same credential on all brokers!
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey zkclient@TEST.CONFLUENT.IO"  > /dev/null
+
+# Create client principals to connect in to the cluster:
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka_producer@TEST.CONFLUENT.IO"  > /dev/null
+# docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka_producer/instance_demo@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey kafka_consumer@TEST.CONFLUENT.IO"  > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey rig/rig.kerberos-demo.local@TEST.CONFLUENT.IO"  > /dev/null
+
+# Create an admin principal for the cluster, which we'll use to setup ACLs.
+# Look after this - its also declared a super user in broker config.
+docker exec -ti kdc kadmin.local -w password -q "add_principal -randkey admin/admin.kerberos-demo.local@TEST.CONFLUENT.IO"  > /dev/null
+
+# Create keytabs to use for Kafka
+docker exec -ti kdc rm -f /var/lib/secret/kafka.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/zookeeper.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/zookeeper-client.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/kafka-client.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/rig.key 2>&1 > /dev/null
+docker exec -ti kdc rm -f /var/lib/secret/kafka-admin.key 2>&1 > /dev/null
+
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka.key -norandkey kafka/kafka.kerberos-demo.local@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper.key -norandkey zookeeper/zookeeper.kerberos-demo.local@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/zookeeper-client.key -norandkey zkclient@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka-client.key -norandkey kafka_producer@TEST.CONFLUENT.IO " > /dev/null
+# docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka-client.key -norandkey kafka_producer/instance_demo@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka-client.key -norandkey kafka_consumer@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/rig.key -norandkey rig/rig.kerberos-demo.local@TEST.CONFLUENT.IO " > /dev/null
+docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka-admin.key -norandkey admin/admin.kerberos-demo.local@TEST.CONFLUENT.IO " > /dev/null
+
+# Creating TLS CA, Certificates and keystore / truststore
+rm -rf certs 
+mkdir -p certs
+# Generate CA certificates
+openssl req -new -nodes -x509 -days 3650 -newkey rsa:2048 -keyout certs/ca.key -out certs/ca.crt -config ca.cnf 
+cat certs/ca.crt certs/ca.key > certs/ca.pem
+
+# Generate kafka server certificates
+openssl req -new -newkey rsa:2048 -keyout certs/server.key -out certs/server.csr -config server.cnf -nodes
+openssl x509 -req -days 3650 -in certs/server.csr -CA certs/ca.crt -CAkey certs/ca.key -CAcreateserial -out certs/server.crt -extfile server.cnf -extensions v3_req
+openssl pkcs12 -export -in certs/server.crt -inkey certs/server.key -chain -CAfile certs/ca.pem -name "kafka.kerberos-demo.local" -out certs/server.p12 -password pass:test1234
+
+# Generate client certificates
+openssl req -new -newkey rsa:2048 -keyout certs/client.key -out certs/client.csr -config client.cnf -nodes
+openssl x509 -req -days 3650 -in certs/client.csr -CA certs/ca.crt -CAkey certs/ca.key -CAcreateserial -out certs/client.crt -extfile client.cnf -extensions v3_req
+openssl pkcs12 -export -in certs/client.crt -inkey certs/client.key -chain -CAfile certs/ca.pem -name "kafka.kerberos-demo.local" -out certs/client.p12 -password pass:test1234
+
+# Generate kafka client certificate
+openssl req -new -newkey rsa:2048 -keyout certs/kafka-client.key -out certs/kafka-client.csr -config kafka-client.cnf -nodes
+openssl x509 -req -days 3650 -in certs/kafka-client.csr -CA certs/ca.crt -CAkey certs/ca.key -CAcreateserial -out certs/kafka-client.crt -extfile kafka-client.cnf -extensions v3_req
+openssl pkcs12 -export -in certs/kafka-client.crt -inkey certs/kafka-client.key -chain -CAfile certs/ca.pem -name "kafka.kerberos-demo.local" -out certs/kafka-client.p12 -password pass:test1234
+
+# Generate local client certificate
+openssl req -new -newkey rsa:2048 -keyout certs/local-client.key -out certs/local-client.csr -config local-client.cnf -nodes
+openssl x509 -req -days 3650 -in certs/local-client.csr -CA certs/ca.crt -CAkey certs/ca.key -CAcreateserial -out certs/local-client.crt -extfile local-client.cnf -extensions v3_req
+openssl pkcs12 -export -in certs/local-client.crt -inkey certs/local-client.key -chain -CAfile certs/ca.pem -name `hostname` -out certs/local-client.p12 -password pass:test1234
+
+
+# Import server certificate to keystore and CA to truststore
+keytool -importkeystore -deststorepass test1234 -destkeystore certs/server.keystore.jks \
+    -srckeystore certs/server.p12 \
+    -deststoretype PKCS12  \
+    -srcstoretype PKCS12 \
+    -noprompt \
+    -srcstorepass test1234
+
+keytool -importkeystore -deststorepass test1234 -destkeystore certs/client.keystore.jks \
+    -srckeystore certs/client.p12 \
+    -deststoretype PKCS12 \
+    -srcstoretype PKCS12 \
+    -noprompt \
+    -srcstorepass test1234
+
+keytool -importkeystore -deststorepass test1234 -destkeystore certs/kafka-client.keystore.jks \
+    -srckeystore certs/kafka-client.p12 \
+    -deststoretype PKCS12 \
+    -srcstoretype PKCS12 \
+    -noprompt \
+    -srcstorepass test1234
+
+keytool -importkeystore -deststorepass test1234 -destkeystore certs/local-client.keystore.jks \
+    -srckeystore certs/local-client.p12 \
+    -deststoretype PKCS12 \
+    -srcstoretype PKCS12 \
+    -noprompt \
+    -srcstorepass test1234
+
+keytool -keystore certs/truststore.jks -alias CARoot -import -file certs/ca.crt -storepass test1234  -noprompt -storetype PKCS12 
+
+# generate client PEM file for kafkacat
+openssl pkcs12 -in certs/client.p12 -out certs/client.pem -passin pass:test1234 -passout pass:test1234
+
+# Starting zookeeper and kafka now that the keytab has been created with the required credentials and services
+docker-compose up -d
+
+# Adding ACLs for consumer and producer user:
+# docker exec client bash -c "kinit -k -t /var/lib/secret/kafka-admin.key admin/admin.kerberos-demo.local && kafka-acls --bootstrap-server kafka.kerberos-demo.local:9093 --command-config /etc/kafka/command.properties --add --allow-principal User:kafka_producer --producer --topic=*"
+# docker exec client bash -c "kinit -k -t /var/lib/secret/kafka-admin.key admin/admin.kerberos-demo.local && kafka-acls --bootstrap-server kafka.kerberos-demo.local:9093 --command-config /etc/kafka/command.properties --add --allow-principal User:kafka_consumer --consumer --topic=* --group=*"
+# docker exec client bash -c "kinit -k -t /var/lib/secret/kafka-admin.key admin/admin.kerberos-demo.local && kafka-acls --bootstrap-server kafka.kerberos-demo.local:9093 --command-config /etc/kafka/command.properties --add --allow-principal User:rig --producer --topic=*"
+# docker exec client bash -c "kinit -k -t /var/lib/secret/kafka-admin.key admin/admin.kerberos-demo.local && kafka-acls --bootstrap-server kafka.kerberos-demo.local:9093 --command-config /etc/kafka/command.properties --add --allow-principal User:rig --consumer --topic=* --group=*"
+
+# Output example usage:
+echo "Example configuration to access kafka:"
+echo "-> docker-compose exec client bash -c 'kinit -k -t /var/lib/secret/kafka-client.key kafka_producer && kafka-console-producer --broker-list kafka.kerberos-demo.local:9093 --topic test --producer.config /etc/kafka/producer.properties'"
+echo "-> docker-compose exec client bash -c 'kinit -k -t /var/lib/secret/kafka-client.key kafka_consumer && kafka-console-consumer --bootstrap-server kafka.kerberos-demo.local:9093 --topic test --consumer.config /etc/kafka/consumer.properties --from-beginning'"
