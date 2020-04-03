@@ -62,7 +62,7 @@ services:
     environment:
       - LOG_LEVEL=debug
       - KAFKA_SOURCE_TOPICS=test
-      - KAFKA_BROKERS=kafka:9093
+      - KAFKA_BROKERS=kafka.kerberos-demo.local:9093
       - KAFKA_SASL=gssapi:/var/lib/secret/rig.key:rig/rig.kerberos-demo.local@TEST.CONFLUENT.IO
       - KAFKA_SSL_ENABLED=1
       - KAFKA_SSL_KEYFILE_PASS=abcdefgh
