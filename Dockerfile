@@ -20,7 +20,7 @@ COPY mix.lock /opt/sites/rig/
 # Install project dependencies and compile them
 RUN mix deps.get && mix deps.compile && mix deps.clean mime --build
 
-#COPY deps/brod_gssapi /opt/sites/rig/deps/brod_gssapi
+COPY deps/brod_gssapi /opt/sites/rig/deps/brod_gssapi
 
 # Copy application files
 COPY config /opt/sites/rig/config
@@ -37,8 +37,19 @@ LABEL org.label-schema.description="Reactive API Gateway and Event Hub"
 LABEL org.label-schema.url="https://accenture.github.io/reactive-interaction-gateway/"
 LABEL org.label-schema.vcs-url="https://github.com/Accenture/reactive-interaction-gateway"
 
-RUN apk add --no-cache bash cyrus-sasl-dev cyrus-sasl krb5 krb5-dev krb5-libs libsasl
-RUN apk add --no-cache cyrus-sasl-gssapiv2 dovecot-gssapi 
+#RUN apk add --no-cache bash krb5 openssl librdkafka librdkafka-dev
+#RUN apk add --no-cache cyrus-sasl-gssapiv2
+
+# experimenting with sasl and gssapi ================================
+RUN apk add --no-cache alpine-sdk git python-dev py-pip py-cffi krb5
+
+# change to edge alpine branch to install librdkafka package
+RUN sed -i -e 's/v3\.4/edge/g' /etc/apk/repositories \
+    && apk upgrade --update-cache --available \
+    && apk add --no-cache librdkafka librdkafka-dev
+
+RUN apk add --no-cache bash libsasl
+# ===================================================================
 
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8

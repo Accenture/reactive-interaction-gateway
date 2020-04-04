@@ -46,7 +46,7 @@ docker exec -ti kdc kadmin.local -w password -q "ktadd  -k /var/lib/secret/kafka
 
 
 # Starting zookeeper and kafka now that the keytab has been created with the required credentials and services
-docker-compose up -d
+docker-compose up -d client kafka zookeeper
 
 # Adding ACLs for consumer and producer user:
 docker exec client bash -c "kinit -k -t /var/lib/secret/kafka-admin.key admin/for-kafka && kafka-acls --bootstrap-server kafka:9093 --command-config /etc/kafka/command.properties --add --allow-principal User:kafka_producer --producer --topic=*"
@@ -56,6 +56,8 @@ docker exec client bash -c "kinit -k -t /var/lib/secret/kafka-admin.key admin/fo
 # docker cp client:/var/lib/secret/kafka-client.key .
 # docker cp kafka-client.key rig:/kafka-client.key
 # docker exec rig bash -c 'chown root:root /kafka-client.key'
+
+docker-compose up -d rig
 
 # Output example usage:
 echo "Example configuration to access kafka:"
