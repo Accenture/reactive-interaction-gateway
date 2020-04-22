@@ -14,6 +14,8 @@ RUN yum install -y confluent-platform-2.12
 # 3. Install Kerberos libaries
 RUN yum install -y krb5-workstation krb5-libs
 
+RUN yum install -y cyrus-sasl 
+
 # 4. Copy in required settings for client access to Kafka
 COPY consumer.properties /etc/kafka/consumer.properties
 COPY producer.properties /etc/kafka/producer.properties

@@ -57,7 +57,7 @@ docker exec client bash -c "kinit -k -t /var/lib/secret/kafka-admin.key admin/fo
 # docker cp kafka-client.key rig:/kafka-client.key
 # docker exec rig bash -c 'chown root:root /kafka-client.key'
 
-docker-compose up -d rig
+# docker-compose up -d rig
 
 # Output example usage:
 echo "Example configuration to access kafka:"

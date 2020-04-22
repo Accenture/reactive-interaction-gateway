@@ -35,6 +35,9 @@ services:
       - kdc
     # Required to wait for the keytab to get generated
     restart: on-failure
+    environment:
+      - KAFKA_LOG4J_ROOT_LOGLEVEL=DEBUG
+      - KAFKA_TOOLS_LOG4J_LOGLEVEL=DEBUG
     ports:
       - 9093:9093
     volumes:
@@ -56,26 +59,26 @@ services:
       - secret:/var/lib/secret
       - ./kdc/krb5.conf:/etc/krb5.conf
 
-  rig:
-    image: accenture/reactive-interaction-gateway:local
-    container_name: rig
-    hostname: rig.kerberos-demo.local
-    environment:
-      - LOG_LEVEL=debug
-      - KAFKA_SOURCE_TOPICS=test
-      - KAFKA_BROKERS=kafka:9093
-      - KAFKA_SASL=gssapi:/var/lib/secret/rig.key:rig/rig.kerberos-demo.local@TEST.CONFLUENT.IO
-      - KRB5_CONFIG=/etc/krb5.conf
-      - PROXY_CONFIG_FILE=/config.json
-      - API_HOST=http://host.docker.internal
-    ports:
-      - 4000:4000
-    depends_on:
-      - client
-    volumes:
-      - secret:/var/lib/secret
-      - ./config.json:/config.json
-      - ./kdc/krb5.conf:/etc/krb5.conf
+  # rig:
+  #   image: accenture/reactive-interaction-gateway:local
+  #   container_name: rig
+  #   hostname: rig.kerberos-demo.local
+  #   environment:
+  #     - LOG_LEVEL=debug
+  #     - KAFKA_SOURCE_TOPICS=test
+  #     - KAFKA_BROKERS=kafka:9093
+  #     - KAFKA_SASL=gssapi:/var/lib/secret/rig.key:rig/rig.kerberos-demo.local@TEST.CONFLUENT.IO
+  #     - KRB5_CONFIG=/etc/krb5.conf
+  #     - PROXY_CONFIG_FILE=/config.json
+  #     - API_HOST=http://host.docker.internal
+  #   ports:
+  #     - 4000:4000
+  #   depends_on:
+  #     - client
+  #   volumes:
+  #     - secret:/var/lib/secret
+  #     - ./config.json:/config.json
+  #     - ./kdc/krb5.conf:/etc/krb5.conf
 
 volumes:
   secret: {}
