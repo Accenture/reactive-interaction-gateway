@@ -17,10 +17,12 @@ RUN yum install -y krb5-workstation krb5-libs
 COPY server.properties /etc/kafka/server.properties
 COPY kafka.sasl.jaas.config /etc/kafka/kafka_server_jaas.conf
 
+COPY log4j.properties /etc/kafka/log4j.properties
+
 RUN yum install -y cyrus-sasl
 
 EXPOSE 9093
 
-ENV KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
+ENV KAFKA_OPTS=-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dsun.security.krb5.debug=true
 
 CMD kafka-server-start /etc/kafka/server.properties
