@@ -1,7 +1,7 @@
 defmodule RigInboundGateway.ApiProxy.Validations do
   @moduledoc """
   Used to validate APIs configuration for reverse proxy.
-  Validates use cases such as setting "target" to "kafka", but ommiting "topic" which is required in such case.
+  Validates use cases such as setting "target" to "kafka" but not "topic", which is required in such case.
 
   When any error occurs during RIG start -> process will exit.
   When any error occurs during REST API request -> process won't exit, but instead API returns 400 -- bad request.
