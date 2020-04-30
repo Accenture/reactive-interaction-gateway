@@ -18,6 +18,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   alias RigInboundGateway.ApiProxy.Handler.Http, as: HttpHandler
   alias RigInboundGateway.ApiProxy.Handler.Kafka, as: KafkaHandler
   alias RigInboundGateway.ApiProxy.Handler.Kinesis, as: KinesisHandler
+  alias RigInboundGateway.ApiProxy.Handler.Nats, as: NatsHandler
   alias RigInboundGateway.ApiProxy.Serializer
   alias RigInboundGateway.Proxy
   alias RigInboundGateway.RequestLogger.ConfigValidation
@@ -84,6 +85,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
           "http" -> HttpHandler
           "kafka" -> KafkaHandler
           "kinesis" -> KinesisHandler
+          "nats" -> NatsHandler
         end
 
       %{active_loggers: active_loggers, logger_modules: logger_modules} = config()
