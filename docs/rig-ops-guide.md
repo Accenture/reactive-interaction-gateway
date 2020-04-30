@@ -39,8 +39,8 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `KAFKA_SCHEMA_REGISTRY_HOST` | Host for Kafka Schema Registry. | nil
 `KAFKA_SERIALIZER` | Serializer for Kafka events, currently supports Avro. By default uses JSON serialization. | nil
 `KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will consume, delimited by comma. | ["rig"]
-`KAFKATOFILTER_KAFKA_GROUP_ID` | Kafka group ID used for forwarding events according to subscriptions over SSE and WS connections. The default should be fine. | "rig-kafka-to-filter"
-`KAFKATOHTTP_KAFKA_GROUP_ID` | Kafka group ID used for forwarding _all_ events over a HTTP connection. The default should be fine. | "rig-kafka-to-http"
+`KAFKATOFILTER_KAFKA_GROUP_ID` | Kafka group ID used for forwarding events according to subscriptions over SSE and WS connections. Make sure to use the same value on all RIG instances that belong to the same cluster. The default should be fine. | "rig-kafka-to-filter"
+`KAFKATOHTTP_KAFKA_GROUP_ID` | Kafka group ID used for forwarding _all_ events over a HTTP connection. Make sure to use the same value on all RIG instances that belong to the same cluster. The default should be fine. | "rig-kafka-to-http"
 `KAFKA_SASL` | If set, SASL is used to authenticate RIG against the Kafka brokers. Use the following format for SASL/Plain authentication: "plain:myusername:mypassword". Note that setting `KAFKA_SASL` does *not* enable SSL (see `KAFKA_SSL_ENABLED` and related settings). | nil
 `KAFKA_SSL_ENABLED` | Enables encrypted communication to Kafka brokers. | false
 `KAFKA_SSL_CA_CERTFILE` | Path to the CA certificate (PEM format) that was used to sign the server and client certificates. Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "ca.crt.pem"
@@ -57,6 +57,9 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `KINESIS_OTP_JAR` | Path to the `OtpErlang.jar` file that contains the `JInterface` implementation. If left empty, RIG picks the file from its Erlang environment (Erlang must be compiled with Java support enabled). | nil
 `KINESIS_STREAM` | The name of the Kinesis stream to consume. | "RIG-outbound"
 `LOG_LEVEL` | Controls logging level for RIG, available values are: "debug", "info", "warn", "error". Production is using "warn" level. | :warn
+`NATS_SERVERS` | List of [NATS](https://nats.io) servers RIG should connect to, delimited by comma (e.g., `localhost:4222,example.com:4222`). | []
+`NATS_SOURCE_TOPICS` | List of NATS topics to subscribe to, delimited by comma. | ["rig"]
+`NATSTOFILTER_QUEUE_GROUP` | NATS [queue group](https://docs.nats.io/developing-with-nats/receiving/queues) used for forwarding events according to subscriptions over SSE and WS connections. Make sure to use the same value on all RIG instances that belong to the same cluster. The default should be fine. | "rig-nats-to-filter"
 `NODE_COOKIE` | Erlang cookie used in distributed mode, so nodes in cluster can communicate between each other.<br />Used also as secret key for integrity-check of correlation IDs. | nil
 `NODE_HOST` | Erlang hostname for given node, used to build Erlang long-name `rig@NODE_HOST`. This value is used by Erlang's distributed mode, so nodes can see each other. | nil
 `PROXY_CONFIG_FILE` | Configuration JSON file with initial API definition for API Proxy. Use this variable to pass either a path to a JSON file, or the JSON string itself. A path can be given in absolute or in relative form (e.g., `proxy/your_json_file.json`). If given in relative form, the working directory is one of RIG's `priv` dirs (e.g., `/opt/sites/rig/lib/rig_inbound_gateway-2.0.2/priv/` in a Docker container). | nil

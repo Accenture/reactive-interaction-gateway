@@ -62,6 +62,13 @@ config :rig, Rig.EventStream.KafkaToHttp,
   targets: {:system, :list, "FIREHOSE_KAFKA_HTTP_TARGETS", []},
   group_id: {:system, "KAFKATOHTTP_KAFKA_GROUP_ID", "rig-kafka-to-http"}
 
+config :rig, Rig.EventStream.NatsToFilter,
+  # The list of servers, given by a comma-separated list of host:port items:
+  servers: {:system, :list, "NATS_SERVERS", []},
+  # The list of topics to consume messages from:
+  topics: {:system, :list, "NATS_SOURCE_TOPICS", ["rig"]},
+  queue_group: {:system, "NATSTOFILTER_QUEUE_GROUP", "rig-nats-to-filter"}
+
 config :rig, Rig.Connection.Codec,
   codec_secret_key: {:system, "NODE_COOKIE", nil},
   codec_default_key: "7tsf4Y6GTOfPY1iDo4PqZA=="
