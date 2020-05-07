@@ -72,6 +72,9 @@ defmodule RigInboundGateway.Proxy do
 
   defp do_init_presence(config_path_or_json, state) do
     case Config.parse_json_env(config_path_or_json) do
+      {:ok, [%{}]} ->
+        Logger.warn(fn -> "Reverse-proxy configuration is empty." end)
+        :ok
       {:ok, config} when is_list(config) ->
         Enum.each(config, fn %{"id" => id} = api ->
           # credo:disable-for-next-line Credo.Check.Refactor.Nesting
