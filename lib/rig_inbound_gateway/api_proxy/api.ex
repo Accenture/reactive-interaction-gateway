@@ -4,9 +4,6 @@ defmodule RigInboundGateway.ApiProxy.Api do
 
   """
 
-  # TODO
-  # revisit swagger
-
   @type endpoint :: %{
           optional(:secured) => boolean,
           optional(:transform_request_headers) => boolean,
