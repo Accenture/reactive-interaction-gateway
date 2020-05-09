@@ -4,7 +4,6 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   """
   @behaviour :cowboy_loop
 
-  import Opencensus.Trace
   use Rig.Config, [:cors]
 
   alias Jason
@@ -27,40 +26,38 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   @impl :cowboy_loop
   def init(req, _state) do
-    with_child_span "rig.connection.create" do
-      query_params = req |> :cowboy_req.parse_qs() |> Enum.into(%{})
-      jwt = query_params["jwt"]
+    query_params = req |> :cowboy_req.parse_qs() |> Enum.into(%{})
+    jwt = query_params["jwt"]
 
-      auth_info =
-        case jwt do
-          jwt when byte_size(jwt) > 0 ->
-            %{auth_header: "Bearer #{jwt}", auth_tokens: [{"bearer", jwt}]}
+    auth_info =
+      case jwt do
+        jwt when byte_size(jwt) > 0 ->
+          %{auth_header: "Bearer #{jwt}", auth_tokens: [{"bearer", jwt}]}
 
-          _ ->
-            nil
-        end
-
-      case ConnectionInit.subscriptions_query_param_to_body(query_params) do
-        {:ok, encoded_body_or_nil} ->
-          request = %{
-            auth_info: auth_info,
-            query_params: "",
-            content_type: "application/json; charset=utf-8",
-            body: encoded_body_or_nil
-          }
-
-          do_init(req, request)
-
-        {:error, reason} ->
-          req = :cowboy_req.reply(400, %{}, reason, req)
-          {:stop, req, :unknown_state}
+        _ ->
+          nil
       end
+
+    case ConnectionInit.subscriptions_query_param_to_body(query_params) do
+      {:ok, encoded_body_or_nil} ->
+        request = %{
+          auth_info: auth_info,
+          query_params: "",
+          content_type: "application/json; charset=utf-8",
+          body: encoded_body_or_nil
+        }
+
+        setup_connection(req, request)
+
+      {:error, reason} ->
+        req = :cowboy_req.reply(400, %{}, reason, req)
+        {:stop, req, :unknown_state}
     end
   end
 
   # ---
 
-  def do_init(req, request) do
+  def setup_connection(req, request) do
     conf = config()
 
     on_success = fn subscriptions ->
@@ -130,22 +127,20 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   @impl :cowboy_loop
   def info({:set_subscriptions, subscriptions}, req, state) do
-    with_child_span "rig.subscriptions_set" do
-      Logger.debug(fn -> "subscriptions: " <> inspect(subscriptions) end)
+    Logger.debug(fn -> "subscriptions: " <> inspect(subscriptions) end)
 
-      # Trigger immediate refresh:
-      EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
+    # Trigger immediate refresh:
+    EventFilter.refresh_subscriptions(subscriptions, state.subscriptions)
 
-      # Replace current subscriptions:
-      state = Map.put(state, :subscriptions, subscriptions)
+    # Replace current subscriptions:
+    state = Map.put(state, :subscriptions, subscriptions)
 
-      # Notify the client:
-      Events.subscriptions_set(subscriptions)
-      |> to_server_sent_event()
-      |> send_via(req)
+    # Notify the client:
+    Events.subscriptions_set(subscriptions)
+    |> to_server_sent_event()
+    |> send_via(req)
 
-      {:ok, req, state, :hibernate}
-    end
+    {:ok, req, state, :hibernate}
   end
 
   @impl :cowboy_loop
@@ -186,18 +181,15 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   defp to_server_sent_event(:heartbeat), do: %{comment: "heartbeat"}
 
   defp to_server_sent_event(:session_killed) do
-    with_child_span "sse_session_killed" do
-      %{
-        specversion: "0.2",
-        type: "rig.session_killed",
-        source: "rig",
-        id: UUID.uuid4(),
-        time: Timex.now() |> Timex.format!("{RFC3339}")
-      }
-      |> TracePlug.append_distributed_tracing_context(TracePlug.tracecontext_headers())
-      |> CloudEvent.parse!()
-      |> to_server_sent_event()
-    end
+    %{
+      specversion: "0.2",
+      type: "rig.session_killed",
+      source: "rig",
+      id: UUID.uuid4(),
+      time: Timex.now() |> Timex.format!("{RFC3339}")
+    }
+    |> CloudEvent.parse!()
+    |> to_server_sent_event()
   end
 
   defp to_server_sent_event(%CloudEvent{} = event),

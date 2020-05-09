@@ -22,7 +22,7 @@ defmodule RigTracing.TracePlug do
     quote do
       tracecontext_from_event =
         unquote(event)
-        |> Enum.reject(fn {k, _} -> k != "traceparent" and k != "tracestate" end)
+        |> Enum.filter(fn {k, _} -> k == "traceparent" or k == "tracestate" end)
 
       parent_span_ctx = :oc_propagation_http_tracecontext.from_headers(tracecontext_from_event)
 
@@ -95,7 +95,7 @@ defmodule RigTracing.TracePlug do
     end)
   end
 
-  @spec append_distributed_tracing_context(Map, List) :: Map
+  @spec append_distributed_tracing_context(map, list) :: map
   def append_distributed_tracing_context(cloudevent, tracecontext_headers) do
     cloudevent =
       Enum.reduce(tracecontext_headers, cloudevent, fn trace_header, acc ->
@@ -106,7 +106,7 @@ defmodule RigTracing.TracePlug do
     cloudevent
   end
 
-  @spec tracecontext_headers() :: List
+  @spec tracecontext_headers() :: list
   def tracecontext_headers do
     for {k, v} <- :oc_propagation_http_tracecontext.to_headers(:ocp.current_span_ctx()) do
       {k, List.to_string(v)}
