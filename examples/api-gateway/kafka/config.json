@@ -11,11 +11,6 @@
           "topic": "example"
         }]
       }
-    },
-    "proxy": {
-      "use_env": true,
-      "target_url": "API_HOST",
-      "port": 3000
     }
   }
 ]
