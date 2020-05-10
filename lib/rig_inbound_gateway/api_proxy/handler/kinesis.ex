@@ -5,14 +5,13 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   """
   use Rig.Config, :custom_validation
 
-
   alias ExAws
   alias Plug.Conn
   alias Rig.Connection.Codec
   alias RigInboundGateway.ApiProxy.Handler
   alias RigMetrics.ProxyMetrics
-  alias UUID
   alias RigTracing.TracePlug
+  alias UUID
 
   @behaviour Handler
 
