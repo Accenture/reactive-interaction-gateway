@@ -5,12 +5,14 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   """
   use Rig.Config, :custom_validation
 
+
   alias ExAws
   alias Plug.Conn
   alias Rig.Connection.Codec
   alias RigInboundGateway.ApiProxy.Handler
   alias RigMetrics.ProxyMetrics
   alias UUID
+  alias RigTracing.TracePlug
 
   @behaviour Handler
 
@@ -181,6 +183,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         path: request_path,
         query: conn.query_string
       })
+      |> TracePlug.append_distributed_tracing_context(TracePlug.tracecontext_headers())
       |> Poison.encode!()
 
     produce(partition, kinesis_message, topic)
