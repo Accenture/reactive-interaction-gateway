@@ -5,7 +5,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   """
   use Rig.KafkaConsumerSetup, [:cors, :request_topic, :request_schema, :response_timeout]
 
-  import RigTracing.TracePlug
   alias Plug.Conn
 
   alias RigMetrics.ProxyMetrics
