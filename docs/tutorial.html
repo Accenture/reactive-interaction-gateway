@@ -171,7 +171,7 @@ content-type: application/json; charset=utf-8
       <span class="hljs-keyword">const</span> eventType = <span class="hljs-string">"greeting"</span>
       <span class="hljs-keyword">return</span> fetch(<span class="hljs-string">`http://localhost:4000/_rig/v1/connection/sse/<span class="hljs-subst">${connectionToken}</span>/subscriptions`</span>, {
           <span class="hljs-attr">method</span>: <span class="hljs-string">"PUT"</span>,
-          ...,
+          <span class="hljs-attr">headers</span>: { <span class="hljs-string">"Content-Type"</span>: <span class="hljs-string">"application/json"</span> },
           <span class="hljs-attr">body</span>: <span class="hljs-built_in">JSON</span>.stringify({
             <span class="hljs-string">"subscriptions"</span>: [{
               <span class="hljs-string">"eventType"</span>: eventType
