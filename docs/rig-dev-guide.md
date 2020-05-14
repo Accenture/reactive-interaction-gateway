@@ -30,14 +30,14 @@ Our conventions are documented in [`guides/architecture/decisions/`](https://git
 
 ## Project Layout
 
-Run `mix doc` to see the source documentation. The module descriptions should make the code structure obvious; if they don't, please open an issue describing what you were looking for but couldn't find. Also, updates to the (source code) documentation are appreciated!
+Run `mix docs` to see the source documentation. The module descriptions should make the code structure obvious; if they don't, please open an issue describing what you were looking for but couldn't find. Also, updates to the (source code) documentation are appreciated!
 
 ## Incrementing Elixir and OTP versions
 
 To have the project use a newer Elixir version, make sure to change the following locations:
 
 - `.travis.yml`: Update the Elixir and OTP versions in the `.elixir-env` section.
-- `Dockerfile`: Make sure to change the `FROM` image tag for both the build image (elixir:...-alpine) as well as the runtime image (erlang:...-alpine). If the Erlang runtime (ERTS) in the runtime image doesn't match the ERTS version in the build image, chances are the built image won't work due to missing libraries. Because of this, it's best to use the most recent versions for both images when upgrading - they should always be compatible.
+- `Dockerfile`, `aws.dockerfile`, `smoke_tests.dockerfile`: Make sure to change the `FROM` image tag for both the build image (elixir:...-alpine) as well as the runtime image (erlang:...-alpine). If the Erlang runtime (ERTS) in the runtime image doesn't match the ERTS version in the build image, chances are the built image won't work due to missing libraries. Because of this, it's best to use the most recent versions for both images when upgrading - they should always be compatible.
 - `version`: Again, make sure both the Elixir and the OTP versions match what you have used in the previous steps.
 
 ## Releasing a new version
