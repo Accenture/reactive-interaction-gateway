@@ -148,7 +148,7 @@ See [**examples/sse-demo.html**](https://github.com/Accenture/reactive-interacti
       const eventType = "greeting"
       return fetch(`http://localhost:4000/_rig/v1/connection/sse/${connectionToken}/subscriptions`, {
           method: "PUT",
-          ...,
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             "subscriptions": [{
               "eventType": eventType

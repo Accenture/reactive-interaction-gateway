@@ -5,12 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+<!-- ## [Unreleased] -->
 
 ### Added
 
-- Added possibility to define Kafka/Kinesis topic and schema per reverse proxy endpoint. The current solution using environment variables is deprecated, but still used as a fallback -- will be removed in the version 3.0. [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
-- Added Kinesis + Localstack example [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
 - Added longpolling examples to `/examples` folder [#235](https://github.com/Accenture/reactive-interaction-gateway/issues/235)
 
 <!-- ### Changed -->
@@ -24,6 +22,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ### Security -->
 
 <!-- ### Technical Improvements -->
+
+## [2.4.0] - 2020-05-07
+
+### Added
+
+- Added possibility to define Kafka/Kinesis topic and schema per reverse proxy endpoint. The current solution using environment variables is deprecated, but still used as a fallback -- will be removed in the version 3.0.
+  [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+- Added Kinesis + Localstack example.
+  [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+
+### Technical Improvements
+
+- Upgrade the Elixir version to 1.10 for source code and Docker images. Upgrade version for multiple dependencies.
+  [#285](https://github.com/Accenture/reactive-interaction-gateway/issues/285)
+- Added [Slackin](https://rig-slackin.herokuapp.com/) integration for easier Slack access - check the main page badge!
+  [#240](https://github.com/Accenture/reactive-interaction-gateway/issues/240)
 
 ## [2.3.0] - 2019-12-13
 
@@ -370,7 +384,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Disable Origin checking.
   [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
-[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.3.0...HEAD
+[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.4.0...HEAD
+[2.4.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.3.0...2.4.0
 [2.3.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.1...2.3.0
 [2.2.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.0...2.2.1
 [2.2.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.1...2.2.0

@@ -1,4 +1,4 @@
-FROM elixir:1.9-alpine as build
+FROM elixir:1.10-alpine as build
 
 # Install Elixir & Erlang environment dependencies
 RUN apk add --no-cache make gcc g++
