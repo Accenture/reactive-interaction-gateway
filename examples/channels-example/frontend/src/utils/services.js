@@ -37,6 +37,8 @@ export const produceKafkaMessageAsync = (subscriberEvent, data) => {
       eventID: randomString(),
       eventType: subscriberEvent,
       source: 'events-example-ui',
+      traceparent: "00-39fb839b1d9a53e8a5e0306526669021-8472fb1fee6307e5-01",
+      tracestate: "example=channels,source=frontend",
       contentType: 'text/plain',
       data
     }),

@@ -15,7 +15,6 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
   alias RigInboundGatewayWeb.ConnectionInit
-  alias RigTracing.TracePlug
 
   require Logger
 

@@ -3,6 +3,8 @@ defmodule RigTracing.TracePlug do
   Wrapper Module for Opencensus.Plug.Trace from opencensus_plug
   """
   use Opencensus.Plug.Trace
+  alias RigCloudEvents.CloudEvent
+  alias RigCloudEvents.Parser.PartialParser
 
   @doc "Like Opencensus.Trace.with_child_span, but for cloudevents distributed tracing extension defined in https://github.com/cloudevents/spec/blob/master/extensions/distributed-tracing.md"
   defmacro with_child_span_from_cloudevent(label, event, attributes \\ quote(do: %{}), do: block) do
@@ -20,11 +22,21 @@ defmodule RigTracing.TracePlug do
       })
 
     quote do
-      tracecontext_from_event =
-        unquote(event)
-        |> Enum.filter(fn {k, _} -> k == "traceparent" or k == "tracestate" end)
+      tracecontext = []
 
-      parent_span_ctx = :oc_propagation_http_tracecontext.from_headers(tracecontext_from_event)
+      tracecontext =
+        case PartialParser.context_attribute(unquote(event).parsed, "traceparent") do
+          {:ok, traceparent} -> Enum.concat(tracecontext, %{"traceparent" => traceparent})
+          _ -> tracecontext
+        end
+
+      tracecontext =
+        case PartialParser.context_attribute(unquote(event).parsed, "tracestate") do
+          {:ok, tracestate} -> Enum.concat(tracecontext, %{"tracestate" => tracestate})
+          _ -> tracecontext
+        end
+
+      parent_span_ctx = :oc_propagation_http_tracecontext.from_headers(tracecontext)
 
       new_span_ctx =
         :oc_trace.start_span(unquote(label), parent_span_ctx, %{
@@ -93,6 +105,17 @@ defmodule RigTracing.TracePlug do
       atom, acc ->
         Map.put(acc, atom, Map.fetch!(default_attributes, atom))
     end)
+  end
+
+  @spec append_distributed_tracing_context_to_cloudevent(CloudEvent.t(), list) :: CloudEvent.t()
+  def append_distributed_tracing_context_to_cloudevent(cloudevent, tracecontext_headers) do
+    cloudevent =
+      cloudevent.json
+      |> Jason.decode!()
+      |> append_distributed_tracing_context(tracecontext_headers)
+      |> CloudEvent.parse!()
+
+    cloudevent
   end
 
   @spec append_distributed_tracing_context(map, list) :: map

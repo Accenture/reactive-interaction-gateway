@@ -5,6 +5,7 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
   use Rig.KafkaConsumerSetup, [:log_topic, :log_schema, :serializer]
 
   alias RigInboundGateway.RequestLogger
+  alias RigTracing.TracePlug
   @behaviour RequestLogger
   alias UUID
 
@@ -54,6 +55,7 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
           remote_ip: conn.remote_ip |> format_ip
         }
       }
+      |> TracePlug.append_distributed_tracing_context(TracePlug.tracecontext_headers())
       |> Poison.encode!()
 
     produce("partition", kafka_message)
