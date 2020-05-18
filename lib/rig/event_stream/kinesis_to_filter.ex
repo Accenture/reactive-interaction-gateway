@@ -4,6 +4,7 @@ defmodule Rig.EventStream.KinesisToFilter do
 
   """
 
+  import RigTracing.TracePlug
   alias Rig.EventFilter
   alias RigCloudEvents.CloudEvent
 
@@ -18,9 +19,15 @@ defmodule Rig.EventStream.KinesisToFilter do
   def kinesis_handler(message) do
     case CloudEvent.parse(message) do
       {:ok, %CloudEvent{} = cloud_event} ->
-        Logger.debug(fn -> inspect(cloud_event.parsed) end)
-        EventFilter.forward_event(cloud_event)
-        :ok
+        with_child_span_from_cloudevent("kinesis_to_filter", cloud_event) do
+          cloud_event =
+            cloud_event
+            |> append_distributed_tracing_context_to_cloudevent(tracecontext_headers())
+
+          Logger.debug(fn -> inspect(cloud_event.parsed) end)
+          EventFilter.forward_event(cloud_event)
+          :ok
+        end
 
       {:error, :parse_error} ->
         {:error, :non_cloud_events_not_supported, message}
