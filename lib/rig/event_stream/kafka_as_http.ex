@@ -5,11 +5,10 @@ defmodule Rig.EventStream.KafkaToHttp do
   """
   use Rig.KafkaConsumerSetup, [:targets]
 
-  import RigTracing.TracePlug
-
   alias HTTPoison
 
   alias RigCloudEvents.CloudEvent
+  alias RigTracing.TracePlug
 
   # ---
 
@@ -21,7 +20,7 @@ defmodule Rig.EventStream.KafkaToHttp do
   def kafka_handler(message) do
     case CloudEvent.parse(message) do
       {:ok, %CloudEvent{} = cloud_event} ->
-        with_child_span_from_cloudevent("kafka_as_http", cloud_event) do
+        TracePlug.with_child_span_from_cloudevent "kafka_as_http", cloud_event do
           Logger.debug(fn -> inspect(cloud_event.parsed) end)
           forward_to_external_endpoint(cloud_event)
         end
@@ -40,9 +39,7 @@ defmodule Rig.EventStream.KafkaToHttp do
 
     headers =
       [{"content-type", "application/json"}]
-      |> Enum.concat(tracecontext_headers())
-      # we only want to send traceparent to frontend
-      |> Enum.reject(fn {k, _} -> k === "tracestate" end)
+      |> Enum.concat(TracePlug.tracecontext_headers())
 
     for url <- targets do
       body = json

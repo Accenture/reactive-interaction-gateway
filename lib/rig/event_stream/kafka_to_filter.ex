@@ -5,10 +5,9 @@ defmodule Rig.EventStream.KafkaToFilter do
   """
   use Rig.KafkaConsumerSetup
 
-  import RigTracing.TracePlug
-
   alias Rig.EventFilter
   alias RigCloudEvents.CloudEvent
+  alias RigTracing.TracePlug
 
   # ---
 
@@ -19,12 +18,12 @@ defmodule Rig.EventStream.KafkaToFilter do
   def kafka_handler(message) do
     case CloudEvent.parse(message) do
       {:ok, %CloudEvent{} = cloud_event} ->
-        with_child_span_from_cloudevent("kafka_to_filter", cloud_event) do
+        TracePlug.with_child_span_from_cloudevent "kafka_to_filter", cloud_event do
           cloud_event =
             cloud_event
-            |> append_distributed_tracing_context_to_cloudevent(tracecontext_headers())
+            |> TracePlug.append_distributed_tracing_context_to_cloudevent(tracecontext_headers())
             # we only want to send traceparent to frontend
-            |> remove_tracestate_from_cloudevent()
+            |> TracePlug.remove_tracestate_from_cloudevent()
 
           Logger.debug(fn -> inspect(cloud_event.parsed) end)
           EventFilter.forward_event(cloud_event)
