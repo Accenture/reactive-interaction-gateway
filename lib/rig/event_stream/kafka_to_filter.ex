@@ -23,6 +23,8 @@ defmodule Rig.EventStream.KafkaToFilter do
           cloud_event =
             cloud_event
             |> append_distributed_tracing_context_to_cloudevent(tracecontext_headers())
+            # we only want to send traceparent to frontend
+            |> remove_tracestate_from_cloudevent()
 
           Logger.debug(fn -> inspect(cloud_event.parsed) end)
           EventFilter.forward_event(cloud_event)

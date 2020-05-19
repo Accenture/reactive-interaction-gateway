@@ -118,6 +118,17 @@ defmodule RigTracing.TracePlug do
     cloudevent
   end
 
+  @spec remove_tracestate_from_cloudevent(CloudEvent.t()) :: CloudEvent.t()
+  def remove_tracestate_from_cloudevent(cloudevent) do
+    cloudevent =
+      cloudevent.json
+      |> Jason.decode!()
+      |> Map.delete("tracestate")
+      |> CloudEvent.parse!()
+
+    cloudevent
+  end
+
   @spec append_distributed_tracing_context(map, list) :: map
   def append_distributed_tracing_context(cloudevent, tracecontext_headers) do
     cloudevent =

@@ -37,7 +37,12 @@ defmodule Rig.EventStream.KafkaToHttp do
 
   defp forward_to_external_endpoint(%CloudEvent{json: json}) do
     %{targets: targets} = config()
-    headers = [{"content-type", "application/json"}] |> Enum.concat(tracecontext_headers())
+
+    headers =
+      [{"content-type", "application/json"}]
+      |> Enum.concat(tracecontext_headers())
+      # we only want to send traceparent to frontend
+      |> Enum.reject(fn {k, _} -> k === "tracestate" end)
 
     for url <- targets do
       body = json
