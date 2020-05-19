@@ -22,10 +22,6 @@ defmodule Rig.EventStream.KafkaToHttp do
     case CloudEvent.parse(message) do
       {:ok, %CloudEvent{} = cloud_event} ->
         with_child_span_from_cloudevent("kafka_as_http", cloud_event) do
-          cloud_event =
-            cloud_event
-            |> append_distributed_tracing_context_to_cloudevent(tracecontext_headers())
-
           Logger.debug(fn -> inspect(cloud_event.parsed) end)
           forward_to_external_endpoint(cloud_event)
         end
@@ -41,7 +37,7 @@ defmodule Rig.EventStream.KafkaToHttp do
 
   defp forward_to_external_endpoint(%CloudEvent{json: json}) do
     %{targets: targets} = config()
-    headers = [{"content-type", "application/json"}]
+    headers = [{"content-type", "application/json"}] |> Enum.concat(tracecontext_headers())
 
     for url <- targets do
       body = json
