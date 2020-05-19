@@ -210,10 +210,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
     # only possibility for "response_from" = "http", therefore hardcoded here
     ProxyMetrics.count_proxy_request(conn.method, conn.request_path, "http", "http", "ok")
 
-    for {trace_key, trace_val} <- TracePlug.tracecontext_headers() do
-      Logger.debug("#{trace_key}=#{trace_val}")
-    end
-
     headers
     |> Map.new()
     |> Map.get("transfer-encoding")
