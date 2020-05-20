@@ -3,9 +3,9 @@ defmodule RigTracing.TracePlug do
   Wrapper Module for Opencensus.Plug.Trace from opencensus_plug
   """
   use Opencensus.Plug.Trace
-  alias RigTracing.Context
+  alias RigTracing.Config
 
-  @spec put_tracecontext_header(Plug.Conn.headers(), Context.t()) :: Plug.Conn.headers()
+  @spec put_tracecontext_header(Plug.Conn.headers(), Config.tracecontext()) :: Plug.Conn.headers()
   def put_tracecontext_header(req_headers, tracecontext) do
     req_headers
     |> Enum.reject(fn {k, _} -> k === "traceparent" end)

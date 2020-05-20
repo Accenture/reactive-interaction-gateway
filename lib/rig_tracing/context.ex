@@ -3,9 +3,10 @@ defmodule RigTracing.Context do
   Distributed Tracing Context instrumenter
   """
 
-  @type t :: list()
-
+  use Opencensus
   alias RigCloudEvents.CloudEvent
+  alias RigTracing.Config
+
   require Logger
 
   @spec tracecontext() :: list
@@ -19,7 +20,8 @@ defmodule RigTracing.Context do
 
   def append_tracecontext(a, b, mode \\ :public)
 
-  @spec append_tracecontext(CloudEvent.t(), t, mode :: atom()) :: CloudEvent.t()
+  @spec append_tracecontext(CloudEvent.t(), Config.tracecontext(), mode :: atom()) ::
+          CloudEvent.t()
   def append_tracecontext(%CloudEvent{} = cloudevent, tracecontext, mode) do
     cloudevent =
       cloudevent.json
@@ -39,7 +41,7 @@ defmodule RigTracing.Context do
 
   # ---
 
-  @spec append_tracecontext(map, t) :: map
+  @spec append_tracecontext(map, Config.tracecontext()) :: map
   def append_tracecontext(%{} = map, tracecontext, _mode) do
     Enum.reduce(tracecontext, map, fn trace_header, acc ->
       {key, val} = trace_header
