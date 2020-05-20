@@ -8,7 +8,10 @@ defmodule Rig.EventStream.KafkaToHttp do
   alias HTTPoison
 
   alias RigCloudEvents.CloudEvent
-  alias RigTracing.TracePlug
+  alias RigTracing.CloudEvent, as: TraceCloudEvent
+  alias RigTracing.Context
+
+  require TraceCloudEvent
 
   # ---
 
@@ -20,7 +23,7 @@ defmodule Rig.EventStream.KafkaToHttp do
   def kafka_handler(message) do
     case CloudEvent.parse(message) do
       {:ok, %CloudEvent{} = cloud_event} ->
-        TracePlug.with_child_span_from_cloudevent "kafka_as_http", cloud_event do
+        TraceCloudEvent.with_child_span "kafka_as_http", cloud_event do
           Logger.debug(fn -> inspect(cloud_event.parsed) end)
           forward_to_external_endpoint(cloud_event)
         end
@@ -39,7 +42,7 @@ defmodule Rig.EventStream.KafkaToHttp do
 
     headers =
       [{"content-type", "application/json"}]
-      |> Enum.concat(TracePlug.tracecontext_headers())
+      |> Enum.concat(Context.tracecontext())
 
     for url <- targets do
       body = json

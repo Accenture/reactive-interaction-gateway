@@ -8,7 +8,7 @@ defmodule RigInboundGateway.Events do
   alias Rig.Connection
   alias Rig.Subscription
   alias RigCloudEvents.CloudEvent
-  alias RigTracing.TracePlug
+  alias RigTracing.Context
 
   @spec welcome_event(pid | nil) :: CloudEvent.t()
   def welcome_event(pid \\ self()) do
@@ -39,7 +39,7 @@ defmodule RigInboundGateway.Events do
       time: Timex.now() |> Timex.format!("{RFC3339}"),
       data: data
     }
-    |> TracePlug.append_distributed_tracing_context(TracePlug.tracecontext_headers())
+    |> Context.append_tracecontext(Context.tracecontext())
     |> CloudEvent.parse!()
   end
 end
