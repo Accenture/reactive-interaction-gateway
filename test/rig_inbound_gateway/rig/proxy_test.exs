@@ -14,6 +14,8 @@ defmodule RigInboundGateway.ProxyTest do
       handle_join_api: 3
     ]
 
+  import ExUnit.CaptureLog
+
   alias RigInboundGateway.Proxy
   alias RigInboundGateway.ProxyConfig
 
@@ -23,7 +25,118 @@ defmodule RigInboundGateway.ProxyTest do
 
   setup [:with_tracker_mock_proxy]
 
+  defp test_proxy_exit(ctx, error) do
+    Process.flag(:trap_exit, true)
+
+    assert capture_log(fn ->
+             catch_exit do
+               {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+               proxy |> list_apis
+             end
+           end) =~
+             error
+
+    assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
+  end
+
   describe "validations" do
+    test "should exit the process when api doesn't have required top level properties 'id', 'name', 'proxy' and 'version_data'",
+         ctx do
+      ProxyConfig.set_proxy_config()
+
+      test_proxy_exit(
+        ctx,
+        "[{:error, \"id\", :presence, \"must be present\"}, {:error, \"id\", :by, \"must be valid\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"name\", :presence, \"must be present\"}, {:error, \"name\", :by, \"must be valid\"}, {:error, \"name\", :length, \"must have a length of at least 1\"}, {:error, \"proxy\", :presence, \"must be present\"}, {:error, \"version_data\", :presence, \"must be present\"}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'proxy' doesn't have required properties 'target_url' and 'port'",
+         ctx do
+      proxy = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{},
+        "version_data" => %{
+          "default" => %{
+            "endpoints" => []
+          }
+        }
+      }
+
+      ProxyConfig.set_proxy_config(proxy)
+
+      test_proxy_exit(
+        ctx,
+        "[{:error, \"proxy\", :presence, \"must be present\"}, {:error, \"target_url\", :presence, \"must be present\"}, {:error, \"target_url\", :by, \"must be valid\"}, {:error, \"target_url\", :length, \"must have a length of at least 1\"}, {:error, \"port\", :presence, \"must be present\"}, {:error, \"port\", :by, \"must be valid\"}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'version_data' doesn't have any version",
+         ctx do
+      proxy = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{
+          "port" => 3000,
+          "target_url" => "http://localhost"
+        },
+        "version_data" => %{}
+      }
+
+      ProxyConfig.set_proxy_config(proxy)
+
+      test_proxy_exit(
+        ctx,
+        "[{:error, \"version_data\", :presence, \"must be present\"}, {:error, \"version_data\", :presence, \"must have at least one version, e.g. default\"}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'default' version doesn't have 'endpoints' property",
+         ctx do
+      proxy = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{
+          "port" => 3000,
+          "target_url" => "http://localhost"
+        },
+        "version_data" => %{
+          "default" => %{}
+        }
+      }
+
+      ProxyConfig.set_proxy_config(proxy)
+
+      test_proxy_exit(
+        ctx,
+        "[{:error, \"default\", :presence, \"must have endpoints property\"}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'endpoint' doesn't have required properties 'id', 'method' and 'path'",
+         ctx do
+      endpoints = [
+        %{}
+      ]
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/\", [{:error, \"id\", :presence, \"must be present\"}, {:error, \"id\", :by, \"must be valid\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"path\", :presence, \"must be present\"}, {:error, \"path\", :by, \"must be valid\"}, {:error, \"path\", :length, \"must have a length of at least 1\"}, {:error, \"method\", :presence, \"must be present\"}, {:error, \"method\", :by, \"must be valid\"}, {:error, \"method\", :length, \"must have a length of at least 1\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
     test "should exit the process when target is set to kafka or kinesis, but topic is not",
          ctx do
       # kinesis topic not set
@@ -39,14 +152,11 @@ defmodule RigInboundGateway.ProxyTest do
       ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
       kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
 
-      Process.flag(:trap_exit, true)
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, :kinesis_request_stream, :presence, \"must be present\"}, {:error, \"topic\", :presence, \"must be present\"}]}]"
+      )
 
-      catch_exit do
-        {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-        proxy |> list_apis
-      end
-
-      assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
       ProxyConfig.restore()
       ProxyConfig.restore("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
 
@@ -63,14 +173,11 @@ defmodule RigInboundGateway.ProxyTest do
       ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
       kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
 
-      Process.flag(:trap_exit, true)
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, :kafka_request_topic, :presence, \"must be present\"}, {:error, \"topic\", :presence, \"must be present\"}]}]"
+      )
 
-      catch_exit do
-        {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-        proxy |> list_apis
-      end
-
-      assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
       ProxyConfig.restore()
       ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
     end
@@ -87,14 +194,11 @@ defmodule RigInboundGateway.ProxyTest do
 
       ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
 
-      Process.flag(:trap_exit, true)
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, \"target\", :presence, \"must be present\"}]}]"
+      )
 
-      catch_exit do
-        {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-        proxy |> list_apis
-      end
-
-      assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
       ProxyConfig.restore()
     end
 
@@ -110,14 +214,11 @@ defmodule RigInboundGateway.ProxyTest do
 
       ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
 
-      Process.flag(:trap_exit, true)
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, \"auth_type\", :inclusion, \"must be one of [\\\"jwt\\\"]\"}]}]"
+      )
 
-      catch_exit do
-        {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-        proxy |> list_apis
-      end
-
-      assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
       ProxyConfig.restore()
     end
 
@@ -135,14 +236,11 @@ defmodule RigInboundGateway.ProxyTest do
 
       ProxyConfig.set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
 
-      Process.flag(:trap_exit, true)
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config\", [{:error, \"header_name\", :presence, \"must be present\"}]}]"
+      )
 
-      catch_exit do
-        {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-        proxy |> list_apis
-      end
-
-      assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
       ProxyConfig.restore()
     end
 
@@ -160,14 +258,11 @@ defmodule RigInboundGateway.ProxyTest do
 
       ProxyConfig.set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
 
-      Process.flag(:trap_exit, true)
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config\", [{:error, \"query_name\", :presence, \"must be present\"}]}]"
+      )
 
-      catch_exit do
-        {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-        proxy |> list_apis
-      end
-
-      assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
       ProxyConfig.restore()
     end
 
@@ -184,14 +279,11 @@ defmodule RigInboundGateway.ProxyTest do
 
       ProxyConfig.set_proxy_config(@invalid_config_id, endpoints, auth)
 
-      Process.flag(:trap_exit, true)
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config\", [{:error, \"auth_type\", :inclusion, \"must be one of [\\\"jwt\\\"]\"}]}]"
+      )
 
-      catch_exit do
-        {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
-        proxy |> list_apis
-      end
-
-      assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
       ProxyConfig.restore()
     end
   end

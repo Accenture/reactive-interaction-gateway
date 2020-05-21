@@ -58,4 +58,12 @@ defmodule RigInboundGateway.ProxyConfig do
   def set_proxy_config(id, endpoints, auth \\ %{}, auth_type \\ nil) do
     set([create_proxy_config(id, endpoints, auth, auth_type)])
   end
+
+  def set_proxy_config(proxy) do
+    set([proxy])
+  end
+
+  def set_proxy_config() do
+    set([%{}])
+  end
 end

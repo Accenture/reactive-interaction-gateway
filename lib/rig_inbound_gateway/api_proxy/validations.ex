@@ -23,7 +23,7 @@ defmodule RigInboundGateway.ApiProxy.Validations do
 
   # ---
 
-  @spec with_nested_presence(Api.t(), String.t() | atom, map) :: error_t()
+  @spec with_nested_presence(boolean, String.t() | atom, map) :: error_t()
   def with_nested_presence(true, key, map) do
     Vex.errors(map, %{key => [presence: true]})
   end
@@ -72,10 +72,10 @@ defmodule RigInboundGateway.ApiProxy.Validations do
       )
 
     all_errors = use_header_error ++ use_query_error ++ validate_auth_type(api)
-    if all_errors == [], do: errors, else: errors ++ [{id, all_errors}]
+    merge_errors(errors, [{id, all_errors}])
   end
 
-  def validate_auth(_, _), do: []
+  def validate_auth(errors, _), do: errors
 
   # ---
 
@@ -137,11 +137,86 @@ defmodule RigInboundGateway.ApiProxy.Validations do
       all_errors =
         validate_secured_endpoint(api, endpoint) ++
           with_any_error(topic_presence) ++
-          with_any_error(stream_presence) ++ schema_presence
+          with_any_error(stream_presence) ++
+          schema_presence ++
+          validate_string(endpoint, "id") ++
+          validate_string(endpoint, "path") ++ validate_string(endpoint, "method")
 
-      if all_errors == [], do: acc, else: acc ++ [{"#{id}/#{endpoint["id"]}", all_errors}]
+      merge_errors(acc, [{"#{id}/#{endpoint["id"]}", all_errors}])
     end)
     |> Enum.concat(errors)
+  end
+
+  def validate_endpoints(errors, _), do: errors
+
+  # ---
+
+  @spec validate_string(Api.t(), String.t()) :: error_list_t()
+  def validate_string(api, key) do
+    Vex.errors(api, %{key => [presence: true]}) ++
+      Vex.errors(api, %{key => &is_binary/1}) ++
+      Vex.errors(api, %{key => [length: [min: 1]]})
+  end
+
+  # ---
+
+  @spec validate_integer(Api.t(), String.t()) :: error_list_t()
+  def validate_integer(api, key) do
+    Vex.errors(api, %{key => [presence: true]}) ++
+      Vex.errors(api, %{key => &is_integer/1})
+  end
+
+  # ---
+
+  @spec validate_proxy(Api.t()) :: error_list_t()
+  def validate_proxy(%{"proxy" => proxy}) do
+    validate_string(proxy, "target_url") ++ validate_integer(proxy, "port")
+  end
+
+  def validate_proxy(_), do: []
+
+  # ---
+
+  @spec validate_version_data(Api.t()) :: error_list_t()
+  def validate_version_data(%{"version_data" => version_data}) do
+    keys = Map.keys(version_data)
+
+    if length(keys) > 0 do
+      Enum.reduce(keys, [], fn key, acc ->
+        has_endpoints =
+          version_data
+          |> Map.get(key)
+          |> Map.has_key?("endpoints")
+
+        if has_endpoints do
+          acc
+        else
+          acc ++ [{:error, key, :presence, "must have endpoints property"}]
+        end
+      end)
+    else
+      [{:error, "version_data", :presence, "must have at least one version, e.g. default"}]
+    end
+  end
+
+  def validate_version_data(_), do: []
+
+  # ---
+
+  @spec validate_required_props(error_list_t(), Api.t()) :: error_list_t()
+  def validate_required_props(
+        errors,
+        api
+      ) do
+    api_errors =
+      validate_string(api, "id") ++
+        validate_string(api, "name") ++
+        Vex.errors(api, %{"proxy" => [presence: true]}) ++
+        validate_proxy(api) ++
+        Vex.errors(api, %{"version_data" => [presence: true]}) ++
+        validate_version_data(api)
+
+    merge_errors(errors, [{"api", api_errors}])
   end
 
   # ---
@@ -149,6 +224,7 @@ defmodule RigInboundGateway.ApiProxy.Validations do
   @spec validate_all(Api.t()) :: error_list_t()
   def validate_all(api) do
     []
+    |> validate_required_props(api)
     |> validate_auth(api)
     |> validate_endpoints(api)
     |> Enum.dedup()
@@ -201,4 +277,9 @@ defmodule RigInboundGateway.ApiProxy.Validations do
       "Wrong reverse proxy configuration: #{inspect(errors)}"
     end)
   end
+
+  # ---
+
+  defp merge_errors(current_errors, [{_key, []}]), do: current_errors
+  defp merge_errors(current_errors, new_errors), do: current_errors ++ new_errors
 end

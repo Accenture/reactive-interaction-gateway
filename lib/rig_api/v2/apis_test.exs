@@ -71,7 +71,7 @@ defmodule RigApi.V2.APIsTest do
       kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
-      conn = build_conn() |> post("/v1/apis", new_api)
+      conn = build_conn() |> post("/v2/apis", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -96,7 +96,7 @@ defmodule RigApi.V2.APIsTest do
       kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
-      conn = build_conn() |> post("/v1/apis", new_api)
+      conn = build_conn() |> post("/v2/apis", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -120,7 +120,7 @@ defmodule RigApi.V2.APIsTest do
       ]
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
-      conn = build_conn() |> post("/v1/apis", new_api)
+      conn = build_conn() |> post("/v2/apis", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -141,7 +141,7 @@ defmodule RigApi.V2.APIsTest do
       ]
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
-      conn = build_conn() |> post("/v1/apis", new_api)
+      conn = build_conn() |> post("/v2/apis", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -164,7 +164,7 @@ defmodule RigApi.V2.APIsTest do
       auth_type = "jwt"
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
-      conn = build_conn() |> post("/v1/apis", new_api)
+      conn = build_conn() |> post("/v2/apis", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -187,7 +187,7 @@ defmodule RigApi.V2.APIsTest do
       ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
-      conn = build_conn() |> post("/v1/apis", new_api)
+      conn = build_conn() |> post("/v2/apis", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -209,7 +209,7 @@ defmodule RigApi.V2.APIsTest do
       ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth)
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth)
-      conn = build_conn() |> post("/v1/apis", new_api)
+      conn = build_conn() |> post("/v2/apis", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -230,7 +230,12 @@ defmodule RigApi.V2.APIsTest do
         build_conn()
         |> put("/v2/apis/fake-service", %{
           "id" => "fake",
-          "version_data" => %{"default" => %{"endpoints" => []}}
+          "name" => "fake",
+          "version_data" => %{"default" => %{"endpoints" => []}},
+          "proxy" => %{
+            "port" => 3000,
+            "target_url" => "http://localhost"
+          }
         })
 
       response = json_response(conn, 404)
@@ -241,6 +246,116 @@ defmodule RigApi.V2.APIsTest do
       conn = build_conn() |> put("/v2/apis/another-service", @mock_api)
       response = json_response(conn, 404)
       assert response["message"] == "API with id=another-service doesn't exists."
+    end
+
+    test "should return 400 when api doesn't have required top level properties 'id', 'name', 'proxy' and 'version_data'" do
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", %{})
+      response = json_response(conn, 400)
+
+      assert response == %{
+               "api" => [
+                 %{"name" => "must be present"},
+                 %{"name" => "must be valid"},
+                 %{"name" => "must have a length of at least 1"},
+                 %{"proxy" => "must be present"},
+                 %{"version_data" => "must be present"}
+               ]
+             }
+    end
+
+    test "should return 400 when 'proxy' doesn't have required properties 'target_url' and 'port'" do
+      new_api = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{},
+        "version_data" => %{
+          "default" => %{
+            "endpoints" => []
+          }
+        }
+      }
+
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
+      response = json_response(conn, 400)
+
+      assert response == %{
+               "api" => [
+                 %{"proxy" => "must be present"},
+                 %{"target_url" => "must be present"},
+                 %{"target_url" => "must be valid"},
+                 %{"target_url" => "must have a length of at least 1"},
+                 %{"port" => "must be present"},
+                 %{"port" => "must be valid"}
+               ]
+             }
+    end
+
+    test "should return 400 when 'version_data' doesn't have any version" do
+      new_api = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{
+          "port" => 3000,
+          "target_url" => "http://localhost"
+        },
+        "version_data" => %{}
+      }
+
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
+      response = json_response(conn, 400)
+
+      assert response == %{
+               "api" => [
+                 %{"version_data" => "must be present"},
+                 %{
+                   "version_data" => "must have at least one version, e.g. default"
+                 }
+               ]
+             }
+    end
+
+    test "should return 400 when 'default' version doesn't have 'endpoints' property" do
+      new_api = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{
+          "port" => 3000,
+          "target_url" => "http://localhost"
+        },
+        "version_data" => %{
+          "default" => %{}
+        }
+      }
+
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
+      response = json_response(conn, 400)
+
+      assert response == %{
+               "api" => [
+                 %{"default" => "must have endpoints property"}
+               ]
+             }
+    end
+
+    test "should return 400 when 'endpoint' doesn't have required properties 'id', 'method' and 'path'" do
+      endpoints = [%{}]
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
+      response = json_response(conn, 400)
+
+      assert response == %{
+               "invalid-config/" => [
+                 %{"id" => "must be present"},
+                 %{"id" => "must be valid"},
+                 %{"id" => "must have a length of at least 1"},
+                 %{"path" => "must be present"},
+                 %{"path" => "must be valid"},
+                 %{"path" => "must have a length of at least 1"},
+                 %{"method" => "must be present"},
+                 %{"method" => "must be valid"},
+                 %{"method" => "must have a length of at least 1"}
+               ]
+             }
     end
 
     test "should return 400 when target is set to kafka or kinesis, but topic is not" do
@@ -257,7 +372,7 @@ defmodule RigApi.V2.APIsTest do
       kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
-      conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -282,7 +397,7 @@ defmodule RigApi.V2.APIsTest do
       kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
-      conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -306,7 +421,7 @@ defmodule RigApi.V2.APIsTest do
       ]
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
-      conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -327,7 +442,7 @@ defmodule RigApi.V2.APIsTest do
       ]
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
-      conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -350,7 +465,7 @@ defmodule RigApi.V2.APIsTest do
       auth_type = "jwt"
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
-      conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -373,7 +488,7 @@ defmodule RigApi.V2.APIsTest do
       ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
-      conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
@@ -395,7 +510,7 @@ defmodule RigApi.V2.APIsTest do
       ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth)
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints, auth)
-      conn = build_conn() |> put("/v1/apis/#{@invalid_config_id}", new_api)
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
