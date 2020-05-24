@@ -6,13 +6,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Nats do
   require Logger
   use Rig.Config, [:timeout, :cors]
 
-  alias ExAws
   alias Plug.Conn
   alias Rig.Connection.Codec
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.ApiProxy.Handler
   alias RigMetrics.ProxyMetrics
-  alias UUID
 
   @behaviour Handler
 
