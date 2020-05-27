@@ -3,7 +3,6 @@ defmodule RigTracing.Context do
   Distributed Tracing Context instrumenter
   """
 
-  use Opencensus
   alias RigCloudEvents.CloudEvent
   alias RigTracing.Config
 
