@@ -124,3 +124,23 @@ import_config "rig_inbound_gateway/config.exs"
 import_config "rig_metrics/config.exs"
 import_config "rig_outbound_gateway/config.exs"
 import_config "rig_tests/config.exs"
+
+# --------------------------------------
+# Jaeger
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+config :opencensus, [
+  {
+    :reporters,
+    [
+      {
+        :oc_reporter_jaeger,
+        [
+          {:hostname, 'localhost'},
+          {:port, 6831},
+          {:service_name, 'service'}
+        ]
+      }
+    ]
+  }
+]
