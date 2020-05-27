@@ -158,8 +158,8 @@ defmodule RIG.MixProject do
       {:prometheus_plugs, "~> 1.1"},
       {:opencensus_plug, "~> 0.3"},
       {:opencensus, "~> 0.9"},
-      {:opencensus_elixir, "~> 0.3.0"}
-      # {:opencensus_jaeger, "~> 0.0.1"}
+      {:opencensus_elixir, "~> 0.3.0"},
+      {:opencensus_jaeger, "~> 0.0.1"}
     ]
   end
 

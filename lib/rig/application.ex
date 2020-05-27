@@ -15,7 +15,7 @@ defmodule Rig.Application do
     # Override application logging with environment variable
     Logger.configure([{:level, config().log_level}])
 
-    # Tracing.start()
+    Tracing.start()
     Discovery.start()
 
     children = [

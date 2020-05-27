@@ -3,7 +3,7 @@ defmodule RIG.Tracing do
 
   def start do
     conf = config()
-    Application.put_env(:opencensus, :reporters, reporters(conf), :persistent)
+    Application.put_env(:opencensus, :reporters, reporters(conf), [:persistent])
     Application.ensure_all_started(:opencensus, :permanent)
   end
 
