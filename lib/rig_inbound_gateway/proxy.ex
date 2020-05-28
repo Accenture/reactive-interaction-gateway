@@ -84,11 +84,12 @@ defmodule RigInboundGateway.Proxy do
         end)
 
       {:ok, not_a_list} ->
-        {:error, "the proxy config must be a list", [not_a_list: not_a_list]}
+        Logger.error(fn -> "The proxy config must be a list, got #{inspect(not_a_list)}" end)
+        System.stop()
 
       {:error, :syntax_error, details} ->
-        {:error, "could not read proxy config",
-         [syntax_error: details, path_or_json: config_path_or_json]}
+        Logger.error(fn -> "Could not read proxy config, got #{inspect(config_path_or_json)}" end)
+        System.stop()
     end
   end
 

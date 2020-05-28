@@ -254,8 +254,7 @@ defmodule RigApi.V2.APIsTest do
 
       assert response == %{
                "api" => [
-                 %{"name" => "must be present"},
-                 %{"name" => "must be valid"},
+                 %{"name" => "must be string"},
                  %{"name" => "must have a length of at least 1"},
                  %{"proxy" => "must be present"},
                  %{"version_data" => "must be present"}
@@ -281,11 +280,9 @@ defmodule RigApi.V2.APIsTest do
       assert response == %{
                "api" => [
                  %{"proxy" => "must be present"},
-                 %{"target_url" => "must be present"},
-                 %{"target_url" => "must be valid"},
+                 %{"target_url" => "must be string"},
                  %{"target_url" => "must have a length of at least 1"},
-                 %{"port" => "must be present"},
-                 %{"port" => "must be valid"}
+                 %{"port" => "must be integer"}
                ]
              }
     end
@@ -314,7 +311,8 @@ defmodule RigApi.V2.APIsTest do
              }
     end
 
-    test "should return 400 when 'default' version doesn't have 'endpoints' property" do
+    test "should return 400 when 'default' version doesn't have 'endpoints' property or is not a list" do
+      # missing "endpoints" property
       new_api = %{
         "id" => "invalid_proxy",
         "name" => "invalid_proxy",
@@ -332,7 +330,29 @@ defmodule RigApi.V2.APIsTest do
 
       assert response == %{
                "api" => [
-                 %{"default" => "must have endpoints property"}
+                 %{"endpoints" => "must be list"}
+               ]
+             }
+
+      # "endpoints" not list
+      new_api = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{
+          "port" => 3000,
+          "target_url" => "http://localhost"
+        },
+        "version_data" => %{
+          "default" => %{"endpoints" => %{}}
+        }
+      }
+
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
+      response = json_response(conn, 400)
+
+      assert response == %{
+               "api" => [
+                 %{"endpoints" => "must be list"}
                ]
              }
     end
@@ -345,14 +365,11 @@ defmodule RigApi.V2.APIsTest do
 
       assert response == %{
                "invalid-config/" => [
-                 %{"id" => "must be present"},
-                 %{"id" => "must be valid"},
+                 %{"id" => "must be string"},
                  %{"id" => "must have a length of at least 1"},
-                 %{"path" => "must be present"},
-                 %{"path" => "must be valid"},
+                 %{"path" => "must be string"},
                  %{"path" => "must have a length of at least 1"},
-                 %{"method" => "must be present"},
-                 %{"method" => "must be valid"},
+                 %{"method" => "must be string"},
                  %{"method" => "must have a length of at least 1"}
                ]
              }

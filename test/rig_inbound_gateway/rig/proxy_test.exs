@@ -46,7 +46,7 @@ defmodule RigInboundGateway.ProxyTest do
 
       test_proxy_exit(
         ctx,
-        "[{:error, \"id\", :presence, \"must be present\"}, {:error, \"id\", :by, \"must be valid\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"name\", :presence, \"must be present\"}, {:error, \"name\", :by, \"must be valid\"}, {:error, \"name\", :length, \"must have a length of at least 1\"}, {:error, \"proxy\", :presence, \"must be present\"}, {:error, \"version_data\", :presence, \"must be present\"}]"
+        "[{\"api\", [{:error, \"id\", :by, \"must be string\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"name\", :by, \"must be string\"}, {:error, \"name\", :length, \"must have a length of at least 1\"}, {:error, \"proxy\", :presence, \"must be present\"}, {:error, \"version_data\", :presence, \"must be present\"}]}]"
       )
 
       ProxyConfig.restore()
@@ -69,7 +69,7 @@ defmodule RigInboundGateway.ProxyTest do
 
       test_proxy_exit(
         ctx,
-        "[{:error, \"proxy\", :presence, \"must be present\"}, {:error, \"target_url\", :presence, \"must be present\"}, {:error, \"target_url\", :by, \"must be valid\"}, {:error, \"target_url\", :length, \"must have a length of at least 1\"}, {:error, \"port\", :presence, \"must be present\"}, {:error, \"port\", :by, \"must be valid\"}]"
+        "[{\"api\", [{:error, \"proxy\", :presence, \"must be present\"}, {:error, \"target_url\", :by, \"must be string\"}, {:error, \"target_url\", :length, \"must have a length of at least 1\"}, {:error, \"port\", :by, \"must be integer\"}]}]"
       )
 
       ProxyConfig.restore()
@@ -97,8 +97,9 @@ defmodule RigInboundGateway.ProxyTest do
       ProxyConfig.restore()
     end
 
-    test "should exit the process when 'default' version doesn't have 'endpoints' property",
+    test "should exit the process when 'default' version doesn't have 'endpoints' property or is not an list",
          ctx do
+      # missing "endpoints" property
       proxy = %{
         "id" => "invalid_proxy",
         "name" => "invalid_proxy",
@@ -115,7 +116,29 @@ defmodule RigInboundGateway.ProxyTest do
 
       test_proxy_exit(
         ctx,
-        "[{:error, \"default\", :presence, \"must have endpoints property\"}]"
+        "[{\"api\", [{:error, \"endpoints\", :by, \"must be list\"}]}]"
+      )
+
+      # "endpoints" not list
+      proxy = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{
+          "port" => 3000,
+          "target_url" => "http://localhost"
+        },
+        "version_data" => %{
+          "default" => %{
+            "endpoints" => %{}
+          }
+        }
+      }
+
+      ProxyConfig.set_proxy_config(proxy)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"api\", [{:error, \"endpoints\", :by, \"must be list\"}]}]"
       )
 
       ProxyConfig.restore()
@@ -131,7 +154,7 @@ defmodule RigInboundGateway.ProxyTest do
 
       test_proxy_exit(
         ctx,
-        "[{\"invalid-config/\", [{:error, \"id\", :presence, \"must be present\"}, {:error, \"id\", :by, \"must be valid\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"path\", :presence, \"must be present\"}, {:error, \"path\", :by, \"must be valid\"}, {:error, \"path\", :length, \"must have a length of at least 1\"}, {:error, \"method\", :presence, \"must be present\"}, {:error, \"method\", :by, \"must be valid\"}, {:error, \"method\", :length, \"must have a length of at least 1\"}]}]"
+        "[{\"invalid-config/\", [{:error, \"id\", :by, \"must be string\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"path\", :by, \"must be string\"}, {:error, \"path\", :length, \"must have a length of at least 1\"}, {:error, \"method\", :by, \"must be string\"}, {:error, \"method\", :length, \"must have a length of at least 1\"}]}]"
       )
 
       ProxyConfig.restore()

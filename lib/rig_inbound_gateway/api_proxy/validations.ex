@@ -151,19 +151,42 @@ defmodule RigInboundGateway.ApiProxy.Validations do
 
   # ---
 
-  @spec validate_string(Api.t(), String.t()) :: error_list_t()
-  def validate_string(api, key) do
-    Vex.errors(api, %{key => [presence: true]}) ++
-      Vex.errors(api, %{key => &is_binary/1}) ++
-      Vex.errors(api, %{key => [length: [min: 1]]})
+  @spec type_validation(map, String.t(), String.t(), function) :: error_list_t()
+  def type_validation(map, key, type, fun) do
+    Vex.errors(
+      map,
+      %{
+        key => fn key ->
+          if fun.(key) do
+            :ok
+          else
+            {:error, "must be #{type}"}
+          end
+        end
+      }
+    )
   end
 
   # ---
 
-  @spec validate_integer(Api.t(), String.t()) :: error_list_t()
-  def validate_integer(api, key) do
-    Vex.errors(api, %{key => [presence: true]}) ++
-      Vex.errors(api, %{key => &is_integer/1})
+  @spec validate_string(map, String.t()) :: error_list_t()
+  def validate_string(map, key) do
+    type_validation(map, key, "string", &is_binary/1) ++
+      Vex.errors(map, %{key => [length: [min: 1]]})
+  end
+
+  # ---
+
+  @spec validate_integer(map, String.t()) :: error_list_t()
+  def validate_integer(map, key) do
+    type_validation(map, key, "integer", &is_integer/1)
+  end
+
+  # ---
+
+  @spec validate_list(map, String.t()) :: error_list_t()
+  def validate_list(map, key) do
+    type_validation(map, key, "list", &is_list/1)
   end
 
   # ---
@@ -183,16 +206,8 @@ defmodule RigInboundGateway.ApiProxy.Validations do
 
     if length(keys) > 0 do
       Enum.reduce(keys, [], fn key, acc ->
-        has_endpoints =
-          version_data
-          |> Map.get(key)
-          |> Map.has_key?("endpoints")
-
-        if has_endpoints do
-          acc
-        else
-          acc ++ [{:error, key, :presence, "must have endpoints property"}]
-        end
+        endpoints_errors = version_data |> Map.get(key) |> validate_list("endpoints")
+        acc ++ endpoints_errors
       end)
     else
       [{:error, "version_data", :presence, "must have at least one version, e.g. default"}]
