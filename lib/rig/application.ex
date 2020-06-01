@@ -23,6 +23,7 @@ defmodule Rig.Application do
       Rig.EventFilter.Sup,
       Rig.EventStream.KafkaToFilter,
       Rig.EventStream.KafkaToHttp,
+      Rig.EventStream.NatsToFilter,
       # Blacklist:
       Spec.worker(RIG.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
       # Kinesis event stream:
