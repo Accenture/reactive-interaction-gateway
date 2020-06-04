@@ -40,7 +40,7 @@ defmodule Rig.Config do
   defmodule SyntaxError do
     defexception [:cause]
 
-    def message(%__MODULE__{cause: cause} = e) when is_list(cause),
+    def message(%__MODULE__{cause: cause}) when is_list(cause),
       do: "could not parse JSON: #{inspect(cause)}"
 
     def message(%__MODULE__{cause: cause}) when byte_size(cause) > 0,
