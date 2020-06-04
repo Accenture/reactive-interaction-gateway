@@ -2,7 +2,7 @@
 
 # RIG - Reactive Interaction Gateway
 
-_The missing link between backend and frontend -- stop polling and go real-time!_
+Create low-latency, interactive user experiences for stateless microservices.
 
 [![Build Status](https://travis-ci.org/Accenture/reactive-interaction-gateway.svg?branch=master)](https://travis-ci.org/Accenture/reactive-interaction-gateway)
 [![DockerHub](https://img.shields.io/docker/pulls/accenture/reactive-interaction-gateway)](https://hub.docker.com/r/accenture/reactive-interaction-gateway)
@@ -10,36 +10,56 @@ _The missing link between backend and frontend -- stop polling and go real-time!
 
 Take a look at the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html) and get in touch with us on [Slack](https://rig-slackin.herokuapp.com)!
 
-## What does it solve?
+- [About](#about)
+- [Getting Started](#getting-started)
+  - [API Documentation](#api-documentation)
+  - [Metrics](#metrics)
+- [Contribute](#contribute)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
-- Let RIG take care of client connection state so you don't have to.
-- Send events to RIG and have them forwarded to clients based on their event subscriptions.
-- Use RIG to forward client requests to backend services.
+## About
+
+How RIG makes asynchronous backend<->frontend communication easier:
+
+- RIG takes care of client connection state so you don't have to.
+- RIG picks up back-end events and forwards them to clients based on subscriptions.
+- RIG forwards client requests to backend services either synchronously or asynchronously.
 
 Built on open standards, RIG is very easy to integrate – and easy to _replace_ – which means low-cost, low-risk adoption. Unlike other solutions, RIG does not leak into your application – no libraries or SDKs required.
 
-For more details take a look at the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html).
-
-## Feature Summary
+Features:
 
 - Easy to use and scalable by design:
   - Supports tens of thousands stable connections per node even on low-end machines.
   - Easy to add additional nodes.
-  - Built on the battle-proven [**Erlang/OTP**](http://www.erlang.org/) distribution model.
+  - Built on the battle-proven [Erlang/OTP](http://www.erlang.org/) distribution model.
   - Only uses in-memory data structures - no external dependencies to configure or scale.
-- Firewall friendly and future proof using **Server-Sent Events (SSE)**:
-  - [HTML5 standard](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events).
-  - Regular HTTP requests, so no issues with proxy servers or firewalls.
-  - Connection multiplexing with HTTP/2 out of the box.
-  - SSE implementation (browser) keeps track of connection drops and restores the connection automatically.
-  - Polyfills available for older browsers.
-- WebSocket connections are supported, too.
-- HTTP long polling for situations where SSE and WS are not supported.
-- Uses the upcoming [**CloudEvents** specification](https://cloudevents.io/).
+- Connect using standard protocols:
+  - Firewall friendly and future proof using Server-Sent Events (SSE)
+    - [HTML5 standard](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events).
+    - Regular HTTP requests, so no issues with proxy servers or firewalls.
+    - Connection multiplexing with HTTP/2 out of the box.
+    - SSE implementation (browser) keeps track of connection drops and restores the connection automatically.
+    - Polyfills available for older browsers.
+  - WebSocket connections are supported, too.
+  - HTTP long polling for situations where SSE and WS are not supported.
+- Publish events from various sources:
+  - Kafka
+  - NATS
+  - Amazon Kinesis
+  - or publish via HTTP
+- Convert a HTTP request to a message for asynchronous processing:
+  - produce to Kafka topic, optionally wait for the result on another Kafka topic
+  - produce to a NATS topic, optionally using NATS request-response to wait for the result
+  - produce to Amazon Kinesis
+- Uses the CNCF [CloudEvents specification](https://cloudevents.io/).
 - Flexible event subscription model based on event types.
 - Use existing services for authentication and authorization of users and subscriptions.
 - JWT signature verification for APIs as a simple authentication check.
 - Session blacklist with immediate session invalidation.
+
+For more details take a look at the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html).
 
 ## Getting Started
 

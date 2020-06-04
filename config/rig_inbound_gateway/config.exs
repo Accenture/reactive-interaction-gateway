@@ -133,6 +133,10 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
   cors: {:system, "CORS", "*"},
   kinesis_endpoint: {:system, "KINESIS_ENDPOINT", ""}
 
+config :rig, RigInboundGateway.ApiProxy.Handler.Nats,
+  timeout: {:system, :integer, "PROXY_NATS_RESPONSE_TIMEOUT", 60_000},
+  cors: {:system, "CORS", "*"}
+
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   # The list of brokers, given by a comma-separated list of host:port items:
   brokers: {:system, :list, "KAFKA_BROKERS", []},

@@ -157,7 +157,9 @@ defmodule RIG.MixProject do
       {:socket, "~> 0.3", only: :test},
       # Prometheus metrics
       {:prometheus_ex, "~> 3.0"},
-      {:prometheus_plugs, "~> 1.1"}
+      {:prometheus_plugs, "~> 1.1"},
+      # NATS client:
+      {:gnat, "~> 1.0.0"}
     ]
   end
 

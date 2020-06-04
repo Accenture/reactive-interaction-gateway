@@ -4,17 +4,15 @@ title: Publishing Events towards Frontends
 sidebar_label: Publishing Events
 ---
 
-RIG supports various ways to publish an event towards frontends. The recommended way is to have RIG consume one or more Kafka topics, but RIG also support Kinesis as an alternative. For testing and low-traffic scenarios, RIG also provides an HTTP endpoint that can be used to send events to.
+Frontends can subscribe to events from multiple sources. RIG supports Kafka, NATS, and Amazon Kinesis. For testing and low-traffic scenarios, RIG also provides an HTTP endpoint that can be used to send events to.
+
+RIG was designed to effectively cope with high volumes of messages to consume. The idea is to drop messages as quickly as possible as long as nobody is subscribed to it. For example, in a large bank, thousands of events are produced every second but only a fraction of those events are relevant to frontends; additionally, only a fraction of the bank's customer are online at any given moment. Hence RIG can drop almost all messages it consumes immediately. To be able to do this efficiently, every RIG instance has a view of all subscriptions, so deciding whether an incoming message is a relevant event or not does not require network communication.
 
 ## HTTP
 
-The HTTP endpoint is available on RIG's [internal port](rig-ops-guide). It supports JSON-encoded CloudEvents in [structured and binary modes](event-format#http-transport-binding) (Avro is currently not supported).
-- publishing via API Gateway to specific topic/stream, see [Publishing to event streams](./api-gateway#publishing-to-event-streams) for more details
-  - consuming of events from specific topic/stream to achieve sync requests
-- consuming of events to be forwarded via SSE/WS/Longpolling
-- publishing "monitoring" messages per API Gateway call
+The `events` endpoint is available on RIG's [internal port](rig-ops-guide) and can be used to publish events. RIG treats events published this way the same way it would handle an events consumed from a Kafka topic, for example.
 
-Example usage (taken from the [tutorial](tutorial#4-create-a-new-chatroom-message-event-backend)):
+Example, taken from the [tutorial](tutorial#4-create-a-new-chatroom-message-event-backend):
 
 ```bash
 $ http post :4000/_rig/v1/events \
@@ -33,10 +31,47 @@ content-type: application/json; charset=utf-8
     "type": "chatroom_message",
     "source": "tutorial"
 }
+```
 
+The `events` endpoint supports JSON-encoded CloudEvents in [structured and binary modes](event-format#http-transport-binding). Avro is currently not supported.
+
+## NATS
+
+RIG support publishing events consumed from a NATS topic. NATS is super lightweight and a good alternative to Kafka for many projects. And it's easy to set up too - let's go through a quick example.
+
+Use Docker to start a NATS server on your machine:
+
+```bash
+docker network create test
+docker run --rm -d --name nats --network test nats
+```
+
+The two [environment variables](./rig-ops-guide.md) we're interested here are `NATS_SERVERS` and `NATS_SOURCE_TOPICS`. Let's run RIG and set it up to subscribe to the "rig-test" topic on the NATS server we've just started:
+
+```bash
+docker run --rm -d --name rig --network test \
+  -e NATS_SERVERS=nats:4222 \
+  -e NATS_SOURCE_TOPICS=rig-test \
+  -p 4000:4000 \
+  accenture/reactive-interaction-gateway
+```
+
+That's it - RIG is now ready to consume events. To see this in action, have your microservice publish events and connect a client to RIG's inbound port:
+
+```bash
+http --stream :4000/_rig/v1/connection/sse\?subscriptions='[{"eventType":"test"}]'
+```
+
+Finally, clean up:
+
+```bash
+docker stop rig nats
+docker rm rig nats
+docker network rm test
 ```
 
 ## Kafka
+
 > __NOTE:__ it's enough to set one Kafka broker, RIG will automatically discover rest of the Kafka cluster.
 
 ### Change consumer topics and group ID
@@ -121,7 +156,8 @@ docker run -e KINESIS_ENABLED=1 accenture/reactive-interaction-gateway
 docker run -e KINESIS_ENABLED=1 -e KINESIS_AWS_REGION=eu-west-3 accenture/reactive-interaction-gateway
 ```
 
-The used consumer stream and the app name can be changed as well:
+The used consumer stream and the app name can be changed as well..
+
 ### Change consumer stream and app name
 
 As Kinesis is enabled, RIG starts to consume events on default stream `RIG-outbound`. `RIG-outbound` topic is used to consume all events and forward them to client via SSE/WS/Longpolling.
