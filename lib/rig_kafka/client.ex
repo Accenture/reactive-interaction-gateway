@@ -90,6 +90,9 @@ defmodule RigKafka.Client do
 
             "application/json" ->
               body
+              |> Jason.decode!()
+              |> Map.merge(headers_no_prefix)
+              |> Jason.encode!()
 
             _ ->
               {:error, {:unknown_content_type, content_type}}

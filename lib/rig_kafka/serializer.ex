@@ -49,7 +49,6 @@ defmodule RigKafka.Serializer do
         stripped_key =
           key
           |> String.replace_prefix(@prefix, "")
-          |> String.to_atom()
 
         decoded_value =
           case Jason.decode(value) do
@@ -63,7 +62,7 @@ defmodule RigKafka.Serializer do
           {stripped_key, value}
         end
       else
-        {String.to_atom(key), value}
+        {key, value}
       end
     end
     |> Enum.into(%{})
