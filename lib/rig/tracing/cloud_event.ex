@@ -1,4 +1,4 @@
-defmodule RigTracing.CloudEvent do
+defmodule RIG.Tracing.CloudEvent do
   @moduledoc """
   Distributed Tracing instrumenter for cloudevents
   """

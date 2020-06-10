@@ -10,7 +10,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   alias Rig.Connection.Codec
   alias RigInboundGateway.ApiProxy.Handler
   alias RigMetrics.ProxyMetrics
-  alias RigTracing.Context
+  alias RIG.Tracing
   alias UUID
 
   @behaviour Handler
@@ -182,7 +182,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         path: request_path,
         query: conn.query_string
       })
-      |> Context.append_tracecontext(Context.tracecontext())
+      |> Tracing.append_context(Tracing.context())
       |> Poison.encode!()
 
     produce(partition, kinesis_message, topic)

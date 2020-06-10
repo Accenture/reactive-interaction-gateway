@@ -133,16 +133,3 @@ config :rig, RIG.Tracing,
   jaeger_host: {:system, :charlist, "JAEGER_HOST", ''},
   jaeger_port: {:system, :integer, "JAEGER_PORT", 6831},
   jaeger_service_name: {:system, :charlist, "JAEGER_SERVICE_NAME", 'rig'}
-
-# reporters = [
-#   {
-#     :oc_reporter_jaeger,
-#     [
-#       {:hostname, 'localhost'},
-#       {:port, 6831},
-#       {:service_name, 'rig'}
-#     ]
-#   }
-# ]
-
-# config :opencensus, :reporters, reporters

@@ -14,7 +14,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
   alias Rig.Connection.Codec
 
-  alias RigTracing.Context
+  alias RIG.Tracing
 
   @help_text """
   Produce the request to a Kafka topic and optionally wait for the (correlated) response.
@@ -208,7 +208,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         path: request_path,
         query: conn.query_string
       })
-      |> Context.append_tracecontext(Context.tracecontext())
+      |> Tracing.append_context(Tracing.context())
       |> Poison.encode!()
 
     produce(partition, kafka_message, topic, schema)

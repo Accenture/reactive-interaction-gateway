@@ -23,8 +23,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
   alias RigInboundGateway.ApiProxy.Handler
   alias RigInboundGateway.ApiProxy.Handler.HttpHeader
-  alias RigTracing.Context
-  alias RigTracing.TracePlug
+  alias RIG.Tracing
   @behaviour Handler
 
   # ---
@@ -46,7 +45,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
       req_headers
       |> HttpHeader.put_host_header(url)
       |> HttpHeader.put_forward_header(conn.remote_ip, host_ip)
-      |> TracePlug.put_tracecontext_header(Context.tracecontext())
+      |> Tracing.Plug.put_context_header(Tracing.context())
       |> drop_connection_related_headers()
 
     result = do_request(method, url, body, req_headers)
