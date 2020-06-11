@@ -7,8 +7,6 @@ defmodule RigKafka.ProtocolBinding do
 
   alias RigKafka.Serializer
 
-  require Logger
-
   # --- https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md#32-binary-content-mode
 
   defp handle_binary_mode(body, headers) do
