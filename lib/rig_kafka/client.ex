@@ -4,6 +4,7 @@ defmodule RigKafka.Client do
   """
 
   alias RigKafka.Config
+  alias RigKafka.ProtocolBinding
   alias RigKafka.Serializer
 
   require Logger
@@ -38,32 +39,6 @@ defmodule RigKafka.Client do
 
     # ---
 
-    @spec get_content_type(any(), any()) :: String.t()
-    defp get_content_type(<<0::8, _id::32, _body::binary>>), do: "avro/binary"
-    defp get_content_type(_), do: "application/json"
-
-    defp get_content_type(headers, body) do
-      ce_specversion =
-        case headers do
-          %{specversion: version} ->
-            version
-
-          %{cloudEventsVersion: version} ->
-            version
-
-          _ ->
-            headers
-        end
-
-      case ce_specversion do
-        "0.2" -> Map.get(headers, :contenttype, get_content_type(body))
-        "0.1" -> Map.get(headers, :contentType, get_content_type(body))
-        _ -> get_content_type(body)
-      end
-    end
-
-    # ---
-
     @impl :brod_group_subscriber
     def handle_message(
           topic,
@@ -72,31 +47,12 @@ defmodule RigKafka.Client do
           %{callback: callback, schema_registry_host: schema_registry_host} = state
         ) do
       %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
-      headers_no_prefix = Serializer.remove_prefix(headers)
-      content_type = get_content_type(headers_no_prefix, body)
 
       try do
         encoded_body =
-          case content_type do
-            "avro/binary" ->
-              data =
-                body
-                |> Serializer.decode_body!("avro", schema_registry_host: schema_registry_host)
-                |> Jason.decode!()
-
-              headers_no_prefix
-              |> Map.merge(%{data: data})
-              |> Jason.encode!()
-
-            "application/json" ->
-              body
-              |> Jason.decode!()
-              |> Map.merge(headers_no_prefix)
-              |> Jason.encode!()
-
-            _ ->
-              {:error, {:unknown_content_type, content_type}}
-          end
+          ProtocolBinding.handle_cloudevent(body, headers,
+            schema_registry_host: schema_registry_host
+          )
 
         case callback.(encoded_body) do
           :ok ->
@@ -367,7 +323,11 @@ defmodule RigKafka.Client do
           case serializer do
             "avro" ->
               {data, headers} = Map.pop(plaintext_map, "data", %{})
-              prefixed_headers = Serializer.add_prefix(headers)
+
+              prefixed_headers =
+                headers
+                |> Serializer.add_prefix()
+                |> Enum.concat([{"content-type", "application/cloudevents+avro"}])
 
               {prefixed_headers,
                Serializer.encode_body(data, "avro", schema, schema_registry_host)}

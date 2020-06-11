@@ -17,10 +17,12 @@ function is_kafka_ready() {
         docker-compose exec kafka bash -c 'kafka-topics --create --topic rig-request-log --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:2181'
         docker-compose exec kafka bash -c 'kafka-topics --create --topic rig-proxy-response --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:2181'
         docker-compose exec kafka bash -c 'kafka-topics --create --topic rig-kafka-test-simple-topic --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:2181'
+        docker-compose exec kafka bash -c 'kafka-topics --create --topic rig-avro-test-simple-topic --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:2181'
         docker-compose exec kafka bash -c 'kafka-topics --create --topic rig-avro --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:2181'
         section_header "List of Kafka topics"
         docker-compose exec kafka bash -c 'kafka-topics --list --zookeeper zookeeper:2181'
         section_header "Creating Kafka registry schemas"
+        curl -d '{"schema":"{\"name\":\"simpleAvro\",\"type\":\"record\",\"fields\":[{\"name\":\"foo\",\"type\":\"string\"}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rig-avro-test-simple-topic-value/versions
         curl -d '{"schema":"{\"name\":\"basicAvro\",\"type\":\"record\",\"fields\":[{\"name\":\"foo\",\"type\":\"string\"}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rig-avro-value/versions
         curl -d '{"schema":"{\"name\":\"loggerAvro\",\"type\":\"record\",\"fields\":[{\"name\":\"request_path\",\"type\":\"string\"},{\"name\":\"remote_ip\",\"type\":\"string\"},{\"name\":\"endpoint\",\"type\":{\"name\":\"endpoint\",\"type\":\"record\",\"fields\":[{\"name\":\"path\",\"type\":\"string\"},{\"name\":\"method\",\"type\":\"string\"},{\"name\":\"id\",\"type\":\"string\"}]}}]}}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rig-request-logger-value/versions
         printf "\n"

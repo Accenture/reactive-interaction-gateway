@@ -9,14 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support publishing events consumed from [NATS](https://nats.io) topics. See the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/event-streams.html#nats) for how to get started.
-  [#297](https://github.com/Accenture/reactive-interaction-gateway/issues/297)
-- Added possibility to define Kafka/Kinesis topic and schema per reverse proxy endpoint. The current solution using environment variables is deprecated, but still used as a fallback -- will be removed in the version 3.0.
-  [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
-- Added Kinesis + Localstack example.
-  [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+- Support publishing events consumed from [NATS](https://nats.io) topics. See the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/event-streams.html#nats) for how to get started. [#297](https://github.com/Accenture/reactive-interaction-gateway/issues/297)
 
-<!-- ### Changed -->
+### Changed
+
+- Updated consumption of Kafka messages to properly use binary and structured modes based on the [Cloud Events spec](https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md). [#306](https://github.com/Accenture/reactive-interaction-gateway/pull/306)
 
 ### Fixed
 
