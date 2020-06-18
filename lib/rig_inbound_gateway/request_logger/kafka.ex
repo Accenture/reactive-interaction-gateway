@@ -4,8 +4,8 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
   """
   use Rig.KafkaConsumerSetup, [:log_topic, :log_schema, :serializer]
 
-  alias RigInboundGateway.RequestLogger
   alias RIG.Tracing
+  alias RigInboundGateway.RequestLogger
   @behaviour RequestLogger
   alias UUID
 

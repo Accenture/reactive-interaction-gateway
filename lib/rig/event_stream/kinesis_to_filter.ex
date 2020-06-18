@@ -5,8 +5,8 @@ defmodule Rig.EventStream.KinesisToFilter do
   """
 
   alias Rig.EventFilter
-  alias RigCloudEvents.CloudEvent
   alias RIG.Tracing
+  alias RigCloudEvents.CloudEvent
 
   require Logger
   require Tracing.CloudEvent

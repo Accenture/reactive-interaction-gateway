@@ -7,8 +7,8 @@ defmodule RigInboundGateway.Events do
 
   alias Rig.Connection
   alias Rig.Subscription
-  alias RigCloudEvents.CloudEvent
   alias RIG.Tracing
+  alias RigCloudEvents.CloudEvent
 
   @spec welcome_event(pid | nil) :: CloudEvent.t()
   def welcome_event(pid \\ self()) do

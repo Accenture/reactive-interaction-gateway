@@ -1,4 +1,10 @@
 defmodule RIG.Tracing do
+  @moduledoc """
+  Module that handle trace-context according to W3C.
+
+  Accepts and forwards trace-context both from/to http endpoints and from/to event-based systems
+  using cloudevents
+  """
   use Rig.Config, [:jaeger_host, :jaeger_port, :jaeger_service_name]
 
   alias RigCloudEvents.CloudEvent
@@ -31,8 +37,8 @@ defmodule RIG.Tracing do
 
   # ---
 
-  @spec context() :: list
-  def context() do
+  @spec context :: list
+  def context do
     for {k, v} <- :oc_propagation_http_tracecontext.to_headers(:ocp.current_span_ctx()) do
       {k, List.to_string(v)}
     end

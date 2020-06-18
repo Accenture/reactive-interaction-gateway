@@ -6,8 +6,8 @@ defmodule Rig.EventStream.KafkaToFilter do
   use Rig.KafkaConsumerSetup
 
   alias Rig.EventFilter
-  alias RigCloudEvents.CloudEvent
   alias RIG.Tracing
+  alias RigCloudEvents.CloudEvent
 
   require Tracing.CloudEvent
 

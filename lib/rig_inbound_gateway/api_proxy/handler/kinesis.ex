@@ -8,9 +8,9 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   alias ExAws
   alias Plug.Conn
   alias Rig.Connection.Codec
+  alias RIG.Tracing
   alias RigInboundGateway.ApiProxy.Handler
   alias RigMetrics.ProxyMetrics
-  alias RIG.Tracing
   alias UUID
 
   @behaviour Handler

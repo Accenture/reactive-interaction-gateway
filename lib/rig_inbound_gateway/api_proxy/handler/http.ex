@@ -16,14 +16,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
   alias Plug.Conn.Query
 
   alias Rig.Connection.Codec
-
-  alias RigMetrics.ProxyMetrics
-
+  alias RIG.Tracing
   alias RigInboundGateway.ApiProxy.Base
-
   alias RigInboundGateway.ApiProxy.Handler
   alias RigInboundGateway.ApiProxy.Handler.HttpHeader
-  alias RIG.Tracing
+  alias RigMetrics.ProxyMetrics
   @behaviour Handler
 
   # ---
