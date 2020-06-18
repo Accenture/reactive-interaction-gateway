@@ -45,7 +45,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
       req_headers
       |> HttpHeader.put_host_header(url)
       |> HttpHeader.put_forward_header(conn.remote_ip, host_ip)
-      |> Tracing.Plug.put_context_header(Tracing.context())
+      |> Tracing.Plug.put_req_header(Tracing.context())
       |> drop_connection_related_headers()
 
     result = do_request(method, url, body, req_headers)
@@ -117,6 +117,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
         conn
         |> with_cors()
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.put_resp_content_type("application/json")
         |> Conn.send_resp(:ok, response)
     after
@@ -131,6 +132,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
         conn
         |> with_cors()
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.send_resp(:gateway_timeout, "")
     end
   end

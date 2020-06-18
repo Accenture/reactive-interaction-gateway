@@ -274,6 +274,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         )
 
         conn
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.put_resp_content_type("application/json")
         |> Conn.send_resp(:ok, response)
     after
@@ -287,6 +288,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         )
 
         conn
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.send_resp(:gateway_timeout, "")
     end
   end
