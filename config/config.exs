@@ -139,4 +139,6 @@ import_config "rig_tests/config.exs"
 config :rig, RIG.Tracing,
   jaeger_host: {:system, :charlist, "JAEGER_HOST", ''},
   jaeger_port: {:system, :integer, "JAEGER_PORT", 6831},
-  jaeger_service_name: {:system, :charlist, "JAEGER_SERVICE_NAME", 'rig'}
+  jaeger_service_name: {:system, :charlist, "JAEGER_SERVICE_NAME", 'rig'},
+  zipkin_address: {:system, :charlist, "ZIPKIN_ADDR", ''},
+  zipkin_service_name: {:system, "ZIPKIN_SERVICE_NAME", "rig"}

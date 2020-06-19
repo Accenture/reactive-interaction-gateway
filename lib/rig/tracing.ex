@@ -5,7 +5,13 @@ defmodule RIG.Tracing do
   Accepts and forwards trace-context both from/to http endpoints and from/to event-based systems
   using cloudevents
   """
-  use Rig.Config, [:jaeger_host, :jaeger_port, :jaeger_service_name]
+  use Rig.Config, [
+    :jaeger_host,
+    :jaeger_port,
+    :jaeger_service_name,
+    :zipkin_address,
+    :zipkin_service_name
+  ]
 
   alias RigCloudEvents.CloudEvent
 
@@ -15,15 +21,17 @@ defmodule RIG.Tracing do
 
   def start do
     conf = config()
-    Application.put_env(:opencensus, :reporters, reporters(conf), [:persistent])
+    Application.put_env(:opencensus, :reporters, reporters(conf, "jaeger"), [:persistent])
+    Application.put_env(:opencensus, :reporters, reporters(conf, "zipkin"), [:persistent])
     Application.ensure_all_started(:opencensus, :permanent)
   end
 
   # ---
 
-  defp reporters(%{jaeger_host: ''}), do: []
+  defp reporters(%{jaeger_host: ''}, "jaeger"), do: []
+  defp reporters(%{zipkin_address: ''}, "zipkin"), do: []
 
-  defp reporters(conf),
+  defp reporters(conf, "jaeger"),
     do: [
       {
         :oc_reporter_jaeger,
@@ -31,6 +39,17 @@ defmodule RIG.Tracing do
           {:hostname, conf.jaeger_host},
           {:port, conf.jaeger_port},
           {:service_name, conf.jaeger_service_name}
+        ]
+      }
+    ]
+
+  defp reporters(conf, "zipkin"),
+    do: [
+      {
+        :oc_reporter_zipkin,
+        [
+          {:address, conf.zipkin_address},
+          {:local_endpoint, %{:serviceName => conf.zipkin_service_name}}
         ]
       }
     ]
