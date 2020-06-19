@@ -43,10 +43,9 @@ To have the project use a newer Elixir version, make sure to change the followin
 ## Releasing a new version
 
 - Increment `rig` version in the [version](../version) file
-- Increment `appVersion` in the [Helm v2 Chart.yaml](https://github.com/Accenture/reactive-interaction-gateway/blob/master/deployment/helm2/reactive-interaction-gateway/Chart.yaml) and [Helm v3 Chart.yaml](https://github.com/Accenture/reactive-interaction-gateway/blob/master/deployment/helm3/reactive-interaction-gateway/Chart.yaml) files
-- Increment `tag` in the [Helm v2 values.yaml](https://github.com/Accenture/reactive-interaction-gateway/blob/master/deployment/helm2/reactive-interaction-gateway/values.yaml) file
-- Increment image tag in the [Kubernetes rig.yaml](https://github.com/Accenture/reactive-interaction-gateway/blob/master/deployment/kubectl/rig.yaml) file
-- In [CHANGELOG.md](https://github.com/Accenture/reactive-interaction-gateway/blob/master/CHANGELOG.md), rename `[Unreleased]` and add a corresponding link to the bottom of the file
+- Increment `appVersion` in the [Helm v2 Chart.yaml](../deployment/helm2/reactive-interaction-gateway/Chart.yaml) and [Helm v3 Chart.yaml](../deployment/helm3/reactive-interaction-gateway/Chart.yaml) files
+- Increment image tag in the [Kubernetes rig.yaml](../deployment/kubectl/rig.yaml) file
+- In [CHANGELOG.md](../CHANGELOG.md), rename `[Unreleased]` and add a corresponding link to the bottom of the file
 - Create a signed Git tag either using `git -s` or by creating a release using the Github UI
 
 ## Test Tags
