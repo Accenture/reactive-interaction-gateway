@@ -33,10 +33,7 @@ Adopting Avro for event (de)serialization is fairly straightforward. First you n
 
 ## RIG as a Kafka consumer
 
-- when consuming Kafka event, RIG checks headers of such event and removes `ce-` prefix
-- based on headers decides cloud events version and content type
-- In case content type is `avro/binary`, schema ID is taken from event value and deserialized
-- If content type is **not** present, RIG checks for Avro format (`<<0, 0, 0, 0, 1, 5, 3, 8, ...>>`) and attempts for deserialization, otherwise event is sent to client as it is without any deserialization
+Event parsing is based on the [Kafka Transport Binding for CloudEvents v1.0](https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md). Check the [Event format](./event-format.md#kafka-transport-binding) section.
 
 ## Example 1: producing to and consuming from the same topic
 

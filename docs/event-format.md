@@ -14,17 +14,17 @@ We aim at following the [CloudEvents specification](https://github.com/cloudeven
 
 ```json
 {
-    "specversion" : "0.2",
-    "type" : "com.github.pull.create",
-    "source" : "https://github.com/cloudevents/spec/pull/123",
-    "id" : "A234-1234-1234",
-    "time" : "2018-04-05T17:31:00Z",
-    "comexampleextension1" : "value",
-    "comexampleextension2" : {
-        "othervalue": 5
-    },
-    "contenttype" : "text/xml",
-    "data" : "<much wow=\"xml\"/>"
+  "specversion": "0.2",
+  "type": "com.github.pull.create",
+  "source": "https://github.com/cloudevents/spec/pull/123",
+  "id": "A234-1234-1234",
+  "time": "2018-04-05T17:31:00Z",
+  "comexampleextension1": "value",
+  "comexampleextension2": {
+    "othervalue": 5
+  },
+  "contenttype": "text/xml",
+  "data": "<much wow=\"xml\"/>"
 }
 ```
 
@@ -40,8 +40,6 @@ To enable Avro & Schema Registry support, checkout the [Operator's Guide](rig-op
 For further details and examples, checkout the dedicated [Section on Avro](avro).
 
 ## Transport Bindings
-
-While the HTTP transport binding seems solid already, the Kafka transport mode is not yet available. To support Kafka anyway, we have adapted the HTTP transport modes for Kafka. Consequently, the Kafka transport mode implementation may change in the future, depending on the outcome of the [standardization process](https://github.com/cloudevents/spec/pull/337).
 
 When sending or receiving an event, you have a couple of options:
 
@@ -90,7 +88,7 @@ Request body:
 
 ### Binary
 
-In binary mode the request body only contains the `data` value of the corresponding CloudEvent. The _context attributes_ - i.e., all other fields - are moved into the HTTP header. The data/body encoding is determined by the `content-type` header. At the time of writing there are two content types supported: `application/json` and `avro/binary`.
+In binary mode the request body only contains the `data` value of the corresponding CloudEvent. The _context attributes_ - i.e., all other fields - are moved into the HTTP header (**this means also [extensions](https://github.com/cloudevents/spec/blob/v1.0/spec.md#extension-context-attributes)**). The data/body encoding is determined by the `content-type` header. At the time of writing there are two content types supported: `application/json` and `avro/binary`.
 
 <details>
 <summary>Same example event, sent using HTTP request in binary mode</summary>
@@ -119,7 +117,7 @@ Request body:
 
 ## Kafka Transport Binding
 
-As mentioned above, the corresponding CloudEvents transport binding specification is still under [active development](https://github.com/cloudevents/spec/pull/337/files). We follow an approach very similar to the HTTP transport binding outlined above. We utilize Kafka headers that have been introduced in Kafka version `0.11`. In order to support older Kafka versions as well, RIG defaults to structured mode and does not require any headers at all (see below).
+Implemented using [Kafka Transport Binding for CloudEvents v1.0](https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md). We utilize Kafka headers that have been introduced in Kafka version `0.11`. In order to support older Kafka versions as well, RIG defaults to structured mode and does not require any headers at all (see below).
 
 Like with the HTTP transport binding, we define two modes of operation: structured and binary.
 
@@ -158,7 +156,7 @@ Message body:
 
 ### Binary
 
-In binary mode the message body only contains the `data` value of the corresponding CloudEvent. The _context attributes_ - i.e., all other fields - are moved into the message header. The data/body encoding is determined by the `content-type` header. In this mode there is no default for `content-type` and RIG rejects messages that come without it. At the time of writing there are two content types supported: `application/json` and `avro/binary`.
+In binary mode the message body only contains the `data` value of the corresponding CloudEvent. The _context attributes_ - i.e., all other fields - are moved into the message header (**this means also [extensions](https://github.com/cloudevents/spec/blob/v1.0/spec.md#extension-context-attributes)**). The data/body encoding is determined by the `content-type` header. In this mode there is no default for `content-type` and RIG rejects messages that come without it. At the time of writing there are two content types supported: `application/json` and `avro/binary`.
 
 <details>
 <summary>Same example in binary mode</summary>
@@ -185,6 +183,6 @@ Message body:
 </p>
 </details>
 
-[CloudEvents]: https://cloudevents.io/
-[CNCF]: https://www.cncf.io/
-[Apache Avro]: https://avro.apache.org/
+[cloudevents]: https://cloudevents.io/
+[cncf]: https://www.cncf.io/
+[apache avro]: https://avro.apache.org/
