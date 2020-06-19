@@ -46,9 +46,15 @@ helm upgrade --set service.type=LoadBalancer rig reactive-interaction-gateway
 
 ## Scaling
 
-1. Get the name of the deployment `kubectl get deployments`
-2. Scale the deployment and create multiple pods `kubectl scale deployment/<deployment_name> --replicas <replicas>`
-3. `kubectl get pods` should list new pods automatically connected to RIG cluster
+1. Scale the deployment and create multiple pods
+
+  ```bash
+  helm upgrade --set service.type=LoadBalancer --set replicaCount=<replicas> rig reactive-interaction-gateway
+  # or
+  kubectl scale deployment/<deployment_name> --replicas <replicas>
+  ```
+
+2. `kubectl get pods` should list new pods automatically connected to RIG cluster
 
 You can also inspect logs of pods `kubectl logs <pod_name>` to see how they automatically re-balance Kafka consumers (if you are using Kafka) and adapt Proxy APIs from other nodes.
 
@@ -95,3 +101,16 @@ In Kubernetes world it can be set like this:
 ### Additional configuration
 
 You can configure bunch of environment variables, please check the [Operator's Guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html).
+
+## Cleanup
+
+```bash
+# kubectl
+kubectl delete -f kubectl/rig.yaml
+
+# Helm v3
+helm uninstall rig
+
+# Helm v2
+helm delete --purge rig
+```
