@@ -50,11 +50,14 @@ spec:
     app: reactive-interaction-gateway
   clusterIP: None
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: reactive-interaction-gateway
 spec:
+  selector:
+    matchLabels:
+      app: reactive-interaction-gateway
   replicas: 1
   template:
     metadata:
