@@ -50,3 +50,14 @@ Selector labels
 app.kubernetes.io/name: {{ include "reactive-interaction-gateway.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
+
+{{/*
+Return the appropriate apiVersion for deployment.
+*/}}
+{{- define "deployment.apiVersion" -}}
+{{- if semverCompare ">=1.9-0" .Capabilities.KubeVersion.GitVersion -}}
+{{- print "apps/v1" -}}
+{{- else -}}
+{{- print "apps/v1beta2" -}}
+{{- end -}}
+{{- end -}}
