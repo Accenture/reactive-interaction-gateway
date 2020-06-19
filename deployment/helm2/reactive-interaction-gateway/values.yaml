@@ -15,11 +15,6 @@ image:
 service:
   type: ClusterIP
 
-# Configuration for the headless service which takes care of DNS and discovery of nodes
-serviceHeadless:
-  type: ClusterIP
-  clusterIP: None
-
 deployment:
   env:
     ## Proxy ports

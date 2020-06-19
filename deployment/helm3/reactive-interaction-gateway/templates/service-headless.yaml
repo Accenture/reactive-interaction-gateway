@@ -5,8 +5,8 @@ metadata:
   labels:
     {{- include "reactive-interaction-gateway.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.serviceHeadless.type }}
-  clusterIP: {{ .Values.serviceHeadless.clusterIP }}
+  type: ClusterIP
+  clusterIP: None
   ports:
     - port: {{ .Values.deployment.env.INBOUND_PORT }}
       targetPort: proxy-http

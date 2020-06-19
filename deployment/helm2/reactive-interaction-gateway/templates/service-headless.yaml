@@ -5,7 +5,8 @@ metadata:
   labels:
 {{ include "reactive-interaction-gateway.labels" . | indent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
+  clusterIP: None
   ports:
     - port: {{ .Values.deployment.env.INBOUND_PORT }}
       targetPort: proxy-http
