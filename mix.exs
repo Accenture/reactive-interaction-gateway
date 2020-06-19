@@ -166,6 +166,8 @@ defmodule RIG.MixProject do
       {:opencensus, "~> 0.9", runtime: false},
       {:opencensus_elixir, "~> 0.3.0", runtime: false},
       {:opencensus_jaeger, "~> 0.0.1", runtime: false}
+      # NATS client:
+      {:gnat, "~> 1.0.0"}
     ]
   end
 
