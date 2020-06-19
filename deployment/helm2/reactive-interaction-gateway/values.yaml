@@ -9,7 +9,6 @@ replicaCount: 1
 
 image:
   repository: accenture/reactive-interaction-gateway
-  tag: 2.3.0
   pullPolicy: IfNotPresent
 
 service:
