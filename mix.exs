@@ -164,9 +164,9 @@ defmodule RIG.MixProject do
       # Distributed tracing:
       {:opencensus_plug, "~> 0.3", runtime: false},
       {:opencensus, "~> 0.9", runtime: false},
-      {:opencensus_elixir, "~> 0.3.0", runtime: false},
+      {:opencensus_elixir, "~> 0.3", runtime: false},
       {:opencensus_jaeger, "~> 0.0.1", runtime: false},
-      {:opencensus_zipkin, git: "https://github.com/opencensus-beam/opencensus_zipkin.git", branch: "master", runtime: false},
+      {:opencensus_zipkin, "~> 0.3", runtime: false},
       # NATS client:
       {:gnat, "~> 1.0.0"}
     ]
