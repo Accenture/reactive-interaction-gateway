@@ -94,8 +94,6 @@ defmodule RigCloudEvents.CloudEvent do
   # ---
 
   defp specversion_0_1?(%Cloudevents.Format.V_0_1.Event{} = event) do
-    IO.puts("specversion_0_1")
-
     case Map.get(event, :cloudEventsVersion) do
       "0.1" -> true
       _ -> false
@@ -112,8 +110,6 @@ defmodule RigCloudEvents.CloudEvent do
   # ---
 
   defp specversion_0_2?(%Cloudevents.Format.V_0_2.Event{} = event) do
-    IO.puts("specversion_0_2")
-
     case Map.get(event, :specversion) do
       "0.2" -> true
       _ -> false

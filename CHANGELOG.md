@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated consumption of Kafka messages to properly use binary and structured modes based on the [Cloud Events spec](https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md). [#306](https://github.com/Accenture/reactive-interaction-gateway/pull/306)
+- TODO
 
 ### Fixed
 
