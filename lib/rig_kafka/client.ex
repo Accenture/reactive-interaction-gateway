@@ -4,7 +4,6 @@ defmodule RigKafka.Client do
   """
 
   alias RigKafka.Config
-  alias RigKafka.ProtocolBinding
   alias RigKafka.Serializer
 
   require Logger
@@ -49,12 +48,7 @@ defmodule RigKafka.Client do
       %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
 
       try do
-        encoded_body =
-          ProtocolBinding.handle_cloudevent(body, headers,
-            schema_registry_host: schema_registry_host
-          )
-
-        case callback.(encoded_body) do
+        case callback.(body, headers) do
           :ok ->
             {:ok, :ack, state}
 
@@ -110,9 +104,14 @@ defmodule RigKafka.Client do
 
   # ---
 
+  def produce(%{server_id: server_id}, topic, schema, key, plaintext, headers)
+      when is_binary(topic) and is_binary(key) and is_binary(plaintext) and is_list(headers) do
+    GenServer.call(server_id, {:produce, topic, schema, key, plaintext, headers})
+  end
+
   def produce(%{server_id: server_id}, topic, schema, key, plaintext)
       when is_binary(topic) and is_binary(key) and is_binary(plaintext) do
-    GenServer.call(server_id, {:produce, topic, schema, key, plaintext})
+    GenServer.call(server_id, {:produce, topic, schema, key, plaintext, []})
   end
 
   # ---
@@ -238,7 +237,7 @@ defmodule RigKafka.Client do
 
   @impl GenServer
   def handle_call(
-        {:produce, topic, schema, key, plaintext},
+        {:produce, topic, schema, key, plaintext, headers},
         _from,
         %{
           brod_client: brod_client,
@@ -257,7 +256,8 @@ defmodule RigKafka.Client do
         topic,
         schema,
         key,
-        plaintext
+        plaintext,
+        headers
       )
 
     {:reply, result, state}
@@ -282,13 +282,13 @@ defmodule RigKafka.Client do
   @spec transform_content_type(map()) :: [{String.t(), String.t()}]
   defp transform_content_type(%{"contenttype" => contenttype}) do
     [
-      {"ce-contenttype", contenttype}
+      {"ce_contenttype", contenttype}
     ]
   end
 
   defp transform_content_type(%{"contentType" => contentType}) do
     [
-      {"ce-contentType", contentType}
+      {"ce_contentType", contentType}
     ]
   end
 
@@ -302,6 +302,7 @@ defmodule RigKafka.Client do
          schema,
          key,
          plaintext,
+         headers,
          retry_delay_divisor \\ 64
        )
 
@@ -315,6 +316,7 @@ defmodule RigKafka.Client do
          schema,
          key,
          plaintext,
+         headers,
          retry_delay_divisor
        ) do
     {constructed_headers, body} =
@@ -322,10 +324,11 @@ defmodule RigKafka.Client do
         {:ok, plaintext_map} ->
           case serializer do
             "avro" ->
-              {data, headers} = Map.pop(plaintext_map, "data", %{})
+              {data, additional_headers} = Map.pop(plaintext_map, "data", %{})
 
               prefixed_headers =
                 headers
+                |> Enum.concat(additional_headers)
                 |> Serializer.add_prefix()
                 |> Enum.concat([{"content-type", "application/cloudevents+avro"}])
 
@@ -333,7 +336,7 @@ defmodule RigKafka.Client do
                Serializer.encode_body(data, "avro", schema, schema_registry_host)}
 
             _ ->
-              constructed_headers = transform_content_type(plaintext_map)
+              constructed_headers = transform_content_type(plaintext_map) ++ headers
               {constructed_headers, plaintext}
           end
 
@@ -372,6 +375,7 @@ defmodule RigKafka.Client do
             schema,
             key,
             plaintext,
+            headers,
             retry_delay_divisor / 2
           )
         else

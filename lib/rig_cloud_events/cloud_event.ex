@@ -76,6 +76,14 @@ defmodule RigCloudEvents.CloudEvent do
     end
   end
 
+  def specversion(event) do
+    cond do
+      specversion_0_2?(event) -> {:ok, "0.2"}
+      specversion_0_1?(event) -> {:ok, "0.1"}
+      true -> {:error, :not_a_cloud_event}
+    end
+  end
+
   # ---
 
   def specversion!(event) do
@@ -85,6 +93,15 @@ defmodule RigCloudEvents.CloudEvent do
 
   # ---
 
+  defp specversion_0_1?(%Cloudevents.Format.V_0_1.Event{} = event) do
+    IO.puts("specversion_0_1")
+
+    case Map.get(event, :cloudEventsVersion) do
+      "0.1" -> true
+      _ -> false
+    end
+  end
+
   defp specversion_0_1?(parsed) do
     case @parser.context_attribute(parsed, "cloudEventsVersion") do
       {:ok, "0.1"} -> true
@@ -93,6 +110,15 @@ defmodule RigCloudEvents.CloudEvent do
   end
 
   # ---
+
+  defp specversion_0_2?(%Cloudevents.Format.V_0_2.Event{} = event) do
+    IO.puts("specversion_0_2")
+
+    case Map.get(event, :specversion) do
+      "0.2" -> true
+      _ -> false
+    end
+  end
 
   defp specversion_0_2?(parsed) do
     case @parser.context_attribute(parsed, "specversion") do
@@ -107,6 +133,13 @@ defmodule RigCloudEvents.CloudEvent do
     case specversion(event) do
       {:ok, "0.2"} -> @parser.context_attribute(parsed, "type")
       {:ok, "0.1"} -> @parser.context_attribute(parsed, "eventType")
+    end
+  end
+
+  def type(event) do
+    case specversion(event) do
+      {:ok, "0.2"} -> {:ok, Map.get(event, :type)}
+      {:ok, "0.1"} -> {:ok, Map.get(event, :eventType)}
     end
   end
 

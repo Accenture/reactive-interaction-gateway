@@ -128,17 +128,18 @@ defmodule RigInboundGateway.ApiProxy.Validations do
         |> with_nested_presence("target", endpoint)
 
       # DEPRECATED. (Will be removed with the version 3.0.)
-      schema_presence =
-        conf
-        |> Vex.valid?(%{:kafka_request_avro => [presence: true]})
-        |> with_nested_presence("target", endpoint)
-        |> Enum.concat(schema_presence_config)
+      # this doesn't really make sense like this
+      # schema_presence =
+      #   conf
+      #   |> Vex.valid?(%{:kafka_request_avro => [presence: true]})
+      #   |> with_nested_presence("target", endpoint)
+      #   |> Enum.concat(schema_presence_config)
 
       all_errors =
         validate_secured_endpoint(api, endpoint) ++
           with_any_error(topic_presence) ++
           with_any_error(stream_presence) ++
-          schema_presence ++
+          schema_presence_config ++
           validate_string(endpoint, "id") ++
           validate_string(endpoint, "path") ++ validate_string(endpoint, "method")
 

@@ -29,8 +29,9 @@ defmodule RigTests.Avro.AvroTest do
     test_pid = self()
 
     callback = fn
-      msg ->
-        send(test_pid, msg)
+      body, headers ->
+        {:ok, event} = Cloudevents.from_kafka_message(body, headers)
+        send(test_pid, event)
         :ok
     end
 
@@ -55,6 +56,18 @@ defmodule RigTests.Avro.AvroTest do
       }
     }
 
+    expected_event = %Cloudevents.Format.V_0_1.Event{
+      cloudEventsVersion: "0.1",
+      contentType: "application/json",
+      data: %{"foo" => "avro required"},
+      eventID: "1",
+      eventTime: nil,
+      eventType: "rig.avro.test1",
+      extensions: %{},
+      schemaURL: nil,
+      source: "/test-producer"
+    }
+
     kafka_config = kafka_config()
     :timer.sleep(5_000)
 
@@ -69,7 +82,7 @@ defmodule RigTests.Avro.AvroTest do
 
     assert_receive received_msg, 10_000
 
-    assert Jason.decode!(received_msg) == event
+    assert received_msg == expected_event
   end
 
   @tag :avro
@@ -87,58 +100,16 @@ defmodule RigTests.Avro.AvroTest do
       }
     }
 
-    kafka_config = kafka_config()
-    :timer.sleep(5_000)
-
-    assert :ok ==
-             RigKafka.produce(
-               kafka_config,
-               "rig-avro",
-               "rig-avro-value",
-               "response",
-               Jason.encode!(event)
-             )
-
-    assert_receive received_msg, 10_000
-
-    assert Jason.decode!(received_msg) == event
-  end
-
-  @tag :avro
-  test "Given avro is enabled, the producer should be able to encode message with required cloud events(0.2) fields and consumer decode message" do
-    event =
-      Jason.encode!(%{
-        specversion: "0.2",
-        type: "rig.avro.test1",
-        source: "/test-producer",
-        id: "1",
-        data: %{
-          foo: "avro required"
-        }
-      })
-
-    kafka_config = kafka_config()
-    :timer.sleep(5_000)
-    assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
-
-    assert_receive received_msg, 10_000
-
-    assert received_msg == event
-  end
-
-  @tag :avro
-  test "Given avro is enabled, the producer should be able to encode message with optional cloud events(0.2) fields and consumer decode message" do
-    event = %{
-      "specversion" => "0.2",
-      "type" => "rig.avro",
-      "source" => "/test-producer",
-      "id" => "1",
-      "rig" => %{"a" => %{"b" => "c"}},
-      "time" => "2019-02-21T09:17:23.137Z",
-      "contenttype" => "avro/binary",
-      "data" => %{
-        "foo" => "avro optional"
-      }
+    expected_event = %Cloudevents.Format.V_0_1.Event{
+      cloudEventsVersion: "0.1",
+      contentType: "avro/binary",
+      data: %{"foo" => "avro optional"},
+      eventID: "1",
+      eventTime: "2019-02-21T09:17:23.137Z",
+      eventType: "rig.avro",
+      extensions: %{"rig" => "{\"a\":{\"b\":\"c\"}}"},
+      schemaURL: nil,
+      source: "/test-producer"
     }
 
     kafka_config = kafka_config()
@@ -155,24 +126,109 @@ defmodule RigTests.Avro.AvroTest do
 
     assert_receive received_msg, 10_000
 
-    assert Jason.decode!(received_msg) == event
+    assert received_msg == expected_event
   end
 
   @tag :avro
-  test "Given avro is enabled, the producer should be able to encode message without any cloud events fields and consumer decode message" do
-    event =
-      Jason.encode!(%{
-        data: %{
-          foo: "avro just data"
-        }
-      })
+  test "Given avro is enabled, the producer should be able to encode message with required cloud events(0.2) fields and consumer decode message" do
+    event = %{
+      specversion: "0.2",
+      type: "rig.avro.test1",
+      source: "/test-producer",
+      id: "1",
+      data: %{
+        "foo" => "avro required"
+      }
+    }
+
+    expected_event = %Cloudevents.Format.V_0_2.Event{
+      contenttype: "application/json",
+      data: %{"foo" => "avro required"},
+      extensions: %{},
+      id: "1",
+      schemaurl: nil,
+      source: "/test-producer",
+      specversion: "0.2",
+      time: nil,
+      type: "rig.avro.test1"
+    }
 
     kafka_config = kafka_config()
     :timer.sleep(5_000)
-    assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
+
+    assert :ok ==
+             RigKafka.produce(
+               kafka_config,
+               "rig-avro",
+               "rig-avro-value",
+               "response",
+               Jason.encode!(event)
+             )
 
     assert_receive received_msg, 10_000
 
-    assert received_msg == event
+    assert received_msg == expected_event
   end
+
+  @tag :avro
+  test "Given avro is enabled, the producer should be able to encode message with optional cloud events(0.2) fields and consumer decode message" do
+    event = %{
+      specversion: "0.2",
+      type: "rig.avro",
+      source: "/test-producer",
+      id: "1",
+      rig: %{"a" => %{"b" => "c"}},
+      time: "2019-02-21T09:17:23.137Z",
+      contenttype: "avro/binary",
+      data: %{
+        "foo" => "avro optional"
+      }
+    }
+
+    expected_event = %Cloudevents.Format.V_0_2.Event{
+      contenttype: "avro/binary",
+      data: %{"foo" => "avro optional"},
+      id: "1",
+      source: "/test-producer",
+      specversion: "0.2",
+      time: "2019-02-21T09:17:23.137Z",
+      type: "rig.avro",
+      extensions: %{"rig" => %{"a" => %{"b" => "c"}}},
+      schemaurl: nil
+    }
+
+    kafka_config = kafka_config()
+    :timer.sleep(5_000)
+
+    assert :ok ==
+             RigKafka.produce(
+               kafka_config,
+               "rig-avro",
+               "rig-avro-value",
+               "response",
+               Jason.encode!(event)
+             )
+
+    assert_receive received_msg, 10_000
+
+    assert received_msg == expected_event
+  end
+
+  # @tag :avro
+  # test "Given avro is enabled, the producer should be able to encode message without any cloud events fields and consumer decode message" do
+  #   event =
+  #     Jason.encode!(%{
+  #       data: %{
+  #         foo: "avro just data"
+  #       }
+  #     })
+
+  #   kafka_config = kafka_config()
+  #   :timer.sleep(5_000)
+  #   assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
+
+  #   assert_receive received_msg, 10_000
+
+  #   assert received_msg == event
+  # end
 end

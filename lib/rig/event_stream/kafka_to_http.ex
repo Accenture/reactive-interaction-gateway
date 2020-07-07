@@ -2,6 +2,8 @@ defmodule Rig.EventStream.KafkaToHttp do
   @moduledoc """
   Forwards all consumed events to an HTTP endpoint.
 
+  TODO: do we want to keep this feature?
+
   """
   use Rig.KafkaConsumerSetup, [:targets]
 
@@ -16,7 +18,7 @@ defmodule Rig.EventStream.KafkaToHttp do
 
   # ---
 
-  def kafka_handler(message) do
+  def kafka_handler(message, headers) do
     case CloudEvent.parse(message) do
       {:ok, %CloudEvent{} = cloud_event} ->
         Logger.debug(fn -> inspect(cloud_event.parsed) end)

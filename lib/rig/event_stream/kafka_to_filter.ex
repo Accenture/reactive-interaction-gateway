@@ -14,17 +14,17 @@ defmodule Rig.EventStream.KafkaToFilter do
 
   # ---
 
-  def kafka_handler(message) do
-    case CloudEvent.parse(message) do
-      {:ok, %CloudEvent{} = cloud_event} ->
-        Logger.debug(fn -> inspect(cloud_event.parsed) end)
+  def kafka_handler(body, headers) do
+    case Cloudevents.from_kafka_message(body, headers) do
+      {:ok, cloud_event} ->
+        Logger.debug(fn -> inspect(cloud_event) end)
         EventFilter.forward_event(cloud_event)
         :ok
 
       {:error, :parse_error} ->
-        {:error, :non_cloud_events_not_supported, message}
+        {:error, :non_cloud_events_not_supported, body}
     end
   rescue
-    err -> {:error, err, message}
+    err -> {:error, err, body}
   end
 end

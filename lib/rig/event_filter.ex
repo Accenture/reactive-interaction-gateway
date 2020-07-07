@@ -270,6 +270,7 @@ defmodule Rig.EventFilter do
 
   """
   @type done_callback :: (() -> nil)
+  @type cloudevent_t :: Cloudevents.t()
 
   @callback refresh_subscriptions([Subscription.t()], [Subscription.t()], done_callback) ::
               :ok
@@ -291,9 +292,9 @@ defmodule Rig.EventFilter do
 
   # ---
 
-  @callback forward_event(CloudEvent.t()) :: :ok
-  @spec forward_event(CloudEvent.t()) :: :ok
-  def forward_event(%CloudEvent{} = event) do
+  @callback forward_event(cloudevent_t) :: :ok
+  @spec forward_event(cloudevent_t) :: :ok
+  def forward_event(%cloudevent_t{} = event) do
     event_type = CloudEvent.type!(event)
     # On any node, there is only one Filter process for a given event type, or none, if
     # there are no subscriptions for the event type.

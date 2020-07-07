@@ -102,7 +102,9 @@ config :logger, :console,
   format: "\n$time [$level] $levelpad$message\n$metadata\n",
   metadata: metadata |> Enum.uniq()
 
-config :rig, Rig.Application, log_level: {:system, :atom, "LOG_LEVEL", :debug}
+config :rig, Rig.Application,
+  log_level: {:system, :atom, "LOG_LEVEL", :debug},
+  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", nil}
 
 # --------------------------------------
 # Session and Authorization

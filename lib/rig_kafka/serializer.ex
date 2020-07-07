@@ -9,7 +9,7 @@ defmodule RigKafka.Serializer do
   @typep schema_name :: String.t()
   @typep kafka_headers :: list()
 
-  @prefix "ce-"
+  @prefix "ce_"
 
   # ---
 
