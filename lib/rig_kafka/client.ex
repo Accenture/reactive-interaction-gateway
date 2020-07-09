@@ -330,7 +330,7 @@ defmodule RigKafka.Client do
                 headers
                 |> Enum.concat(additional_headers)
                 |> Serializer.add_prefix()
-                |> Enum.concat([{"content-type", "application/cloudevents+avro"}])
+                |> Enum.concat([{"content-type", "avro/binary"}])
 
               {prefixed_headers,
                Serializer.encode_body(data, "avro", schema, schema_registry_host)}

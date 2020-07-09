@@ -55,7 +55,7 @@ export KAFKA_SOURCE_TOPICS=rig-test
 
 cd "${RIG_DIR}"
 section_header "Running integration test suite for Kafka"
-# mix test --only kafka "$@"
+mix test --only kafka "$@"
 
 export KAFKA_SOURCE_TOPICS=rig-avro
 export KAFKA_SERIALIZER=avro

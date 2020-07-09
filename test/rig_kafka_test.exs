@@ -196,7 +196,7 @@ defmodule RigKafkaTest do
       topic,
       Avro.encode("rig-avro-test-simple-topic-value", data, @schema_registry_host),
       [
-        {"content-type", "application/cloudevents+avro"},
+        {"content-type", "avro/binary"},
         {"ce_specversion", "0.2"},
         {"ce_type", "com.example.test.simple"},
         {"ce_source", "/rig-test"},
@@ -357,7 +357,7 @@ defmodule RigKafkaTest do
     test_produce(
       config.client_id,
       topic,
-      Avro.encode("rig-cloud-event-value", expected_msg, @schema_registry_host),
+      Avro.encode("rig-cloud-event-value", msg, @schema_registry_host),
       []
     )
 
