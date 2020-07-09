@@ -6,7 +6,6 @@ defmodule Rig.EventStream.KafkaToFilter do
   use Rig.KafkaConsumerSetup
 
   alias Rig.EventFilter
-  alias RigCloudEvents.CloudEvent
 
   # ---
 
@@ -21,7 +20,7 @@ defmodule Rig.EventStream.KafkaToFilter do
         EventFilter.forward_event(cloud_event)
         :ok
 
-      {:error, :parse_error} ->
+      {:error, _reason} ->
         {:error, :non_cloud_events_not_supported, body}
     end
   rescue

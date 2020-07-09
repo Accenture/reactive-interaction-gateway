@@ -107,7 +107,7 @@ defmodule RigTests.Avro.AvroTest do
       eventID: "1",
       eventTime: "2019-02-21T09:17:23.137Z",
       eventType: "rig.avro",
-      extensions: %{"rig" => "{\"a\":{\"b\":\"c\"}}"},
+      extensions: %{"rig" => %{"a" => %{"b" => "c"}}},
       schemaURL: nil,
       source: "/test-producer"
     }
@@ -213,22 +213,4 @@ defmodule RigTests.Avro.AvroTest do
 
     assert received_msg == expected_event
   end
-
-  # @tag :avro
-  # test "Given avro is enabled, the producer should be able to encode message without any cloud events fields and consumer decode message" do
-  #   event =
-  #     Jason.encode!(%{
-  #       data: %{
-  #         foo: "avro just data"
-  #       }
-  #     })
-
-  #   kafka_config = kafka_config()
-  #   :timer.sleep(5_000)
-  #   assert :ok == RigKafka.produce(kafka_config, "rig-avro", "rig-avro-value", "response", event)
-
-  #   assert_receive received_msg, 10_000
-
-  #   assert received_msg == event
-  # end
 end

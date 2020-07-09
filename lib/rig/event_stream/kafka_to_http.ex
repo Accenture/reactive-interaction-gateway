@@ -2,8 +2,6 @@ defmodule Rig.EventStream.KafkaToHttp do
   @moduledoc """
   Forwards all consumed events to an HTTP endpoint.
 
-  TODO: do we want to keep this feature?
-
   """
   use Rig.KafkaConsumerSetup, [:targets]
 

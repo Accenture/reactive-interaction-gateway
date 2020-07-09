@@ -281,7 +281,7 @@ defmodule RigKafkaTest do
 
     msg =
       Jason.encode!(%{
-        "specversion" => "1.0",
+        "specversion" => "0.2",
         "type" => "com.example.test.simple",
         "source" => "/rig-test",
         "id" => "069711bf-3946-4661-984f-c667657b8d85",
@@ -312,42 +312,60 @@ defmodule RigKafkaTest do
     RigKafka.Client.stop_supervised(pid)
   end
 
-  # @tag :avro
-  # test "Consumer should be able to decode Avro message if content_type header is not set" do
-  #   topic = "rig-avro-test-simple-topic"
-  #   serializer = "avro"
-  #   schema_registry_host = @schema_registry_host
+  @tag :avro
+  test "Consumer should be able to decode Avro message if content_type header is not set" do
+    topic = "rig-avro-test-simple-topic"
+    serializer = "avro"
+    schema_registry_host = @schema_registry_host
 
-  #   config = kafka_config([topic], serializer, schema_registry_host)
+    config = kafka_config([topic], serializer, schema_registry_host)
 
-  #   expected_msg = %{
-  #     "foo" => "bar"
-  #   }
+    msg = %{
+      "specversion" => "0.2",
+      "type" => "com.example.test.simple",
+      "source" => "/rig-test",
+      "id" => "069711bf-3946-4661-984f-c667657b8d85",
+      "data" => %{
+        "foo" => "bar"
+      }
+    }
 
-  #   test_pid = self()
+    expected_msg = %Cloudevents.Format.V_0_2.Event{
+      contenttype: "application/json",
+      data: [{"foo", "bar"}],
+      extensions: %{},
+      id: "069711bf-3946-4661-984f-c667657b8d85",
+      schemaurl: nil,
+      source: "/rig-test",
+      specversion: "0.2",
+      time: nil,
+      type: "com.example.test.simple"
+    }
 
-  #   callback = fn
-  #     body, headers ->
-  #       {:ok, event} = Cloudevents.from_kafka_message(body, headers)
-  #       send(test_pid, event)
-  #       :ok
-  #   end
+    test_pid = self()
 
-  #   {:ok, pid} = RigKafka.start(config, callback)
-  #   :timer.sleep(5_000)
+    callback = fn
+      body, headers ->
+        {:ok, event} = Cloudevents.from_kafka_message(body, headers)
+        send(test_pid, event)
+        :ok
+    end
 
-  #   test_produce(
-  #     config.client_id,
-  #     topic,
-  #     Avro.encode("rig-avro-test-simple-topic-value", expected_msg, @schema_registry_host),
-  #     []
-  #   )
+    {:ok, pid} = RigKafka.start(config, callback)
+    :timer.sleep(5_000)
 
-  #   assert_receive received_msg, 10_000
-  #   assert received_msg == expected_msg
+    test_produce(
+      config.client_id,
+      topic,
+      Avro.encode("rig-cloud-event-value", expected_msg, @schema_registry_host),
+      []
+    )
 
-  #   RigKafka.Client.stop_supervised(pid)
-  # end
+    assert_receive received_msg, 10_000
+    assert received_msg == expected_msg
+
+    RigKafka.Client.stop_supervised(pid)
+  end
 
   @tag :kafka
   test "Consumer should used structured mode if content_type header is not set and message is not Avro encoded" do

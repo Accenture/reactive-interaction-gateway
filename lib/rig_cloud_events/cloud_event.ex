@@ -93,32 +93,32 @@ defmodule RigCloudEvents.CloudEvent do
 
   # ---
 
-  defp specversion_0_1?(%Cloudevents.Format.V_0_1.Event{} = event) do
-    case Map.get(event, :cloudEventsVersion) do
-      "0.1" -> true
-      _ -> false
-    end
-  end
-
-  defp specversion_0_1?(parsed) do
+  defp specversion_0_1?(parsed) when is_list(parsed) do
     case @parser.context_attribute(parsed, "cloudEventsVersion") do
       {:ok, "0.1"} -> true
       _ -> false
     end
   end
 
-  # ---
-
-  defp specversion_0_2?(%Cloudevents.Format.V_0_2.Event{} = event) do
-    case Map.get(event, :specversion) do
-      "0.2" -> true
+  defp specversion_0_1?(event) do
+    case Map.get(event, :cloudEventsVersion) do
+      "0.1" -> true
       _ -> false
     end
   end
 
-  defp specversion_0_2?(parsed) do
+  # ---
+
+  defp specversion_0_2?(parsed) when is_list(parsed) do
     case @parser.context_attribute(parsed, "specversion") do
       {:ok, "0.2"} -> true
+      _ -> false
+    end
+  end
+
+  defp specversion_0_2?(event) do
+    case Map.get(event, :specversion) do
+      "0.2" -> true
       _ -> false
     end
   end
