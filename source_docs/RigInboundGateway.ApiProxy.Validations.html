@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.21.3">
+    <meta name="project" content="Reactive Interaction Gateway v2.4.0">
+    <title>RigInboundGateway.ApiProxy.Validations — Reactive Interaction Gateway v2.4.0</title>
+    <link rel="stylesheet" href="dist/elixir-0ab8a6a80ebaaa287431.css" />
+    <script src="dist/sidebar_items-dfa7ec2f17.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-a225d03098e64fef431a.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://accenture.github.io/reactive-interaction-gateway" class="sidebar-projectName">
+Reactive Interaction Gateway      </a>
+      <h2 class="sidebar-projectVersion">
+        v2.4.0
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+      <li><a id="tasks-list" href="#full-list">Mix Tasks</a></li>
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Reactive Interaction Gateway v2.4.0</small>
+RigInboundGateway.ApiProxy.Validations          <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Used to validate APIs configuration for reverse proxy.
+Validates use cases such as setting &quot;target&quot; to &quot;kafka&quot; but not &quot;topic&quot;, which is required in such case.</p>
+<p>When any error occurs during RIG start -&gt; process will exit.
+When any error occurs during REST API request -&gt; process won&#39;t exit, but instead API returns 400 -- bad request.</p>
+        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:error_list_t/0">error_list_t()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:error_map_t/0">error_map_t()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:error_t/0">error_t()</a>
+  </div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#config/0">config()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns module configuration.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_map/1">to_map(errors)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#type_validation/4">type_validation(map, key, type, fun)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate/1">validate(api)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate!/1">validate!(api)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_all/1">validate_all(api)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_auth/2">validate_auth(errors, api)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_auth_type/1">validate_auth_type(api)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_endpoint_target/2">validate_endpoint_target(endpoint, targets)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_endpoints/2">validate_endpoints(errors, api)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_integer/2">validate_integer(map, key)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_list/2">validate_list(map, key)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_proxy/1">validate_proxy(arg1)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_required_props/2">validate_required_props(errors, api)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_secured_endpoint/2">validate_secured_endpoint(api, arg2)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_string/2">validate_string(map, key)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate_version_data/1">validate_version_data(arg1)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#with_any_error/2">with_any_error(errors, min_errors \\ 1)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#with_nested_presence/3">with_nested_presence(arg1, key, map)</a>
+  </div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:error_list_t/0">
+  <div class="detail-header">
+    <a href="#t:error_list_t/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">error_list_t()</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L16" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>error_list_t() :: [{<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="#t:error_t/0">error_t</a>()}]</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:error_map_t/0">
+  <div class="detail-header">
+    <a href="#t:error_map_t/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">error_map_t()</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L17" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>error_map_t() :: %{
+  required(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) => [%{required(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) => <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()}]
+}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:error_t/0">
+  <div class="detail-header">
+    <a href="#t:error_t/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">error_t()</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L15" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>error_t() :: [{:error, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()}]</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="config/0">
+  <div class="detail-header">
+    <a href="#config/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">config()</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L9" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>config() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns module configuration.</p>
+<p>If application environment contains values in <a href="https://hexdocs.pm/elixir/Keyword.html"><code class="inline">Keyword</code></a> or <a href="https://hexdocs.pm/elixir/Map.html"><code class="inline">Map</code></a> struct,
+defaults from macro usage will be recursively merged with application configuration.</p>
+<p>If one of the configuration parameters does not exist or can not be resolved, raises <a href="https://hexdocs.pm/elixir/ArgumentError.html"><code class="inline">ArgumentError</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="to_map/1">
+  <div class="detail-header">
+    <a href="#to_map/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_map(errors)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L280" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>to_map(<a href="#t:error_list_t/0">error_list_t</a>()) :: <a href="#t:error_map_t/0">error_map_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="type_validation/4">
+  <div class="detail-header">
+    <a href="#type_validation/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">type_validation(map, key, type, fun)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L155" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>type_validation(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">function</a>()) :: <a href="#t:error_list_t/0">error_list_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate/1">
+  <div class="detail-header">
+    <a href="#validate/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate(api)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L266" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate(<a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>()) ::
+  {:error, <a href="#t:error_list_t/0">error_list_t</a>()} | {:ok, <a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>()}</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate!/1">
+  <div class="detail-header">
+    <a href="#validate!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate!(api)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L251" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate!(<a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>()) ::
+  <a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_all/1">
+  <div class="detail-header">
+    <a href="#validate_all/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_all(api)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L240" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_all(<a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>()) :: <a href="#t:error_list_t/0">error_list_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_auth/2">
+  <div class="detail-header">
+    <a href="#validate_auth/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_auth(errors, api)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L49" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_auth(<a href="#t:error_list_t/0">error_list_t</a>(), <a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>()) ::
+  <a href="#t:error_list_t/0">error_list_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_auth_type/1">
+  <div class="detail-header">
+    <a href="#validate_auth_type/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_auth_type(api)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L36" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_auth_type(<a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>()) :: <a href="#t:error_t/0">error_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_endpoint_target/2">
+  <div class="detail-header">
+    <a href="#validate_endpoint_target/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_endpoint_target(endpoint, targets)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L20" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_endpoint_target(<a href="RigInboundGateway.ApiProxy.Api.html#t:endpoint/0">RigInboundGateway.ApiProxy.Api.endpoint</a>(), [<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()]) ::
+  <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_endpoints/2">
+  <div class="detail-header">
+    <a href="#validate_endpoints/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_endpoints(errors, api)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L99" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_endpoints(<a href="#t:error_list_t/0">error_list_t</a>(), <a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>()) ::
+  <a href="#t:error_list_t/0">error_list_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_integer/2">
+  <div class="detail-header">
+    <a href="#validate_integer/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_integer(map, key)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L181" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_integer(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: <a href="#t:error_list_t/0">error_list_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_list/2">
+  <div class="detail-header">
+    <a href="#validate_list/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_list(map, key)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L188" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_list(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: <a href="#t:error_list_t/0">error_list_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_proxy/1">
+  <div class="detail-header">
+    <a href="#validate_proxy/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_proxy(arg1)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L195" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_proxy(<a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>()) :: <a href="#t:error_list_t/0">error_list_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_required_props/2">
+  <div class="detail-header">
+    <a href="#validate_required_props/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_required_props(errors, api)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L222" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_required_props(<a href="#t:error_list_t/0">error_list_t</a>(), <a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>()) ::
+  <a href="#t:error_list_t/0">error_list_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_secured_endpoint/2">
+  <div class="detail-header">
+    <a href="#validate_secured_endpoint/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_secured_endpoint(api, arg2)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L83" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_secured_endpoint(
+  <a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>(),
+  <a href="RigInboundGateway.ApiProxy.Api.html#t:endpoint/0">RigInboundGateway.ApiProxy.Api.endpoint</a>()
+) :: <a href="#t:error_t/0">error_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_string/2">
+  <div class="detail-header">
+    <a href="#validate_string/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_string(map, key)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L173" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_string(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: <a href="#t:error_list_t/0">error_list_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="validate_version_data/1">
+  <div class="detail-header">
+    <a href="#validate_version_data/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate_version_data(arg1)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L204" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>validate_version_data(<a href="RigInboundGateway.ApiProxy.Api.html#t:t/0">RigInboundGateway.ApiProxy.Api.t</a>()) :: <a href="#t:error_list_t/0">error_list_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="with_any_error/2">
+    <span id="with_any_error/1"></span>
+  <div class="detail-header">
+    <a href="#with_any_error/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">with_any_error(errors, min_errors \\ 1)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L92" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>with_any_error(<a href="#t:error_list_t/0">error_list_t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()) :: <a href="#t:error_list_t/0">error_list_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="with_nested_presence/3">
+  <div class="detail-header">
+    <a href="#with_nested_presence/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">with_nested_presence(arg1, key, map)</h1>
+      <a href="https://github.com/Accenture/reactive-interaction-gateway/blob/master/lib/rig_inbound_gateway/api_proxy/validations.ex#L27" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <div class="specs">
+          <pre>with_nested_presence(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="#t:error_t/0">error_t</a>()</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.21.3),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>
