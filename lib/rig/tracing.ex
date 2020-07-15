@@ -21,17 +21,17 @@ defmodule RIG.Tracing do
 
   def start do
     conf = config()
-    Application.put_env(:opencensus, :reporters, reporters(conf, "jaeger"), [:persistent])
-    Application.put_env(:opencensus, :reporters, reporters(conf, "zipkin"), [:persistent])
+    reporters = jaeger_reporter(conf) ++ zipkin_reporter(conf)
+    Logger.debug(fn -> "reporters: #{inspect(reporters)}" end)
+    Application.put_env(:opencensus, :reporters, reporters, [:persistent])
     Application.ensure_all_started(:opencensus, :permanent)
   end
 
   # ---
 
-  defp reporters(%{jaeger_host: ''}, "jaeger"), do: []
-  defp reporters(%{zipkin_address: ''}, "zipkin"), do: []
+  defp jaeger_reporter(%{jaeger_host: ''}), do: []
 
-  defp reporters(conf, "jaeger"),
+  defp jaeger_reporter(conf),
     do: [
       {
         :oc_reporter_jaeger,
@@ -43,7 +43,9 @@ defmodule RIG.Tracing do
       }
     ]
 
-  defp reporters(conf, "zipkin"),
+  defp zipkin_reporter(%{zipkin_address: ''}), do: []
+
+  defp zipkin_reporter(conf),
     do: [
       {
         :oc_reporter_zipkin,
