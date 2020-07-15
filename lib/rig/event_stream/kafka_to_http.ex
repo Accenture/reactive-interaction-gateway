@@ -21,7 +21,7 @@ defmodule Rig.EventStream.KafkaToHttp do
   def kafka_handler(message) do
     case CloudEvent.parse(message) do
       {:ok, %CloudEvent{} = cloud_event} ->
-        Tracing.CloudEvent.with_child_span "kafka_as_http", cloud_event do
+        Tracing.CloudEvent.with_child_span "kafka_to_http", cloud_event do
           Logger.debug(fn -> inspect(cloud_event.parsed) end)
           forward_to_external_endpoint(cloud_event)
         end
