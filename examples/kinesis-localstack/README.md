@@ -56,7 +56,6 @@ curl -X "POST" \
 curl -X "POST" \
   -H "Content-Type: application/json" \
   -H 'traceparent: 00-9c18b63f316cbfe3854122c20c8c6b23-22d69e0945046f2d-01' \
-  -H 'tracestate: hello=tracing' \
   -d "{\"specversion\":\"0.2\",\"type\":\"com.github.pull.create\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"rig\":{\"target_partition\":\"the-partition-key\"},\"data\":\"hello\"}" \
   --silent \
   "http://localhost:4000/kinesis"
@@ -65,7 +64,6 @@ curl -X "POST" \
 curl -X "POST" \
   -H "Content-Type: application/json" \
   -H 'traceparent: 00-9c18b63f316cbfe3854122c20c8c6b23-22d69e0945046f2d-01' \
-  -H 'tracestate: hello=tracing' \
   -d "{\"specversion\":\"0.2\",\"type\":\"com.github.pull.create\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"data\":\"hello\"}" \
   --silent \
   "http://localhost:4000/kinesis"
