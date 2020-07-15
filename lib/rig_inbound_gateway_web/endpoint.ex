@@ -4,9 +4,9 @@ defmodule RigInboundGatewayWeb.Endpoint do
 
   alias Rig.Config
 
-  plug(RIG.Tracing.Plug)
   plug(Plug.RequestId)
   plug(Plug.Logger)
+  plug(RIG.Tracing.Plug)
 
   plug(Plug.MethodOverride)
   plug(Plug.Head)
