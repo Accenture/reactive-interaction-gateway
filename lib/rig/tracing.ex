@@ -24,7 +24,11 @@ defmodule RIG.Tracing do
     reporters = jaeger_reporter(conf) ++ zipkin_reporter(conf)
     Logger.debug(fn -> "reporters: #{inspect(reporters)}" end)
     Application.put_env(:opencensus, :reporters, reporters, [:persistent])
+    Application.ensure_all_started(:opencensus_jaeger, :permanent)
+    Application.ensure_all_started(:opencensus_zipkin, :permanent)
     Application.ensure_all_started(:opencensus, :permanent)
+    Application.ensure_all_started(:opencensus_elixir, :permanent)
+    Application.ensure_all_started(:opencensus_plug, :permanent)
   end
 
   # ---

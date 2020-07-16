@@ -59,7 +59,14 @@ defmodule RIG.MixProject do
         :prometheus_ex,
         :prometheus_plugs
       ],
-      included_applications: [:peerage]
+      included_applications: [
+        :peerage,
+        :opencensus,
+        :opencensus_elixir,
+        :opencensus_plug,
+        :opencensus_zipkin,
+        :opencensus_jaeger
+      ]
     ]
   end
 
@@ -162,11 +169,11 @@ defmodule RIG.MixProject do
       {:prometheus_ex, "~> 3.0"},
       {:prometheus_plugs, "~> 1.1"},
       # Distributed tracing:
-      {:opencensus_plug, "~> 0.3", runtime: false},
-      {:opencensus, "~> 0.9", runtime: false},
-      {:opencensus_elixir, "~> 0.3", runtime: false},
-      {:opencensus_jaeger, "~> 0.0.1", runtime: false},
-      {:opencensus_zipkin, "~> 0.3", runtime: false},
+      {:opencensus_plug, "~> 0.3"},
+      {:opencensus, "~> 0.9"},
+      {:opencensus_elixir, "~> 0.3"},
+      {:opencensus_jaeger, "~> 0.0.1"},
+      {:opencensus_zipkin, "~> 0.3"},
       # NATS client:
       {:gnat, "~> 1.0.0"}
     ]
