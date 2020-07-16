@@ -5,7 +5,10 @@ defmodule RIG.Tracing.CloudEvent do
   alias RigCloudEvents.Parser.PartialParser
 
   @doc "Like Opencensus.Trace.with_child_span (https://hexdocs.pm/opencensus_elixir/Opencensus.Trace.html#with_child_span/3),
-  but for cloudevents distributed tracing extension defined in https://github.com/cloudevents/spec/blob/master/extensions/distributed-tracing.md"
+  but for cloudevents distributed tracing extension defined in https://github.com/cloudevents/spec/blob/master/extensions/distributed-tracing.md.
+
+  This macro reads the distributed trace context from a cloudevent and creates a new span out of it.
+  "
   defmacro with_child_span(label, event, attributes \\ quote(do: %{}), do: block) do
     line = __CALLER__.line
     module = __CALLER__.module
