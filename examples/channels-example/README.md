@@ -108,3 +108,16 @@ Repeat steps 1 to 6.
 1. Second tab: Fill in `Set event type` to `message`
 1. Second tab: Fill in `Event message` with e.g. `{"name":"john","foo":"bar"}`
 1. Second tab: new message should be displayed, First tab: **no new message**
+
+## One word to distributed Tracing
+
+RIG processes distributed tracing context differently depending on the type of a message: sometimes RIG expects the trace context to be in the (HTTP) header, sometimes in the event payload itself.
+For more information, read the [distributed tracing docs](../../docs/distributed-tracing.md).
+
+In this example, RIG processes the trace context as following:
+
+- frontend->RIG: RIG reads trace context from the http header (as this is an incoming message)
+- RIG->Kafka: RIG creates a new span and forwards it to the kafka header (as it is still a message) (tackled in issue #311). Consequently, the backend application could potentially also process the -race context and create a new span out of it with the same trace-ID
+- Backend->Kafka: Backend need to send the trace context via the event payload (because now we are talking of an event, and not a message anymore)
+- Kafka->Rig: RIG will read the trace context from the cloudevent
+- RIG->frontend: RIG emits the event, having the trace context in the event payload
