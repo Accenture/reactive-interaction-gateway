@@ -21,7 +21,7 @@ http://localhost:8080
 docker logs -f reactive-interaction-gateway
 
 # send event via AWS CLI
-docker-compose exec localstack bash -c 'awslocal kinesis put-record --stream-name RIG-outbound --data "{\"specversion\":\"0.2\",\"type\":\"com.github.pull.create\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"data\":\"hello\"}" --partition-key test --region eu-west-1'
+docker-compose exec localstack bash -c 'awslocal kinesis put-record --stream-name RIG-outbound --data "{\"specversion\":\"0.2\",\"type\":\"com.github.pull.create\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"traceparent\":\"00-15aa5a4ee009a477e7e1430b08551c6c-303aaee850c51164-01\",\"data\":\"hello\"}" --partition-key test --region eu-west-1'
 ```
 
 ## Setup Proxy API endpoint
