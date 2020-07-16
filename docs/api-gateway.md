@@ -176,7 +176,7 @@ The endpoint expects the following request format:
 Sometimes it makes sense to provide a simple request-response API to something that runs asynchronously on the backend. For example, let's say there's a ticket reservation process that takes 10 seconds in total and involves three different services that communicate via message passing. For an external client, it may be simpler to wait 10 seconds for the response instead of polling for a response every other second.
 A behavior like this can be configured using an endpoints' `response_from` property. When set to `kafka`, the response to the request is not taken from the `target` (e.g., for `target` = `http` this means the backend's HTTP response is ignored), but instead it's read from a Kafka topic. In order to enable RIG to correlate the response from the topic with the original request, RIG adds a correlation ID to the request (using a query parameter in case of `target` = `http`, or backed into the produced CloudEvent otherwise). Backend services that work with the request need to include that correlation ID in their response; otherwise, RIG won't be able to forward it to the client (and times out).
 
-> In case you want to use _binary_ transport mode, make sure that `rig` extension (containing correlation ID) is prefixed with `ce-` as well.
+> In case you want to use _binary_ transport mode, make sure that `rig` extension (containing correlation ID) is prefixed with `ce_` as well.
 
 Configuration of such API endpoint might look like this:
 

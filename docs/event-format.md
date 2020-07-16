@@ -165,10 +165,10 @@ In binary mode the message body only contains the `data` value of the correspond
 In binary mode the message header contains all context attributes. It also announces the body encoding:
 
 ```plaintext
-ce-specversion: 0.2
-ce-type: com.example.someevent
-ce-source: example
-ce-id: 80dc037c-fb24-43e9-9759-94f91f310a4b1
+ce_specversion: 0.2
+ce_type: com.example.someevent
+ce_source: example
+ce_id: 80dc037c-fb24-43e9-9759-94f91f310a4b1
 Content-Type: application/json; charset=UTF-8
 ```
 

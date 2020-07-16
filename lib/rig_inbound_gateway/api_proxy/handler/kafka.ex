@@ -55,7 +55,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
       end)
 
       data =
-        if length(headers) == 0,
+        if headers == [],
           do: Cloudevents.Format.Encoder.JSON.encode(event),
           else: Jason.encode!(event.data)
 

@@ -33,7 +33,7 @@ Adopting Avro for event (de)serialization is fairly straightforward. First you n
 
 ## RIG as a Kafka consumer
 
-Event parsing is based on the [Kafka Transport Binding for CloudEvents v1.0](https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md). Check the [Event format](./event-format.md#kafka-transport-binding) section.
+Event parsing is based on the [Kafka Transport Binding for CloudEvents v1.0](https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md) implemented via [cloudevents-ex](https://github.com/kevinbader/cloudevents-ex). Check the [Event format](./event-format.md#kafka-transport-binding) section.
 
 ## Example 1: producing to and consuming from the same topic
 

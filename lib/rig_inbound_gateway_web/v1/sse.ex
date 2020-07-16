@@ -117,13 +117,9 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     Logger.debug(fn -> "event: " <> inspect(event) end)
 
     # Forward the event to the client:
-    send_via(
-      %{
-        data: event |> Map.from_struct() |> Jason.encode!(),
-        event: CloudEvent.type!(event)
-      },
-      req
-    )
+    event
+    |> to_server_sent_event()
+    |> send_via(req)
 
     {:ok, req, state, :hibernate}
   end
@@ -198,6 +194,12 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   defp to_server_sent_event(%CloudEvent{} = event),
     do: %{
       data: event.json,
+      event: CloudEvent.type!(event)
+    }
+
+  defp to_server_sent_event(%{} = event),
+    do: %{
+      data: event |> Map.from_struct() |> Jason.encode!(),
       event: CloudEvent.type!(event)
     }
 
