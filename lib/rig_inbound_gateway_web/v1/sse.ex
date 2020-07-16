@@ -113,13 +113,17 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   end
 
   @impl :cowboy_loop
-  def info(%CloudEvent{} = event, req, state) do
+  def info(%{} = event, req, state) do
     Logger.debug(fn -> "event: " <> inspect(event) end)
 
     # Forward the event to the client:
-    event
-    |> to_server_sent_event()
-    |> send_via(req)
+    send_via(
+      %{
+        data: event |> Map.from_struct() |> Jason.encode!(),
+        event: CloudEvent.type!(event)
+      },
+      req
+    )
 
     {:ok, req, state, :hibernate}
   end

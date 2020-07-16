@@ -155,6 +155,14 @@ defmodule RigCloudEvents.CloudEvent do
     end
   end
 
+  def id(%{id: id}) do
+    {:ok, id}
+  end
+
+  def id(%{eventID: eventID}) do
+    {:ok, eventID}
+  end
+
   # ---
 
   def id!(event) do
@@ -166,6 +174,11 @@ defmodule RigCloudEvents.CloudEvent do
 
   @spec find_value(t, json_pointer :: String.t()) :: {:ok, value :: any} | {:error, any}
   def find_value(%__MODULE__{parsed: parsed}, json_pointer) do
+    @parser.find_value(parsed, json_pointer)
+  end
+
+  def find_value(event, json_pointer) do
+    parsed = @parser.parse(event |> Map.from_struct() |> Jason.encode!())
     @parser.find_value(parsed, json_pointer)
   end
 end
