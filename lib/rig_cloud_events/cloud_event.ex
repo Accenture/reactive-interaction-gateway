@@ -100,12 +100,14 @@ defmodule RigCloudEvents.CloudEvent do
     end
   end
 
-  defp specversion_0_1?(event) do
-    case Map.get(event, :cloudEventsVersion) do
+  defp specversion_0_1?(%{cloudEventsVersion: cloudEventsVersion}) do
+    case cloudEventsVersion do
       "0.1" -> true
       _ -> false
     end
   end
+
+  defp specversion_0_1?(_event), do: false
 
   # ---
 
@@ -116,12 +118,14 @@ defmodule RigCloudEvents.CloudEvent do
     end
   end
 
-  defp specversion_0_2?(event) do
-    case Map.get(event, :specversion) do
+  defp specversion_0_2?(%{specversion: specversion}) do
+    case specversion do
       "0.2" -> true
       _ -> false
     end
   end
+
+  defp specversion_0_2?(_event), do: false
 
   # ---
 
@@ -134,8 +138,8 @@ defmodule RigCloudEvents.CloudEvent do
 
   def type(event) do
     case specversion(event) do
-      {:ok, "0.2"} -> {:ok, Map.get(event, :type)}
-      {:ok, "0.1"} -> {:ok, Map.get(event, :eventType)}
+      {:ok, "0.2"} -> {:ok, event.type}
+      {:ok, "0.1"} -> {:ok, event.eventType}
     end
   end
 
@@ -155,13 +159,9 @@ defmodule RigCloudEvents.CloudEvent do
     end
   end
 
-  def id(%{id: id}) do
-    {:ok, id}
-  end
+  def id(%{id: id}), do: {:ok, id}
 
-  def id(%{eventID: eventID}) do
-    {:ok, eventID}
-  end
+  def id(%{eventID: eventID}), do: {:ok, eventID}
 
   # ---
 
@@ -178,7 +178,11 @@ defmodule RigCloudEvents.CloudEvent do
   end
 
   def find_value(event, json_pointer) do
-    parsed = @parser.parse(event |> Map.from_struct() |> Jason.encode!())
+    parsed =
+      event
+      |> Cloudevents.Format.Encoder.JSON.encode()
+      |> @parser.parse()
+
     @parser.find_value(parsed, json_pointer)
   end
 end

@@ -176,7 +176,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   end
 
   defp frame(event) do
-    {:text, event |> Map.from_struct() |> Jason.encode!()}
+    {:text, Cloudevents.Format.Encoder.JSON.encode(event)}
   end
 
   # ---

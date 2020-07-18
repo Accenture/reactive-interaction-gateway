@@ -283,7 +283,6 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     # The client calls the proxy endpoint:
     request_url = rig_proxy_url <> endpoint_path
 
-    # TODO: why it needs so much time to start consumer??
     :timer.sleep(25_000)
     %HTTPoison.Response{status_code: res_status, body: res_body} = HTTPoison.get!(request_url)
 

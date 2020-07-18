@@ -199,7 +199,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   defp to_server_sent_event(%{} = event),
     do: %{
-      data: event |> Map.from_struct() |> Jason.encode!(),
+      data: Cloudevents.Format.Encoder.JSON.encode(event),
       event: CloudEvent.type!(event)
     }
 
