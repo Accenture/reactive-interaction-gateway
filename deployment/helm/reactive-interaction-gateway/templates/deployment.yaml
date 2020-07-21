@@ -19,6 +19,10 @@ spec:
         app: {{ template "reactive-interaction-gateway.name" . }}
         release: {{ .Release.Name }}
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
