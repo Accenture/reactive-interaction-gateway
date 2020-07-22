@@ -94,11 +94,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
   # ---
 
   defp respond_directly_or_wait_for_response(conn, res, response_from) do
-    res = %HTTPoison.Response{
-      status_code: status_code
-    }
-
-    case status_code do
+    case res.status_code do
       202 -> wait_for_response(conn, response_from)
       _ -> send_or_chunk_response(conn, res, response_from)
     end
