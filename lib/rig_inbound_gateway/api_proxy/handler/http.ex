@@ -86,10 +86,23 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
   defp handle_response(conn, res, response_from)
 
   defp handle_response(conn, res, "http"),
-    do: send_or_chunk_response(conn, res)
+    do: send_or_chunk_response(conn, res, "http")
 
-  defp handle_response(conn, _, response_from),
-    do: wait_for_response(conn, response_from)
+  defp handle_response(conn, res, response_from),
+    do: respond_directly_or_wait_for_response(conn, res, response_from)
+
+  # ---
+
+  defp respond_directly_or_wait_for_response(conn, res, response_from) do
+    res = %HTTPoison.Response{
+      status_code: status_code
+    }
+
+    case status_code do
+      202 -> wait_for_response(conn, response_from)
+      _ -> send_or_chunk_response(conn, res, response_from)
+    end
+  end
 
   # ---
 
@@ -189,14 +202,15 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
   # ---
 
-  @spec send_or_chunk_response(Plug.Conn.t(), HTTPoison.Response.t()) :: Plug.Conn.t()
+  @spec send_or_chunk_response(Plug.Conn.t(), HTTPoison.Response.t(), String.t()) :: Plug.Conn.t()
   defp send_or_chunk_response(
          conn,
          %HTTPoison.Response{
            headers: headers,
            status_code: status_code,
            body: body
-         }
+         },
+         response_from
        ) do
     headers =
       headers
@@ -205,8 +219,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
     conn = %{conn | resp_headers: headers}
 
-    # only possibility for "response_from" = "http", therefore hardcoded here
-    ProxyMetrics.count_proxy_request(conn.method, conn.request_path, "http", "http", "ok")
+    ProxyMetrics.count_proxy_request(conn.method, conn.request_path, "http", response_from, "ok")
 
     headers
     |> Map.new()
