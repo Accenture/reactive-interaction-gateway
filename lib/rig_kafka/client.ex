@@ -43,7 +43,7 @@ defmodule RigKafka.Client do
           topic,
           partition,
           message,
-          %{callback: callback, schema_registry_host: schema_registry_host} = state
+          %{callback: callback} = state
         ) do
       %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
 

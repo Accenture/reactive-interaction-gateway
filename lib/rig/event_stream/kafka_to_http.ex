@@ -16,7 +16,7 @@ defmodule Rig.EventStream.KafkaToHttp do
 
   # ---
 
-  def kafka_handler(message, headers) do
+  def kafka_handler(message, _headers) do
     case CloudEvent.parse(message) do
       {:ok, %CloudEvent{} = cloud_event} ->
         Logger.debug(fn -> inspect(cloud_event.parsed) end)

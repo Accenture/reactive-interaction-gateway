@@ -44,8 +44,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
           | {:error, %{:__exception__ => true, :__struct__ => atom(), optional(atom()) => any()},
              any()}
   def kafka_handler(message, headers) do
-    {:ok, event} = Cloudevents.from_kafka_message(message, headers)
-
     with {:ok, event} <- Cloudevents.from_kafka_message(message, headers),
          {:ok, rig_metadata} <- Map.fetch(event.extensions, "rig"),
          {:ok, correlation_id} <- Map.fetch(rig_metadata, "correlation"),
