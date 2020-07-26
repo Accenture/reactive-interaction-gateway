@@ -199,7 +199,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   defp to_server_sent_event(%{} = event),
     do: %{
-      data: Cloudevents.Format.Encoder.JSON.encode(event),
+      data: Cloudevents.to_json(event),
       event: CloudEvent.type!(event)
     }
 

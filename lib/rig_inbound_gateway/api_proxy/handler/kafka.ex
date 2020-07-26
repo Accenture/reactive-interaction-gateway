@@ -54,7 +54,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
       data =
         if headers == [],
-          do: Cloudevents.Format.Encoder.JSON.encode(event),
+          do: Cloudevents.to_json(event),
           else: Jason.encode!(event.data)
 
       send(deserialized_pid, {:response_received, data})

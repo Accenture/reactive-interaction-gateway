@@ -180,7 +180,7 @@ defmodule RigCloudEvents.CloudEvent do
   def find_value(event, json_pointer) do
     parsed =
       event
-      |> Cloudevents.Format.Encoder.JSON.encode()
+      |> Cloudevents.to_json()
       |> @parser.parse()
 
     @parser.find_value(parsed, json_pointer)

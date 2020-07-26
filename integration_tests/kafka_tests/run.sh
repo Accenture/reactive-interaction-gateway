@@ -59,7 +59,7 @@ mix test --only kafka "$@"
 
 export KAFKA_SOURCE_TOPICS=rig-avro
 export KAFKA_SERIALIZER=avro
-export KAFKA_SCHEMA_REGISTRY_HOST=http://localhost:8081
+export KAFKA_SCHEMA_REGISTRY_HOST=localhost:8081
 export KAFKA_LOG_SCHEMA=rig-request-logger-value
 export PROXY_KAFKA_REQUEST_TOPIC=rig-avro
 export PROXY_KAFKA_REQUEST_AVRO=rig-avro-value

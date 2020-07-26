@@ -176,7 +176,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   end
 
   defp frame(event) do
-    {:text, Cloudevents.Format.Encoder.JSON.encode(event)}
+    {:text, Cloudevents.to_json(event)}
   end
 
   # ---
