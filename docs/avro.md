@@ -6,7 +6,7 @@ sidebar_label: Avro
 
 Apache Avro format as adapted by the [Confluent Schema Registry](https://docs.confluent.io/current/schema-registry/docs/serializer-formatter.html#wire-format):
 
-``` bash
+```bash
 # 0 - magic byte
 # 1-4 - schema id - this is used by consumer to know which schema to use for deserialization
 # 5-... - data
@@ -19,17 +19,17 @@ Apache Avro format as adapted by the [Confluent Schema Registry](https://docs.co
 
 ![event-serialization-avro](assets/event-serialization-avro.png)
 
-Adopting Avro for event (de)serialization is fairly straightforward. First you need to run an instance of the `Kafka Schema Registry` , which is a central store for all Avro schemas in use. As an event is consumed from Kafka, RIG fetches the corresponding schema from the registry and deserializes the event with it, caching the schema in the process (in memory). As for producing, RIG again retrieves and caches the schemas used for serializing events.
+Adopting Avro for event (de)serialization is fairly straightforward. First you need to run an instance of the `Kafka Schema Registry`, which is a central store for all Avro schemas in use. As an event is consumed from Kafka, RIG fetches the corresponding schema from the registry and deserializes the event with it, caching the schema in the process (in memory). As for producing, RIG again retrieves and caches the schemas used for serializing events.
 
 ## RIG as a Kafka producer
 
 * producer evaluates if serialization is turned on by checking `KAFKA_SERIALIZER` environment variable and if it's value is `avro`
-* If it is, creates headers for Kafka event by appending `ce-` prefix for every field, besides `data` field - **binary mode**
+* If it is, creates headers for Kafka event by appending `ce_` prefix for every field, except `data` field - **binary mode**
   + **nested context attributes are stringified**, since Kafka headers don't support nested values (this is common when using Cloud events extensions)
 * after that, the `data` field is serialized using the schema name (function for getting schemas from registry is cached in-memory)
 * producer sends event with created headers and data (in binary format `<<0, 0, 0, 0, 1, 5, 3, 8, ...>>` ) to Kafka
 
-> If `KAFKA_SERIALIZER` is not set to `avro` , producer sets **only** `ce-contenttype` or `ce-contentType` for kafka event
+> If `KAFKA_SERIALIZER` is not set to `avro`, producer sets **only** `ce_contenttype` or `ce_contentType` for kafka event
 
 ## RIG as a Kafka consumer
 
@@ -39,7 +39,7 @@ Event parsing is based on the [Kafka Transport Binding for CloudEvents v1.0](htt
 
 In this example we'll have RIG send a message to itself to see whether RIG producing and consuming parts work correctly. The idea is that RIG produces a serialized event as a result to an HTTP request and, a few moments later, consumes that same event (and deserializes it correctly).
 
-``` bash
+```bash
 
 ## 1. Start Kafka with Zookeeper and Kafka Schema Registry
 
