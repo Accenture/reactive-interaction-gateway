@@ -293,7 +293,7 @@ defmodule Rig.EventFilter do
 
   @callback forward_event(Cloudevents.t()) :: :ok
   @spec forward_event(Cloudevents.t()) :: :ok
-  def forward_event(%{} = event) do
+  def forward_event(event) when is_struct(event) do
     event_type = CloudEvent.type!(event)
     # On any node, there is only one Filter process for a given event type, or none, if
     # there are no subscriptions for the event type.

@@ -126,7 +126,7 @@ defmodule RIG.MixProject do
       # Apache Kafka Schema Registry wrapper library:
       {:schemex, "~> 0.1.1"},
       # Cloud Events
-      {:cloudevents, "~> 0.3.0"},
+      {:cloudevents, "~> 0.4.0"},
       # Caching library using ETS:
       {:memoize, "~> 1.3"},
       # For distributed_set:

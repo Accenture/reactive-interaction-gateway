@@ -125,7 +125,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   end
 
   @impl :cowboy_websocket
-  def websocket_info(%{} = event, state) do
+  def websocket_info(event, state) when is_struct(event) do
     Logger.debug(fn -> "event: " <> inspect(event) end)
     # Forward the event to the client:
     {:reply, frame(event), state, :hibernate}

@@ -20,10 +20,10 @@ defmodule Rig.EventStream.KafkaToFilter do
         EventFilter.forward_event(cloud_event)
         :ok
 
-      {:error, _reason} ->
-        {:error, :non_cloud_events_not_supported, body}
+      {:error, reason} ->
+        {:error, {:non_cloud_events_not_supported, reason, body}}
     end
   rescue
-    err -> {:error, err, body}
+    err -> {:error, {:failed_to_parse_kafka_message, headers, body}}
   end
 end

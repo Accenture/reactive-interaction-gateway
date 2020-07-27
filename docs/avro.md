@@ -23,11 +23,11 @@ Adopting Avro for event (de)serialization is fairly straightforward. First you n
 
 ## RIG as a Kafka producer
 
-* producer evaluates if serialization is turned on by checking `KAFKA_SERIALIZER` environment variable and if it's value is `avro`
-* If it is, creates headers for Kafka event by appending `ce_` prefix for every field, except `data` field - **binary mode**
-  + **nested context attributes are stringified**, since Kafka headers don't support nested values (this is common when using Cloud events extensions)
-* after that, the `data` field is serialized using the schema name (function for getting schemas from registry is cached in-memory)
-* producer sends event with created headers and data (in binary format `<<0, 0, 0, 0, 1, 5, 3, 8, ...>>` ) to Kafka
+- producer evaluates if serialization is turned on by checking `KAFKA_SERIALIZER` environment variable and if it's value is `avro`
+- If it is, creates headers for Kafka event by appending `ce_` prefix for every field, except `data` field - **binary mode**
+  - **nested context attributes are stringified**, since Kafka headers don't support nested values (this is common when using Cloud events extensions)
+- after that, the `data` field is serialized using the schema name (function for getting schemas from registry is cached in-memory)
+- producer sends event with created headers and data (in binary format `<<0, 0, 0, 0, 1, 5, 3, 8, ...>>`) to Kafka
 
 > If `KAFKA_SERIALIZER` is not set to `avro`, producer sets **only** `ce_contenttype` or `ce_contentType` for kafka event
 
