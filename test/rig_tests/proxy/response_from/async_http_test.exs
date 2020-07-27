@@ -172,7 +172,7 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
   end
 
   test_with_server "Given response_from is set to http_async and the backend responds with 400, the client should not receive any data." do
-    test_name = "proxy-http-response-synchronous"
+    test_name = "proxy-http-no-response"
 
     api_id = "mock-#{test_name}-api"
     endpoint_id = "mock-#{test_name}-endpoint"
