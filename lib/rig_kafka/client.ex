@@ -72,7 +72,6 @@ defmodule RigKafka.Client do
   def start_supervised(config, callback \\ nil) do
     %{server_id: server_id} = config
     opts = Keyword.merge([config: config, callback: callback], name: server_id)
-
     DynamicSupervisor.start_child(@supervisor, {__MODULE__, opts})
   end
 

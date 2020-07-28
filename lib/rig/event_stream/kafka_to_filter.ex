@@ -6,6 +6,9 @@ defmodule Rig.EventStream.KafkaToFilter do
   use Rig.KafkaConsumerSetup
 
   alias Rig.EventFilter
+  alias RIG.Tracing
+
+  require Tracing.CloudEvent
 
   # ---
 
@@ -16,14 +19,22 @@ defmodule Rig.EventStream.KafkaToFilter do
   def kafka_handler(body, headers) do
     case Cloudevents.from_kafka_message(body, headers) do
       {:ok, cloud_event} ->
-        Logger.debug(fn -> inspect(cloud_event) end)
-        EventFilter.forward_event(cloud_event)
-        :ok
+        Tracing.CloudEvent.with_child_span "kafka_to_filter", cloud_event do
+          cloud_event =
+            cloud_event
+            |> Tracing.append_context_with_mode(Tracing.context(), :private)
+
+          Logger.debug(fn -> inspect(cloud_event) end)
+          EventFilter.forward_event(cloud_event)
+          :ok
+        end
 
       {:error, reason} ->
         {:error, {:non_cloud_events_not_supported, reason, body}}
     end
   rescue
-    err -> {:error, {:failed_to_parse_kafka_message, headers, body}}
+    err -> {:error, {:failed_to_parse_kafka_message, headers, body, err}}
   end
 end
+
+# ---

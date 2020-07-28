@@ -21,7 +21,7 @@ http://localhost:8080
 docker logs -f reactive-interaction-gateway
 
 # send event via AWS CLI
-docker-compose exec localstack bash -c 'awslocal kinesis put-record --stream-name RIG-outbound --data "{\"specversion\":\"0.2\",\"type\":\"com.github.pull.create\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"data\":\"hello\"}" --partition-key test --region eu-west-1'
+docker-compose exec localstack bash -c 'awslocal kinesis put-record --stream-name RIG-outbound --data "{\"specversion\":\"0.2\",\"type\":\"com.github.pull.create\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"traceparent\":\"00-15aa5a4ee009a477e7e1430b08551c6c-303aaee850c51164-01\",\"data\":\"hello\"}" --partition-key test --region eu-west-1'
 ```
 
 ## Setup Proxy API endpoint
@@ -30,10 +30,10 @@ docker-compose exec localstack bash -c 'awslocal kinesis put-record --stream-nam
 
 ```sh
 curl -X "POST" \
--H "Content-Type: application/json" \
--d "{\"id\":\"kinesis-service\",\"name\":\"kinesis-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kinesis-producer-endpoint\",\"path\":\"/kinesis\",\"method\":\"POST\",\"secured\":false,\"target\":\"kinesis\",\"topic\":\"RIG-outbound\"}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localstack\",\"port\":4568}}" \
---silent \
-"http://localhost:4010/v2/apis"
+  -H "Content-Type: application/json" \
+  -d "{\"id\":\"kinesis-service\",\"name\":\"kinesis-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kinesis-producer-endpoint\",\"path\":\"/kinesis\",\"method\":\"POST\",\"secured\":false,\"target\":\"kinesis\",\"topic\":\"RIG-outbound\"}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localstack\",\"port\":4568}}" \
+  --silent \
+  "http://localhost:4010/v2/apis"
 ```
 
 ### Deprecated way
@@ -43,10 +43,10 @@ curl -X "POST" \
 ```sh
 # send event via RIG's proxy -> register API in RIG's proxy and send HTTP request
 curl -X "POST" \
--H "Content-Type: application/json" \
--d "{\"id\":\"kinesis-service\",\"name\":\"kinesis-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kinesis-producer-endpoint\",\"path\":\"/kinesis\",\"method\":\"POST\",\"secured\":false,\"target\":\"kinesis\"}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localstack\",\"port\":4568}}" \
---silent \
-"http://localhost:4010/v2/apis"
+  -H "Content-Type: application/json" \
+  -d "{\"id\":\"kinesis-service\",\"name\":\"kinesis-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kinesis-producer-endpoint\",\"path\":\"/kinesis\",\"method\":\"POST\",\"secured\":false,\"target\":\"kinesis\"}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localstack\",\"port\":4568}}" \
+  --silent \
+  "http://localhost:4010/v2/apis"
 ```
 
 ## Produce messages
@@ -54,17 +54,19 @@ curl -X "POST" \
 ```sh
 # setting partition key manually
 curl -X "POST" \
--H "Content-Type: application/json" \
--d "{\"specversion\":\"0.2\",\"type\":\"com.github.pull.create\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"rig\":{\"target_partition\":\"the-partition-key\"},\"data\":\"hello\"}" \
---silent \
-"http://localhost:4000/kinesis"
+  -H "Content-Type: application/json" \
+  -H 'traceparent: 00-9c18b63f316cbfe3854122c20c8c6b23-22d69e0945046f2d-01' \
+  -d "{\"specversion\":\"0.2\",\"type\":\"com.github.pull.create\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"rig\":{\"target_partition\":\"the-partition-key\"},\"data\":\"hello\"}" \
+  --silent \
+  "http://localhost:4000/kinesis"
 
 # partition key not set -> will be randomized
 curl -X "POST" \
--H "Content-Type: application/json" \
--d "{\"specversion\":\"0.2\",\"type\":\"com.github.pull.create\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"data\":\"hello\"}" \
---silent \
-"http://localhost:4000/kinesis"
+  -H "Content-Type: application/json" \
+  -H 'traceparent: 00-9c18b63f316cbfe3854122c20c8c6b23-22d69e0945046f2d-01' \
+  -d "{\"specversion\":\"0.2\",\"type\":\"com.github.pull.create\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"data\":\"hello\"}" \
+  --silent \
+  "http://localhost:4000/kinesis"
 
 # get Kinesis shard iterator and record -> should list several records ... you can also monitor RIG logs and see consumed events
 docker-compose exec localstack bash -c 'export SHARD_ITERATOR=$(awslocal kinesis get-shard-iterator --stream-name RIG-outbound --shard-id 0 --shard-iterator-type TRIM_HORIZON --region eu-west-1 --query ShardIterator --output text) && awslocal kinesis get-records --shard-iterator $SHARD_ITERATOR --region eu-west-1'

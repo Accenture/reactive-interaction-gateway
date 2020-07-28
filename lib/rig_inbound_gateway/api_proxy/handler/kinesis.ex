@@ -8,6 +8,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   alias ExAws
   alias Plug.Conn
   alias Rig.Connection.Codec
+  alias RIG.Tracing
   alias RigInboundGateway.ApiProxy.Handler
   alias RigMetrics.ProxyMetrics
   alias UUID
@@ -59,6 +60,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
 
   # ---
 
+  @doc @help_text
   @impl Handler
   def handle_http_request(conn, api, endpoint, request_path)
 
@@ -81,9 +83,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     |> with_cors()
     |> Conn.send_resp(:no_content, "")
   end
-
-  @doc @help_text
-  def handle_http_request(conn, api, endpoint, request_path)
 
   def handle_http_request(
         conn,
@@ -181,6 +180,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         path: request_path,
         query: conn.query_string
       })
+      |> Tracing.append_context(Tracing.context())
       |> Poison.encode!()
 
     produce(partition, kinesis_message, topic)
@@ -244,6 +244,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         )
 
         conn
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.put_resp_content_type("application/json")
         |> Conn.send_resp(:ok, response)
     after
@@ -257,6 +258,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         )
 
         conn
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.send_resp(:gateway_timeout, "")
     end
   end
