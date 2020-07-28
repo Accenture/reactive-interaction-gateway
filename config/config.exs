@@ -120,7 +120,7 @@ config :rig, RIG.AuthorizationCheck.Submission,
 # Peerage
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-config :rig, Rig.Discovery,
+config :rig, RIG.Discovery,
   discovery_type: {:system, "DISCOVERY_TYPE", nil},
   dns_name: {:system, "DNS_NAME", "localhost"}
 
@@ -131,3 +131,14 @@ import_config "rig_inbound_gateway/config.exs"
 import_config "rig_metrics/config.exs"
 import_config "rig_outbound_gateway/config.exs"
 import_config "rig_tests/config.exs"
+
+# --------------------------------------
+# Jaeger
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+config :rig, RIG.Tracing,
+  jaeger_host: {:system, :charlist, "JAEGER_HOST", ''},
+  jaeger_port: {:system, :integer, "JAEGER_PORT", 6831},
+  jaeger_service_name: {:system, :charlist, "JAEGER_SERVICE_NAME", 'rig'},
+  zipkin_address: {:system, :charlist, "ZIPKIN_ADDR", ''},
+  zipkin_service_name: {:system, "ZIPKIN_SERVICE_NAME", "rig"}

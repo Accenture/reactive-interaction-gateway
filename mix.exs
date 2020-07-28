@@ -53,8 +53,20 @@ defmodule RIG.MixProject do
   def application do
     [
       mod: {Rig.Application, []},
-      extra_applications: [:logger, :runtime_tools, :prometheus_ex, :prometheus_plugs],
-      included_applications: [:peerage]
+      extra_applications: [
+        :logger,
+        :runtime_tools,
+        :prometheus_ex,
+        :prometheus_plugs
+      ],
+      included_applications: [
+        :peerage,
+        :opencensus,
+        :opencensus_elixir,
+        :opencensus_plug,
+        :opencensus_zipkin,
+        :opencensus_jaeger
+      ]
     ]
   end
 
@@ -155,9 +167,15 @@ defmodule RIG.MixProject do
       {:stubr, "~> 1.5.0", only: :test},
       {:fake_server, "~> 2.1", only: :test},
       {:socket, "~> 0.3", only: :test},
-      # Prometheus metrics
+      # Prometheus metrics:
       {:prometheus_ex, "~> 3.0"},
       {:prometheus_plugs, "~> 1.1"},
+      # Distributed tracing:
+      {:opencensus_plug, "~> 0.3"},
+      {:opencensus, "~> 0.9"},
+      {:opencensus_elixir, "~> 0.3"},
+      {:opencensus_jaeger, "~> 0.0.1"},
+      {:opencensus_zipkin, "~> 0.3"},
       # NATS client:
       {:gnat, "~> 1.0.0"}
     ]
