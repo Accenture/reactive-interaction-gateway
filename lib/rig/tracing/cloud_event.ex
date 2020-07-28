@@ -2,6 +2,7 @@ defmodule RIG.Tracing.CloudEvent do
   @moduledoc """
   Distributed Tracing instrumenter for cloudevents
   """
+  alias RigCloudEvents.Parser.PartialParser
 
   @doc "Like Opencensus.Trace.with_child_span (https://hexdocs.pm/opencensus_elixir/Opencensus.Trace.html#with_child_span/3),
   but for cloudevents distributed tracing extension defined in https://github.com/cloudevents/spec/blob/master/extensions/distributed-tracing.md.
@@ -9,6 +10,56 @@ defmodule RIG.Tracing.CloudEvent do
   This macro reads the distributed trace context from a cloudevent and creates a new span out of it.
   "
   defmacro with_child_span(label, event, attributes \\ quote(do: %{}), do: block) do
+    line = __CALLER__.line
+    module = __CALLER__.module
+    file = __CALLER__.file
+    function = format_function(__CALLER__.function)
+
+    computed_attributes =
+      compute_attributes(attributes, %{
+        line: line,
+        module: module,
+        file: file,
+        function: function
+      })
+
+    quote do
+      tracecontext = []
+
+      tracecontext =
+        case PartialParser.context_attribute(unquote(event).parsed, "traceparent") do
+          {:ok, traceparent} -> Enum.concat(tracecontext, %{"traceparent" => traceparent})
+          _ -> tracecontext
+        end
+
+      tracecontext =
+        case PartialParser.context_attribute(unquote(event).parsed, "tracestate") do
+          {:ok, tracestate} -> Enum.concat(tracecontext, %{"tracestate" => tracestate})
+          _ -> tracecontext
+        end
+
+      parent_span_ctx = :oc_propagation_http_tracecontext.from_headers(tracecontext)
+
+      new_span_ctx =
+        :oc_trace.start_span(unquote(label), parent_span_ctx, %{
+          :attributes => unquote(computed_attributes)
+        })
+
+      :ocp.with_span_ctx(new_span_ctx)
+
+      try do
+        unquote(block)
+      after
+        :oc_trace.finish_span(new_span_ctx)
+        :ocp.with_span_ctx(parent_span_ctx)
+      end
+    end
+  end
+
+  # ---
+
+  # temporary function to handle new cloudevents library for Kafka
+  defmacro with_child_span_temp(label, event, attributes \\ quote(do: %{}), do: block) do
     line = __CALLER__.line
     module = __CALLER__.module
     file = __CALLER__.file

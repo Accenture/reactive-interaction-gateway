@@ -90,7 +90,8 @@ defmodule RIG.Tracing do
     end
   end
 
-  # Temporary function for Kafka as we are transitioning to new cloudevents library, once everything is migrated, we can remove function above
+  # Temporary function for Kafka as we are transitioning to new cloudevents library,
+  # once everything is migrated, we can remove function above
   @spec append_context_with_mode(Cloudevents.t(), t(), mode :: atom()) ::
           CloudEvent.t()
   def append_context_with_mode(cloudevent, context, mode) do
