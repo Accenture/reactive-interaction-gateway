@@ -5,6 +5,8 @@ defmodule Rig.EventStream.KafkaToFilter do
   """
   use Rig.KafkaConsumerSetup
 
+  import RIG.Tracing.CloudEvent
+
   alias Rig.EventFilter
   alias RIG.Tracing
 
@@ -19,10 +21,10 @@ defmodule Rig.EventStream.KafkaToFilter do
   def kafka_handler(body, headers) do
     case Cloudevents.from_kafka_message(body, headers) do
       {:ok, cloud_event} ->
-        Tracing.CloudEvent.with_child_span_temp "kafka_to_filter", cloud_event do
+        Tracing.CloudEvent.with_child_span "kafka_to_filter", cloud_event do
           cloud_event =
             cloud_event
-            |> Tracing.append_context_with_mode(Tracing.context(), :private)
+            |> Tracing.append_context(Tracing.context(), :private)
 
           Logger.debug(fn -> inspect(cloud_event) end)
           EventFilter.forward_event(cloud_event)

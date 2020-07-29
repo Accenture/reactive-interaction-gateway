@@ -2,6 +2,7 @@ defmodule RIG.Tracing.CloudEvent do
   @moduledoc """
   Distributed Tracing instrumenter for cloudevents
   """
+  alias RigCloudEvents.CloudEvent
   alias RigCloudEvents.Parser.PartialParser
 
   @doc "Like Opencensus.Trace.with_child_span (https://hexdocs.pm/opencensus_elixir/Opencensus.Trace.html#with_child_span/3),
@@ -24,19 +25,7 @@ defmodule RIG.Tracing.CloudEvent do
       })
 
     quote do
-      tracecontext = []
-
-      tracecontext =
-        case PartialParser.context_attribute(unquote(event).parsed, "traceparent") do
-          {:ok, traceparent} -> Enum.concat(tracecontext, %{"traceparent" => traceparent})
-          _ -> tracecontext
-        end
-
-      tracecontext =
-        case PartialParser.context_attribute(unquote(event).parsed, "tracestate") do
-          {:ok, tracestate} -> Enum.concat(tracecontext, %{"tracestate" => tracestate})
-          _ -> tracecontext
-        end
+      tracecontext = compute_context(unquote(event))
 
       parent_span_ctx = :oc_propagation_http_tracecontext.from_headers(tracecontext)
 
@@ -58,53 +47,36 @@ defmodule RIG.Tracing.CloudEvent do
 
   # ---
 
-  # temporary function to handle new cloudevents library for Kafka
-  defmacro with_child_span_temp(label, event, attributes \\ quote(do: %{}), do: block) do
-    line = __CALLER__.line
-    module = __CALLER__.module
-    file = __CALLER__.file
-    function = format_function(__CALLER__.function)
+  def compute_context(%CloudEvent{} = event) do
+    tracecontext = []
 
-    computed_attributes =
-      compute_attributes(attributes, %{
-        line: line,
-        module: module,
-        file: file,
-        function: function
-      })
-
-    quote do
-      tracecontext = []
-
-      tracecontext =
-        case Map.get(unquote(event), "traceparent") do
-          nil -> tracecontext
-          traceparent -> Enum.concat(tracecontext, %{"traceparent" => traceparent})
-        end
-
-      tracecontext =
-        case Map.get(unquote(event), "tracestate") do
-          nil -> tracecontext
-          tracestate -> Enum.concat(tracecontext, %{"tracestate" => tracestate})
-        end
-
-      parent_span_ctx = :oc_propagation_http_tracecontext.from_headers(tracecontext)
-
-      new_span_ctx =
-        :oc_trace.start_span(unquote(label), parent_span_ctx, %{
-          :attributes => unquote(computed_attributes)
-        })
-
-      :ocp.with_span_ctx(new_span_ctx)
-
-      try do
-        unquote(block)
-      after
-        :oc_trace.finish_span(new_span_ctx)
-        :ocp.with_span_ctx(parent_span_ctx)
+    tracecontext =
+      case PartialParser.context_attribute(event.parsed, "traceparent") do
+        {:ok, traceparent} -> Enum.concat(tracecontext, %{"traceparent" => traceparent})
+        _ -> tracecontext
       end
+
+    case PartialParser.context_attribute(event.parsed, "tracestate") do
+      {:ok, tracestate} -> Enum.concat(tracecontext, %{"tracestate" => tracestate})
+      _ -> tracecontext
     end
   end
+
+  def compute_context(%{} = event) do
+    tracecontext = []
+    tracecontext =
+      case Map.get(event, "traceparent") do
+        nil -> tracecontext
+        traceparent -> Enum.concat(tracecontext, %{"traceparent" => traceparent})
+      end
+
+    case Map.get(event, "tracestate") do
+      nil -> tracecontext
+      tracestate -> Enum.concat(tracecontext, %{"tracestate" => tracestate})
+    end
+  end
+
+  # ---
 
   defp format_function(nil), do: nil
   defp format_function({name, arity}), do: "#{name}/#{arity}"

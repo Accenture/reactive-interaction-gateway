@@ -4,6 +4,8 @@ defmodule Rig.EventStream.KinesisToFilter do
 
   """
 
+  import RIG.Tracing.CloudEvent
+
   alias Rig.EventFilter
   alias RIG.Tracing
   alias RigCloudEvents.CloudEvent
@@ -23,7 +25,7 @@ defmodule Rig.EventStream.KinesisToFilter do
         Tracing.CloudEvent.with_child_span "kinesis_to_filter", cloud_event do
           cloud_event =
             cloud_event
-            |> Tracing.append_context_with_mode(Tracing.context(), :private)
+            |> Tracing.append_context(Tracing.context(), :private)
 
           Logger.debug(fn -> inspect(cloud_event.parsed) end)
           EventFilter.forward_event(cloud_event)

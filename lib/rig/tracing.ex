@@ -71,56 +71,32 @@ defmodule RIG.Tracing do
 
   # ---
 
-  @spec append_context_with_mode(CloudEvent.t(), t(), mode :: atom()) ::
-          CloudEvent.t()
-  def append_context_with_mode(%CloudEvent{} = cloudevent, context, mode) do
-    cloudevent =
-      cloudevent.json
-      |> Jason.decode!()
-      |> append_context(context)
-      |> CloudEvent.parse!()
-
-    case mode do
-      :private ->
-        Logger.debug(fn -> "private mode, remove tracestate." end)
-        remove_tracestate(cloudevent)
-
-      _ ->
-        cloudevent
-    end
-  end
-
-  # Temporary function for Kafka as we are transitioning to new cloudevents library,
-  # once everything is migrated, we can remove function above
-  @spec append_context_with_mode(Cloudevents.t(), t(), mode :: atom()) ::
-          CloudEvent.t()
-  def append_context_with_mode(cloudevent, context, mode) do
-    {:ok, cloudevent} =
-      cloudevent
-      |> append_context(context)
-      |> Cloudevents.to_json()
-      |> CloudEvent.parse()
-
-    case mode do
-      :private ->
-        Logger.debug(fn -> "private mode, remove tracestate." end)
-        remove_tracestate(cloudevent)
-
-      _ ->
-        cloudevent
-    end
-  end
-
-  # ---
-
   def append_context(a, b, mode \\ :public)
 
+  @spec append_context(CloudEvent.t(), t(), mode :: atom()) :: CloudEvent.t()
+  def append_context(%CloudEvent{} = cloudevent, context, mode) do
+    cloudevent.json
+    |> Jason.decode!()
+    |> append_context(context, mode)
+    |> CloudEvent.parse!()
+  end
+
   @spec append_context(map, t()) :: map
-  def append_context(%{} = map, context, _mode) do
-    Enum.reduce(context, map, fn trace_header, acc ->
-      {key, val} = trace_header
-      Map.put(acc, key, val)
-    end)
+  def append_context(%{} = map, context, mode) do
+    cloudevent =
+      Enum.reduce(context, map, fn trace_header, acc ->
+        {key, val} = trace_header
+        Map.put(acc, key, val)
+      end)
+
+    case mode do
+      :private ->
+        Logger.debug(fn -> "private mode, remove tracestate." end)
+        remove_tracestate(cloudevent)
+
+      _ ->
+        cloudevent
+    end
   end
 
   # ---
@@ -131,5 +107,11 @@ defmodule RIG.Tracing do
     |> Jason.decode!()
     |> Map.delete("tracestate")
     |> CloudEvent.parse!()
+  end
+
+  @spec remove_tracestate(map) :: map
+  defp remove_tracestate(%{} = cloudevent) do
+    cloudevent
+    |> Map.delete("tracestate")
   end
 end
