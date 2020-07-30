@@ -4,6 +4,8 @@ defmodule Rig.EventStream.KinesisToFilter do
 
   """
 
+  import RIG.Tracing.CloudEvent
+
   alias Rig.EventFilter
   alias RIG.Tracing
   alias RigCloudEvents.CloudEvent

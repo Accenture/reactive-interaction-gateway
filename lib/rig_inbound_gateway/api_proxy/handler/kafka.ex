@@ -41,20 +41,25 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
   # ---
 
-  @spec kafka_handler(any()) ::
+  @spec kafka_handler(Cloudevents.kafka_body(), Cloudevents.kafka_headers()) ::
           :ok
           | {:error, %{:__exception__ => true, :__struct__ => atom(), optional(atom()) => any()},
              any()}
-  def kafka_handler(message) do
-    with {:ok, body} <- Jason.decode(message),
-         {:ok, rig_metadata} <- Map.fetch(body, "rig"),
+  def kafka_handler(message, headers) do
+    with {:ok, event} <- Cloudevents.from_kafka_message(message, headers),
+         {:ok, rig_metadata} <- Map.fetch(event.extensions, "rig"),
          {:ok, correlation_id} <- Map.fetch(rig_metadata, "correlation"),
          {:ok, deserialized_pid} <- Codec.deserialize(correlation_id) do
       Logger.debug(fn ->
         "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
       end)
 
-      send(deserialized_pid, {:response_received, message})
+      data =
+        if headers == [],
+          do: Cloudevents.to_json(event),
+          else: Jason.encode!(event.data)
+
+      send(deserialized_pid, {:response_received, data})
     else
       err ->
         Logger.warn(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)

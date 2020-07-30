@@ -38,64 +38,17 @@ defmodule RigKafka.Client do
 
     # ---
 
-    @spec get_content_type(any(), any()) :: String.t()
-    defp get_content_type(<<0::8, _id::32, _body::binary>>), do: "avro/binary"
-    defp get_content_type(_), do: "application/json"
-
-    defp get_content_type(headers, body) do
-      ce_specversion =
-        case headers do
-          %{specversion: version} ->
-            version
-
-          %{cloudEventsVersion: version} ->
-            version
-
-          _ ->
-            headers
-        end
-
-      case ce_specversion do
-        "0.2" -> Map.get(headers, :contenttype, get_content_type(body))
-        "0.1" -> Map.get(headers, :contentType, get_content_type(body))
-        _ -> get_content_type(body)
-      end
-    end
-
-    # ---
-
     @impl :brod_group_subscriber
     def handle_message(
           topic,
           partition,
           message,
-          %{callback: callback, schema_registry_host: schema_registry_host} = state
+          %{callback: callback} = state
         ) do
       %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
-      headers_no_prefix = Serializer.remove_prefix(headers)
-      content_type = get_content_type(headers_no_prefix, body)
 
       try do
-        encoded_body =
-          case content_type do
-            "avro/binary" ->
-              data =
-                body
-                |> Serializer.decode_body!("avro", schema_registry_host: schema_registry_host)
-                |> Jason.decode!()
-
-              headers_no_prefix
-              |> Map.merge(%{data: data})
-              |> Jason.encode!()
-
-            "application/json" ->
-              body
-
-            _ ->
-              {:error, {:unknown_content_type, content_type}}
-          end
-
-        case callback.(encoded_body) do
+        case callback.(body, headers) do
           :ok ->
             {:ok, :ack, state}
 
@@ -150,9 +103,14 @@ defmodule RigKafka.Client do
 
   # ---
 
+  def produce(%{server_id: server_id}, topic, schema, key, plaintext, headers)
+      when is_binary(topic) and is_binary(key) and is_binary(plaintext) and is_list(headers) do
+    GenServer.call(server_id, {:produce, topic, schema, key, plaintext, headers})
+  end
+
   def produce(%{server_id: server_id}, topic, schema, key, plaintext)
       when is_binary(topic) and is_binary(key) and is_binary(plaintext) do
-    GenServer.call(server_id, {:produce, topic, schema, key, plaintext})
+    GenServer.call(server_id, {:produce, topic, schema, key, plaintext, []})
   end
 
   # ---
@@ -278,7 +236,7 @@ defmodule RigKafka.Client do
 
   @impl GenServer
   def handle_call(
-        {:produce, topic, schema, key, plaintext},
+        {:produce, topic, schema, key, plaintext, headers},
         _from,
         %{
           brod_client: brod_client,
@@ -297,7 +255,8 @@ defmodule RigKafka.Client do
         topic,
         schema,
         key,
-        plaintext
+        plaintext,
+        headers
       )
 
     {:reply, result, state}
@@ -322,13 +281,13 @@ defmodule RigKafka.Client do
   @spec transform_content_type(map()) :: [{String.t(), String.t()}]
   defp transform_content_type(%{"contenttype" => contenttype}) do
     [
-      {"ce-contenttype", contenttype}
+      {"ce_contenttype", contenttype}
     ]
   end
 
   defp transform_content_type(%{"contentType" => contentType}) do
     [
-      {"ce-contentType", contentType}
+      {"ce_contentType", contentType}
     ]
   end
 
@@ -342,6 +301,7 @@ defmodule RigKafka.Client do
          schema,
          key,
          plaintext,
+         headers,
          retry_delay_divisor \\ 64
        )
 
@@ -355,6 +315,7 @@ defmodule RigKafka.Client do
          schema,
          key,
          plaintext,
+         headers,
          retry_delay_divisor
        ) do
     {constructed_headers, body} =
@@ -362,14 +323,19 @@ defmodule RigKafka.Client do
         {:ok, plaintext_map} ->
           case serializer do
             "avro" ->
-              {data, headers} = Map.pop(plaintext_map, "data", %{})
-              prefixed_headers = Serializer.add_prefix(headers)
+              {data, additional_headers} = Map.pop(plaintext_map, "data", %{})
+
+              prefixed_headers =
+                headers
+                |> Enum.concat(additional_headers)
+                |> Serializer.add_prefix()
+                |> Enum.concat([{"content-type", "avro/binary"}])
 
               {prefixed_headers,
                Serializer.encode_body(data, "avro", schema, schema_registry_host)}
 
             _ ->
-              constructed_headers = transform_content_type(plaintext_map)
+              constructed_headers = transform_content_type(plaintext_map) ++ headers
               {constructed_headers, plaintext}
           end
 
@@ -408,6 +374,7 @@ defmodule RigKafka.Client do
             schema,
             key,
             plaintext,
+            headers,
             retry_delay_divisor / 2
           )
         else

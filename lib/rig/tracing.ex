@@ -73,14 +73,21 @@ defmodule RIG.Tracing do
 
   def append_context(a, b, mode \\ :public)
 
-  @spec append_context(CloudEvent.t(), t(), mode :: atom()) ::
-          CloudEvent.t()
+  @spec append_context(CloudEvent.t(), t(), mode :: atom()) :: CloudEvent.t()
   def append_context(%CloudEvent{} = cloudevent, context, mode) do
+    cloudevent.json
+    |> Jason.decode!()
+    |> append_context(context, mode)
+    |> CloudEvent.parse!()
+  end
+
+  @spec append_context(map, t()) :: map
+  def append_context(%{} = map, context, mode) do
     cloudevent =
-      cloudevent.json
-      |> Jason.decode!()
-      |> append_context(context)
-      |> CloudEvent.parse!()
+      Enum.reduce(context, map, fn trace_header, acc ->
+        {key, val} = trace_header
+        Map.put(acc, key, val)
+      end)
 
     case mode do
       :private ->
@@ -94,21 +101,17 @@ defmodule RIG.Tracing do
 
   # ---
 
-  @spec append_context(map, t()) :: map
-  def append_context(%{} = map, context, _mode) do
-    Enum.reduce(context, map, fn trace_header, acc ->
-      {key, val} = trace_header
-      Map.put(acc, key, val)
-    end)
-  end
-
-  # ---
-
   @spec remove_tracestate(CloudEvent.t()) :: CloudEvent.t()
   defp remove_tracestate(%CloudEvent{} = cloudevent) do
     cloudevent.json
     |> Jason.decode!()
     |> Map.delete("tracestate")
     |> CloudEvent.parse!()
+  end
+
+  @spec remove_tracestate(map) :: map
+  defp remove_tracestate(%{} = cloudevent) do
+    cloudevent
+    |> Map.delete("tracestate")
   end
 end

@@ -2,6 +2,7 @@ defmodule RIG.Tracing.CloudEvent do
   @moduledoc """
   Distributed Tracing instrumenter for cloudevents
   """
+  alias RigCloudEvents.CloudEvent
   alias RigCloudEvents.Parser.PartialParser
 
   @doc "Like Opencensus.Trace.with_child_span (https://hexdocs.pm/opencensus_elixir/Opencensus.Trace.html#with_child_span/3),
@@ -24,19 +25,7 @@ defmodule RIG.Tracing.CloudEvent do
       })
 
     quote do
-      tracecontext = []
-
-      tracecontext =
-        case PartialParser.context_attribute(unquote(event).parsed, "traceparent") do
-          {:ok, traceparent} -> Enum.concat(tracecontext, %{"traceparent" => traceparent})
-          _ -> tracecontext
-        end
-
-      tracecontext =
-        case PartialParser.context_attribute(unquote(event).parsed, "tracestate") do
-          {:ok, tracestate} -> Enum.concat(tracecontext, %{"tracestate" => tracestate})
-          _ -> tracecontext
-        end
+      tracecontext = compute_context(unquote(event))
 
       parent_span_ctx = :oc_propagation_http_tracecontext.from_headers(tracecontext)
 
@@ -55,6 +44,39 @@ defmodule RIG.Tracing.CloudEvent do
       end
     end
   end
+
+  # ---
+
+  def compute_context(%CloudEvent{} = event) do
+    tracecontext = []
+
+    tracecontext =
+      case PartialParser.context_attribute(event.parsed, "traceparent") do
+        {:ok, traceparent} -> Enum.concat(tracecontext, %{"traceparent" => traceparent})
+        _ -> tracecontext
+      end
+
+    case PartialParser.context_attribute(event.parsed, "tracestate") do
+      {:ok, tracestate} -> Enum.concat(tracecontext, %{"tracestate" => tracestate})
+      _ -> tracecontext
+    end
+  end
+
+  def compute_context(%{} = event) do
+    tracecontext = []
+    tracecontext =
+      case Map.get(event, "traceparent") do
+        nil -> tracecontext
+        traceparent -> Enum.concat(tracecontext, %{"traceparent" => traceparent})
+      end
+
+    case Map.get(event, "tracestate") do
+      nil -> tracecontext
+      tracestate -> Enum.concat(tracecontext, %{"tracestate" => tracestate})
+    end
+  end
+
+  # ---
 
   defp format_function(nil), do: nil
   defp format_function({name, arity}), do: "#{name}/#{arity}"
