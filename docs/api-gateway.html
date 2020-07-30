@@ -87,11 +87,11 @@ You can also utilize <a href="https://github.com/Accenture/reactive-interaction-
 </code></pre>
 <p>This defines a single service called &quot;my-service&quot;. The URL is read from an given environment variable in this case (<code>use_env: true</code>). Because we want to run RIG inside a Docker container, we cannot use <code>localhost</code>. Instead, we can use <code>host.docker.internal</code> within the container to refer to the Docker host. This way, the service URL is resolved to <code>http://host.docker.internal:3000</code>. The service has one endpoint called &quot;my-endpoint&quot; at path <code>/</code>, which forwards <code>GET</code> requests to the same path (<code>http://host.docker.internal:3000/</code>).</p>
 <p>As a demo service, we use a small Node.js script:</p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>);
+<pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">"http"</span>);
 <span class="hljs-keyword">const</span> port = <span class="hljs-number">3000</span>;
 <span class="hljs-keyword">const</span> handler = <span class="hljs-function">(<span class="hljs-params">_req, res</span>) =&gt;</span> res.end(<span class="hljs-string">"Hi, I'm a demo service!\n"</span>);
 <span class="hljs-keyword">const</span> server = http.createServer(handler);
-server.listen(port, err =&gt; {
+server.listen(port, (err) =&gt; {
   <span class="hljs-keyword">if</span> (err) {
     <span class="hljs-keyword">return</span> <span class="hljs-built_in">console</span>.error(err);
   }
@@ -195,6 +195,9 @@ Hi, I<span class="hljs-string">'m a demo service!
 <h3><a class="anchor" aria-hidden="true" id="wait-for-response"></a><a href="#wait-for-response" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Wait for response</h3>
 <p>Sometimes it makes sense to provide a simple request-response API to something that runs asynchronously on the backend. For example, let's say there's a ticket reservation process that takes 10 seconds in total and involves three different services that communicate via message passing. For an external client, it may be simpler to wait 10 seconds for the response instead of polling for a response every other second.
 A behavior like this can be configured using an endpoints' <code>response_from</code> property. When set to <code>kafka</code>, the response to the request is not taken from the <code>target</code> (e.g., for <code>target</code> = <code>http</code> this means the backend's HTTP response is ignored), but instead it's read from a Kafka topic. In order to enable RIG to correlate the response from the topic with the original request, RIG adds a correlation ID to the request (using a query parameter in case of <code>target</code> = <code>http</code>, or backed into the produced CloudEvent otherwise). Backend services that work with the request need to include that correlation ID in their response; otherwise, RIG won't be able to forward it to the client (and times out).</p>
+<blockquote>
+<p>In case you want to use <em>binary</em> transport mode, make sure that <code>rig</code> extension (containing correlation ID) is prefixed with <code>ce_</code> as well.</p>
+</blockquote>
 <p>Configuration of such API endpoint might look like this:</p>
 <pre><code class="hljs css language-json">[{
   ...

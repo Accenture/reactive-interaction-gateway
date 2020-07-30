@@ -60,17 +60,17 @@
 <summary>Example event</summary></p>
 <p>
 <pre><code class="hljs css language-json">{
-    <span class="hljs-attr">"specversion"</span> : <span class="hljs-string">"0.2"</span>,
-    <span class="hljs-attr">"type"</span> : <span class="hljs-string">"com.github.pull.create"</span>,
-    <span class="hljs-attr">"source"</span> : <span class="hljs-string">"https://github.com/cloudevents/spec/pull/123"</span>,
-    <span class="hljs-attr">"id"</span> : <span class="hljs-string">"A234-1234-1234"</span>,
-    <span class="hljs-attr">"time"</span> : <span class="hljs-string">"2018-04-05T17:31:00Z"</span>,
-    <span class="hljs-attr">"comexampleextension1"</span> : <span class="hljs-string">"value"</span>,
-    <span class="hljs-attr">"comexampleextension2"</span> : {
-        <span class="hljs-attr">"othervalue"</span>: <span class="hljs-number">5</span>
-    },
-    <span class="hljs-attr">"contenttype"</span> : <span class="hljs-string">"text/xml"</span>,
-    <span class="hljs-attr">"data"</span> : <span class="hljs-string">"&lt;much wow=\"xml\"/&gt;"</span>
+  <span class="hljs-attr">"specversion"</span>: <span class="hljs-string">"0.2"</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"com.github.pull.create"</span>,
+  <span class="hljs-attr">"source"</span>: <span class="hljs-string">"https://github.com/cloudevents/spec/pull/123"</span>,
+  <span class="hljs-attr">"id"</span>: <span class="hljs-string">"A234-1234-1234"</span>,
+  <span class="hljs-attr">"time"</span>: <span class="hljs-string">"2018-04-05T17:31:00Z"</span>,
+  <span class="hljs-attr">"comexampleextension1"</span>: <span class="hljs-string">"value"</span>,
+  <span class="hljs-attr">"comexampleextension2"</span>: {
+    <span class="hljs-attr">"othervalue"</span>: <span class="hljs-number">5</span>
+  },
+  <span class="hljs-attr">"contenttype"</span>: <span class="hljs-string">"text/xml"</span>,
+  <span class="hljs-attr">"data"</span>: <span class="hljs-string">"&lt;much wow=\"xml\"/&gt;"</span>
 }
 </code></pre>
 </p>
@@ -80,7 +80,6 @@
 <p>To enable Avro &amp; Schema Registry support, checkout the <a href="rig-ops-guide">Operator's Guide</a> and look for the environment variables <code>KAFKA_SCHEMA_REGISTRY_HOST</code> and <code>PROXY_KAFKA_REQUEST_AVRO</code>.</p>
 <p>For further details and examples, checkout the dedicated <a href="avro">Section on Avro</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="transport-bindings"></a><a href="#transport-bindings" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Transport Bindings</h2>
-<p>While the HTTP transport binding seems solid already, the Kafka transport mode is not yet available. To support Kafka anyway, we have adapted the HTTP transport modes for Kafka. Consequently, the Kafka transport mode implementation may change in the future, depending on the outcome of the <a href="https://github.com/cloudevents/spec/pull/337">standardization process</a>.</p>
 <p>When sending or receiving an event, you have a couple of options:</p>
 <ul>
 <li>Send the event as-is, or send only the &quot;data&quot; (= payload) in the &quot;body&quot; and the rest (the so-called &quot;context attributes&quot;) in headers. The former is called <em>structured</em> transport mode, while the latter is known as <em>binary</em> transport mode.</li>
@@ -113,7 +112,7 @@
 </p>
 </details>
 <h3><a class="anchor" aria-hidden="true" id="binary"></a><a href="#binary" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Binary</h3>
-<p>In binary mode the request body only contains the <code>data</code> value of the corresponding CloudEvent. The <em>context attributes</em> - i.e., all other fields - are moved into the HTTP header. The data/body encoding is determined by the <code>content-type</code> header. At the time of writing there are two content types supported: <code>application/json</code> and <code>avro/binary</code>.</p>
+<p>In binary mode the request body only contains the <code>data</code> value of the corresponding CloudEvent. The <em>context attributes</em> - i.e., all other fields - are moved into the HTTP header (<strong>this means also <a href="https://github.com/cloudevents/spec/blob/v1.0/spec.md#extension-context-attributes">extensions</a></strong>). The data/body encoding is determined by the <code>content-type</code> header. At the time of writing there are two content types supported: <code>application/json</code> and <code>avro/binary</code>.</p>
 <p><details>
 <summary>Same example event, sent using HTTP request in binary mode</summary></p>
 <p>
@@ -132,7 +131,7 @@ Content-Type: application/json; charset=UTF-8
 </p>
 </details>
 <h2><a class="anchor" aria-hidden="true" id="kafka-transport-binding"></a><a href="#kafka-transport-binding" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Kafka Transport Binding</h2>
-<p>As mentioned above, the corresponding CloudEvents transport binding specification is still under <a href="https://github.com/cloudevents/spec/pull/337/files">active development</a>. We follow an approach very similar to the HTTP transport binding outlined above. We utilize Kafka headers that have been introduced in Kafka version <code>0.11</code>. In order to support older Kafka versions as well, RIG defaults to structured mode and does not require any headers at all (see below).</p>
+<p>Implemented using <a href="https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md">Kafka Transport Binding for CloudEvents v1.0</a>. We utilize Kafka headers that have been introduced in Kafka version <code>0.11</code>. In order to support older Kafka versions as well, RIG defaults to structured mode and does not require any headers at all (see below).</p>
 <p>Like with the HTTP transport binding, we define two modes of operation: structured and binary.</p>
 <h3><a class="anchor" aria-hidden="true" id="structured-1"></a><a href="#structured-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Structured</h3>
 <p>In structured mode the event is encoded in full and sent as the message body. Structured mode is determined by parsing the <code>content-type</code> header, which defaults to <code>application/cloudevents+json</code>.</p>
@@ -157,15 +156,15 @@ Content-Type: application/json; charset=UTF-8
 </p>
 </details>
 <h3><a class="anchor" aria-hidden="true" id="binary-1"></a><a href="#binary-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Binary</h3>
-<p>In binary mode the message body only contains the <code>data</code> value of the corresponding CloudEvent. The <em>context attributes</em> - i.e., all other fields - are moved into the message header. The data/body encoding is determined by the <code>content-type</code> header. In this mode there is no default for <code>content-type</code> and RIG rejects messages that come without it. At the time of writing there are two content types supported: <code>application/json</code> and <code>avro/binary</code>.</p>
+<p>In binary mode the message body only contains the <code>data</code> value of the corresponding CloudEvent. The <em>context attributes</em> - i.e., all other fields - are moved into the message header (<strong>this means also <a href="https://github.com/cloudevents/spec/blob/v1.0/spec.md#extension-context-attributes">extensions</a></strong>). The data/body encoding is determined by the <code>content-type</code> header. In this mode there is no default for <code>content-type</code> and RIG rejects messages that come without it. At the time of writing there are two content types supported: <code>application/json</code> and <code>avro/binary</code>.</p>
 <p><details>
 <summary>Same example in binary mode</summary></p>
 <p>
 <p>In binary mode the message header contains all context attributes. It also announces the body encoding:</p>
-<pre><code class="hljs css language-plaintext">ce-specversion: 0.2
-ce-type: com.example.someevent
-ce-source: example
-ce-id: 80dc037c-fb24-43e9-9759-94f91f310a4b1
+<pre><code class="hljs css language-plaintext">ce_specversion: 0.2
+ce_type: com.example.someevent
+ce_source: example
+ce_id: 80dc037c-fb24-43e9-9759-94f91f310a4b1
 Content-Type: application/json; charset=UTF-8
 </code></pre>
 <p>Message body:</p>
