@@ -41,6 +41,48 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   @spec validate(any()) :: {:ok, any()}
   def validate(conf), do: {:ok, conf}
 
+  defp parse_response_from(
+         _headers,
+         %{
+           "body" => body,
+           "rig" => rig_metadata
+         } = message
+       ) do
+    {:ok, correlation_id} = Map.fetch(rig_metadata, "correlation")
+    {:ok, deserialized_pid} = Codec.deserialize(correlation_id)
+    response_code = Map.get(rig_metadata, "response_code", 200)
+    response_headers = Map.get(message, "headers", %{})
+
+    {deserialized_pid, response_code, body, response_headers}
+  end
+
+  defp parse_response_from(
+         headers,
+         message
+       ) do
+    headers_map = Enum.into(headers, %{})
+    {:ok, correlation_id} = Map.fetch(headers_map, "rig-correlation")
+    {:ok, deserialized_pid} = Codec.deserialize(correlation_id)
+
+    {response_code, _} =
+      headers_map
+      |> Map.get("rig-response-code", "200")
+      |> Integer.parse()
+
+    {deserialized_pid, response_code, Jason.encode!(message), %{}}
+  end
+
+  # TODO avro
+  defp try_decode(message) when is_binary(message) do
+    case Jason.decode(message) do
+      {:ok, val_map} ->
+        val_map
+
+      _ ->
+        message
+    end
+  end
+
   # ---
 
   @spec kafka_handler(Cloudevents.kafka_body(), Cloudevents.kafka_headers()) ::
@@ -48,21 +90,15 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
           | {:error, %{:__exception__ => true, :__struct__ => atom(), optional(atom()) => any()},
              any()}
   def kafka_handler(message, headers) do
-    with {:ok, event} <- Cloudevents.from_kafka_message(message, headers),
-         {:ok, rig_metadata} <- Map.fetch(event.extensions, "rig"),
-         {:ok, correlation_id} <- Map.fetch(rig_metadata, "correlation"),
-         response_code <- Map.get(rig_metadata, "response_code", @default_response_code),
-         {:ok, deserialized_pid} <- Codec.deserialize(correlation_id) do
+    decoded_message = try_decode(message)
+
+    with {deserialized_pid, response_code, response, response_headers} <-
+           parse_response_from(headers, decoded_message) do
       Logger.debug(fn ->
         "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
       end)
 
-      data =
-        if headers == [],
-          do: Cloudevents.to_json(event),
-          else: Jason.encode!(event.data)
-
-      send(deserialized_pid, {:response_received, data, response_code})
+      send(deserialized_pid, {:response_received, response, response_code, response_headers})
     else
       err ->
         Logger.warn(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)
