@@ -6,17 +6,12 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   use Rig.KafkaConsumerSetup, [:cors, :request_topic, :request_schema, :response_timeout]
 
   alias Plug.Conn
-
-  alias RigMetrics.ProxyMetrics
-
+  alias Rig.Connection.Codec
+  alias RIG.Tracing
   alias RigInboundGateway.ApiProxy.Handler
   @behaviour Handler
-
-  alias Rig.Connection.Codec
-
-  alias RIG.Tracing
-
-  @default_response_code 200
+  alias RigInboundGateway.ApiProxy.ResponseFromParser
+  alias RigMetrics.ProxyMetrics
 
   @help_text """
   Produce the request to a Kafka topic and optionally wait for the (correlated) response.
@@ -41,48 +36,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   @spec validate(any()) :: {:ok, any()}
   def validate(conf), do: {:ok, conf}
 
-  defp parse_response_from(
-         _headers,
-         %{
-           "body" => body,
-           "rig" => rig_metadata
-         } = message
-       ) do
-    {:ok, correlation_id} = Map.fetch(rig_metadata, "correlation")
-    {:ok, deserialized_pid} = Codec.deserialize(correlation_id)
-    response_code = Map.get(rig_metadata, "response_code", 200)
-    response_headers = Map.get(message, "headers", %{})
-
-    {deserialized_pid, response_code, body, response_headers}
-  end
-
-  defp parse_response_from(
-         headers,
-         message
-       ) do
-    headers_map = Enum.into(headers, %{})
-    {:ok, correlation_id} = Map.fetch(headers_map, "rig-correlation")
-    {:ok, deserialized_pid} = Codec.deserialize(correlation_id)
-
-    {response_code, _} =
-      headers_map
-      |> Map.get("rig-response-code", "200")
-      |> Integer.parse()
-
-    {deserialized_pid, response_code, Jason.encode!(message), %{}}
-  end
-
-  # TODO avro
-  defp try_decode(message) when is_binary(message) do
-    case Jason.decode(message) do
-      {:ok, val_map} ->
-        val_map
-
-      _ ->
-        message
-    end
-  end
-
   # ---
 
   @spec kafka_handler(Cloudevents.kafka_body(), Cloudevents.kafka_headers()) ::
@@ -90,10 +43,9 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
           | {:error, %{:__exception__ => true, :__struct__ => atom(), optional(atom()) => any()},
              any()}
   def kafka_handler(message, headers) do
-    decoded_message = try_decode(message)
-
-    with {deserialized_pid, response_code, response, response_headers} <-
-           parse_response_from(headers, decoded_message) do
+    with decoded_message <- ResponseFromParser.try_decode_message(message),
+         {deserialized_pid, response_code, response, response_headers} <-
+           ResponseFromParser.parse(headers, decoded_message) do
       Logger.debug(fn ->
         "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
       end)

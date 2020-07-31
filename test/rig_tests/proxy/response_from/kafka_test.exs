@@ -452,8 +452,9 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
                  kafka_topic,
                  "rig-proxy-avro-value",
                  "response",
+                 # we are using cloud events format here since RigKafka.produce enforces it, but response_from handler will ignore that fact
                  event,
-                 []
+                 [{"rig-correlation", correlation_id}]
                )
 
       Response.ok!(sync_response, %{"content-type" => "application/json"})

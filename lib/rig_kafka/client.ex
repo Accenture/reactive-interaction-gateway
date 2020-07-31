@@ -326,9 +326,9 @@ defmodule RigKafka.Client do
               {data, additional_headers} = Map.pop(plaintext_map, "data", %{})
 
               prefixed_headers =
-                headers
-                |> Enum.concat(additional_headers)
+                additional_headers
                 |> Serializer.add_prefix()
+                |> Enum.concat(headers)
                 |> Enum.concat([{"content-type", "avro/binary"}])
 
               {prefixed_headers,

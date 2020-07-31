@@ -5,11 +5,9 @@ defmodule RigApi.V2.Responses do
   use RigApi, :controller
   use PhoenixSwagger
 
-  alias Rig.Connection.Codec
-  alias RigCloudEvents.CloudEvent
+  alias RigInboundGateway.ApiProxy.ResponseFromParser
 
   @prefix "/v2"
-  @default_response_code 200
 
   action_fallback(RigApi.Fallback)
 
@@ -32,52 +30,21 @@ defmodule RigApi.V2.Responses do
     response(400, "Bad Request: Failed to parse request body :parse-error")
   end
 
-  defp parse_response_from(
-         _headers,
-         %{
-           "body" => body,
-           "rig" => rig_metadata
-         } = message
-       ) do
-    {:ok, correlation_id} = Map.fetch(rig_metadata, "correlation")
-    {:ok, deserialized_pid} = Codec.deserialize(correlation_id)
-    response_code = Map.get(rig_metadata, "response_code", 200)
-    response_headers = Map.get(message, "headers", %{})
-
-    {deserialized_pid, response_code, body, response_headers}
-  end
-
-  defp parse_response_from(
-         headers,
-         message
-       ) do
-    headers_map = Enum.into(headers, %{})
-    {:ok, correlation_id} = Map.fetch(headers_map, "rig-correlation")
-    {:ok, deserialized_pid} = Codec.deserialize(correlation_id)
-
-    {response_code, _} =
-      headers_map
-      |> Map.get("rig-response-code", "200")
-      |> Integer.parse()
-
-    {deserialized_pid, response_code, Jason.encode!(message), %{}}
-  end
-
   @doc """
   Accepts message to be sent to correlated HTTP process.
 
   Note that body has to contain following field `"rig": { "correlation": "_id_" }`.
   """
   def create(%{req_headers: req_headers} = conn, message) do
-    with {deserialized_pid, response_code, response, response_headers} <-
-           parse_response_from(req_headers, message) do
-      Logger.debug(fn ->
-        "HTTP response via internal HTTP to #{inspect(deserialized_pid)}: #{inspect(message)}"
-      end)
+    case ResponseFromParser.parse(req_headers, message) do
+      {deserialized_pid, response_code, response, response_headers} ->
+        Logger.debug(fn ->
+          "HTTP response via internal HTTP to #{inspect(deserialized_pid)}: #{inspect(message)}"
+        end)
 
-      send(deserialized_pid, {:response_received, response, response_code, response_headers})
-      send_resp(conn, :accepted, "message sent to correlated reverse proxy request")
-    else
+        send(deserialized_pid, {:response_received, response, response_code, response_headers})
+        send_resp(conn, :accepted, "message sent to correlated reverse proxy request")
+
       err ->
         Logger.warn(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)
 

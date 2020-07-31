@@ -40,7 +40,7 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
       message =
         Jason.encode!(%{
           rig: %{correlation: correlation_id},
-          body: Jason.encode!(async_response)
+          body: async_response
         })
 
       build_conn()
@@ -167,7 +167,7 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
       message =
         Jason.encode!(%{
           rig: %{correlation: correlation_id, response_code: 201},
-          body: Jason.encode!(async_response)
+          body: async_response
         })
 
       build_conn()
@@ -233,11 +233,9 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
       message =
         Jason.encode!(%{
           rig: %{correlation: correlation_id, response_code: 201},
-          body: Jason.encode!(async_response),
+          body: async_response,
           headers: %{foo: "bar"}
         })
-
-      IO.inspect(message, label: "message")
 
       build_conn()
       |> put_req_header("content-type", "application/json;charset=utf-8")
