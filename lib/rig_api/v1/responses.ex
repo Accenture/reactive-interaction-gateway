@@ -5,8 +5,7 @@ defmodule RigApi.V1.Responses do
   use RigApi, :controller
   use PhoenixSwagger
 
-  alias Rig.Connection.Codec
-  alias RigCloudEvents.CloudEvent
+  alias RigInboundGateway.ApiProxy.ResponseFromParser
 
   @prefix "/v1"
 
@@ -36,18 +35,16 @@ defmodule RigApi.V1.Responses do
 
   Note that body has to contain following field `"rig": { "correlation": "_id_" }`.
   """
-  def create(conn, message) do
-    with {:ok, cloud_event} <- CloudEvent.parse(message),
-         {:ok, rig_metadata} <- Map.fetch(message, "rig"),
-         {:ok, correlation_id} <- Map.fetch(rig_metadata, "correlation"),
-         {:ok, deserialized_pid} <- Codec.deserialize(correlation_id) do
-      Logger.debug(fn ->
-        "HTTP response via internal HTTP to #{inspect(deserialized_pid)}: #{inspect(message)}"
-      end)
+  def create(%{req_headers: req_headers} = conn, message) do
+    case ResponseFromParser.parse(req_headers, message) do
+      {deserialized_pid, response_code, response, response_headers} ->
+        Logger.debug(fn ->
+          "HTTP response via internal HTTP to #{inspect(deserialized_pid)}: #{inspect(message)}"
+        end)
 
-      send(deserialized_pid, {:response_received, cloud_event.json})
-      send_resp(conn, :accepted, "message sent to correlated reverse proxy request")
-    else
+        send(deserialized_pid, {:response_received, response, response_code, response_headers})
+        send_resp(conn, :accepted, "message sent to correlated reverse proxy request")
+
       err ->
         Logger.warn(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)
 

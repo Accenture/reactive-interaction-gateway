@@ -228,7 +228,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     Conn.send_resp(conn, :bad_request, response)
   end
 
-  # ---
+  # --- Not used at the moment
 
   defp wait_for_response(conn, response_from) do
     conf = config()

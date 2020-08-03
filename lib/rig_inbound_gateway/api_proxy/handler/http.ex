@@ -116,8 +116,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
         |> with_cors()
         |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.put_resp_content_type("application/json")
-        |> Map.update!(:resp_headers, fn existing_header ->
-          existing_header ++ Map.to_list(response_headers)
+        |> Map.update!(:resp_headers, fn existing_headers ->
+          existing_headers ++ Map.to_list(response_headers)
         end)
         |> Conn.send_resp(response_code, response)
     after

@@ -50,8 +50,6 @@ defmodule RigTests.Proxy.ResponseFrom.HttpTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "GET",
                 path: endpoint_path
               }
