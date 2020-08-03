@@ -61,7 +61,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
       message =
         Jason.encode!(%{
           rig: %{correlation: correlation_id},
-          body: Jason.encode!(async_response)
+          body: async_response
         })
 
       kafka_config = kafka_config()
@@ -133,7 +133,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
       message =
         Jason.encode!(%{
           rig: %{correlation: correlation_id, response_code: 201},
-          body: Jason.encode!(async_response)
+          body: async_response
         })
 
       kafka_config = kafka_config()
@@ -283,7 +283,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
       message =
         Jason.encode!(%{
           rig: %{correlation: correlation_id},
-          body: Jason.encode!(async_response),
+          body: async_response,
           headers: %{foo: "bar"}
         })
 
@@ -527,7 +527,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
         message =
           Jason.encode!(%{
             rig: %{correlation: get_in(event.extensions, ["rig", "correlation"]), response_code: 201},
-            body: Jason.encode!(async_response)
+            body: async_response
           })
 
         assert :ok == RigKafka.produce(kafka_config, config().response_topic, "", "response", message)
