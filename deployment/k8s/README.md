@@ -46,8 +46,8 @@ If you want to use local image (either original RIG or your own based on origina
 1. Switch to Minikube context `eval $(minikube docker-env)`
 1. Build your image `docker build -t rig .`
 1. Check `docker images` => new image should be listed there
-1. Supply image name to `rig_dns.yml` e.g. `image: rig` (line 44)
-1. Add `imagePullPolicy: Never` under line 44, so K8s won't try to pull local image
+1. Change the image name to `rig` in the `rig_dns.yml` (line 74)
+1. Add `imagePullPolicy: Never` just below the `image` line, so K8s won't try to pull the official image
 
 Start RIG in Minikube:
 

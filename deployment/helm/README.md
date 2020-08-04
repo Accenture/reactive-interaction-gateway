@@ -46,8 +46,8 @@ If you want to use local image (either original RIG or your own based on origina
 1. Switch to Minikube context `eval $(minikube docker-env)`
 1. Build your image `docker build -t rig .`
 1. Check `docker images` => new image should be listed there
-1. Supply the image name to the [values file](reactive-interaction-gateway/values.yaml) e.g. `repository: rig` (line 8)
-1. Add `imagePullPolicy: Never` under line 10 [values](reactive-interaction-gateway/values.yaml)
+1. Change the image name to `rig` in the [values file](reactive-interaction-gateway/values.yaml) (line 10)
+1. Change `imagePullPolicy` to `Never` in the [values file](reactive-interaction-gateway/values.yaml) (line 12)
 
 
 ## Start RIG on Kubernetes

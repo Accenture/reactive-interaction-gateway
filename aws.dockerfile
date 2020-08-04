@@ -49,9 +49,12 @@ ENV KINESIS_OTP_JAR=/opt/sites/rig/kinesis-client/local-maven-repo/org/erlang/ot
 # Install Java
 RUN apk add --no-cache openjdk8-jre
 
+RUN addgroup -S rig -g 1000 && adduser -S rig -G rig --uid 1000
 WORKDIR /opt/sites/rig
 COPY --from=elixir-build /opt/sites/rig/_build/prod/rel/rig /opt/sites/rig/
 COPY --from=java-build opt/sites/rig/kinesis-client /opt/sites/rig/kinesis-client
+RUN chown -R rig:rig /opt/sites/rig
+USER rig
 
 # Proxy
 EXPOSE 4000

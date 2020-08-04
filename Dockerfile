@@ -40,8 +40,11 @@ RUN apk add --no-cache bash
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
+RUN addgroup -S rig -g 1000 && adduser -S rig -G rig --uid 1000
 WORKDIR /opt/sites/rig
 COPY --from=build /opt/sites/rig/_build/prod/rel/rig /opt/sites/rig/
+RUN chown -R rig:rig /opt/sites/rig
+USER rig
 
 # Proxy
 EXPOSE 4000
