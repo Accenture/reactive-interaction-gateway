@@ -43,14 +43,14 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
           | {:error, %{:__exception__ => true, :__struct__ => atom(), optional(atom()) => any()},
              any()}
   def kafka_handler(message, headers) do
-    with {deserialized_pid, response_code, response} <-
-           ResponseFromParser.parse(headers, message) do
-      Logger.debug(fn ->
-        "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
-      end)
+    case ResponseFromParser.parse(headers, message) do
+      {deserialized_pid, response_code, response} ->
+        Logger.debug(fn ->
+          "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
+        end)
 
-      send(deserialized_pid, {:response_received, response, response_code})
-    else
+        send(deserialized_pid, {:response_received, response, response_code})
+
       err ->
         Logger.warn(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)
         :ignore

@@ -214,8 +214,6 @@ Configuration of such API endpoint might look like this:
 
 `http_async` means that correlated response has to be sent to internal `:4010/v2/responses` `POST` endpoint.
 
-`response_from="kafka"` will try to decode Avro encoded message.
-
 #### Supported formats
 
 All `response_from` options support only binary mode.

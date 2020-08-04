@@ -6,8 +6,6 @@ defmodule RigInboundGateway.ApiProxy.ResponseFromParser do
 
   require Logger
 
-  use Rig.Config, [:schema_registry_host]
-
   alias Rig.Connection.Codec
 
   # ---
