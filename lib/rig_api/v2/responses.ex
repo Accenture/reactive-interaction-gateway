@@ -37,12 +37,12 @@ defmodule RigApi.V2.Responses do
   """
   def create(%{req_headers: req_headers} = conn, message) do
     case ResponseFromParser.parse(req_headers, message) do
-      {deserialized_pid, response_code, response, response_headers} ->
+      {deserialized_pid, response_code, response} ->
         Logger.debug(fn ->
           "HTTP response via internal HTTP to #{inspect(deserialized_pid)}: #{inspect(message)}"
         end)
 
-        send(deserialized_pid, {:response_received, response, response_code, response_headers})
+        send(deserialized_pid, {:response_received, response, response_code})
         send_resp(conn, :accepted, "message sent to correlated reverse proxy request")
 
       err ->

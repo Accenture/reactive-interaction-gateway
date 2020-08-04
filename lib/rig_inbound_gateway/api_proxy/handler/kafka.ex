@@ -43,14 +43,13 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
           | {:error, %{:__exception__ => true, :__struct__ => atom(), optional(atom()) => any()},
              any()}
   def kafka_handler(message, headers) do
-    with decoded_message <- ResponseFromParser.try_decode_message(message),
-         {deserialized_pid, response_code, response, response_headers} <-
-           ResponseFromParser.parse(headers, decoded_message) do
+    with {deserialized_pid, response_code, response} <-
+           ResponseFromParser.parse(headers, message) do
       Logger.debug(fn ->
         "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
       end)
 
-      send(deserialized_pid, {:response_received, response, response_code, response_headers})
+      send(deserialized_pid, {:response_received, response, response_code})
     else
       err ->
         Logger.warn(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)
@@ -258,7 +257,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     conf = config()
 
     receive do
-      {:response_received, response, response_code, response_headers} ->
+      {:response_received, response, response_code} ->
         ProxyMetrics.count_proxy_request(
           conn.method,
           conn.request_path,
@@ -270,9 +269,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         conn
         |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.put_resp_content_type("application/json")
-        |> Map.update!(:resp_headers, fn existing_headers ->
-          existing_headers ++ Map.to_list(response_headers)
-        end)
         |> Conn.send_resp(response_code, response)
     after
       conf.response_timeout ->

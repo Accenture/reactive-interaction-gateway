@@ -43,304 +43,6 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
   end
 
   @tag :kafka
-  test_with_server "Given response_from is set to Kafka, the http response is taken from the Kafka response topic instead of forwarding the backend's original response." do
-    test_name = "proxy-http-response-from-kafka"
-    kafka_config = kafka_config()
-    {:ok, kafka_client} = RigKafka.start(kafka_config)
-
-    api_id = "mock-#{test_name}-api"
-    endpoint_id = "mock-#{test_name}-endpoint"
-    %{response_topic: kafka_topic} = config()
-    endpoint_path = "/#{endpoint_id}"
-    sync_response = %{"message" => "the client never sees this response"}
-    async_response = %{"message" => "this is the async response that reaches the client instead"}
-
-    # The following service fake also shows how a real service should
-    # wrap its response in a CloudEvent:
-    route(endpoint_path, fn %{query: %{"correlation" => correlation_id}} ->
-      message =
-        Jason.encode!(%{
-          rig: %{correlation: correlation_id},
-          body: async_response
-        })
-
-      kafka_config = kafka_config()
-      assert :ok == RigKafka.produce(kafka_config, kafka_topic, "", "response", message)
-      Response.ok!(sync_response, %{"content-type" => "application/json"})
-    end)
-
-    # We register the endpoint with the proxy:
-    rig_api_url = "http://localhost:#{@api_port}/v2/apis"
-    rig_proxy_url = "http://localhost:#{@proxy_port}"
-
-    body =
-      Jason.encode!(%{
-        id: api_id,
-        name: "Mock API",
-        version_data: %{
-          default: %{
-            endpoints: [
-              %{
-                id: endpoint_id,
-                method: "GET",
-                path: endpoint_path,
-                response_from: "kafka"
-              }
-            ]
-          }
-        },
-        proxy: %{
-          target_url: "localhost",
-          port: FakeServer.port()
-        }
-      })
-
-    headers = [{"content-type", "application/json"}]
-    HTTPoison.post!(rig_api_url, body, headers)
-
-    # The client calls the proxy endpoint:
-    request_url = rig_proxy_url <> endpoint_path
-
-    %HTTPoison.Response{status_code: res_status, body: res_body} = HTTPoison.get!(request_url)
-
-    # Now we can assert that...
-    # ...the fake backend service has been called:
-    assert FakeServer.hits() == 1
-    # ...the connection is closed and the status is OK:
-    assert res_status == 200
-    # ...but the client got the response sent to the Kafka topic:
-    assert Jason.decode!(res_body) == async_response
-
-    RigKafka.Client.stop_supervised(kafka_client)
-  end
-
-  @tag :kafka
-  test_with_server "Given response_from is set to Kafka, the custom http response code - 201 - is taken from the Kafka response topic." do
-    test_name = "proxy-http-response-from-kafka-status-code"
-    kafka_config = kafka_config()
-    {:ok, kafka_client} = RigKafka.start(kafka_config)
-
-    api_id = "mock-#{test_name}-api"
-    endpoint_id = "mock-#{test_name}-endpoint"
-    %{response_topic: kafka_topic} = config()
-    endpoint_path = "/#{endpoint_id}"
-    sync_response = %{"message" => "the client never sees this response"}
-    async_response = %{"message" => "this is the async response that reaches the client instead"}
-
-    # The following service fake also shows how a real service should
-    # wrap its response in a CloudEvent:
-    route(endpoint_path, fn %{query: %{"correlation" => correlation_id}} ->
-      message =
-        Jason.encode!(%{
-          rig: %{correlation: correlation_id, response_code: 201},
-          body: async_response
-        })
-
-      kafka_config = kafka_config()
-      assert :ok == RigKafka.produce(kafka_config, kafka_topic, "", "response", message)
-      Response.ok!(sync_response, %{"content-type" => "application/json"})
-    end)
-
-    # We register the endpoint with the proxy:
-    rig_api_url = "http://localhost:#{@api_port}/v2/apis"
-    rig_proxy_url = "http://localhost:#{@proxy_port}"
-
-    body =
-      Jason.encode!(%{
-        id: api_id,
-        name: "Mock API",
-        version_data: %{
-          default: %{
-            endpoints: [
-              %{
-                id: endpoint_id,
-                method: "GET",
-                path: endpoint_path,
-                response_from: "kafka"
-              }
-            ]
-          }
-        },
-        proxy: %{
-          target_url: "localhost",
-          port: FakeServer.port()
-        }
-      })
-
-    headers = [{"content-type", "application/json"}]
-    HTTPoison.post!(rig_api_url, body, headers)
-
-    # The client calls the proxy endpoint:
-    request_url = rig_proxy_url <> endpoint_path
-
-    %HTTPoison.Response{status_code: res_status, body: res_body} = HTTPoison.get!(request_url)
-
-    # Now we can assert that...
-    # ...the fake backend service has been called:
-    assert FakeServer.hits() == 1
-    # ...the connection is closed and the status is OK:
-    assert res_status == 201
-    # ...but the client got the response sent to the Kafka topic:
-    assert Jason.decode!(res_body) == async_response
-
-    RigKafka.Client.stop_supervised(kafka_client)
-  end
-
-  @tag :kafka
-  test_with_server "Given response_from is set to Kafka and response is in binary mode, the http response should include only body content." do
-    test_name = "proxy-http-response-from-kafka-binary"
-    kafka_config = kafka_config()
-    {:ok, kafka_client} = RigKafka.start(kafka_config)
-
-    api_id = "mock-#{test_name}-api"
-    endpoint_id = "mock-#{test_name}-endpoint"
-    %{response_topic: kafka_topic} = config()
-    endpoint_path = "/#{endpoint_id}"
-    sync_response = %{"message" => "the client never sees this response"}
-    async_response = %{"message" => "this is the async response that reaches the client instead"}
-
-    # The following service fake also shows how a real service should
-    # wrap its response in a CloudEvent:
-    route(endpoint_path, fn %{query: %{"correlation" => correlation_id}} ->
-      kafka_config = kafka_config()
-
-      assert :ok ==
-               RigKafka.produce(
-                 kafka_config,
-                 kafka_topic,
-                 "",
-                 "response",
-                 Jason.encode!(async_response),
-                 [
-                   {"rig-correlation", correlation_id}
-                 ]
-               )
-
-      Response.ok!(sync_response, %{"content-type" => "application/json"})
-    end)
-
-    # We register the endpoint with the proxy:
-    rig_api_url = "http://localhost:#{@api_port}/v2/apis"
-    rig_proxy_url = "http://localhost:#{@proxy_port}"
-
-    body =
-      Jason.encode!(%{
-        id: api_id,
-        name: "Mock API",
-        version_data: %{
-          default: %{
-            endpoints: [
-              %{
-                id: endpoint_id,
-                method: "GET",
-                path: endpoint_path,
-                response_from: "kafka"
-              }
-            ]
-          }
-        },
-        proxy: %{
-          target_url: "localhost",
-          port: FakeServer.port()
-        }
-      })
-
-    headers = [{"content-type", "application/json"}]
-    HTTPoison.post!(rig_api_url, body, headers)
-
-    # The client calls the proxy endpoint:
-    request_url = rig_proxy_url <> endpoint_path
-
-    %HTTPoison.Response{status_code: res_status, body: res_body} = HTTPoison.get!(request_url)
-
-    # Now we can assert that...
-    # ...the fake backend service has been called:
-    assert FakeServer.hits() == 1
-    # ...the connection is closed and the status is OK:
-    assert res_status == 200
-    # ...but the client got the response sent to the Kafka topic:
-    assert Jason.decode!(res_body) == async_response
-
-    RigKafka.Client.stop_supervised(kafka_client)
-  end
-
-  @tag :kafka
-  test_with_server "Given response_from is set to Kafka, the provided headers are forwarded to client." do
-    test_name = "proxy-http-response-from-kafka-headers"
-    kafka_config = kafka_config()
-    {:ok, kafka_client} = RigKafka.start(kafka_config)
-
-    api_id = "mock-#{test_name}-api"
-    endpoint_id = "mock-#{test_name}-endpoint"
-    %{response_topic: kafka_topic} = config()
-    endpoint_path = "/#{endpoint_id}"
-    sync_response = %{"message" => "the client never sees this response"}
-    async_response = %{"message" => "this is the async response that reaches the client instead"}
-
-    # The following service fake also shows how a real service should
-    # wrap its response in a CloudEvent:
-    route(endpoint_path, fn %{query: %{"correlation" => correlation_id}} ->
-      message =
-        Jason.encode!(%{
-          rig: %{correlation: correlation_id},
-          body: async_response,
-          headers: %{foo: "bar"}
-        })
-
-      kafka_config = kafka_config()
-      assert :ok == RigKafka.produce(kafka_config, kafka_topic, "", "response", message)
-
-      Response.ok!(sync_response, %{"content-type" => "application/json"})
-    end)
-
-    # We register the endpoint with the proxy:
-    rig_api_url = "http://localhost:#{@api_port}/v2/apis"
-    rig_proxy_url = "http://localhost:#{@proxy_port}"
-
-    body =
-      Jason.encode!(%{
-        id: api_id,
-        name: "Mock API",
-        version_data: %{
-          default: %{
-            endpoints: [
-              %{
-                id: endpoint_id,
-                method: "GET",
-                path: endpoint_path,
-                response_from: "kafka"
-              }
-            ]
-          }
-        },
-        proxy: %{
-          target_url: "localhost",
-          port: FakeServer.port()
-        }
-      })
-
-    headers = [{"content-type", "application/json"}]
-    HTTPoison.post!(rig_api_url, body, headers)
-
-    # The client calls the proxy endpoint:
-    request_url = rig_proxy_url <> endpoint_path
-
-    %HTTPoison.Response{status_code: res_status, body: res_body, headers: res_headers} =
-      HTTPoison.get!(request_url)
-
-    # Now we can assert that...
-    # ...the fake backend service has been called:
-    assert FakeServer.hits() == 1
-    # ...the connection is closed and the status is OK:
-    assert res_status == 200
-    # ...but the client got the response sent to the Kafka topic:
-    assert Jason.decode!(res_body) == async_response
-    assert Enum.member?(res_headers, {"foo", "bar"})
-
-    RigKafka.Client.stop_supervised(kafka_client)
-  end
-
-  @tag :kafka
   test_with_server "Given response_from is set to Kafka and response is in binary mode, the custom http response code - 201 - should be used." do
     test_name = "proxy-http-response-from-kafka-binary-status-code"
     kafka_config = kafka_config()
@@ -419,177 +121,102 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     RigKafka.Client.stop_supervised(kafka_client)
   end
 
-  @tag :avro
-  test_with_server "Given response_from is set to Kafka and response is in avro format, the http response should be correctly decoded and forwarded." do
-    test_name = "proxy-http-response-from-kafka-avro"
-    kafka_config = kafka_config()
-    {:ok, kafka_client} = RigKafka.start(kafka_config)
+  # @tag :kafka
+  # test_with_server "Given response_from and target are set to Kafka, the http response is taken from the Kafka response topic instead of forwarding the backend's original response." do
+  #   test_name = "proxy-http-response-from-kafka-target"
+  #   topic = "rig-test"
 
-    api_id = "mock-#{test_name}-api"
-    endpoint_id = "mock-#{test_name}-endpoint"
-    %{response_topic: kafka_topic} = config()
-    endpoint_path = "/#{endpoint_id}"
-    sync_response = %{"message" => "the client never sees this response"}
-    async_response = %{"message" => "this is the async response that reaches the client instead"}
+  #   api_id = "mock-#{test_name}-api"
+  #   endpoint_id = "mock-#{test_name}-endpoint"
+  #   endpoint_path = "/#{endpoint_id}"
+  #   async_response = %{"message" => "this is the async response that reaches the client instead"}
+  #   kafka_config = kafka_config()
 
-    # The following service fake also shows how a real service should
-    # wrap its response in a CloudEvent:
-    route(endpoint_path, fn %{query: %{"correlation" => correlation_id}} ->
-      event =
-        Jason.encode!(%{
-          specversion: "0.2",
-          type: "rig.async-response",
-          source: "fake-service",
-          id: "3",
-          rig: %{correlation: correlation_id},
-          data: async_response
-        })
+  #   callback = fn
+  #     body, headers ->
+  #       {:ok, event} = Cloudevents.from_kafka_message(body, headers)
 
-      kafka_config = kafka_config()
+  #       IO.inspect(event, label: "event")
 
-      assert :ok ==
-               RigKafka.produce(
-                 kafka_config,
-                 kafka_topic,
-                 "rig-proxy-avro-value",
-                 "response",
-                 # we are using cloud events format here since RigKafka.produce enforces it, but response_from handler will ignore that fact
-                 event,
-                 [{"rig-correlation", correlation_id}]
-               )
+  #       message =
+  #         Jason.encode!(%{
+  #           rig: %{correlation: get_in(event.extensions, ["rig", "correlation"]), response_code: 201},
+  #           body: async_response
+  #         })
 
-      Response.ok!(sync_response, %{"content-type" => "application/json"})
+  #       assert :ok == RigKafka.produce(kafka_config, config().response_topic, "", "response", message)
 
-      RigKafka.Client.stop_supervised(kafka_client)
-    end)
+  #       # assert :ok ==
+  #       #   RigKafka.produce(
+  #       #     kafka_config,
+  #       #     config().response_topic,
+  #       #     "",
+  #       #     "response",
+  #       #     Jason.encode!(async_response),
+  #       #     [
+  #       #       {"rig-correlation", get_in(event.extensions, ["rig", "correlation"])},
+  #       #       {"rig-response-code", "201"}
+  #       #     ]
+  #       #   )
+  #   end
 
-    # We register the endpoint with the proxy:
-    rig_api_url = "http://localhost:#{@api_port}/v2/apis"
-    rig_proxy_url = "http://localhost:#{@proxy_port}"
+  #   {:ok, kafka_client} = RigKafka.start(kafka_config, callback)
 
-    body =
-      Jason.encode!(%{
-        id: api_id,
-        name: "Mock API",
-        version_data: %{
-          default: %{
-            endpoints: [
-              %{
-                id: endpoint_id,
-                method: "GET",
-                path: endpoint_path,
-                response_from: "kafka"
-              }
-            ]
-          }
-        },
-        proxy: %{
-          target_url: "localhost",
-          port: FakeServer.port()
-        }
-      })
+  #   # We register the endpoint with the proxy:
+  #   rig_api_url = "http://localhost:#{@api_port}/v2/apis"
+  #   rig_proxy_url = "http://localhost:#{@proxy_port}"
 
-    headers = [{"content-type", "application/json"}]
-    HTTPoison.post!(rig_api_url, body, headers)
+  #   body =
+  #     Jason.encode!(%{
+  #       id: api_id,
+  #       name: "Mock API",
+  #       version_data: %{
+  #         default: %{
+  #           endpoints: [
+  #             %{
+  #               id: endpoint_id,
+  #               method: "POST",
+  #               path: endpoint_path,
+  #               response_from: "kafka",
+  #               target: "kafka",
+  #               topic: topic
+  #             }
+  #           ]
+  #         }
+  #       },
+  #       proxy: %{
+  #         target_url: "localhost",
+  #         port: FakeServer.port()
+  #       }
+  #     })
 
-    # The client calls the proxy endpoint:
-    request_url = rig_proxy_url <> endpoint_path
+  #   headers = [{"content-type", "application/json"}]
+  #   HTTPoison.post!(rig_api_url, body, headers)
 
-    :timer.sleep(25_000)
-    %HTTPoison.Response{status_code: res_status, body: res_body} = HTTPoison.get!(request_url)
+  #   # The client calls the proxy endpoint:
+  #   request_url = rig_proxy_url <> endpoint_path
+  #   req_body =
+  #     Jason.encode!(%{
+  #       "event" => %{
+  #         "specversion" => "0.2",
+  #         "type" => "com.example.test",
+  #         "source" => "/rig-test",
+  #         "id" => "069711bf-3946-4661-984f-c667657b8d85",
+  #         "time" => "2018-04-05T17:31:00Z",
+  #         "data" => %{
+  #           "foo" => "bar"
+  #         }
+  #       }
+  #     })
 
-    # Now we can assert that...
-    # ...the fake backend service has been called:
-    assert FakeServer.hits() == 1
-    # ...the connection is closed and the status is OK:
-    assert res_status == 200
-    # ...but the client got the response sent to the Kafka topic:
-    assert Jason.decode!(res_body) == async_response
+  #   %HTTPoison.Response{status_code: res_status, body: res_body} = HTTPoison.post!(request_url, req_body)
 
-    RigKafka.Client.stop_supervised(kafka_client)
-  end
+  #   # Now we can assert that...
+  #   # ...the connection is closed and the status is OK:
+  #   assert res_status == 201
+  #   # ...but the client got the response sent to the Kafka topic:
+  #   assert Jason.decode!(res_body) == async_response
 
-  @tag :kafka
-  test_with_server "Given response_from and target are set to Kafka, the http response is taken from the Kafka response topic instead of forwarding the backend's original response." do
-    test_name = "proxy-http-response-from-kafka-target"
-    topic = "rig-test"
-
-    api_id = "mock-#{test_name}-api"
-    endpoint_id = "mock-#{test_name}-endpoint"
-    endpoint_path = "/#{endpoint_id}"
-    async_response = %{"message" => "this is the async response that reaches the client instead"}
-    kafka_config = kafka_config()
-
-    callback = fn
-      body, headers ->
-        {:ok, event} = Cloudevents.from_kafka_message(body, headers)
-
-        message =
-          Jason.encode!(%{
-            rig: %{correlation: get_in(event.extensions, ["rig", "correlation"]), response_code: 201},
-            body: async_response
-          })
-
-        assert :ok == RigKafka.produce(kafka_config, config().response_topic, "", "response", message)
-    end
-
-    {:ok, kafka_client} = RigKafka.start(kafka_config, callback)
-
-    # We register the endpoint with the proxy:
-    rig_api_url = "http://localhost:#{@api_port}/v2/apis"
-    rig_proxy_url = "http://localhost:#{@proxy_port}"
-
-    body =
-      Jason.encode!(%{
-        id: api_id,
-        name: "Mock API",
-        version_data: %{
-          default: %{
-            endpoints: [
-              %{
-                id: endpoint_id,
-                method: "POST",
-                path: endpoint_path,
-                response_from: "kafka",
-                target: "kafka",
-                topic: topic
-              }
-            ]
-          }
-        },
-        proxy: %{
-          target_url: "localhost",
-          port: FakeServer.port()
-        }
-      })
-
-    headers = [{"content-type", "application/json"}]
-    HTTPoison.post!(rig_api_url, body, headers)
-
-    # The client calls the proxy endpoint:
-    request_url = rig_proxy_url <> endpoint_path
-    req_body =
-      Jason.encode!(%{
-        "event" => %{
-          "specversion" => "0.2",
-          "type" => "com.example.test",
-          "source" => "/rig-test",
-          "id" => "069711bf-3946-4661-984f-c667657b8d85",
-          "time" => "2018-04-05T17:31:00Z",
-          "data" => %{
-            "foo" => "bar"
-          }
-        }
-      })
-
-    %HTTPoison.Response{status_code: res_status, body: res_body} = HTTPoison.post!(request_url, req_body, [], recv_timeout: 30_000)
-
-    # Now we can assert that...
-    # ...the connection is closed and the status is OK:
-    assert res_status == 201
-    # ...but the client got the response sent to the Kafka topic:
-    assert Jason.decode!(res_body) == async_response
-
-    RigKafka.Client.stop_supervised(kafka_client)
-  end
+  #   RigKafka.Client.stop_supervised(kafka_client)
+  # end
 end

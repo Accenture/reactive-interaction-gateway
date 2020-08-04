@@ -218,9 +218,7 @@ Configuration of such API endpoint might look like this:
 
 #### Supported formats
 
-All `response_from` options are using message structures as below.
-
-##### Binary
+All `response_from` options support only binary mode.
 
 Message headers:
 
@@ -229,7 +227,7 @@ rig-correlation: "correlation_id_sent_by_rig"
 rig-response-code: "201"
 ```
 
-> `rig-correlation` is required.
+> Both headers are required.
 
 Message body:
 
@@ -238,27 +236,6 @@ Message body:
   "foo": "bar"
 }
 ```
-
-##### Structured
-
-Message body:
-
-```json
-{
-  "rig": {
-    "correlation": "correlation_id_sent_by_rig",
-    "response_code": 201
-  },
-  "headers": {
-    "foo": "bar"
-  },
-  "body": {
-    "foo": "bar"
-  }
-}
-```
-
-> `rig.correlation` is required.
 
 ## Auth
 
