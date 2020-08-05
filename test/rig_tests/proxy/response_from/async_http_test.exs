@@ -27,7 +27,10 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
     end)
   end
 
-  test_with_server "Given response_from is set to http_async and the backend responds with 202, the http response is taken from the internal HTTP endpoint." do
+  # test_with_server "" do
+  # Given response_from=http_async, when the backend responds with 202, RIG doesn't forward that 202-response.
+  # Instead, RIG expects the actual response to be submitted to its API, identified by the correlation ID RIG has added to the forwarded request.
+  test_with_server "Given response_from=http_async, when the backend responds with 202, the http response is taken from the internal HTTP endpoint" do
     test_name = "proxy-http-response-from-http-internal"
 
     api_id = "mock-#{test_name}-api"
@@ -99,7 +102,7 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
     assert Jason.decode!(res_body)["data"] == async_response
   end
 
-  test_with_server "Given response_from is set to http_async and the backend responds with 200, the http response is synchronous." do
+  test_with_server "Given response_from=http_async, when the backend responds with 200, RIG forwards this 200-response (and does not expect an asynchronous response for this request)." do
     test_name = "proxy-http-response-synchronous"
 
     api_id = "mock-#{test_name}-api"
@@ -171,12 +174,13 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
     assert Jason.decode!(res_body) != async_response
   end
 
-  test_with_server "Given response_from is set to http_async and the backend responds with 400, the client should not receive any data." do
+  test_with_server "Given response_from=http_async, when the backend responds with 400, RIG forwards this 400-response (and does not expect an asynchronous response for this request)." do
     test_name = "proxy-http-no-response"
 
     api_id = "mock-#{test_name}-api"
     endpoint_id = "mock-#{test_name}-endpoint"
     endpoint_path = "/#{endpoint_id}"
+    sync_response = "Bad request from the test endpoint"
     async_response = %{"this response" => "the client never sees this response"}
 
     route(endpoint_path, fn %{query: %{"correlation" => correlation_id}} ->
@@ -194,7 +198,7 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
       |> put_req_header("content-type", "application/json;charset=utf-8")
       |> post("/v2/responses", event)
 
-      Response.bad_request!()
+      Response.bad_request!(sync_response)
     end)
 
     # We register the endpoint with the proxy:
@@ -237,6 +241,6 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
     # ...the connection is closed and the status is OK:
     assert res_status == 400
     # ...the client does not get any response:
-    assert res_body == ""
+    assert res_body == sync_response
   end
 end
