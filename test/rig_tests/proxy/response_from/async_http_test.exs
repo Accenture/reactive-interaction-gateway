@@ -77,13 +77,17 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
 
     # The client calls the proxy endpoint:
     request_url = rig_proxy_url <> endpoint_path
-    %HTTPoison.Response{status_code: res_status, body: res_body} = HTTPoison.get!(request_url)
+
+    %HTTPoison.Response{status_code: res_status, body: res_body, headers: headers} =
+      HTTPoison.get!(request_url)
 
     # Now we can assert that...
     # ...the fake backend service has been called:
     assert FakeServer.hits() == 1
     # ...the connection is closed and the status is OK:
     assert res_status == 201
+    # ...extra headers are present
+    assert Enum.member?(headers, {"content-type", "application/json; charset=utf-8"})
     # ...but the client got the response sent to the HTTP internal endpoint:
     assert Jason.decode!(res_body) == async_response
   end

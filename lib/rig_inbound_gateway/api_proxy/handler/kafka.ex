@@ -44,12 +44,12 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
              any()}
   def kafka_handler(message, headers) do
     case ResponseFromParser.parse(headers, message) do
-      {deserialized_pid, response_code, response} ->
+      {deserialized_pid, response_code, response, extra_headers} ->
         Logger.debug(fn ->
           "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
         end)
 
-        send(deserialized_pid, {:response_received, response, response_code})
+        send(deserialized_pid, {:response_received, response, response_code, extra_headers})
 
       err ->
         Logger.warn(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)
@@ -257,7 +257,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     conf = config()
 
     receive do
-      {:response_received, response, response_code} ->
+      {:response_received, response, response_code, extra_headers} ->
         ProxyMetrics.count_proxy_request(
           conn.method,
           conn.request_path,
@@ -268,6 +268,9 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
         conn
         |> Tracing.Plug.put_resp_header(Tracing.context())
+        |> Map.update!(:resp_headers, fn existing_headers ->
+          existing_headers ++ Map.to_list(extra_headers)
+        end)
         |> Conn.put_resp_content_type("application/json")
         |> Conn.send_resp(response_code, response)
     after
