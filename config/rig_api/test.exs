@@ -10,5 +10,6 @@ config :rig, RigApi.Endpoint,
 
 config :rig, RigApi.V1.APIs, rig_proxy: RigInboundGateway.ProxyMock
 config :rig, RigApi.V2.APIs, rig_proxy: RigInboundGateway.ProxyMock
+config :rig, RigApi.V3.APIs, rig_proxy: RigInboundGateway.ProxyMock
 
 config :rig, :event_filter, Rig.EventFilterMock
