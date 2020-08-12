@@ -51,5 +51,9 @@ defmodule RigInboundGateway.ApiProxy.ResponseFromParser do
   # ---
 
   defp to_int(value) when is_integer(value), do: value
-  defp to_int(value) when is_binary(value), do: String.to_integer(value)
+  defp to_int(string) when is_binary(string) do
+    String.to_integer(string)
+  rescue
+    ArgumentError -> {:error, {:not_an_integer, string}}
+  end
 end
