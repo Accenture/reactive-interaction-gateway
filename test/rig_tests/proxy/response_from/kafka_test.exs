@@ -43,20 +43,20 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
   end
 
   @tag :kafka
-  test_with_server "Given response_from is set to Kafka and response is in binary mode, the custom http response code - 201 - should be used." do
-    test_name = "proxy-http-response-from-kafka-binary-status-code"
+  test_with_server "Given response_from is set to Kafka, the http response (code, content-type, body) is taken from the Kafka response topic instead of forwarding the backend's original response." do
+    test_name = "proxy-http-response-from-kafka"
     kafka_config = kafka_config()
     {:ok, kafka_client} = RigKafka.start(kafka_config)
+    %{response_topic: kafka_topic} = config()
 
     api_id = "mock-#{test_name}-api"
     endpoint_id = "mock-#{test_name}-endpoint"
-    %{response_topic: kafka_topic} = config()
     endpoint_path = "/#{endpoint_id}"
+
     sync_response = %{"message" => "the client never sees this response"}
     async_response = %{"message" => "this is the async response that reaches the client instead"}
 
-    # The following service fake also shows how a real service should
-    # wrap its response in a CloudEvent:
+    # The fake backend service:
     route(endpoint_path, fn %{query: %{"correlation" => correlation_id}} ->
       kafka_config = kafka_config()
 
@@ -77,7 +77,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
       Response.ok!(sync_response, %{"content-type" => "application/json"})
     end)
 
-    # We register the endpoint with the proxy:
+    # We register this endpoint with the proxy:
     rig_api_url = "http://localhost:#{@api_port}/v2/apis"
     rig_proxy_url = "http://localhost:#{@proxy_port}"
 
@@ -109,17 +109,15 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
     # The client calls the proxy endpoint:
     request_url = rig_proxy_url <> endpoint_path
 
+    # The client sees only the asynchronous response:
     %HTTPoison.Response{status_code: res_status, body: res_body, headers: headers} =
       HTTPoison.get!(request_url)
 
-    # Now we can assert that...
-    # ...the fake backend service has been called:
-    assert FakeServer.hits() == 1
-    # ...the connection is closed and the status is OK:
+    # The response code is taken from the async response (201) and not from the sync one (200):
     assert res_status == 201
-    # ...extra headers are present
+    # Extra headers are present:
     assert Enum.member?(headers, {"content-type", "application/json;charset=utf-8"})
-    # ...but the client got the response sent to the Kafka topic:
+    # The body is taken from the async response as well:
     assert Jason.decode!(res_body) == async_response
 
     RigKafka.Client.stop_supervised(kafka_client)
@@ -202,9 +200,10 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
   end
 
   @tag :kafka
-  test_with_server "Given response_from and target are set to Kafka, the http response is taken from the Kafka response topic instead of forwarding the backend's original response." do
+  test_with_server "response_from and target can both be set to Kafka." do
     test_name = "proxy-http-response-from-kafka-target"
     topic = "rig-test"
+    %{response_topic: response_topic} = config()
 
     api_id = "mock-#{test_name}-api"
     endpoint_id = "mock-#{test_name}-endpoint"
@@ -219,7 +218,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
         assert :ok ==
                  RigKafka.produce(
                    kafka_config,
-                   config().response_topic,
+                   response_topic,
                    "",
                    "response",
                    Jason.encode!(async_response),
@@ -281,19 +280,17 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
         }
       })
 
-    # consumer start tends to be slower sometimes, therefore we give it some time before producing
+    # Wait for the Kafka consumer to get its assignments..
     :timer.sleep(15_000)
 
     %HTTPoison.Response{status_code: res_status, body: res_body, headers: headers} =
       HTTPoison.post!(request_url, req_body)
 
-    # Now we can assert that...
-    # ...the connection is closed and the status is OK:
+    # Status and body are both taken from the Kafka response:
     assert res_status == 201
-    # ...extra headers are present
-    assert Enum.member?(headers, {"content-type", "application/json;charset=utf-8"})
-    # ...but the client got the response sent to the Kafka topic:
     assert Jason.decode!(res_body) == async_response
+    # Extra headers are present:
+    assert Enum.member?(headers, {"content-type", "application/json;charset=utf-8"})
 
     RigKafka.Client.stop_supervised(kafka_client)
   end
