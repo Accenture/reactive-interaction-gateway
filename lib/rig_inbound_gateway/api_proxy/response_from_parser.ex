@@ -24,7 +24,7 @@ defmodule RigInboundGateway.ApiProxy.ResponseFromParser do
          # forward extra haeders such as content-type
          extra_headers <- Map.drop(headers_map, ["rig-correlation", "rig-response-code"]),
          # convert status code to int if needed, HTTP headers can't have number as a value
-         response_code <- to_int(raw_response_code),
+         {:ok, response_code} <- to_int(raw_response_code),
          response_body <- try_encode(message) do
       Logger.debug(fn ->
         "Parsed binary HTTP response: body=#{inspect(response_body)}, code=#{
@@ -54,10 +54,10 @@ defmodule RigInboundGateway.ApiProxy.ResponseFromParser do
 
   # ---
 
-  defp to_int(value) when is_integer(value), do: value
+  defp to_int(value) when is_integer(value), do: {:ok, value}
 
   defp to_int(string) when is_binary(string) do
-    String.to_integer(string)
+    {:ok, String.to_integer(string)}
   rescue
     ArgumentError -> {:error, {:not_an_integer, string}}
   end

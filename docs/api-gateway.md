@@ -212,7 +212,7 @@ Configuration of such API endpoint might look like this:
 - Kinesis -> **not supported**
 - Nats -> `nats`
 
-`http_async` means that correlated response has to be sent to internal `:4010/v2/responses` `POST` endpoint.
+`http_async` means that correlated response has to be sent to internal `:4010/v3/responses` `POST` endpoint.
 
 #### Supported formats
 
@@ -223,9 +223,10 @@ Message headers:
 ```plaintext
 rig-correlation: "correlation_id_sent_by_rig"
 rig-response-code: "201"
+content-type: "application/json"
 ```
 
-> Both headers are required.
+> All headers are required.
 
 Message body:
 

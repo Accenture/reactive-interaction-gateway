@@ -118,7 +118,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
         |> Map.update!(:resp_headers, fn existing_headers ->
           existing_headers ++ Map.to_list(extra_headers)
         end)
-        |> Conn.put_resp_content_type("application/json")
         |> Conn.send_resp(response_code, response)
     after
       response_timeout ->
