@@ -25,6 +25,10 @@
         "title": "Avro Implementation Details",
         "sidebar_label": "Avro"
       },
+      "distributed-tracing": {
+        "title": "Distributed Tracing",
+        "sidebar_label": "Distributed Tracing"
+      },
       "event-format": {
         "title": "Event Format",
         "sidebar_label": "Event Format"

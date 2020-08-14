@@ -75,8 +75,6 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "OPTIONS",
                 path: endpoint_path,
                 target: "kafka"
@@ -134,8 +132,6 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "POST",
                 path: endpoint_path,
                 target: "kafka",
@@ -252,8 +248,6 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "POST",
                 path: endpoint_path,
                 target: "kafka",
@@ -371,8 +365,6 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "POST",
                 path: endpoint_path,
                 target: "kafka"
@@ -488,8 +480,6 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "POST",
                 path: endpoint_path,
                 target: "kafka"

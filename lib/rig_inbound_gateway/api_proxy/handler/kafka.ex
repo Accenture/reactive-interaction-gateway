@@ -6,15 +6,12 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   use Rig.KafkaConsumerSetup, [:cors, :request_topic, :request_schema, :response_timeout]
 
   alias Plug.Conn
-
-  alias RigMetrics.ProxyMetrics
-
+  alias Rig.Connection.Codec
+  alias RIG.Tracing
   alias RigInboundGateway.ApiProxy.Handler
   @behaviour Handler
-
-  alias Rig.Connection.Codec
-
-  alias RIG.Tracing
+  alias RigInboundGateway.ApiProxy.ResponseFromParser
+  alias RigMetrics.ProxyMetrics
 
   @help_text """
   Produce the request to a Kafka topic and optionally wait for the (correlated) response.
@@ -46,21 +43,14 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
           | {:error, %{:__exception__ => true, :__struct__ => atom(), optional(atom()) => any()},
              any()}
   def kafka_handler(message, headers) do
-    with {:ok, event} <- Cloudevents.from_kafka_message(message, headers),
-         {:ok, rig_metadata} <- Map.fetch(event.extensions, "rig"),
-         {:ok, correlation_id} <- Map.fetch(rig_metadata, "correlation"),
-         {:ok, deserialized_pid} <- Codec.deserialize(correlation_id) do
-      Logger.debug(fn ->
-        "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
-      end)
+    case ResponseFromParser.parse(headers, message) do
+      {deserialized_pid, response_code, response, extra_headers} ->
+        Logger.debug(fn ->
+          "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
+        end)
 
-      data =
-        if headers == [],
-          do: Cloudevents.to_json(event),
-          else: Jason.encode!(event.data)
+        send(deserialized_pid, {:response_received, response, response_code, extra_headers})
 
-      send(deserialized_pid, {:response_received, data})
-    else
       err ->
         Logger.warn(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)
         :ignore
@@ -267,7 +257,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     conf = config()
 
     receive do
-      {:response_received, response} ->
+      {:response_received, response, response_code, extra_headers} ->
         ProxyMetrics.count_proxy_request(
           conn.method,
           conn.request_path,
@@ -278,8 +268,10 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
         conn
         |> Tracing.Plug.put_resp_header(Tracing.context())
-        |> Conn.put_resp_content_type("application/json")
-        |> Conn.send_resp(:ok, response)
+        |> Map.update!(:resp_headers, fn existing_headers ->
+          existing_headers ++ Map.to_list(extra_headers)
+        end)
+        |> Conn.send_resp(response_code, response)
     after
       conf.response_timeout ->
         ProxyMetrics.count_proxy_request(
