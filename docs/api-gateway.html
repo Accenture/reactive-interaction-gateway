@@ -194,10 +194,7 @@ Hi, I<span class="hljs-string">'m a demo service!
 </blockquote>
 <h3><a class="anchor" aria-hidden="true" id="wait-for-response"></a><a href="#wait-for-response" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Wait for response</h3>
 <p>Sometimes it makes sense to provide a simple request-response API to something that runs asynchronously on the backend. For example, let's say there's a ticket reservation process that takes 10 seconds in total and involves three different services that communicate via message passing. For an external client, it may be simpler to wait 10 seconds for the response instead of polling for a response every other second.
-A behavior like this can be configured using an endpoints' <code>response_from</code> property. When set to <code>kafka</code>, the response to the request is not taken from the <code>target</code> (e.g., for <code>target</code> = <code>http</code> this means the backend's HTTP response is ignored), but instead it's read from a Kafka topic. In order to enable RIG to correlate the response from the topic with the original request, RIG adds a correlation ID to the request (using a query parameter in case of <code>target</code> = <code>http</code>, or backed into the produced CloudEvent otherwise). Backend services that work with the request need to include that correlation ID in their response; otherwise, RIG won't be able to forward it to the client (and times out).</p>
-<blockquote>
-<p>In case you want to use <em>binary</em> transport mode, make sure that <code>rig</code> extension (containing correlation ID) is prefixed with <code>ce_</code> as well.</p>
-</blockquote>
+A behavior like this can be configured using an endpoints' <code>response_from</code> property. When set to <code>kafka</code>, the response to the request is not taken from the <code>target</code> (e.g., for <code>target</code> = <code>http</code> this means the backend's HTTP response is ignored), but instead it's read from a Kafka topic. In order to enable RIG to correlate the response from the topic with the original request, RIG adds a correlation ID to the request (using a query parameter in case of <code>target</code> = <code>http</code>, or backed into the produced CloudEvent otherwise). <strong>Backend services that work with the request need to include that correlation ID in their response; otherwise, RIG won't be able to forward it to the client (and times out).</strong></p>
 <p>Configuration of such API endpoint might look like this:</p>
 <pre><code class="hljs css language-json">[{
   ...
@@ -219,24 +216,29 @@ A behavior like this can be configured using an endpoints' <code>response_from</
 <blockquote>
 <p>Note the presence of <code>response_from</code> field. This tells RIG to wait for different event with the same correlation ID.</p>
 </blockquote>
-<p>As an alternative you can set <code>response_from</code> to <code>http_async</code>. This means that correlated response has to be sent to internal <code>:4010/v2/responses</code> <code>POST</code> endpoint with a body like this:</p>
-<pre><code class="hljs css language-json">{
-  "id": "1",
-  "specversion": "0.2",
-  "source": "my-service",
-  "type": "com.example",
-  "rig": {
-    "correlation": "_id_"
-  },
-  "data": {
-    ...
-  }
-  ...
-}
+<h4><a class="anchor" aria-hidden="true" id="supported-combinations-target---response_from"></a><a href="#supported-combinations-target---response_from" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Supported combinations (<code>target</code> -&gt; <code>response_from</code>)</h4>
+<ul>
+<li>HTTP -&gt; <code>kafka</code>/<code>http_async</code>/<code>kinesis</code></li>
+<li>Kafka -&gt; <code>kafka</code></li>
+<li>Kinesis -&gt; <strong>not supported</strong></li>
+<li>Nats -&gt; <code>nats</code></li>
+</ul>
+<p><code>http_async</code> means that correlated response has to be sent to internal <code>:4010/v3/responses</code> <code>POST</code> endpoint.</p>
+<h4><a class="anchor" aria-hidden="true" id="supported-formats"></a><a href="#supported-formats" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Supported formats</h4>
+<p>All <code>response_from</code> options support only binary mode.</p>
+<p>Message headers:</p>
+<pre><code class="hljs css language-plaintext">rig-correlation: "correlation_id_sent_by_rig"
+rig-response-code: "201"
+content-type: "application/json"
 </code></pre>
 <blockquote>
-<p><strong>NOTE:</strong> Kinesis doesn't support <code>response_from</code> field yet.</p>
+<p>All headers are required.</p>
 </blockquote>
+<p>Message body:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"foo"</span>: <span class="hljs-string">"bar"</span>
+}
+</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="auth"></a><a href="#auth" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Auth</h2>
 <p>RIG can do simple auth check for endpoints. Currently supports JWT.</p>
 <p>API configuration is following:</p>
