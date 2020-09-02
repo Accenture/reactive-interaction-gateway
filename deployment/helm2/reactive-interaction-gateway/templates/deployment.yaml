@@ -25,6 +25,8 @@ spec:
             - name: {{ $key }}
               value: {{ $value | quote }}
           {{- end }}
+            - name: DNS_NAME
+              value: {{ include "reactive-interaction-gateway.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local
             - name: NODE_HOST
               valueFrom:
                 fieldRef:

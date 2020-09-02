@@ -36,10 +36,10 @@ deployment:
 
     ## Discovery
     DISCOVERY_TYPE: dns
-    ## Change "default" if you are using different namespace
-    DNS_NAME: reactive-interaction-gateway-headless.default.svc.cluster.local
-    NODE_COOKIE: magiccookie
+    ## DNS_NAME is set dynamically
     ## NODE_HOST is set dynamically to PodIP in "templates/deployment.yaml"
+    # Change magiccookie to some individual hash
+    NODE_COOKIE: magiccookie
 
     ## Kafka
     ## Setting "KAFKA_BROKERS" automatically enables usage of Kafka

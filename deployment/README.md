@@ -1,6 +1,4 @@
-# Distributed deployment
-
-Reactive Interaction Gateway (RIG) uses [Peerage library](https://github.com/mrluc/peerage) to do discovery in distributed mode (production Distillery release).
+# Running RIG on Kubernetes
 
 ## Kubectl
 
@@ -13,6 +11,7 @@ kubectl apply -f kubectl/rig.yaml
 ### Version 2
 
 ```bash
+cd helm2
 # dry run to verify that everything is ok
 helm install --name=rig reactive-interaction-gateway --dry-run
 # install
@@ -22,6 +21,7 @@ helm install --name=rig reactive-interaction-gateway
 ### Version 3
 
 ```bash
+cd helm3
 # dry run to verify that everything is ok
 helm install rig reactive-interaction-gateway --dry-run
 # install
@@ -32,31 +32,29 @@ helm install rig reactive-interaction-gateway
 
 Both `kubectl` and `helm` deploy bunch of Kubernetes resources:
 
-- deployment - creates also pod(s)
-- service - provides the main communication point for other applications -- `rig-reactive-interaction-gateway`
-- headless service - takes care of DNS discovery
+- deployment - manages pod(s)
+- service - provides the main communication point for other applications
+- headless service - takes care of DNS discovery used internally
 
 To allow external communication (outside of your cluster) do:
 
 ```bash
 # both helm versions
 helm upgrade --set service.type=LoadBalancer rig reactive-interaction-gateway
-# for kubectl update kubectl/rig.yaml:12 to LoadBalancer
+# for kubectl update kubectl/rig.yaml to use a service of type LoadBalancer instead of ClusterIP
 ```
 
 ## Scaling
 
-1. Scale the deployment and create multiple pods
+Scale the deployment and create multiple pods
 
-  ```bash
-  helm upgrade --set service.type=LoadBalancer --set replicaCount=<replicas> rig reactive-interaction-gateway
-  # or
-  kubectl scale deployment/<deployment_name> --replicas <replicas>
-  ```
+```bash
+helm upgrade --set service.type=LoadBalancer --set replicaCount=<replicas> rig reactive-interaction-gateway
+# or
+kubectl scale deployment/<deployment_name> --replicas <replicas>
+```
 
-2. `kubectl get pods` should list new pods automatically connected to RIG cluster
-
-You can also inspect logs of pods `kubectl logs <pod_name>` to see how they automatically re-balance Kafka consumers (if you are using Kafka) and adapt Proxy APIs from other nodes.
+You can also inspect the logs of the pods with `kubectl logs <pod_name>` to see how they automatically re-balance Kafka consumers (if you are using Kafka) and adapt Proxy APIs from other nodes.
 
 ## Configuration
 
@@ -64,7 +62,7 @@ You can also inspect logs of pods `kubectl logs <pod_name>` to see how they auto
 
 Every node in cluster needs to be discoverable by other nodes. For that Elixir/Erlang uses so called `long name` or `short name`. We are using `long name` which is formed in the following way `app_name@node_host`. `app_name` is in our case set to `rig` and `node_host` is taken from environment variable `NODE_HOST`. This can be either IP or container alias or whatever that is routable in network by other nodes.
 
-In Kubernetes world it can be set like this:
+We are using the pod IP with:
 
 ```yaml
 - name: NODE_HOST
@@ -75,28 +73,7 @@ In Kubernetes world it can be set like this:
 
 ### Node cookie
 
-Nodes in Erlang cluster use cookies as a form of authorization/authentication between them. Only nodes with the same cookie can communicate together. It should be ideally some generated hash, set it to the `NODE_COOKIE` environment variable.
-
-### DNS discovery
-
-RIG currently supports distributed deployment via DNS discovery. To make it work, you need to set two environment variables:
-
-1. Discovery type - Currently, RIG supports only `dns` discovery. To use DNS, set the `DISCOVERY_TYPE` to `dns`.
-
-2. DNS name (address) - Address where peerage will do a discovery for Node host addresses. Value is taken from the environment variable `DNS_NAME`.
-
-DNS discovery is executed every 5 seconds.
-
-In Kubernetes world it can be set like this:
-
-```yaml
-- name: DISCOVERY_TYPE
-  value: dns
-- name: DNS_NAME
-  value: "reactive-interaction-gateway-service-headless.default.svc.cluster.local"
-```
-
-> `default` is Kubernetes namespace.
+Nodes in Erlang cluster use cookies as a form of authorization/authentication between them. Only nodes with the same cookie can communicate together. Ideally, it is some generated hash, that's why we recommend adapting `NODE_COOKIE` environment variable in the `values.yaml`.
 
 ### Additional configuration
 
