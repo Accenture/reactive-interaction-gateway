@@ -37,6 +37,19 @@ defmodule Rig.Config do
   If you use :custom_validation, you should deal with the raw keyword list
   by implementing `validate_config!/1` in the module.
   """
+  defmodule SyntaxError do
+    defexception [:cause]
+
+    def message(%__MODULE__{cause: cause}) when is_list(cause),
+      do: "could not parse JSON: #{inspect(cause)}"
+
+    def message(%__MODULE__{cause: cause}) when byte_size(cause) > 0,
+      do: "could not parse JSON: #{cause}"
+
+    def message(%__MODULE__{cause: cause}),
+      do: "could not parse JSON: #{Exception.message(cause)}"
+  end
+
   require Logger
   alias Jason
   alias Result
@@ -90,17 +103,54 @@ defmodule Rig.Config do
   end
 
   # ---
+
+  defp uppercase_http_method(apis) when is_list(apis) do
+    Enum.map(apis, fn api ->
+      if Map.has_key?(api, "version_data") do
+        %{"version_data" => version_data} = api
+
+        updated_version_data =
+          Enum.into(version_data, %{}, fn {key, value} = api ->
+            endpoints = Map.get(value, "endpoints")
+
+            if is_list(endpoints) do
+              updated_endpoints =
+                Enum.map(endpoints, fn endpoint ->
+                  if Map.has_key?(endpoint, "method") do
+                    Map.update!(endpoint, "method", &Plug.Router.Utils.normalize_method/1)
+                  else
+                    endpoint
+                  end
+                end)
+
+              {key, Map.update!(value, "endpoints", fn _ -> updated_endpoints end)}
+            else
+              api
+            end
+          end)
+
+        Map.update!(api, "version_data", fn _ -> updated_version_data end)
+      else
+        api
+      end
+    end)
+  end
+
+  defp uppercase_http_method(parsed_json), do: parsed_json
+
+  # ---
   # pub
   # ---
 
-  @spec parse_json_env(String.t()) :: {:ok, any} | {:error, :syntax_error, any}
+  @spec parse_json_env(String.t()) :: {:ok, any} | {:error, %SyntaxError{}}
   def parse_json_env(path_or_encoded) do
-    with {:error, reason1} <- decode_json_file(path_or_encoded),
-         {:error, reason2} <- from_encoded(path_or_encoded) do
-      {:error, :syntax_error, [reason1, reason2]}
-    else
-      {:ok, config} -> {:ok, config}
-    end
+    decode_json_file(path_or_encoded)
+    |> Result.or_else(fn file_error ->
+      from_encoded(path_or_encoded)
+      |> Result.map_err(fn decode_error -> [file_error, decode_error] end)
+    end)
+    |> Result.map(&uppercase_http_method/1)
+    |> Result.map_err(&%SyntaxError{cause: &1})
   end
 
   # ---

@@ -2,10 +2,12 @@ defmodule RigInboundGateway.Events do
   @moduledoc """
   Utility functions used in more than one controller.
   """
+
   alias UUID
 
   alias Rig.Connection
   alias Rig.Subscription
+  alias RIG.Tracing
   alias RigCloudEvents.CloudEvent
 
   @spec welcome_event(pid | nil) :: CloudEvent.t()
@@ -29,13 +31,15 @@ defmodule RigInboundGateway.Events do
   end
 
   defp rig_event(type, data) do
-    CloudEvent.parse!(%{
+    %{
       specversion: "0.2",
       type: type,
       source: "rig",
       id: UUID.uuid4(),
       time: Timex.now() |> Timex.format!("{RFC3339}"),
       data: data
-    })
+    }
+    |> Tracing.append_context(Tracing.context())
+    |> CloudEvent.parse!()
   end
 end

@@ -14,6 +14,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
   alias Rig.Connection.Codec
 
+  alias RIG.Tracing
+
   @help_text """
   Produce the request to a Kafka topic and optionally wait for the (correlated) response.
 
@@ -66,6 +68,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
   # ---
 
+  @doc @help_text
   @impl Handler
   def handle_http_request(conn, api, endpoint, request_path)
 
@@ -89,9 +92,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     |> Conn.send_resp(:no_content, "")
   end
 
-  @doc @help_text
-  def handle_http_request(conn, api, endpoint, request_path)
-
   def handle_http_request(
         conn,
         _,
@@ -107,11 +107,27 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     |> case do
       # Deprecated way to pass events:
       {:ok, %{"partition" => partition, "event" => event}} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from, topic, schema)
+        do_handle_http_request(
+          conn,
+          request_path,
+          partition,
+          event,
+          response_from,
+          topic,
+          schema
+        )
 
       # Preferred way to pass events, where the partition goes into the "rig" extension:
       {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from, topic, schema)
+        do_handle_http_request(
+          conn,
+          request_path,
+          partition,
+          event,
+          response_from,
+          topic,
+          schema
+        )
 
       # Deprecated way to pass events, partition not set -> will be randomized:
       {:ok, %{"event" => event}} ->
@@ -190,6 +206,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         path: request_path,
         query: conn.query_string
       })
+      |> Tracing.append_context(Tracing.context())
       |> Poison.encode!()
 
     produce(partition, kafka_message, topic, schema)
@@ -255,6 +272,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         )
 
         conn
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.put_resp_content_type("application/json")
         |> Conn.send_resp(:ok, response)
     after
@@ -268,6 +286,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         )
 
         conn
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.send_resp(:gateway_timeout, "")
     end
   end

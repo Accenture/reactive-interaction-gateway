@@ -46,7 +46,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
           body: encoded_body_or_nil
         }
 
-        do_init(req, request)
+        setup_connection(req, request)
 
       {:error, reason} ->
         req = :cowboy_req.reply(400, %{}, reason, req)
@@ -56,7 +56,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   # ---
 
-  def do_init(req, request) do
+  def setup_connection(req, request) do
     conf = config()
 
     on_success = fn subscriptions ->

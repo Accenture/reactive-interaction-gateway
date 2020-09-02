@@ -4,6 +4,8 @@ defmodule Rig.Application do
   use Application
   use Rig.Config, [:log_level]
 
+  alias RIG.Discovery
+  alias RIG.Tracing
   alias RigOutboundGateway.Kinesis
   alias RigOutboundGateway.KinesisFirehose
 
@@ -13,7 +15,8 @@ defmodule Rig.Application do
     # Override application logging with environment variable
     Logger.configure([{:level, config().log_level}])
 
-    Rig.Discovery.start()
+    Tracing.start()
+    Discovery.start()
 
     children = [
       Spec.supervisor(Phoenix.PubSub.PG2, [Rig.PubSub, []]),
@@ -23,6 +26,7 @@ defmodule Rig.Application do
       Rig.EventFilter.Sup,
       Rig.EventStream.KafkaToFilter,
       Rig.EventStream.KafkaToHttp,
+      Rig.EventStream.NatsToFilter,
       # Blacklist:
       Spec.worker(RIG.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
       # Kinesis event stream:
