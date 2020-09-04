@@ -1,5 +1,5 @@
+# See https://github.com/helm/chart-testing#configuration
 remote: origin
 chart-dirs:
-  - deployment/helm3
-  - deployment/helm2
+  - deployment/helm
 debug: true
