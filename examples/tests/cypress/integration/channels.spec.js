@@ -1,5 +1,5 @@
 describe('Channels', () => {
-  ['sse', 'ws'].forEach(type => {
+  ['sse', 'ws'].forEach((type) => {
     it(`Creates ${type} subscription, sends & receives public events`, () => {
       cy.visit('http://localhost:3000');
       cy.connect(type);
@@ -21,7 +21,8 @@ describe('Channels', () => {
       cy.assertEventLogHasMatch('"name":"mike"');
       // send constrained event for different user - John
       cy.sendEvent('message', '"name":"john","foo":"bar"');
-      // Mike shouldn't receive any new event
+      // Mike shouldn't receive any new event - wait for 5 seconds to make sure that event was produced and consumed
+      cy.wait(5000);
       cy.assertEventLogHasMatch('"foo":"bar"');
       cy.assertEventLogHasMatch('"name":"mike"');
       cy.assertEventLogHasMatch('"eventType":"message"');

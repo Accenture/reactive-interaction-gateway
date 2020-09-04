@@ -103,7 +103,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
       end
 
     receive do
-      {:response_received, response} ->
+      {:response_received, response, response_code, extra_headers} ->
         ProxyMetrics.count_proxy_request(
           conn.method,
           conn.request_path,
@@ -115,8 +115,10 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
         conn
         |> with_cors()
         |> Tracing.Plug.put_resp_header(Tracing.context())
-        |> Conn.put_resp_content_type("application/json")
-        |> Conn.send_resp(:ok, response)
+        |> Map.update!(:resp_headers, fn existing_headers ->
+          existing_headers ++ Map.to_list(extra_headers)
+        end)
+        |> Conn.send_resp(response_code, response)
     after
       response_timeout ->
         ProxyMetrics.count_proxy_request(

@@ -127,7 +127,7 @@ defmodule RIG.MixProject do
       # JSON parser, for cloud_event and event_hub:
       {:poison, "~> 3.0 or ~> 4.0"},
       # JSON parser that's supposedly faster than poison:
-      {:jason, "~> 1.1"},
+      {:jason, "~> 1.2"},
       {:jaxon, "~> 1.0"},
       # JSON Pointer (RFC 6901) implementation for subscriptions:
       {:odgn_json_pointer, "~> 2.5"},
@@ -137,6 +137,8 @@ defmodule RIG.MixProject do
       {:erlavro, "~> 2.8"},
       # Apache Kafka Schema Registry wrapper library:
       {:schemex, "~> 0.1.1"},
+      # Cloud Events
+      {:cloudevents, "~> 0.4.0"},
       # Caching library using ETS:
       {:memoize, "~> 1.3"},
       # For distributed_set:
@@ -158,7 +160,7 @@ defmodule RIG.MixProject do
       # SSE serialization:
       {:server_sent_event, "~> 1.0"},
       # A library for defining structs with a type without writing boilerplate code:
-      {:typed_struct, "~> 0.1.4"},
+      {:typed_struct, "~> 0.2.0"},
       # AWS SDK
       {:ex_aws, "~> 2.0"},
       {:ex_aws_kinesis, "~> 2.0"},

@@ -5,6 +5,8 @@ defmodule Rig.EventStream.KafkaToHttp do
   """
   use Rig.KafkaConsumerSetup, [:targets]
 
+  import RIG.Tracing.CloudEvent
+
   alias HTTPoison
   alias RIG.Tracing
   alias RigCloudEvents.CloudEvent
@@ -18,7 +20,7 @@ defmodule Rig.EventStream.KafkaToHttp do
 
   # ---
 
-  def kafka_handler(message) do
+  def kafka_handler(message, _headers) do
     case CloudEvent.parse(message) do
       {:ok, %CloudEvent{} = cloud_event} ->
         Tracing.CloudEvent.with_child_span "kafka_to_http", cloud_event do

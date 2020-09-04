@@ -75,6 +75,32 @@ defmodule RigApi.Router do
     end
   end
 
+  scope "/v3", RigApi.V3 do
+    scope "/apis" do
+      pipe_through(:body_parser)
+      get("/", APIs, :list_apis)
+      post("/", APIs, :add_api)
+      get("/:id", APIs, :get_api_detail)
+      put("/:id", APIs, :update_api)
+      delete("/:id", APIs, :deactivate_api)
+    end
+
+    scope "/messages" do
+      post("/", Messages, :publish)
+    end
+
+    scope "/responses" do
+      pipe_through(:body_parser)
+      resources("/", Responses, only: [:create])
+    end
+
+    scope "/session-blacklist" do
+      pipe_through(:body_parser)
+      post("/", SessionBlacklist, :blacklist_session)
+      get("/:session_id", SessionBlacklist, :check_status)
+    end
+  end
+
   def swagger_info do
     %{
       info: %{
