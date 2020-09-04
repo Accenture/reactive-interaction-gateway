@@ -5,11 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<!-- ## [Unreleased] -->
-
-<!-- ### Added -->
-
-## [3.0.0-alpha.1] - 2020-09-04
+## [Unreleased]
 
 ### Added
 
@@ -32,6 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed a bug where distributed set processes would crash when one of their peers has died but hasn't been removed yet from the pg2 group.
 
+<!-- ### Deprecated -->
+
+<!-- ### Removed -->
+
+<!-- ### Security -->
+
+<!-- ### Technical Improvements -->
 
 ## [2.4.0] - 2020-05-07
 
@@ -394,7 +397,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Disable Origin checking.
   [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
-[3.0.0-alpha.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.4.0...3.0.0-alpha.1
+[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.4.0...HEAD
 [2.4.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.3.0...2.4.0
 [2.3.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.1...2.3.0
 [2.2.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.0...2.2.1
