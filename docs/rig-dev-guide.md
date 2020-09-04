@@ -43,16 +43,18 @@ To have the project use a newer Elixir version, make sure to change the followin
 ## Releasing a new version
 
 - Increment `rig` version in the [version](../version) file
-- In [CHANGELOG.md](https://github.com/Accenture/reactive-interaction-gateway/blob/master/CHANGELOG.md), rename `[Unreleased]` and add a corresponding link to the bottom of the file
+- Increment `appVersion` in the [Helm 2 Chart.yaml](../deployment/helm2/reactive-interaction-gateway/Chart.yaml) and [Helm 3 Chart.yaml](../deployment/helm3/reactive-interaction-gateway/Chart.yaml) files
+- Increment image tag in the [Kubernetes rig.yaml](../deployment/kubectl/rig.yaml) file
+- In [CHANGELOG.md](../CHANGELOG.md), rename `[Unreleased]` and add a corresponding link to the bottom of the file
 - Create a signed Git tag either using `git -s` or by creating a release using the Github UI
 
 ## Test Tags
 
 We use `tag`s to group tests together. Often, it makes sense to assign more than one tag to a test case.
 
-`@tag` | When to use it?
------- | ---------------
-`:avro` | Integration tests that require a running Avro schema registry.
-`:kafka` | Integration tests that require a running Kafka broker.
-`:kinesis` | Integration tests that require an active Kinesis stream.
-`:smoke` | Quick integration test that is designed to catch obvious integration problems.
+| `@tag`     | When to use it?                                                                |
+| ---------- | ------------------------------------------------------------------------------ |
+| `:avro`    | Integration tests that require a running Avro schema registry.                 |
+| `:kafka`   | Integration tests that require a running Kafka broker.                         |
+| `:kinesis` | Integration tests that require an active Kinesis stream.                       |
+| `:smoke`   | Quick integration test that is designed to catch obvious integration problems. |

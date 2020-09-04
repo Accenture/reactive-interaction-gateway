@@ -1,0 +1,66 @@
+apiVersion: {{ template "deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ include "reactive-interaction-gateway.fullname" . }}
+  labels:
+    {{- include "reactive-interaction-gateway.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "reactive-interaction-gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "reactive-interaction-gateway.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- range $key, $value := .Values.deployment.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+            - name: DNS_NAME
+              value: {{ include "reactive-interaction-gateway.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local
+            - name: NODE_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          ports:
+            - name: proxy-http
+              containerPort: {{ .Values.deployment.env.INBOUND_PORT }}
+              protocol: TCP
+            - name: proxy-https
+              containerPort: {{ .Values.deployment.env.INBOUND_HTTPS_PORT }}
+              protocol: TCP
+            - name: internal-http
+              containerPort: {{ .Values.deployment.env.API_HTTP_PORT }}
+              protocol: TCP
+            - name: internal-https
+              containerPort: {{ .Values.deployment.env.API_HTTPS_PORT }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: internal-http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: internal-http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
