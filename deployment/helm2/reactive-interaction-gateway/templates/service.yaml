@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "reactive-interaction-gateway.fullname" . }}
   labels:
-{{ include "reactive-interaction-gateway.labels" . | indent 4 }}
+    {{- include "reactive-interaction-gateway.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -24,5 +24,4 @@ spec:
       protocol: TCP
       name: internal-https
   selector:
-    app.kubernetes.io/name: {{ include "reactive-interaction-gateway.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "reactive-interaction-gateway.selectorLabels" . | nindent 4 }}
