@@ -8,22 +8,20 @@ kubectl apply -f kubectl/rig.yaml
 
 ## Helm
 
-The Helm Charts are stored in [./helm2](./helm2) and [./helm3](./helm3) directory, which are essentially the same but only use a different `apiVersion` in the `Chart.yaml`.
+The Helm Charts in [./helm/reactive-interaction-gateway-helm-v2](./helm/reactive-interaction-gateway-helm-v2) and [./helm/reactive-interaction-gateway](./helm/reactive-interaction-gateway) are essentially the same but only use a different `apiVersion` in the `Chart.yaml`.
 
 ### Version 2
 
 ```bash
-cd helm2
-# dry run to verify that everything is ok
-helm install --name=rig reactive-interaction-gateway --dry-run
+cd helm
 # install
-helm install --name=rig reactive-interaction-gateway
+helm install --name=rig reactive-interaction-gateway-helm-v2
 ```
 
 ### Version 3
 
 ```bash
-cd helm3
+cd helm
 # dry run to verify that everything is ok
 helm install rig reactive-interaction-gateway --dry-run
 # install
