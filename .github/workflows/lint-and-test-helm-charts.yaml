@@ -12,29 +12,18 @@ jobs:
       - name: Fetch history
         run: git fetch --prune --unshallow
 
-      - name: lint helm3 chart
-        id: lint_helm3
+      - name: lint helm charts
+        id: lint_helm
         uses: helm/chart-testing-action@v1.0.0
         with:
-          command: lint --chart-dirs deployment/helm3 --debug
-
-      - name: lint helm2 chart
-        id: lint_helm2
-        uses: helm/chart-testing-action@dev-v2
-        with:
-          command: lint --chart-dirs deployment/helm2 --debug
+          command: lint
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.0.0
         # Only build a kind cluster if there are chart changes to test.
-        if: steps.lint_helm3.outputs.changed == 'true' || steps.lint_helm2.outputs.changed == 'true'
+        if: steps.lint_helm.outputs.changed == 'true'
 
-      - name: install and test helm3 chart
+      - name: install and test helm charts
         uses: helm/chart-testing-action@v1.0.0
         with:
-          command: install --chart-dirs deployment/helm3
-
-      - name: install and test helm2 chart
-        uses: helm/chart-testing-action@dev-v2
-        with:
-          command: install --chart-dirs deployment/helm2
+          command: install

@@ -1,0 +1,5 @@
+remote: origin
+chart-dirs:
+  - deployment/helm3
+  - deployment/helm2
+debug: true
