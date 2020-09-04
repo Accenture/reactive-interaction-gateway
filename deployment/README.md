@@ -8,6 +8,8 @@ kubectl apply -f kubectl/rig.yaml
 
 ## Helm
 
+The Helm Charts are stored in [./helm2](./helm2) and [./helm3](./helm3) directory, which are essentially the same but only use a different `apiVersion` in the `Chart.yaml`.
+
 ### Version 2
 
 ```bash
