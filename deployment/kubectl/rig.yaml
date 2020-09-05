@@ -69,7 +69,7 @@ spec:
       tolerations: []
       containers:
         - name: reactive-interaction-gateway
-          image: accenture/reactive-interaction-gateway:2.3.0
+          image: accenture/reactive-interaction-gateway:3.0.0-alpha.1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 4000
