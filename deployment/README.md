@@ -33,7 +33,6 @@ Both `kubectl` and `helm` deploy bunch of Kubernetes resources:
 To allow external communication (outside of your cluster) do:
 
 ```bash
-# both helm versions
 helm upgrade --set service.type=LoadBalancer rig accenture/reactive-interaction-gateway
 # for kubectl update kubectl/rig.yaml to use a service of type LoadBalancer instead of ClusterIP
 ```
@@ -43,8 +42,7 @@ helm upgrade --set service.type=LoadBalancer rig accenture/reactive-interaction-
 Scale the deployment and create multiple pods
 
 ```bash
-# both helm versions
-helm upgrade --set service.type=LoadBalancer --set replicaCount=<replicas> rig accenture/reactive-interaction-gateway
+helm upgrade --set replicaCount=<replicas> rig accenture/reactive-interaction-gateway
 # or
 kubectl scale deployment/<deployment_name> --replicas <replicas>
 ```
