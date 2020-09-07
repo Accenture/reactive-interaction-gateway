@@ -23,6 +23,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change above affects also `"response_from": "kafka"` proxy functionality. RIG will forward to clients only Kafka body, no headers. This means, when using binary mode, clients receive only the data part, no CloudEvents context attributes.
 - Changed `response_from` handler to expect a message in binary format, **NOT** a cloud event (`kafka` and `http_async`). [#321](https://github.com/Accenture/reactive-interaction-gateway/pull/321)
 - Updated Helm v2 template, kubectl yaml file and instructions in the `deployment` folder [#288](https://github.com/Accenture/reactive-interaction-gateway/issues/288)
+- Publish Helm Chart to Github pages. With this change, we can simply install the chart using
+
+    ```shell
+    helm repo add accenture https://accenture.github.io/reactive-interaction-gateway
+    helm install rig accenture/reactive-interaction-gateway
+    ```
+  
+  More information, follow the [deployment Readme](./deployment/README.md). [#319](https://github.com/Accenture/reactive-interaction-gateway/issues/319)
 
 ### Fixed
 
