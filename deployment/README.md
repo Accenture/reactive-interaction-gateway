@@ -10,7 +10,7 @@ helm install rig accenture/reactive-interaction-gateway
 helm install --name=rig accenture/reactive-interaction-gateway-helm-v2
 ```
 
-Check out the [Helm v2 README](helm/reactive-interaction-gateway-helm-v2/README.md) or [Helm v3 README](./helm/reactive-interaction-gateway/README.md) and [Operator's Guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html) for more information on configuring RIG.
+Check out the [Helm v2 README](./reactive-interaction-gateway-helm-v2/README.md) or [Helm v3 README](./reactive-interaction-gateway/README.md) and [Operator's Guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html) for more information on configuring RIG.
 
 ## Deploy with kubectl
 
@@ -70,7 +70,7 @@ Nodes in Erlang cluster use cookies as a form of authorization/authentication be
 
 #### Additional configuration
 
-You can configure bunch of environment variables, please check the [Helm v2 README](helm/reactive-interaction-gateway-helm-v2/README.md) or [Helm v3 README](./helm/reactive-interaction-gateway/README.md) and [Operator's Guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html).
+You can configure bunch of environment variables, please check the [Helm v2 README](./reactive-interaction-gateway-helm-v2/README.md) or [Helm v3 README](./reactive-interaction-gateway/README.md) and [Operator's Guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html).
 
 ## Cleanup
 
