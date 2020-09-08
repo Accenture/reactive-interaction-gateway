@@ -16,11 +16,14 @@ service:
 
 deployment:
   env:
-    ## Proxy ports
+    # Proxy ports
+    # deployment.env.INBOUND_PORT -- See docs/rig-ops-guide.md
     INBOUND_PORT: 4000
+    # deployment.env.INBOUND_HTTPS_PORT -- See docs/rig-ops-guide.md
     INBOUND_HTTPS_PORT: 4001
-    ## Internal HTTP API ports
+    # deployment.env.API_HTTP_PORT -- See docs/rig-ops-guide.md
     API_HTTP_PORT: 4010
+    # deployment.env.API_HTTPS_PORT -- See docs/rig-ops-guide.md
     API_HTTPS_PORT: 4011
 
     ## Hostname for HTTP endpoints
@@ -35,10 +38,11 @@ deployment:
     # CORS: *
 
     ## Discovery
+    # deployment.env.DISCOVERY_TYPE -- See docs/rig-ops-guide.md
     DISCOVERY_TYPE: dns
     ## DNS_NAME is set dynamically
     ## NODE_HOST is set dynamically to PodIP in "templates/deployment.yaml"
-    ## Change magiccookie to some individual hash
+    # deployment.env.NODE_COOKIE -- See docs/rig-ops-guide.md
     NODE_COOKIE: magiccookie
 
 
@@ -101,7 +105,8 @@ deployment:
     # JWT_SESSION_FIELD: /userId
 
     ## Logging
-    # REQUEST_LOG: console,kafka
+    ## REQUEST_LOG: console,kafka
+    # deployment.env.LOG_LEVEL -- See docs/rig-ops-guide.md
     LOG_LEVEL: warn
 
     ## SSE, WS
