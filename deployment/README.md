@@ -3,7 +3,7 @@
 The easiest way to deploy RIG is using Helm:
 
 ```shell
-helm repo add accenture https://accenture.github.io/reactive-interaction-gateway
+helm repo add accenture https://Accenture.github.io/reactive-interaction-gateway
 # Helm v3
 helm install rig accenture/reactive-interaction-gateway
 # Helm v2

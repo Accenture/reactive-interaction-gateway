@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Publish Helm Chart to Github pages. With this change, we can simply install the chart using
 
     ```shell
-    helm repo add accenture https://accenture.github.io/reactive-interaction-gateway
+    helm repo add accenture https://Accenture.github.io/reactive-interaction-gateway
     helm install rig accenture/reactive-interaction-gateway
     ```
   

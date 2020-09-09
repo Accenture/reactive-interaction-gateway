@@ -20,7 +20,7 @@ Even though it's possible to run RIG anywhere, we recommend to use Kubernetes.
 kubectl scale deployment/reactive-interaction-gateway --replicas 3
 
 # Start right away with 3 nodes using Helm template -- (assuming you are in the deployment directory)
-helm repo add accenture https://accenture.github.io/reactive-interaction-gateway
+helm repo add accenture https://Accenture.github.io/reactive-interaction-gateway
 # Helm v3
 helm install --set replicaCount=3 rig accenture/reactive-interaction-gateway
 # Helm v2
