@@ -67,10 +67,11 @@ jobs:
         - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
         - git fetch origin
         - git checkout gh-pages
-        - git checkout $(git rev-list -n1 HEAD -- index.yaml)~1 -- index.yaml
+        - git checkout $(git rev-list -n1 HEAD -- index.yaml)~1 -- index.yaml > /dev/null 2>&1 | true
         - git add index.yaml
-        - git commit -m "Auto-restore Helm chart repo index after Docusaurus publish"
-        - git push
+        - git diff-index --quiet HEAD || git commit -m "Auto-restore Helm chart repo index after Docusaurus publish"
+        - git diff-index --quiet HEAD || git remote add origin-pages https://${GH_TOKEN}@github.com/Accenture/reactive-interaction-gateway.git > /dev/null 2>&1
+        - git diff-index --quiet HEAD || git push --set-upstream origin-pages gh-pages
     - stage: sourcedocs
       <<: *elixir-env
       script:
