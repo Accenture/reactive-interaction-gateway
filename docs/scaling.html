@@ -67,7 +67,7 @@
 kubectl scale deployment/reactive-interaction-gateway --replicas 3
 
 <span class="hljs-comment"># Start right away with 3 nodes using Helm template -- (assuming you are in the deployment directory)</span>
-helm repo add accenture https://Accenture.github.io/reactive-interaction-gateway
+helm repo add accenture https://accenture.github.io/reactive-interaction-gateway
 <span class="hljs-comment"># Helm v3</span>
 helm install --<span class="hljs-built_in">set</span> replicaCount=3 rig accenture/reactive-interaction-gateway
 <span class="hljs-comment"># Helm v2</span>
