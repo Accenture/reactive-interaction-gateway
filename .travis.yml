@@ -1,5 +1,4 @@
 stages:
-  - restore-helm-repo-index
   - unittest
   - exampletest
   - name: dockerbuild
