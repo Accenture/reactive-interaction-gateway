@@ -23,10 +23,11 @@ Take a look at the [documentation](https://accenture.github.io/reactive-interact
 
 The Reactive Interaction Gateway (RIG) is the glue between your client (frontend) apps and your backend. It makes communication between them easier by
 
-- picking up back-end events and forwards them to clients based on subscriptions: this makes your frontend apps **reactive and eliminates the need for polling**.
-- forwarding client requests to backend services **either synchronously or asynchronously**:
-  - synchronously: if requests are being sent synchronously, RIG acts as a reverse proxy, but still RIG communicates asynchronously with the Backend via Kafka or NATS. In such case, RIG waits for the response from Kafka/NATS based on a connection id and forwards it to the still open HTTP connection to the frontend. 
-  - asynchonously: this is a fire&firget scenario where RIG forwards the request to the backend asynchronously using either Kafka, NATS or Amazon Kinesis Data Streams
+- picking up back-end events and forwarding them to clients based on subscriptions: this makes your frontend apps **reactive and eliminates the need for polling**.
+- forwarding client requests to backend services **either synchronously, asynchronously or a mix of both**:
+  - **synchronously**: if requests are being sent synchronously, RIG acts as a reverse proxy: RIG forwards the request to an HTTP endpoint of a backend service, waits for the response and sends it to the client.
+  - **asynchronously - fire&forget**: RIG transforms a HTTP request to a message for asynchronous processing and forwards it to the backend asynchronously using either Kafka, NATS or Amazon Kinesis Data Streams.
+  - **mix of both - asynchronous response** - a pseudo-synchronous request: RIG either forwards the client request to the backend synchronously via HTTP or asynchronously via Kafka or NATS. Additionally, RIG waits for the backend response by listening to Kafka/NATS based on a connection id and forwards it to the still open HTTP connection to the frontend.
 
 Built on open standards, RIG is very easy to integrate – and easy to replace – which means low-cost, low-risk adoption. Unlike other solutions, RIG does not leak into your application – no libraries or SDKs required. Along with handling client requests and publishing events from backend to the frontend, RIG provides many built-in features such as:
 
