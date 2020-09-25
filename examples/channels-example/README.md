@@ -111,7 +111,7 @@ Repeat steps 1 to 6.
 
 ## One word to distributed Tracing
 
-RIG handles two types of messages: request/response messages (of any format) and events (in CloudEvents format). Tracing the former is done using headers - e.g., for HTTP RIG implements the w3c trace context specification. Tracing CloudEvents is done using the official CloudEvents tracing extension, where parent trace ID and trace context are taken from the context attributes of the event itself rather than from trace context headers.
+RIG handles two types of messages: request/response messages (of any format) and events (in CloudEvents format). Tracing the former is done using headers - e.g., for HTTP, RIG implements the W3C trace context specification. Tracing CloudEvents is done using the official CloudEvents tracing extension, where parent trace ID and trace context are taken from the context attributes of the event itself rather than from trace context headers.
 For more information, read the [distributed tracing docs](../../docs/distributed-tracing.md).
 
 In this example, RIG processes the trace context as following:
