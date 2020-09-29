@@ -12,10 +12,12 @@ defmodule RigKafka do
   @typep schema :: String.t()
   @typep key :: String.t()
   @typep plaintext :: String.t()
+  @typep headers :: [{String.t(), String.t()}]
 
   @spec start(Config.t(), Client.callback() | nil) :: {:ok, pid} | :ignore | {:error, any}
   defdelegate start(config, callback \\ nil), to: RigKafka.Client, as: :start_supervised
 
-  @spec produce(Config.t(), topic, schema, key, plaintext) :: :ok
+  @spec produce(Config.t(), topic, schema, key, plaintext, headers) :: :ok
+  defdelegate produce(config, topic, schema, key, plaintext, headers), to: RigKafka.Client
   defdelegate produce(config, topic, schema, key, plaintext), to: RigKafka.Client
 end

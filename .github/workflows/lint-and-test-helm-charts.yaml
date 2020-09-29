@@ -1,0 +1,29 @@
+name: Lint and Test Charts
+
+on: pull_request
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Fetch history
+        run: git fetch --prune --unshallow
+
+      - name: lint helm charts
+        id: lint_helm
+        uses: helm/chart-testing-action@v1.0.0
+        with:
+          command: lint
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.0.0
+        # Only build a kind cluster if there are chart changes to test.
+        if: steps.lint_helm.outputs.changed == 'true'
+
+      - name: install and test helm charts
+        uses: helm/chart-testing-action@v1.0.0
+        with:
+          command: install

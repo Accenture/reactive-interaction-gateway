@@ -2,8 +2,10 @@ defmodule Rig.Application do
   @moduledoc false
 
   use Application
-  use Rig.Config, [:log_level]
+  use Rig.Config, [:log_level, :schema_registry_host]
 
+  alias RIG.Discovery
+  alias RIG.Tracing
   alias RigOutboundGateway.Kinesis
   alias RigOutboundGateway.KinesisFirehose
 
@@ -13,7 +15,8 @@ defmodule Rig.Application do
     # Override application logging with environment variable
     Logger.configure([{:level, config().log_level}])
 
-    Rig.Discovery.start()
+    Tracing.start()
+    Discovery.start()
 
     children = [
       Spec.supervisor(Phoenix.PubSub.PG2, [Rig.PubSub, []]),
@@ -37,7 +40,9 @@ defmodule Rig.Application do
       RigInboundGateway.ApiProxy.Sup,
       RigInboundGateway.ApiProxy.Handler.Kafka,
       # RIG public-facing endpoint:
-      RigInboundGatewayWeb.Endpoint
+      RigInboundGatewayWeb.Endpoint,
+      # Cloud Events:
+      {Cloudevents, [confluent_schema_registry_url: config().schema_registry_host]}
     ]
 
     # Prometheus

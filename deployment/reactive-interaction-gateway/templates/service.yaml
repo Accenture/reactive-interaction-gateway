@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "reactive-interaction-gateway.fullname" . }}
+  labels:
+    {{- include "reactive-interaction-gateway.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.deployment.env.INBOUND_PORT }}
+      targetPort: proxy-http
+      protocol: TCP
+      name: proxy-http
+    - port: {{ .Values.deployment.env.INBOUND_HTTPS_PORT }}
+      targetPort: proxy-https
+      protocol: TCP
+      name: proxy-https
+    - port: {{ .Values.deployment.env.API_HTTP_PORT }}
+      targetPort: internal-http
+      protocol: TCP
+      name: internal-http
+    - port: {{ .Values.deployment.env.API_HTTPS_PORT }}
+      targetPort: internal-https
+      protocol: TCP
+      name: internal-https
+  selector:
+    {{- include "reactive-interaction-gateway.selectorLabels" . | nindent 4 }}

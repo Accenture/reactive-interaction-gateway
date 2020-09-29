@@ -1,4 +1,4 @@
-defmodule Rig.Discovery do
+defmodule RIG.Discovery do
   @moduledoc """
   Module responsible to start Peerage application if relevant.
   Peerage will be auto-configured by values from environment variables.

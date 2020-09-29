@@ -16,13 +16,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
   alias Plug.Conn.Query
 
   alias Rig.Connection.Codec
-
-  alias RigMetrics.ProxyMetrics
-
+  alias RIG.Tracing
   alias RigInboundGateway.ApiProxy.Base
-
   alias RigInboundGateway.ApiProxy.Handler
   alias RigInboundGateway.ApiProxy.Handler.HttpHeader
+  alias RigMetrics.ProxyMetrics
   @behaviour Handler
 
   # ---
@@ -44,6 +42,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
       req_headers
       |> HttpHeader.put_host_header(url)
       |> HttpHeader.put_forward_header(conn.remote_ip, host_ip)
+      |> Tracing.Plug.put_req_header(Tracing.context())
       |> drop_connection_related_headers()
 
     result = do_request(method, url, body, req_headers)
@@ -113,7 +112,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
       end
 
     receive do
-      {:response_received, response} ->
+      {:response_received, response, response_code, extra_headers} ->
         ProxyMetrics.count_proxy_request(
           conn.method,
           conn.request_path,
@@ -124,8 +123,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
         conn
         |> with_cors()
-        |> Conn.put_resp_content_type("application/json")
-        |> Conn.send_resp(:ok, response)
+        |> Tracing.Plug.put_resp_header(Tracing.context())
+        |> Map.update!(:resp_headers, fn existing_headers ->
+          existing_headers ++ Map.to_list(extra_headers)
+        end)
+        |> Conn.send_resp(response_code, response)
     after
       response_timeout ->
         ProxyMetrics.count_proxy_request(
@@ -138,6 +140,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Http do
 
         conn
         |> with_cors()
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.send_resp(:gateway_timeout, "")
     end
   end

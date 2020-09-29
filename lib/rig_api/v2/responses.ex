@@ -33,7 +33,6 @@ defmodule RigApi.V2.Responses do
 
   @doc """
   Accepts message to be sent to correlated HTTP process.
-
   Note that body has to contain following field `"rig": { "correlation": "_id_" }`.
   """
   def create(conn, message) do
