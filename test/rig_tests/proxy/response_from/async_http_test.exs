@@ -27,7 +27,6 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
     end)
   end
 
-  # test_with_server "" do
   # Given response_from=http_async, when the backend responds with 202, RIG doesn't forward that 202-response.
   # Instead, RIG expects the actual response to be submitted to its API, identified by the correlation ID RIG has added to the forwarded request.
   test_with_server "Given response_from=http_async, when the backend responds with 202, the http response is taken from the internal HTTP endpoint" do
