@@ -64,7 +64,7 @@ RIG forwards the client request to the backend asynchronously via Kafka or NATS 
 
 ![client-to-backend-asynchronously-asynchronous-response](./assets/features-client-to-backend-asynchronously-asynchronous-response.png)
 
-Essentially this is a combination of the [asynchronous - fire&forget approach](#asynchronously---fireforget) and the [synchronous - asynchronous response approach](#synchronously---asnychronous-response). 
+Essentially this is a combination of the [asynchronous - fire&forget approach](#asynchronously---fireforget) and the [synchronous - asynchronous response approach](#synchronously---asnychronous-response).
 
 ## Built-in Features
 
