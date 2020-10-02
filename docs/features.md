@@ -15,7 +15,12 @@ RIG can be used in different scenarios.
 
 ## Picking up backend events and forwarding them to clients based on subscriptions
 
-Lorem Ipsum
+RIG acts as a fan-out publisher of backend events. Clients can simply subscribe to RIG in order to receive these events. This makes your frontend apps reactive and eliminates the need for polling.
+Additionally clients can provide a filter during the subscription initialization and tell RIG in what type of events it is interested in. Thus, you don't have to implement this filter logic in all of your client applications, RIG takes care of it.
+[The Glitch Mob example use case](http://localhost:3000/reactive-interaction-gateway/docs/intro.html#use-case-real-time-updates) describes one advantage of this reactive architectural approach.
+Check out the [Intro](http://localhost:3000/reactive-interaction-gateway/docs/intro.html#reactive-interaction-gateway) for a detailed description and architecture diagram. Basically it works like this:
+
+![fan-out-to-multiple-clients](./assets/features-fan-out-to-multiple-clients.png)
 
 ## Forwarding client requests to backend services
 
