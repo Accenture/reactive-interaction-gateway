@@ -114,7 +114,7 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
       assert res_status == 400
       assert res_body == "Failed to parse request body: {:error, {:not_an_integer, \"abc201\"}}"
 
-      Response.ok!(sync_response, %{"content-type" => "application/json"})
+      Response.accepted!(sync_response, %{"content-type" => "application/json"})
     end)
 
     # We register the endpoint with the proxy:
