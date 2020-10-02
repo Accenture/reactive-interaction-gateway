@@ -10,19 +10,11 @@ Makes frontend<->backend communication reactive based on events.
 
 Take a look at the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html) and get in touch with us on [Slack](https://rig-slackin.herokuapp.com)!
 
-* [About](#about)
-* [Getting Started](#getting-started)
-  * [API Documentation](#api-documentation)
-  * [Metrics](#metrics)
-* [Contribute](#contribute)
-* [License](#license)
-* [Acknowledgments](#acknowledgments)
-
 ## About
 
 The Reactive Interaction Gateway (RIG) is the glue between your client (frontend) apps and your backend. It makes communication between them easier by (click the links to learn more)
 
-- [picking up back-end events and forwarding them to clients based on subscriptions](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions): this makes your frontend apps **reactive and eliminates the need for polling**.
+- [picking up backend events and forwarding them to clients based on subscriptions](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions): this makes your frontend apps **reactive and eliminates the need for polling**.
 - forwarding client requests to backend services **either synchronously, asynchronously or a mix of both**:
   - [synchronously](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#synchronously): if requests are being sent synchronously, RIG acts as a reverse proxy: RIG forwards the request to an HTTP endpoint of a backend service, waits for the response and sends it to the client.
   - [asynchronously - fire&forget](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#asynchronously---fireforget): RIG transforms a HTTP request to a message for asynchronous processing and forwards it to the backend asynchronously using either Kafka, NATS or Amazon Kinesis Data Streams.
