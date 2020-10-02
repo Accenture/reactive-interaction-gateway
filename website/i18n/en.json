@@ -49,6 +49,10 @@
         "title": "Frequently Asked Questions",
         "sidebar_label": "FAQ"
       },
+      "features": {
+        "title": "Features",
+        "sidebar_label": "Features"
+      },
       "https": {
         "title": "HTTPS",
         "sidebar_label": "HTTPS"

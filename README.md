@@ -2,7 +2,7 @@
 
 # RIG - Reactive Interaction Gateway
 
-Makes frontend/backend communication asynchronous and reactive based on events.
+Makes frontend<->backend communication reactive based on events.
 
 [![Build Status](https://travis-ci.org/Accenture/reactive-interaction-gateway.svg?branch=master)](https://travis-ci.org/Accenture/reactive-interaction-gateway)
 [![DockerHub](https://img.shields.io/docker/pulls/accenture/reactive-interaction-gateway)](https://hub.docker.com/r/accenture/reactive-interaction-gateway)
@@ -21,45 +21,15 @@ Take a look at the [documentation](https://accenture.github.io/reactive-interact
 
 ## About
 
-The Reactive Interaction Gateway (RIG) is the glue between your client (frontend) apps and your backend. It makes communication between them easier by
+The Reactive Interaction Gateway (RIG) is the glue between your client (frontend) apps and your backend. It makes communication between them easier by (click the links to learn more)
 
-- picking up back-end events and forwarding them to clients based on subscriptions: this makes your frontend apps **reactive and eliminates the need for polling**.
+- [picking up back-end events and forwarding them to clients based on subscriptions](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions): this makes your frontend apps **reactive and eliminates the need for polling**.
 - forwarding client requests to backend services **either synchronously, asynchronously or a mix of both**:
   - [synchronously](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#synchronously): if requests are being sent synchronously, RIG acts as a reverse proxy: RIG forwards the request to an HTTP endpoint of a backend service, waits for the response and sends it to the client.
   - [asynchronously - fire&forget](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#asynchronously---fireforget): RIG transforms a HTTP request to a message for asynchronous processing and forwards it to the backend asynchronously using either Kafka, NATS or Amazon Kinesis Data Streams.
   - [mix of both - asynchronous response](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#asynchronously---asnychronous-response) - a pseudo-synchronous request: RIG either forwards the client request to the backend synchronously via HTTP or asynchronously via Kafka or NATS. Additionally, RIG waits for the backend response by listening to Kafka/NATS based on a connection id and forwards it to the still open HTTP connection to the frontend.
 
-Built on open standards, RIG is very easy to integrate – and easy to replace – which means low-cost, low-risk adoption. Unlike other solutions, RIG does not leak into your application – no libraries or SDKs required. Along with handling client requests and publishing events from backend to the frontend, RIG provides many built-in features such as:
-
-- Easy to use and scalable by design:
-  - Supports tens of thousands stable connections per node even on low-end machines.
-  - Easy to add additional nodes.
-  - Built on the battle-proven [Erlang/OTP](http://www.erlang.org/) distribution model.
-  - Only uses in-memory data structures - no external dependencies to configure or scale.
-- Connect using standard protocols:
-  - Firewall friendly and future proof using Server-Sent Events (SSE)
-    - [HTML5 standard](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events).
-    - Regular HTTP requests, so no issues with proxy servers or firewalls.
-    - Connection multiplexing with HTTP/2 out of the box.
-    - SSE implementation (browser) keeps track of connection drops and restores the connection automatically.
-    - Polyfills available for older browsers.
-  - WebSocket connections are supported, too.
-  - HTTP long polling for situations where SSE and WS are not supported.
-- Publish events from various sources:
-  - Kafka
-  - NATS
-  - Amazon Kinesis
-  - or publish via HTTP
-- Convert a HTTP request to a message for asynchronous processing:
-  - produce to Kafka topic, optionally wait for the result on another Kafka topic
-  - produce to a NATS topic, optionally using NATS request-response to wait for the result
-  - produce to Amazon Kinesis
-- Uses the CNCF [CloudEvents specification](https://cloudevents.io/).
-- Takes care of client connection state so you don't have to.
-- Flexible event subscription model based on event types.
-- Use existing services for authentication and authorization of users and subscriptions.
-- JWT signature verification for APIs as a simple authentication check.
-- Session blacklist with immediate session invalidation.
+Built on open standards, RIG is very easy to integrate – and easy to replace – which means low-cost, low-risk adoption. Unlike other solutions, RIG does not leak into your application – no libraries or SDKs required. Along with handling client requests and publishing events from backend to the frontend, RIG provides [many built-in features](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#built-in-features).
 
 Learn more by taking a look into the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html).
 
