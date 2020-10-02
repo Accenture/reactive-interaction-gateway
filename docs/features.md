@@ -8,6 +8,7 @@ sidebar_label: Features
 * [Forwarding client requests to backend services](#forwarding-client-requests-to-backend-services)
   * [Synchronously](#synchronously)
   * [Asynchronously - Fire&Forget](#asynchronously---fireforget)
+  * [Synchronously - Asnychronous Response](#synchronously---asnychronous-response)
   * [Asynchronously - Asnychronous Response](#asynchronously---asnychronous-response)
 * [Built-in Features](#built-in-features)
 
@@ -16,27 +17,54 @@ RIG can be used in different scenarios.
 ## Picking up backend events and forwarding them to clients based on subscriptions
 
 RIG acts as a fan-out publisher of backend events. Clients can simply subscribe to RIG in order to receive these events. This makes your frontend apps reactive and eliminates the need for polling.
+
 Additionally clients can provide a filter during the subscription initialization and tell RIG in what type of events it is interested in. Thus, you don't have to implement this filter logic in all of your client applications, RIG takes care of it.
-[The Glitch Mob example use case](http://localhost:3000/reactive-interaction-gateway/docs/intro.html#use-case-real-time-updates) describes one advantage of this reactive architectural approach.
-Check out the [Intro](http://localhost:3000/reactive-interaction-gateway/docs/intro.html#reactive-interaction-gateway) for a detailed description and architecture diagram. Basically it works like this:
+
+[The concert example use case](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html#use-case-real-time-updates) describes one advantage of this reactive architectural approach. Check out the [Intro](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html#reactive-interaction-gateway) for a detailed description and architecture diagram. Basically it works like this:
 
 ![fan-out-to-multiple-clients](./assets/features-fan-out-to-multiple-clients.png)
 
 ## Forwarding client requests to backend services
 
-When client requests need to be forwarded to the backend, there are a couple of options how to do that technically.
+When client requests need to be forwarded to the backend, clients sometimes are interested in the response of the backend, and sometimes not. Especially when the client is interested in the direct response of the backend, there are a couple of options how to design that technically.
 
 ### Synchronously
 
-Lorem Ipsum
+If requests are being sent synchronously, RIG acts as a reverse proxy: RIG forwards the request to an HTTP endpoint of a backend service, waits for the response and sends it back to the client. It is as simple as
+
+![client-to-backend-synchronously](./assets/features-client-to-backend-synchronously.png)
+
+You may ask: Why shouldn't I directly talk to the Backend? What benefits does RIG provide?
+
+Rig provides many additional features on top like session management or JWT signature verification. You don't have to implement this over and over again at the clients and backend services.
 
 ### Asynchronously - Fire&Forget
 
-Lorem Ipsum
+RIG transforms a HTTP request to a message for asynchronous processing and forwards it to the backend asynchronously using either [Kafka](https://kafka.apache.org/), [NATS](https://nats.io/) or [Amazon Kinesis Data Streams](https://aws.amazon.com/kinesis/data-streams/).
+
+![client-to-backend-asynchronously-fireandforget](./assets/features-client-to-backend-asynchronously-fireandforget.png)
+
+This enables an asynchonous communication between client-side applications and the backend. RIG acts as a middle-man handling authentication when communicating to queuing systems. Without RIG, it would be required to have a custom backend applications that handles client requests and forwarding them to Kafka, Nats or Kinesis. This additional backend app is a single source of failure, hence it would be necessary to harden it and make it highly available and reliable. WIth RIG, you don't have to take care of that - RIG is [scalable by design](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#built-in-features).
+
+### Synchronously - Asnychronous Response
+
+RIG forwards the client request to the backend synchronously via HTTP and waits for the backend response by listening to Kafka/NATS and forwarding it to the still open HTTP connection to the frontend.
+
+![client-to-backend-synchronously-asynchronous-response](./assets/features-client-to-backend-synchronously-asynchronous-response.png)
+
+This scenario can be quite useful which is described in more detail in the [Architecture section](https://accenture.github.io/reactive-interaction-gateway/docs/architecture.html#providing-a-synchronous-api-for-asynchronous-back-end-services). RIG correlates the corresponding answer using the correlation ID of the original request, that will be forwarded to the backend and also being used in the response of the backend. With this ID, RIG can filter the appropriate message from the consuming topic.
+
+As you can see in the architecture diagram, the backend service responds to RIG with `202 Accepted` to tell RIG that the response will be provided asynchronously.
+
+Apart from that, the backend service also has the possibility to return a cached response (this will be a `200 OK` response with a corresponding http body) or anything else, e.g. a `400 Bad Request`. In turn, RIG will not listen to the topic and wait for the response. Consequently, the request flow will look similar to the [synchronous approach](#synchronously).
 
 ### Asynchronously - Asnychronous Response
 
-Lorem Ipsum
+RIG forwards the client request to the backend asynchronously via Kafka or NATS and waits for the backend response by listening to Kafka/NATS and forwarding it to the still open HTTP connection to the frontend.
+
+![client-to-backend-asynchronously-asynchronous-response](./assets/features-client-to-backend-asynchronously-asynchronous-response.png)
+
+Essentially this is a combination of the [asynchronous - fire&forget approach](#asynchronously---fireforget) and the [synchronous - asynchronous response approach](#synchronously---asnychronous-response). 
 
 ## Built-in Features
 
