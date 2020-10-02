@@ -10,14 +10,13 @@ Makes frontend<->backend communication reactive based on events.
 
 Take a look at the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html) and get in touch with us on [Slack](https://rig-slackin.herokuapp.com)!
 
-* [RIG - Reactive Interaction Gateway](#rig---reactive-interaction-gateway)
-  * [About](#about)
-  * [Getting Started](#getting-started)
-    * [API Documentation](#api-documentation)
-    * [Metrics](#metrics)
-  * [Contribute](#contribute)
-  * [License](#license)
-  * [Acknowledgments](#acknowledgments)
+* [About](#about)
+* [Getting Started](#getting-started)
+  * [API Documentation](#api-documentation)
+  * [Metrics](#metrics)
+* [Contribute](#contribute)
+* [License](#license)
+* [Acknowledgments](#acknowledgments)
 
 ## About
 
