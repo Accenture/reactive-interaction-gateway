@@ -2,7 +2,7 @@
 
 # RIG - Reactive Interaction Gateway
 
-Makes frontend<->backend communication reactive based on events.
+Makes frontend<->backend communication reactive and event-driven.
 
 [![Build Status](https://travis-ci.org/Accenture/reactive-interaction-gateway.svg?branch=master)](https://travis-ci.org/Accenture/reactive-interaction-gateway)
 [![DockerHub](https://img.shields.io/docker/pulls/accenture/reactive-interaction-gateway)](https://hub.docker.com/r/accenture/reactive-interaction-gateway)
@@ -12,10 +12,10 @@ Take a look at the [documentation](https://accenture.github.io/reactive-interact
 
 ## About
 
-The Reactive Interaction Gateway (RIG) is the glue between your client (frontend) apps and your backend. It makes communication between them easier by (click the links to learn more)
+The Reactive Interaction Gateway (RIG) is the glue between your client (frontend) and your backend. It makes communication between them easier by (click the links to learn more)
 
 - [picking up backend events and forwarding them to clients based on subscriptions](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions): this makes your frontend apps **reactive and eliminates the need for polling**.
-- forwarding client requests to backend services **either synchronously, asynchronously or a mix of both**:
+- forwarding client requests to backend services either synchronously, asynchronously or a mix of both:
   - [synchronously](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#synchronously): if requests are being sent synchronously, RIG acts as a reverse proxy: RIG forwards the request to an HTTP endpoint of a backend service, waits for the response and sends it to the client.
   - [asynchronously - fire&forget](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#asynchronously---fireforget): RIG transforms a HTTP request to a message for asynchronous processing and forwards it to the backend asynchronously using either Kafka, NATS or Amazon Kinesis Data Streams.
   - [synchronously with asynchronous response](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#synchronously---asnychronous-response) - a pseudo-synchronous request: RIG forwards the client request to the backend synchronously via HTTP and waits for the backend response by listening to Kafka/NATS and forwarding it to the still open HTTP connection to the frontend.
@@ -29,15 +29,7 @@ Learn more by taking a look into the [documentation](https://accenture.github.io
 
 Take a look at the [getting-started tutorial](https://accenture.github.io/reactive-interaction-gateway/docs/tutorial.html).
 
-### API Documentation
-
-RIG exposes its API documentation on its API endpoint under [/swagger-ui](http://localhost:4010/swagger-ui). For integration into an existing swagger UI, the related JSON document can either be [retrieved at runtime](http://localhost:4010/swagger-ui/rig_api_swagger.json) or [found on disk](./priv/static/rig_api_swagger.json) after compiling RIG at least once.
-
-### Metrics
-
-RIG exposes Metrics in [Prometheus](https://prometheus.io/) format on its API endpoint under [/metrics](http:localhost:4010/metrics)
-
-## Contribute
+## Contributing
 
 - **Use issues for everything.**
 - For a small change, just send a PR.

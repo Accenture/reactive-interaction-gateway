@@ -23,10 +23,13 @@
     ],
     "RIG in Production": [
       "rig-ops-guide",
+      "api-documentation",
       "metrics-details",
       "https",
       "scaling"
     ],
-    "Hacking the Source": ["rig-dev-guide"]
+    "Hacking the Source": [
+      "rig-dev-guide"
+    ]
   }
 }

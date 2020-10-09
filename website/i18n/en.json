@@ -5,6 +5,10 @@
     "previous": "Previous",
     "tagline": "Create low-latency, interactive user experiences for stateless microservices.",
     "docs": {
+      "api-documentation": {
+        "title": "API Documentation",
+        "sidebar_label": "API Documentation"
+      },
       "api-gateway-management": {
         "title": "API Gateway Management",
         "sidebar_label": "API Gateway Management"
