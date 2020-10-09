@@ -26,7 +26,8 @@ Learn more by taking a look into the [documentation](https://accenture.github.io
 
 ## Getting Started
 
-Take a look at the [getting-started tutorial](https://accenture.github.io/reactive-interaction-gateway/docs/tutorial.html).
+- Take a look at the [getting-started tutorial](https://accenture.github.io/reactive-interaction-gateway/docs/tutorial.html) for a simple walkthrough using docker
+- For deploying RIG on Kubernetes, check out the [Kubernetes deployment instructions](https://github.com/Accenture/reactive-interaction-gateway/tree/284-document-sync-async-http-to-kafka/deployment)
 
 ## Get Involved
 
