@@ -29,21 +29,12 @@ Learn more by taking a look into the [documentation](https://accenture.github.io
 
 Take a look at the [getting-started tutorial](https://accenture.github.io/reactive-interaction-gateway/docs/tutorial.html).
 
-## Contributing
+## Get Involved
 
-- **Use issues for everything.**
-- For a small change, just send a PR.
-- For bigger changes open an issue for discussion before sending a PR.
-- PR should have:
-  - Test case
-  - Documentation (e.g., moduledoc, developer's guide, operator's guide)
-  - Changelog entry
-- You can also contribute by:
-  - Reporting issues
-  - Suggesting new features or enhancements
-  - Improve/fix documentation
-
-See the [developer's guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-dev-guide.html) and [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+- discuss RIG on [Slack](https://rig-slackin.herokuapp.com)
+- Follow us on [Twitter](https://twitter.com/reactivegateway)
+- Start contributing: refer to our [contributing guide](./CONTRIBUTING.md)
+- Develop RIG: refer to our [developer's guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-dev-guide.html)
 
 ## License
 
