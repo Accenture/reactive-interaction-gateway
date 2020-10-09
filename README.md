@@ -6,7 +6,6 @@ Makes frontend<->backend communication reactive and event-driven.
 
 [![Build Status](https://travis-ci.org/Accenture/reactive-interaction-gateway.svg?branch=master)](https://travis-ci.org/Accenture/reactive-interaction-gateway)
 [![DockerHub](https://img.shields.io/docker/pulls/accenture/reactive-interaction-gateway)](https://hub.docker.com/r/accenture/reactive-interaction-gateway)
-[![Slack](https://rig-slackin.herokuapp.com/badge.svg)](https://rig-slackin.herokuapp.com)
 
 Take a look at the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html) and get in touch with us on [Slack](https://rig-slackin.herokuapp.com)!
 
