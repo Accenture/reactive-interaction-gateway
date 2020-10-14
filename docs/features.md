@@ -40,7 +40,7 @@ Rig provides many additional features on top like session management or JWT sign
 
 ### Asynchronously - Fire&Forget
 
-RIG transforms a HTTP request to a message for asynchronous processing and forwards it to the backend asynchronously using either [Kafka](https://kafka.apache.org/), [NATS](https://nats.io/) or [Amazon Kinesis Data Streams](https://aws.amazon.com/kinesis/data-streams/).
+RIG transforms a HTTP request to a message for asynchronous processing and forwards it to the backend asynchronously using either [Kafka](https://kafka.apache.org/), [NATS](https://nats.io/) or [Amazon Kinesis](https://aws.amazon.com/kinesis/).
 
 ![client-to-backend-asynchronously-fireandforget](./assets/features-client-to-backend-asynchronously-fireandforget.png)
 
