@@ -7,8 +7,6 @@ Makes frontend<->backend communication reactive and event-driven.
 [![Build Status](https://travis-ci.org/Accenture/reactive-interaction-gateway.svg?branch=master)](https://travis-ci.org/Accenture/reactive-interaction-gateway)
 [![DockerHub](https://img.shields.io/docker/pulls/accenture/reactive-interaction-gateway)](https://hub.docker.com/r/accenture/reactive-interaction-gateway)
 
-Take a look at the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html) and get in touch with us on [Slack](https://rig-slackin.herokuapp.com)!
-
 ## About
 
 The Reactive Interaction Gateway (RIG) is the glue between your client (frontend) and your backend. It makes communication between them easier by (click the links to learn more)
@@ -22,7 +20,7 @@ The Reactive Interaction Gateway (RIG) is the glue between your client (frontend
 
 Built on open standards, RIG is very easy to integrate – and easy to replace – which means low-cost, low-risk adoption. Unlike other solutions, RIG does not leak into your application – no libraries or SDKs required. Along with handling client requests and publishing events from backend to the frontend, RIG provides [many built-in features](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#built-in-features).
 
-Learn more by taking a look into the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html) and the [FAQ](https://accenture.github.io/reactive-interaction-gateway/docs/faq.html).
+This is just a basic summary of what RIG can do. There is a comprehensive documentation available on our [website](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html). If you have any unanswered question, check out the [FAQ](https://accenture.github.io/reactive-interaction-gateway/docs/faq.html) section to get them answered.
 
 ## Getting Started
 

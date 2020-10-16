@@ -6,7 +6,7 @@ sidebar_label: Distributed Tracing
 
 RIG is able to process distributed tracing data following the [W3C Trace Contexts](https://www.w3.org/TR/trace-context/). 
 
-In certain conditions RIG expects the trace context to be in the (HTTP) Header, and in other conditions in the event payload itself. With events, we always speak of cloudevents following the [distributed tracing extension](https://github.com/cloudevents/spec/blob/v1.0/extensions/distributed-tracing.md). There is one key rule when RIG expects the trace context either in the header or in the cloudevent:
+In certain conditions RIG expects the trace context to be in the (HTTP) header, and in other conditions in the event payload itself. With events, we always speak of cloudevents following the [distributed tracing extension](https://github.com/cloudevents/spec/blob/v1.0/extensions/distributed-tracing.md). There is one key rule when RIG expects the trace context either in the header or in the cloudevent:
 
 1. if we talk of messages, then RIG expects the trace context to be in the (HTTP) header
 2. if we talk of events (cloudevents), then RIG expects the trace context to be in the cloudevent
