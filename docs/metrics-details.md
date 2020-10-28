@@ -141,9 +141,9 @@ We are exposing the standard metrics providing information about the running app
 
 Following standard metrics are currently provided:
 
-- erlang*vm_memory_ets_tables - \_Erlang VM ETS Tables count*
-- erlang*vm_memory_atom_bytes_total (Labels: Free, Used) - \_The total amount of memory currently allocated for atoms. This memory is part of the memory presented as system memory.*
-- erlang*vm_port_limit - \_The maximum number of simultaneously existing ports at the local node*
+- erlang_vm_memory_ets_tables - *Erlang VM ETS Tables count*
+- erlang_vm_memory_atom_bytes_total (Labels: Free, Used) - *The total amount of memory currently allocated for atoms. This memory is part of the memory presented as system memory.*
+- erlang_vm_port_limit - *The maximum number of simultaneously existing ports at the local node*
 - etc.
 
 Detailed documentation to these standard metrics can be found [**here**](https://github.com/deadtrickster/prometheus.ex/tree/master/pages)
