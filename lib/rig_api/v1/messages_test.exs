@@ -13,7 +13,7 @@ defmodule RigApi.V1.MessagesTest do
   setup do
     # TODO that mock doesn't work - the request goes to the real Filter :(
     Rig.EventFilterMock
-    |> stub(:forward_event, fn ev, _source, _topic -> send(self(), {:cloud_event_sent, ev}) end)
+    |> stub(:forward_event, fn ev -> send(self(), {:cloud_event_sent, ev}) end)
 
     :ok
   end

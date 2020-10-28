@@ -260,7 +260,8 @@ defmodule Rig.EventFilter do
   alias Rig.EventFilter.Sup, as: FilterSup
   alias Rig.Subscription
   alias RigCloudEvents.CloudEvent
-  alias RigMetrics.SubscriptionsMetrics
+
+  # alias RigMetrics.SubscriptionsMetrics
 
   @doc """
   Refresh an existing subscription.
@@ -286,7 +287,7 @@ defmodule Rig.EventFilter do
         {:refresh_subscriptions, subscriber, subscriptions, prev_subscriptions, done_callback}
       )
 
-      SubscriptionsMetrics.set_subscriptions(length(subscriptions))
+      # SubscriptionsMetrics.set_subscriptions(length(subscriptions))
     end
 
     :ok

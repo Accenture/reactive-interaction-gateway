@@ -39,15 +39,15 @@ defmodule Rig.EventFilter.ServerTest do
     {:ok, filter_pid} = Server.start_link(event_type, field_config, opts)
 
     register_subscription_with_event_filter(subscription)
-    EventFilter.forward_event(event, "source_type", "topic")
-    EventFilter.forward_event(event, "source_type", "topic")
+    EventFilter.forward_event(event)
+    EventFilter.forward_event(event)
 
     assert_receive ^event
     assert_receive ^event
 
     # No longer receive an event for timed-out subscriptions after :cleanup:
     simulate_cleanup(filter_pid)
-    EventFilter.forward_event(event, "source_type", "topic")
+    EventFilter.forward_event(event)
     refute_receive ^event
 
     :ok = GenServer.stop(filter_pid)
@@ -121,7 +121,7 @@ defmodule Rig.EventFilter.ServerTest do
       {:ok, filter_pid} = Server.start_link(event_type, field_config)
 
       register_subscription_with_event_filter(subscription)
-      EventFilter.forward_event(event, "source_type", "topic")
+      EventFilter.forward_event(event)
 
       case match_expectation do
         :match -> assert_receive ^event
@@ -163,25 +163,25 @@ defmodule Rig.EventFilter.ServerTest do
       base_event |> Map.merge(%{"id" => 2, "data" => %{"name" => "sam"}}) |> CloudEvent.parse!()
 
     # Even though the greeting is for Sam and not for Joe, we receive it:
-    EventFilter.forward_event(greeting_to_sam, "source_type", "topic")
+    EventFilter.forward_event(greeting_to_sam)
     assert_receive ^greeting_to_sam
 
     # Let's load the proper field config now:
     GenServer.call(filter_pid, {:reload_configuration, greeting_with_name_field_config})
 
     # Without touching the subscriptions, there is no change:
-    EventFilter.forward_event(greeting_to_sam, "source_type", "topic")
+    EventFilter.forward_event(greeting_to_sam)
     assert_receive ^greeting_to_sam
 
     # But after refreshing the subscriptions, a greeting to Sam is no longer forwarded:
     register_subscription_with_event_filter(greetings_to_joe_subscription)
     # wait for genserver cast
     :sys.get_state(filter_pid)
-    EventFilter.forward_event(greeting_to_sam, "source_type", "topic")
+    EventFilter.forward_event(greeting_to_sam)
     refute_receive ^greeting_to_sam
 
     # ...but a greeting to Joe still is:
-    EventFilter.forward_event(greeting_to_joe, "source_type", "topic")
+    EventFilter.forward_event(greeting_to_joe)
     assert_receive ^greeting_to_joe
 
     :ok = GenServer.stop(filter_pid)

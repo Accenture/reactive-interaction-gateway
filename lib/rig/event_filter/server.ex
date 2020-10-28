@@ -15,7 +15,8 @@ defmodule Rig.EventFilter.Server do
   alias Rig.EventFilter.MatchSpec.SubscriptionMatcher
   alias Rig.Subscription
   alias RigCloudEvents.CloudEvent
-  alias RigMetrics.EventsMetrics
+
+  # alias RigMetrics.EventsMetrics
 
   @default_subscription_ttl_s 60
   @cleanup_interval_ms 90_000
@@ -153,7 +154,7 @@ defmodule Rig.EventFilter.Server do
       if n_clients > 0 do
         clients = if n_clients == 1, do: "1 client", else: "#{n_clients} clients"
         ~s|Event "#{id}" of type "#{type}" forwarded to #{clients}|
-        EventsMetrics.count_forwarded_event(source, topic)
+        # EventsMetrics.count_forwarded_event(source, topic)
       else
         ~s|Event "#{id}" of type "#{type}" not forwarded (there are no clients)|
       end
