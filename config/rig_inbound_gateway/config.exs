@@ -78,6 +78,12 @@ config :mime, :types, %{
 
 config :rig, RigInboundGateway.Proxy, config_path_or_json: {:system, "PROXY_CONFIG_FILE", nil}
 
+config :rig, RigInboundGateway.ApiProxy.Validations,
+  kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},
+  kafka_request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", ""},
+  kafka_request_avro: {:system, "PROXY_KAFKA_REQUEST_AVRO", ""},
+  system: System
+
 config :rig, RigInboundGateway.ApiProxy.Base,
   recv_timeout: {:system, :integer, "PROXY_RECV_TIMEOUT", 5_000}
 
@@ -126,6 +132,10 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
   response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000},
   cors: {:system, "CORS", "*"},
   kinesis_endpoint: {:system, "KINESIS_ENDPOINT", ""}
+
+config :rig, RigInboundGateway.ApiProxy.Handler.Nats,
+  timeout: {:system, :integer, "PROXY_NATS_RESPONSE_TIMEOUT", 60_000},
+  cors: {:system, "CORS", "*"}
 
 config :rig, RigInboundGateway.RequestLogger.Kafka,
   # The list of brokers, given by a comma-separated list of host:port items:

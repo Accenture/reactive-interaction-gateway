@@ -129,7 +129,7 @@ defmodule Rig.EventFilter.Server do
 
   @impl GenServer
   def handle_cast(
-        %CloudEvent{} = event,
+        event,
         %{subscription_table: subscription_table, config: config, fields: fields} = state
       ) do
     get_value_in_event = get_extractor(config, event)
@@ -297,7 +297,7 @@ defmodule Rig.EventFilter.Server do
 
   # ---
 
-  defp extract_value(%CloudEvent{} = event, json_pointer) do
+  defp extract_value(event, json_pointer) do
     case CloudEvent.find_value(event, json_pointer) do
       {:ok, value} ->
         value

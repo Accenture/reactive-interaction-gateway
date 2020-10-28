@@ -23,7 +23,7 @@ config :rig, RigTests.Proxy.ResponseFrom.KafkaTest,
   ssl_keyfile_pass: {:system, "KAFKA_SSL_KEYFILE_PASS", ""},
   # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
   sasl: {:system, "KAFKA_SASL", nil},
-  response_topic: "rig-proxy-response"
+  response_topic: {:system, "PROXY_KAFKA_RESPONSE_TOPICS", "rig-proxy-response"}
 
 config :rig, RigTests.Proxy.PublishToEventStream.KafkaTest,
   server_id: :rig_proxy_publish_kafkatest_genserver,

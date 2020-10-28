@@ -1,7 +1,7 @@
 defmodule RigInboundGateway.ApiProxyInjection do
   @moduledoc false
 
-  @mods [RigApi.V1.APIs, RigApi.V2.APIs]
+  @mods [RigApi.V1.APIs, RigApi.V2.APIs, RigApi.V3.APIs]
   @orig_vals for mod <- @mods, do: {mod, Application.get_env(:rig, mod)}
 
   def set do

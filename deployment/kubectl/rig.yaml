@@ -1,0 +1,228 @@
+# --- Operator's Guide ---
+# Full list of environment variables: https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html
+# ------------------------
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reactive-interaction-gateway
+  labels:
+    app: reactive-interaction-gateway
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4000
+      targetPort: proxy-http
+      protocol: TCP
+      name: proxy-http
+    - port: 4001
+      targetPort: proxy-https
+      protocol: TCP
+      name: proxy-https
+    - port: 4010
+      targetPort: internal-http
+      protocol: TCP
+      name: internal-http
+    - port: 4011
+      targetPort: internal-https
+      protocol: TCP
+      name: internal-https
+  selector:
+    app: reactive-interaction-gateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reactive-interaction-gateway-headless
+  labels:
+    app: reactive-interaction-gateway-headless
+spec:
+  ports:
+    - port: 4000
+      name: proxy-http
+    - port: 4001
+      name: proxy-https
+    - port: 4010
+      name: internal-http
+    - port: 4011
+      name: internal-https
+  selector:
+    app: reactive-interaction-gateway
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reactive-interaction-gateway
+spec:
+  selector:
+    matchLabels:
+      app: reactive-interaction-gateway
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: reactive-interaction-gateway
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+      nodeSelector: {}
+      affinity: {}
+      tolerations: []
+      containers:
+        - name: reactive-interaction-gateway
+          image: accenture/reactive-interaction-gateway:3.0.0-alpha.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4000
+              name: proxy-http
+              protocol: TCP
+            - containerPort: 4001
+              name: proxy-https
+              protocol: TCP
+            - containerPort: 4010
+              name: internal-http
+              protocol: TCP
+            - containerPort: 4011
+              name: internal-https
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: internal-http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: internal-http
+          resources: {}
+          env:
+            ## Proxy ports
+            - name: INBOUND_PORT
+              value: "4000"
+            - name: INBOUND_HTTPS_PORT
+              value: "4001"
+            ## Internal HTTP API ports
+            - name: API_HTTP_PORT
+              value: "4010"
+            - name: API_HTTPS_PORT
+              value: "4011"
+            ## Hostname for HTTP endpoints
+            # - name: HOST
+            #   value: "localhost"
+            ## HTTPS
+            # - name: HTTPS_CERTFILE
+            #   value: "cert/signed.pem"
+            # - name: HTTPS_KEYFILE
+            #   value: "cert/signed_key.pem"
+            # - name: HTTPS_KEYFILE_PASS
+            #   value: "asdf"
+            ## CORS (Access-Control-Allow-Origin) for "inbound" port(s)
+            # - name: CORS
+            #   value: "*"
+            ## Discovery & node
+            - name: DISCOVERY_TYPE
+              value: "dns"
+            ## Change "default" if you are using different namespace
+            - name: DNS_NAME
+              value: "reactive-interaction-gateway-headless.default.svc.cluster.local"
+            - name: NODE_COOKIE
+              value: "magiccookie"
+            - name: NODE_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            ## Kafka
+            ## Setting "KAFKA_BROKERS" automatically enables usage of Kafka
+            # - name: KAFKA_BROKERS
+            #   value: "localhost:9092"
+            # - name: KAFKA_SOURCE_TOPICS
+            #   value: "rig"
+            ## Kafka group ID used for forwarding events according to subscriptions over SSE and WS connections. The default should be fine.
+            # - name: KAFKATOFILTER_KAFKA_GROUP_ID
+            #   value: "rig-kafka-to-filter"
+            ## Kafka group ID used for forwarding all events over a HTTP connection. The default should be fine.
+            # - name: KAFKATOHTTP_KAFKA_GROUP_ID
+            #   value: "rig-kafka-to-http"
+            # - name: KAFKA_RESTART_DELAY_MS
+            #   value: "10000"
+            ## Host for Kafka Schema Registry
+            # - name: KAFKA_SCHEMA_REGISTRY_HOST
+            #   value: "schema-registry:8081"
+            ## Serializer for Kafka events, currently supports Avro. By default uses JSON serialization
+            # - name: KAFKA_SERIALIZER
+            #   value: "avro"
+            ## Avro schema name for events published by logger
+            # - name: KAFKA_LOG_SCHEMA
+            #   value: "logger-schema"
+            # - name: KAFKA_LOG_TOPIC
+            #   value: "rig-request-log"
+            ## Kafka SASL
+            # - name: KAFKA_SASL
+            #   value: "plain:myusername:mypassword"
+            ## Kafka SSL
+            # - name: KAFKA_SSL_ENABLED
+            #   value: "1"
+            # - name: KAFKA_SSL_CA_CERTFILE
+            #   value: "ca.crt.pem"
+            # - name: KAFKA_SSL_CERTFILE
+            #   value: "client.crt.pem"
+            # - name: KAFKA_SSL_KEYFILE
+            #   value: "client.key.pem"
+            # - name: KAFKA_SSL_KEYFILE_PASS
+            #   value: "asdf"
+            ## Kinesis
+            # - name: KINESIS_ENABLED
+            #   value: "1"
+            # - name: KINESIS_STREAM
+            #   value: "RIG-outbound"
+            # - name: KINESIS_APP_NAME
+            #   value: "Reactive-Interaction-Gateway"
+            # - name: KINESIS_AWS_REGION
+            #   value: "eu-west-1"
+            # - name: KINESIS_LOG_LEVEL
+            #   value: "INFO"
+            ## Proxy
+            ## Path to a JSON file or the JSON string itself
+            # - name: PROXY_CONFIG_FILE
+            #   value: "./proxy.json"
+            # - name: PROXY_RECV_TIMEOUT
+            #   value: "5000"
+            # - name: PROXY_HTTP_ASYNC_RESPONSE_TIMEOUT
+            #   value: "5000"
+            ## Proxy Kafka
+            # - name: PROXY_KAFKA_RESPONSE_TOPICS
+            #   value: "rig-proxy-response"
+            # - name: PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID
+            #   value: "rig-proxy-response"
+            # - name: PROXY_KAFKA_RESPONSE_TIMEOUT
+            #   value: "5000"
+            ## Proxy Kinesis
+            # - name: PROXY_KINESIS_REQUEST_STREAM
+            #   value: "rig-proxy-request"
+            # - name: PROXY_KINESIS_REQUEST_REGION
+            #   value: "eu-west-1"
+            # - name: PROXY_KINESIS_RESPONSE_TIMEOUT
+            #   value: "5000"
+            ## Extractors
+            # - name: EXTRACTORS
+            #   value: '{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/name"}}}}'
+            ## JWT
+            # - name: JWT_SECRET_KEY
+            #   value: "asdf"
+            # - name: JWT_ALG
+            #   value: "HS256"
+            # - name: JWT_SESSION_FIELD
+            #   value: "/userId"
+            ## Logging
+            # - name: REQUEST_LOG
+            #   value: "console,kafka"
+            - name: LOG_LEVEL
+              value: "warn"
+            ## SSE, WS
+            # - name: SUBSCRIPTION_CHECK
+            #   value: "jwt_validation"
+            ## HTTP events endpoint
+            # - name: SUBMISSION_CHECK
+            #   value: "jwt_validation"

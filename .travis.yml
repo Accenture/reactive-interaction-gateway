@@ -5,6 +5,8 @@ stages:
     if: branch = master
   - name: website
     if: branch = master AND type != pull_request
+  - name: restore-helm-repo-index
+    if: branch = master AND type != pull_request
   - name: sourcedocs
     if: branch = master AND type != pull_request
 
@@ -55,6 +57,20 @@ jobs:
         - git config --global user.email "${GH_EMAIL}"
         - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
         - cd website && yarn install && GIT_USER="${GH_NAME}" yarn run publish-gh-pages
+    - stage: restore-helm-repo-index
+      language: minimal
+      script:
+        - git config --global user.name "${GH_NAME}"
+        - git config --global user.email "${GH_EMAIL}"
+        - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
+        - git fetch --unshallow
+        - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+        - git fetch origin
+        - git checkout gh-pages
+        - test -e index.yaml || git checkout $(git rev-list -n1 HEAD -- index.yaml)~1 -- index.yaml
+        - git add index.yaml
+        - git diff-index --quiet HEAD || git commit -m "Auto-restore Helm chart repo index after Docusaurus publish"
+        - git push
     - stage: sourcedocs
       <<: *elixir-env
       script:

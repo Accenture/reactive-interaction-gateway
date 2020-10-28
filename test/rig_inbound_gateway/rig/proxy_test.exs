@@ -1,10 +1,7 @@
 defmodule RigInboundGateway.ProxyTest do
   @moduledoc false
   use ExUnit.Case, async: false
-  require Logger
-  alias RigInboundGateway.Proxy
   use RigApi.ConnCase
-  alias RigInboundGateway.ProxyConfig
 
   import RigInboundGateway.Proxy,
     only: [
@@ -17,7 +14,302 @@ defmodule RigInboundGateway.ProxyTest do
       handle_join_api: 3
     ]
 
+  import ExUnit.CaptureLog
+
+  alias RigInboundGateway.Proxy
+  alias RigInboundGateway.ProxyConfig
+
+  require Logger
+
+  @invalid_config_id "invalid-config"
+
   setup [:with_tracker_mock_proxy]
+
+  defp test_proxy_exit(ctx, error) do
+    Process.flag(:trap_exit, true)
+
+    assert capture_log(fn ->
+             catch_exit do
+               {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
+               proxy |> list_apis
+             end
+           end) =~
+             error
+
+    assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
+  end
+
+  describe "validations" do
+    test "should exit the process when api doesn't have required top level properties 'id', 'name', 'proxy' and 'version_data'",
+         ctx do
+      ProxyConfig.set_proxy_config()
+
+      test_proxy_exit(
+        ctx,
+        "[{\"api\", [{:error, \"id\", :by, \"must be string\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"name\", :by, \"must be string\"}, {:error, \"name\", :length, \"must have a length of at least 1\"}, {:error, \"proxy\", :presence, \"must be present\"}, {:error, \"version_data\", :presence, \"must be present\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'proxy' doesn't have required properties 'target_url' and 'port'",
+         ctx do
+      proxy = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{},
+        "version_data" => %{
+          "default" => %{
+            "endpoints" => []
+          }
+        }
+      }
+
+      ProxyConfig.set_proxy_config(proxy)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"api\", [{:error, \"proxy\", :presence, \"must be present\"}, {:error, \"target_url\", :by, \"must be string\"}, {:error, \"target_url\", :length, \"must have a length of at least 1\"}, {:error, \"port\", :by, \"must be integer\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'version_data' doesn't have any version",
+         ctx do
+      proxy = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{
+          "port" => 3000,
+          "target_url" => "http://localhost"
+        },
+        "version_data" => %{}
+      }
+
+      ProxyConfig.set_proxy_config(proxy)
+
+      test_proxy_exit(
+        ctx,
+        "[{:error, \"version_data\", :presence, \"must be present\"}, {:error, \"version_data\", :presence, \"must have at least one version, e.g. default\"}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'default' version doesn't have 'endpoints' property or is not an list",
+         ctx do
+      # missing "endpoints" property
+      proxy = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{
+          "port" => 3000,
+          "target_url" => "http://localhost"
+        },
+        "version_data" => %{
+          "default" => %{}
+        }
+      }
+
+      ProxyConfig.set_proxy_config(proxy)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"api\", [{:error, \"endpoints\", :by, \"must be list\"}]}]"
+      )
+
+      # "endpoints" not list
+      proxy = %{
+        "id" => "invalid_proxy",
+        "name" => "invalid_proxy",
+        "proxy" => %{
+          "port" => 3000,
+          "target_url" => "http://localhost"
+        },
+        "version_data" => %{
+          "default" => %{
+            "endpoints" => %{}
+          }
+        }
+      }
+
+      ProxyConfig.set_proxy_config(proxy)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"api\", [{:error, \"endpoints\", :by, \"must be list\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'endpoint' doesn't have required properties 'id', 'method' and 'path'",
+         ctx do
+      endpoints = [
+        %{}
+      ]
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/\", [{:error, \"id\", :by, \"must be string\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"path\", :by, \"must be string\"}, {:error, \"path\", :length, \"must have a length of at least 1\"}, {:error, \"method\", :by, \"must be string\"}, {:error, \"method\", :length, \"must have a length of at least 1\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when target is set to kafka or kinesis, but topic is not",
+         ctx do
+      # kinesis topic not set
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path" => "/foo",
+          "target" => "kinesis"
+        }
+      ]
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
+      kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, :kinesis_request_stream, :presence, \"must be present\"}, {:error, \"topic\", :presence, \"must be present\"}]}]"
+      )
+
+      ProxyConfig.restore()
+      ProxyConfig.restore("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
+
+      # kafka topic not set
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path" => "/foo",
+          "target" => "kafka"
+        }
+      ]
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
+      kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, :kafka_request_topic, :presence, \"must be present\"}, {:error, \"topic\", :presence, \"must be present\"}]}]"
+      )
+
+      ProxyConfig.restore()
+      ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
+    end
+
+    test "should exit the process when schema is set, but target is not kafka or kinesis", ctx do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path" => "/foo",
+          "schema" => "some-avro-schema"
+        }
+      ]
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, \"target\", :presence, \"must be present\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when secured is set, but auth_type is not jwt", ctx do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path" => "/foo",
+          "secured" => true
+        }
+      ]
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, \"auth_type\", :inclusion, \"must be one of [\\\"jwt\\\"]\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when use_header is set, but header_name is not", ctx do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path" => "/foo"
+        }
+      ]
+
+      auth = %{"use_header" => true}
+      auth_type = "jwt"
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config\", [{:error, \"header_name\", :presence, \"must be present\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when use_query is set, but query_name is not", ctx do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path" => "/foo"
+        }
+      ]
+
+      auth = %{"use_query" => true}
+      auth_type = "jwt"
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints, auth, auth_type)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config\", [{:error, \"query_name\", :presence, \"must be present\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when auth is set, but auth_type is not", ctx do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path" => "/foo"
+        }
+      ]
+
+      auth = %{"use_query" => true, "query_name" => "test"}
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints, auth)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config\", [{:error, \"auth_type\", :inclusion, \"must be one of [\\\"jwt\\\"]\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+  end
 
   describe "list_apis" do
     test "should return API definitions when the configuration is passed as a JSON file.", ctx do
@@ -31,32 +323,16 @@ defmodule RigInboundGateway.ProxyTest do
          ctx do
       id = "config-by-json-string"
 
-      ProxyConfig.set([
+      endpoints = [
         %{
-          "active" => true,
-          "auth_type" => "none",
-          "id" => id,
-          "name" => id,
-          "proxy" => %{
-            "port" => 3000,
-            "target_url" => "http://localhost",
-            "use_env" => false
-          },
-          "version_data" => %{
-            "default" => %{
-              "endpoints" => [
-                %{
-                  "id" => id <> "1",
-                  "method" => "GET",
-                  "secured" => false,
-                  "path" => "/foo"
-                }
-              ]
-            }
-          },
-          "versioned" => false
+          "id" => id <> "1",
+          "method" => "GET",
+          "secured" => false,
+          "path" => "/foo"
         }
-      ])
+      ]
+
+      ProxyConfig.set_proxy_config(id, endpoints)
 
       {:ok, proxy} = Proxy.start_link(ctx.tracker, name: nil)
       apis = Proxy.list_apis(proxy)

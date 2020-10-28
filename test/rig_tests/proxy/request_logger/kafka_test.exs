@@ -20,6 +20,7 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
   alias FakeServer.Response
   alias Rig.KafkaConfig, as: RigKafkaConfig
   alias RigInboundGateway.ApiProxyInjection
+  alias RigInboundGateway.ProxyConfig
   alias RigKafka
 
   @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
@@ -43,8 +44,9 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
     test_pid = self()
 
     callback = fn
-      msg ->
-        send(test_pid, msg)
+      body, headers ->
+        {:ok, event} = Cloudevents.from_kafka_message(body, headers)
+        send(test_pid, event)
         :ok
     end
 
@@ -104,29 +106,30 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
     HTTPoison.post!(request_url, "", headers)
 
     assert_receive received_msg, 10_000
-    received_msg_map = Jason.decode!(received_msg)
+    received_msg_map = received_msg
 
     System.delete_env("REQUEST_LOG")
 
     # Type
-    assert get_in(received_msg_map, ["type"]) == "com.rig.proxy.api.call"
+    assert received_msg_map.type == "com.rig.proxy.api.call"
 
     # Endpoint
-    assert get_in(received_msg_map, ["data", "endpoint", "id"]) == endpoint_id
-    assert get_in(received_msg_map, ["data", "endpoint", "method"]) == "POST"
-    assert get_in(received_msg_map, ["data", "endpoint", "path"]) == endpoint_path
+    assert get_in(received_msg_map.data, ["endpoint", "id"]) == endpoint_id
+    assert get_in(received_msg_map.data, ["endpoint", "method"]) == "POST"
+    assert get_in(received_msg_map.data, ["endpoint", "path"]) == endpoint_path
 
     # IP
-    assert get_in(received_msg_map, ["data", "remote_ip"]) == "127.0.0.1"
+    assert get_in(received_msg_map.data, ["remote_ip"]) == "127.0.0.1"
 
     # Path
-    assert get_in(received_msg_map, ["data", "request_path"]) == endpoint_path
+    assert get_in(received_msg_map.data, ["request_path"]) == endpoint_path
   end
 
   @tag :avro
   test_with_server "Given request logger is set to Kafka and Avro enabled, the http request
   should publish message to Kafka topic",
                    @env do
+    kafka_request_avro_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_AVRO", "")
     test_name = "proxy-logger-kafka-avro"
 
     api_id = "mock-#{test_name}-api"
@@ -175,19 +178,20 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
     assert res_body == "{\"status\":\"ok\"}"
 
     assert_receive received_msg, 10_000
-    received_msg_map = Jason.decode!(received_msg)
+    received_msg_map = received_msg
 
     System.delete_env("REQUEST_LOG")
 
     # Endpoint
-    assert get_in(received_msg_map, ["data", "endpoint", "id"]) == endpoint_id
-    assert get_in(received_msg_map, ["data", "endpoint", "method"]) == "POST"
-    assert get_in(received_msg_map, ["data", "endpoint", "path"]) == endpoint_path
+    assert get_in(received_msg_map.data, ["endpoint", "id"]) == endpoint_id
+    assert get_in(received_msg_map.data, ["endpoint", "method"]) == "POST"
+    assert get_in(received_msg_map.data, ["endpoint", "path"]) == endpoint_path
 
     # IP
-    assert get_in(received_msg_map, ["data", "remote_ip"]) == "127.0.0.1"
+    assert get_in(received_msg_map.data, ["remote_ip"]) == "127.0.0.1"
 
     # Path
-    assert get_in(received_msg_map, ["data", "request_path"]) == endpoint_path
+    assert get_in(received_msg_map.data, ["request_path"]) == endpoint_path
+    ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_request_avro_orig_value)
   end
 end

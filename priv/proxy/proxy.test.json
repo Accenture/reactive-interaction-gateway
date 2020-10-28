@@ -99,8 +99,7 @@
           {
             "id": "get-myapi-direct",
             "path": "/myapi/direct",
-            "method": "GET",
-            "secured": true
+            "method": "GET"
           }
         ]
       }

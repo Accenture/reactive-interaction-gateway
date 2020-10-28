@@ -23,7 +23,6 @@
             "id": "post-myapi-publish-async",
             "path": "/myapi/publish-async",
             "method": "POST",
-            "type": "async",
             "target": "kafka",
             "secured": false
           },
@@ -31,16 +30,13 @@
             "id": "post-myapi-publish-async",
             "path": "/myapi/publish-kinesis-async",
             "method": "POST",
-            "type": "async",
             "target": "kinesis",
-            "stream": "test-topic",
             "secured": false
           },
           {
             "id": "post-myapi-publish-sync",
             "path": "/myapi/publish-sync",
             "method": "POST",
-            "type": "sync",
             "target": "kafka",
             "secured": false
           },
@@ -150,8 +146,7 @@
           {
             "id": "get-myapi-direct",
             "path": "/myapi/direct",
-            "method": "GET",
-            "secured": true
+            "method": "GET"
           }
         ]
       }

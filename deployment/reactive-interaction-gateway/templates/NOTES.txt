@@ -1,0 +1,3 @@
+Monitor the deployment of RIG by getting the pods and services with:
+
+    kubectl get pods,svc --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "reactive-interaction-gateway.name" . }}"
