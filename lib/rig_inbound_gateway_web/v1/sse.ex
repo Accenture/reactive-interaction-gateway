@@ -46,7 +46,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
           body: encoded_body_or_nil
         }
 
-        do_init(req, request)
+        setup_connection(req, request)
 
       {:error, reason} ->
         req = :cowboy_req.reply(400, %{}, reason, req)
@@ -56,7 +56,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   # ---
 
-  def do_init(req, request) do
+  def setup_connection(req, request) do
     conf = config()
 
     on_success = fn subscriptions ->
@@ -113,7 +113,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   end
 
   @impl :cowboy_loop
-  def info(%CloudEvent{} = event, req, state) do
+  def info(event, req, state) when is_struct(event) do
     Logger.debug(fn -> "event: " <> inspect(event) end)
 
     # Forward the event to the client:
@@ -194,6 +194,12 @@ defmodule RigInboundGatewayWeb.V1.SSE do
   defp to_server_sent_event(%CloudEvent{} = event),
     do: %{
       data: event.json,
+      event: CloudEvent.type!(event)
+    }
+
+  defp to_server_sent_event(event) when is_struct(event),
+    do: %{
+      data: Cloudevents.to_json(event),
       event: CloudEvent.type!(event)
     }
 

@@ -39,8 +39,9 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     test_pid = self()
 
     callback = fn
-      msg, _topic ->
-        send(test_pid, msg)
+      body, headers ->
+        {:ok, event} = Cloudevents.from_kafka_message(body, headers)
+        send(test_pid, event)
         :ok
     end
 
@@ -74,8 +75,6 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "OPTIONS",
                 path: endpoint_path,
                 target: "kafka"
@@ -133,8 +132,6 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "POST",
                 path: endpoint_path,
                 target: "kafka",
@@ -180,21 +177,23 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     assert res_body == "Accepted."
 
     assert_receive received_msg, 10_000
-    received_msg_map = Jason.decode!(received_msg)
+    received_msg_map = received_msg
 
     # The event payload is still there:
-    assert get_in(received_msg_map, ["data", "foo"]) == "bar"
+    assert get_in(received_msg_map.data, ["foo"]) == "bar"
 
     # The event context attributes are, too:
-    assert get_in(received_msg_map, ["type"]) == "com.example.test"
-    assert get_in(received_msg_map, ["id"]) == "069711bf-3946-4661-984f-c667657b8d85"
+    assert received_msg_map.type == "com.example.test"
+    assert received_msg_map.id == "069711bf-3946-4661-984f-c667657b8d85"
 
     # RIG adds meta data to the "rig" extension attribute:
-    assert get_in(received_msg_map, ["rig", "path"]) == "/mock-proxy-publish-to-kafka-endpoint"
-    assert get_in(received_msg_map, ["rig", "remoteip"]) == "127.0.0.1"
-    assert get_in(received_msg_map, ["rig", "correlation"]) |> byte_size > 0
+    assert get_in(received_msg_map.extensions, ["rig", "path"]) ==
+             "/mock-proxy-publish-to-kafka-endpoint"
 
-    assert get_in(received_msg_map, ["rig", "headers"])
+    assert get_in(received_msg_map.extensions, ["rig", "remoteip"]) == "127.0.0.1"
+    assert get_in(received_msg_map.extensions, ["rig", "correlation"]) |> byte_size > 0
+
+    assert get_in(received_msg_map.extensions, ["rig", "headers"])
            |> Enum.member?(["host", "#{@proxy_host}:#{@proxy_port}"])
 
     # Send request with no partition key -- RIG will randomize it
@@ -219,11 +218,13 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     assert res_body == "Accepted."
 
     assert_receive received_msg, 10_000
-    received_msg_map = Jason.decode!(received_msg)
+    received_msg_map = received_msg
 
     # The event payload is still there:
-    assert get_in(received_msg_map, ["data", "foo"]) == "random partition"
-    assert get_in(received_msg_map, ["rig", "path"]) == "/mock-proxy-publish-to-kafka-endpoint"
+    assert get_in(received_msg_map.data, ["foo"]) == "random partition"
+
+    assert get_in(received_msg_map.extensions, ["rig", "path"]) ==
+             "/mock-proxy-publish-to-kafka-endpoint"
   end
 
   @tag :avro
@@ -247,8 +248,6 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "POST",
                 path: endpoint_path,
                 target: "kafka",
@@ -295,23 +294,23 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     assert res_body == "Accepted."
 
     assert_receive received_msg, 10_000
-    received_msg_map = Jason.decode!(received_msg)
+    received_msg_map = received_msg
 
     # The event payload is still there:
-    assert get_in(received_msg_map, ["data", "foo"]) == "bar"
+    assert get_in(received_msg_map.data, ["foo"]) == "bar"
 
     # The event context attributes are, too:
-    assert get_in(received_msg_map, ["type"]) == "com.example.test"
-    assert get_in(received_msg_map, ["id"]) == "069711bf-3946-4661-984f-c667657b8d85"
+    assert received_msg_map.type == "com.example.test"
+    assert received_msg_map.id == "069711bf-3946-4661-984f-c667657b8d85"
 
     # RIG adds meta data to the "rig" extension attribute:
-    assert get_in(received_msg_map, ["rig", "path"]) ==
+    assert get_in(received_msg_map.extensions, ["rig", "path"]) ==
              "/mock-proxy-publish-to-kafka-avro-endpoint"
 
-    assert get_in(received_msg_map, ["rig", "remoteip"]) == "127.0.0.1"
-    assert get_in(received_msg_map, ["rig", "correlation"]) |> byte_size > 0
+    assert get_in(received_msg_map.extensions, ["rig", "remoteip"]) == "127.0.0.1"
+    assert get_in(received_msg_map.extensions, ["rig", "correlation"]) |> byte_size > 0
 
-    assert get_in(received_msg_map, ["rig", "headers"])
+    assert get_in(received_msg_map.extensions, ["rig", "headers"])
            |> Enum.member?(["host", "#{@proxy_host}:#{@proxy_port}"])
 
     # Send request with no partition key -- RIG will randomize it
@@ -336,12 +335,12 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     assert res_body == "Accepted."
 
     assert_receive received_msg, 10_000
-    received_msg_map = Jason.decode!(received_msg)
+    received_msg_map = received_msg
 
     # The event payload is still there:
-    assert get_in(received_msg_map, ["data", "foo"]) == "random partition"
+    assert get_in(received_msg_map.data, ["foo"]) == "random partition"
 
-    assert get_in(received_msg_map, ["rig", "path"]) ==
+    assert get_in(received_msg_map.extensions, ["rig", "path"]) ==
              "/mock-proxy-publish-to-kafka-avro-endpoint"
   end
 
@@ -366,8 +365,6 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "POST",
                 path: endpoint_path,
                 target: "kafka"
@@ -412,23 +409,23 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     assert res_body == "Accepted."
 
     assert_receive received_msg, 10_000
-    received_msg_map = Jason.decode!(received_msg)
+    received_msg_map = received_msg
 
     # The event payload is still there:
-    assert get_in(received_msg_map, ["data", "foo"]) == "bar"
+    assert get_in(received_msg_map.data, ["foo"]) == "bar"
 
     # The event context attributes are, too:
-    assert get_in(received_msg_map, ["type"]) == "com.example.test"
-    assert get_in(received_msg_map, ["id"]) == "069711bf-3946-4661-984f-c667657b8d85"
+    assert received_msg_map.type == "com.example.test"
+    assert received_msg_map.id == "069711bf-3946-4661-984f-c667657b8d85"
 
     # RIG adds meta data to the "rig" extension attribute:
-    assert get_in(received_msg_map, ["rig", "path"]) ==
+    assert get_in(received_msg_map.extensions, ["rig", "path"]) ==
              "/mock-proxy-publish-to-kafka-fallback-endpoint"
 
-    assert get_in(received_msg_map, ["rig", "remoteip"]) == "127.0.0.1"
-    assert get_in(received_msg_map, ["rig", "correlation"]) |> byte_size > 0
+    assert get_in(received_msg_map.extensions, ["rig", "remoteip"]) == "127.0.0.1"
+    assert get_in(received_msg_map.extensions, ["rig", "correlation"]) |> byte_size > 0
 
-    assert get_in(received_msg_map, ["rig", "headers"])
+    assert get_in(received_msg_map.extensions, ["rig", "headers"])
            |> Enum.member?(["host", "#{@proxy_host}:#{@proxy_port}"])
 
     # Send request with no partition key -- RIG will randomize it
@@ -453,12 +450,12 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     assert res_body == "Accepted."
 
     assert_receive received_msg, 10_000
-    received_msg_map = Jason.decode!(received_msg)
+    received_msg_map = received_msg
 
     # The event payload is still there:
-    assert get_in(received_msg_map, ["data", "foo"]) == "random partition"
+    assert get_in(received_msg_map.data, ["foo"]) == "random partition"
 
-    assert get_in(received_msg_map, ["rig", "path"]) ==
+    assert get_in(received_msg_map.extensions, ["rig", "path"]) ==
              "/mock-proxy-publish-to-kafka-fallback-endpoint"
   end
 
@@ -483,8 +480,6 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "POST",
                 path: endpoint_path,
                 target: "kafka"
@@ -529,23 +524,23 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     assert res_body == "Accepted."
 
     assert_receive received_msg, 10_000
-    received_msg_map = Jason.decode!(received_msg)
+    received_msg_map = received_msg
 
     # The event payload is still there:
-    assert get_in(received_msg_map, ["data", "foo"]) == "bar"
+    assert get_in(received_msg_map.data, ["foo"]) == "bar"
 
     # The event context attributes are, too:
-    assert get_in(received_msg_map, ["type"]) == "com.example.test"
-    assert get_in(received_msg_map, ["id"]) == "069711bf-3946-4661-984f-c667657b8d85"
+    assert received_msg_map.type == "com.example.test"
+    assert received_msg_map.id == "069711bf-3946-4661-984f-c667657b8d85"
 
     # RIG adds meta data to the "rig" extension attribute:
-    assert get_in(received_msg_map, ["rig", "path"]) ==
+    assert get_in(received_msg_map.extensions, ["rig", "path"]) ==
              "/mock-proxy-publish-to-kafka-avro-endpoint"
 
-    assert get_in(received_msg_map, ["rig", "remoteip"]) == "127.0.0.1"
-    assert get_in(received_msg_map, ["rig", "correlation"]) |> byte_size > 0
+    assert get_in(received_msg_map.extensions, ["rig", "remoteip"]) == "127.0.0.1"
+    assert get_in(received_msg_map.extensions, ["rig", "correlation"]) |> byte_size > 0
 
-    assert get_in(received_msg_map, ["rig", "headers"])
+    assert get_in(received_msg_map.extensions, ["rig", "headers"])
            |> Enum.member?(["host", "#{@proxy_host}:#{@proxy_port}"])
 
     # Send request with no partition key -- RIG will randomize it
@@ -570,12 +565,12 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
     assert res_body == "Accepted."
 
     assert_receive received_msg, 10_000
-    received_msg_map = Jason.decode!(received_msg)
+    received_msg_map = received_msg
 
     # The event payload is still there:
-    assert get_in(received_msg_map, ["data", "foo"]) == "random partition"
+    assert get_in(received_msg_map.data, ["foo"]) == "random partition"
 
-    assert get_in(received_msg_map, ["rig", "path"]) ==
+    assert get_in(received_msg_map.extensions, ["rig", "path"]) ==
              "/mock-proxy-publish-to-kafka-avro-endpoint"
   end
 end

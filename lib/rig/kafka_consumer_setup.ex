@@ -10,7 +10,7 @@ defmodule Rig.KafkaConsumerSetup do
 
   React to incoming messages:
 
-      @spec kafka_handler(message :: String.t()) :: :ok | error :: any
+      @spec kafka_handler(message :: String.t(), headers:: [{String.t(), String.t()}]) :: :ok | error :: any
 
   """
 
