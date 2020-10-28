@@ -1,20 +1,20 @@
 defmodule RigMetrics.DistributedSetMetrics do
   @moduledoc """
-  Metrics Metrics for the Rig Distributed Sets
+  Metrics instrumenter for the Rig Distributed Sets, for example backlist.
   """
   use Prometheus.Metric
 
-  # to be called at app startup.
+  # To be called at app startup.
   def setup do
     Gauge.declare(
       name: :rig_distributed_set_items_total,
-      help: "Total count of items in distributed set",
+      help: "Total count of items in distributed set.",
       labels: [:name]
     )
 
     Gauge.declare(
       name: :rig_distributed_set_items_current,
-      help: "Current count of items in distributed set",
+      help: "Current count of items in distributed set.",
       labels: [:name]
     )
   end

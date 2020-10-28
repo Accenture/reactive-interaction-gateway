@@ -15,8 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added possibility to set response code for `response_from` messages in reverse proxy (`kafka` and `http_async`). [#321](https://github.com/Accenture/reactive-interaction-gateway/pull/321)
 - Added new version - `v3` - for internal endpoints to support response code in the `/responses` endpoint
 - Added Helm v3 template to the `deployment` folder [#288](https://github.com/Accenture/reactive-interaction-gateway/issues/288)
-- Added Prometheus metrics for events, subscriptions and blacklist. Check the [wiki](https://accenture.github.io/reactive-interaction-gateway/docs/metrics-details.html#rig-specific-metrics). [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
-- Added custom Grafana dashboard. Check the [wiki](https://accenture.github.io/reactive-interaction-gateway/docs/metrics-details.html#provided-dashboard). [#222](https://github.com/Accenture/reactive-interaction-gateway/issues/222)
+- Added Prometheus metrics for events, subscriptions and blacklist. Check the [wiki](https://accenture.github.io/reactive-interaction-gateway/docs/metrics-details.html#rig-specific-metrics) for more info. [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
+- Added custom Grafana dashboard. Check the [wiki](https://accenture.github.io/reactive-interaction-gateway/docs/metrics-details.html#provided-dashboard) for more info. [#222](https://github.com/Accenture/reactive-interaction-gateway/issues/222)
 
 ### Changed
 

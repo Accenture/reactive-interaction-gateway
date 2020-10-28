@@ -48,23 +48,29 @@ defmodule RigKafka.Client do
           message,
           %{callback: callback} = state
         ) do
-      start_time_mono = System.monotonic_time()
+      # start to measure processing time for Prometheus metric
+      metrics_start_time_mono = System.monotonic_time()
       %{offset: offset, value: body, headers: headers} = Enum.into(kafka_message(message), %{})
 
       try do
         case callback.(body, headers) do
           :ok ->
+            # update Prometheus metric with calculated processing time
             EventsMetrics.measure_event_processing(
               @metrics_source_label,
               topic,
-              System.monotonic_time() - start_time_mono
+              System.monotonic_time() - metrics_start_time_mono
             )
+
+            # increase Prometheus metric with consumed event forwarded to any frontend channel
+            EventsMetrics.count_forwarded_event(@metrics_source_label, topic)
 
             {:ok, :ack, state}
 
           err ->
             info = %{error: err, topic: topic, partition: partition, offset: offset}
             Logger.error("Callback failed to handle message: #{inspect(info)}")
+            # increase Prometheus metric with event failed to be consumed
             EventsMetrics.count_failed_event(@metrics_source_label, topic)
             {:ok, :ack_no_commit, state}
         end
@@ -72,7 +78,8 @@ defmodule RigKafka.Client do
         err ->
           info = %{error: err, topic: topic, partition: partition, offset: offset}
           Logger.error(fn -> {"failed to decode message: #{inspect(err)}", [info: info]} end)
-          EventsMetrics.count_dropped_event(@metrics_source_label, topic)
+          # increase Prometheus metric with event failed to be consumed
+          EventsMetrics.count_failed_event(@metrics_source_label, topic)
           {:ok, :ack_no_commit, state}
       end
     end
@@ -366,11 +373,13 @@ defmodule RigKafka.Client do
            }
          ) do
       :ok ->
+        # increase Prometheus metric with a produced event
         EventsMetrics.count_produced_event(@metrics_target_label, topic)
         :ok
 
       {:error, :leader_not_available} ->
         try_again? = retry_delay_divisor >= 1
+        # increase Prometheus metric with an event failed to be produced
         EventsMetrics.count_failed_produce_event(@metrics_target_label, topic)
 
         if try_again? do
@@ -396,6 +405,7 @@ defmodule RigKafka.Client do
         end
 
       err ->
+        # increase Prometheus metric with an event failed to be produced
         EventsMetrics.count_failed_produce_event(@metrics_target_label, topic)
         err
     end

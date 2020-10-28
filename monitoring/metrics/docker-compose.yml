@@ -50,7 +50,7 @@ services:
     volumes:
       - ./dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
       - ./datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
-      - ./rig-grafana.json:/var/lib/grafana/dashboards/rig-grafana.json
+      - ./dashboards:/var/lib/grafana/dashboards/rig
     links:
       - prometheus
     restart: on-failure:5

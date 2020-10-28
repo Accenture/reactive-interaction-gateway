@@ -287,7 +287,8 @@ defmodule Rig.EventFilter do
         {:refresh_subscriptions, subscriber, subscriptions, prev_subscriptions, done_callback}
       )
 
-      # SubscriptionsMetrics.set_subscriptions(length(subscriptions))
+      # increase Prometheus metric with a subscription
+      SubscriptionsMetrics.set_subscriptions(length(subscriptions))
     end
 
     :ok
