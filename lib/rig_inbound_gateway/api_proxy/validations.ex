@@ -12,6 +12,9 @@ defmodule RigInboundGateway.ApiProxy.Validations do
 
   require Logger
 
+  @endpoint_paths ["path", "path_regex"]
+  @endpoint_paths_error_key "path, path_regex"
+
   @type error_t :: [{:error, String.t() | atom, atom, String.t()}]
   @type error_list_t :: [{String.t(), error_t()}]
   @type error_map_t :: %{String.t() => [%{(String.t() | atom) => String.t()}]}
@@ -90,10 +93,23 @@ defmodule RigInboundGateway.ApiProxy.Validations do
 
   @spec validate_endpoint_path(Api.endpoint()) :: error_list_t()
   def validate_endpoint_path(endpoint) do
-    errors = validate_string(endpoint, "path") ++ validate_string(endpoint, "path_regex")
+    present_paths =
+      @endpoint_paths
+      |> Enum.filter(fn key -> Map.has_key?(endpoint, key) end)
 
-    # each option can produce 2 errors, so 4 in total, therefore 2 is the min value for number of errors
-    with_any_error(errors, 2)
+    case present_paths do
+      [] ->
+        [{:error, @endpoint_paths_error_key, :by, "Either path or path_regex must be set"}]
+
+      [path] ->
+        validate_string(endpoint, path)
+
+      _ ->
+        [
+          {:error, @endpoint_paths_error_key, :by,
+           "You can't set path and path_regex at the same time"}
+        ]
+    end
   end
 
   # ---

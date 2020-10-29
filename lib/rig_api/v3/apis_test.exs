@@ -367,10 +367,7 @@ defmodule RigApi.V3.APIsTest do
                "invalid-config/" => [
                  %{"id" => "must be string"},
                  %{"id" => "must have a length of at least 1"},
-                 %{"path" => "must be string"},
-                 %{"path" => "must have a length of at least 1"},
-                 %{"path_regex" => "must be string"},
-                 %{"path_regex" => "must have a length of at least 1"},
+                 %{"path, path_regex" => "Either path or path_regex must be set"},
                  %{"method" => "must be string"},
                  %{"method" => "must have a length of at least 1"}
                ]

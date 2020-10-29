@@ -154,7 +154,68 @@ defmodule RigInboundGateway.ProxyTest do
 
       test_proxy_exit(
         ctx,
-        "[{\"invalid-config/\", [{:error, \"id\", :by, \"must be string\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"path\", :by, \"must be string\"}, {:error, \"path\", :length, \"must have a length of at least 1\"}, {:error, \"path_regex\", :by, \"must be string\"}, {:error, \"path_regex\", :length, \"must have a length of at least 1\"}, {:error, \"method\", :by, \"must be string\"}, {:error, \"method\", :length, \"must have a length of at least 1\"}]}]"
+        "[{\"invalid-config/\", [{:error, \"id\", :by, \"must be string\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"path, path_regex\", :by, \"Either path or path_regex must be set\"}, {:error, \"method\", :by, \"must be string\"}, {:error, \"method\", :length, \"must have a length of at least 1\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'endpoint' has 'path' and 'path_regex' set at the same time",
+         ctx do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path" => "/",
+          "path_regex" => "/"
+        }
+      ]
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, \"path, path_regex\", :by, \"You can't set path and path_regex at the same time\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'path' is set, but incorrect",
+         ctx do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path" => ""
+        }
+      ]
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, \"path\", :length, \"must have a length of at least 1\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'path_regex' is set, but incorrect",
+         ctx do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path_regex" => ""
+        }
+      ]
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, \"path_regex\", :length, \"must have a length of at least 1\"}]}]"
       )
 
       ProxyConfig.restore()
