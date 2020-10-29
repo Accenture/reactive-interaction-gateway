@@ -92,7 +92,7 @@ defmodule RigInboundGateway.ApiProxy.Validations do
   def validate_endpoint_path(endpoint) do
     errors = validate_string(endpoint, "path") ++ validate_string(endpoint, "path_regex")
 
-    # each option can produce 2 errors, so 4 in total, therefore 2 is min the min value for number of errors
+    # each option can produce 2 errors, so 4 in total, therefore 2 is the min value for number of errors
     with_any_error(errors, 2)
   end
 
