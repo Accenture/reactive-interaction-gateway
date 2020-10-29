@@ -374,6 +374,67 @@ defmodule RigApi.V2.APIsTest do
              }
     end
 
+    test "should return 400 when 'endpoint' has 'path' and 'path_regex' set at the same time" do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path" => "/",
+          "path_regex" => "/"
+        }
+      ]
+
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
+      response = json_response(conn, 400)
+
+      assert response == %{
+               "invalid-config/invalid-config1" => [
+                 %{"path, path_regex" => "You can't set path and path_regex at the same time"}
+               ]
+             }
+    end
+
+    test "should return 400 when when 'path' is set, but incorrect" do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path" => ""
+        }
+      ]
+
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
+      response = json_response(conn, 400)
+
+      assert response == %{
+               "invalid-config/invalid-config1" => [
+                 %{"path" => "must have a length of at least 1"}
+               ]
+             }
+    end
+
+    test "should return 400 when when 'path_regex' is set, but incorrect" do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path_regex" => ""
+        }
+      ]
+
+      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
+      conn = build_conn() |> put("/v2/apis/#{@invalid_config_id}", new_api)
+      response = json_response(conn, 400)
+
+      assert response == %{
+               "invalid-config/invalid-config1" => [
+                 %{"path_regex" => "must have a length of at least 1"}
+               ]
+             }
+    end
+
     test "should return 400 when target is set to kafka or kinesis, but topic is not" do
       # kinesis topic not set
       endpoints = [
