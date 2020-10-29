@@ -357,7 +357,7 @@ defmodule RigApi.V3.APIsTest do
              }
     end
 
-    test "should return 400 when 'endpoint' doesn't have required properties 'id', 'method' and 'path'" do
+    test "should return 400 when 'endpoint' doesn't have required properties 'id', 'method' and 'path' or 'path_regex'" do
       endpoints = [%{}]
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> put("/v3/apis/#{@invalid_config_id}", new_api)
@@ -369,6 +369,8 @@ defmodule RigApi.V3.APIsTest do
                  %{"id" => "must have a length of at least 1"},
                  %{"path" => "must be string"},
                  %{"path" => "must have a length of at least 1"},
+                 %{"path_regex" => "must be string"},
+                 %{"path_regex" => "must have a length of at least 1"},
                  %{"method" => "must be string"},
                  %{"method" => "must have a length of at least 1"}
                ]

@@ -45,6 +45,11 @@ defmodule RigApi.ConnCase do
                 "method" => "GET",
                 "secured" => false,
                 "path" => "/myapi/movies"
+              },
+              %{
+                "id" => "get-movies-2",
+                "method" => "GET",
+                "path_regex" => "/foo/([^/]+)/bar/([^/]+)"
               }
             ]
           }
