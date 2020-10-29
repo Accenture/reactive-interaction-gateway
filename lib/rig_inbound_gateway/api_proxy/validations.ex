@@ -88,6 +88,16 @@ defmodule RigInboundGateway.ApiProxy.Validations do
 
   # ---
 
+  @spec validate_endpoint_path(Api.endpoint()) :: error_list_t()
+  def validate_endpoint_path(endpoint) do
+    errors = validate_string(endpoint, "path") ++ validate_string(endpoint, "path_regex")
+
+    # each option can produce 2 errors, so 4 in total, therefore 2 is min the min value for number of errors
+    with_any_error(errors, 2)
+  end
+
+  # ---
+
   @spec with_any_error(error_list_t(), integer) :: error_list_t()
   def with_any_error(errors, min_errors \\ 1)
   def with_any_error(errors, min_errors) when length(errors) > min_errors, do: errors
@@ -127,13 +137,15 @@ defmodule RigInboundGateway.ApiProxy.Validations do
         |> Vex.valid?(%{"schema" => [presence: true]})
         |> with_nested_presence("target", endpoint)
 
+      endpoint_path_errors = validate_endpoint_path(endpoint)
+
       all_errors =
         validate_secured_endpoint(api, endpoint) ++
           with_any_error(topic_presence) ++
           with_any_error(stream_presence) ++
           schema_presence_config ++
           validate_string(endpoint, "id") ++
-          validate_string(endpoint, "path") ++ validate_string(endpoint, "method")
+          endpoint_path_errors ++ validate_string(endpoint, "method")
 
       merge_errors(acc, [{"#{id}/#{endpoint["id"]}", all_errors}])
     end)

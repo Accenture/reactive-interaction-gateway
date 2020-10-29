@@ -144,7 +144,7 @@ defmodule RigInboundGateway.ProxyTest do
       ProxyConfig.restore()
     end
 
-    test "should exit the process when 'endpoint' doesn't have required properties 'id', 'method' and 'path'",
+    test "should exit the process when 'endpoint' doesn't have required properties 'id', 'method' and 'path' or 'path_regex'",
          ctx do
       endpoints = [
         %{}
@@ -154,7 +154,7 @@ defmodule RigInboundGateway.ProxyTest do
 
       test_proxy_exit(
         ctx,
-        "[{\"invalid-config/\", [{:error, \"id\", :by, \"must be string\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"path\", :by, \"must be string\"}, {:error, \"path\", :length, \"must have a length of at least 1\"}, {:error, \"method\", :by, \"must be string\"}, {:error, \"method\", :length, \"must have a length of at least 1\"}]}]"
+        "[{\"invalid-config/\", [{:error, \"id\", :by, \"must be string\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"path\", :by, \"must be string\"}, {:error, \"path\", :length, \"must have a length of at least 1\"}, {:error, \"path_regex\", :by, \"must be string\"}, {:error, \"path_regex\", :length, \"must have a length of at least 1\"}, {:error, \"method\", :by, \"must be string\"}, {:error, \"method\", :length, \"must have a length of at least 1\"}]}]"
       )
 
       ProxyConfig.restore()
@@ -329,6 +329,11 @@ defmodule RigInboundGateway.ProxyTest do
           "method" => "GET",
           "secured" => false,
           "path" => "/foo"
+        },
+        %{
+          "id" => id <> "2",
+          "method" => "GET",
+          "path_regex" => "/foo/([^/]+)/bar/([^/]+)"
         }
       ]
 

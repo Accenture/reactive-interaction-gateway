@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed a bug where distributed set processes would crash when one of their peers has died but hasn't been removed yet from the pg2 group.
+- Fixed wrong endpoint validation for reverse proxy. Now it should correctly check for `path` or `path_regex`. Before it would require `path` even with `path_regex` in place. [#334](https://github.com/Accenture/reactive-interaction-gateway/issues/334)
 
 <!-- ### Deprecated -->
 
