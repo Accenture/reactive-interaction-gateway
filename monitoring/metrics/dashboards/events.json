@@ -69,19 +69,19 @@
           "expr": "sum by (topic, source) (rate(rig_consumed_events_total[5m]))",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "Total: source - {{source}}, topic - {{topic}}",
+          "legendFormat": "Total: {{source}} - {{topic}}",
           "refId": "A"
         },
         {
           "expr": "sum by (topic, source) (rate(rig_consumed_events_forwarded_total[5m]))",
           "interval": "",
-          "legendFormat": "Failed: source - {{source}}, topic - {{topic}}",
+          "legendFormat": "Failed: {{source}} - {{topic}}",
           "refId": "B"
         },
         {
-          "expr": "sum by (topic, source) (rate(rig_consumed_events_forwarded_total[5m]))",
+          "expr": "sum by (type) (rate(rig_consumed_events_forwarded_total[5m]))",
           "interval": "",
-          "legendFormat": "Forwarded: source - {{source}}, topic - {{topic}}",
+          "legendFormat": "Forwarded: {{type}}",
           "refId": "D"
         }
       ],
@@ -177,13 +177,13 @@
         {
           "expr": "sum by (topic, target) (rate(rig_produced_events_total[5m]))",
           "interval": "",
-          "legendFormat": "Total: target - {{target}}, topic - {{topic}}",
+          "legendFormat": "Total: {{target}} - {{topic}}",
           "refId": "E"
         },
         {
           "expr": "sum by (topic, target) (rate(rig_produced_events_failed_total[5m]))",
           "interval": "",
-          "legendFormat": "Failed: target - {{target}}, topic - {{topic}}",
+          "legendFormat": "Failed: {{target}} - {{topic}}",
           "refId": "F"
         }
       ],
@@ -298,7 +298,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "(((rig_consumed_events_total - rig_consumed_events_failed_total) / rig_consumed_events_total) and on () rig_consumed_events_failed_total > 0) OR (((rig_consumed_events_total - rig_consumed_events_failed_total) / rig_consumed_events_total) and on () rig_consumed_events_failed_total > 0) OR rig_consumed_events_total/rig_consumed_events_total",
+          "expr": "(((sum(rig_consumed_events_total) - sum(rig_consumed_events_failed_total)) / sum(rig_consumed_events_total)) and on () sum(rig_consumed_events_failed_total) > 0) OR \n(((sum(rig_consumed_events_total) - sum(rig_consumed_events_failed_total)) / sum(rig_consumed_events_total)) and on () sum(rig_consumed_events_failed_total) > 0) OR \nsum(rig_consumed_events_total)/sum(rig_consumed_events_total)",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -372,17 +372,17 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.5, sum(rate(rig_consumed_event_processing_duration_milliseconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.5, sum(rate(rig_consumed_event_processing_duration_milliseconds_bucket[5m])) by (le, source))",
           "format": "time_series",
           "instant": false,
           "interval": "",
-          "legendFormat": "Median",
+          "legendFormat": "Median: {{source}}",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(rig_consumed_event_processing_duration_milliseconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(rig_consumed_event_processing_duration_milliseconds_bucket[5m])) by (le, source))",
           "interval": "",
-          "legendFormat": "95th percentile",
+          "legendFormat": "95th percentile: {{source}}",
           "refId": "B"
         }
       ],
@@ -588,9 +588,9 @@
           "refId": "B"
         },
         {
-          "expr": "sum by (topic, source) (rig_consumed_events_forwarded_total)",
+          "expr": "sum by () (rig_consumed_events_forwarded_total)",
           "interval": "",
-          "legendFormat": "Forwarded: {{source}} - {{topic}}",
+          "legendFormat": "Forwarded",
           "refId": "D"
         }
       ],
@@ -739,7 +739,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "((rig_produced_events_total / (rig_produced_events_failed_total + rig_produced_events_total)) and on () rig_produced_events_total > 0) OR rig_produced_events_total/rig_produced_events_total",
+          "expr": "((sum(rig_produced_events_total) / (sum(rig_produced_events_failed_total) + sum(rig_produced_events_total))) and on () sum(rig_produced_events_total) > 0) OR \nsum(rig_produced_events_total)/sum(rig_produced_events_total)",
           "format": "time_series",
           "instant": false,
           "interval": "",

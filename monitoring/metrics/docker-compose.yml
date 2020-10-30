@@ -1,5 +1,21 @@
 version: "3"
 services:
+  localstack:
+    image: localstack/localstack
+    container_name: localstack
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+    environment:
+      - SERVICES=${SERVICES-dynamodb,kinesis,cloudwatch}
+      - DEBUG=${DEBUG- }
+      - DATA_DIR=${DATA_DIR- }
+      - PORT_WEB_UI=${PORT_WEB_UI- }
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+      - DEFAULT_REGION=eu-west-1
+
   zk:
     image: confluentinc/cp-zookeeper:5.0.0
     container_name: zk
@@ -31,7 +47,7 @@ services:
   kafkacat:
     image: confluentinc/cp-kafkacat:5.0.0
     container_name: kafkacat
-    command: sh -c "sleep 1000"
+    command: sh -c "sleep infinity"
 
   prometheus:
     image: prom/prometheus
@@ -63,8 +79,14 @@ services:
       # Kafka
       - KAFKA_BROKERS=kafka:9092
       - KAFKA_SOURCE_TOPICS=test-monitoring
-      - PROXY_KAFKA_REQUEST_TOPIC=test-monitoring
-      - PROXY_KAFKA_RESPONSE_TOPICS=test-monitoring
+      # Kinesis
+      - AWS_ACCESS_KEY_ID=foobar
+      - AWS_SECRET_ACCESS_KEY=foobar
+      - KINESIS_APP_NAME=rig
+      - KINESIS_DYNAMODB_ENDPOINT=http://localstack:4566
+      - KINESIS_ENABLED=1
+      - KINESIS_ENDPOINT=http://localstack:4566
+      - AWS_CBOR_DISABLE=1
       # Proxy
       - PROXY_CONFIG_FILE=/rig-proxy.json
       - KAFKA_HOST=kafka

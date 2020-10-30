@@ -5,7 +5,8 @@ services:
     image: localstack/localstack
     container_name: localstack
     ports:
-      - "4567-4597:4567-4597"
+      - "4566:4566"
+      - "4571:4571"
       - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
     environment:
       - SERVICES=${SERVICES-dynamodb,kinesis,cloudwatch}
@@ -29,9 +30,9 @@ services:
       - AWS_ACCESS_KEY_ID=foobar
       - AWS_SECRET_ACCESS_KEY=foobar
       - KINESIS_APP_NAME=rig
-      - KINESIS_DYNAMODB_ENDPOINT=http://localstack:4569
+      - KINESIS_DYNAMODB_ENDPOINT=http://localstack:4566
       - KINESIS_ENABLED=1
-      - KINESIS_ENDPOINT=http://localstack:4568
+      - KINESIS_ENDPOINT=http://localstack:4566
       - AWS_CBOR_DISABLE=1
       - JAEGER_HOST=jaeger
       # Using env var to set stream name is deprecated and will be removed in version 3.0!

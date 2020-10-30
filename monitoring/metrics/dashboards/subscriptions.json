@@ -15,7 +15,6 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 5,
   "links": [],
   "panels": [
     {
@@ -48,7 +47,7 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 9,
+        "h": 8,
         "w": 24,
         "x": 0,
         "y": 1
@@ -82,6 +81,7 @@
       "targets": [
         {
           "expr": "rig_subscriptions_total",
+          "interval": "",
           "legendFormat": "{{instance}}",
           "refId": "A"
         }
@@ -135,7 +135,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 9
       },
       "id": 36,
       "panels": [],
@@ -168,10 +168,10 @@
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 9,
-        "w": 6,
+        "h": 4,
+        "w": 4,
         "x": 0,
-        "y": 11
+        "y": 10
       },
       "id": 37,
       "interval": null,
@@ -212,7 +212,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "rig_sessions_total{name=\"Elixir.SessionBlacklist\"}",
+          "expr": "rig_distributed_set_items_total{name=\"Elixir.SessionBlacklist\"}",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -247,10 +249,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 9,
-        "w": 18,
-        "x": 6,
-        "y": 11
+        "h": 8,
+        "w": 20,
+        "x": 4,
+        "y": 10
       },
       "hiddenSeries": false,
       "id": 38,
@@ -280,7 +282,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rig_sessions_current{name=\"Elixir.SessionBlacklist\"}",
+          "expr": "rig_distributed_set_items_current{name=\"Elixir.SessionBlacklist\"}",
+          "interval": "",
           "legendFormat": "{{instance}}",
           "refId": "A"
         }
@@ -326,6 +329,97 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": null,
+      "decimals": 0,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 14
+      },
+      "id": 39,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false,
+        "ymax": null,
+        "ymin": null
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "rig_distributed_set_items_current{name=\"Elixir.SessionBlacklist\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Current Number of Blacklisted Tokens",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
     }
   ],
   "refresh": "10s",
@@ -367,5 +461,5 @@
   "timezone": "",
   "title": "Subscriptions",
   "uid": "Vk7MWRTZr",
-  "version": 2
+  "version": 1
 }

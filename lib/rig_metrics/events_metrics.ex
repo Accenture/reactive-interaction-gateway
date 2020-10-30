@@ -18,7 +18,7 @@ defmodule RigMetrics.EventsMetrics do
       name: :rig_consumed_events_forwarded_total,
       help:
         "Total count of consumed events forwarded to any frontend channel (Websocket, Server-Sent Events, Long Polling).",
-      labels: [:source, :topic]
+      labels: [:type]
     )
 
     Counter.declare(
@@ -52,8 +52,8 @@ defmodule RigMetrics.EventsMetrics do
   # Consumer
 
   @doc "Increases the Prometheus counter rig_consumed_events_forwarded_total"
-  def count_forwarded_event(source, topic) do
-    Counter.inc(name: :rig_consumed_events_forwarded_total, labels: [source, topic])
+  def count_forwarded_event(type) do
+    Counter.inc(name: :rig_consumed_events_forwarded_total, labels: [type])
   end
 
   @doc "Increases the Prometheus counters rig_consumed_events_total, rig_consumed_events_failed_total"

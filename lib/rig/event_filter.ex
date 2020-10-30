@@ -260,8 +260,7 @@ defmodule Rig.EventFilter do
   alias Rig.EventFilter.Sup, as: FilterSup
   alias Rig.Subscription
   alias RigCloudEvents.CloudEvent
-
-  # alias RigMetrics.SubscriptionsMetrics
+  alias RigMetrics.SubscriptionsMetrics
 
   @doc """
   Refresh an existing subscription.

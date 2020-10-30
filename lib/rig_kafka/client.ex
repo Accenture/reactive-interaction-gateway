@@ -62,9 +62,6 @@ defmodule RigKafka.Client do
               System.monotonic_time() - metrics_start_time_mono
             )
 
-            # increase Prometheus metric with consumed event forwarded to any frontend channel
-            EventsMetrics.count_forwarded_event(@metrics_source_label, topic)
-
             {:ok, :ack, state}
 
           err ->

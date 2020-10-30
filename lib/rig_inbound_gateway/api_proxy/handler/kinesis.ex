@@ -10,8 +10,13 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   alias Rig.Connection.Codec
   alias RIG.Tracing
   alias RigInboundGateway.ApiProxy.Handler
+  alias RigMetrics.EventsMetrics
   alias RigMetrics.ProxyMetrics
   alias UUID
+
+  require Logger
+
+  @metrics_target_label "kinesis"
 
   @behaviour Handler
 
@@ -267,14 +272,26 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
 
   defp produce(partition_key, plaintext, topic) do
     conf = config()
+    stream_name = topic || conf.kinesis_request_stream
 
-    {:ok, _} =
-      ExAws.Kinesis.put_record(
-        _stream_name = topic || conf.kinesis_request_stream,
-        _partition_key = partition_key,
-        _data = plaintext
-      )
-      |> ExAws.request(conf.kinesis_options)
+    case ExAws.Kinesis.put_record(
+           _stream_name = stream_name,
+           _partition_key = partition_key,
+           _data = plaintext
+         )
+         |> ExAws.request(conf.kinesis_options) do
+      {:ok, _} ->
+        # increase Prometheus metric with a produced event
+        EventsMetrics.count_produced_event(@metrics_target_label, stream_name)
+
+      err ->
+        # increase Prometheus metric with an event failed to be produced
+        EventsMetrics.count_failed_produce_event(@metrics_target_label, stream_name)
+
+        Logger.error(fn ->
+          "Error occurred when producing Kinesis event to topic #{stream_name}, #{inspect(err)}"
+        end)
+    end
   end
 
   # ---

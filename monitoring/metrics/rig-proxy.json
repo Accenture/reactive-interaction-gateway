@@ -1,7 +1,7 @@
 [
   {
-    "id": "kafka-service",
-    "name": "kafka-service",
+    "id": "stream-service",
+    "name": "stream-service",
     "versioned": false,
     "version_data": {
       "default": {
@@ -10,7 +10,15 @@
             "id": "kafka",
             "path": "/api/kafka",
             "method": "POST",
-            "target": "kafka"
+            "target": "kafka",
+            "topic": "test-monitoring"
+          },
+          {
+            "id": "kinesis",
+            "path": "/api/kinesis",
+            "method": "POST",
+            "target": "kinesis",
+            "topic": "RIG-outbound"
           }
         ]
       }
