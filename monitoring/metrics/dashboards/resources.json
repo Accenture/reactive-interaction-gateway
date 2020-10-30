@@ -15,7 +15,6 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
   "links": [],
   "panels": [
     {
@@ -26,8 +25,7 @@
       "datasource": null,
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
@@ -68,10 +66,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate (container_cpu_usage_seconds_total{container=\"rig-metrics-container\"}[5m])",
+          "expr": "rate (container_cpu_usage_seconds_total{container=\"reactive-interaction-gateway\"}[5m])",
           "format": "time_series",
           "instant": false,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "{{pod}}",
           "refId": "B"
         }
       ],
@@ -124,8 +124,7 @@
       "datasource": null,
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
@@ -169,8 +168,9 @@
           "expr": "erlang_vm_memory_bytes_total",
           "format": "time_series",
           "instant": false,
+          "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{kind}}",
+          "legendFormat": "{{kind}}: {{instance}}",
           "refId": "B"
         }
       ],
@@ -223,8 +223,7 @@
       "datasource": null,
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
@@ -265,12 +264,14 @@
       "targets": [
         {
           "expr": "erlang_vm_port_count",
-          "legendFormat": "Number of currently used ports",
+          "interval": "",
+          "legendFormat": "Currently used: {{instance}}",
           "refId": "A"
         },
         {
           "expr": "erlang_vm_port_limit",
-          "legendFormat": "Maximum number of ports",
+          "interval": "",
+          "legendFormat": "Maximum: {{instance}}",
           "refId": "B"
         }
       ],
@@ -278,7 +279,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Erlang Ports",
+      "title": "Number of Erlang Ports",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -355,5 +356,5 @@
   "timezone": "",
   "title": "Resources",
   "uid": "Vk7MWRTZx",
-  "version": 2
+  "version": 1
 }

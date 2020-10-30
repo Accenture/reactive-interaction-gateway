@@ -12,8 +12,13 @@ defmodule RigMetrics.SubscriptionsMetrics do
     )
   end
 
-  @doc "Sets the Prometheus gauge rig_subscriptions_total"
-  def set_subscriptions(subscriptions_amount) do
-    Gauge.set([name: :rig_subscriptions_total], subscriptions_amount)
+  @doc "Increases the Prometheus gauge rig_subscriptions_total"
+  def add_item(increasedBy \\ 1) do
+    Gauge.inc([name: :rig_subscriptions_total], increasedBy)
+  end
+
+  @doc "Decreases the Prometheus gauge rig_subscriptions_total"
+  def delete_item(decreasedBy \\ 1) do
+    Gauge.dec([name: :rig_subscriptions_total], decreasedBy)
   end
 end

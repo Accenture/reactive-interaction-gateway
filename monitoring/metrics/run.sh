@@ -36,8 +36,7 @@ while true; do
 
   # send one standard event every second
   printf "\nProducing a standard Kafka event ...\n"
-  curl -d "{\"specversion\":\"0.2\",\"type\":\"greeting.simple\",\"source\":\"https://github.com/cloudevents/spec/pull\",\"id\":\"A234-1234-1234\",\"time\":\"2018-04-05T17:31:00Z\",\"data\":{\"example\":\"kafka test\"}}" -H "Content-Type: application/json" -X POST http://localhost:4000/api/kafka
-	# curl -d '{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"greeting.simple","specversion":"0.2","source":"\/cli","data":{"example":"kafka test"}}' -H "Content-Type: application/json" -X POST http://localhost:4000/api/kafka
+	curl -d '{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"greeting.simple","specversion":"0.2","source":"\/cli","data":{"example":"kafka test"}}' -H "Content-Type: application/json" -X POST http://localhost:4000/api/kafka
   (( count++ ))
   sleep 1
 done

@@ -213,7 +213,6 @@ defmodule RIG.DistributedSet do
       end
 
     # increase Prometheus metrics (total, current) with an item in a set
-    # TODO: maybe not needed
     DistributedSetMetrics.add_item(name)
     {:noreply, %{state | last_record_id: synced_record_id}}
   end

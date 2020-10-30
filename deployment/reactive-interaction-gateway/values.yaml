@@ -16,6 +16,10 @@ service:
 
 deployment:
   env:
+    # Prometheus
+    PROMETHEUS_ENABLED: 'true'
+    PROMETHEUS_SCRAPE_PORT: '4010'
+
     # Proxy ports
     # deployment.env.INBOUND_PORT -- See docs/rig-ops-guide.md
     INBOUND_PORT: 4000

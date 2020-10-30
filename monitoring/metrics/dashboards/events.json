@@ -73,7 +73,7 @@
           "refId": "A"
         },
         {
-          "expr": "sum by (topic, source) (rate(rig_consumed_events_forwarded_total[5m]))",
+          "expr": "sum by (topic, source) (rate(rig_consumed_events_failed_total[5m]))",
           "interval": "",
           "legendFormat": "Failed: {{source}} - {{topic}}",
           "refId": "B"
@@ -310,7 +310,7 @@
       "thresholds": "10,30",
       "timeFrom": null,
       "timeShift": null,
-      "title": "Consumed Events Success Rate",
+      "title": "Consumed Events Success Ratio",
       "transparent": true,
       "type": "singlestat",
       "valueFontSize": "80%",
@@ -510,7 +510,7 @@
       "thresholds": "10,30",
       "timeFrom": null,
       "timeShift": null,
-      "title": "Consumed Forwarded Events Rate",
+      "title": "Forwarded Events to UIs Ratio",
       "transparent": true,
       "type": "singlestat",
       "valueFontSize": "80%",
@@ -751,7 +751,7 @@
       "thresholds": "10,30",
       "timeFrom": null,
       "timeShift": null,
-      "title": "Produced Events Success Rate",
+      "title": "Produced Events Success Ratio",
       "transparent": true,
       "type": "singlestat",
       "valueFontSize": "80%",

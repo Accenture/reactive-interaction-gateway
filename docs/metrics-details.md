@@ -49,21 +49,17 @@ Following Labels are provided:
 
 ### Events
 
-#### `rig_forwarded_events_total`
+#### `rig_consumed_events_forwarded_total`
 
 Counts all events forwarded to frontend.
 
 Following Labels are provided:
 
-- **topic**
-- **source**
-  - `kafka`
-  - `kinesis`
-  - `http`
+- **type**
 
-#### `rig_processed_events_total`
+#### `rig_consumed_events_total`
 
-Counts all events successfully processed by consumer.
+Counts all consumed events.
 
 Following Labels are provided:
 
@@ -72,7 +68,7 @@ Following Labels are provided:
   - `kafka`
   - `kinesis`
 
-#### `rig_failed_events_total`
+#### `rig_consumed_events_failed_total`
 
 Counts all events that failed when handling the event.
 
@@ -81,16 +77,7 @@ Counts all events that failed when handling the event.
   - `kafka`
   - `kinesis`
 
-#### `rig_dropped_events_total`
-
-Counts all events that RIG couldn't parse and were skipped.
-
-- **topic**
-- **source**
-  - `kafka`
-  - `kinesis`
-
-#### `rig_event_processing_duration_milliseconds`
+#### `rig_consumed_event_processing_duration_milliseconds`
 
 Histogram measuring how long it took to process the event (serialization, filtering & forwarding to frontend).
 
@@ -108,7 +95,7 @@ Counts all successfully produced events.
   - `kafka`
   - `kinesis`
 
-#### `rig_failed_produce_events_total`
+#### `rig_produced_events_failed_total`
 
 Counts all events that failed to be produced.
 
@@ -153,7 +140,7 @@ Detailed documentation to these standard metrics can be found [**here**](https:/
 To use RIG-Metrics for monitoring in Grafana, following steps are required:
 
 - Add the RIG-Metrics endpoint to the Prometheus config-file `prometheus.yml` + start the Prometheus server
-  - In your RIG-Logs you should see continuous calls to the `/metrics`-Endpoint (Prometheus is implemented that it will actively gather data from the configured enpoints)
+  - In your RIG-Logs you should see continuous calls to the `/metrics`-Endpoint (Prometheus is implemented that it will actively gather data from the configured endpoints)
 - In the Grafana frontend add Prometheus as a new datasource
 - Now RIG-Metrics can be used to create dashboards
 
@@ -163,12 +150,24 @@ To use RIG-Metrics for monitoring in Grafana, following steps are required:
 
 Some example Grafana dashboard for the standard metrics can be found [**here**](https://github.com/deadtrickster/beam-dashboards).
 
-### Provided Dashboard
+### Provided Dashboards
 
-We provide also our own dashboard with RIG specific metrics. You can find it in the [**metrics folder**](https://github.com/Accenture/reactive-interaction-gateway/monitoring/metrics/rig-grafana.json). This folder includes also example setup using docker-compose.
+We provide also our own dashboards with RIG specific metrics. You can find it in the [**dashboards folder**](https://github.com/Accenture/reactive-interaction-gateway/monitoring/metrics/dashboards). The [**metrics folder**](https://github.com/Accenture/reactive-interaction-gateway/monitoring/metrics) includes example setup using docker-compose.
 
-Dashboard looks like this:
+#### Events
 
-![simple-add-rig](assets/grafana-dashboard.png)
+TODO
+
+#### Proxy
+
+TODO
+
+#### Resources
+
+TODO
+
+#### Subscriptions
+
+TODO
 
 _Kudus to [**deadtrickster**](https://github.com/deadtrickster) for his awesome prometheus integration package_

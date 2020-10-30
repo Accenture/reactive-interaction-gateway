@@ -15,7 +15,6 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 4,
   "links": [],
   "panels": [
     {
@@ -220,7 +219,7 @@
       "thresholds": "10,30",
       "timeFrom": null,
       "timeShift": null,
-      "title": "Proxy Requests Success Rate",
+      "title": "Proxy Requests Success Ratio",
       "transparent": true,
       "type": "singlestat",
       "valueFontSize": "80%",
@@ -359,5 +358,5 @@
   "timezone": "",
   "title": "Proxy",
   "uid": "Vk7MWRTZq",
-  "version": 2
+  "version": 1
 }

@@ -260,7 +260,6 @@ defmodule Rig.EventFilter do
   alias Rig.EventFilter.Sup, as: FilterSup
   alias Rig.Subscription
   alias RigCloudEvents.CloudEvent
-  alias RigMetrics.SubscriptionsMetrics
 
   @doc """
   Refresh an existing subscription.
@@ -285,9 +284,6 @@ defmodule Rig.EventFilter do
         pid,
         {:refresh_subscriptions, subscriber, subscriptions, prev_subscriptions, done_callback}
       )
-
-      # increase Prometheus metric with a subscription
-      SubscriptionsMetrics.set_subscriptions(length(subscriptions))
     end
 
     :ok
