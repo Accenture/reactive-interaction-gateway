@@ -156,18 +156,18 @@ We provide also our own dashboards with RIG specific metrics. You can find it in
 
 #### Events
 
-TODO
+![Grafana dashboard events](./assets/grafana-dashboard-events.png)
 
 #### Proxy
 
-TODO
+![Grafana dashboard proxy](./assets/grafana-dashboard-proxy.png)
 
 #### Resources
 
-TODO
+![Grafana dashboard resources](./assets/grafana-dashboard-resources.png)
 
 #### Subscriptions
 
-TODO
+![Grafana dashboard subscriptions](./assets/grafana-dashboard-subscriptions.png)
 
 _Kudus to [**deadtrickster**](https://github.com/deadtrickster) for his awesome prometheus integration package_

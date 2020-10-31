@@ -69,7 +69,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(rig_proxy_requests_total[5m])",
+          "expr": "sum(rate(rig_proxy_requests_total[5m]))",
+          "interval": "",
           "legendFormat": "All proxy requests",
           "refId": "B"
         },
@@ -176,10 +177,12 @@
       "mappingType": 1,
       "mappingTypes": [
         {
+          "$$hashKey": "object:438",
           "name": "value to text",
           "value": 1
         },
         {
+          "$$hashKey": "object:439",
           "name": "range to text",
           "value": 2
         }
@@ -225,6 +228,7 @@
       "valueFontSize": "80%",
       "valueMaps": [
         {
+          "$$hashKey": "object:441",
           "op": "=",
           "text": "N/A",
           "value": "null"
@@ -259,6 +263,7 @@
       },
       "styles": [
         {
+          "$$hashKey": "object:84",
           "alias": "Time",
           "align": "auto",
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
@@ -266,6 +271,7 @@
           "type": "date"
         },
         {
+          "$$hashKey": "object:85",
           "alias": "",
           "align": "left",
           "colorMode": null,
@@ -283,7 +289,8 @@
       ],
       "targets": [
         {
-          "expr": "rig_proxy_requests_total",
+          "expr": "sum(rig_proxy_requests_total)",
+          "interval": "",
           "legendFormat": "All proxy requests",
           "refId": "B"
         },

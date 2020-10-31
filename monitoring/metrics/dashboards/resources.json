@@ -165,13 +165,31 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "erlang_vm_memory_bytes_total",
+          "expr": "erlang_vm_memory_bytes_total{kind=\"processes\"}",
           "format": "time_series",
           "instant": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{kind}}: {{instance}}",
+          "legendFormat": "Processes: {{instance}}",
           "refId": "B"
+        },
+        {
+          "expr": "erlang_vm_memory_system_bytes_total{usage=\"ets\"}",
+          "interval": "",
+          "legendFormat": "ETS: {{instance}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(erlang_vm_allocators{usage=\"carriers_size\"}) by (instance)",
+          "interval": "",
+          "legendFormat": "Allocated: {{instance}}",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(erlang_vm_allocators{usage=\"blocks_size\"}) by (instance)",
+          "interval": "",
+          "legendFormat": "Used: {{instance}}",
+          "refId": "D"
         }
       ],
       "thresholds": [],
@@ -265,7 +283,7 @@
         {
           "expr": "erlang_vm_port_count",
           "interval": "",
-          "legendFormat": "Currently used: {{instance}}",
+          "legendFormat": "Used: {{instance}}",
           "refId": "A"
         },
         {

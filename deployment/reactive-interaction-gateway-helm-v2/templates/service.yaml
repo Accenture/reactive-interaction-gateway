@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    prometheus.io/scrape: {{ .Values.deployment.env.PROMETHEUS_ENABLED }}
-    prometheus.io/port: {{ .Values.deployment.env.PROMETHEUS_SCRAPE_PORT }}
+    prometheus.io/scrape: "{{ .Values.deployment.env.PROMETHEUS_ENABLED }}"
+    prometheus.io/port: "{{ .Values.deployment.env.API_HTTP_PORT }}"
   name: {{ include "reactive-interaction-gateway.fullname" . }}
   labels:
     {{- include "reactive-interaction-gateway.labels" . | nindent 4 }}

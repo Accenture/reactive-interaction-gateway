@@ -176,7 +176,7 @@ defmodule RIG.DistributedSet do
     |> save(record)
     |> broadcast_update(pg2_group, last_record_id)
 
-    # increase Prometheus metrics (total, current) with an item in a set
+    # increase Prometheus metrics (total, current) number of items in this set
     DistributedSetMetrics.add_item(name)
     {:reply, :ok, %{state | last_record_id: uuid}}
   end
@@ -212,7 +212,7 @@ defmodule RIG.DistributedSet do
           local_last_record_id
       end
 
-    # increase Prometheus metrics (total, current) with an item in a set
+    # increase Prometheus metrics (total, current) number of items in this set
     DistributedSetMetrics.add_item(name)
     {:noreply, %{state | last_record_id: synced_record_id}}
   end
@@ -271,7 +271,7 @@ defmodule RIG.DistributedSet do
       Logger.debug(fn -> "Removed #{n_deleted} expired records" end)
     end
 
-    # decrease Prometheus metric (current) with an item not in a set
+    # decrease Prometheus metric (current) number of items in this set
     DistributedSetMetrics.delete_item(name, n_deleted)
     n_deleted
   end

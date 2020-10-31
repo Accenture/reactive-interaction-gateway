@@ -16,22 +16,21 @@ A Helm v2 chart for Kubernetes
 
 ## Values
 
-| Key                                   | Type   | Default                                    | Description                                                                                             |
-| ------------------------------------- | ------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| affinity                              | object | `{}`                                       |                                                                                                         |
-| deployment.env.API_HTTPS_PORT         | int    | `4011`                                     | See docs/rig-ops-guide.md                                                                               |
-| deployment.env.API_HTTP_PORT          | int    | `4010`                                     | See docs/rig-ops-guide.md                                                                               |
-| deployment.env.DISCOVERY_TYPE         | string | `"dns"`                                    | See docs/rig-ops-guide.md                                                                               |
-| deployment.env.INBOUND_HTTPS_PORT     | int    | `4001`                                     | See docs/rig-ops-guide.md                                                                               |
-| deployment.env.INBOUND_PORT           | int    | `4000`                                     | See docs/rig-ops-guide.md                                                                               |
-| deployment.env.LOG_LEVEL              | string | `"warn"`                                   | See docs/rig-ops-guide.md                                                                               |
-| deployment.env.NODE_COOKIE            | string | `"magiccookie"`                            | See docs/rig-ops-guide.md                                                                               |
-| deployment.env.PROMETHEUS_ENABLED     | string | `"true"`                                   | Enables/disables scraping of metrics by Prometheus.                                                     |
-| deployment.env.PROMETHEUS_SCRAPE_PORT | string | `"4010"`                                   | Which RIG port to use for scraping. Should be the same as `API_HTTP_PORT`, but represented as a string. |
-| image.pullPolicy                      | string | `"IfNotPresent"`                           |                                                                                                         |
-| image.repository                      | string | `"accenture/reactive-interaction-gateway"` |                                                                                                         |
-| nodeSelector                          | object | `{}`                                       |                                                                                                         |
-| replicaCount                          | int    | `1`                                        |                                                                                                         |
-| resources                             | object | `{}`                                       |                                                                                                         |
-| service.type                          | string | `"ClusterIP"`                              |                                                                                                         |
-| tolerations                           | list   | `[]`                                       |                                                                                                         |
+| Key                               | Type   | Default                                    | Description                                         |
+| --------------------------------- | ------ | ------------------------------------------ | --------------------------------------------------- |
+| affinity                          | object | `{}`                                       |                                                     |
+| deployment.env.API_HTTPS_PORT     | int    | `4011`                                     | See docs/rig-ops-guide.md                           |
+| deployment.env.API_HTTP_PORT      | int    | `4010`                                     | See docs/rig-ops-guide.md                           |
+| deployment.env.DISCOVERY_TYPE     | string | `"dns"`                                    | See docs/rig-ops-guide.md                           |
+| deployment.env.INBOUND_HTTPS_PORT | int    | `4001`                                     | See docs/rig-ops-guide.md                           |
+| deployment.env.INBOUND_PORT       | int    | `4000`                                     | See docs/rig-ops-guide.md                           |
+| deployment.env.LOG_LEVEL          | string | `"warn"`                                   | See docs/rig-ops-guide.md                           |
+| deployment.env.NODE_COOKIE        | string | `"magiccookie"`                            | See docs/rig-ops-guide.md                           |
+| deployment.env.PROMETHEUS_ENABLED | string | `"true"`                                   | Enables/disables scraping of metrics by Prometheus. |
+| image.pullPolicy                  | string | `"IfNotPresent"`                           |                                                     |
+| image.repository                  | string | `"accenture/reactive-interaction-gateway"` |                                                     |
+| nodeSelector                      | object | `{}`                                       |                                                     |
+| replicaCount                      | int    | `1`                                        |                                                     |
+| resources                         | object | `{}`                                       |                                                     |
+| service.type                      | string | `"ClusterIP"`                              |                                                     |
+| tolerations                       | list   | `[]`                                       |                                                     |

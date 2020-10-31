@@ -153,9 +153,9 @@ defmodule Rig.EventFilter.Server do
 
       if n_clients > 0 do
         clients = if n_clients == 1, do: "1 client", else: "#{n_clients} clients"
-        ~s|Event "#{id}" of type "#{type}" forwarded to #{clients}|
         # increase Prometheus metric with consumed event forwarded to any frontend channel
         EventsMetrics.count_forwarded_event(type)
+        ~s|Event "#{id}" of type "#{type}" forwarded to #{clients}|
       else
         ~s|Event "#{id}" of type "#{type}" not forwarded (there are no clients)|
       end
@@ -216,7 +216,7 @@ defmodule Rig.EventFilter.Server do
          subscription_ttl_s
        ) do
     # get number of current subscriptions
-    n_current =
+    n_current_subs =
       subscription_table
       |> :ets.lookup(socket_pid)
       |> length
@@ -226,7 +226,7 @@ defmodule Rig.EventFilter.Server do
     :ets.delete(subscription_table, socket_pid)
 
     # increase/decrease Prometheus metric with new subscriptions - current subscriptions
-    SubscriptionsMetrics.add_item(length(subscriptions) - n_current)
+    SubscriptionsMetrics.add_item(length(subscriptions) - n_current_subs)
 
     expiration_ts = Timex.now() |> Timex.shift(seconds: subscription_ttl_s) |> as_epoch()
 
