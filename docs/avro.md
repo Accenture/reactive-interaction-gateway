@@ -55,8 +55,6 @@ docker run --name rig \
 -e KAFKA_SCHEMA_REGISTRY_HOST=kafka-schema-registry:8081 \
 -e KAFKA_SOURCE_TOPICS=rigRequest \
 -e PROXY_CONFIG_FILE='[{"id":"my-api","name":"my-api","versioned":false,"version_data":{"default":{"endpoints":[{"id":"post-myapi-publish-async","path":"/myapi/publish-async","method":"POST","target":"kafka"}]}},"proxy":{"use_env":true,"target_url":"KAFKA_HOST","port":9092}}]' \
--e PROXY_KAFKA_REQUEST_TOPIC=rigRequest \
--e PROXY_KAFKA_REQUEST_AVRO=rigRequest-value \
 -e LOG_LEVEL=debug \
 -p 4000:4000 -p 4010:4010 \
 --network kafka_tests_default \

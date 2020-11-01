@@ -268,15 +268,13 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
 
     req_body =
       Jason.encode!(%{
-        "event" => %{
-          "specversion" => "0.2",
-          "type" => "com.example.test",
-          "source" => "/rig-test",
-          "id" => "069711bf-3946-4661-984f-c667657b8d85",
-          "time" => "2018-04-05T17:31:00Z",
-          "data" => %{
-            "foo" => "bar"
-          }
+        "specversion" => "0.2",
+        "type" => "com.example.test",
+        "source" => "/rig-test",
+        "id" => "069711bf-3946-4661-984f-c667657b8d85",
+        "time" => "2018-04-05T17:31:00Z",
+        "data" => %{
+          "foo" => "bar"
         }
       })
 

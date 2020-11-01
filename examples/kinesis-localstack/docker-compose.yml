@@ -34,8 +34,6 @@ services:
       - KINESIS_ENDPOINT=http://localstack:4568
       - AWS_CBOR_DISABLE=1
       - JAEGER_HOST=jaeger
-      # Using env var to set stream name is deprecated and will be removed in version 3.0!
-      # - PROXY_KINESIS_REQUEST_STREAM=RIG-outbound
 
   jaeger:
     image: jaegertracing/all-in-one:1.18

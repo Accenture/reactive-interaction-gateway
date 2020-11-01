@@ -4,8 +4,6 @@ Example showing how to use RIG with AWS Kinesis and [Localstack](https://github.
 
 ## Setup local Kinesis with RIG
 
-> In case you still want to use deprecated version, uncomment line `examples/kinesis-localstack/docker-compose.yml:37`
-
 ```sh
 # run Localstack and RIG
 docker-compose up -d
@@ -32,19 +30,6 @@ docker-compose exec localstack bash -c 'awslocal kinesis put-record --stream-nam
 curl -X "POST" \
   -H "Content-Type: application/json" \
   -d "{\"id\":\"kinesis-service\",\"name\":\"kinesis-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kinesis-producer-endpoint\",\"path\":\"/kinesis\",\"method\":\"POST\",\"secured\":false,\"target\":\"kinesis\",\"topic\":\"RIG-outbound\"}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localstack\",\"port\":4568}}" \
-  --silent \
-  "http://localhost:4010/v2/apis"
-```
-
-### Deprecated way
-
-> Will be removed in version 3.0.
-
-```sh
-# send event via RIG's proxy -> register API in RIG's proxy and send HTTP request
-curl -X "POST" \
-  -H "Content-Type: application/json" \
-  -d "{\"id\":\"kinesis-service\",\"name\":\"kinesis-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kinesis-producer-endpoint\",\"path\":\"/kinesis\",\"method\":\"POST\",\"secured\":false,\"target\":\"kinesis\"}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localstack\",\"port\":4568}}" \
   --silent \
   "http://localhost:4010/v2/apis"
 ```

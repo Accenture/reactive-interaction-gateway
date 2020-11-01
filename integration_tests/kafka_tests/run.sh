@@ -50,7 +50,6 @@ export KAFKA_BROKERS="${HOST}:${KAFKA_PORT_PLAIN}"
 export KAFKA_SSL_ENABLED=0
 export KAFKA_SSL_KEYFILE_PASS=abcdefgh
 export LOG_LEVEL=warn
-export PROXY_KAFKA_REQUEST_TOPIC=rig-test
 export KAFKA_SOURCE_TOPICS=rig-test
 
 cd "${RIG_DIR}"
@@ -61,8 +60,6 @@ export KAFKA_SOURCE_TOPICS=rig-avro
 export KAFKA_SERIALIZER=avro
 export KAFKA_SCHEMA_REGISTRY_HOST=localhost:8081
 export KAFKA_LOG_SCHEMA=rig-request-logger-value
-export PROXY_KAFKA_REQUEST_TOPIC=rig-avro
-export PROXY_KAFKA_REQUEST_AVRO=rig-avro-value
 export PROXY_KAFKA_RESPONSE_TOPICS=rig-proxy-avro
 
 section_header "Running integration test suite for Kafka & Avro"

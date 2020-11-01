@@ -24,21 +24,21 @@
             "path": "/myapi/publish-async",
             "method": "POST",
             "target": "kafka",
-            "secured": false
+            "topic": "test-topic"
           },
           {
             "id": "post-myapi-publish-async",
             "path": "/myapi/publish-kinesis-async",
             "method": "POST",
             "target": "kinesis",
-            "secured": false
+            "topic": "test-topic"
           },
           {
             "id": "post-myapi-publish-sync",
             "path": "/myapi/publish-sync",
             "method": "POST",
             "target": "kafka",
-            "secured": false
+            "topic": "test-topic"
           },
           {
             "id": "get-myapi-test-id",
@@ -56,8 +56,7 @@
           {
             "id": "get-myapi-free",
             "path": "/myapi/free",
-            "method": "GET",
-            "secured": false
+            "method": "GET"
           },
           {
             "id": "badmethod-myapi-books",
@@ -111,14 +110,12 @@
             "id": "post-myapi-transform-headers",
             "path": "/myapi/transform-headers",
             "method": "POST",
-            "secured": false,
             "transform_request_headers": true
           },
           {
             "id": "post-myapi-no-transform-headers",
             "path": "/myapi/no-transform-headers",
-            "method": "POST",
-            "secured": false
+            "method": "POST"
           }
         ]
       }

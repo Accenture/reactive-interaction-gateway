@@ -92,7 +92,6 @@ deployment:
     # PROXY_KAFKA_RESPONSE_TIMEOUT: 5000
 
     ## Proxy Kinesis
-    # PROXY_KINESIS_REQUEST_STREAM: rig-proxy-request
     # PROXY_KINESIS_REQUEST_REGION: eu-west-1
     # PROXY_KINESIS_RESPONSE_TIMEOUT: 5000
 

@@ -68,20 +68,15 @@ defmodule RigApi.V3.APIsTest do
         }
       ]
 
-      kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
-
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> post("/v3/apis", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
                "invalid-config/invalid-config1" => [
-                 %{"kinesis_request_stream" => "must be present"},
                  %{"topic" => "must be present"}
                ]
              }
-
-      ProxyConfig.restore("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
 
       # kafka topic not set
       endpoints = [
@@ -93,20 +88,15 @@ defmodule RigApi.V3.APIsTest do
         }
       ]
 
-      kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
-
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> post("/v3/apis", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
                "invalid-config/invalid-config1" => [
-                 %{"kafka_request_topic" => "must be present"},
                  %{"topic" => "must be present"}
                ]
              }
-
-      ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
     end
 
     test "should return 400 when schema is set, but target is not kafka or kinesis" do
@@ -446,20 +436,15 @@ defmodule RigApi.V3.APIsTest do
         }
       ]
 
-      kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
-
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> put("/v3/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
                "invalid-config/invalid-config1" => [
-                 %{"kinesis_request_stream" => "must be present"},
                  %{"topic" => "must be present"}
                ]
              }
-
-      ProxyConfig.restore("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
 
       # kafka topic not set
       endpoints = [
@@ -471,20 +456,15 @@ defmodule RigApi.V3.APIsTest do
         }
       ]
 
-      kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
-
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> put("/v3/apis/#{@invalid_config_id}", new_api)
       response = json_response(conn, 400)
 
       assert response == %{
                "invalid-config/invalid-config1" => [
-                 %{"kafka_request_topic" => "must be present"},
                  %{"topic" => "must be present"}
                ]
              }
-
-      ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
     end
 
     test "should return 400 when schema is set, but target is not kafka or kinesis" do

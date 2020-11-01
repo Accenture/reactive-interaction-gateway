@@ -11,12 +11,6 @@ defmodule RigInboundGateway.ApiProxy.Auth do
   @spec check(Plug.Conn.t(), Api.t(), Api.endpoint()) :: :ok | {:error, :authentication_failed}
   def check(conn, api, endpoint)
 
-  # Skip authentication if auth type is not set:
-  def check(_, %{"auth_type" => "none"}, _), do: :ok
-
-  # Skip authentication if turned off:
-  def check(_, _, %{"secured" => false}), do: :ok
-
   # Authenticate by JWT:
   def check(
         conn,
@@ -24,4 +18,7 @@ defmodule RigInboundGateway.ApiProxy.Auth do
         %{"secured" => true}
       ),
       do: Jwt.check(conn, api)
+
+  # Skip by default
+  def check(_, _, _), do: :ok
 end

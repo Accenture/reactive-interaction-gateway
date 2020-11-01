@@ -234,15 +234,13 @@ defmodule RigInboundGateway.ProxyTest do
       ]
 
       ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
-      kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
 
       test_proxy_exit(
         ctx,
-        "[{\"invalid-config/invalid-config1\", [{:error, :kinesis_request_stream, :presence, \"must be present\"}, {:error, \"topic\", :presence, \"must be present\"}]}]"
+        "[{\"invalid-config/invalid-config1\", [{:error, \"topic\", :presence, \"must be present\"}]}]"
       )
 
       ProxyConfig.restore()
-      ProxyConfig.restore("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
 
       # kafka topic not set
       endpoints = [
@@ -255,15 +253,13 @@ defmodule RigInboundGateway.ProxyTest do
       ]
 
       ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
-      kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
 
       test_proxy_exit(
         ctx,
-        "[{\"invalid-config/invalid-config1\", [{:error, :kafka_request_topic, :presence, \"must be present\"}, {:error, \"topic\", :presence, \"must be present\"}]}]"
+        "[{\"invalid-config/invalid-config1\", [{:error, \"topic\", :presence, \"must be present\"}]}]"
       )
 
       ProxyConfig.restore()
-      ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
     end
 
     test "should exit the process when schema is set, but target is not kafka or kinesis", ctx do

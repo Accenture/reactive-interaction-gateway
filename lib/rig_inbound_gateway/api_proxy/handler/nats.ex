@@ -8,7 +8,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Nats do
 
   alias Plug.Conn
   alias Rig.Connection.Codec
-  alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.ApiProxy.Handler
   alias RigMetrics.ProxyMetrics
 
@@ -24,7 +23,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Nats do
   def handle_http_request(conn, api, endpoint, request_path)
 
   @doc "CORS response for preflight request."
-  def handle_http_request(%{method: "OPTIONS"} = conn, _, %{"target" => "nats"} = endpoint, _) do
+  def handle_http_request(%{method: "OPTIONS"} = conn, _, %{"target" => "nats"} = _endpoint, _) do
     conn
     |> with_cors()
     |> Conn.send_resp(:no_content, "")
@@ -50,7 +49,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Nats do
       error ->
         message =
           case error do
-            {:ok, obj} -> "The body is a valid JSON object but does not look like a CloudEvent."
+            {:ok, _obj} -> "The body is a valid JSON object but does not look like a CloudEvent."
             {:error, error} -> "The body is not JSON encoded (#{inspect(error)})."
           end
 
