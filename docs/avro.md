@@ -54,7 +54,7 @@ docker run --name rig \
 -e KAFKA_SERIALIZER=avro \
 -e KAFKA_SCHEMA_REGISTRY_HOST=kafka-schema-registry:8081 \
 -e KAFKA_SOURCE_TOPICS=rigRequest \
--e PROXY_CONFIG_FILE='[{"id":"my-api","name":"my-api","versioned":false,"version_data":{"default":{"endpoints":[{"id":"post-myapi-publish-async","path":"/myapi/publish-async","method":"POST","target":"kafka"}]}},"proxy":{"use_env":true,"target_url":"KAFKA_HOST","port":9092}}]' \
+-e PROXY_CONFIG_FILE='[{"id":"my-api","name":"my-api","versioned":false,"version_data":{"default":{"endpoints":[{"id":"post-myapi-publish-async","path":"/myapi/publish-async","method":"POST","target":"kafka","topic":"rigRequest","schema":"rigRequest-value"}]}},"proxy":{"use_env":true,"target_url":"KAFKA_HOST","port":9092}}]' \
 -e LOG_LEVEL=debug \
 -p 4000:4000 -p 4010:4010 \
 --network kafka_tests_default \
@@ -67,7 +67,7 @@ curl -d '{"schema":"{\"name\":\"rigproducer\",\"type\":\"record\",\"fields\":[{\
 ## 4. Send HTTP request to RIG proxy
 
 # Request will produce serialized Kafka event to Kafka
-curl -d '{"event":{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"com.example","time":"2018-04-05T17:31:00Z","specversion":"0.2","source":"\/cli","contenttype":"avro\/binary","data":{"example":"test"}},"partition":"test_key"}' -H "Content-Type: application/json" -X POST http://localhost:4000/myapi/publish-async
+curl -d '{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"com.example","time":"2018-04-05T17:31:00Z","specversion":"0.2","source":"\/cli","contenttype":"avro\/binary","data":{"example":"test"}}' -H "Content-Type: application/json" -X POST http://localhost:4000/myapi/publish-async
 
 ## 5. In terminal you should see something like below -- in nutshell it means event was successfully consumed, deserialized and forwarded to UI client
 
@@ -89,7 +89,7 @@ kafka-avro-console-consumer --topic rigRequest \
 --property schema.registry.url='http://kafka-schema-registry:8081'
 
 # 3. Send HTTP request to RIG proxy - same request as before
-curl -d '{"event":{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"com.example","time":"2018-04-05T17:31:00Z","specversion":"0.2","source":"\/cli","contenttype":"avro\/binary","data":{"example":"test"}},"partition":"test_key"}' -H "Content-Type: application/json" -X POST http://localhost:4000/myapi/publish-async
+curl -d '{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"com.example","time":"2018-04-05T17:31:00Z","specversion":"0.2","source":"\/cli","contenttype":"avro\/binary","data":{"example":"test"}}' -H "Content-Type: application/json" -X POST http://localhost:4000/myapi/publish-async
 
 # 4. Now there should be message also in this consumer
 {"example":"test"}
