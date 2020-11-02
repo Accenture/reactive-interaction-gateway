@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added possibility to set response code for `response_from` messages in reverse proxy (`kafka` and `http_async`). [#321](https://github.com/Accenture/reactive-interaction-gateway/pull/321)
 - Added new version - `v3` - for internal endpoints to support response code in the `/responses` endpoint
 - Added Helm v3 template to the `deployment` folder [#288](https://github.com/Accenture/reactive-interaction-gateway/issues/288)
+- Added [documentation section](https://accenture.github.io/reactive-interaction-gateway/docs/jwt-blacklisting.html) for the JWT Blacklist feature. [#156](https://github.com/Accenture/reactive-interaction-gateway/issues/156)
 
 ### Changed
 

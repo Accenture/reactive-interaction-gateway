@@ -57,6 +57,10 @@
         "title": "Intro",
         "sidebar_label": "Intro"
       },
+      "jwt-blacklisting": {
+        "title": "JWT Blacklisting",
+        "sidebar_label": "JWT Blacklisting"
+      },
       "metrics-details": {
         "title": "Metrics Details",
         "sidebar_label": "Metrics Details"
