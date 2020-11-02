@@ -31,7 +31,6 @@ defmodule RIG.AuthorizationCheck.Request do
   @spec from_plug_conn(Conn.t()) :: __MODULE__.t()
   def from_plug_conn(conn)
 
-  # ???
   def from_plug_conn(%{query_params: %Plug.Conn.Unfetched{}}),
     do: :ok = :bug__query_params_unfetched
 

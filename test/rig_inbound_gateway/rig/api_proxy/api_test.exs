@@ -40,7 +40,7 @@ defmodule RigInboundGateway.ApiProxy.ApiTest do
     assert Api.filter(apis, conn) == [{api1, api1_endpoint1, "/foo"}]
   end
 
-  test "An API definition that uses placeholders may match a request." do
+  test "An API definition that uses actual regex may match a request." do
     api1_endpoint1 = %{
       "id" => "test-endpoint-that-should-not-match",
       "type" => "http",
