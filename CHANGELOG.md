@@ -45,6 +45,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed deprecated internal API `/v1`.
   - Removed deprecated environment variables: `PROXY_KAFKA_REQUEST_AVRO`, `PROXY_KAFKA_REQUEST_TOPIC`, `PROXY_KINESIS_REQUEST_STREAM`. This means that you can set topic and schema for publishing to event streams **only** in the proxy config as described in the [docs](https://accenture.github.io/reactive-interaction-gateway/docs/api-gateway.html#publishing-to-event-streams).
   - Removed experimental feature Firehose (forwarding events to an HTTP endpoint).
+  - Removed `path` field in proxy configuration. Reason is that the `path_regex` field is already covering `path` functionality and thus it doesn't make sense to have both of them. Should cause less confusion and improve maintainability.
+    - **Migration:**
+      - `"path": "/foo"` -> `"path_regex": "/foo"`
+      - `"path": "/foo/{id}"` -> `"path_regex": "/foo/(.+)"` - or pretty much whatever regex you need (e.g. UUID pattern)
 
 <!-- ### Security -->
 

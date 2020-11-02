@@ -54,7 +54,7 @@ docker run --name rig \
 -e KAFKA_SERIALIZER=avro \
 -e KAFKA_SCHEMA_REGISTRY_HOST=kafka-schema-registry:8081 \
 -e KAFKA_SOURCE_TOPICS=rigRequest \
--e PROXY_CONFIG_FILE='[{"id":"my-api","name":"my-api","versioned":false,"version_data":{"default":{"endpoints":[{"id":"post-myapi-publish-async","path":"/myapi/publish-async","method":"POST","target":"kafka","topic":"rigRequest","schema":"rigRequest-value"}]}},"proxy":{"use_env":true,"target_url":"KAFKA_HOST","port":9092}}]' \
+-e PROXY_CONFIG_FILE='[{"id":"my-api","name":"my-api","versioned":false,"version_data":{"default":{"endpoints":[{"id":"post-myapi-publish-async","path_regex":"/myapi/publish-async","method":"POST","target":"kafka","topic":"rigRequest","schema":"rigRequest-value"}]}},"proxy":{"use_env":true,"target_url":"KAFKA_HOST","port":9092}}]' \
 -e LOG_LEVEL=debug \
 -p 4000:4000 -p 4010:4010 \
 --network kafka_tests_default \
@@ -72,7 +72,7 @@ curl -d '{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"com.example","time
 ## 5. In terminal you should see something like below -- in nutshell it means event was successfully consumed, deserialized and forwarded to UI client
 
 21:54:52.869 module=Avrora.Storage.Registry [debug] obtaining schema with global id `1`
-21:54:52.870 module=Rig.EventStream.KafkaToFilter [debug] %Cloudevents.Format.V_0_2.Event{contenttype: "avro/binary", data: %{"example" => "test"}, extensions: %{"rig" => %{"correlation" => "Ve1d-XF0Qi46lwh47X5IqI7m_FCIqCLsqyV0KTCxg28Hnd7ytczBe1cASZYPxA7GNFCZ4AzDC0QX1w0=", "headers" => [["accept", "*/*"], ["content-length", "221"], ["content-type", "application/json"], ["host", "localhost:4000"], ["user-agent", "curl/7.54.0"]], "host" => "localhost", "method" => "POST", "path" => "/myapi/publish-async", "port" => 4000, "query" => "", "remoteip" => "172.28.0.1", "scheme" => "http"}}, id: "069711bf-3946-4661-984f-c667657b8d85", schemaurl: nil, source: "/cli", specversion: "0.2", time: "2018-04-05T17:31:00Z", type: "com.example"}
+21:54:52.870 module=Rig.EventStream.KafkaToFilter [debug] %Cloudevents.Format.V_0_2.Event{contenttype: "avro/binary", data: %{"example" => "test"}, extensions: %{"rig" => %{"correlation" => "Ve1d-XF0Qi46lwh47X5IqI7m_FCIqCLsqyV0KTCxg28Hnd7ytczBe1cASZYPxA7GNFCZ4AzDC0QX1w0=", "headers" => [["accept", "*/*"], ["content-length", "221"], ["content-type", "application/json"], ["host", "localhost:4000"], ["user-agent", "curl/7.54.0"]], "host" => "localhost", "method" => "POST", "path_regex" => "/myapi/publish-async", "port" => 4000, "query" => "", "remoteip" => "172.28.0.1", "scheme" => "http"}}, id: "069711bf-3946-4661-984f-c667657b8d85", schemaurl: nil, source: "/cli", specversion: "0.2", time: "2018-04-05T17:31:00Z", type: "com.example"}
 ```
 
 ## Example 2: Kafka schema Registry CLI

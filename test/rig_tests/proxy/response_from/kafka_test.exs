@@ -91,7 +91,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
               %{
                 id: endpoint_id,
                 method: "GET",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 response_from: "kafka"
               }
             ]
@@ -172,7 +172,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
               %{
                 id: endpoint_id,
                 method: "GET",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 response_from: "kafka"
               }
             ]
@@ -246,7 +246,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
               %{
                 id: endpoint_id,
                 method: "POST",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 response_from: "kafka",
                 target: "kafka",
                 topic: topic

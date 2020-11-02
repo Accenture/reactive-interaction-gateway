@@ -27,7 +27,7 @@ We define an endpoint configuration like this:
           {
             "id": "my-endpoint",
             "method": "GET",
-            "path": "/"
+            "path_regex": "/"
           }
         ]
       }
@@ -105,7 +105,7 @@ Hi, I'm a demo service!
 
 ## Dynamic URL parameters
 
-It's a common case that you want to fetch detail for some entity e.g. `/books/123`. To make sure the dynamic value `123` is correctly matched and forwarded API endpoint can be configured like this:
+It's a common case that you want to fetch detail for some entity e.g. `/books/123`. To make sure the dynamic value `123` is correctly matched and forwarded API endpoint can be configured as a regular expression:
 
 ```json
 [{
@@ -115,15 +115,13 @@ It's a common case that you want to fetch detail for some entity e.g. `/books/12
       "endpoints": [{
         "id": "my-detail-endpoint",
         "method": "GET",
-        "path": "/books/{book_id}"
+        "path_regex": "/books/(.+)"
       }]
     }
   },
   ...
 }]
 ```
-
-Dynamic values in `path` have to be wrapped in curly braces. Value inside curly braces is up to you.
 
 ## Publishing to event streams
 
@@ -141,7 +139,7 @@ For fire-and-forget style requests, the endpoint configuration looks like this:
       "endpoints": [{
         "id": "my-endpoint",
         "method": "POST",
-        "path": "/",
+        "path_regex": "/",
         "target": "kafka",
         "topic": "my-topic",
         "schema": "my-avro-schema"
@@ -190,7 +188,7 @@ Configuration of such API endpoint might look like this:
       "endpoints": [{
         "id": "my-endpoint",
         "method": "POST",
-        "path": "/",
+        "path_regex": "/",
         "target": "kafka",
         "topic": "my-topic",
         "response_from": "kafka"
@@ -255,11 +253,11 @@ API configuration is following:
       "endpoints": [{
         "id": "my-unsecured-endpoint",
         "method": "GET",
-        "path": "/unsecured"
+        "path_regex": "/unsecured"
       },{
         "id": "my-secured-endpoint",
         "method": "GET",
-        "path": "/secured",
+        "path_regex": "/secured",
         "secured": true
       }]
     }
@@ -292,11 +290,11 @@ Headers transformations are supported in a very simple way. Assume following API
       "endpoints": [{
         "id": "my-endpoint",
         "method": "GET",
-        "path": "/"
+        "path_regex": "/"
       },{
         "id": "my-transformed-endpoint",
         "method": "GET",
-        "path": "/transformed",
+        "path_regex": "/transformed",
         "transform_request_headers": true
       }]
     }
@@ -317,11 +315,6 @@ With URL rewriting you can set how the incoming and outgoing request urls should
   "version_data": {
     "default": {
       "endpoints": [{
-        "id": "my-endpoint",
-        "method": "GET",
-        "path": "/",
-        "path_replacement": "/different-endpoint"
-      },{
         "id": "my-transformed-endpoint",
         "method": "GET",
         "path_regex": "/foo/([^/]+)/bar/([^/]+)",
@@ -333,7 +326,7 @@ With URL rewriting you can set how the incoming and outgoing request urls should
 }]
 ```
 
-In first case, sending GET request to `/` RIG will forward the request to GET `/different-endpoint`. In second case we are using `path_regex` instead of `path` (this is alternative to `## Dynamic URL parameters`). As you send GET request to `/foo/1/bar/2` RIG will forward it to GET `/bar/1/foo/2`.
+As you send GET request to `/foo/1/bar/2` RIG will forward it to GET `/bar/1/foo/2`.
 
 ## CORS
 
@@ -347,11 +340,11 @@ Quite often you need to deal with cross origin requests. CORS itself is configur
       "endpoints": [{
         "id": "my-endpoint",
         "method": "GET",
-        "path": "/"
+        "path_regex": "/"
       },{
         "id": "my-endpoint-preflight",
         "method": "OPTIONS",
-        "path": "/"
+        "path_regex": "/"
       }]
     }
   },

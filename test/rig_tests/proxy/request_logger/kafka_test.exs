@@ -83,7 +83,7 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
               %{
                 id: endpoint_id,
                 method: "POST",
-                path: endpoint_path
+                path_regex: endpoint_path
               }
             ]
           }
@@ -115,7 +115,7 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
     # Endpoint
     assert get_in(received_msg_map.data, ["endpoint", "id"]) == endpoint_id
     assert get_in(received_msg_map.data, ["endpoint", "method"]) == "POST"
-    assert get_in(received_msg_map.data, ["endpoint", "path"]) == endpoint_path
+    assert get_in(received_msg_map.data, ["endpoint", "path_regex"]) == endpoint_path
 
     # IP
     assert get_in(received_msg_map.data, ["remote_ip"]) == "127.0.0.1"
@@ -150,7 +150,7 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
               %{
                 id: endpoint_id,
                 method: "POST",
-                path: endpoint_path
+                path_regex: endpoint_path
               }
             ]
           }
@@ -183,7 +183,7 @@ defmodule RigTests.Proxy.RequestLogger.KafkaTest do
     # Endpoint
     assert get_in(received_msg_map.data, ["endpoint", "id"]) == endpoint_id
     assert get_in(received_msg_map.data, ["endpoint", "method"]) == "POST"
-    assert get_in(received_msg_map.data, ["endpoint", "path"]) == endpoint_path
+    assert get_in(received_msg_map.data, ["endpoint", "path_regex"]) == endpoint_path
 
     # IP
     assert get_in(received_msg_map.data, ["remote_ip"]) == "127.0.0.1"

@@ -42,7 +42,7 @@ You'll right away see list of all internal APIs.
       "endpoints": [
         {
           "id": "post-auth-register",
-          "path": "/auth/register",
+          "path_regex": "/auth/register",
           "method": "POST",
           "secured": false
         }
@@ -88,7 +88,7 @@ This is also way how to check if your APIs were loaded properly.
       "endpoints": [
         {
           "id": "post-auth-register",
-          "path": "/auth/register",
+          "path_regex": "/auth/register",
           "method": "POST",
           "secured": false
         }

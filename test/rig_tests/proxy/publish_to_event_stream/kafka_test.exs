@@ -76,7 +76,7 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
               %{
                 id: endpoint_id,
                 method: "OPTIONS",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 target: "kafka",
                 topic: "rig-test"
               }
@@ -134,7 +134,7 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
               %{
                 id: endpoint_id,
                 method: "POST",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 target: "kafka",
                 topic: "rig-test"
               }
@@ -246,7 +246,7 @@ defmodule RigTests.Proxy.PublishToEventStream.KafkaTest do
               %{
                 id: endpoint_id,
                 method: "POST",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 target: "kafka",
                 topic: "rig-avro",
                 schema: "rig-avro-value"

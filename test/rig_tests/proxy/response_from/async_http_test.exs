@@ -60,7 +60,7 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
               %{
                 id: endpoint_id,
                 method: "GET",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 response_from: "http_async"
               }
             ]
@@ -129,7 +129,7 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
               %{
                 id: endpoint_id,
                 method: "GET",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 response_from: "http_async"
               }
             ]
