@@ -9,7 +9,7 @@ Example showing how to use RIG with AWS Kinesis and [Localstack](https://github.
 docker-compose up -d
 
 # create Kinesis streams
-docker-compose exec localstack bash -c 'awslocal kinesis create-stream --stream-name RIG-outbound --shard-count 1 --region eu-west-1 && awslocal kinesis create-stream --stream-name RIG-firehose --shard-count 1 --region eu-west-1'
+docker-compose exec localstack bash -c 'awslocal kinesis create-stream --stream-name RIG-outbound --shard-count 1 --region eu-west-1'
 
 # check created resources in Localstack
 http://localhost:8080

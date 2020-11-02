@@ -42,8 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Removed deprecated or unused code/functionality, these are **breaking changes** [#278](https://github.com/Accenture/reactive-interaction-gateway/issues/278):
-  - Removed internal API `/v1`, TODO: should we remove also `v2`?
-  - Removed environment variables: `PROXY_KAFKA_REQUEST_AVRO`, `PROXY_KAFKA_REQUEST_TOPIC`, `PROXY_KINESIS_REQUEST_STREAM`. This means that you can set topic and schema for publishing to event streams only in the proxy config as described in the [docs](https://accenture.github.io/reactive-interaction-gateway/docs/api-gateway.html#publishing-to-event-streams).
+  - Removed deprecated internal API `/v1`.
+  - Removed deprecated environment variables: `PROXY_KAFKA_REQUEST_AVRO`, `PROXY_KAFKA_REQUEST_TOPIC`, `PROXY_KINESIS_REQUEST_STREAM`. This means that you can set topic and schema for publishing to event streams **only** in the proxy config as described in the [docs](https://accenture.github.io/reactive-interaction-gateway/docs/api-gateway.html#publishing-to-event-streams).
+  - Removed experimental feature Firehose (forwarding events to an HTTP endpoint).
 
 <!-- ### Security -->
 
