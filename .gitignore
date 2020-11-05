@@ -42,3 +42,5 @@ erl_crash.dump
 
 # asdf 
 .tool-versions
+
+/performance_tests/report.*

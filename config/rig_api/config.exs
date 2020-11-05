@@ -19,6 +19,8 @@ cowboy_options = [
 ]
 
 config :rig, RigApi.Endpoint,
+  live_view: [signing_salt: "Mb9ilmLoxae6ANcIXTap3vdzAZuZceBi"],
+  secret_key_base: "some_secret",
   server: true,
   url: [
     host: {:system, "HOST", "localhost"}

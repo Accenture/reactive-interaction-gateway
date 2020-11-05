@@ -1,5 +1,6 @@
 defmodule RigApi.Router do
   use RigApi, :router
+  import Phoenix.LiveDashboard.Router
 
   pipeline :body_parser do
     plug(Plug.Parsers,
@@ -20,6 +21,13 @@ defmodule RigApi.Router do
       otp_app: :rig,
       swagger_file: "rig_api_swagger.json"
     )
+  end
+
+  if Mix.env() == :dev do
+    scope "/" do
+      # pipe_through(:browser)
+      live_dashboard("/dashboard")
+    end
   end
 
   # Deprecated in 2.3, to be removed with 3.0:

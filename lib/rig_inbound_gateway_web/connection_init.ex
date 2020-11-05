@@ -14,6 +14,9 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
   alias RIG.Session
   alias Rig.Subscription
   alias RIG.Subscriptions
+  alias RigInboundGatewayWeb.V1.Valet
+
+  @valet_server ValetServer
 
   # ---
 
@@ -46,7 +49,8 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
          {:ok, query_subs} <-
            Subscriptions.from_json(request.body),
          subscriptions = Enum.uniq(jwt_subs ++ query_subs),
-         :ok <- SubscriptionAuthZ.check_authorization(request) do
+         :ok <- SubscriptionAuthZ.check_authorization(request),
+         :ok <- Valet.add_new_connection(@valet_server) do
       # If the JWT is valid and points to a session, we associate this connection with
       # it. If that doesn't work out, we log a warning but don't tell the frontend -
       # it's not the frontend's fault anyway.
@@ -86,6 +90,9 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
         end)
 
         on_error.("Subscription denied (not authorized).")
+
+      {:error, :reached_max_connections} ->
+        on_error.("Reached maximum number of connections per minute")
     end
   end
 

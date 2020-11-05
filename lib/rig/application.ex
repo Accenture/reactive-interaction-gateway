@@ -41,6 +41,7 @@ defmodule Rig.Application do
       RigInboundGateway.ApiProxy.Handler.Kafka,
       # RIG public-facing endpoint:
       RigInboundGatewayWeb.Endpoint,
+      Spec.worker(RigInboundGatewayWeb.V1.Valet, _args = [ValetServer, [name: ValetServer]]),
       # Cloud Events:
       {Cloudevents, [confluent_schema_registry_url: config().schema_registry_host]}
     ]

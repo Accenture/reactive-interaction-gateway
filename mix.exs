@@ -57,7 +57,8 @@ defmodule RIG.MixProject do
         :logger,
         :runtime_tools,
         :prometheus_ex,
-        :prometheus_plugs
+        :prometheus_plugs,
+        :os_mon
       ],
       included_applications: [
         :peerage,
@@ -152,7 +153,7 @@ defmodule RIG.MixProject do
       # For JSON Web Tokens:
       {:joken, "~> 1.5"},
       # Web framework, for all HTTP endpoints except SSE and WS:
-      {:phoenix, "~> 1.4"},
+      {:phoenix, "~> 1.4.17"},
       {:plug_cowboy, "~> 2.1"},
       {:phoenix_swagger, "~> 0.8"},
       # Data validation library, e.g. used for proxy configuration:
@@ -179,7 +180,9 @@ defmodule RIG.MixProject do
       {:opencensus_jaeger, "~> 0.0.1"},
       {:opencensus_zipkin, "~> 0.3"},
       # NATS client:
-      {:gnat, "~> 1.0.0"}
+      {:gnat, "~> 1.0.0"},
+      # monitoring:
+      {:phoenix_live_dashboard, "~> 0.2"}
     ]
   end
 
