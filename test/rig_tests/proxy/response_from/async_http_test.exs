@@ -224,8 +224,6 @@ defmodule RigTests.Proxy.ResponseFrom.AsyncHttpTest do
     assert res_status == 200
     # ...the client receives the synchronous http response:
     assert Jason.decode!(res_body) == sync_response
-    # ... and never receives the asynchronous response
-    assert Jason.decode!(res_body) != async_response
   end
 
   test_with_server "Given response_from=http_async, when the backend responds with 400, RIG forwards this 400-response (and does not expect an asynchronous response for this request)." do
