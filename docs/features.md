@@ -52,7 +52,7 @@ RIG forwards the client request to the backend synchronously via HTTP and waits 
 
 ![client-to-backend-synchronously-asynchronous-response](./assets/features-client-to-backend-synchronously-asynchronous-response.png)
 
-This scenario can be quite useful which is described in more detail in the [Architecture section](https://accenture.github.io/reactive-interaction-gateway/docs/architecture.html#providing-a-synchronous-api-for-asynchronous-back-end-services). RIG correlates the corresponding answer using the correlation ID of the oRIGinal request, that will be forwarded to the backend and also being used in the response of the backend. With this ID, RIG can filter the appropriate message from the consuming topic.
+This scenario can be quite useful which is described in more detail in the [Architecture section](https://accenture.github.io/reactive-interaction-gateway/docs/architecture.html#providing-a-synchronous-api-for-asynchronous-back-end-services). RIG correlates the corresponding answer using the correlation ID of the original request, that will be forwarded to the backend and also being used in the response of the backend. With this ID, RIG can filter the appropriate message from the consuming topic.
 
 As you can see in the architecture diagram, the backend service responds to RIG with `202 Accepted` to tell RIG that the response will be provided asynchronously.
 
