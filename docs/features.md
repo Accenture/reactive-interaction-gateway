@@ -10,7 +10,7 @@ sidebar_label: Features
   * [Asynchronously - Fire&Forget](#asynchronously---fireforget)
   * [Synchronously - Asnychronous Response](#synchronously---asnychronous-response)
   * [Asynchronously - Asnychronous Response](#asynchronously---asnychronous-response)
-* [Built-in Features](#built-in-features)
+* [Out-of-the-box Features](#out-of-the-box-features)
 
 RIG can be used in different scenarios.
 
@@ -18,7 +18,7 @@ RIG can be used in different scenarios.
 
 RIG acts as a fan-out publisher of backend events. Clients can simply subscribe to RIG in order to receive these events. This makes your frontend apps reactive and eliminates the need for polling.
 
-Additionally clients can provide a filter during the subscription initialization and tell RIG in what type of events it is interested in. Thus, you don't have to implement this filter logic in all of your client applications, RIG takes care of it.
+Additionally clients can provide filters during the subscription initialization and tell RIG in what type of events it is interested in. Those filters allow clients to tap into high-volume event streams without getting overwhelmed by unwanted events. In other words, filters enable bandwidth efficiency.
 
 [The concert example use case](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html#use-case-real-time-updates) describes one advantage of this reactive architectural approach. Check out the [Intro](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html#reactive-interaction-gateway) for a detailed description and architecture diagram. Basically it works like this:
 
@@ -36,7 +36,7 @@ If requests are being sent synchronously, RIG acts as a reverse proxy: RIG forwa
 
 You may ask: Why shouldn't I directly talk to the backend? What benefits does RIG provide?
 
-RIG provides many additional features on top like session management or JWT signature verification. You don't have to implement this over and over again at the clients and backend services.
+RIG provides many additional features on top like session management or JWT signature verification. You don't have to implement this over and over again at the clients and backend services. That said, it's perfectly fine to run RIG alongside an existing API management gateway, too.
 
 ### Asynchronously - Fire&Forget
 
@@ -44,7 +44,7 @@ RIG transforms a HTTP request to a message for asynchronous processing and forwa
 
 ![client-to-backend-asynchronously-fireandforget](./assets/features-client-to-backend-asynchronously-fireandforget.png)
 
-This enables an asynchonous communication between client-side applications and the backend. RIG acts as a middle-man handling authentication when communicating to queuing systems. Without RIG, it would be required to have a custom backend applications that handles client requests and forwarding them to Kafka, Nats or Kinesis. This additional backend app is a single source of failure, hence it would be necessary to harden it and make it highly available and reliable. WIth RIG, you don't have to take care of that - RIG is [scalable by design](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#built-in-features).
+This enables asynchonous communication between client-side applications and the backend. RIG acts as a bridge between its clients and the messaging system. Similar to above, the authenticity of client requests are validated using JWT signature verification. RIG effectively replaces a custom backend application that would accept client requests and forward them to Kafka, Nats or Kinesis. This additional backend app is a single point of failure, hence it would be necessary to harden it and make it highly available and reliable. With RIG, you don't have to take care of that - RIG is [scalable by design](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#out-of-the-box-features).
 
 ### Synchronously - Asnychronous Response
 
@@ -66,9 +66,9 @@ RIG forwards the client request to the backend asynchronously via Kafka or NATS 
 
 Essentially this is a combination of the [asynchronous - fire&forget approach](#asynchronously---fireforget) and the [synchronous - asynchronous response approach](#synchronously---asnychronous-response).
 
-## Built-in Features
+## Out-of-the-box Features  
 
-Built on open standards, RIG is very easy to integrate – and easy to replace – which means low-cost, low-risk adoption. Unlike other solutions, RIG does not leak into your application – no libraries or SDKs required. Along with handling client requests and publishing events from backend to the frontend, RIG provides many built-in features such as:
+Built on open standards, RIG is very easy to integrate – and easy to replace – which means low-cost, low-risk adoption. Unlike other solutions, RIG does not leak into your application – no libraries or SDKs required. Along with handling client requests and publishing events from backend to the frontend, RIG provides many out-of-the-box features:
 
 - Easy to use and scalable by design:
   - Supports tens of thousands stable connections per node even on low-end machines
