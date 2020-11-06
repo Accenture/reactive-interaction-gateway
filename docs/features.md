@@ -5,8 +5,10 @@ sidebar_label: Features
 ---
 
 * [Picking up backend events and forwarding them to clients based on subscriptions](#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions)
-* [Forwarding client requests to backend services](#forwarding-client-requests-to-backend-services)
+  * [Asynchronously](#asynchronously)
   * [Synchronously](#synchronously)
+* [Forwarding client requests to backend services](#forwarding-client-requests-to-backend-services)
+  * [Synchronously](#synchronously-1)
   * [Asynchronously - Fire&Forget](#asynchronously---fireforget)
   * [Synchronously - Asnychronous Response](#synchronously---asnychronous-response)
   * [Asynchronously - Asnychronous Response](#asynchronously---asnychronous-response)
@@ -16,6 +18,8 @@ RIG can be used in different scenarios.
 
 ## Picking up backend events and forwarding them to clients based on subscriptions
 
+### Asynchronously
+
 RIG acts as a fan-out publisher of backend events. Clients can simply subscribe to RIG in order to receive these events. This makes your frontend apps reactive and eliminates the need for polling.
 
 Additionally clients can provide filters during the subscription initialization and tell RIG in what type of events it is interested in. Those filters allow clients to tap into high-volume event streams without getting overwhelmed by unwanted events. In other words, filters enable bandwidth efficiency.
@@ -23,6 +27,12 @@ Additionally clients can provide filters during the subscription initialization 
 [The concert example use case](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html#use-case-real-time-updates) describes one advantage of this reactive architectural approach. Check out the [Intro](https://accenture.github.io/reactive-interaction-gateway/docs/intro.html#reactive-interaction-gateway) for a detailed description and architecture diagram. Basically it works like this:
 
 ![fan-out-to-multiple-clients](./assets/features-fan-out-to-multiple-clients.png)
+
+### Synchronously
+
+With RIG, you don't have to necessarily deploy and manage Kafka/Nats/Kinesis. In the previous architecture you can simply remove that part and publish events from the backend directly to RIG. RIG then acts as a simple message broker:
+
+![fan-out-to-multiple-clients-synchronously](./assets/features-fan-out-to-multiple-clients-synchronously.png)
 
 ## Forwarding client requests to backend services
 

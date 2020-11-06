@@ -11,7 +11,9 @@ Makes frontend<->backend communication reactive and event-driven.
 
 The Reactive Interaction Gateway (RIG) is the glue between your client (frontend) and your backend. It makes communication between them easier by (click the links to learn more)
 
-- [picking up backend events and forwarding them to clients based on subscriptions](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions): this makes your frontend apps **reactive and eliminates the need for polling**.
+- picking up backend events and forwarding them to clients based on subscriptions: this makes your frontend apps **reactive and eliminates the need for polling**. You can do this
+  - [asynchronously](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions#asynchronously) using Kafka, Nats or Kinesis.
+  - [synchronously](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions#synchronously) if you don't want to manage a (potentially complex) message broker system like Kafka.
 - forwarding client requests to backend services either synchronously, asynchronously or a mix of both:
   - [synchronously](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#synchronously): if requests are being sent synchronously, RIG acts as a reverse proxy: RIG forwards the request to an HTTP endpoint of a backend service, waits for the response and sends it to the client.
   - [asynchronously - fire&forget](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#asynchronously---fireforget): RIG transforms a HTTP request to a message for asynchronous processing and forwards it to the backend asynchronously using either Kafka, NATS or Amazon Kinesis.
