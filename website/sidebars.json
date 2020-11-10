@@ -21,7 +21,8 @@
     ],
     "RIG in Production": [
       "rig-ops-guide",
-      "metrics-details",
+      "phoenix-live-dashboard",
+      "prometheus-metrics",
       "https",
       "scaling"
     ],

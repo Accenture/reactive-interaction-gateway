@@ -144,3 +144,10 @@ config :rig, RIG.Tracing,
   jaeger_service_name: {:system, :charlist, "JAEGER_SERVICE_NAME", 'rig'},
   zipkin_address: {:system, :charlist, "ZIPKIN_ADDR", ''},
   zipkin_service_name: {:system, "ZIPKIN_SERVICE_NAME", "rig"}
+
+# --------------------------------------
+# Connections rate limiting
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+config :rig, RigInboundGatewayWeb.ConnectionInit,
+  max_connections_per_minute: {:system, :integer, "MAX_CONNECTIONS_PER_MINUTE", 5000}

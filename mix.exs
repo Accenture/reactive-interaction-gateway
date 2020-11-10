@@ -173,6 +173,8 @@ defmodule RIG.MixProject do
       # Prometheus metrics:
       {:prometheus_ex, "~> 3.0"},
       {:prometheus_plugs, "~> 1.1"},
+      # Additional monitoring:
+      {:phoenix_live_dashboard, "~> 0.2"},
       # Distributed tracing:
       {:opencensus_plug, "~> 0.3"},
       {:opencensus, "~> 0.9"},
@@ -181,8 +183,8 @@ defmodule RIG.MixProject do
       {:opencensus_zipkin, "~> 0.3"},
       # NATS client:
       {:gnat, "~> 1.0.0"},
-      # monitoring:
-      {:phoenix_live_dashboard, "~> 0.2"}
+      # Rate limiting via leaky bucket
+      {:ex_rated, "~> 1.2"}
     ]
   end
 

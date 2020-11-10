@@ -57,9 +57,13 @@
         "title": "Intro",
         "sidebar_label": "Intro"
       },
-      "metrics-details": {
-        "title": "Metrics Details",
-        "sidebar_label": "Metrics Details"
+      "phoenix-live-dashboard": {
+        "title": "Phoenix LiveDashboard",
+        "sidebar_label": "Phoenix LiveDashboard"
+      },
+      "prometheus-metrics": {
+        "title": "Prometheus Metrics",
+        "sidebar_label": "Prometheus Metrics"
       },
       "rig-dev-guide": {
         "title": "Developer's Guide to the Reactive Interaction Gateway",

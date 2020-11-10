@@ -43,4 +43,5 @@ erl_crash.dump
 # asdf 
 .tool-versions
 
-/performance_tests/report.*
+# Artillery
+/performance_tests/artillery/report*.*
