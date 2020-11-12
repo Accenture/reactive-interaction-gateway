@@ -7,6 +7,20 @@ in the [Accenture Organization](https://github.com/accenture) on GitHub. These a
 guidelines, not rules. Use your best judgment, and feel free to propose changes to this document
 in a pull request.
 
+## TL;DR
+
+- **Use issues for everything.**
+- For a small change, just send a PR.
+- For bigger changes open an issue for discussion before sending a PR.
+- PR should have:
+  - Test case
+  - Documentation (e.g., moduledoc, developer's guide, operator's guide)
+  - Changelog entry
+- You can also contribute by:
+  - Reporting issues
+  - Suggesting new features or enhancements
+  - Improve/fix documentation
+
 ## Code of Conduct
 
 This project and everyone participating in it is governed by our
