@@ -30,9 +30,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Nats do
     |> Conn.send_resp(:no_content, "")
   end
 
-  # @doc @help_text
-  # def handle_http_request(conn, api, endpoint, request_path)
-
   def handle_http_request(
         conn,
         _,
