@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added new version - `v3` - for internal endpoints to support response code in the `/responses` endpoint
 - Added Helm v3 template to the `deployment` folder [#288](https://github.com/Accenture/reactive-interaction-gateway/issues/288)
 - Added detailed features summary on the website with architecture diagrams. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
+- Added [documentation section](https://accenture.github.io/reactive-interaction-gateway/docs/jwt-blacklisting.html) for the JWT Blacklist feature. [#156](https://github.com/Accenture/reactive-interaction-gateway/issues/156)
 
 ### Changed
 

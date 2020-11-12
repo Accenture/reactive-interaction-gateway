@@ -19,7 +19,8 @@
     "Advanced Guides": [
       "api-gateway-management",
       "api-gateway-synchronization",
-      "avro"
+      "avro",
+      "jwt-blacklisting"
     ],
     "RIG in Production": [
       "rig-ops-guide",
