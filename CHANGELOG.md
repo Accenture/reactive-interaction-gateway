@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added possibility to set response code for `response_from` messages in reverse proxy (`kafka` and `http_async`). [#321](https://github.com/Accenture/reactive-interaction-gateway/pull/321)
 - Added new version - `v3` - for internal endpoints to support response code in the `/responses` endpoint
 - Added Helm v3 template to the `deployment` folder [#288](https://github.com/Accenture/reactive-interaction-gateway/issues/288)
+- Added detailed features summary on the website with architecture diagrams. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
 
 ### Changed
 
@@ -31,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     ```
   
   More information, follow the [deployment Readme](./deployment/README.md). [#319](https://github.com/Accenture/reactive-interaction-gateway/issues/319)
+- make README smaller, easier to read and highlight features. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
 
 ### Fixed
 
