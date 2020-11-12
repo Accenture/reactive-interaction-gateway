@@ -74,7 +74,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
                  ]
                )
 
-      Response.ok!(sync_response, %{"content-type" => "application/json"})
+      Response.accepted!(sync_response, %{"content-type" => "application/json"})
     end)
 
     # We register this endpoint with the proxy:
@@ -155,7 +155,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
                  ]
                )
 
-      Response.ok!(sync_response, %{"content-type" => "application/json"})
+      Response.accepted!(sync_response, %{"content-type" => "application/json"})
     end)
 
     # We register the endpoint with the proxy:
