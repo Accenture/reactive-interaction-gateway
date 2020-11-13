@@ -72,7 +72,7 @@ You can also utilize <a href="https://github.com/Accenture/reactive-interaction-
           {
             <span class="hljs-attr">"id"</span>: <span class="hljs-string">"my-endpoint"</span>,
             <span class="hljs-attr">"method"</span>: <span class="hljs-string">"GET"</span>,
-            <span class="hljs-attr">"path"</span>: <span class="hljs-string">"/"</span>
+            <span class="hljs-attr">"path_regex"</span>: <span class="hljs-string">"/"</span>
           }
         ]
       }
@@ -132,7 +132,7 @@ $ docker run \
 Hi, I<span class="hljs-string">'m a demo service!
 </span></code></pre>
 <h2><a class="anchor" aria-hidden="true" id="dynamic-url-parameters"></a><a href="#dynamic-url-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Dynamic URL parameters</h2>
-<p>It's a common case that you want to fetch detail for some entity e.g. <code>/books/123</code>. To make sure the dynamic value <code>123</code> is correctly matched and forwarded API endpoint can be configured like this:</p>
+<p>It's a common case that you want to fetch detail for some entity e.g. <code>/books/123</code>. To make sure the dynamic value <code>123</code> is correctly matched and forwarded API endpoint can be configured as a regular expression:</p>
 <pre><code class="hljs css language-json">[{
   "id": "my-service",
   "version_data": {
@@ -140,14 +140,13 @@ Hi, I<span class="hljs-string">'m a demo service!
       "endpoints": [{
         "id": "my-detail-endpoint",
         "method": "GET",
-        "path": "/books/{book_id}"
+        "path_regex": "/books/(.+)"
       }]
     }
   },
   ...
 }]
 </code></pre>
-<p>Dynamic values in <code>path</code> have to be wrapped in curly braces. Value inside curly braces is up to you.</p>
 <h2><a class="anchor" aria-hidden="true" id="publishing-to-event-streams"></a><a href="#publishing-to-event-streams" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Publishing to event streams</h2>
 <p>Instead of forwarding an HTTP request to an internal HTTP endpoint, RIG can also produce an event to a Kafka topic (or Kinesis stream). What looks like a standard HTTP call to the frontend, actually produces an event for backend services to consume.</p>
 <p>Depending on the use case, the request may either return immediately or after a response has been produced to another Kafka topic (or Kinesis stream), as described below.</p>
@@ -159,7 +158,7 @@ Hi, I<span class="hljs-string">'m a demo service!
       "endpoints": [{
         "id": "my-endpoint",
         "method": "POST",
-        "path": "/",
+        "path_regex": "/",
         "target": "kafka",
         "topic": "my-topic",
         "schema": "my-avro-schema"
@@ -169,10 +168,7 @@ Hi, I<span class="hljs-string">'m a demo service!
   ...
 }]
 </code></pre>
-<p>Note that the <code>target</code> field is set to <code>kafka</code> (for Kinesis use <code>kinesis</code>). The <code>topic</code> field is mandatory, but the <code>schema</code> field is optional. Alternatively (fallback to the previously used solution), you can define these values via environment variables, described by the <code>PROXY_KAFKA_*</code> and <code>PROXY_KINESIS_*</code> variables in the <a href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator's Guide</a>. Note that the <code>topic</code> and <code>schema</code> fields are just about publishing to event stream and have nothing to do with events consumption.</p>
-<blockquote>
-<p>Beware, that the fallback method is deprecated and will be removed in the version 3.0.</p>
-</blockquote>
+<p>Note that the <code>target</code> field is set to <code>kafka</code> (for Kinesis use <code>kinesis</code>). The <code>topic</code> field is mandatory, but the <code>schema</code> field is optional. Note that the <code>topic</code> and <code>schema</code> fields are just about publishing to event stream and have nothing to do with events consumption.</p>
 <p>The endpoint expects the following request format:</p>
 <pre><code class="hljs css language-json">{
   <span class="hljs-attr">"id"</span>: <span class="hljs-string">"069711bf-3946-4661-984f-c667657b8d85"</span>,
@@ -203,7 +199,7 @@ A behavior like this can be configured using an endpoints' <code>response_from</
       "endpoints": [{
         "id": "my-endpoint",
         "method": "POST",
-        "path": "/",
+        "path_regex": "/",
         "target": "kafka",
         "topic": "my-topic",
         "response_from": "kafka"
@@ -256,11 +252,11 @@ content-type: "application/json"
       "endpoints": [{
         "id": "my-unsecured-endpoint",
         "method": "GET",
-        "path": "/unsecured"
+        "path_regex": "/unsecured"
       },{
         "id": "my-secured-endpoint",
         "method": "GET",
-        "path": "/secured",
+        "path_regex": "/secured",
         "secured": true
       }]
     }
@@ -288,11 +284,11 @@ content-type: "application/json"
       "endpoints": [{
         "id": "my-endpoint",
         "method": "GET",
-        "path": "/"
+        "path_regex": "/"
       },{
         "id": "my-transformed-endpoint",
         "method": "GET",
-        "path": "/transformed",
+        "path_regex": "/transformed",
         "transform_request_headers": true
       }]
     }
@@ -308,11 +304,6 @@ content-type: "application/json"
   "version_data": {
     "default": {
       "endpoints": [{
-        "id": "my-endpoint",
-        "method": "GET",
-        "path": "/",
-        "path_replacement": "/different-endpoint"
-      },{
         "id": "my-transformed-endpoint",
         "method": "GET",
         "path_regex": "/foo/([^/]+)/bar/([^/]+)",
@@ -323,7 +314,7 @@ content-type: "application/json"
   ...
 }]
 </code></pre>
-<p>In first case, sending GET request to <code>/</code> RIG will forward the request to GET <code>/different-endpoint</code>. In second case we are using <code>path_regex</code> instead of <code>path</code> (this is alternative to <code>## Dynamic URL parameters</code>). As you send GET request to <code>/foo/1/bar/2</code> RIG will forward it to GET <code>/bar/1/foo/2</code>.</p>
+<p>As you send GET request to <code>/foo/1/bar/2</code> RIG will forward it to GET <code>/bar/1/foo/2</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="cors"></a><a href="#cors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>CORS</h2>
 <p>Quite often you need to deal with cross origin requests. CORS itself is configured via <code>CORS</code> environment variable, which defaults to <code>*</code>. In addition RIG requires to configure OPTIONS pre-flight endpoints:</p>
 <pre><code class="hljs css language-json">[{
@@ -333,11 +324,11 @@ content-type: "application/json"
       "endpoints": [{
         "id": "my-endpoint",
         "method": "GET",
-        "path": "/"
+        "path_regex": "/"
       },{
         "id": "my-endpoint-preflight",
         "method": "OPTIONS",
-        "path": "/"
+        "path_regex": "/"
       }]
     }
   },
