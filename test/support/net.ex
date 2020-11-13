@@ -14,7 +14,7 @@ defmodule RigInboundGatewayWeb.Net do
 
       {port, info}
     end)
-    |> filter(fn {port, info} -> info[:name] == 'tcp_inet' end)
+    |> filter(fn {_port, info} -> info[:name] == 'tcp_inet' end)
     |> reduce_while(nil, fn {port, info}, _acc ->
       case :inet.port(port) do
         {:ok, ^port_num} -> {:halt, info[:connected]}
@@ -25,7 +25,7 @@ defmodule RigInboundGatewayWeb.Net do
       nil ->
         true
 
-      pid ->
+      _pid ->
         # Process.exit(pid, :kill)
         false
     end

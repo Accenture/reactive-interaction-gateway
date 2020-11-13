@@ -6,14 +6,11 @@ defmodule RigInboundGateway.ApiProxy.Validations do
   When any error occurs during RIG start -> process will exit.
   When any error occurs during REST API request -> process won't exit, but instead API returns 400 -- bad request.
   """
-  use Rig.Config, [:kinesis_request_stream, :kafka_request_topic, :kafka_request_avro, :system]
+  use Rig.Config, [:system]
 
   alias RigInboundGateway.ApiProxy.Api
 
   require Logger
-
-  @endpoint_paths ["path", "path_regex"]
-  @endpoint_paths_error_key "path, path_regex"
 
   @type error_t :: [{:error, String.t() | atom, atom, String.t()}]
   @type error_list_t :: [{String.t(), error_t()}]
@@ -91,29 +88,6 @@ defmodule RigInboundGateway.ApiProxy.Validations do
 
   # ---
 
-  @spec validate_endpoint_path(Api.endpoint()) :: error_list_t()
-  def validate_endpoint_path(endpoint) do
-    present_paths =
-      @endpoint_paths
-      |> Enum.filter(fn key -> Map.has_key?(endpoint, key) end)
-
-    case present_paths do
-      [] ->
-        [{:error, @endpoint_paths_error_key, :by, "Either path or path_regex must be set"}]
-
-      [path] ->
-        validate_string(endpoint, path)
-
-      _ ->
-        [
-          {:error, @endpoint_paths_error_key, :by,
-           "You can't set path and path_regex at the same time"}
-        ]
-    end
-  end
-
-  # ---
-
   @spec with_any_error(error_list_t(), integer) :: error_list_t()
   def with_any_error(errors, min_errors \\ 1)
   def with_any_error(errors, min_errors) when length(errors) > min_errors, do: errors
@@ -126,42 +100,24 @@ defmodule RigInboundGateway.ApiProxy.Validations do
         errors,
         %{"id" => id, "version_data" => %{"default" => %{"endpoints" => endpoints}}} = api
       ) do
-    conf = config()
-
     Enum.reduce(endpoints, [], fn endpoint, acc ->
       topic_presence_config =
         endpoint
         |> validate_endpoint_target(["kafka", "kinesis"])
         |> with_nested_presence("topic", endpoint)
 
-      # DEPRECATED. (Will be removed with the version 3.0.)
-      topic_presence =
-        endpoint
-        |> validate_endpoint_target(["kafka"])
-        |> with_nested_presence(:kafka_request_topic, conf)
-        |> Enum.concat(topic_presence_config)
-
-      # DEPRECATED. (Will be removed with the version 3.0.)
-      stream_presence =
-        endpoint
-        |> validate_endpoint_target(["kinesis"])
-        |> with_nested_presence(:kinesis_request_stream, conf)
-        |> Enum.concat(topic_presence_config)
-
       schema_presence_config =
         endpoint
         |> Vex.valid?(%{"schema" => [presence: true]})
         |> with_nested_presence("target", endpoint)
 
-      endpoint_path_errors = validate_endpoint_path(endpoint)
-
       all_errors =
         validate_secured_endpoint(api, endpoint) ++
-          with_any_error(topic_presence) ++
-          with_any_error(stream_presence) ++
+          topic_presence_config ++
           schema_presence_config ++
           validate_string(endpoint, "id") ++
-          endpoint_path_errors ++ validate_string(endpoint, "method")
+          validate_string(endpoint, "path_regex") ++
+          validate_string(endpoint, "method")
 
       merge_errors(acc, [{"#{id}/#{endpoint["id"]}", all_errors}])
     end)

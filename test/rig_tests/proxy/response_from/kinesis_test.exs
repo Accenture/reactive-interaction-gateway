@@ -71,7 +71,7 @@ defmodule RigTests.Proxy.ResponseFrom.KinesisTest do
               %{
                 id: endpoint_id,
                 method: "GET",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 response_from: "kinesis"
               }
             ]

@@ -28,7 +28,7 @@ Following Labels are provided:
   - `DELETE`
   - `HEAD`
   - `OPTIONS`
-- **path** - The path used for this request.
+- **path_regex** - The path used for this request.
 - **target** - The target for this request. Grabbed from proxy config. Following possible values:
   - `http`
   - `kafka`

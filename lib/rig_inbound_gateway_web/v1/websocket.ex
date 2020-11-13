@@ -104,7 +104,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   @doc ~S"Allow the client to send :ping messages to test connectivity."
   @impl :cowboy_websocket
-  def websocket_handle({:ping, app_data}, state), do: {:reply, {:pong, app_data}, :hibernate}
+  def websocket_handle({:ping, app_data}, _state), do: {:reply, {:pong, app_data}, :hibernate}
 
   @impl :cowboy_websocket
   def websocket_handle(in_frame, state) do
