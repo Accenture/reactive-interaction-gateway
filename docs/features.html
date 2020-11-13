@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Features · Reactive Interaction Gateway</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="* [Picking up backend events and forwarding them to clients based on subscriptions](#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions)"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Features · Reactive Interaction Gateway"/><meta property="og:type" content="website"/><meta property="og:url" content="https://accenture.github.io/reactive-interaction-gateway/index.html"/><meta property="og:description" content="* [Picking up backend events and forwarding them to clients based on subscriptions](#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions)"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/reactive-interaction-gateway/img/favicon.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/reactive-interaction-gateway/js/scrollSpy.js"></script><link rel="stylesheet" href="/reactive-interaction-gateway/css/main.css"/><script src="/reactive-interaction-gateway/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/reactive-interaction-gateway/"><img class="logo" src="/reactive-interaction-gateway/img/icon.svg" alt="Reactive Interaction Gateway"/><h2 class="headerTitleWithLogo">Reactive Interaction Gateway</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/reactive-interaction-gateway/docs/intro.html" target="_self">User Documentation</a></li><li class=""><a href="/reactive-interaction-gateway/source_docs/index.html" target="_self">Source Documentation</a></li><li class=""><a href="https://github.com/Accenture/reactive-interaction-gateway" target="_self">GitHub</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Main Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/intro.html">Intro</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/tutorial.html">Tutorial</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/examples.html">Examples</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/faq.html">FAQ</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Main Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/architecture.html">Architecture</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/reactive-interaction-gateway/docs/features.html">Features</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-format.html">Event Format</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-streams.html">Publishing Events</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/event-subscription.html">Receiving Events</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway.html">Forwarding Requests</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/user-authorization.html">User Authorization</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/distributed-tracing.html">Distributed Tracing</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-management.html">API Gateway Management</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-gateway-synchronization.html">API Gateway Synchronization</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/avro.html">Avro</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/jwt-blacklisting.html">JWT Blacklisting</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">RIG in Production</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-ops-guide.html">Operator&#x27;s Guide</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/api-documentation.html">API Documentation</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/metrics-details.html">Metrics Details</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/https.html">HTTPS</a></li><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/scaling.html">Scaling</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Hacking the Source</h3><ul class=""><li class="navListItem"><a class="navItem" href="/reactive-interaction-gateway/docs/rig-dev-guide.html">Developer&#x27;s Guide</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Features</h1></header><article><div><span><ul>
+<li><a href="#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions">Picking up backend events and forwarding them to clients based on subscriptions</a>
+<ul>
+<li><a href="#asynchronously">Asynchronously</a></li>
+<li><a href="#synchronously">Synchronously</a></li>
+</ul></li>
+<li><a href="#forwarding-client-requests-to-backend-services">Forwarding client requests to backend services</a>
+<ul>
+<li><a href="#synchronously-1">Synchronously</a></li>
+<li><a href="#asynchronously---fireforget">Asynchronously - Fire&amp;Forget</a></li>
+<li><a href="#synchronously---asnychronous-response">Synchronously - Asnychronous Response</a></li>
+<li><a href="#asynchronously---asnychronous-response">Asynchronously - Asnychronous Response</a></li>
+</ul></li>
+<li><a href="#out-of-the-box-features">Out-of-the-box Features</a></li>
+</ul>
+<p>RIG can be used in different scenarios.</p>
+<h2><a class="anchor" aria-hidden="true" id="picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions"></a><a href="#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Picking up backend events and forwarding them to clients based on subscriptions</h2>
+<h3><a class="anchor" aria-hidden="true" id="asynchronously"></a><a href="#asynchronously" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Asynchronously</h3>
+<p>RIG acts as a fan-out publisher of backend events. Clients can simply subscribe to RIG in order to receive these events. This makes your frontend apps reactive and eliminates the need for polling.</p>
+<p>Additionally clients can provide filters during the subscription initialization and tell RIG in what type of events it is interested in. Those filters allow clients to tap into high-volume event streams without getting overwhelmed by unwanted events. In other words, filters enable bandwidth efficiency.</p>
+<p><a href="https://accenture.github.io/reactive-interaction-gateway/docs/intro.html#use-case-real-time-updates">The concert example use case</a> describes one advantage of this reactive architectural approach. Check out the <a href="https://accenture.github.io/reactive-interaction-gateway/docs/intro.html#reactive-interaction-gateway">Intro</a> for a detailed description and architecture diagram. Basically it works like this:</p>
+<p><img src="./assets/features-fan-out-to-multiple-clients.png" alt="fan-out-to-multiple-clients"></p>
+<h3><a class="anchor" aria-hidden="true" id="synchronously"></a><a href="#synchronously" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Synchronously</h3>
+<p>With RIG, you don't have to necessarily deploy and manage Kafka/Nats/Kinesis. In the previous architecture you can simply remove that part and publish events from the backend directly to RIG. RIG then acts as a simple message broker:</p>
+<p><img src="./assets/features-fan-out-to-multiple-clients-synchronously.png" alt="fan-out-to-multiple-clients-synchronously"></p>
+<h2><a class="anchor" aria-hidden="true" id="forwarding-client-requests-to-backend-services"></a><a href="#forwarding-client-requests-to-backend-services" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Forwarding client requests to backend services</h2>
+<p>When client requests need to be forwarded to the backend, clients sometimes are interested in the response of the backend, and sometimes not. Especially when the client is interested in the direct response of the backend, there are a couple of options how to design that technically.</p>
+<h3><a class="anchor" aria-hidden="true" id="synchronously-1"></a><a href="#synchronously-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Synchronously</h3>
+<p>If requests are being sent synchronously, RIG acts as a reverse proxy: RIG forwards the request to an HTTP endpoint of a backend service, waits for the response and sends it back to the client. It is as simple as</p>
+<p><img src="./assets/features-client-to-backend-synchronously.png" alt="client-to-backend-synchronously"></p>
+<p>You may ask: Why shouldn't I directly talk to the backend? What benefits does RIG provide?</p>
+<p>RIG provides many additional features on top like session management or JWT signature verification. You don't have to implement this over and over again at the clients and backend services. That said, it's perfectly fine to run RIG alongside an existing API management gateway, too.</p>
+<h3><a class="anchor" aria-hidden="true" id="asynchronously---fireforget"></a><a href="#asynchronously---fireforget" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Asynchronously - Fire&amp;Forget</h3>
+<p>RIG transforms a HTTP request to a message for asynchronous processing and forwards it to the backend asynchronously using either <a href="https://kafka.apache.org/">Kafka</a>, <a href="https://nats.io/">NATS</a> or <a href="https://aws.amazon.com/kinesis/">Amazon Kinesis</a>.</p>
+<p><img src="./assets/features-client-to-backend-asynchronously-fireandforget.png" alt="client-to-backend-asynchronously-fireandforget"></p>
+<p>This enables asynchonous communication between client-side applications and the backend. RIG acts as a bridge between its clients and the messaging system. Similar to above, the authenticity of client requests are validated using JWT signature verification. RIG effectively replaces a custom backend application that would accept client requests and forward them to Kafka, Nats or Kinesis. This additional backend app is a single point of failure, hence it would be necessary to harden it and make it highly available and reliable. With RIG, you don't have to take care of that - RIG is <a href="https://accenture.github.io/reactive-interaction-gateway/docs/features.html#out-of-the-box-features">scalable by design</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="synchronously---asnychronous-response"></a><a href="#synchronously---asnychronous-response" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Synchronously - Asnychronous Response</h3>
+<p>RIG forwards the client request to the backend synchronously via HTTP and waits for the backend response by listening to Kafka/NATS and forwarding it to the still open HTTP connection to the frontend.</p>
+<p><img src="./assets/features-client-to-backend-synchronously-asynchronous-response.png" alt="client-to-backend-synchronously-asynchronous-response"></p>
+<p>This scenario can be quite useful which is described in more detail in the <a href="https://accenture.github.io/reactive-interaction-gateway/docs/architecture.html#providing-a-synchronous-api-for-asynchronous-back-end-services">Architecture section</a>. RIG correlates the corresponding answer using the correlation ID of the original request, that will be forwarded to the backend and also being used in the response of the backend. With this ID, RIG can filter the appropriate message from the consuming topic.</p>
+<p>As you can see in the architecture diagram, the backend service responds to RIG with <code>202 Accepted</code> to tell RIG that the response will be provided asynchronously.</p>
+<p>Apart from that, the backend service also has the possibility to return a cached response (this will be a <code>200 OK</code> response with a corresponding http body) or anything else, e.g. a <code>400 Bad Request</code>. In turn, RIG will not listen to the topic and wait for the response. Consequently, the request flow will look similar to the <a href="#synchronously">synchronous approach</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="asynchronously---asnychronous-response"></a><a href="#asynchronously---asnychronous-response" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Asynchronously - Asnychronous Response</h3>
+<p>RIG forwards the client request to the backend asynchronously via Kafka or NATS and waits for the backend response by listening to Kafka/NATS and forwarding it to the still open HTTP connection to the frontend.</p>
+<p><img src="./assets/features-client-to-backend-asynchronously-asynchronous-response.png" alt="client-to-backend-asynchronously-asynchronous-response"></p>
+<p>Essentially this is a combination of the <a href="#asynchronously---fireforget">asynchronous - fire&amp;forget approach</a> and the <a href="#synchronously---asnychronous-response">synchronous - asynchronous response approach</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="out-of-the-box-features"></a><a href="#out-of-the-box-features" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Out-of-the-box Features</h2>
+<p>Built on open standards, RIG is very easy to integrate – and easy to replace – which means low-cost, low-risk adoption. Unlike other solutions, RIG does not leak into your application – no libraries or SDKs required. Along with handling client requests and publishing events from backend to the frontend, RIG provides many out-of-the-box features:</p>
+<ul>
+<li>Easy to use and scalable by design:
+<ul>
+<li>Supports tens of thousands stable connections per node even on low-end machines</li>
+<li>Easy to add additional nodes</li>
+<li>Built on the battle-proven <a href="http://www.erlang.org/">Erlang/OTP</a> distribution model</li>
+<li>Only uses in-memory data structures - no external dependencies to configure or scale</li>
+</ul></li>
+<li>Connect using standard protocols:
+<ul>
+<li>Firewall friendly and future proof using Server-Sent Events (SSE)
+<ul>
+<li><a href="https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events">HTML5 standard</a></li>
+<li>Regular HTTP requests, so no issues with proxy servers or firewalls</li>
+<li>Connection multiplexing with HTTP/2 out of the box</li>
+<li>SSE implementation (browser) keeps track of connection drops and restores the connection automatically</li>
+<li>Polyfills available for older browsers</li>
+</ul></li>
+<li>WebSocket connections are supported, too</li>
+<li>HTTP long polling for situations where SSE and WS are not supported</li>
+</ul></li>
+<li>Publish events from various sources:
+<ul>
+<li>Kafka</li>
+<li>NATS</li>
+<li>Amazon Kinesis</li>
+<li>or publish via HTTP</li>
+</ul></li>
+<li>Convert a HTTP request to a message for asynchronous processing:
+<ul>
+<li>produce to Kafka topic, optionally wait for the result on another Kafka topic</li>
+<li>produce to a NATS topic, optionally using NATS request-response to wait for the result</li>
+<li>produce to Amazon Kinesis</li>
+</ul></li>
+<li>Uses the CNCF <a href="https://cloudevents.io/">CloudEvents specification</a></li>
+<li>Takes care of client connection state so you don't have to</li>
+<li>Flexible event subscription model based on event types</li>
+<li>Use existing services for authentication and authorization of users and subscriptions</li>
+<li>JWT signature verification for APIs as a simple authentication check</li>
+<li>Session blacklist with immediate session invalidation</li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/reactive-interaction-gateway/docs/architecture.html"><span class="arrow-prev">← </span><span>Architecture</span></a><a class="docs-next button" href="/reactive-interaction-gateway/docs/event-format.html"><span>Event Format</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#picking-up-backend-events-and-forwarding-them-to-clients-based-on-subscriptions">Picking up backend events and forwarding them to clients based on subscriptions</a><ul class="toc-headings"><li><a href="#asynchronously">Asynchronously</a></li><li><a href="#synchronously">Synchronously</a></li></ul></li><li><a href="#forwarding-client-requests-to-backend-services">Forwarding client requests to backend services</a><ul class="toc-headings"><li><a href="#synchronously-1">Synchronously</a></li><li><a href="#asynchronously---fireforget">Asynchronously - Fire&amp;Forget</a></li><li><a href="#synchronously---asnychronous-response">Synchronously - Asnychronous Response</a></li><li><a href="#asynchronously---asnychronous-response">Asynchronously - Asnychronous Response</a></li></ul></li><li><a href="#out-of-the-box-features">Out-of-the-box Features</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/reactive-interaction-gateway/" class="nav-home"></a><div><h5>Docs</h5><a href="/reactive-interaction-gateway/docs/en/intro.html">Intro</a><a href="/reactive-interaction-gateway/docs/en/getting-started.html">Getting Started</a></div><div><h5>Community</h5><a href="/reactive-interaction-gateway/en/users.html">User Showcase</a><a href="https://rig-slackin.herokuapp.com" target="_blank" rel="noreferrer noopener">Slack</a><a href="http://stackoverflow.com/questions/tagged/reactive-interaction-gateway" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://twitter.com/kevnbadr" target="_blank" rel="noreferrer noopener">@KevnBadr</a></div><div><h5>More</h5><a class="github-button" href="https://github.com/accenture/reactive-interaction-gateway" data-icon="octicon-star" data-count-href="/accenture/reactive-interaction-gateway/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star RIG on GitHub">Star RIG on GitHub</a></div></section><section class="copyright">Copyright © 2020 Accenture</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '071fafffc3dde04e540162e0f3f68af4',
+                indexName: 'reactive-interaction-gateway',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>
