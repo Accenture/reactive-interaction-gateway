@@ -55,7 +55,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   @impl Handler
   def handle_http_request(conn, api, endpoint, request_path)
 
-  @doc "CORS response for preflight request."
+  # CORS response for preflight request.
   def handle_http_request(
         %{method: "OPTIONS"} = conn,
         _,

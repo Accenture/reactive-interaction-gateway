@@ -125,7 +125,7 @@ config :rig, RIG.Tracing,
   zipkin_service_name: {:system, "ZIPKIN_SERVICE_NAME", "rig"}
 
 # --------------------------------------
-# Pheonix
+# Phoenix
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 config :phoenix, :json_library, Jason
