@@ -7,8 +7,10 @@ defmodule RIG.MixProject do
   from backend services to connected frontends (and vice versa).
   """
 
+  @rig_version "3.0.0-alpha.1"
+
   def project do
-    %{rig: rig_version, elixir: elixir_version} = versions()
+    elixir_version = elixir_version_from_tool_versions_file()
 
     [
       # OTP app:
@@ -17,7 +19,7 @@ defmodule RIG.MixProject do
       # Meta data:
       name: "Reactive Interaction Gateway",
       description: @description,
-      version: rig_version,
+      version: @rig_version,
       source_url: "https://github.com/Accenture/reactive-interaction-gateway",
       homepage_url: "https://accenture.github.io/reactive-interaction-gateway",
       docs: docs(),
@@ -44,6 +46,11 @@ defmodule RIG.MixProject do
     ]
   end
 
+  defp elixir_version_from_tool_versions_file do
+    [_, version] = Regex.run(~r/^elixir (.+)-otp-\d+$/m, File.read!(".tool-versions"))
+    version
+  end
+
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
@@ -68,11 +75,6 @@ defmodule RIG.MixProject do
         :opencensus_jaeger
       ]
     ]
-  end
-
-  defp versions do
-    {map, []} = Code.eval_file("version", ".")
-    map
   end
 
   defp docs do

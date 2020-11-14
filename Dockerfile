@@ -1,4 +1,4 @@
-FROM elixir:1.10-alpine as build
+FROM elixir:1.11-alpine as build
 
 # Install Elixir & Erlang environment dependencies
 RUN apk add --no-cache make gcc g++
@@ -28,7 +28,7 @@ COPY lib /opt/sites/rig/lib
 RUN mix compile
 RUN mix distillery.release
 
-FROM erlang:22-alpine
+FROM erlang:23-alpine
 
 LABEL org.label-schema.name="Reactive Interaction Gateway"
 LABEL org.label-schema.description="Reactive API Gateway and Event Hub"
