@@ -5,11 +5,9 @@ ENV MIX_ENV=test
 
 # Install Elixir & Erlang environment dependencies
 RUN apk add --no-cache make gcc g++
+COPY .tool-versions /opt/sites/rig/
 RUN mix local.hex --force
 RUN mix local.rebar --force
-
-# Copy release config
-COPY version /opt/sites/rig/
 
 # Copy necessary files for dependencies
 COPY mix.exs /opt/sites/rig/
