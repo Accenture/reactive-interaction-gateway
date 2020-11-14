@@ -125,7 +125,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         query: conn.query_string
       })
       |> Tracing.append_context(Tracing.context())
-      |> Poison.encode!()
+      |> Jason.encode!()
 
     produce(partition, kinesis_message, topic)
 

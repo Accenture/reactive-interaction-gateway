@@ -116,7 +116,7 @@ defmodule RIG.MixProject do
       # Read and use application configuration from environment variables:
       {:confex, "~> 3.4"},
       # For providing the global Phx PubSub server:
-      {:phoenix_pubsub, "~> 1.1"},
+      {:phoenix_pubsub, "~> 2.0"},
       # for Kafka, partition from MurmurHash(key):
       {:murmur, "~> 1.0"},
       {:peerage, "~> 1.0"},
@@ -124,9 +124,7 @@ defmodule RIG.MixProject do
       {:porcelain, "~> 2.0"},
       # HTTP request handling (wraps Cowboy):
       {:plug, "~> 1.9"},
-      # JSON parser, for cloud_event and event_hub:
-      {:poison, "~> 3.0 or ~> 4.0"},
-      # JSON parser that's supposedly faster than poison:
+      # JSON parser:
       {:jason, "~> 1.2"},
       {:jaxon, "~> 1.0"},
       # JSON Pointer (RFC 6901) implementation for subscriptions:
@@ -152,7 +150,7 @@ defmodule RIG.MixProject do
       # For JSON Web Tokens:
       {:joken, "~> 1.5"},
       # Web framework, for all HTTP endpoints except SSE and WS:
-      {:phoenix, "~> 1.4"},
+      {:phoenix, "~> 1.5"},
       {:plug_cowboy, "~> 2.1"},
       {:phoenix_swagger, "~> 0.8"},
       # Data validation library, e.g. used for proxy configuration:

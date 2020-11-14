@@ -139,7 +139,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         query: conn.query_string
       })
       |> Tracing.append_context(Tracing.context())
-      |> Poison.encode!()
+      |> Jason.encode!()
 
     produce(partition, kafka_message, topic, schema)
 

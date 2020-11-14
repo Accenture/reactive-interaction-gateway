@@ -6,7 +6,7 @@ defmodule RigApi.Router do
       parsers: [:urlencoded, :multipart, :json],
       # return "415 Unsupported Media Type" if not handled by any parser
       pass: [],
-      json_decoder: Poison
+      json_decoder: Jason
     )
   end
 
