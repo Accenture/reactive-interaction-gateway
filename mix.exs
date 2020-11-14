@@ -179,7 +179,7 @@ defmodule RIG.MixProject do
       {:opencensus_jaeger, "~> 0.0.1"},
       {:opencensus_zipkin, "~> 0.3"},
       # NATS client:
-      {:gnat, "~> 1.0.0"}
+      {:gnat, "~> 1.0"}
     ]
   end
 
