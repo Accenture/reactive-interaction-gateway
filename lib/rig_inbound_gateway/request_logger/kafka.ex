@@ -56,7 +56,7 @@ defmodule RigInboundGateway.RequestLogger.Kafka do
         }
       }
       |> Tracing.append_context(Tracing.context())
-      |> Poison.encode!()
+      |> Jason.encode!()
 
     produce("partition", kafka_message)
   end

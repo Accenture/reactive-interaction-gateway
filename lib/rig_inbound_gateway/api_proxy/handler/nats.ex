@@ -23,7 +23,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Nats do
   @doc @help_text
   def handle_http_request(conn, api, endpoint, request_path)
 
-  @doc "CORS response for preflight request."
+  # CORS response for preflight request.
   def handle_http_request(%{method: "OPTIONS"} = conn, _, %{"target" => "nats"} = _endpoint, _) do
     conn
     |> with_cors()

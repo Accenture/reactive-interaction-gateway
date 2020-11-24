@@ -130,3 +130,9 @@ config :rig, RIG.Tracing,
 
 config :rig, RigInboundGatewayWeb.ConnectionInit,
   max_connections_per_minute: {:system, :integer, "MAX_CONNECTIONS_PER_MINUTE", 5000}
+
+# --------------------------------------
+# Phoenix
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+config :phoenix, :json_library, Jason
