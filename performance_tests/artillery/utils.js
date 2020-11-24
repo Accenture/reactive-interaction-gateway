@@ -1,17 +1,19 @@
 const EventSource = require('eventsource');
 
+const CONNECTION_CREATE_EVENT = 'rig.connection.create';
+
 module.exports = { connectToWS, connectToSSE };
+
+function createHistogram(events, start, description) {
+  events.emit('histogram', description, new Date() - start);
+}
 
 function connectToWS(userContext, events, done) {
   const start = new Date();
   userContext.ws.onmessage = (e) => {
     const ce = JSON.parse(e.data);
-    if (ce.type === 'rig.connection.create') {
-      events.emit(
-        'histogram',
-        'Websocket connection time (msec)',
-        new Date() - start
-      );
+    if (ce.type === CONNECTION_CREATE_EVENT) {
+      createHistogram(events, start, 'Websocket connection time (msec)');
       done();
     }
   };
@@ -23,13 +25,9 @@ function connectToSSE(userContext, events, done) {
   );
   const start = new Date();
   source.addEventListener(
-    'rig.connection.create',
+    CONNECTION_CREATE_EVENT,
     function (e) {
-      events.emit(
-        'histogram',
-        'SSE connection time (msec)',
-        new Date() - start
-      );
+      createHistogram(events, start, 'SSE connection time (msec)');
       done();
     },
     false

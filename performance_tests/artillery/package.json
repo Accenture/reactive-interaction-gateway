@@ -1,14 +1,16 @@
 {
-  "name": "artillery",
+  "name": "perf-artillery",
   "version": "1.0.0",
   "description": "",
   "main": "utils.js",
   "dependencies": {
+    "artillery": "^1.6.1",
     "eventsource": "^1.0.7"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "connections:ws": "artillery run ws.yml",
+    "connections:sse": "artillery run sse.yml"
   },
   "author": "Accenture",
   "license": "Apache-2.0"

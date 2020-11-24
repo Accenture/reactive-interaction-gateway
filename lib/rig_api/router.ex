@@ -25,7 +25,6 @@ defmodule RigApi.Router do
 
   if Mix.env() == :dev do
     scope "/" do
-      # pipe_through(:browser)
       live_dashboard("/dashboard")
     end
   end

@@ -1,12 +1,13 @@
-  config:
-    target: "ws://localhost:4000/_rig/v1/connection/ws"
-    processor: "./utils.js"
-    phases:
-      - duration: 300
-        arrivalRate: 75
-  scenarios:
-    - engine: "ws"
-      flow:
-        - function: "connectToWS"
-        # keep connection open for 15s
-        - think: 15
+config:
+  target: "ws://localhost:4000/_rig/v1/connection/ws"
+  processor: "./utils.js"
+  phases:
+    # 22_500 connections per 5 minutes -> 4500 connections per minute
+    - duration: 300
+      arrivalRate: 75
+scenarios:
+  - engine: "ws"
+    flow:
+      - function: "connectToWS"
+      # keep connection open for 15s
+      - think: 15
