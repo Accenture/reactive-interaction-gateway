@@ -23,11 +23,6 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `DISCOVERY_TYPE` | Type of discovery used in distributed mode. If not set discovery is not used. Available options: `dns`. | nil
 `DNS_NAME` | Address where RIG will do DNS discovery for Node host addresses. | "localhost"
 `EXTRACTORS` | Extractor configuration, given either as path to a JSON file, or directly as JSON. The extractor configuration contains information about events' fields per event type, used to _extract_ information. For example, the following setting allows clients to specify a constraint on the `name` field of `greeting` events: `EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/name"}}}}'`. Note that `stable_field_index` and `event/json_pointer` are required for all configured fields. | nil
-`FIREHOSE_KAFKA_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KAFKA_SOURCE_TOPICS | []
-`FIREHOSE_KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will use as a firehose consumer, delimited by comma. Events will be sent to `FIREHOSE_KAFKA_HTTP_TARGETS | ["rig-firehose"]
-`FIREHOSE_KINESIS_APP_NAME` | Name for Firehose Kinesis consumer group -- DynamoDB table | "Reactive-Interaction-Gateway-Firehose"
-`FIREHOSE_KINESIS_HTTP_TARGETS` | List of HTTP endpoints where events will be sent from `FIREHOSE_KINESIS_STREAM | ["http://localhost:4040/todo"]
-`FIREHOSE_KINESIS_STREAM` | Kinesis stream RIG will use as a firehose consumer. Events will be sent to `FIREHOSE_KINESIS_HTTP_TARGETS | "RIG-firehose"
 `HOST` | Hostname for Phoenix endpoints (HTTP communication). | "localhost"
 `JWT_SECRET_KEY` | The secret key used to sign and verify the JSON web tokens. | ""
 `JWT_ALG` | Algorithm used to sign and verify JSON web tokens. | "HS256"
@@ -40,7 +35,6 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `KAFKA_SERIALIZER` | Serializer for Kafka events, currently supports Avro. By default uses JSON serialization. | nil
 `KAFKA_SOURCE_TOPICS` | List of Kafka topics RIG will consume, delimited by comma. | ["rig"]
 `KAFKATOFILTER_KAFKA_GROUP_ID` | Kafka group ID used for forwarding events according to subscriptions over SSE and WS connections. Make sure to use the same value on all RIG instances that belong to the same cluster. The default should be fine. | "rig-kafka-to-filter"
-`KAFKATOHTTP_KAFKA_GROUP_ID` | Kafka group ID used for forwarding _all_ events over a HTTP connection. Make sure to use the same value on all RIG instances that belong to the same cluster. The default should be fine. | "rig-kafka-to-http"
 `KAFKA_SASL` | If set, SASL is used to authenticate RIG against the Kafka brokers. Use the following format for SASL/Plain authentication: "plain:myusername:mypassword". Note that setting `KAFKA_SASL` does *not* enable SSL (see `KAFKA_SSL_ENABLED` and related settings). | nil
 `KAFKA_SSL_ENABLED` | Enables encrypted communication to Kafka brokers. | false
 `KAFKA_SSL_CA_CERTFILE` | Path to the CA certificate (PEM format) that was used to sign the server and client certificates. Similar to `PROXY_CONFIG_FILE` the path is relative to the OTP app's `priv` directory. | "ca.crt.pem"
@@ -68,12 +62,9 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `PROXY_RECV_TIMEOUT` | Timeout used when receiving a response for a forwarded/proxied request. | 5000
 `PROXY_KAFKA_RESPONSE_TOPICS` | Kafka topic for acknowledging Kafka sync events from proxy by correlation ID | ["rig-proxy-response"]
 `PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID` | Kafka group ID used for forwarding asynchronous HTTP responses to waiting HTTP clients. The default should be fine. | "rig-proxy-response"
-`PROXY_KAFKA_REQUEST_AVRO` | **DEPRECATED. (Will be removed with the version 3.0.)** Avro schema name for events published from proxy. | ""
-`PROXY_KAFKA_REQUEST_TOPIC` | **DEPRECATED. (Will be removed with the version 3.0.)** Kafka topic for publishing sync/async events from proxy. | ""
 `PROXY_KAFKA_RESPONSE_TIMEOUT` | In case an endpoint has `target` set to `http` and `response_from` set to `kafka`, this is the maximum delay between an HTTP request and the corresponding Kafka response message. | 5000
 `PROXY_KINESIS_RESPONSE_TIMEOUT` | In case an endpoint has `target` set to `http` and `response_from` set to `kinesis`, this is the maximum delay between an HTTP request and the corresponding Kinesis response message. | 5000
 `PROXY_KINESIS_REQUEST_REGION` | AWS region for Kinesis stream publishing events from proxy. | "eu-west-1"
-`PROXY_KINESIS_REQUEST_STREAM` | **DEPRECATED. (Will be removed with the version 3.0.)** Kinesis stream for publishing sync/async events from proxy. | nil
 `PROXY_NATS_RESPONSE_TIMEOUT` | If `response_from` is set to `nats`, this defines how long RIG waits for the response. | 60_000
 `REQUEST_LOG` | Type of loggers to use to log requests processed by API Proxy, delimited by comma. | []
 `SUBMISSION_CHECK` | Select if and how submitting/publishing events should be denied. Can be either `no_check` (submissions are always allowed), `jwt_validation` (submissions are allowed if at least one authorization token is valid - using JWT_SECRET_KEY - and not blacklisted), or an URL that points to an external service that decides whether to allow or deny the submissions. Such an external service is expected to accept POST requests. The CloudEvent is passed as a JSON map in the body. The original request's `Authorization` headers are reused for this request. The submission is allowed if the service returns 2xx and denied otherwise; return either 401 or 403 to reject a submission request. | "NO_CHECK"

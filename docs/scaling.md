@@ -12,7 +12,7 @@ Even though it's possible to run RIG anywhere, we recommend to use Kubernetes.
 # Increase number of nodes in Kubernetes cluster to 3
 # After few seconds already running RIG will auto-discover new nodes and form the cluster, this means:
 # - automatic synchronization of APIs across the nodes - notice logs with API synchronization
-# - redistribution of Kafka/Kinesis partitions - notice logs with partitions rebalancing
+# - redistribution of Kafka/Kinesis partitions - notice logs with partitions re-balancing
 # - blacklist state synchronization
 # - SSE/WS synchronization
 #

@@ -51,7 +51,7 @@ defmodule RigTests.Proxy.ResponseFrom.HttpTest do
               %{
                 id: endpoint_id,
                 method: "GET",
-                path: endpoint_path
+                path_regex: endpoint_path
               }
             ]
           }

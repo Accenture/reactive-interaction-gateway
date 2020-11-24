@@ -7,7 +7,6 @@ defmodule Rig.Application do
   alias RIG.Discovery
   alias RIG.Tracing
   alias RigOutboundGateway.Kinesis
-  alias RigOutboundGateway.KinesisFirehose
 
   def start(_type, _args) do
     alias Supervisor.Spec
@@ -25,13 +24,11 @@ defmodule Rig.Application do
       # Event stream handling:
       Rig.EventFilter.Sup,
       Rig.EventStream.KafkaToFilter,
-      Rig.EventStream.KafkaToHttp,
       Rig.EventStream.NatsToFilter,
       # Blacklist:
       Spec.worker(RIG.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
       # Kinesis event stream:
       Kinesis.JavaClient,
-      KinesisFirehose.JavaClient,
       # RIG API (internal port):
       RigApi.Endpoint,
       # Request logger for proxy:

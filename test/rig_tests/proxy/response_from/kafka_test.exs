@@ -74,7 +74,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
                  ]
                )
 
-      Response.ok!(sync_response, %{"content-type" => "application/json"})
+      Response.accepted!(sync_response, %{"content-type" => "application/json"})
     end)
 
     # We register this endpoint with the proxy:
@@ -91,7 +91,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
               %{
                 id: endpoint_id,
                 method: "GET",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 response_from: "kafka"
               }
             ]
@@ -155,7 +155,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
                  ]
                )
 
-      Response.ok!(sync_response, %{"content-type" => "application/json"})
+      Response.accepted!(sync_response, %{"content-type" => "application/json"})
     end)
 
     # We register the endpoint with the proxy:
@@ -172,7 +172,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
               %{
                 id: endpoint_id,
                 method: "GET",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 response_from: "kafka"
               }
             ]
@@ -246,7 +246,7 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
               %{
                 id: endpoint_id,
                 method: "POST",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 response_from: "kafka",
                 target: "kafka",
                 topic: topic
@@ -268,15 +268,13 @@ defmodule RigTests.Proxy.ResponseFrom.KafkaTest do
 
     req_body =
       Jason.encode!(%{
-        "event" => %{
-          "specversion" => "0.2",
-          "type" => "com.example.test",
-          "source" => "/rig-test",
-          "id" => "069711bf-3946-4661-984f-c667657b8d85",
-          "time" => "2018-04-05T17:31:00Z",
-          "data" => %{
-            "foo" => "bar"
-          }
+        "specversion" => "0.2",
+        "type" => "com.example.test",
+        "source" => "/rig-test",
+        "id" => "069711bf-3946-4661-984f-c667657b8d85",
+        "time" => "2018-04-05T17:31:00Z",
+        "data" => %{
+          "foo" => "bar"
         }
       })
 

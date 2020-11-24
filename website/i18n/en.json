@@ -5,6 +5,10 @@
     "previous": "Previous",
     "tagline": "Create low-latency, interactive user experiences for stateless microservices.",
     "docs": {
+      "api-documentation": {
+        "title": "API Documentation",
+        "sidebar_label": "API Documentation"
+      },
       "api-gateway-management": {
         "title": "API Gateway Management",
         "sidebar_label": "API Gateway Management"
@@ -49,6 +53,10 @@
         "title": "Frequently Asked Questions",
         "sidebar_label": "FAQ"
       },
+      "features": {
+        "title": "Features",
+        "sidebar_label": "Features"
+      },
       "https": {
         "title": "HTTPS",
         "sidebar_label": "HTTPS"
@@ -56,6 +64,10 @@
       "intro": {
         "title": "Intro",
         "sidebar_label": "Intro"
+      },
+      "jwt-blacklisting": {
+        "title": "JWT Blacklisting",
+        "sidebar_label": "JWT Blacklisting"
       },
       "phoenix-live-dashboard": {
         "title": "Phoenix LiveDashboard",

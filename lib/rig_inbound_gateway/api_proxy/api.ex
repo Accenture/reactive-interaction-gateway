@@ -12,10 +12,6 @@ defmodule RigInboundGateway.ApiProxy.Api do
           optional(:schema) => String.t(),
           optional(:response_from) => String.t(),
           id: String.t(),
-          # Simple matching; curly braces may be used to ignore parts of the URI.
-          # Example:
-          #     /path/{to}/somewhere/{special} is matched by /path/1/somewhere/2
-          path: String.t(),
           # Matches against a regular expression.
           # Note that JSON requires escaping the backslash character.
           # Example:
@@ -98,7 +94,6 @@ defmodule RigInboundGateway.ApiProxy.Api do
   # ---
 
   defp match_and_rewrite(endpoint, request_path) do
-    path = Map.get(endpoint, "path")
     path_regex = Map.get(endpoint, "path_regex")
     path_replacement = Map.get(endpoint, "path_replacement")
 
@@ -108,7 +103,6 @@ defmodule RigInboundGateway.ApiProxy.Api do
       match?: false,
       rewritten_path: nil
     }
-    |> match_by_simple_pattern(path)
     |> match_by_regex_pattern(path_regex)
     |> rewrite_request_path(path_replacement)
     |> case do
@@ -117,25 +111,6 @@ defmodule RigInboundGateway.ApiProxy.Api do
       _ -> :no_match
     end
   end
-
-  # ---
-
-  defp match_by_simple_pattern(state, path)
-
-  defp match_by_simple_pattern(%{request_path: request_path, match?: false} = state, path)
-       when byte_size(path) > 0 do
-    # Ignore placeholders:
-    pattern =
-      path
-      |> String.replace(~r/\{.*?\}/ui, "[^/]+")
-      |> to_anchored_regex()
-
-    if Regex.match?(pattern, request_path),
-      do: Map.merge(state, %{match?: true, pattern: pattern}),
-      else: state
-  end
-
-  defp match_by_simple_pattern(state, _), do: state
 
   # ---
 

@@ -63,12 +63,10 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "target" => "kinesis"
         }
       ]
-
-      kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> post("/v3/apis", new_api)
@@ -76,24 +74,19 @@ defmodule RigApi.V3.APIsTest do
 
       assert response == %{
                "invalid-config/invalid-config1" => [
-                 %{"kinesis_request_stream" => "must be present"},
                  %{"topic" => "must be present"}
                ]
              }
-
-      ProxyConfig.restore("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
 
       # kafka topic not set
       endpoints = [
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "target" => "kafka"
         }
       ]
-
-      kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> post("/v3/apis", new_api)
@@ -101,12 +94,9 @@ defmodule RigApi.V3.APIsTest do
 
       assert response == %{
                "invalid-config/invalid-config1" => [
-                 %{"kafka_request_topic" => "must be present"},
                  %{"topic" => "must be present"}
                ]
              }
-
-      ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
     end
 
     test "should return 400 when schema is set, but target is not kafka or kinesis" do
@@ -114,7 +104,7 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "schema" => "some-avro-schema"
         }
       ]
@@ -135,7 +125,7 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "secured" => true
         }
       ]
@@ -156,7 +146,7 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo"
+          "path_regex" => "/foo"
         }
       ]
 
@@ -177,7 +167,7 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo"
+          "path_regex" => "/foo"
         }
       ]
 
@@ -200,7 +190,7 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo"
+          "path_regex" => "/foo"
         }
       ]
 
@@ -357,7 +347,7 @@ defmodule RigApi.V3.APIsTest do
              }
     end
 
-    test "should return 400 when 'endpoint' doesn't have required properties 'id', 'method' and 'path' or 'path_regex'" do
+    test "should return 400 when 'endpoint' doesn't have required properties 'id', 'method' and 'path_regex'" do
       endpoints = [%{}]
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> put("/v3/apis/#{@invalid_config_id}", new_api)
@@ -367,50 +357,10 @@ defmodule RigApi.V3.APIsTest do
                "invalid-config/" => [
                  %{"id" => "must be string"},
                  %{"id" => "must have a length of at least 1"},
-                 %{"path, path_regex" => "Either path or path_regex must be set"},
+                 %{"path_regex" => "must be string"},
+                 %{"path_regex" => "must have a length of at least 1"},
                  %{"method" => "must be string"},
                  %{"method" => "must have a length of at least 1"}
-               ]
-             }
-    end
-
-    test "should return 400 when 'endpoint' has 'path' and 'path_regex' set at the same time" do
-      endpoints = [
-        %{
-          "id" => @invalid_config_id <> "1",
-          "method" => "GET",
-          "path" => "/",
-          "path_regex" => "/"
-        }
-      ]
-
-      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
-      conn = build_conn() |> put("/v3/apis/#{@invalid_config_id}", new_api)
-      response = json_response(conn, 400)
-
-      assert response == %{
-               "invalid-config/invalid-config1" => [
-                 %{"path, path_regex" => "You can't set path and path_regex at the same time"}
-               ]
-             }
-    end
-
-    test "should return 400 when when 'path' is set, but incorrect" do
-      endpoints = [
-        %{
-          "id" => @invalid_config_id <> "1",
-          "method" => "GET",
-          "path" => ""
-        }
-      ]
-
-      new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
-      conn = build_conn() |> put("/v3/apis/#{@invalid_config_id}", new_api)
-      response = json_response(conn, 400)
-
-      assert response == %{
-               "invalid-config/invalid-config1" => [
-                 %{"path" => "must have a length of at least 1"}
                ]
              }
     end
@@ -441,12 +391,10 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "target" => "kinesis"
         }
       ]
-
-      kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> put("/v3/apis/#{@invalid_config_id}", new_api)
@@ -454,24 +402,19 @@ defmodule RigApi.V3.APIsTest do
 
       assert response == %{
                "invalid-config/invalid-config1" => [
-                 %{"kinesis_request_stream" => "must be present"},
                  %{"topic" => "must be present"}
                ]
              }
-
-      ProxyConfig.restore("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
 
       # kafka topic not set
       endpoints = [
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "target" => "kafka"
         }
       ]
-
-      kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
 
       new_api = ProxyConfig.create_proxy_config(@invalid_config_id, endpoints)
       conn = build_conn() |> put("/v3/apis/#{@invalid_config_id}", new_api)
@@ -479,12 +422,9 @@ defmodule RigApi.V3.APIsTest do
 
       assert response == %{
                "invalid-config/invalid-config1" => [
-                 %{"kafka_request_topic" => "must be present"},
                  %{"topic" => "must be present"}
                ]
              }
-
-      ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
     end
 
     test "should return 400 when schema is set, but target is not kafka or kinesis" do
@@ -492,7 +432,7 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "schema" => "some-avro-schema"
         }
       ]
@@ -513,7 +453,7 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "secured" => true
         }
       ]
@@ -534,7 +474,7 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo"
+          "path_regex" => "/foo"
         }
       ]
 
@@ -555,7 +495,7 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo"
+          "path_regex" => "/foo"
         }
       ]
 
@@ -578,7 +518,7 @@ defmodule RigApi.V3.APIsTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo"
+          "path_regex" => "/foo"
         }
       ]
 
