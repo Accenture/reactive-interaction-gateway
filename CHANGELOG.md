@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     helm repo add accenture https://accenture.github.io/reactive-interaction-gateway
     helm install rig accenture/reactive-interaction-gateway
     ```
-  
+
   More information, follow the [deployment Readme](./deployment/README.md). [#319](https://github.com/Accenture/reactive-interaction-gateway/issues/319)
 - make README smaller, easier to read and highlight features. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
 
@@ -55,7 +55,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ### Security -->
 
-<!-- ### Technical Improvements -->
+### Technical Improvements
+
+- Updated dependencies to support OTP 23. We've also replaced the versions file with `.tool-versions`, which makes it easier for those using the [asdf package manager](https://asdf-vm.com/) - just run `asdf install` to obtain the correct versions of Erlang and Elixir.
+  [#341](https://github.com/Accenture/reactive-interaction-gateway/issues/341)
 
 ## [2.4.0] - 2020-05-07
 
