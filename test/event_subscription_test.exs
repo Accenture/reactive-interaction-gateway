@@ -383,7 +383,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
         # After this, greetings to Alice are no longer forwarded:
         :ok = submit_event(greeting_for_alice())
-        assert {:ok, ref} = client.refute_receive(ref)
+        assert {:ok, _ref} = client.refute_receive(ref)
       end
     end
   end
