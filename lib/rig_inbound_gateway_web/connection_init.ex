@@ -5,9 +5,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
   As soon as Phoenix pulls in Cowboy 2 this will have to be rewritten using the
   :cowboy_websocket behaviour.
   """
-  use Rig.Config, [
-    :max_connections_per_minute
-  ]
+  use Rig.Config, [:max_connections_per_minute, :max_connections_per_minute_bucket]
 
   require Logger
 
@@ -17,8 +15,6 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
   alias RIG.Session
   alias Rig.Subscription
   alias RIG.Subscriptions
-
-  @max_connections_per_min_bucket "max-connections-per-minute"
 
   # ---
 
@@ -54,7 +50,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
          :ok <- SubscriptionAuthZ.check_authorization(request),
          {:ok, _n_connections} <-
            ExRated.check_rate(
-             @max_connections_per_min_bucket,
+             config().max_connections_per_minute_bucket,
              60_000,
              config().max_connections_per_minute
            ) do
@@ -105,7 +101,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
           "Cannot accept #{conn_type} connection #{pid}: #{msg}"
         end)
 
-        on_error.("Reached maximum number of connections=#{n_connections} per minute")
+        on_error.({429, "Reached maximum number of connections=#{n_connections} per minute"})
     end
   end
 
