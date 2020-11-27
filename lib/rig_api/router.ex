@@ -23,11 +23,9 @@ defmodule RigApi.Router do
     )
   end
 
-  if Mix.env() == :dev do
-    scope "/" do
-      pipe_through(:body_parser)
-      live_dashboard("/dashboard")
-    end
+  scope "/" do
+    pipe_through(:body_parser)
+    live_dashboard("/dashboard")
   end
 
   scope "/v2", RigApi.V2 do

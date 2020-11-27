@@ -8,6 +8,6 @@ sidebar_label: Phoenix LiveDashboard
 
 [Phoenix LiveDashboard](https://github.com/phoenixframework/phoenix_live_dashboard) provides real-time performance monitoring and debugging tools.
 
-TODO image
+![phoenix-live-dashboard](assets/phoenix-live-dashboard.png)
 
 It's accessible at `:4010/dashboard`.
