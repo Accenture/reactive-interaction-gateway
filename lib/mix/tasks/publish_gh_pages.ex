@@ -8,7 +8,6 @@ defmodule Mix.Tasks.PublishGhPages do
   use Mix.Task
   require Logger
 
-  @target_branch "gh-pages"
   @target_dir "source_docs"
 
   @shortdoc "Publishes the output of mix docs to the gh-pages branch."
@@ -28,16 +27,6 @@ defmodule Mix.Tasks.PublishGhPages do
 
     docs_out_dir = new_empty_tmp_dir("rig_source_docs")
     Mix.Task.run("docs", ["--output", docs_out_dir])
-
-    orig_ref =
-      case git(["rev-parse", "--abbrev-ref", "HEAD"]) do
-        "HEAD" ->
-          # This is a detached checkout -> we use the commit sha:
-          git(["rev-parse", "HEAD"])
-
-        branch when byte_size(branch) > 0 ->
-          branch
-      end
 
     gh_pages_workdir = new_empty_tmp_dir("rig_gh-pages")
     git(["clone", "--single-branch", "--branch", "gh-pages", source_url, gh_pages_workdir])

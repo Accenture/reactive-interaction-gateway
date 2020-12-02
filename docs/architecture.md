@@ -21,7 +21,7 @@ Why not introduce (connection) state for microservices? Two reasons. First, it m
 
 ## Event-Driven Architecture and the UI
 
-Forwarding events to frontends enables and event-driven UX design, effectively extending the idea of [event-driven architecture](https://en.wikipedia.org/wiki/Event-driven_architecture) to the UI.
+Forwarding events to frontends enables an event-driven UX design, effectively extending the idea of [event-driven architecture](https://en.wikipedia.org/wiki/Event-driven_architecture) to the UI.
 
 We believe that hiding asynchronism by turning it into a fake synchronous process is an anti-pattern. For example, sending money from one bank account to another doesn't happen instantaneously, but with at least two events: "transfer requested" and "transfer completed" (or "transfer failed"). Acknowledging this when designing the UI leads to a more natural user experience and less loading indicators.
 

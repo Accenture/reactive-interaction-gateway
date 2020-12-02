@@ -12,9 +12,9 @@ defmodule RigInboundGateway.ApiProxy.Sup do
 
   def init(:ok) do
     children = [
-      worker(RigInboundGateway.ApiProxy.PresenceHandler, _args = [[pubsub_server: Rig.PubSub]])
+      {RigInboundGateway.ApiProxy.PresenceHandler, [pubsub_server: Rig.PubSub]}
     ]
 
-    supervise(children, strategy: :one_for_one)
+    Supervisor.init(children, strategy: :one_for_one)
   end
 end

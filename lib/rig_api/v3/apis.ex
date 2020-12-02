@@ -295,21 +295,16 @@ defmodule RigApi.V3.APIs do
           properties do
             id(:string, "Endpoint ID", required: true, example: "get-auth-register")
 
-            path(:string, "Endpoint path. Curly braces may be used to ignore parts of the path.",
-              required: true,
-              example: "/auth/register/{user}"
-            )
-
             path_regex(
               :string,
               "Endpoint path, given as a regular expression (note that JSON requires escaping backslash characters).",
-              required: false,
+              required: true,
               example: "/auth/register/(.+)"
             )
 
             path_replacement(
               :string,
-              "If given, the request path is rewritten. When used with `path_regex`, capture groups can be referenced by number (note that JSON requires escaping backslash characters).",
+              "If given, the request path_regex is rewritten. Capture groups can be referenced by number (note that JSON requires escaping backslash characters).",
               required: false,
               example: ~S"/auth/register/\1"
             )

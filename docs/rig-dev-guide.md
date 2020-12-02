@@ -4,7 +4,7 @@ title: Developer's Guide to the Reactive Interaction Gateway
 sidebar_label: Developer's Guide
 ---
 
-You'd like to mess with the code? Great! To get started, install Elixir and the Mix build tool on your machine. You can either follow the [instructions on the Elixir website](https://elixir-lang.org/install.html), or use [kiex](https://github.com/taylor/kiex) to install and manage Elixir runtimes. Kiex is recommended for development, because it allows you to jump to definitions inside the Elixir source code, plus you can checkout upcoming Elixir versions easily.
+You'd like to help hacking? Great! To get started, install Elixir and the Mix build tool on your machine. If you use [asdf](https://asdf-vm.com/), all you need to do is `asdf install`. Otherwise, either follow the [instructions on the Elixir website](https://elixir-lang.org/install.html), or use [kiex](https://github.com/taylor/kiex) to install and manage Elixir runtimes.
 
 With Elixir installed, do this:
 
@@ -38,11 +38,11 @@ To have the project use a newer Elixir version, make sure to change the followin
 
 - `.travis.yml`: Update the Elixir and OTP versions in the `.elixir-env` section.
 - `Dockerfile`, `aws.dockerfile`, `smoke_tests.dockerfile`: Make sure to change the `FROM` image tag for both the build image (elixir:...-alpine) as well as the runtime image (erlang:...-alpine). If the Erlang runtime (ERTS) in the runtime image doesn't match the ERTS version in the build image, chances are the built image won't work due to missing libraries. Because of this, it's best to use the most recent versions for both images when upgrading - they should always be compatible.
-- `version`: Again, make sure both the Elixir and the OTP versions match what you have used in the previous steps.
+- `.tool-versions`: Again, make sure both the Elixir and the OTP versions match what you have used in the previous steps.
 
 ## Releasing a new version
 
-- Increment `rig` version in the [version](../version) file
+- Increment `@rig_version` in [mix.exs](../mix.exs)
 - Increment `appVersion` in the [Helm v2 Chart.yaml](../deployment/reactive-interaction-gateway/Chart.yaml) and [Helm v3 Chart.yaml](../deployment/reactive-interaction-gateway/Chart.yaml) files
 - Update Helm chart README files: install [helm-docs](https://github.com/norwoodj/helm-docs) and run `helm-docs` in the root directory
 - Increment image tag in the [Kubernetes rig.yaml](../deployment/kubectl/rig.yaml) file

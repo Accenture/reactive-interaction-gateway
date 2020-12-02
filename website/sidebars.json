@@ -8,23 +8,29 @@
     ],
     "Main Concepts": [
       "architecture",
+      "features",
       "event-format",
       "event-streams",
       "event-subscription",
       "api-gateway",
-      "user-authorization"
+      "user-authorization",
+      "distributed-tracing"
     ],
     "Advanced Guides": [
       "api-gateway-management",
       "api-gateway-synchronization",
-      "avro"
+      "avro",
+      "jwt-blacklisting"
     ],
     "RIG in Production": [
       "rig-ops-guide",
+      "api-documentation",
       "metrics-details",
       "https",
       "scaling"
     ],
-    "Hacking the Source": ["rig-dev-guide"]
+    "Hacking the Source": [
+      "rig-dev-guide"
+    ]
   }
 }

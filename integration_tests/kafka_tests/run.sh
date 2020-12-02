@@ -26,7 +26,7 @@ function is_kafka_ready() {
         curl -d '{"schema":"{\"name\":\"simpleAvro\",\"type\":\"record\",\"fields\":[{\"name\":\"foo\",\"type\":\"string\"}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rig-avro-test-simple-topic-value/versions
         curl -d '{"schema":"{\"name\":\"basicAvro\",\"type\":\"record\",\"fields\":[{\"name\":\"foo\",\"type\":\"string\"}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rig-avro-value/versions
         curl -d '{"schema":"{\"name\":\"proxyAvro\",\"type\":\"record\",\"fields\":[{\"name\":\"message\",\"type\":\"string\"}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rig-proxy-avro-value/versions
-        curl -d '{"schema":"{\"name\":\"loggerAvro\",\"type\":\"record\",\"fields\":[{\"name\":\"request_path\",\"type\":\"string\"},{\"name\":\"remote_ip\",\"type\":\"string\"},{\"name\":\"endpoint\",\"type\":{\"name\":\"endpoint\",\"type\":\"record\",\"fields\":[{\"name\":\"path\",\"type\":\"string\"},{\"name\":\"method\",\"type\":\"string\"},{\"name\":\"id\",\"type\":\"string\"}]}}]}}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rig-request-logger-value/versions
+        curl -d '{"schema":"{\"name\":\"loggerAvro\",\"type\":\"record\",\"fields\":[{\"name\":\"request_path\",\"type\":\"string\"},{\"name\":\"remote_ip\",\"type\":\"string\"},{\"name\":\"endpoint\",\"type\":{\"name\":\"endpoint\",\"type\":\"record\",\"fields\":[{\"name\":\"path_regex\",\"type\":\"string\"},{\"name\":\"method\",\"type\":\"string\"},{\"name\":\"id\",\"type\":\"string\"}]}}]}}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rig-request-logger-value/versions
         curl -d '{"schema":"{\"name\":\"cloudEvent\",\"type\":\"record\",\"fields\":[{\"name\":\"specversion\",\"type\":\"string\"},{\"name\":\"type\",\"type\":\"string\"},{\"name\":\"source\",\"type\":\"string\"},{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"}}]}"}' -H "Content-Type: application/vnd.schemaregistry.v1+json" -X POST http://localhost:8081/subjects/rig-cloud-event-value/versions
         printf "\n"
         return 0
@@ -50,7 +50,6 @@ export KAFKA_BROKERS="${HOST}:${KAFKA_PORT_PLAIN}"
 export KAFKA_SSL_ENABLED=0
 export KAFKA_SSL_KEYFILE_PASS=abcdefgh
 export LOG_LEVEL=warn
-export PROXY_KAFKA_REQUEST_TOPIC=rig-test
 export KAFKA_SOURCE_TOPICS=rig-test
 
 cd "${RIG_DIR}"
@@ -61,8 +60,6 @@ export KAFKA_SOURCE_TOPICS=rig-avro
 export KAFKA_SERIALIZER=avro
 export KAFKA_SCHEMA_REGISTRY_HOST=localhost:8081
 export KAFKA_LOG_SCHEMA=rig-request-logger-value
-export PROXY_KAFKA_REQUEST_TOPIC=rig-avro
-export PROXY_KAFKA_REQUEST_AVRO=rig-avro-value
 export PROXY_KAFKA_RESPONSE_TOPICS=rig-proxy-avro
 
 section_header "Running integration test suite for Kafka & Avro"

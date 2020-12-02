@@ -40,6 +40,3 @@ erl_crash.dump
 /.elixir_ls/
 *~
 *.orig
-
-# asdf 
-.tool-versions

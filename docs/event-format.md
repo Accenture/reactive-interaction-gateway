@@ -35,7 +35,7 @@ We aim at following the [CloudEvents specification](https://github.com/cloudeven
 
 In addition to JSON encoding, RIG also supports publishing CloudEvents using the [Apache Avro] format. With Confluent recommending the use of Avro in combination with their Kafka distribution, Avro sees much adoption lately, especially when used alongside the [Confluent Schema Registry](https://docs.confluent.io/current/schema-registry/index.html) ([open source](https://github.com/confluentinc/schema-registry) under the [Confluent Community License](https://www.confluent.io/confluent-community-license)). Consequently, RIG primarily supports the "registry model", where the message schema is not sent alongside every message; instead, [each message only contains a schema ID](https://docs.confluent.io/current/schema-registry/serializer-formatter.html#wire-format) and the schema itself is looked up (and cached) at runtime, using the Schema Registry.
 
-To enable Avro & Schema Registry support, checkout the [Operator's Guide](rig-ops-guide) and look for the environment variables `KAFKA_SCHEMA_REGISTRY_HOST` and `PROXY_KAFKA_REQUEST_AVRO`.
+To enable Avro & Schema Registry support, checkout the [Operator's Guide](rig-ops-guide) and look for the environment variable `KAFKA_SCHEMA_REGISTRY_HOST`.
 
 For further details and examples, checkout the dedicated [Section on Avro](avro).
 

@@ -10,7 +10,7 @@ defmodule Rig.ConfigTest do
       %{
         "id" => "1",
         "method" => "get",
-        "path" => "/foo"
+        "path_regex" => "/foo"
       }
     ]
 
@@ -18,7 +18,7 @@ defmodule Rig.ConfigTest do
       %{
         "id" => "1",
         "method" => "GET",
-        "path" => "/foo"
+        "path_regex" => "/foo"
       }
     ]
 
