@@ -50,7 +50,8 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
       {:error, reason} ->
         req = :cowboy_req.reply(400, %{}, reason, req)
-        {:stop, req, :unknown_state}
+        # Returning :ok at this point simply closes the handler.
+        {:ok, req, :unknown_state}
     end
   end
 
@@ -89,7 +90,8 @@ defmodule RigInboundGatewayWeb.V1.SSE do
           _ -> :cowboy_req.reply(400, %{}, reason, req)
         end
 
-      {:stop, req, :no_state}
+      # Returning :ok at this point simply closes the handler.
+      {:ok, req, :no_state}
     end
 
     ConnectionInit.set_up(

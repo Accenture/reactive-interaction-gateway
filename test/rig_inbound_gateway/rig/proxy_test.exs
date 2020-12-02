@@ -36,7 +36,7 @@ defmodule RigInboundGateway.ProxyTest do
            end) =~
              error
 
-    assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
+    assert_received({:EXIT, _proxy, :ReverseProxyConfigurationError})
   end
 
   describe "validations" do
