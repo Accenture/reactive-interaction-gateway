@@ -56,12 +56,12 @@ defmodule BlacklistTest do
       # Verify all connections but the last one have been dropped:
 
       assert {_event, sse} = SseClient.read_event(sse, "rig.session_killed")
-      assert {:closed, sse} = SseClient.status(sse)
+      assert {:closed, _sse} = SseClient.status(sse)
 
-      assert {:closed, ws} = WsClient.status(ws)
+      assert {:closed, _ws} = WsClient.status(ws)
 
       assert {:ok, other_sse} = SseClient.refute_receive(other_sse)
-      assert {:open, other_sse} = SseClient.status(other_sse)
+      assert {:open, _other_sse} = SseClient.status(other_sse)
     end
   end
 

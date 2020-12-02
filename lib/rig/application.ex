@@ -18,7 +18,7 @@ defmodule Rig.Application do
     Discovery.start()
 
     children = [
-      Spec.supervisor(Phoenix.PubSub.PG2, [Rig.PubSub, []]),
+      {Phoenix.PubSub, name: Rig.PubSub},
       # Kafka:
       {DynamicSupervisor, strategy: :one_for_one, name: RigKafka.DynamicSupervisor},
       # Event stream handling:

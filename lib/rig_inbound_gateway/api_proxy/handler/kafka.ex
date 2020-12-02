@@ -59,7 +59,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   @impl Handler
   def handle_http_request(conn, api, endpoint, request_path)
 
-  @doc "CORS response for preflight request."
+  # CORS response for preflight request.
   def handle_http_request(
         %{method: "OPTIONS"} = conn,
         _,
@@ -139,7 +139,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         query: conn.query_string
       })
       |> Tracing.append_context(Tracing.context())
-      |> Poison.encode!()
+      |> Jason.encode!()
 
     produce(partition, kafka_message, topic, schema)
 

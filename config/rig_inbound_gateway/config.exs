@@ -65,7 +65,7 @@ config :rig, RigInboundGatewayWeb.Endpoint,
     transport_options: ranch_transport_options
   ],
   render_errors: [view: RigInboundGatewayWeb.ErrorView, accepts: ~w(html json xml)],
-  pubsub: [name: Rig.PubSub],
+  pubsub_server: Rig.PubSub,
   check_origin: false
 
 config :mime, :types, %{

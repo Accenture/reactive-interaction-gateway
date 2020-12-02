@@ -38,14 +38,12 @@ defmodule RigCloudEvents.CloudEvent do
     end
   end
 
-  @doc """
-  Convenience function used in testing.
-
-  If this would be called in production, of course it would be way more efficient to
-  access the given map directly. However, this modules' raison d'être is the safe
-  handling of incoming JSON encoded data, so it's safe to assume this function is ever
-  only called by tests.
-  """
+  # Convenience function used in testing.
+  #
+  # If this would be called in production, of course it would be way more efficient to
+  # access the given map directly. However, this modules' raison d'être is the safe
+  # handling of incoming JSON encoded data, so it's safe to assume this function is ever
+  # only called by tests.
   @spec parse(map) :: {:ok, t} | {:error, any}
   def parse(map) when is_map(map) do
     map |> Jason.encode!() |> parse

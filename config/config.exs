@@ -123,3 +123,9 @@ config :rig, RIG.Tracing,
   jaeger_service_name: {:system, :charlist, "JAEGER_SERVICE_NAME", 'rig'},
   zipkin_address: {:system, :charlist, "ZIPKIN_ADDR", ''},
   zipkin_service_name: {:system, "ZIPKIN_SERVICE_NAME", "rig"}
+
+# --------------------------------------
+# Phoenix
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+config :phoenix, :json_library, Jason
