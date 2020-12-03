@@ -36,7 +36,7 @@ defmodule RigInboundGateway.ProxyTest do
            end) =~
              error
 
-    assert_received({:EXIT, proxy, :ReverseProxyConfigurationError})
+    assert_received({:EXIT, _proxy, :ReverseProxyConfigurationError})
   end
 
   describe "validations" do
@@ -144,7 +144,7 @@ defmodule RigInboundGateway.ProxyTest do
       ProxyConfig.restore()
     end
 
-    test "should exit the process when 'endpoint' doesn't have required properties 'id', 'method' and 'path'",
+    test "should exit the process when 'endpoint' doesn't have required properties 'id', 'method' and 'path' or 'path_regex'",
          ctx do
       endpoints = [
         %{}
@@ -154,7 +154,27 @@ defmodule RigInboundGateway.ProxyTest do
 
       test_proxy_exit(
         ctx,
-        "[{\"invalid-config/\", [{:error, \"id\", :by, \"must be string\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"path\", :by, \"must be string\"}, {:error, \"path\", :length, \"must have a length of at least 1\"}, {:error, \"method\", :by, \"must be string\"}, {:error, \"method\", :length, \"must have a length of at least 1\"}]}]"
+        "[{\"invalid-config/\", [{:error, \"id\", :by, \"must be string\"}, {:error, \"id\", :length, \"must have a length of at least 1\"}, {:error, \"path_regex\", :by, \"must be string\"}, {:error, \"path_regex\", :length, \"must have a length of at least 1\"}, {:error, \"method\", :by, \"must be string\"}, {:error, \"method\", :length, \"must have a length of at least 1\"}]}]"
+      )
+
+      ProxyConfig.restore()
+    end
+
+    test "should exit the process when 'path_regex' is set, but incorrect",
+         ctx do
+      endpoints = [
+        %{
+          "id" => @invalid_config_id <> "1",
+          "method" => "GET",
+          "path_regex" => ""
+        }
+      ]
+
+      ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
+
+      test_proxy_exit(
+        ctx,
+        "[{\"invalid-config/invalid-config1\", [{:error, \"path_regex\", :length, \"must have a length of at least 1\"}]}]"
       )
 
       ProxyConfig.restore()
@@ -167,42 +187,38 @@ defmodule RigInboundGateway.ProxyTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "target" => "kinesis"
         }
       ]
 
       ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
-      kinesis_orig_value = ProxyConfig.set("PROXY_KINESIS_REQUEST_STREAM", "")
 
       test_proxy_exit(
         ctx,
-        "[{\"invalid-config/invalid-config1\", [{:error, :kinesis_request_stream, :presence, \"must be present\"}, {:error, \"topic\", :presence, \"must be present\"}]}]"
+        "[{\"invalid-config/invalid-config1\", [{:error, \"topic\", :presence, \"must be present\"}]}]"
       )
 
       ProxyConfig.restore()
-      ProxyConfig.restore("PROXY_KINESIS_REQUEST_STREAM", kinesis_orig_value)
 
       # kafka topic not set
       endpoints = [
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "target" => "kafka"
         }
       ]
 
       ProxyConfig.set_proxy_config(@invalid_config_id, endpoints)
-      kafka_orig_value = ProxyConfig.set("PROXY_KAFKA_REQUEST_TOPIC", "")
 
       test_proxy_exit(
         ctx,
-        "[{\"invalid-config/invalid-config1\", [{:error, :kafka_request_topic, :presence, \"must be present\"}, {:error, \"topic\", :presence, \"must be present\"}]}]"
+        "[{\"invalid-config/invalid-config1\", [{:error, \"topic\", :presence, \"must be present\"}]}]"
       )
 
       ProxyConfig.restore()
-      ProxyConfig.restore("PROXY_KAFKA_REQUEST_TOPIC", kafka_orig_value)
     end
 
     test "should exit the process when schema is set, but target is not kafka or kinesis", ctx do
@@ -210,7 +226,7 @@ defmodule RigInboundGateway.ProxyTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "schema" => "some-avro-schema"
         }
       ]
@@ -230,7 +246,7 @@ defmodule RigInboundGateway.ProxyTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo",
+          "path_regex" => "/foo",
           "secured" => true
         }
       ]
@@ -250,7 +266,7 @@ defmodule RigInboundGateway.ProxyTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo"
+          "path_regex" => "/foo"
         }
       ]
 
@@ -272,7 +288,7 @@ defmodule RigInboundGateway.ProxyTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo"
+          "path_regex" => "/foo"
         }
       ]
 
@@ -294,7 +310,7 @@ defmodule RigInboundGateway.ProxyTest do
         %{
           "id" => @invalid_config_id <> "1",
           "method" => "GET",
-          "path" => "/foo"
+          "path_regex" => "/foo"
         }
       ]
 
@@ -328,7 +344,12 @@ defmodule RigInboundGateway.ProxyTest do
           "id" => id <> "1",
           "method" => "GET",
           "secured" => false,
-          "path" => "/foo"
+          "path_regex" => "/foo"
+        },
+        %{
+          "id" => id <> "2",
+          "method" => "GET",
+          "path_regex" => "/foo/([^/]+)/bar/([^/]+)"
         }
       ]
 

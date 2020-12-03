@@ -125,7 +125,7 @@ defmodule RIG.DistributedSet do
     {:ok, %{state | ets_table: ets_table}}
   end
 
-  @doc "Handles get_record requests from other nodes."
+  # Handles get_record requests from other nodes.
   @impl GenServer
   def handle_call(
         {:get_records, since_record_id},
@@ -164,7 +164,7 @@ defmodule RIG.DistributedSet do
     {:reply, reply, state}
   end
 
-  @doc "Handles adding a record on this node."
+  # Handles adding a record on this node.
   @impl GenServer
   def handle_call(
         {:add_from_local, {_, uuid, _, _} = record},
@@ -217,12 +217,10 @@ defmodule RIG.DistributedSet do
     {:noreply, %{state | last_record_id: synced_record_id}}
   end
 
-  @doc """
-  Asks a random peer for missing records.
-
-  Records are missing on startup, but there could also be a gap caused by a temporary
-  network split.
-  """
+  # Asks a random peer for missing records.
+  #
+  # Records are missing on startup, but there could also be a gap caused by a temporary
+  # network split.
   @impl GenServer
   def handle_info(
         :sync_with_random_peer,
@@ -247,7 +245,7 @@ defmodule RIG.DistributedSet do
     {:noreply, state}
   end
 
-  @doc "Remove expired records."
+  # Remove expired records.
   @impl GenServer
   def handle_info(:cleanup, %{ets_table: ets_table, name: name} = state) do
     remove_expired_records(ets_table, name)

@@ -55,8 +55,6 @@ deployment:
     # KAFKA_SOURCE_TOPICS: rig
     ## Kafka group ID used for forwarding events according to subscriptions over SSE and WS connections. The default should be fine.
     # KAFKATOFILTER_KAFKA_GROUP_ID: rig-kafka-to-filter
-    ## Kafka group ID used for forwarding all events over a HTTP connection. The default should be fine.
-    # KAFKATOHTTP_KAFKA_GROUP_ID: rig-kafka-to-http
     # KAFKA_RESTART_DELAY_MS: 10000
     ## Host for Kafka Schema Registry
     # KAFKA_SCHEMA_REGISTRY_HOST: schema-registry:8081
@@ -95,7 +93,6 @@ deployment:
     # PROXY_KAFKA_RESPONSE_TIMEOUT: 5000
 
     ## Proxy Kinesis
-    # PROXY_KINESIS_REQUEST_STREAM: rig-proxy-request
     # PROXY_KINESIS_REQUEST_REGION: eu-west-1
     # PROXY_KINESIS_RESPONSE_TIMEOUT: 5000
 

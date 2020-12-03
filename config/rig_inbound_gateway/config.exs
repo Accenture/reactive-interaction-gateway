@@ -65,7 +65,7 @@ config :rig, RigInboundGatewayWeb.Endpoint,
     transport_options: ranch_transport_options
   ],
   render_errors: [view: RigInboundGatewayWeb.ErrorView, accepts: ~w(html json xml)],
-  pubsub: [name: Rig.PubSub],
+  pubsub_server: Rig.PubSub,
   check_origin: false
 
 config :mime, :types, %{
@@ -78,11 +78,7 @@ config :mime, :types, %{
 
 config :rig, RigInboundGateway.Proxy, config_path_or_json: {:system, "PROXY_CONFIG_FILE", nil}
 
-config :rig, RigInboundGateway.ApiProxy.Validations,
-  kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},
-  kafka_request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", ""},
-  kafka_request_avro: {:system, "PROXY_KAFKA_REQUEST_AVRO", ""},
-  system: System
+config :rig, RigInboundGateway.ApiProxy.Validations, system: System
 
 config :rig, RigInboundGateway.ApiProxy.Base,
   recv_timeout: {:system, :integer, "PROXY_RECV_TIMEOUT", 5_000}
@@ -120,14 +116,11 @@ config :rig, RigInboundGateway.ApiProxy.Handler.Kafka,
   ssl_keyfile_pass: {:system, "KAFKA_SSL_KEYFILE_PASS", ""},
   # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
   sasl: {:system, "KAFKA_SASL", nil},
-  request_topic: {:system, "PROXY_KAFKA_REQUEST_TOPIC", ""},
-  request_schema: {:system, "PROXY_KAFKA_REQUEST_AVRO", ""},
   cors: {:system, "CORS", "*"},
   response_timeout: {:system, :integer, "PROXY_KAFKA_RESPONSE_TIMEOUT", 5_000},
   group_id: {:system, "PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID", "rig-proxy-response"}
 
 config :rig, RigInboundGateway.ApiProxy.Handler.Kinesis,
-  kinesis_request_stream: {:system, "PROXY_KINESIS_REQUEST_STREAM", nil},
   kinesis_request_region: {:system, "PROXY_KINESIS_REQUEST_REGION", "eu-west-1"},
   response_timeout: {:system, :integer, "PROXY_KINESIS_RESPONSE_TIMEOUT", 5_000},
   cors: {:system, "CORS", "*"},

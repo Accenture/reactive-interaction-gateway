@@ -145,9 +145,6 @@ spec:
             ## Kafka group ID used for forwarding events according to subscriptions over SSE and WS connections. The default should be fine.
             # - name: KAFKATOFILTER_KAFKA_GROUP_ID
             #   value: "rig-kafka-to-filter"
-            ## Kafka group ID used for forwarding all events over a HTTP connection. The default should be fine.
-            # - name: KAFKATOHTTP_KAFKA_GROUP_ID
-            #   value: "rig-kafka-to-http"
             # - name: KAFKA_RESTART_DELAY_MS
             #   value: "10000"
             ## Host for Kafka Schema Registry
@@ -202,8 +199,6 @@ spec:
             # - name: PROXY_KAFKA_RESPONSE_TIMEOUT
             #   value: "5000"
             ## Proxy Kinesis
-            # - name: PROXY_KINESIS_REQUEST_STREAM
-            #   value: "rig-proxy-request"
             # - name: PROXY_KINESIS_REQUEST_REGION
             #   value: "eu-west-1"
             # - name: PROXY_KINESIS_RESPONSE_TIMEOUT

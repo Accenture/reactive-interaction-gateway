@@ -124,7 +124,7 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
 
     try do
       case data[:body]
-           |> Poison.decode!()
+           |> Jason.decode!()
            |> KinesisToFilter.kinesis_handler() do
         :ok ->
           # update Prometheus metric with calculated processing time

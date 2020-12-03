@@ -18,7 +18,8 @@ defmodule RigApi.ConnCase do
   using do
     quote do
       # Import conveniences for testing with connections
-      use Phoenix.ConnTest
+      import Plug.Conn
+      import Phoenix.ConnTest
       import RigApi.Router.Helpers
 
       # Example mock API definition to ease testing
@@ -44,7 +45,12 @@ defmodule RigApi.ConnCase do
                 "id" => "get-movies",
                 "method" => "GET",
                 "secured" => false,
-                "path" => "/myapi/movies"
+                "path_regex" => "/myapi/movies"
+              },
+              %{
+                "id" => "get-movies-2",
+                "method" => "GET",
+                "path_regex" => "/foo/([^/]+)/bar/([^/]+)"
               }
             ]
           }

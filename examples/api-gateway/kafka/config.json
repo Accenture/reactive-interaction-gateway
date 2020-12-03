@@ -6,7 +6,7 @@
         "endpoints": [{
           "id": "my-endpoint",
           "method": "POST",
-          "path": "/",
+          "path_regex": "/",
           "target": "kafka",
           "topic": "example"
         }]

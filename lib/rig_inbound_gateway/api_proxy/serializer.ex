@@ -23,6 +23,6 @@ defmodule RigInboundGateway.ApiProxy.Serializer do
   end
 
   def encode_error_message(message) do
-    Poison.encode!(%{message: message})
+    Jason.encode!(%{message: message})
   end
 end

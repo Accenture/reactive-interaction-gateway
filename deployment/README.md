@@ -20,7 +20,10 @@ Check out the [Helm v2 README](./reactive-interaction-gateway-helm-v2/README.md)
 kubectl apply -f kubectl/rig.yaml
 ```
 
+
 ## Some Additional information
+
+Check out the [getting-started tutorial](https://accenture.github.io/reactive-interaction-gateway/docs/tutorial.html), the [examples](https://accenture.github.io/reactive-interaction-gateway/docs/examples.html) and the [features](https://accenture.github.io/reactive-interaction-gateway/docs/features.html) for more information what you can do with RIG.
 
 ### Communication
 

@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added possibility to set response code for `response_from` messages in reverse proxy (`kafka` and `http_async`). [#321](https://github.com/Accenture/reactive-interaction-gateway/pull/321)
 - Added new version - `v3` - for internal endpoints to support response code in the `/responses` endpoint
 - Added Helm v3 template to the `deployment` folder [#288](https://github.com/Accenture/reactive-interaction-gateway/issues/288)
+- Added detailed features summary on the website with architecture diagrams. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
+- Added [documentation section](https://accenture.github.io/reactive-interaction-gateway/docs/jwt-blacklisting.html) for the JWT Blacklist feature. [#156](https://github.com/Accenture/reactive-interaction-gateway/issues/156)
 - Added Prometheus metrics for events, subscriptions and blacklist. Check the [wiki](https://accenture.github.io/reactive-interaction-gateway/docs/metrics-details.html#rig-specific-metrics) for more info. [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
 - Added custom Grafana dashboard. Check the [wiki](https://accenture.github.io/reactive-interaction-gateway/docs/metrics-details.html#provided-dashboard) for more info. [#222](https://github.com/Accenture/reactive-interaction-gateway/issues/222)
 
@@ -31,20 +33,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     helm repo add accenture https://accenture.github.io/reactive-interaction-gateway
     helm install rig accenture/reactive-interaction-gateway
     ```
-  
+
   More information, follow the [deployment Readme](./deployment/README.md). [#319](https://github.com/Accenture/reactive-interaction-gateway/issues/319)
+- make README smaller, easier to read and highlight features. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
 
 ### Fixed
 
 - Fixed a bug where distributed set processes would crash when one of their peers has died but hasn't been removed yet from the pg2 group.
+- Fixed wrong endpoint validation for reverse proxy. Now it should correctly check for `path` or `path_regex`. Before it would require `path` even with `path_regex` in place. [#334](https://github.com/Accenture/reactive-interaction-gateway/issues/334)
 
 <!-- ### Deprecated -->
 
-<!-- ### Removed -->
+### Removed
+
+- Removed deprecated or unused code/functionality, these are **breaking changes** [#278](https://github.com/Accenture/reactive-interaction-gateway/issues/278):
+  - Removed deprecated internal API `/v1`.
+  - Removed deprecated environment variables: `PROXY_KAFKA_REQUEST_AVRO`, `PROXY_KAFKA_REQUEST_TOPIC`, `PROXY_KINESIS_REQUEST_STREAM`. This means that you can set topic and schema for publishing to event streams **only** in the proxy config as described in the [docs](https://accenture.github.io/reactive-interaction-gateway/docs/api-gateway.html#publishing-to-event-streams).
+  - Removed experimental feature Firehose (forwarding events to an HTTP endpoint).
+  - Removed `path` field in proxy configuration. Reason is that the `path_regex` field is already covering `path` functionality and thus it doesn't make sense to have both of them. Should cause less confusion and improve maintainability.
+    - **Migration:**
+      - `"path": "/foo"` -> `"path_regex": "/foo"`
+      - `"path": "/foo/{id}"` -> `"path_regex": "/foo/(.+)"` - or pretty much whatever regex you need (e.g. UUID pattern)
 
 <!-- ### Security -->
 
-<!-- ### Technical Improvements -->
+### Technical Improvements
+
+- Updated dependencies to support OTP 23. We've also replaced the versions file with `.tool-versions`, which makes it easier for those using the [asdf package manager](https://asdf-vm.com/) - just run `asdf install` to obtain the correct versions of Erlang and Elixir.
+  [#341](https://github.com/Accenture/reactive-interaction-gateway/issues/341)
 
 ## [2.4.0] - 2020-05-07
 

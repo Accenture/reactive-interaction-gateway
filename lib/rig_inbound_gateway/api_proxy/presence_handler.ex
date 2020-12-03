@@ -10,7 +10,7 @@ defmodule RigInboundGateway.ApiProxy.PresenceHandler do
 
   """
   require Logger
-  @behaviour Phoenix.Tracker
+  use Phoenix.Tracker
 
   alias RigInboundGateway.Proxy
 

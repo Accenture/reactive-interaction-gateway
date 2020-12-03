@@ -7,7 +7,6 @@ defmodule Rig.Application do
   alias RIG.Discovery
   alias RIG.Tracing
   alias RigOutboundGateway.Kinesis
-  alias RigOutboundGateway.KinesisFirehose
 
   def start(_type, _args) do
     alias Supervisor.Spec
@@ -19,19 +18,17 @@ defmodule Rig.Application do
     Discovery.start()
 
     children = [
-      Spec.supervisor(Phoenix.PubSub.PG2, [Rig.PubSub, []]),
+      {Phoenix.PubSub, name: Rig.PubSub},
       # Kafka:
       {DynamicSupervisor, strategy: :one_for_one, name: RigKafka.DynamicSupervisor},
       # Event stream handling:
       Rig.EventFilter.Sup,
       Rig.EventStream.KafkaToFilter,
-      Rig.EventStream.KafkaToHttp,
       Rig.EventStream.NatsToFilter,
       # Blacklist:
       Spec.worker(RIG.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
       # Kinesis event stream:
       Kinesis.JavaClient,
-      KinesisFirehose.JavaClient,
       # RIG API (internal port):
       RigApi.Endpoint,
       # Request logger for proxy:

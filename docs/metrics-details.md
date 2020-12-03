@@ -6,9 +6,11 @@ sidebar_label: Metrics Details
 
 ## Introduction
 
-RIG is providing it's Metrics as [**"Prometheus"**](https://prometheus.io) format. Prometheus is CNCFs second graduated project and therefore can be assumed as de-facto standard.
+RIG is providing its metrics in [Prometheus](https://prometheus.io) format. Prometheus is CNCFs second graduated project and therefore can be assumed as de-facto standard.
 
-This metrics can be used to be included into a monitoring platform like [**Grafana**](https://grafana.com/)
+These metrics can be used to be included into a monitoring platform like [Grafana](https://grafana.com/).
+
+RIG exposes Metrics in [Prometheus](https://prometheus.io/) format on its API endpoint under [/metrics](http:localhost:4010/metrics).
 
 ## RIG Specific Metrics
 
@@ -28,7 +30,7 @@ Following Labels are provided:
   - `DELETE`
   - `HEAD`
   - `OPTIONS`
-- **path** - The path used for this request.
+- **path_regex** - The path used for this request.
 - **target** - The target for this request. Grabbed from proxy config. Following possible values:
   - `http`
   - `kafka`
@@ -133,7 +135,7 @@ Following standard metrics are currently provided:
 - erlang_vm_port_limit - *The maximum number of simultaneously existing ports at the local node*
 - etc.
 
-Detailed documentation to these standard metrics can be found [**here**](https://github.com/deadtrickster/prometheus.ex/tree/master/pages)
+Detailed documentation to these standard metrics can be found [here](https://github.com/deadtrickster/prometheus.ex/tree/master/pages).
 
 ## Usecase
 
@@ -170,4 +172,4 @@ We provide also our own dashboards with RIG specific metrics. You can find it in
 
 ![Grafana dashboard subscriptions](./assets/grafana-dashboard-subscriptions.png)
 
-_Kudus to [**deadtrickster**](https://github.com/deadtrickster) for his awesome prometheus integration package_
+_Kudus to [deadtrickster](https://github.com/deadtrickster) for his awesome prometheus integration package_.

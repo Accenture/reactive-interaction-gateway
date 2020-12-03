@@ -7,8 +7,10 @@ defmodule RIG.MixProject do
   from backend services to connected frontends (and vice versa).
   """
 
+  @rig_version "3.0.0-alpha.1"
+
   def project do
-    %{rig: rig_version, elixir: elixir_version} = versions()
+    elixir_version = elixir_version_from_tool_versions_file()
 
     [
       # OTP app:
@@ -17,7 +19,7 @@ defmodule RIG.MixProject do
       # Meta data:
       name: "Reactive Interaction Gateway",
       description: @description,
-      version: rig_version,
+      version: @rig_version,
       source_url: "https://github.com/Accenture/reactive-interaction-gateway",
       homepage_url: "https://accenture.github.io/reactive-interaction-gateway",
       docs: docs(),
@@ -44,6 +46,11 @@ defmodule RIG.MixProject do
     ]
   end
 
+  defp elixir_version_from_tool_versions_file do
+    [_, version] = Regex.run(~r/^elixir (.+)-otp-\d+$/m, File.read!(".tool-versions"))
+    version
+  end
+
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
@@ -68,11 +75,6 @@ defmodule RIG.MixProject do
         :opencensus_jaeger
       ]
     ]
-  end
-
-  defp versions do
-    {map, []} = Code.eval_file("version", ".")
-    map
   end
 
   defp docs do
@@ -116,7 +118,7 @@ defmodule RIG.MixProject do
       # Read and use application configuration from environment variables:
       {:confex, "~> 3.4"},
       # For providing the global Phx PubSub server:
-      {:phoenix_pubsub, "~> 1.1"},
+      {:phoenix_pubsub, "~> 2.0"},
       # for Kafka, partition from MurmurHash(key):
       {:murmur, "~> 1.0"},
       {:peerage, "~> 1.0"},
@@ -124,9 +126,7 @@ defmodule RIG.MixProject do
       {:porcelain, "~> 2.0"},
       # HTTP request handling (wraps Cowboy):
       {:plug, "~> 1.9"},
-      # JSON parser, for cloud_event and event_hub:
-      {:poison, "~> 3.0 or ~> 4.0"},
-      # JSON parser that's supposedly faster than poison:
+      # JSON parser:
       {:jason, "~> 1.2"},
       {:jaxon, "~> 1.0"},
       # JSON Pointer (RFC 6901) implementation for subscriptions:
@@ -152,7 +152,7 @@ defmodule RIG.MixProject do
       # For JSON Web Tokens:
       {:joken, "~> 1.5"},
       # Web framework, for all HTTP endpoints except SSE and WS:
-      {:phoenix, "~> 1.4"},
+      {:phoenix, "~> 1.5"},
       {:plug_cowboy, "~> 2.1"},
       {:phoenix_swagger, "~> 0.8"},
       # Data validation library, e.g. used for proxy configuration:
@@ -179,7 +179,7 @@ defmodule RIG.MixProject do
       {:opencensus_jaeger, "~> 0.0.1"},
       {:opencensus_zipkin, "~> 0.3"},
       # NATS client:
-      {:gnat, "~> 1.0.0"}
+      {:gnat, "~> 1.0"}
     ]
   end
 
