@@ -205,7 +205,7 @@ defmodule WsClient do
 
     # We need to check whether the connection has already been closed:
     first_message =
-      case WebSocket.recv(client, timeout: 100) do
+      case WebSocket.recv(client, timeout: 500) do
         {:ok, {:close, code, reason}} ->
           raise TestClient.ConnectionError, code: code, reason: reason
 

@@ -84,7 +84,12 @@ defmodule RigInboundGatewayWeb.V1.SSE do
     end
 
     on_error = fn reason ->
-      req = :cowboy_req.reply(400, %{}, reason, req)
+      req =
+        case reason do
+          {code, reason} -> :cowboy_req.reply(code, %{}, reason, req)
+          _ -> :cowboy_req.reply(400, %{}, reason, req)
+        end
+
       # Returning :ok at this point simply closes the handler.
       {:ok, req, :no_state}
     end

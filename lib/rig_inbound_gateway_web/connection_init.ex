@@ -5,6 +5,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
   As soon as Phoenix pulls in Cowboy 2 this will have to be rewritten using the
   :cowboy_websocket behaviour.
   """
+  use Rig.Config, [:max_connections_per_minute, :max_connections_per_minute_bucket]
 
   require Logger
 
@@ -46,7 +47,13 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
          {:ok, query_subs} <-
            Subscriptions.from_json(request.body),
          subscriptions = Enum.uniq(jwt_subs ++ query_subs),
-         :ok <- SubscriptionAuthZ.check_authorization(request) do
+         :ok <- SubscriptionAuthZ.check_authorization(request),
+         {:ok, _n_connections} <-
+           ExRated.check_rate(
+             config().max_connections_per_minute_bucket,
+             60_000,
+             config().max_connections_per_minute
+           ) do
       # If the JWT is valid and points to a session, we associate this connection with
       # it. If that doesn't work out, we log a warning but don't tell the frontend -
       # it's not the frontend's fault anyway.
@@ -86,6 +93,15 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
         end)
 
         on_error.("Subscription denied (not authorized).")
+
+      {:error, n_connections} ->
+        Logger.warn(fn ->
+          pid = inspect(self())
+          msg = "Reached maximum number of connections=#{n_connections} per minute"
+          "Cannot accept #{conn_type} connection #{pid}: #{msg}"
+        end)
+
+        on_error.({429, "Reached maximum number of connections=#{n_connections} per minute"})
     end
   end
 
