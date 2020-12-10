@@ -25,6 +25,7 @@ defmodule RigInboundGatewayWeb.Router do
       scope "/connection/longpolling" do
         subscription_url = "/:connection_id/subscriptions"
         get("/", LongpollingController, :handle_connection)
+        options("/", LongpollingController, :handle_preflight)
         options(subscription_url, SubscriptionController, :handle_preflight)
         put(subscription_url, SubscriptionController, :set_subscriptions)
       end

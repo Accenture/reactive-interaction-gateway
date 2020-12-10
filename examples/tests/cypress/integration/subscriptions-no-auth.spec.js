@@ -1,5 +1,5 @@
 describe('Subscriptions with no auth', () => {
-  ['sse', 'ws'].forEach(type => {
+  ['sse', 'ws', 'lp'].forEach(type => {
     it(`Creates ${type} connection and subscriptions`, () => {
       cy.visit(`/${type}-1-demo.html`);
       cy.setAndVerifyInput('greeting', 'hello');
