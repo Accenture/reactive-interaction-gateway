@@ -61,7 +61,6 @@ defmodule RIG.MixProject do
     [
       mod: {Rig.Application, []},
       extra_applications: [
-        :logger,
         :runtime_tools,
         :prometheus_ex,
         :prometheus_plugs
@@ -179,7 +178,9 @@ defmodule RIG.MixProject do
       {:opencensus_jaeger, "~> 0.0.1"},
       {:opencensus_zipkin, "~> 0.3"},
       # NATS client:
-      {:gnat, "~> 1.0"}
+      {:gnat, "~> 1.0"},
+      # JSON Log backend
+      {:logger_json, "~> 4.0"}
     ]
   end
 
