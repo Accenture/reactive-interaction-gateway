@@ -6,11 +6,13 @@ on:
     paths:
       - "**.exs?"
       - mix.lock
+      - .github/workflows/**.yml
   pull_request:
     branches: [master]
     paths:
       - "**.exs?"
       - mix.lock
+      - .github/workflows/**.yml
 
 jobs:
   build:

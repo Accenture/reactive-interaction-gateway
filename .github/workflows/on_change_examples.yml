@@ -5,10 +5,12 @@ on:
     branches: [master]
     paths:
       - "examples/tests/**"
+      - .github/workflows/**.yml
   pull_request:
     branches: [master]
     paths:
       - "examples/tests/**"
+      - .github/workflows/**.yml
 
 jobs:
   examples:
