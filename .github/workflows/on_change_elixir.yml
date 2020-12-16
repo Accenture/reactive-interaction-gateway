@@ -1,0 +1,38 @@
+name: build and test
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "**.exs?"
+      - mix.lock
+  pull_request:
+    branches: [master]
+    paths:
+      - "**.exs?"
+      - mix.lock
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Elixir
+        uses: actions/setup-elixir@v1
+        with:
+          elixir-version: "1.11.2" # Define the elixir version [required]
+          otp-version: "23.1" # Define the OTP version [required]
+      - name: Restore dependencies cache
+        uses: actions/cache@v2
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+      - name: Install dependencies
+        run: mix deps.get
+      - name: Lint code with Credo
+        run: mix credo --ignore-checks Design
+      - name: Run tests
+        run: mix test

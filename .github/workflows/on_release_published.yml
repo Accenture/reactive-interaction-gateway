@@ -1,0 +1,10 @@
+name: deploy
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
