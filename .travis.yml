@@ -17,29 +17,6 @@ stages:
 
 jobs:
   include:
-    - stage: unittest
-      <<: *elixir-env
-      env:
-        - MIX_ENV=test
-      script:
-        - mix test
-        - mix credo --ignore-checks Design
-    - stage: exampletest
-      language: node_js
-      node_js:
-        - "10"
-      addons:
-        apt:
-          packages:
-            - libgconf-2-4
-      cache:
-        npm: true
-        directories:
-          - ~/.cache
-      script:
-        - cd examples/tests
-        - npm ci
-        - npm run cypress:run:all
     - stage: dockerbuild
       language: minimal
       services:
