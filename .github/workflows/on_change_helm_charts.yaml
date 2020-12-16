@@ -5,12 +5,12 @@ on:
     branches: [master]
     paths:
       - "deployment/**"
-      - .github/workflows/**.yml
+      - .github/workflows/on_change_helm_charts.yml
   pull_request:
     branches: [master]
     paths:
       - "deployment/**"
-      - .github/workflows/**.yml
+      - .github/workflows/on_change_helm_charts.yml
 
 jobs:
   lint:
