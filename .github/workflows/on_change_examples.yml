@@ -32,5 +32,5 @@ jobs:
             ${{ runner.os }}-cypress-
       - run: npm ci
         working-directory: examples/tests
-      - run: npm cypress:run:all
+      - run: npm run cypress:run:all
         working-directory: examples/tests
