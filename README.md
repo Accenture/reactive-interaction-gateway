@@ -31,7 +31,7 @@ This is just a basic summary of what RIG can do. There is a comprehensive docume
 
 ## Get Involved
 
-- discuss RIG on [Slack](https://rig-slackin.herokuapp.com)
+- [Ask anything by opening GitHub issues](https://github.com/Accenture/reactive-interaction-gateway/issues/new/choose)
 - Follow us on [Twitter](https://twitter.com/reactivegateway)
 - Start contributing: refer to our [contributing guide](./CONTRIBUTING.md)
 - Develop RIG: refer to our [developer's guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-dev-guide.html)
