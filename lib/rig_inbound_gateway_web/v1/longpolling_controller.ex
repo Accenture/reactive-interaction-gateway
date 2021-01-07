@@ -3,11 +3,12 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   Handling of Longpolling functionalitiy
   """
   require Logger
-  use Rig.Config, [:cors, :max_connections_per_minute, :max_connections_per_minute_bucket]
+  use Rig.Config, [:cors]
 
   use RigInboundGatewayWeb, :controller
 
   alias Rig.Connection
+  alias RigInboundGatewayWeb.ConnectionLimit
   alias RigInboundGatewayWeb.Session
   alias RigOutboundGateway
 
@@ -41,12 +42,7 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
 
   # starts a new session
   defp process_request(true, conn) do
-    with {:ok, _n_connections} <-
-           ExRated.check_rate(
-             config().max_connections_per_minute_bucket,
-             60_000,
-             config().max_connections_per_minute
-           ),
+    with {:ok, _n_connections} <- ConnectionLimit.check_rate_limit(),
          {:ok, session_pid} <- Session.start(conn.query_params) do
       Logger.debug(fn ->
         "new Longpolling connection (pid=#{inspect(session_pid)}, params=#{
@@ -61,23 +57,23 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
       |> put_resp_header("content-type", "application/json; charset=utf-8")
       |> put_resp_header("cache-control", "no-cache")
       |> put_status(200)
-      |> text(Jason.encode!("ok"))
+      |> text("ok")
     else
       {:error, {:bad_request, message}} ->
         conn
         |> put_status(:bad_request)
         |> text(message)
 
-      {:error, n_connections} ->
+      {:error, %ConnectionLimit.MaxConnectionsError{n_connections: n_connections} = ex} ->
         Logger.warn(fn ->
           pid = inspect(self())
-          msg = "Reached maximum number of connections=#{n_connections} per minute"
+          msg = "#{Exception.message(ex)}=#{n_connections} per minute"
           "Cannot accept long polling connection #{pid}: #{msg}"
         end)
 
         conn
         |> put_status(:too_many_requests)
-        |> text("Reached maximum number of connections=#{n_connections} per minute")
+        |> text(Exception.message(ex))
 
       error ->
         msg = "Failed to initialize long polling connection"
