@@ -131,6 +131,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
       # If the JWT is valid and points to a session, we associate this connection with
       # it. If that doesn't work out, we log a warning but don't tell the frontend -
       # it's not the frontend's fault anyway.
+
       refresh_associated_sessions(socket_pid, Map.get(conn.assigns, :auth_tokens, []))
       |> Result.or_else(fn {:failed_to_associate_to_session, errors} ->
         Logger.warn(fn ->

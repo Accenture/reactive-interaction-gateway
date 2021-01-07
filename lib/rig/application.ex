@@ -2,17 +2,18 @@ defmodule Rig.Application do
   @moduledoc false
 
   use Application
-  use Rig.Config, [:log_level, :schema_registry_host]
+  use Rig.Config, [:log_level, :log_fmt, :schema_registry_host]
 
   alias RIG.Discovery
   alias RIG.Tracing
   alias RigOutboundGateway.Kinesis
 
+  alias LoggerJSON.Formatters.BasicLogger
+
   def start(_type, _args) do
     alias Supervisor.Spec
 
-    # Override application logging with environment variable
-    Logger.configure([{:level, config().log_level}])
+    setup_logger()
 
     Tracing.start()
     Discovery.start()
@@ -50,6 +51,41 @@ defmodule Rig.Application do
 
     opts = [strategy: :one_for_one, name: Rig.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp setup_logger do
+    conf = config()
+    level = conf.log_level |> String.downcase() |> String.to_atom()
+    format = conf.log_fmt |> String.downcase()
+
+    # Override application logging with environment variable
+    Logger.configure([{:level, level}])
+    setup_logger_backend(format)
+  end
+
+  defp setup_logger_backend(format)
+
+  defp setup_logger_backend("json") do
+    Logger.add_backend(LoggerJSON)
+
+    Logger.configure_backend(LoggerJSON,
+      formatter: LoggerJSON.Formatters.BasicLogger,
+      metadata: :all
+    )
+  end
+
+  # Google Cloud Logger format
+  defp setup_logger_backend("gcl") do
+    Logger.add_backend(LoggerJSON)
+
+    Logger.configure_backend(LoggerJSON,
+      formatter: LoggerJSON.Formatters.GoogleCloudLogger,
+      metadata: :all
+    )
+  end
+
+  defp setup_logger_backend("erlang") do
+    Logger.add_backend(:console)
   end
 
   @doc """

@@ -1,4 +1,5 @@
 {
   "fileServerFolder": "../",
-  "video": false
+  "video": false,
+  "port": 54321
 }

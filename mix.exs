@@ -61,7 +61,6 @@ defmodule RIG.MixProject do
     [
       mod: {Rig.Application, []},
       extra_applications: [
-        :logger,
         :runtime_tools,
         :prometheus_ex,
         :prometheus_plugs,
@@ -187,7 +186,9 @@ defmodule RIG.MixProject do
       # NATS client:
       {:gnat, "~> 1.0"},
       # Rate limiting via leaky bucket
-      {:ex_rated, "~> 1.2"}
+      {:ex_rated, "~> 1.2"},
+      # JSON Log backend
+      {:logger_json, "~> 4.0"}
     ]
   end
 

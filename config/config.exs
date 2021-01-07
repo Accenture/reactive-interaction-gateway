@@ -81,8 +81,13 @@ config :logger, :console,
   format: "\n$time [$level] $levelpad$message\n$metadata\n",
   metadata: metadata |> Enum.uniq()
 
+# The logger is configured on Application startup.
+config :logger,
+  backends: []
+
 config :rig, Rig.Application,
-  log_level: {:system, :atom, "LOG_LEVEL", :debug},
+  log_level: {:system, "LOG_LEVEL", "debug"},
+  log_fmt: {:system, "LOG_FMT", "erlang"},
   schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", nil}
 
 # --------------------------------------
@@ -131,11 +136,7 @@ config :rig, RIG.Tracing,
 max_connections_per_minute = {:system, :integer, "MAX_CONNECTIONS_PER_MINUTE", 5000}
 max_connections_per_minute_bucket = "max-connections-per-minute"
 
-config :rig, RigInboundGatewayWeb.ConnectionInit,
-  max_connections_per_minute: max_connections_per_minute,
-  max_connections_per_minute_bucket: max_connections_per_minute_bucket
-
-config :rig, RigInboundGatewayWeb.V1.LongpollingController,
+config :rig, RigInboundGatewayWeb.ConnectionLimit,
   max_connections_per_minute: max_connections_per_minute,
   max_connections_per_minute_bucket: max_connections_per_minute_bucket
 

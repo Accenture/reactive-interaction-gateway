@@ -29,6 +29,7 @@ docker run -d --name "$RIG_CONTAINER_NAME" \
 -e EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/data/name"}}},"greeting.jwt":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}},"nope":{"fullname":{"stable_field_index":1,"jwt":{"json_pointer":"/fullname"},"event":{"json_pointer":"/data/fullname"}}},"example":{"email":{"stable_field_index":1,"event":{"json_pointer":"/data/email"}}}}' \
 -e JWT_SECRET_KEY=secret \
 -e LOG_LEVEL=debug \
+-e CORS="http://localhost:54321" \
 -p 4000:4000 \
 accenture/reactive-interaction-gateway
 
@@ -41,6 +42,7 @@ docker run -d --name "$RIG_CONTAINER_NAME" \
 -e EXTRACTORS='{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/data/name"}}},"greeting.jwt":{"name":{"stable_field_index":1,"jwt":{"json_pointer":"/username"},"event":{"json_pointer":"/data/name"}}},"nope":{"fullname":{"stable_field_index":1,"jwt":{"json_pointer":"/fullname"},"event":{"json_pointer":"/data/fullname"}}},"example":{"email":{"stable_field_index":1,"event":{"json_pointer":"/data/email"}}}}' \
 -e JWT_SECRET_KEY=secret \
 -e LOG_LEVEL=debug \
+-e CORS="http://localhost:54321" \
 -p 4000:4000 \
 accenture/reactive-interaction-gateway
 
