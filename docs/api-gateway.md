@@ -27,7 +27,7 @@ We define an endpoint configuration like this:
           {
             "id": "my-endpoint",
             "method": "GET",
-            "path": "/"
+            "path_regex": "/"
           }
         ]
       }
@@ -46,11 +46,11 @@ This defines a single service called "my-service". The URL is read from an given
 As a demo service, we use a small Node.js script:
 
 ```js
-const http = require('http');
+const http = require("http");
 const port = 3000;
 const handler = (_req, res) => res.end("Hi, I'm a demo service!\n");
 const server = http.createServer(handler);
-server.listen(port, err => {
+server.listen(port, (err) => {
   if (err) {
     return console.error(err);
   }
@@ -75,7 +75,10 @@ $ docker run -d \
 After that we should be able to reach our small demo service through RIG:
 
 ```bash
-$ curl localhost:4000
+$ curl \
+    -H 'traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01' \
+    -H 'tracestate: hello=tracing' \
+    localhost:4000
 Hi, I'm a demo service!
 ```
 
@@ -93,13 +96,16 @@ $ docker run \
 Note that this way we don't need a Docker volume, which might work better in your environment. Again, we should be able to reach the demo service:
 
 ```bash
-$ curl localhost:4000
+$ curl \
+    -H 'traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01' \
+    -H 'tracestate: hello=tracing' \
+    localhost:4000
 Hi, I'm a demo service!
 ```
 
 ## Dynamic URL parameters
 
-It's a common case that you want to fetch detail for some entity e.g. `/books/123`. To make sure the dynamic value `123` is correctly matched and forwarded API endpoint can be configured like this:
+It's a common case that you want to fetch detail for some entity e.g. `/books/123`. To make sure the dynamic value `123` is correctly matched and forwarded API endpoint can be configured as a regular expression:
 
 ```json
 [{
@@ -109,15 +115,13 @@ It's a common case that you want to fetch detail for some entity e.g. `/books/12
       "endpoints": [{
         "id": "my-detail-endpoint",
         "method": "GET",
-        "path": "/books/{book_id}"
+        "path_regex": "/books/(.+)"
       }]
     }
   },
   ...
 }]
 ```
-
-Dynamic values in `path` have to be wrapped in curly braces. Value inside curly braces is up to you.
 
 ## Publishing to event streams
 
@@ -135,7 +139,7 @@ For fire-and-forget style requests, the endpoint configuration looks like this:
       "endpoints": [{
         "id": "my-endpoint",
         "method": "POST",
-        "path": "/",
+        "path_regex": "/",
         "target": "kafka",
         "topic": "my-topic",
         "schema": "my-avro-schema"
@@ -146,9 +150,7 @@ For fire-and-forget style requests, the endpoint configuration looks like this:
 }]
 ```
 
-Note that the `target` field is set to `kafka` (for Kinesis use `kinesis`). The `topic` field is mandatory, but the `schema` field is optional. Alternatively (fallback to the previously used solution), you can define these values via environment variables, described by the `PROXY_KAFKA_*` and `PROXY_KINESIS_*` variables in the [Operator's Guide](./rig-ops-guide.md). Note that the `topic` and `schema` fields are just about publishing to event stream and have nothing to do with events consumption.
-
-> Beware, that the fallback method is deprecated and will be removed in the version 3.0.
+Note that the `target` field is set to `kafka` (for Kinesis use `kinesis`). The `topic` field is mandatory, but the `schema` field is optional. Note that the `topic` and `schema` fields are just about publishing to event stream and have nothing to do with events consumption.
 
 The endpoint expects the following request format:
 
@@ -174,7 +176,7 @@ The endpoint expects the following request format:
 ### Wait for response
 
 Sometimes it makes sense to provide a simple request-response API to something that runs asynchronously on the backend. For example, let's say there's a ticket reservation process that takes 10 seconds in total and involves three different services that communicate via message passing. For an external client, it may be simpler to wait 10 seconds for the response instead of polling for a response every other second.
-A behavior like this can be configured using an endpoints' `response_from` property. When set to `kafka`, the response to the request is not taken from the `target` (e.g., for `target` = `http` this means the backend's HTTP response is ignored), but instead it's read from a Kafka topic. In order to enable RIG to correlate the response from the topic with the original request, RIG adds a correlation ID to the request (using a query parameter in case of `target` = `http`, or backed into the produced CloudEvent otherwise). Backend services that work with the request need to include that correlation ID in their response; otherwise, RIG won't be able to forward it to the client (and times out).
+A behavior like this can be configured using an endpoints' `response_from` property. When set to `kafka`, the response to the request is not necessarily taken from the `target`, e.g., for `target` = `http` this means the backend's HTTP response might be ignored - it's the responsibility of the backend service where to read the response from: If the backend returns with the HTTP code `202 Accepted`, the response will be read from a Kafka topic. If the backend returns a different HTTP code (can be `200` or `400` or whatever makes sense), only then the response will be read synchronously from the http target directly (this allows the backend to return cached responses). In order to enable RIG to correlate the response from the kafka topic with the original request, RIG adds a correlation ID to the request (using a query parameter in case of `target` = `http`, or baked into the produced CloudEvent otherwise). Backend services that work with the request need to include that correlation ID in their response; otherwise, RIG won't be able to forward it to the client (and times out).
 
 Configuration of such API endpoint might look like this:
 
@@ -186,7 +188,7 @@ Configuration of such API endpoint might look like this:
       "endpoints": [{
         "id": "my-endpoint",
         "method": "POST",
-        "path": "/",
+        "path_regex": "/",
         "target": "kafka",
         "topic": "my-topic",
         "response_from": "kafka"
@@ -199,25 +201,36 @@ Configuration of such API endpoint might look like this:
 
 > Note the presence of `response_from` field. This tells RIG to wait for different event with the same correlation ID.
 
-As an alternative you can set `response_from` to `http_async`. This means that correlated response has to be sent to internal `:4010/v2/responses` `POST` endpoint with a body like this:
+#### Supported combinations (`target` -> `response_from`)
+
+- HTTP -> `kafka`/`http_async`/`kinesis`
+- Kafka -> `kafka`
+- Kinesis -> **not supported**
+- Nats -> `nats`
+
+`http_async` means that correlated response has to be sent to internal `:4010/v3/responses` `POST` endpoint.
+
+#### Supported formats
+
+All `response_from` options support only binary mode.
+
+Message headers:
+
+```plaintext
+rig-correlation: "correlation_id_sent_by_rig"
+rig-response-code: "201"
+content-type: "application/json"
+```
+
+> All headers are required.
+
+Message body:
 
 ```json
 {
-  "id": "1",
-  "specversion": "0.2",
-  "source": "my-service",
-  "type": "com.example",
-  "rig": {
-    "correlation": "_id_"
-  },
-  "data": {
-    ...
-  }
-  ...
+  "foo": "bar"
 }
 ```
-
-> **NOTE:** Kinesis doesn't support `response_from` field yet.
 
 ## Auth
 
@@ -240,11 +253,11 @@ API configuration is following:
       "endpoints": [{
         "id": "my-unsecured-endpoint",
         "method": "GET",
-        "path": "/unsecured"
+        "path_regex": "/unsecured"
       },{
         "id": "my-secured-endpoint",
         "method": "GET",
-        "path": "/secured",
+        "path_regex": "/secured",
         "secured": true
       }]
     }
@@ -277,11 +290,11 @@ Headers transformations are supported in a very simple way. Assume following API
       "endpoints": [{
         "id": "my-endpoint",
         "method": "GET",
-        "path": "/"
+        "path_regex": "/"
       },{
         "id": "my-transformed-endpoint",
         "method": "GET",
-        "path": "/transformed",
+        "path_regex": "/transformed",
         "transform_request_headers": true
       }]
     }
@@ -302,11 +315,6 @@ With URL rewriting you can set how the incoming and outgoing request urls should
   "version_data": {
     "default": {
       "endpoints": [{
-        "id": "my-endpoint",
-        "method": "GET",
-        "path": "/",
-        "path_replacement": "/different-endpoint"
-      },{
         "id": "my-transformed-endpoint",
         "method": "GET",
         "path_regex": "/foo/([^/]+)/bar/([^/]+)",
@@ -318,7 +326,7 @@ With URL rewriting you can set how the incoming and outgoing request urls should
 }]
 ```
 
-In first case, sending GET request to `/` RIG will forward the request to GET `/different-endpoint`. In second case we are using `path_regex` instead of `path` (this is alternative to `## Dynamic URL parameters`). As you send GET request to `/foo/1/bar/2` RIG will forward it to GET `/bar/1/foo/2`.
+As you send GET request to `/foo/1/bar/2` RIG will forward it to GET `/bar/1/foo/2`.
 
 ## CORS
 
@@ -332,11 +340,11 @@ Quite often you need to deal with cross origin requests. CORS itself is configur
       "endpoints": [{
         "id": "my-endpoint",
         "method": "GET",
-        "path": "/"
+        "path_regex": "/"
       },{
         "id": "my-endpoint-preflight",
         "method": "OPTIONS",
-        "path": "/"
+        "path_regex": "/"
       }]
     }
   },

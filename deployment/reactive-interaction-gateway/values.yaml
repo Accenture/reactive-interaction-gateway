@@ -1,0 +1,130 @@
+# Default values for reactive-interaction-gateway.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+# --- Operator's Guide ---
+# Full list of environment variables: https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html
+# ------------------------
+
+replicaCount: 1
+
+image:
+  repository: accenture/reactive-interaction-gateway
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+
+deployment:
+  env:
+    # Proxy ports
+    # deployment.env.INBOUND_PORT -- See docs/rig-ops-guide.md
+    INBOUND_PORT: 4000
+    # deployment.env.INBOUND_HTTPS_PORT -- See docs/rig-ops-guide.md
+    INBOUND_HTTPS_PORT: 4001
+    # deployment.env.API_HTTP_PORT -- See docs/rig-ops-guide.md
+    API_HTTP_PORT: 4010
+    # deployment.env.API_HTTPS_PORT -- See docs/rig-ops-guide.md
+    API_HTTPS_PORT: 4011
+
+    ## Hostname for HTTP endpoints
+    # HOST: localhost
+
+    ## HTTPS
+    # HTTPS_CERTFILE: cert/signed.pem
+    # HTTPS_KEYFILE: cert/signed_key.pem
+    # HTTPS_KEYFILE_PASS: asdf
+
+    ## CORS (Access-Control-Allow-Origin) for "inbound" port(s)
+    # CORS: *
+
+    ## Discovery
+    # deployment.env.DISCOVERY_TYPE -- See docs/rig-ops-guide.md
+    DISCOVERY_TYPE: dns
+    ## DNS_NAME is set dynamically
+    ## NODE_HOST is set dynamically to PodIP in "templates/deployment.yaml"
+    # deployment.env.NODE_COOKIE -- See docs/rig-ops-guide.md
+    NODE_COOKIE: magiccookie
+
+
+    ## Kafka
+    ## Setting "KAFKA_BROKERS" automatically enables usage of Kafka
+    # KAFKA_BROKERS: localhost:9092
+    # KAFKA_SOURCE_TOPICS: rig
+    ## Kafka group ID used for forwarding events according to subscriptions over SSE and WS connections. The default should be fine.
+    # KAFKATOFILTER_KAFKA_GROUP_ID: rig-kafka-to-filter
+    # KAFKA_RESTART_DELAY_MS: 10000
+    ## Host for Kafka Schema Registry
+    # KAFKA_SCHEMA_REGISTRY_HOST: schema-registry:8081
+    ## Serializer for Kafka events, currently supports Avro. By default uses JSON serialization
+    # KAFKA_SERIALIZER: avro
+    ## Avro schema name for events published by logger
+    # KAFKA_LOG_SCHEMA: logger-schema
+    # KAFKA_LOG_TOPIC: rig-request-log
+
+    ## Kafka SASL
+    # KAFKA_SASL: plain:myusername:mypassword
+
+    ## Kafka SSL
+    # KAFKA_SSL_ENABLED: 1
+    # KAFKA_SSL_CA_CERTFILE: ca.crt.pem
+    # KAFKA_SSL_CERTFILE: client.crt.pem
+    # KAFKA_SSL_KEYFILE: client.key.pem
+    # KAFKA_SSL_KEYFILE_PASS: asdf
+
+    ## Kinesis
+    # KINESIS_ENABLED: 1
+    # KINESIS_STREAM: RIG-outbound
+    # KINESIS_APP_NAME: Reactive-Interaction-Gateway
+    # KINESIS_AWS_REGION: eu-west-1
+    # KINESIS_LOG_LEVEL: INFO
+
+    ## Proxy
+    ## Path to a JSON file or the JSON string itself
+    # PROXY_CONFIG_FILE: ./proxy.json
+    # PROXY_RECV_TIMEOUT: 5000
+    # PROXY_HTTP_ASYNC_RESPONSE_TIMEOUT: 5000
+
+    ## Proxy Kafka
+    # PROXY_KAFKA_RESPONSE_TOPICS: rig-proxy-response
+    # PROXY_KAFKA_RESPONSE_KAFKA_GROUP_ID: rig-proxy-response
+    # PROXY_KAFKA_RESPONSE_TIMEOUT: 5000
+
+    ## Proxy Kinesis
+    # PROXY_KINESIS_REQUEST_REGION: eu-west-1
+    # PROXY_KINESIS_RESPONSE_TIMEOUT: 5000
+
+    ## Extractors
+    # EXTRACTORS: '{"greeting":{"name":{"stable_field_index":1,"event":{"json_pointer":"/name"}}}}'
+
+    ## JWT
+    # JWT_SECRET_KEY: asdf
+    # JWT_ALG: HS256
+    # JWT_SESSION_FIELD: /userId
+
+    ## Logging
+    ## REQUEST_LOG: console,kafka
+    # deployment.env.LOG_LEVEL -- See docs/rig-ops-guide.md
+    LOG_LEVEL: warn
+
+    ## SSE, WS
+    # SUBSCRIPTION_CHECK: jwt_validation
+    ## HTTP events endpoint
+    # SUBMISSION_CHECK: jwt_validation
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 250m
+  #   memory: 256Mi
+  # requests:
+  #   cpu: 500m
+  #   memory: 512Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -3,8 +3,12 @@
   "localized-strings": {
     "next": "Next",
     "previous": "Previous",
-    "tagline": "Your UI deserves an API, too!",
+    "tagline": "Create low-latency, interactive user experiences for stateless microservices.",
     "docs": {
+      "api-documentation": {
+        "title": "API Documentation",
+        "sidebar_label": "API Documentation"
+      },
       "api-gateway-management": {
         "title": "API Gateway Management",
         "sidebar_label": "API Gateway Management"
@@ -24,6 +28,10 @@
       "avro": {
         "title": "Avro Implementation Details",
         "sidebar_label": "Avro"
+      },
+      "distributed-tracing": {
+        "title": "Distributed Tracing",
+        "sidebar_label": "Distributed Tracing"
       },
       "event-format": {
         "title": "Event Format",
@@ -45,6 +53,10 @@
         "title": "Frequently Asked Questions",
         "sidebar_label": "FAQ"
       },
+      "features": {
+        "title": "Features",
+        "sidebar_label": "Features"
+      },
       "https": {
         "title": "HTTPS",
         "sidebar_label": "HTTPS"
@@ -52,6 +64,10 @@
       "intro": {
         "title": "Intro",
         "sidebar_label": "Intro"
+      },
+      "jwt-blacklisting": {
+        "title": "JWT Blacklisting",
+        "sidebar_label": "JWT Blacklisting"
       },
       "metrics-details": {
         "title": "Metrics Details",

@@ -8,6 +8,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   alias ExAws
   alias Plug.Conn
   alias Rig.Connection.Codec
+  alias RIG.Tracing
   alias RigInboundGateway.ApiProxy.Handler
   alias RigMetrics.ProxyMetrics
   alias UUID
@@ -17,19 +18,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
   @help_text """
   Produce the request to a Kinesis topic and optionally wait for the (correlated) response.
 
-  Expects a JSON encoded HTTP body with the following fields:
+  Expects a JSON encoded CloudEvent in the HTTP body.
 
-  - `event`: The published CloudEvent >= v0.2. The event is extended by metadata
-  written to the "rig" extension field (following the CloudEvents v0.2 spec).
-  - `partition`: The targetted Kinesis partition.
+  Optionally set a partition key via this field:
 
-  or
-
-  ...
-  CloudEvent
-  ...
   `rig`: {\"target_partition\":\"the-partition-key\"}
-
   """
   # ---
 
@@ -48,7 +41,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
       end
 
     %{
-      kinesis_request_stream: Keyword.fetch!(config, :kinesis_request_stream),
       kinesis_request_region: kinesis_request_region,
       response_timeout: Keyword.fetch!(config, :response_timeout),
       cors: Keyword.fetch!(config, :cors),
@@ -59,10 +51,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
 
   # ---
 
+  @doc @help_text
   @impl Handler
   def handle_http_request(conn, api, endpoint, request_path)
 
-  @doc "CORS response for preflight request."
+  # CORS response for preflight request.
   def handle_http_request(
         %{method: "OPTIONS"} = conn,
         _,
@@ -82,9 +75,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     |> Conn.send_resp(:no_content, "")
   end
 
-  @doc @help_text
-  def handle_http_request(conn, api, endpoint, request_path)
-
   def handle_http_request(
         conn,
         _,
@@ -97,58 +87,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     conn.assigns[:body]
     |> Jason.decode()
     |> case do
-      # Deprecated way to pass events:
-      {:ok, %{"partition" => partition, "event" => event}} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from, topic)
-
-      # Preferred way to pass events, where the partition goes into the "rig" extension:
       {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
         do_handle_http_request(conn, request_path, partition, event, response_from, topic)
 
-      # Deprecated way to pass events, partition not set -> will be randomized:
-      {:ok, %{"event" => event}} ->
-        do_handle_http_request(conn, request_path, UUID.uuid4(), event, response_from, topic)
-
-      # Preferred way to pass events, partition not set -> will be randomized:
       {:ok, %{"specversion" => _} = event} ->
         do_handle_http_request(conn, request_path, UUID.uuid4(), event, response_from, topic)
-
-      {:ok, _} ->
-        respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
-
-      {:error, _} ->
-        respond_with_bad_request(conn, response_from, "expected a JSON encoded request body")
-    end
-  end
-
-  @deprecated "Using environemnt variables to set Kinesis proxy request topic is deprecated.
-  Set this value directly in proxy json file"
-  def handle_http_request(
-        conn,
-        _,
-        %{"target" => "kinesis"} = endpoint,
-        request_path
-      ) do
-    response_from = Map.get(endpoint, "response_from", "http")
-
-    conn.assigns[:body]
-    |> Jason.decode()
-    |> case do
-      # Deprecated way to pass events:
-      {:ok, %{"partition" => partition, "event" => event}} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from)
-
-      # Preferred way to pass events, where the partition goes into the "rig" extension:
-      {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from)
-
-      # Deprecated way to pass events, partition not set -> will be randomized:
-      {:ok, %{"event" => event}} ->
-        do_handle_http_request(conn, request_path, UUID.uuid4(), event, response_from)
-
-      # Preferred way to pass events, partition not set -> will be randomized:
-      {:ok, %{"specversion" => _} = event} ->
-        do_handle_http_request(conn, request_path, UUID.uuid4(), event, response_from)
 
       {:ok, _} ->
         respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
@@ -181,7 +124,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         path: request_path,
         query: conn.query_string
       })
-      |> Poison.encode!()
+      |> Tracing.append_context(Tracing.context())
+      |> Jason.encode!()
 
     produce(partition, kinesis_message, topic)
 
@@ -228,7 +172,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
     Conn.send_resp(conn, :bad_request, response)
   end
 
-  # ---
+  # --- Not used at the moment
 
   defp wait_for_response(conn, response_from) do
     conf = config()
@@ -244,6 +188,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         )
 
         conn
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.put_resp_content_type("application/json")
         |> Conn.send_resp(:ok, response)
     after
@@ -257,6 +202,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
         )
 
         conn
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.send_resp(:gateway_timeout, "")
     end
   end
@@ -268,7 +214,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kinesis do
 
     {:ok, _} =
       ExAws.Kinesis.put_record(
-        _stream_name = topic || conf.kinesis_request_stream,
+        _stream_name = topic,
         _partition_key = partition_key,
         _data = plaintext
       )

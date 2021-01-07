@@ -6,7 +6,7 @@ defmodule RigApi.Router do
       parsers: [:urlencoded, :multipart, :json],
       # return "415 Unsupported Media Type" if not handled by any parser
       pass: [],
-      json_decoder: Poison
+      json_decoder: Jason
     )
   end
 
@@ -22,8 +22,7 @@ defmodule RigApi.Router do
     )
   end
 
-  # Deprecated in 2.3, to be removed with 3.0:
-  scope "/v1", RigApi.V1 do
+  scope "/v2", RigApi.V2 do
     scope "/apis" do
       pipe_through(:body_parser)
       get("/", APIs, :list_apis)
@@ -49,7 +48,7 @@ defmodule RigApi.Router do
     end
   end
 
-  scope "/v2", RigApi.V2 do
+  scope "/v3", RigApi.V3 do
     scope "/apis" do
       pipe_through(:body_parser)
       get("/", APIs, :list_apis)

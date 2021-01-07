@@ -2,10 +2,11 @@ defmodule Rig.Application do
   @moduledoc false
 
   use Application
-  use Rig.Config, [:log_level]
+  use Rig.Config, [:log_level, :schema_registry_host]
 
+  alias RIG.Discovery
+  alias RIG.Tracing
   alias RigOutboundGateway.Kinesis
-  alias RigOutboundGateway.KinesisFirehose
 
   def start(_type, _args) do
     alias Supervisor.Spec
@@ -13,21 +14,21 @@ defmodule Rig.Application do
     # Override application logging with environment variable
     Logger.configure([{:level, config().log_level}])
 
-    Rig.Discovery.start()
+    Tracing.start()
+    Discovery.start()
 
     children = [
-      Spec.supervisor(Phoenix.PubSub.PG2, [Rig.PubSub, []]),
+      {Phoenix.PubSub, name: Rig.PubSub},
       # Kafka:
       {DynamicSupervisor, strategy: :one_for_one, name: RigKafka.DynamicSupervisor},
       # Event stream handling:
       Rig.EventFilter.Sup,
       Rig.EventStream.KafkaToFilter,
-      Rig.EventStream.KafkaToHttp,
+      Rig.EventStream.NatsToFilter,
       # Blacklist:
       Spec.worker(RIG.DistributedSet, _args = [SessionBlacklist, [name: SessionBlacklist]]),
       # Kinesis event stream:
       Kinesis.JavaClient,
-      KinesisFirehose.JavaClient,
       # RIG API (internal port):
       RigApi.Endpoint,
       # Request logger for proxy:
@@ -36,7 +37,9 @@ defmodule Rig.Application do
       RigInboundGateway.ApiProxy.Sup,
       RigInboundGateway.ApiProxy.Handler.Kafka,
       # RIG public-facing endpoint:
-      RigInboundGatewayWeb.Endpoint
+      RigInboundGatewayWeb.Endpoint,
+      # Cloud Events:
+      {Cloudevents, [confluent_schema_registry_url: config().schema_registry_host]}
     ]
 
     # Prometheus

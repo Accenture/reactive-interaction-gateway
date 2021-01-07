@@ -7,6 +7,20 @@ in the [Accenture Organization](https://github.com/accenture) on GitHub. These a
 guidelines, not rules. Use your best judgment, and feel free to propose changes to this document
 in a pull request.
 
+## TL;DR
+
+- **Use issues for everything.**
+- For a small change, just send a PR.
+- For bigger changes open an issue for discussion before sending a PR.
+- PR should have:
+  - Test case
+  - Documentation (e.g., moduledoc, developer's guide, operator's guide)
+  - Changelog entry
+- You can also contribute by:
+  - Reporting issues
+  - Suggesting new features or enhancements
+  - Improve/fix documentation
+
 ## Code of Conduct
 
 This project and everyone participating in it is governed by our
@@ -42,7 +56,7 @@ Before submitting a PR:
 
 - Please write tests.
 - Make sure you run all tests and check the linter (credo) for warnings.
-- Think about whether it makes sense to document the change in some way. For smaller, internal changes, inline documentation might be sufficient (moduledoc), while more visible ones might warrant a change to the [developer's guide](guides/developer-guide.md), the [operator's guide](guides/operator-guide.md) or the [README](./README.md).
+- Think about whether it makes sense to document the change in some way. For smaller, internal changes, inline documentation might be sufficient (moduledoc), while more visible ones might warrant a change to the [developer's guide](docs/rig-dev-guide.md), the [operator's guide](docs/rig-ops-guide.md) or the [README](./README.md).
 - Update `CHANGELOG.md` file with your current change in form of `[Type of change e.g. Config, Kafka, .etc] Short description what it is all about - [#NUMBER](link to issue or pull request)`, and choose a suitable section (i.e., changed, added, fixed, removed, deprecated).
 
 ### Design Decisions

@@ -37,7 +37,7 @@ config :rig, RigApi.Endpoint,
     protocol_options: cowboy_options
   ],
   render_errors: [view: RigApi.ErrorView, accepts: ~w(json)],
-  pubsub: [name: Rig.PubSub],
+  pubsub_server: Rig.PubSub,
   check_origin: false
 
 # Always start the HTTP endpoints on application startup:
@@ -45,6 +45,7 @@ config :phoenix, :serve_endpoints, true
 
 config :rig, RigApi.V1.APIs, rig_proxy: RigInboundGateway.Proxy
 config :rig, RigApi.V2.APIs, rig_proxy: RigInboundGateway.Proxy
+config :rig, RigApi.V3.APIs, rig_proxy: RigInboundGateway.Proxy
 
 config :rig, :event_filter, Rig.EventFilter
 

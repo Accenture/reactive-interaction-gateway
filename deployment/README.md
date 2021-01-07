@@ -1,30 +1,89 @@
-# Distributed deployment
+# Running RIG on Kubernetes
 
-Reactive Interaction Gateway (RIG) uses [Peerage library](https://github.com/mrluc/peerage) to do discovery in distributed mode (production Distillery release).
+The easiest way to deploy RIG is using Helm:
 
-**Note:** If you don't care about distributed mode and don't want to do discovery, follow just `General configuration` section and ignore rest of the text.
+```shell
+helm repo add accenture https://accenture.github.io/reactive-interaction-gateway
+# Helm v3
+helm install rig accenture/reactive-interaction-gateway
+# Helm v2
+helm install --name=rig accenture/reactive-interaction-gateway-helm-v2
+```
 
-## Configuration
+Check out the [Helm v2 README](./reactive-interaction-gateway-helm-v2/README.md) or [Helm v3 README](./reactive-interaction-gateway/README.md) and [Operator's Guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html) for more information on configuring RIG.
 
-### General configuration
+## Deploy with kubectl
 
-1. Node host - Every node in cluster needs to be discoverable by other nodes. For that Elixir/Erlang uses so called `long name` or `short name`. We are using `long name` which is formed in the following way `app_name@node_host`. `app_name` is in our case set to `rig`, but `node_host` is taken from environment variable `NODE_HOST`. This can be either IP or container alias or whatever that is routable in network by other nodes.
+> This deployment is not recommended as lots of configurations is hard coded
 
-1. Node cookie - Nodes in Erlang cluster use cookies as a form of authorization/authentication between them. Only nodes with the same cookie can communicate together. It should be ideally some generated hash, set it to `NODE_COOKIE` environment variable.
+```bash
+kubectl apply -f kubectl/rig.yaml
+```
 
-### DNS discovery
 
-RIG currently supports distributed deployment via DNS discovery. To make it work, you need to set two environment variables:
+## Some Additional information
 
-1. Discovery type - Currently RIG supports only DNS discovery. To use DNS, set `DISCOVERY_TYPE` to `dns`.
+Check out the [getting-started tutorial](https://accenture.github.io/reactive-interaction-gateway/docs/tutorial.html), the [examples](https://accenture.github.io/reactive-interaction-gateway/docs/examples.html) and the [features](https://accenture.github.io/reactive-interaction-gateway/docs/features.html) for more information what you can do with RIG.
 
-1. DNS name (address) - Address where peerage will do discovery for Node host addresses. Value is taken from environment variable `DNS_NAME`.
+### Communication
 
-DNS discovery is executed every 5 seconds.
+Both `kubectl` and `helm` deploy bunch of Kubernetes resources:
 
-### Additional configuration
+- deployment - manages pod(s)
+- service - provides the main communication point for other applications
+- headless service - takes care of DNS discovery used internally
 
-When running in distributed mode, additional variables may be passed to the deployment in order to run the proper configuration.
-Changes to these variables are required in most production circumstances.
+To allow external communication (outside of your cluster) do:
 
-For more information on configuration variables, please view the [Operator's Guide to the RIG](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html)
+```bash
+helm upgrade --set service.type=LoadBalancer rig accenture/reactive-interaction-gateway
+# for kubectl update kubectl/rig.yaml to use a service of type LoadBalancer instead of ClusterIP
+```
+
+### Scaling
+
+Scale the deployment and create multiple pods
+
+```bash
+helm upgrade --set replicaCount=<replicas> rig accenture/reactive-interaction-gateway
+# or
+kubectl scale deployment/<deployment_name> --replicas <replicas>
+```
+
+You can also inspect the logs of the pods with `kubectl logs <pod_name>` to see how they automatically re-balance Kafka consumers (if you are using Kafka) and adapt Proxy APIs from other nodes.
+
+### Configuration
+
+#### Node host
+
+Every node in cluster needs to be discoverable by other nodes. For that Elixir/Erlang uses so called `long name` or `short name`. We are using `long name` which is formed in the following way `app_name@node_host`. `app_name` is in our case set to `rig` and `node_host` is taken from environment variable `NODE_HOST`. This can be either IP or container alias or whatever that is routable in network by other nodes.
+
+We are using the pod IP with:
+
+```yaml
+- name: NODE_HOST
+  valueFrom:
+    fieldRef:
+      fieldPath: status.podIP
+```
+
+#### Node cookie
+
+Nodes in Erlang cluster use cookies as a form of authorization/authentication between them. Only nodes with the same cookie can communicate together. Ideally, it is some generated hash, that's why we recommend adapting `NODE_COOKIE` environment variable in the `values.yaml`.
+
+#### Additional configuration
+
+You can configure bunch of environment variables, please check the [Helm v2 README](./reactive-interaction-gateway-helm-v2/README.md) or [Helm v3 README](./reactive-interaction-gateway/README.md) and [Operator's Guide](https://accenture.github.io/reactive-interaction-gateway/docs/rig-ops-guide.html).
+
+## Cleanup
+
+```bash
+# kubectl
+kubectl delete -f kubectl/rig.yaml
+
+# Helm v3
+helm uninstall rig
+
+# Helm v2
+helm delete --purge rig
+```

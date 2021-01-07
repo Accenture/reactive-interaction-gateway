@@ -38,14 +38,12 @@ defmodule RigCloudEvents.CloudEvent do
     end
   end
 
-  @doc """
-  Convenience function used in testing.
-
-  If this would be called in production, of course it would be way more efficient to
-  access the given map directly. However, this modules' raison d'être is the safe
-  handling of incoming JSON encoded data, so it's safe to assume this function is ever
-  only called by tests.
-  """
+  # Convenience function used in testing.
+  #
+  # If this would be called in production, of course it would be way more efficient to
+  # access the given map directly. However, this modules' raison d'être is the safe
+  # handling of incoming JSON encoded data, so it's safe to assume this function is ever
+  # only called by tests.
   @spec parse(map) :: {:ok, t} | {:error, any}
   def parse(map) when is_map(map) do
     map |> Jason.encode!() |> parse
@@ -76,6 +74,14 @@ defmodule RigCloudEvents.CloudEvent do
     end
   end
 
+  def specversion(event) do
+    cond do
+      specversion_0_2?(event) -> {:ok, "0.2"}
+      specversion_0_1?(event) -> {:ok, "0.1"}
+      true -> {:error, :not_a_cloud_event}
+    end
+  end
+
   # ---
 
   def specversion!(event) do
@@ -85,21 +91,39 @@ defmodule RigCloudEvents.CloudEvent do
 
   # ---
 
-  defp specversion_0_1?(parsed) do
+  defp specversion_0_1?(parsed) when is_list(parsed) do
     case @parser.context_attribute(parsed, "cloudEventsVersion") do
       {:ok, "0.1"} -> true
       _ -> false
     end
   end
 
+  defp specversion_0_1?(%{cloudEventsVersion: cloudEventsVersion}) do
+    case cloudEventsVersion do
+      "0.1" -> true
+      _ -> false
+    end
+  end
+
+  defp specversion_0_1?(_event), do: false
+
   # ---
 
-  defp specversion_0_2?(parsed) do
+  defp specversion_0_2?(parsed) when is_list(parsed) do
     case @parser.context_attribute(parsed, "specversion") do
       {:ok, "0.2"} -> true
       _ -> false
     end
   end
+
+  defp specversion_0_2?(%{specversion: specversion}) do
+    case specversion do
+      "0.2" -> true
+      _ -> false
+    end
+  end
+
+  defp specversion_0_2?(_event), do: false
 
   # ---
 
@@ -107,6 +131,13 @@ defmodule RigCloudEvents.CloudEvent do
     case specversion(event) do
       {:ok, "0.2"} -> @parser.context_attribute(parsed, "type")
       {:ok, "0.1"} -> @parser.context_attribute(parsed, "eventType")
+    end
+  end
+
+  def type(event) do
+    case specversion(event) do
+      {:ok, "0.2"} -> {:ok, event.type}
+      {:ok, "0.1"} -> {:ok, event.eventType}
     end
   end
 
@@ -126,6 +157,10 @@ defmodule RigCloudEvents.CloudEvent do
     end
   end
 
+  def id(%{id: id}), do: {:ok, id}
+
+  def id(%{eventID: eventID}), do: {:ok, eventID}
+
   # ---
 
   def id!(event) do
@@ -137,6 +172,15 @@ defmodule RigCloudEvents.CloudEvent do
 
   @spec find_value(t, json_pointer :: String.t()) :: {:ok, value :: any} | {:error, any}
   def find_value(%__MODULE__{parsed: parsed}, json_pointer) do
+    @parser.find_value(parsed, json_pointer)
+  end
+
+  def find_value(event, json_pointer) do
+    parsed =
+      event
+      |> Cloudevents.to_json()
+      |> @parser.parse()
+
     @parser.find_value(parsed, json_pointer)
   end
 end

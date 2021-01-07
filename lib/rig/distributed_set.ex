@@ -124,7 +124,7 @@ defmodule RIG.DistributedSet do
     {:ok, %{state | ets_table: ets_table}}
   end
 
-  @doc "Handles get_record requests from other nodes."
+  # Handles get_record requests from other nodes.
   @impl GenServer
   def handle_call(
         {:get_records, since_record_id},
@@ -163,7 +163,7 @@ defmodule RIG.DistributedSet do
     {:reply, reply, state}
   end
 
-  @doc "Handles adding a record on this node."
+  # Handles adding a record on this node.
   @impl GenServer
   def handle_call(
         {:add_from_local, {_, uuid, _, _} = record},
@@ -211,26 +211,27 @@ defmodule RIG.DistributedSet do
     {:noreply, %{state | last_record_id: synced_record_id}}
   end
 
-  @doc """
-  Asks a random peer for missing records.
-
-  Records are missing on startup, but there could also be a gap caused by a temporary
-  network split.
-  """
+  # Asks a random peer for missing records.
+  #
+  # Records are missing on startup, but there could also be a gap caused by a temporary
+  # network split.
   @impl GenServer
   def handle_info(
         :sync_with_random_peer,
         %{pg2_group: pg2_group, ets_table: ets_table, last_record_id: last_record_id} = state
       ) do
     state =
-      case choose_random_peer(pg2_group) do
-        nil ->
+      with {:ok, peer} <- choose_random_peer(pg2_group),
+           {:ok, {remote_last_record_id, records}} <- get_records_from_peer(peer, last_record_id) do
+        for record <- records, do: save(ets_table, record)
+        %{state | last_record_id: remote_last_record_id}
+      else
+        {:error, :no_peer_available} ->
           state
 
-        peer ->
-          {remote_last_record_id, records} = GenServer.call(peer, {:get_records, last_record_id})
-          for record <- records, do: save(ets_table, record)
-          %{state | last_record_id: remote_last_record_id}
+        {:error, {:timeout, peer}} ->
+          Logger.warn(fn -> "Call to #{inspect(peer)} timed out" end)
+          state
       end
 
     next_sync_in_ms = (@sync_interval_s + :rand.uniform(10) - 5) * 1_000
@@ -238,7 +239,7 @@ defmodule RIG.DistributedSet do
     {:noreply, state}
   end
 
-  @doc "Remove expired records."
+  # Remove expired records.
   @impl GenServer
   def handle_info(:cleanup, %{ets_table: ets_table} = state) do
     remove_expired_records(ets_table)
@@ -258,11 +259,9 @@ defmodule RIG.DistributedSet do
 
     n_deleted = :ets.select_delete(ets_table, match_spec)
 
-    Logger.debug(fn ->
-      if n_deleted > 0,
-        do: "Removed #{n_deleted} expired records",
-        else: :skip
-    end)
+    if n_deleted > 0 do
+      Logger.debug(fn -> "Removed #{n_deleted} expired records" end)
+    end
 
     n_deleted
   end
@@ -276,15 +275,26 @@ defmodule RIG.DistributedSet do
     :ets.select(ets_table, query)
   end
 
+  defp get_records_from_peer(peer, last_record_id) do
+    {remote_last_record_id, records} = GenServer.call(peer, {:get_records, last_record_id})
+    {:ok, {remote_last_record_id, records}}
+  catch
+    :exit, {:timeout, _} ->
+      {:error, {:timeout, peer}}
+  end
+
   defp choose_random_peer(pg2_group) do
     self = self()
 
-    pg2_group
-    |> :pg2.get_members()
-    |> Enum.reject(&(&1 == self))
-    |> Enum.random()
+    peer =
+      pg2_group
+      |> :pg2.get_members()
+      |> Enum.reject(&(&1 == self))
+      |> Enum.random()
+
+    {:ok, peer}
   rescue
-    _ in Enum.EmptyError -> nil
+    _ in Enum.EmptyError -> {:error, :no_peer_available}
   end
 
   defp broadcast_update(record, pg2_group, previous_record_id) do

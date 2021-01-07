@@ -6,6 +6,7 @@ defmodule RigInboundGatewayWeb.Endpoint do
 
   plug(Plug.RequestId)
   plug(Plug.Logger)
+  plug(RIG.Tracing.Plug)
 
   plug(Plug.MethodOverride)
   plug(Plug.Head)

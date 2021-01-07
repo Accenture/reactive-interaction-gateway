@@ -31,7 +31,6 @@ defmodule EncodeJwt.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:poison, "~> 2.0 or ~> 3.0 or ~> 4.0"},
       {:joken, "~> 1.4"}
     ]
   end

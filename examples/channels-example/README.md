@@ -77,7 +77,7 @@ Add new API to RIG. REST API calls from Frontend goes through RIG to external se
 ```sh
 curl -X "POST" \
 -H "Content-Type: application/json" \
--d "{\"id\":\"kafka-service\",\"name\":\"kafka-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kafka-producer-endpoint\",\"path\":\"/produce\",\"method\":\"POST\",\"secured\":false}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localhost\",\"port\":8000}}" \
+-d "{\"id\":\"kafka-service\",\"name\":\"kafka-service\",\"version_data\":{\"default\":{\"endpoints\":[{\"id\":\"kafka-producer-endpoint\",\"path_regex\":\"/produce\",\"method\":\"POST\",\"secured\":false}]}},\"proxy\":{\"use_env\":false,\"target_url\":\"localhost\",\"port\":8000}}" \
 --silent \
 "http://localhost:7010/v2/apis"
 ```
@@ -108,3 +108,16 @@ Repeat steps 1 to 6.
 1. Second tab: Fill in `Set event type` to `message`
 1. Second tab: Fill in `Event message` with e.g. `{"name":"john","foo":"bar"}`
 1. Second tab: new message should be displayed, First tab: **no new message**
+
+## One word to distributed Tracing
+
+RIG handles two types of messages: request/response messages (of any format) and events (in CloudEvents format). Tracing the former is done using headers - e.g., for HTTP, RIG implements the W3C trace context specification. Tracing CloudEvents is done using the official CloudEvents tracing extension, where parent trace ID and trace context are taken from the context attributes of the event itself rather than from trace context headers.
+For more information, read the [distributed tracing docs](../../docs/distributed-tracing.md).
+
+In this example, RIG processes the trace context as following:
+
+- frontend->RIG: RIG reads trace context from the http header (as this is an incoming message)
+- RIG->Kafka: RIG creates a new span and forwards it to the kafka header (as it is still a message) (tackled in issue #311). Consequently, the backend application could potentially also process the -race context and create a new span out of it with the same trace-ID
+- Backend->Kafka: Backend need to send the trace context via the event payload (because now we are talking of an event, and not a message anymore)
+- Kafka->Rig: RIG will read the trace context from the cloudevent
+- RIG->frontend: RIG emits the event, having the trace context in the event payload

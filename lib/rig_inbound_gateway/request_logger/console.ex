@@ -16,6 +16,6 @@ defmodule RigInboundGateway.RequestLogger.Console do
   end
 
   defp endpoint_desc(endpoint) do
-    "[#{endpoint["id"]}] #{endpoint["method"]} #{endpoint["path"]}"
+    "[#{endpoint["id"]}] #{endpoint["method"]} #{endpoint["path_regex"]}"
   end
 end

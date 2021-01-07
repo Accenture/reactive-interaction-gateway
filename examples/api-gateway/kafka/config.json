@@ -1,0 +1,16 @@
+[
+  {
+    "id": "my-kafka-service",
+    "version_data": {
+      "default": {
+        "endpoints": [{
+          "id": "my-endpoint",
+          "method": "POST",
+          "path_regex": "/",
+          "target": "kafka",
+          "topic": "example"
+        }]
+      }
+    }
+  }
+]

@@ -96,15 +96,15 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   # ---
 
-  @doc ~S"The client may send this as the response to the :ping heartbeat."
+  # The client may send this as the response to the :ping heartbeat.
   @impl :cowboy_websocket
   def websocket_handle({:pong, _app_data}, state), do: {:ok, state, :hibernate}
   @impl :cowboy_websocket
   def websocket_handle(:pong, state), do: {:ok, state, :hibernate}
 
-  @doc ~S"Allow the client to send :ping messages to test connectivity."
+  # Allow the client to send :ping messages to test connectivity.
   @impl :cowboy_websocket
-  def websocket_handle({:ping, app_data}, state), do: {:reply, {:pong, app_data}, :hibernate}
+  def websocket_handle({:ping, app_data}, _state), do: {:reply, {:pong, app_data}, :hibernate}
 
   @impl :cowboy_websocket
   def websocket_handle(in_frame, state) do
@@ -125,7 +125,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
   end
 
   @impl :cowboy_websocket
-  def websocket_info(%CloudEvent{} = event, state) do
+  def websocket_info(event, state) when is_struct(event) do
     Logger.debug(fn -> "event: " <> inspect(event) end)
     # Forward the event to the client:
     {:reply, frame(event), state, :hibernate}
@@ -173,6 +173,10 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   defp frame(%CloudEvent{json: json}) do
     {:text, json}
+  end
+
+  defp frame(event) do
+    {:text, Cloudevents.to_json(event)}
   end
 
   # ---

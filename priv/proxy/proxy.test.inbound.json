@@ -21,108 +21,101 @@
         "endpoints": [
           {
             "id": "post-myapi-publish-async",
-            "path": "/myapi/publish-async",
+            "path_regex": "/myapi/publish-async",
             "method": "POST",
-            "type": "async",
             "target": "kafka",
-            "secured": false
+            "topic": "test-topic"
           },
           {
             "id": "post-myapi-publish-async",
-            "path": "/myapi/publish-kinesis-async",
+            "path_regex": "/myapi/publish-kinesis-async",
             "method": "POST",
-            "type": "async",
             "target": "kinesis",
-            "stream": "test-topic",
-            "secured": false
+            "topic": "test-topic"
           },
           {
             "id": "post-myapi-publish-sync",
-            "path": "/myapi/publish-sync",
+            "path_regex": "/myapi/publish-sync",
             "method": "POST",
-            "type": "sync",
             "target": "kafka",
-            "secured": false
+            "topic": "test-topic"
           },
           {
             "id": "get-myapi-test-id",
-            "path": "/myapi/test/{id}",
+            "path_regex": "/myapi/test/(.+)",
             "method": "GET",
             "type": "http",
             "secured": true
           },
           {
             "id": "get-myapi-detail-id",
-            "path": "/myapi/detail/{id}",
+            "path_regex": "/myapi/detail/(.+)",
             "method": "GET",
             "secured": true
           },
           {
             "id": "get-myapi-free",
-            "path": "/myapi/free",
-            "method": "GET",
-            "secured": false
+            "path_regex": "/myapi/free",
+            "method": "GET"
           },
           {
             "id": "badmethod-myapi-books",
-            "path": "/myapi/books",
+            "path_regex": "/myapi/books",
             "method": "BADMETHOD",
             "secured": true
           },
           {
             "id": "options-myapi-books",
-            "path": "/myapi/books",
+            "path_regex": "/myapi/books",
             "method": "OPTIONS",
             "secured": true
           },
           {
             "id": "head-myapi-books",
-            "path": "/myapi/books",
+            "path_regex": "/myapi/books",
             "method": "HEAD",
             "secured": true
           },
           {
             "id": "delete-myapi-books",
-            "path": "/myapi/books",
+            "path_regex": "/myapi/books",
             "method": "DELETE",
             "secured": true
           },
           {
             "id": "patch-myapi-books",
-            "path": "/myapi/books",
+            "path_regex": "/myapi/books",
             "method": "PATCH",
             "secured": true
           },
           {
             "id": "put-myapi-books",
-            "path": "/myapi/books",
+            "path_regex": "/myapi/books",
             "method": "PUT",
             "secured": true
           },
           {
             "id": "post-myapi-books",
-            "path": "/myapi/books",
+            "path_regex": "/myapi/books",
             "method": "POST",
             "secured": true
           },
           {
             "id": "get-myapi-books",
-            "path": "/myapi/books",
+            "path_regex": "/myapi/books",
             "method": "GET",
             "secured": true
           },
           {
             "id": "post-myapi-transform-headers",
-            "path": "/myapi/transform-headers",
+            "path_regex": "/myapi/transform-headers",
             "method": "POST",
-            "secured": false,
             "transform_request_headers": true
           },
           {
             "id": "post-myapi-no-transform-headers",
-            "path": "/myapi/no-transform-headers",
-            "method": "POST",
-            "secured": false
+            "path_regex": "/myapi/no-transform-headers",
+            "method": "POST"
           }
         ]
       }
@@ -136,22 +129,14 @@
   {
     "id": "random-service",
     "name": "random-service",
-    "auth_type": "none",
-    "auth": {
-      "use_header": false,
-      "header_name": "",
-      "use_query": false,
-      "query_name": ""
-    },
     "versioned": false,
     "version_data": {
       "default": {
         "endpoints": [
           {
             "id": "get-myapi-direct",
-            "path": "/myapi/direct",
-            "method": "GET",
-            "secured": true
+            "path_regex": "/myapi/direct",
+            "method": "GET"
           }
         ]
       }

@@ -13,7 +13,7 @@ defmodule RigTests.Proxy.ResponseFrom.KinesisTest do
 
   import FakeServer
 
-  alias FakeServer.HTTP.Response
+  alias FakeServer.Response
   alias RigInboundGateway.ApiProxyInjection
 
   @api_port Confex.fetch_env!(:rig, RigApi.Endpoint)[:http][:port]
@@ -70,10 +70,8 @@ defmodule RigTests.Proxy.ResponseFrom.KinesisTest do
             endpoints: [
               %{
                 id: endpoint_id,
-                type: "http",
-                secured: false,
                 method: "GET",
-                path: endpoint_path,
+                path_regex: endpoint_path,
                 response_from: "kinesis"
               }
             ]

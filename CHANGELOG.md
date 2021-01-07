@@ -9,20 +9,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added possibility to define Kafka/Kinesis topic and schema per reverse proxy endpoint. The current solution using environment variables is deprecated, but still used as a fallback -- will be removed in the version 3.0. [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
-- Added Kinesis + Localstack example [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+- Support publishing events consumed from [NATS](https://nats.io) topics. See the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/event-streams.html#nats) for how to get started. [#297](https://github.com/Accenture/reactive-interaction-gateway/issues/297)
+- Added validation for reverse proxy configuration. Now it crashes RIG on start when configuration is not valid or returns `400` when using REST API to update configuration. [#277](https://github.com/Accenture/reactive-interaction-gateway/issues/277)
+- Added basic distributed tracing support in [W3C Trace Context specification](https://www.w3.org/TR/trace-context/) with Jaeger and Openzipkin exporters. RIG opens a span at the API Gateway and emits trace context in Cloud Events following the [distributed tracing spec](https://github.com/cloudevents/spec/blob/v1.0/extensions/distributed-tracing.md). [#281](https://github.com/Accenture/reactive-interaction-gateway/issues/281)
+- Added possibility to set response code for `response_from` messages in reverse proxy (`kafka` and `http_async`). [#321](https://github.com/Accenture/reactive-interaction-gateway/pull/321)
+- Added new version - `v3` - for internal endpoints to support response code in the `/responses` endpoint
+- Added Helm v3 template to the `deployment` folder [#288](https://github.com/Accenture/reactive-interaction-gateway/issues/288)
+- Added detailed features summary on the website with architecture diagrams. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
+- Added [documentation section](https://accenture.github.io/reactive-interaction-gateway/docs/jwt-blacklisting.html) for the JWT Blacklist feature. [#156](https://github.com/Accenture/reactive-interaction-gateway/issues/156)
 
-<!-- ### Changed -->
+### Changed
 
-<!-- ### Fixed -->
+- Incorporated [cloudevents-ex](https://github.com/kevinbader/cloudevents-ex) to handle binary and structured modes for [Kafka protocol binding](https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md) in a proper way. This introduces some **breaking changes**:
+  - Binary mode is now using `ce_` prefix for CloudEvents context attribute headers, before it was `ce-` - done according to the [Kafka protocol binding](https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md)
+- Change above affects also `"response_from": "kafka"` proxy functionality. RIG will forward to clients only Kafka body, no headers. This means, when using binary mode, clients receive only the data part, no CloudEvents context attributes.
+- Changed `response_from` handler to expect a message in binary format, **NOT** a cloud event (`kafka` and `http_async`). [#321](https://github.com/Accenture/reactive-interaction-gateway/pull/321)
+- Updated Helm v2 template, kubectl yaml file and instructions in the `deployment` folder [#288](https://github.com/Accenture/reactive-interaction-gateway/issues/288)
+- Publish Helm Chart to Github pages. With this change, we can simply install the chart using
+
+    ```shell
+    helm repo add accenture https://accenture.github.io/reactive-interaction-gateway
+    helm install rig accenture/reactive-interaction-gateway
+    ```
+
+  More information, follow the [deployment Readme](./deployment/README.md). [#319](https://github.com/Accenture/reactive-interaction-gateway/issues/319)
+- make README smaller, easier to read and highlight features. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
+
+### Fixed
+
+- Fixed a bug where distributed set processes would crash when one of their peers has died but hasn't been removed yet from the pg2 group.
+- Fixed wrong endpoint validation for reverse proxy. Now it should correctly check for `path` or `path_regex`. Before it would require `path` even with `path_regex` in place. [#334](https://github.com/Accenture/reactive-interaction-gateway/issues/334)
 
 <!-- ### Deprecated -->
 
-<!-- ### Removed -->
+### Removed
+
+- Removed deprecated or unused code/functionality, these are **breaking changes** [#278](https://github.com/Accenture/reactive-interaction-gateway/issues/278):
+  - Removed deprecated internal API `/v1`.
+  - Removed deprecated environment variables: `PROXY_KAFKA_REQUEST_AVRO`, `PROXY_KAFKA_REQUEST_TOPIC`, `PROXY_KINESIS_REQUEST_STREAM`. This means that you can set topic and schema for publishing to event streams **only** in the proxy config as described in the [docs](https://accenture.github.io/reactive-interaction-gateway/docs/api-gateway.html#publishing-to-event-streams).
+  - Removed experimental feature Firehose (forwarding events to an HTTP endpoint).
+  - Removed `path` field in proxy configuration. Reason is that the `path_regex` field is already covering `path` functionality and thus it doesn't make sense to have both of them. Should cause less confusion and improve maintainability.
+    - **Migration:**
+      - `"path": "/foo"` -> `"path_regex": "/foo"`
+      - `"path": "/foo/{id}"` -> `"path_regex": "/foo/(.+)"` - or pretty much whatever regex you need (e.g. UUID pattern)
 
 <!-- ### Security -->
 
-<!-- ### Technical Improvements -->
+### Technical Improvements
+
+- Updated dependencies to support OTP 23. We've also replaced the versions file with `.tool-versions`, which makes it easier for those using the [asdf package manager](https://asdf-vm.com/) - just run `asdf install` to obtain the correct versions of Erlang and Elixir.
+  [#341](https://github.com/Accenture/reactive-interaction-gateway/issues/341)
+
+## [2.4.0] - 2020-05-07
+
+### Added
+
+- Added possibility to define Kafka/Kinesis topic and schema per reverse proxy endpoint. The current solution using environment variables is deprecated, but still used as a fallback -- will be removed in the version 3.0.
+  [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+- Added Kinesis + Localstack example.
+  [#229](https://github.com/Accenture/reactive-interaction-gateway/issues/229)
+
+### Technical Improvements
+
+- Upgrade the Elixir version to 1.10 for source code and Docker images. Upgrade version for multiple dependencies.
+  [#285](https://github.com/Accenture/reactive-interaction-gateway/issues/285)
+- Added [Slackin](https://rig-slackin.herokuapp.com/) integration for easier Slack access - check the main page badge!
+  [#240](https://github.com/Accenture/reactive-interaction-gateway/issues/240)
 
 ## [2.3.0] - 2019-12-13
 
@@ -369,7 +421,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Disable Origin checking.
   [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
-[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.3.0...HEAD
+[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.4.0...HEAD
+[2.4.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.3.0...2.4.0
 [2.3.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.1...2.3.0
 [2.2.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.0...2.2.1
 [2.2.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.1.1...2.2.0

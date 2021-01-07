@@ -3,33 +3,24 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
   Handles requests for Kafka targets.
 
   """
-  use Rig.KafkaConsumerSetup, [:cors, :request_topic, :request_schema, :response_timeout]
+  use Rig.KafkaConsumerSetup, [:cors, :response_timeout]
 
   alias Plug.Conn
-
-  alias RigMetrics.ProxyMetrics
-
+  alias Rig.Connection.Codec
+  alias RIG.Tracing
   alias RigInboundGateway.ApiProxy.Handler
   @behaviour Handler
-
-  alias Rig.Connection.Codec
+  alias RigInboundGateway.ApiProxy.ResponseFromParser
+  alias RigMetrics.ProxyMetrics
 
   @help_text """
   Produce the request to a Kafka topic and optionally wait for the (correlated) response.
 
-  Expects a JSON encoded HTTP body with the following fields:
+  Expects a JSON encoded CloudEvent in the HTTP body.
 
-  - `event`: The published CloudEvent >= v0.2. The event is extended by metadata
-  written to the "rig" extension field (following the CloudEvents v0.2 spec).
-  - `partition`: The targetted Kafka partition.
+  Optionally set a partition key via this field:
 
-  or
-
-  ...
-  CloudEvent
-  ...
   `rig`: {\"target_partition\":\"the-partition-key\"}
-
   """
 
   # ---
@@ -39,21 +30,19 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
   # ---
 
-  @spec kafka_handler(any()) ::
+  @spec kafka_handler(Cloudevents.kafka_body(), Cloudevents.kafka_headers()) ::
           :ok
           | {:error, %{:__exception__ => true, :__struct__ => atom(), optional(atom()) => any()},
              any()}
-  def kafka_handler(message) do
-    with {:ok, body} <- Jason.decode(message),
-         {:ok, rig_metadata} <- Map.fetch(body, "rig"),
-         {:ok, correlation_id} <- Map.fetch(rig_metadata, "correlation"),
-         {:ok, deserialized_pid} <- Codec.deserialize(correlation_id) do
-      Logger.debug(fn ->
-        "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
-      end)
+  def kafka_handler(message, headers) do
+    case ResponseFromParser.parse(headers, message) do
+      {deserialized_pid, response_code, response, extra_headers} ->
+        Logger.debug(fn ->
+          "HTTP response via Kafka to #{inspect(deserialized_pid)}: #{inspect(message)}"
+        end)
 
-      send(deserialized_pid, {:response_received, message})
-    else
+        send(deserialized_pid, {:response_received, response, response_code, extra_headers})
+
       err ->
         Logger.warn(fn -> "Parse error #{inspect(err)} for #{inspect(message)}" end)
         :ignore
@@ -66,10 +55,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
 
   # ---
 
+  @doc @help_text
   @impl Handler
   def handle_http_request(conn, api, endpoint, request_path)
 
-  @doc "CORS response for preflight request."
+  # CORS response for preflight request.
   def handle_http_request(
         %{method: "OPTIONS"} = conn,
         _,
@@ -89,9 +79,6 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     |> Conn.send_resp(:no_content, "")
   end
 
-  @doc @help_text
-  def handle_http_request(conn, api, endpoint, request_path)
-
   def handle_http_request(
         conn,
         _,
@@ -105,58 +92,19 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     conn.assigns[:body]
     |> Jason.decode()
     |> case do
-      # Deprecated way to pass events:
-      {:ok, %{"partition" => partition, "event" => event}} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from, topic, schema)
-
-      # Preferred way to pass events, where the partition goes into the "rig" extension:
       {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from, topic, schema)
+        do_handle_http_request(
+          conn,
+          request_path,
+          partition,
+          event,
+          response_from,
+          topic,
+          schema
+        )
 
-      # Deprecated way to pass events, partition not set -> will be randomized:
-      {:ok, %{"event" => event}} ->
-        do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
-
-      # Preferred way to pass events, partition not set -> will be randomized:
       {:ok, %{"specversion" => _} = event} ->
-        do_handle_http_request(conn, request_path, <<>>, event, response_from, topic)
-
-      {:ok, _} ->
-        respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
-
-      {:error, _} ->
-        respond_with_bad_request(conn, response_from, "expected a JSON encoded request body")
-    end
-  end
-
-  @deprecated "Using environemnt variables to set Kafka proxy request topic and schema is deprecated.
-  Set these values directly in proxy json file"
-  def handle_http_request(
-        conn,
-        _,
-        %{"target" => "kafka"} = endpoint,
-        request_path
-      ) do
-    response_from = Map.get(endpoint, "response_from", "http")
-
-    conn.assigns[:body]
-    |> Jason.decode()
-    |> case do
-      # Deprecated way to pass events:
-      {:ok, %{"partition" => partition, "event" => event}} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from)
-
-      # Preferred way to pass events, where the partition goes into the "rig" extension:
-      {:ok, %{"specversion" => _, "rig" => %{"target_partition" => partition}} = event} ->
-        do_handle_http_request(conn, request_path, partition, event, response_from)
-
-      # Deprecated way to pass events, partition not set -> will be randomized:
-      {:ok, %{"event" => event}} ->
-        do_handle_http_request(conn, request_path, <<>>, event, response_from)
-
-      # Preferred way to pass events, partition not set -> will be randomized:
-      {:ok, %{"specversion" => _} = event} ->
-        do_handle_http_request(conn, request_path, <<>>, event, response_from)
+        do_handle_http_request(conn, request_path, <<>>, event, response_from, topic, schema)
 
       {:ok, _} ->
         respond_with_bad_request(conn, response_from, "the body does not look like a CloudEvent")
@@ -190,7 +138,8 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         path: request_path,
         query: conn.query_string
       })
-      |> Poison.encode!()
+      |> Tracing.append_context(Tracing.context())
+      |> Jason.encode!()
 
     produce(partition, kafka_message, topic, schema)
 
@@ -245,7 +194,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
     conf = config()
 
     receive do
-      {:response_received, response} ->
+      {:response_received, response, response_code, extra_headers} ->
         ProxyMetrics.count_proxy_request(
           conn.method,
           conn.request_path,
@@ -255,8 +204,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         )
 
         conn
-        |> Conn.put_resp_content_type("application/json")
-        |> Conn.send_resp(:ok, response)
+        |> Tracing.Plug.put_resp_header(Tracing.context())
+        |> Map.update!(:resp_headers, fn existing_headers ->
+          existing_headers ++ Map.to_list(extra_headers)
+        end)
+        |> Conn.send_resp(response_code, response)
     after
       conf.response_timeout ->
         ProxyMetrics.count_proxy_request(
@@ -268,6 +220,7 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         )
 
         conn
+        |> Tracing.Plug.put_resp_header(Tracing.context())
         |> Conn.send_resp(:gateway_timeout, "")
     end
   end
@@ -286,13 +239,11 @@ defmodule RigInboundGateway.ApiProxy.Handler.Kafka do
         _from,
         %{kafka_config: kafka_config} = state
       ) do
-    %{request_topic: request_topic, request_schema: request_schema} = config()
-
     res =
       RigKafka.produce(
         kafka_config,
-        topic || request_topic,
-        schema || request_schema,
+        topic,
+        schema,
         key,
         plaintext
       )

@@ -1,7 +1,8 @@
-FROM elixir:1.9-alpine as build
+FROM elixir:1.11-alpine as build
 
 # Install Elixir & Erlang environment dependencies
 RUN apk add --no-cache make gcc g++
+COPY .tool-versions /opt/sites/rig/
 RUN mix local.hex --force
 RUN mix local.rebar --force
 
@@ -9,7 +10,6 @@ ENV MIX_ENV=prod
 WORKDIR /opt/sites/rig
 
 # Copy release config
-COPY version /opt/sites/rig/
 COPY rel /opt/sites/rig/rel/
 COPY vm.args /opt/sites/rig/
 
@@ -28,7 +28,7 @@ COPY lib /opt/sites/rig/lib
 RUN mix compile
 RUN mix distillery.release
 
-FROM erlang:22-alpine
+FROM erlang:23-alpine
 
 LABEL org.label-schema.name="Reactive Interaction Gateway"
 LABEL org.label-schema.description="Reactive API Gateway and Event Hub"
@@ -40,8 +40,11 @@ RUN apk add --no-cache bash
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
+RUN addgroup -S rig -g 1000 && adduser -S rig -G rig --uid 1000
 WORKDIR /opt/sites/rig
 COPY --from=build /opt/sites/rig/_build/prod/rel/rig /opt/sites/rig/
+RUN chown -R rig:rig /opt/sites/rig
+USER rig
 
 # Proxy
 EXPOSE 4000

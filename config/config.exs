@@ -41,26 +41,12 @@ config :rig, Rig.EventStream.KafkaToFilter,
   sasl: {:system, "KAFKA_SASL", nil},
   group_id: {:system, "KAFKATOFILTER_KAFKA_GROUP_ID", "rig-kafka-to-filter"}
 
-config :rig, Rig.EventStream.KafkaToHttp,
-  # The list of brokers, given by a comma-separated list of host:port items:
-  brokers: {:system, :list, "KAFKA_BROKERS", []},
-  serializer: {:system, "KAFKA_SERIALIZER", nil},
-  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", nil},
+config :rig, Rig.EventStream.NatsToFilter,
+  # The list of servers, given by a comma-separated list of host:port items:
+  servers: {:system, :list, "NATS_SERVERS", []},
   # The list of topics to consume messages from:
-  consumer_topics: {:system, :list, "FIREHOSE_KAFKA_SOURCE_TOPICS", ["rig"]},
-  # If KAFKA_SSL_ENABLED=0, the KAFKA_SSL_* settings are ignored; otherwise, they're required.
-  ssl_enabled?: {:system, :boolean, "KAFKA_SSL_ENABLED", false},
-  # If use_enabled?, the following paths are expected (relative to the `priv` directory):
-  ssl_ca_certfile: {:system, "KAFKA_SSL_CA_CERTFILE", "ca.crt.pem"},
-  ssl_certfile: {:system, "KAFKA_SSL_CERTFILE", "client.crt.pem"},
-  ssl_keyfile: {:system, "KAFKA_SSL_KEYFILE", "client.key.pem"},
-  # In case the private key is password protected:
-  ssl_keyfile_pass: {:system, "KAFKA_SSL_KEYFILE_PASS", ""},
-  # Credentials for SASL/Plain authentication. Example: "plain:myusername:mypassword"
-  sasl: {:system, "KAFKA_SASL", nil},
-  # HTTP endpoints to invoke for each Kafka message:
-  targets: {:system, :list, "FIREHOSE_KAFKA_HTTP_TARGETS", []},
-  group_id: {:system, "KAFKATOHTTP_KAFKA_GROUP_ID", "rig-kafka-to-http"}
+  topics: {:system, :list, "NATS_SOURCE_TOPICS", ["rig"]},
+  queue_group: {:system, "NATSTOFILTER_QUEUE_GROUP", "rig-nats-to-filter"}
 
 config :rig, Rig.Connection.Codec,
   codec_secret_key: {:system, "NODE_COOKIE", nil},
@@ -95,7 +81,9 @@ config :logger, :console,
   format: "\n$time [$level] $levelpad$message\n$metadata\n",
   metadata: metadata |> Enum.uniq()
 
-config :rig, Rig.Application, log_level: {:system, :atom, "LOG_LEVEL", :debug}
+config :rig, Rig.Application,
+  log_level: {:system, :atom, "LOG_LEVEL", :debug},
+  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", nil}
 
 # --------------------------------------
 # Session and Authorization
@@ -113,7 +101,7 @@ config :rig, RIG.AuthorizationCheck.Submission,
 # Peerage
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-config :rig, Rig.Discovery,
+config :rig, RIG.Discovery,
   discovery_type: {:system, "DISCOVERY_TYPE", nil},
   dns_name: {:system, "DNS_NAME", "localhost"}
 
@@ -124,3 +112,20 @@ import_config "rig_inbound_gateway/config.exs"
 import_config "rig_metrics/config.exs"
 import_config "rig_outbound_gateway/config.exs"
 import_config "rig_tests/config.exs"
+
+# --------------------------------------
+# Jaeger
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+config :rig, RIG.Tracing,
+  jaeger_host: {:system, :charlist, "JAEGER_HOST", ''},
+  jaeger_port: {:system, :integer, "JAEGER_PORT", 6831},
+  jaeger_service_name: {:system, :charlist, "JAEGER_SERVICE_NAME", 'rig'},
+  zipkin_address: {:system, :charlist, "ZIPKIN_ADDR", ''},
+  zipkin_service_name: {:system, "ZIPKIN_SERVICE_NAME", "rig"}
+
+# --------------------------------------
+# Phoenix
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+config :phoenix, :json_library, Jason
