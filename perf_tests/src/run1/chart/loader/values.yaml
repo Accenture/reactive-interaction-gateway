@@ -1,0 +1,9 @@
+image:
+  repository: azer0s/rig-perf-test-run1-loader
+  tag: latest
+  pullPolicy: Always # needed for local Kubernetes cluster (docker desktop)
+
+deployment:
+  env:
+    KAFKA_HOST: kafka:9092
+    CLIENTS: run1-clients

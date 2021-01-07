@@ -1,0 +1,45 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "reactive-interaction-gateway.name" . }}
+  labels:
+    app: {{ template "reactive-interaction-gateway.name" . }}
+    chart: {{ template "reactive-interaction-gateway.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "reactive-interaction-gateway.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "reactive-interaction-gateway.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- range $key, $value := .Values.deployment.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+            - name: NODE_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: API_PORT
+              value: {{ .Values.apiPort | quote }}
+            - name: INBOUND_PORT
+              value: {{ .Values.inboundPort | quote }}
+          ports:
+            - name: api-port
+              containerPort: {{ .Values.apiPort }}
+              protocol: TCP
+            - name: inbound-port
+              containerPort: {{ .Values.inboundPort }}
+              protocol: TCP

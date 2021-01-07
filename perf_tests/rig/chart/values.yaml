@@ -1,0 +1,25 @@
+replicaCount: 1
+
+image:
+  repository: accenture/reactive-interaction-gateway
+  tag: latest
+  pullPolicy: Always
+
+apiPort: 4010
+inboundPort: 4000
+
+service:
+  type: LoadBalancer
+
+service_headless:
+  type: ClusterIP
+  clusterIP: None
+
+deployment:
+  env:
+    DISCOVERY_TYPE: dns
+    DNS_NAME: reactive-interaction-gateway-headless.default.svc.cluster.local
+    LOG_LEVEL: error
+    KAFKA_BROKERS: kafka:9092
+    API_HTTP_PORT: 4010
+    INBOUND_PORT: 4000

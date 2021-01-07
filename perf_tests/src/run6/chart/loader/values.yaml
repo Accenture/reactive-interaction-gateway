@@ -1,0 +1,9 @@
+image:
+  repository: run6_loader
+  tag: latest
+  pullPolicy: Never # needed for local Kubernetes cluster (docker desktop)
+
+deployment:
+  env:
+    KAFKA_HOST: kafka:9092
+    CLIENTS: run6-clients

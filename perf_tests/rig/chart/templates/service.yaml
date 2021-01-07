@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "reactive-interaction-gateway.name" . }}
+  labels:
+    app: {{ template "reactive-interaction-gateway.name" . }}
+    chart: {{ template "reactive-interaction-gateway.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.inboundPort }}
+      targetPort: {{ .Values.inboundPort }}
+      protocol: TCP
+      name: proxy
+    - port: {{ .Values.apiPort }}
+      targetPort: {{ .Values.apiPort }}
+      protocol: TCP
+      name: internal
+  selector:
+    app: {{ template "reactive-interaction-gateway.name" . }}
+    release: {{ .Release.Name }}
