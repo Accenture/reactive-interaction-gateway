@@ -3,6 +3,24 @@ entries:
   reactive-interaction-gateway:
   - apiVersion: v2
     appVersion: 3.0.0-alpha.1
+    created: "2021-01-07T15:22:32.528609012Z"
+    description: A Helm chart for Kubernetes
+    digest: a22710677e15d6883bcdf1acdc83d6fae2ea2ba57e78c98babb1e4cfb4a8ffcf
+    home: https://github.com/Accenture/reactive-interaction-gateway
+    icon: https://github.com/Accenture/reactive-interaction-gateway/blob/master/logo/Reactive-Interaction-Gateway-logo-cropped.png
+    maintainers:
+    - name: kevinbader
+      url: https://github.com/kevinbader
+    - name: mmacai
+      url: https://github.com/mmacai
+    - name: Knappek
+      url: https://github.com/Knappek
+    name: reactive-interaction-gateway
+    urls:
+    - https://github.com/Accenture/reactive-interaction-gateway/releases/download/reactive-interaction-gateway-2.1.0/reactive-interaction-gateway-2.1.0.tgz
+    version: 2.1.0
+  - apiVersion: v2
+    appVersion: 3.0.0-alpha.1
     created: "2020-11-13T11:58:07.64794249Z"
     description: A Helm chart for Kubernetes
     digest: d04801d33fb05458675c4fdac9ac3a599d029d82751cc47e1c0467217ae1a77e
@@ -38,6 +56,24 @@ entries:
     - https://github.com/Accenture/reactive-interaction-gateway/releases/download/reactive-interaction-gateway-1.0.1/reactive-interaction-gateway-1.0.1.tgz
     version: 1.0.1
   reactive-interaction-gateway-helm-v2:
+  - apiVersion: v1
+    appVersion: 3.0.0-alpha.1
+    created: "2021-01-07T15:22:32.617878174Z"
+    description: A Helm v2 chart for Kubernetes
+    digest: f9156da66eae46dda938049222af34b20bfc7b44440f1433d8fed50f3057293b
+    home: https://github.com/Accenture/reactive-interaction-gateway
+    icon: https://github.com/Accenture/reactive-interaction-gateway/blob/master/logo/Reactive-Interaction-Gateway-logo-cropped.png
+    maintainers:
+    - name: kevinbader
+      url: https://github.com/kevinbader
+    - name: mmacai
+      url: https://github.com/mmacai
+    - name: Knappek
+      url: https://github.com/Knappek
+    name: reactive-interaction-gateway-helm-v2
+    urls:
+    - https://github.com/Accenture/reactive-interaction-gateway/releases/download/reactive-interaction-gateway-helm-v2-2.1.0/reactive-interaction-gateway-helm-v2-2.1.0.tgz
+    version: 2.1.0
   - apiVersion: v1
     appVersion: 3.0.0-alpha.1
     created: "2020-11-13T11:58:07.802145322Z"
