@@ -4,13 +4,10 @@ defmodule RigMetrics.SubscriptionsMetrics do
   """
   use Prometheus.Metric
 
-  # To be called at app startup.
-  def setup do
-    Gauge.declare(
-      name: :rig_subscriptions_total,
-      help: "Total count of subscriptions (Websocket, Server-Sent Events, Long Polling)."
-    )
-  end
+  @gauge name: :rig_subscriptions_total,
+         help: "Total count of subscriptions (Websocket, Server-Sent Events, Long Polling)."
+
+  # ---
 
   @doc "Increases the Prometheus gauge rig_subscriptions_total"
   def add_item(increasedBy \\ 1) do

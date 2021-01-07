@@ -16,7 +16,7 @@ docker-compose down && docker-compose up -d
 sleep 10
 
 # create Kinesis streams
-docker-compose exec localstack bash -c 'awslocal kinesis create-stream --stream-name RIG-outbound --shard-count 1 --region eu-west-1 && awslocal kinesis create-stream --stream-name RIG-firehose --shard-count 1 --region eu-west-1'
+docker-compose exec localstack bash -c 'awslocal kinesis create-stream --stream-name RIG-outbound --shard-count 1 --region eu-west-1'
 
 count=0
 while true; do
@@ -31,7 +31,7 @@ while true; do
   # send one kinesis event every 5 seconds
   if ! ((count % 5)); then
     printf "\nProducing a standard Kinesis event ...\n"
-    curl -d '{"event":{"id":"069711bf-3946-4661-984f-c667657b8d86","type":"greeting.simple","specversion":"0.2","source":"\/cli","data":{"example":"kinesis test"}}}' -H "Content-Type: application/json" -X POST http://localhost:4000/api/kinesis
+    curl -d '{"id":"069711bf-3946-4661-984f-c667657b8d86","type":"greeting.simple","specversion":"0.2","source":"\/cli","data":{"example":"kinesis test"}}' -H "Content-Type: application/json" -X POST http://localhost:4000/api/kinesis
   fi
 
   # send one standard event every second

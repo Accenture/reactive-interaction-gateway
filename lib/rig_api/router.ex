@@ -25,7 +25,7 @@ defmodule RigApi.Router do
 
   scope "/" do
     pipe_through(:body_parser)
-    live_dashboard("/dashboard")
+    live_dashboard("/dashboard", metrics: RigMetrics.Telemetry)
   end
 
   scope "/v2", RigApi.V2 do

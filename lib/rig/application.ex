@@ -39,14 +39,13 @@ defmodule Rig.Application do
       # RIG public-facing endpoint:
       RigInboundGatewayWeb.Endpoint,
       # Cloud Events:
-      {Cloudevents, [confluent_schema_registry_url: config().schema_registry_host]}
+      {Cloudevents, [confluent_schema_registry_url: config().schema_registry_host]},
+      RigMetrics.Telemetry
     ]
 
     # Prometheus
-    RigMetrics.DistributedSetMetrics.setup()
     RigMetrics.EventsMetrics.setup()
     RigMetrics.ProxyMetrics.setup()
-    RigMetrics.SubscriptionsMetrics.setup()
     RigMetrics.MetricsPlugExporter.setup()
 
     opts = [strategy: :one_for_one, name: Rig.Supervisor]

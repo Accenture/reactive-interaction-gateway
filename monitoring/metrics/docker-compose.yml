@@ -1,7 +1,7 @@
 version: "3"
 services:
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:0.12.2
     container_name: localstack
     ports:
       - "4566:4566"
@@ -50,7 +50,7 @@ services:
     command: sh -c "sleep infinity"
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v2.23.0
     container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
@@ -59,7 +59,7 @@ services:
     restart: on-failure:5
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:7.3.4
     container_name: grafana
     ports:
       - 3000:3000

@@ -8,14 +8,14 @@
         "endpoints": [
           {
             "id": "kafka",
-            "path": "/api/kafka",
+            "path_regex": "/api/kafka",
             "method": "POST",
             "target": "kafka",
             "topic": "test-monitoring"
           },
           {
             "id": "kinesis",
-            "path": "/api/kinesis",
+            "path_regex": "/api/kinesis",
             "method": "POST",
             "target": "kinesis",
             "topic": "RIG-outbound"

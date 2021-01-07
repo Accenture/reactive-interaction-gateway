@@ -4,20 +4,14 @@ defmodule RigMetrics.DistributedSetMetrics do
   """
   use Prometheus.Metric
 
-  # To be called at app startup.
-  def setup do
-    Gauge.declare(
-      name: :rig_distributed_set_items_total,
-      help: "Total count of items in distributed set.",
-      labels: [:name]
-    )
+  @gauge name: :rig_distributed_set_items_total,
+         help: "Total count of items in distributed set.",
+         labels: [:name]
+  @gauge name: :rig_distributed_set_items_current,
+         help: "Current count of items in distributed set.",
+         labels: [:name]
 
-    Gauge.declare(
-      name: :rig_distributed_set_items_current,
-      help: "Current count of items in distributed set.",
-      labels: [:name]
-    )
-  end
+  # ---
 
   @doc "Increases the Prometheus gauges rig_distributed_set_items_total, rig_distributed_set_items_current"
   def add_item(name, increasedBy \\ 1) do

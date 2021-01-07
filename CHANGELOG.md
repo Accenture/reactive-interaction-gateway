@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   More information, follow the [deployment Readme](./deployment/README.md). [#319](https://github.com/Accenture/reactive-interaction-gateway/issues/319)
 - make README smaller, easier to read and highlight features. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
+- Updated Phoenix LiveDashboard setup to show also metrics based on the Prometheus metrics (for now only proxy and events metrics). [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
 
 ### Fixed
 

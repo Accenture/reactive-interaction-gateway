@@ -148,11 +148,11 @@ To use RIG-Metrics for monitoring in Grafana, following steps are required:
 
 **Note**: This usecase was only described on a very high level to get an idea on how to use metrics. We highly recommend to check out the [**Prometheus**](https://prometheus.io/docs/prometheus/latest/getting_started/) and [**Grafana**](https://prometheus.io/docs/visualization/grafana/) Tutorials if you plan to set this up
 
-## Grafana Dashboard
+## Grafana Dashboards
 
-Some example Grafana dashboard for the standard metrics can be found [**here**](https://github.com/deadtrickster/beam-dashboards).
+Some example Grafana dashboards for the standard metrics can be found [**here**](https://github.com/deadtrickster/beam-dashboards).
 
-### Provided Dashboards
+### Custom Dashboards
 
 We provide also our own dashboards with RIG specific metrics. You can find it in the [**dashboards folder**](https://github.com/Accenture/reactive-interaction-gateway/monitoring/metrics/dashboards). The [**metrics folder**](https://github.com/Accenture/reactive-interaction-gateway/monitoring/metrics) includes example setup using docker-compose.
 
