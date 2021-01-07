@@ -1,5 +1,5 @@
 describe('Subscriptions with JWT auth', () => {
-  ['sse', 'ws'].forEach(type => {
+  ['sse', 'ws', 'lp'].forEach(type => {
     it(`Does ${type} subscription check when creating subscriptions`, () => {
       cy.visit(`/${type}-3-demo-jwt.html`);
       cy.setAndVerifyInput('greeting', 'hello');

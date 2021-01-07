@@ -11,10 +11,22 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   alias RigInboundGatewayWeb.Session
   alias RigOutboundGateway
 
+  # ---
+
+  @doc false
+  def handle_preflight(%{method: "OPTIONS"} = conn, _params) do
+    conn
+    |> with_allow_origin()
+    |> put_resp_header("access-control-allow-methods", "GET")
+    |> put_resp_header("access-control-allow-headers", "*")
+    |> send_resp(:no_content, "")
+  end
+
+  # ---
+
   @doc false
   def handle_connection(%{method: "GET"} = conn, _params) do
     conn = conn |> fetch_cookies |> fetch_query_params
-
     conn.req_cookies["connection_token"] |> is_new_session? |> process_request(conn)
   end
 
@@ -60,6 +72,7 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
 
       {:error, {:bad_request, message}} ->
         conn
+        |> with_allow_origin()
         |> put_status(:bad_request)
         |> text(message)
 
@@ -68,6 +81,7 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
         Logger.error(fn -> "#{msg}: #{inspect(error)}" end)
 
         conn
+        |> with_allow_origin()
         |> put_status(:internal_server_error)
         |> text("Internal server error: #{msg}.")
     end
@@ -98,6 +112,8 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   # ---
   defp with_allow_origin(conn) do
     %{cors: origins} = config()
+
     put_resp_header(conn, "access-control-allow-origin", origins)
+    |> put_resp_header("access-control-allow-credentials", "true")
   end
 end

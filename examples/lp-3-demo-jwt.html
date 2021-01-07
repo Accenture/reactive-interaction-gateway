@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>RIG-Longpolling-Demo</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+
+  <body>
+    <form onsubmit="sendGreeting(); return false;">
+      <input
+        type="text"
+        id="greeting"
+        placeholder="Your greeting here"
+        autofocus
+      />
+      <input type="submit" id="submit-button" disabled />
+    </form>
+    <ul id="eventList" style="list-style:none;padding-left:0"></ul>
+    <script>
+      const eventList = document.getElementById("eventList");
+
+      function addEvent(cloudEvent) {
+        const { eventTime, data } = cloudEvent;
+
+        const li = document.createElement("li");
+        li.textContent = `[${new Date(
+          eventTime
+        ).toLocaleTimeString()}] ${data}`;
+        eventList.appendChild(li);
+      }
+
+      const baseUrl = "http://localhost:4000/_rig/v1";
+
+      function randomString() {
+        return (
+          Math.random()
+            .toString(36)
+            .substring(2, 15) +
+          Math.random()
+            .toString(36)
+            .substring(2, 15)
+        );
+      }
+
+      function sendGreeting() {
+        const input = document.getElementById("greeting");
+        const greeting = input.value;
+        input.value = "";
+        return fetch(`${baseUrl}/events`, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json; charset=utf-8"
+          },
+          body: JSON.stringify({
+            cloudEventsVersion: "0.1",
+            eventID: randomString(),
+            eventType: "greeting.simple",
+            eventTime: new Date().toISOString(),
+            source: "longpolling-demo-ui",
+            contentType: "text/plain",
+            data: greeting
+          })
+        })
+          .then(response => response.json())
+          .then(json => {
+            console.log("CloudEvent sent:", json);
+            return json;
+          })
+          .catch(err => {
+            console.log("Failed to send CloudEvent:", err);
+          });
+      }
+
+      /**
+       * JWT PAYLOAD DATA
+       * {
+       *   "sub": "1234567890",
+       *   "name": "John Doe",
+       *   "iat": 4103258143,
+       *   "exp": 4103258143
+       * }
+       */
+      const jwt =
+        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0Ijo0MTAzMjU4MTQzLCJleHAiOjQxMDMyNTgxNDN9.t2xx23iYDvzTEJzsl_OTyDA0PLhr7TmvHkIEJZvtj5U";
+
+      function createSubscription() {
+        const eventType = "greeting.simple";
+        const connectionToken = localStorage.getItem("connection_token");
+        console.log("Existing connectionToken", connectionToken);
+        if (!connectionToken) {
+          console.error("Missing connectionToken > can't do subscriptions");
+          return;
+        }
+        return fetch(
+          `${baseUrl}/connection/longpolling/${connectionToken}/subscriptions`,
+          {
+            method: "PUT",
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json; charset=utf-8",
+              Authorization: jwt
+            },
+            body: JSON.stringify({
+              subscriptions: [
+                {
+                  eventType: eventType
+                }
+              ]
+            })
+          }
+        )
+          .then(json => {
+            console.log("Subscription created:", json);
+            return json;
+          })
+          .catch(err => {
+            console.log("Failed to create subscription:", err);
+          });
+      }
+
+      function fetchEvents() {
+        document.getElementById("submit-button").removeAttribute("disabled");
+        axios({
+          method: "GET",
+          url: `${baseUrl}/connection/longpolling`,
+          withCredentials: true
+        })
+          .then(response => {
+            console.log("message", response.data);
+            if (response.data && response.data.events) {
+              response.data.events.forEach(event => {
+                if (event.type === "rig.connection.create") {
+                  console.log("Connection created:", event);
+                  localStorage.setItem(
+                    "connection_token",
+                    event.data.connection_token
+                  );
+                  // re-subscribe when connection is new
+                  createSubscription();
+                  return;
+                }
+
+                if (event.type === "rig.subscriptions_set") {
+                  console.log("Subscription created:", event);
+                  return;
+                }
+
+                addEvent(event);
+              });
+            }
+            setTimeout(fetchEvents, 10000);
+          })
+          .catch(err => {
+            console.log("Failed to fetch events:", err);
+          });
+      }
+
+      const source = axios({
+        method: "GET",
+        url: `${baseUrl}/connection/longpolling`,
+        withCredentials: true
+      });
+
+      source
+        .then(() => createSubscription())
+        .then(() => fetchEvents())
+        .catch(err => {
+          console.log("Failed to create subscription:", err);
+        });
+    </script>
+  </body>
+</html>

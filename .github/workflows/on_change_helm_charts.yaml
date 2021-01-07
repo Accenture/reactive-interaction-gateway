@@ -1,0 +1,53 @@
+name: Lint, test and release Helm charts
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "deployment/**"
+      - .github/workflows/on_change_helm_charts.yml
+  pull_request:
+    branches: [master]
+    paths:
+      - "deployment/**"
+      - .github/workflows/on_change_helm_charts.yml
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Fetch history
+        run: git fetch --prune --unshallow
+      - name: lint helm charts
+        id: lint_helm
+        uses: helm/chart-testing-action@v1.0.0
+        with:
+          command: lint
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.0.0
+        # Only build a kind cluster if there are chart changes to test.
+        if: steps.lint_helm.outputs.changed == 'true'
+      - name: install and test helm charts
+        uses: helm/chart-testing-action@v1.0.0
+        with:
+          command: install
+
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.0.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          charts_dir: deployment

@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Helm v3 template to the `deployment` folder [#288](https://github.com/Accenture/reactive-interaction-gateway/issues/288)
 - Added detailed features summary on the website with architecture diagrams. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
 - Added [documentation section](https://accenture.github.io/reactive-interaction-gateway/docs/jwt-blacklisting.html) for the JWT Blacklist feature. [#156](https://github.com/Accenture/reactive-interaction-gateway/issues/156)
+- Added longpolling examples to the `/examples` folder [#235](https://github.com/Accenture/reactive-interaction-gateway/issues/235)
+- Support JSON and Google Cloud Logger (GCL) log formats. Set the new environment variable `LOG_FMT` to `JSON` or `GCL` to see this in action.
+  [#298](https://github.com/Accenture/reactive-interaction-gateway/pull/298)
 
 ### Changed
 
