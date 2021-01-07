@@ -23,6 +23,7 @@ npm run cypress:run:all
 # start RIG
 EXTRACTORS=examples/extractor.json \
 JWT_SECRET_KEY=secret \
+CORS="http://localhost:54321" \
 mix phx.server
 
 # or via Docker
@@ -43,6 +44,7 @@ npm run cypress:run:noauth
 SUBSCRIPTION_CHECK=jwt_validation \
 EXTRACTORS=examples/extractor.json \
 JWT_SECRET_KEY=secret \
+CORS="http://localhost:54321" \
 mix phx.server
 
 # or via Docker

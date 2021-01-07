@@ -21,6 +21,7 @@ node_modules/
 # Cypress
 /examples/tests/cypress/videos
 /examples/tests/cypress/screenshots
+/examples/tests/cypress/fixtures
 
 # Generated on crash by the VM
 erl_crash.dump
