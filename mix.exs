@@ -26,7 +26,7 @@ defmodule RIG.MixProject do
       package: package(),
 
       # Build:
-      elixir: elixir_version,
+      elixir: "~> #{elixir_version}",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
