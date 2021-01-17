@@ -56,7 +56,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       - `"path": "/foo"` -> `"path_regex": "/foo"`
       - `"path": "/foo/{id}"` -> `"path_regex": "/foo/(.+)"` - or pretty much whatever regex you need (e.g. UUID pattern)
 
-<!-- ### Security -->
+### Security
+
+- Update to Erlang/OTP 23.2.2, which fixes a critical TLS certificate
+  verification issue.
 
 ### Technical Improvements
 
