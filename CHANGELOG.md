@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added longpolling examples to the `/examples` folder [#235](https://github.com/Accenture/reactive-interaction-gateway/issues/235)
 - Support JSON and Google Cloud Logger (GCL) log formats. Set the new environment variable `LOG_FMT` to `JSON` or `GCL` to see this in action.
   [#298](https://github.com/Accenture/reactive-interaction-gateway/pull/298)
+- Added CORS headers to unauthenticated Proxy requests [#344](https://github.com/Accenture/reactive-interaction-gateway/issues/344)
 - Added rate limiting for maximum number of WS + SSE + Longpolling connections per minute. Configurable via `MAX_CONNECTIONS_PER_MINUTE` env var, by default it's 5000. [#257](https://github.com/Accenture/reactive-interaction-gateway/issues/257)
 - Added basic setup for the Phoenix LiveDashboard. Now it's accessible at `:4010/dashboard`. [#301](https://github.com/Accenture/reactive-interaction-gateway/issues/301)
 
@@ -58,7 +59,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       - `"path": "/foo"` -> `"path_regex": "/foo"`
       - `"path": "/foo/{id}"` -> `"path_regex": "/foo/(.+)"` - or pretty much whatever regex you need (e.g. UUID pattern)
 
-<!-- ### Security -->
+### Security
+
+- Update to Erlang/OTP 23.2.2, which fixes a critical TLS certificate
+  verification issue.
 
 ### Technical Improvements
 

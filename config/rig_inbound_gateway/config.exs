@@ -91,7 +91,8 @@ config :rig, RigInboundGateway.ApiProxy.Router,
   logger_modules: %{
     "console" => RigInboundGateway.RequestLogger.Console,
     "kafka" => RigInboundGateway.RequestLogger.Kafka
-  }
+  },
+  cors: {:system, "CORS", "*"}
 
 config :rig, RigInboundGateway.ApiProxy.Handler.Http,
   cors: {:system, "CORS", "*"},
