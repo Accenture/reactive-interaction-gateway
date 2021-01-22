@@ -7,7 +7,7 @@ WORKDIR /opt/sites/rig/kinesis-client
 # Compile AWS Kinesis Java application
 RUN mvn package
 
-FROM elixir:1.11-alpine as elixir-build
+FROM elixir:1.11.2-alpine as elixir-build
 
 # Install Elixir & Erlang environment dependencies
 RUN apk add --no-cache make gcc g++

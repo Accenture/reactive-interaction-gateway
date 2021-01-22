@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added longpolling examples to the `/examples` folder [#235](https://github.com/Accenture/reactive-interaction-gateway/issues/235)
 - Support JSON and Google Cloud Logger (GCL) log formats. Set the new environment variable `LOG_FMT` to `JSON` or `GCL` to see this in action.
   [#298](https://github.com/Accenture/reactive-interaction-gateway/pull/298)
+- Added CORS headers to unauthenticated Proxy requests [#344](https://github.com/Accenture/reactive-interaction-gateway/issues/344)
 
 ### Changed
 
