@@ -1,4 +1,4 @@
-FROM elixir:1.11.2-alpine
+FROM elixir:1.11.3-alpine
 
 WORKDIR /opt/sites/rig
 ENV MIX_ENV=test
