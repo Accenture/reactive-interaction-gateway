@@ -1,5 +1,6 @@
 defmodule RigApi.Router do
   use RigApi, :router
+  import Phoenix.LiveDashboard.Router
 
   pipeline :body_parser do
     plug(Plug.Parsers,
@@ -20,6 +21,11 @@ defmodule RigApi.Router do
       otp_app: :rig,
       swagger_file: "rig_api_swagger.json"
     )
+  end
+
+  scope "/" do
+    pipe_through(:body_parser)
+    live_dashboard("/dashboard")
   end
 
   scope "/v2", RigApi.V2 do

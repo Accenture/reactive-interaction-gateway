@@ -52,6 +52,7 @@ Variable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `KINESIS_STREAM` | The name of the Kinesis stream to consume. | "RIG-outbound"
 `LOG_LEVEL` | Log level. One of: `debug`, `info`, `warn`, `error`. | "warn"
 `LOG_FMT` | Log format. May be set to `json` or `gcl` (Google Cloud Logger LogEntry format). | "erlang"
+`MAX_CONNECTIONS_PER_MINUTE` | Maximum number of WS + SSE + Longpolling connections per minute. | 5000
 `NATS_SERVERS` | List of [NATS](https://nats.io) servers RIG should connect to, delimited by comma (e.g., `localhost:4222,example.com:4222`). | []
 `NATS_SOURCE_TOPICS` | List of NATS topics to subscribe to, delimited by comma. | ["rig"]
 `NATSTOFILTER_QUEUE_GROUP` | NATS [queue group](https://docs.nats.io/developing-with-nats/receiving/queues) used for forwarding events according to subscriptions over SSE and WS connections. Make sure to use the same value on all RIG instances that belong to the same cluster. The default should be fine. | "rig-nats-to-filter"

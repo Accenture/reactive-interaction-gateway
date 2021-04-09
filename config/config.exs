@@ -130,6 +130,20 @@ config :rig, RIG.Tracing,
   zipkin_service_name: {:system, "ZIPKIN_SERVICE_NAME", "rig"}
 
 # --------------------------------------
+# Connections rate limiting
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+max_connections_per_minute = {:system, :integer, "MAX_CONNECTIONS_PER_MINUTE", 5000}
+max_connections_per_minute_bucket = "max-connections-per-minute"
+
+config :rig, RigInboundGatewayWeb.ConnectionLimit,
+  max_connections_per_minute: max_connections_per_minute,
+  max_connections_per_minute_bucket: max_connections_per_minute_bucket
+
+config :rig, RigInboundGateway.ConnectionTest,
+  max_connections_per_minute_bucket: max_connections_per_minute_bucket
+
+# --------------------------------------
 # Phoenix
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

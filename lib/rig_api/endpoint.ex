@@ -28,9 +28,12 @@ defmodule RigApi.Endpoint do
   # Prometheus Integration - START
   # makes the /metrics URL happen
   plug(RigMetrics.MetricsPlugExporter)
+
   # Prometheus Integration - END
 
   plug(RigApi.Router)
+
+  socket("/live", Phoenix.LiveView.Socket)
 
   def init(_key, config) do
     {:ok, config} = Confex.Resolver.resolve(config)

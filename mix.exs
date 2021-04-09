@@ -63,7 +63,8 @@ defmodule RIG.MixProject do
       extra_applications: [
         :runtime_tools,
         :prometheus_ex,
-        :prometheus_plugs
+        :prometheus_plugs,
+        :os_mon
       ],
       included_applications: [
         :peerage,
@@ -171,6 +172,8 @@ defmodule RIG.MixProject do
       # Prometheus metrics:
       {:prometheus_ex, "~> 3.0"},
       {:prometheus_plugs, "~> 1.1"},
+      # Additional monitoring:
+      {:phoenix_live_dashboard, "~> 0.4"},
       # Distributed tracing:
       {:opencensus_plug, "~> 0.3"},
       {:opencensus, "~> 0.9"},
@@ -179,6 +182,8 @@ defmodule RIG.MixProject do
       {:opencensus_zipkin, "~> 0.3"},
       # NATS client:
       {:gnat, "~> 1.0"},
+      # Rate limiting via leaky bucket
+      {:ex_rated, "~> 1.2"},
       # JSON Log backend
       {:logger_json, "~> 4.0"}
     ]

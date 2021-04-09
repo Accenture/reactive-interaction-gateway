@@ -40,3 +40,6 @@ erl_crash.dump
 /.elixir_ls/
 *~
 *.orig
+
+# Artillery
+/performance_tests/artillery/report*.*

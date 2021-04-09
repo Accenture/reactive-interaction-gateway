@@ -8,6 +8,7 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
   use RigInboundGatewayWeb, :controller
 
   alias Rig.Connection
+  alias RigInboundGatewayWeb.ConnectionLimit
   alias RigInboundGatewayWeb.Session
   alias RigOutboundGateway
 
@@ -53,28 +54,38 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
 
   # starts a new session
   defp process_request(true, conn) do
-    case Session.start(conn.query_params) do
-      {:ok, session_pid} ->
-        Logger.debug(fn ->
-          "new Longpolling connection (pid=#{inspect(session_pid)}, params=#{
-            inspect(conn.query_params)
-          })"
-        end)
+    with {:ok, _n_connections} <- ConnectionLimit.check_rate_limit(),
+         {:ok, session_pid} <- Session.start(conn.query_params) do
+      Logger.debug(fn ->
+        "new Longpolling connection (pid=#{inspect(session_pid)}, params=#{
+          inspect(conn.query_params)
+        })"
+      end)
 
-        conn
-        |> with_allow_origin()
-        |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize())
-        |> put_resp_cookie("last_event_id", Jason.encode!("first_event"))
-        |> put_resp_header("content-type", "application/json; charset=utf-8")
-        |> put_resp_header("cache-control", "no-cache")
-        |> put_status(200)
-        |> text(Jason.encode!("ok"))
-
+      conn
+      |> with_allow_origin()
+      |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize())
+      |> put_resp_cookie("last_event_id", Jason.encode!("first_event"))
+      |> put_resp_header("cache-control", "no-cache")
+      |> put_status(200)
+      |> json("ok")
+    else
       {:error, {:bad_request, message}} ->
         conn
         |> with_allow_origin()
         |> put_status(:bad_request)
         |> text(message)
+
+      {:error, %ConnectionLimit.MaxConnectionsError{n_connections: n_connections} = ex} ->
+        Logger.warn(fn ->
+          pid = inspect(self())
+          msg = "#{Exception.message(ex)}=#{n_connections} per minute"
+          "Cannot accept long polling connection #{pid}: #{msg}"
+        end)
+
+        conn
+        |> put_status(:too_many_requests)
+        |> text(Exception.message(ex))
 
       error ->
         msg = "Failed to initialize long polling connection"
@@ -100,7 +111,10 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
     conn
     |> with_allow_origin()
     |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize())
-    |> put_resp_cookie("last_event_id", Jason.encode!(response[:last_event_id] || "first_event"))
+    |> put_resp_cookie(
+      "last_event_id",
+      Jason.encode!(response[:last_event_id] || "first_event")
+    )
     |> put_resp_header("content-type", "application/json; charset=utf-8")
     |> put_resp_header("cache-control", "no-cache")
     |> put_status(200)

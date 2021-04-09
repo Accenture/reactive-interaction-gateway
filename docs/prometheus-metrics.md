@@ -1,7 +1,7 @@
 ---
-id: metrics-details
-title: Metrics Details
-sidebar_label: Metrics Details
+id: prometheus-metrics
+title: Prometheus Metrics
+sidebar_label: Prometheus Metrics
 ---
 
 ## Introduction

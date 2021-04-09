@@ -1,9 +1,11 @@
 defmodule RigInboundGateway.ConnectionTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
+  use Rig.Config, [:max_connections_per_minute_bucket]
 
   require Logger
 
   alias HTTPoison
+  alias RigInboundGateway.EnvVars
 
   @dispatch Confex.fetch_env!(:rig, RigInboundGatewayWeb.Endpoint)[:https][:dispatch]
   @port 47_210
@@ -52,5 +54,24 @@ defmodule RigInboundGateway.ConnectionTest do
       assert {:error, _} = try_ws(subscriptions: "can't { be [ parsed.")
       assert 400 == try_longpolling(jwt: nil, subscriptions: "can't { be [ parsed.")
     end
+  end
+
+  test "The max connection limit is respected for all connection types" do
+    orig_config = EnvVars.set("MAX_CONNECTIONS_PER_MINUTE", "5")
+
+    ExRated.delete_bucket(config().max_connections_per_minute_bucket)
+    Enum.each(0..4, fn _ -> assert 200 == try_longpolling(jwt: nil, subscriptions: nil) end)
+    assert 429 == try_longpolling(jwt: nil, subscriptions: nil)
+
+    :ok = ExRated.delete_bucket(config().max_connections_per_minute_bucket)
+    Enum.each(0..4, fn _ -> assert {:ok, _} = try_sse() end)
+    assert {:error, %{code: 429}} = try_sse()
+
+    :ok = ExRated.delete_bucket(config().max_connections_per_minute_bucket)
+    Enum.each(0..4, fn _ -> assert {:ok, _} = try_ws() end)
+    assert {:error, _} = try_ws()
+
+    :ok = ExRated.delete_bucket(config().max_connections_per_minute_bucket)
+    EnvVars.restore("MAX_CONNECTIONS_PER_MINUTE", orig_config)
   end
 end
