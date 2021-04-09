@@ -65,7 +65,7 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
       conn
       |> with_allow_origin()
       |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize())
-      |> put_resp_cookie("x-last_event_id", Jason.encode!("first_event"))
+      |> put_resp_cookie("last_event_id", Jason.encode!("first_event"))
       |> put_resp_header("cache-control", "no-cache")
       |> put_status(200)
       |> json("ok")
@@ -105,23 +105,21 @@ defmodule RigInboundGatewayWeb.V1.LongpollingController do
     response =
       Session.recv_events(
         session_pid,
-        Jason.decode!(conn.req_cookies["x-last_event_id"] || "first_event")
+        Jason.decode!(conn.req_cookies["last_event_id"] || "first_event")
       )
 
     conn
     |> with_allow_origin()
     |> put_resp_cookie("connection_token", session_pid |> Connection.Codec.serialize())
     |> put_resp_cookie(
-      "x-last_event_id",
+      "last_event_id",
       Jason.encode!(response[:last_event_id] || "first_event")
     )
     |> put_resp_header("content-type", "application/json; charset=utf-8")
     |> put_resp_header("cache-control", "no-cache")
     |> put_status(200)
     |> text(
-      ~s<{"x-last_event_id":"#{response.last_event_id}","events":[#{
-        Enum.join(response.events, ",")
-      }]}>
+      ~s<{"last_event_id":"#{response.last_event_id}","events":[#{Enum.join(response.events, ",")}]}>
     )
   end
 
