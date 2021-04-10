@@ -12,10 +12,10 @@ cd "${METRICS_DIR}"
 
 docker-compose down && docker-compose up -d
 
-# wait for a bit till RIG, Kafka and others are ready
+# wait for a bit till RIG, Kafka and others friends are ready
 sleep 10
 
-# create Kinesis streams
+# create Kinesis stream
 docker-compose exec localstack bash -c 'awslocal kinesis create-stream --stream-name RIG-outbound --shard-count 1 --region eu-west-1'
 
 count=0
@@ -37,6 +37,8 @@ while true; do
   # send one standard event every second
   printf "\nProducing a standard Kafka event ...\n"
 	curl -d '{"id":"069711bf-3946-4661-984f-c667657b8d85","type":"greeting.simple","specversion":"0.2","source":"\/cli","data":{"example":"kafka test"}}' -H "Content-Type: application/json" -X POST http://localhost:4000/api/kafka
+
+  # sleep for a second
   (( count++ ))
   sleep 1
 done

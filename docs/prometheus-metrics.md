@@ -53,11 +53,11 @@ Following Labels are provided:
 
 #### `rig_consumed_events_forwarded_total`
 
-Counts all events forwarded to frontend.
+Counts all events forwarded to a frontend.
 
 Following Labels are provided:
 
-- **type**
+- **type** - event type
 
 #### `rig_consumed_events_total`
 
@@ -72,7 +72,7 @@ Following Labels are provided:
 
 #### `rig_consumed_events_failed_total`
 
-Counts all events that failed when handling the event.
+Counts all events that failed when handling an event.
 
 - **topic**
 - **source**
@@ -81,7 +81,7 @@ Counts all events that failed when handling the event.
 
 #### `rig_consumed_event_processing_duration_milliseconds`
 
-Histogram measuring how long it took to process the event (serialization, filtering & forwarding to frontend).
+Histogram measuring how long it took to process the event (serialization, filtering & forwarding to a frontend).
 
 - **topic**
 - **source**
@@ -150,11 +150,13 @@ To use RIG-Metrics for monitoring in Grafana, following steps are required:
 
 ## Grafana Dashboards
 
-Some example Grafana dashboards for the standard metrics can be found [**here**](https://github.com/deadtrickster/beam-dashboards).
+Example Grafana dashboards for the standard metrics can be found [**here**](https://github.com/deadtrickster/beam-dashboards).
 
 ### Custom Dashboards
 
-We provide also our own dashboards with RIG specific metrics. You can find it in the [**dashboards folder**](https://github.com/Accenture/reactive-interaction-gateway/monitoring/metrics/dashboards). The [**metrics folder**](https://github.com/Accenture/reactive-interaction-gateway/monitoring/metrics) includes example setup using docker-compose.
+We also provide our own Grafana dashboards with RIG specific metrics. You can find it in the [**dashboards folder**](https://github.com/Accenture/reactive-interaction-gateway/monitoring/metrics/dashboards).
+
+> The [**metrics folder**](https://github.com/Accenture/reactive-interaction-gateway/monitoring/metrics) includes example setup using docker-compose.
 
 #### Events
 

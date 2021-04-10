@@ -10,7 +10,7 @@ sidebar_label: Phoenix LiveDashboard
 
 ![phoenix-live-dashboard](assets/phoenix-live-dashboard.png)
 
-It's accessible at `:4010/dashboard`. All metrics are created via same Prometheus metrics as those in the [Grafana dashboards](prometheus-metrics.md#grafana_dashboards).
+It's accessible at `:4010/dashboard`. All metrics are created via the same Prometheus metrics as those in the [Grafana dashboards](prometheus-metrics.md#grafana_dashboards).
 
 ## Phoenix LiveDashboard vs. Grafana
 
