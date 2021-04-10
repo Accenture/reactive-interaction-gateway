@@ -31,6 +31,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
   defp validate_config!(config) do
     active_loggers = Keyword.fetch!(config, :active_loggers)
     logger_modules = Keyword.fetch!(config, :logger_modules)
+    cors = Keyword.fetch!(config, :cors)
 
     :ok =
       ConfigValidation.validate_value_difference(
@@ -39,7 +40,7 @@ defmodule RigInboundGateway.ApiProxy.Router do
         Map.keys(logger_modules)
       )
 
-    %{active_loggers: active_loggers, logger_modules: logger_modules}
+    %{active_loggers: active_loggers, logger_modules: logger_modules, cors: cors}
   end
 
   # Get all incoming HTTP requests, check if they are valid, provide authentication if needed
@@ -106,7 +107,8 @@ defmodule RigInboundGateway.ApiProxy.Router do
       |> Conn.assign(:body, body)
       |> handler.handle_http_request(api, endpoint, request_path)
     else
-      {:error, :authentication_failed} -> send_resp(conn, :unauthorized, "Authentication failed.")
+      {:error, :authentication_failed} ->
+        conn |> with_cors() |> send_resp(:unauthorized, "Authentication failed.")
     end
   end
 
@@ -134,4 +136,13 @@ defmodule RigInboundGateway.ApiProxy.Router do
   end
 
   defp transform_req_headers(conn, _, _), do: conn
+
+  # ---
+
+  defp with_cors(conn) do
+    conn
+    |> Conn.put_resp_header("access-control-allow-origin", config().cors)
+    |> Conn.put_resp_header("access-control-allow-methods", "*")
+    |> Conn.put_resp_header("access-control-allow-headers", "content-type")
+  end
 end

@@ -19,9 +19,12 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
     assert conn.status == 404
   end
 
-  test "protected endpoint with invalid JWT should return 401" do
+  test "protected endpoint with invalid JWT should return 401 and CORS headers" do
     conn = call(Router, build_conn(:get, "/myapi/books"))
     assert conn.status == 401
+    assert Enum.member?(conn.resp_headers, {"access-control-allow-origin", "*"})
+    assert Enum.member?(conn.resp_headers, {"access-control-allow-methods", "*"})
+    assert Enum.member?(conn.resp_headers, {"access-control-allow-headers", "content-type"})
   end
 
   test_with_server "protected endpoint with valid JWT should return response", @env do
