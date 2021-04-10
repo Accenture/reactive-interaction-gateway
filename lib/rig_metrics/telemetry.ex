@@ -1,4 +1,7 @@
 defmodule RigMetrics.Telemetry do
+  @moduledoc """
+  Telemtry instrumentation for Phoenix LiveDashboard
+  """
   use Supervisor
   import Telemetry.Metrics
 
