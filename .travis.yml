@@ -13,7 +13,8 @@ stages:
 .elixir-env: &elixir-env
   language: elixir
   elixir: "1.11.3"
-  otp_release: "23.2.2"
+  # available versions https://docs.travis-ci.com/user/languages/erlang/#otprelease-versions
+  otp_release: "23.2.5"
 
 jobs:
   include:
