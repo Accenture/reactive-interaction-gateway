@@ -10,7 +10,7 @@ RIG is providing its metrics in [Prometheus](https://prometheus.io) format. Prom
 
 These metrics can be used to be included into a monitoring platform like [Grafana](https://grafana.com/).
 
-RIG exposes Metrics in [Prometheus](https://prometheus.io/) format on its API endpoint under [/metrics](http:localhost:4010/metrics).
+RIG exposes Metrics in [Prometheus](https://prometheus.io/) format on its API endpoint under [/metrics](http:localhost:4010/metrics). Metrics can be enabled/disabled via [`PROMETHEUS_METRICS_ENABLED` env var](docs/rig-ops-guide.md) (by default enabled).
 
 ## RIG Specific Metrics
 

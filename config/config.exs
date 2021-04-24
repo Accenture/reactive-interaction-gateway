@@ -88,7 +88,8 @@ config :logger,
 config :rig, Rig.Application,
   log_level: {:system, "LOG_LEVEL", "debug"},
   log_fmt: {:system, "LOG_FMT", "erlang"},
-  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", nil}
+  schema_registry_host: {:system, "KAFKA_SCHEMA_REGISTRY_HOST", nil},
+  prometheus_metrics_enabled?: {:system, :boolean, "PROMETHEUS_METRICS_ENABLED", true}
 
 # --------------------------------------
 # Session and Authorization
