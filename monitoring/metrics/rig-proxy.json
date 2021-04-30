@@ -1,0 +1,32 @@
+[
+  {
+    "id": "stream-service",
+    "name": "stream-service",
+    "versioned": false,
+    "version_data": {
+      "default": {
+        "endpoints": [
+          {
+            "id": "kafka",
+            "path_regex": "/api/kafka",
+            "method": "POST",
+            "target": "kafka",
+            "topic": "test-monitoring"
+          },
+          {
+            "id": "kinesis",
+            "path_regex": "/api/kinesis",
+            "method": "POST",
+            "target": "kinesis",
+            "topic": "RIG-outbound"
+          }
+        ]
+      }
+    },
+    "proxy": {
+      "use_env": true,
+      "target_url": "KAFKA_HOST",
+      "port": 9092
+    }
+  }
+]

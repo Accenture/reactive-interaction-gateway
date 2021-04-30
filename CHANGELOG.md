@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added CORS headers to unauthenticated Proxy requests [#344](https://github.com/Accenture/reactive-interaction-gateway/issues/344)
 - Added rate limiting for maximum number of WS + SSE + Longpolling connections per minute. Configurable via `MAX_CONNECTIONS_PER_MINUTE` env var, by default it's 5000. [#257](https://github.com/Accenture/reactive-interaction-gateway/issues/257)
 - Added basic setup for the Phoenix LiveDashboard. Now it's accessible at `:4010/dashboard`. [#301](https://github.com/Accenture/reactive-interaction-gateway/issues/301)
+- Added Prometheus metrics for events, subscriptions and blacklist. Check the [wiki](https://accenture.github.io/reactive-interaction-gateway/docs/metrics-details.html#rig-specific-metrics) for more info. [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
+- Added custom Grafana dashboard. Check the [wiki](https://accenture.github.io/reactive-interaction-gateway/docs/metrics-details.html#provided-dashboard) for more info. [#222](https://github.com/Accenture/reactive-interaction-gateway/issues/222)
 
 ### Changed
 
@@ -40,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   More information, follow the [deployment Readme](./deployment/README.md). [#319](https://github.com/Accenture/reactive-interaction-gateway/issues/319)
 - make README smaller, easier to read and highlight features. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
+- Updated Phoenix LiveDashboard setup to show also metrics based on the Prometheus metrics (for now only proxy and events metrics). [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
 
 ### Fixed
 

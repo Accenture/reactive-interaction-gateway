@@ -2,7 +2,9 @@ defmodule Rig.Application do
   @moduledoc false
 
   use Application
-  use Rig.Config, [:log_level, :log_fmt, :schema_registry_host]
+  use Rig.Config, [:log_level, :log_fmt, :schema_registry_host, :prometheus_metrics_enabled?]
+
+  require Logger
 
   alias RIG.Discovery
   alias RIG.Tracing
@@ -17,6 +19,8 @@ defmodule Rig.Application do
 
     Tracing.start()
     Discovery.start()
+    # Prometheus
+    setup_prometheus_metrics()
 
     children = [
       {Phoenix.PubSub, name: Rig.PubSub},
@@ -40,21 +44,29 @@ defmodule Rig.Application do
       # RIG public-facing endpoint:
       RigInboundGatewayWeb.Endpoint,
       # Cloud Events:
-      {Cloudevents, [confluent_schema_registry_url: config().schema_registry_host]}
+      {Cloudevents, [confluent_schema_registry_url: config().schema_registry_host]},
+      RigMetrics.Telemetry
     ]
-
-    # Prometheus
-    # TODO: setup currently commented out, as metrics are not yet implemented and
-    # therefore shouldn't be exposed yet to the endpoint
-
-    # RigMetrics.ControlInstrumenter.setup()
-    # RigMetrics.EventhubInstrumenter.setup()
-    RigMetrics.ProxyMetrics.setup()
-    RigMetrics.MetricsPlugExporter.setup()
 
     opts = [strategy: :one_for_one, name: Rig.Supervisor]
     Supervisor.start_link(children, opts)
   end
+
+  # ---
+
+  # Enable/disable Prometheus metrics
+  defp setup_prometheus_metrics do
+    if config().prometheus_metrics_enabled? do
+      RigMetrics.EventsMetrics.setup()
+      RigMetrics.ProxyMetrics.setup()
+      RigMetrics.MetricsPlugExporter.setup()
+      Logger.debug("Prometheus metrics enabled")
+    else
+      Logger.debug("Prometheus metrics disabled")
+    end
+  end
+
+  # ---
 
   defp setup_logger do
     conf = config()
@@ -65,6 +77,8 @@ defmodule Rig.Application do
     Logger.configure([{:level, level}])
     setup_logger_backend(format)
   end
+
+  # ---
 
   defp setup_logger_backend(format)
 
@@ -90,6 +104,8 @@ defmodule Rig.Application do
   defp setup_logger_backend("erlang") do
     Logger.add_backend(:console)
   end
+
+  # ---
 
   @doc """
   This function is called by an application after a code replacement, if the configuration parameters have changed.

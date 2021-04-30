@@ -15,6 +15,8 @@ defmodule Rig.EventFilter.Server do
   alias Rig.EventFilter.MatchSpec.SubscriptionMatcher
   alias Rig.Subscription
   alias RigCloudEvents.CloudEvent
+  alias RigMetrics.EventsMetrics
+  alias RigMetrics.SubscriptionsMetrics
 
   @default_subscription_ttl_s 60
   @cleanup_interval_ms 90_000
@@ -151,6 +153,8 @@ defmodule Rig.EventFilter.Server do
 
       if n_clients > 0 do
         clients = if n_clients == 1, do: "1 client", else: "#{n_clients} clients"
+        # increase Prometheus metric with consumed event forwarded to any frontend channel
+        EventsMetrics.count_forwarded_event(type)
         ~s|Event "#{id}" of type "#{type}" forwarded to #{clients}|
       else
         ~s|Event "#{id}" of type "#{type}" not forwarded (there are no clients)|
@@ -211,9 +215,18 @@ defmodule Rig.EventFilter.Server do
          fields,
          subscription_ttl_s
        ) do
+    # get number of current subscriptions
+    n_current_subs =
+      subscription_table
+      |> :ets.lookup(socket_pid)
+      |> length
+
     # Start with clearing all previous subscriptions (prevents duplicates and removes
     # subscriptions that are not being refreshed immediately):
     :ets.delete(subscription_table, socket_pid)
+
+    # increase/decrease Prometheus metric with new subscriptions - current subscriptions
+    SubscriptionsMetrics.add_item(length(subscriptions) - n_current_subs)
 
     expiration_ts = Timex.now() |> Timex.shift(seconds: subscription_ttl_s) |> as_epoch()
 
@@ -269,6 +282,8 @@ defmodule Rig.EventFilter.Server do
     match_spec = [{match_tuple, [{:"=<", :"$1", now}], [true]}]
 
     n_deleted = :ets.select_delete(ets_table, match_spec)
+    # decrease Prometheus metric with outdated subscriptions
+    SubscriptionsMetrics.delete_item(n_deleted)
 
     # if n_deleted > 0,
     #   do: Logger.debug(fn -> "Removed #{n_deleted} expired #{event_type} subscriptions" end)

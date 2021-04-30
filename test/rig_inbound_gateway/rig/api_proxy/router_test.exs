@@ -204,7 +204,7 @@ defmodule RigInboundGateway.ApiProxy.RouterTest do
 
   test_with_server """
                    When forwarding a request, the Host header should point to \
-                   the distination rather than RIG itself.\
+                   the destination rather than RIG itself.\
                    """,
                    @env do
     route("/myapi/direct", fn %{headers: %{"host" => host_header}} ->

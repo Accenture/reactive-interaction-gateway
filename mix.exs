@@ -174,6 +174,9 @@ defmodule RIG.MixProject do
       {:prometheus_plugs, "~> 1.1"},
       # Additional monitoring:
       {:phoenix_live_dashboard, "~> 0.4"},
+      {:telemetry_metrics, "~> 0.6"},
+      {:telemetry_poller, "~> 0.5"},
+      {:telemetry_metrics_prometheus, "~> 0.6"},
       # Distributed tracing:
       {:opencensus_plug, "~> 0.3"},
       {:opencensus, "~> 0.9"},

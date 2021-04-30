@@ -1,8 +1,17 @@
 defmodule RigMetricsTest do
   @moduledoc false
-  require Logger
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   use RigApi.ConnCase
+
+  require Logger
+
+  setup do
+    # enable metrics to be able to test them
+    RigMetrics.EventsMetrics.setup()
+    RigMetrics.ProxyMetrics.setup()
+    RigMetrics.MetricsPlugExporter.setup()
+    :ok
+  end
 
   describe "GET /metrics" do
     test "should return 'something'" do

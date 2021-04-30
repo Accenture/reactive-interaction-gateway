@@ -8,11 +8,13 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
   use GenServer
 
   alias Rig.EventStream.KinesisToFilter
+  alias RigMetrics.EventsMetrics
   alias RigOutboundGateway.Kinesis.LogStream
 
   require Logger
 
   @jinterface_version "1.8.1"
+  @metrics_source_label "kinesis"
   @restart_delay_ms 20_000
 
   def start_link(opts) do
@@ -116,8 +118,34 @@ defmodule RigOutboundGateway.Kinesis.JavaClient do
 
   @spec java_client_callback(data :: [{atom(), String.t()}, ...]) :: :ok
   def java_client_callback(data) do
-    data[:body]
-    |> Jason.decode!()
-    |> KinesisToFilter.kinesis_handler()
+    # start to measure processing time for Prometheus metric
+    metrics_start_time_mono = System.monotonic_time()
+    conf = config()
+
+    try do
+      case data[:body]
+           |> Jason.decode!()
+           |> KinesisToFilter.kinesis_handler() do
+        :ok ->
+          # update Prometheus metric with calculated processing time
+          EventsMetrics.measure_event_processing(
+            @metrics_source_label,
+            conf.kinesis_stream,
+            System.monotonic_time() - metrics_start_time_mono
+          )
+
+        err ->
+          info = %{error: err, topic: conf.kinesis_stream}
+          Logger.error("Callback failed to handle message: #{inspect(info)}")
+          # increase Prometheus metric with event failed to be consumed
+          EventsMetrics.count_failed_event(@metrics_source_label, conf.kinesis_stream)
+      end
+    rescue
+      err ->
+        info = %{error: err, topic: conf.kinesis_stream}
+        Logger.error(fn -> {"failed to decode message: #{inspect(err)}", [info: info]} end)
+        # increase Prometheus metric with event failed to be consumed
+        EventsMetrics.count_failed_event(@metrics_source_label, conf.kinesis_stream)
+    end
   end
 end
