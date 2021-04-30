@@ -41,10 +41,10 @@ class Message extends PureComponent {
     );
   }
 
-  successCall(message) {
+  successCall() {
     return (
       <p className="notification is-success">
-        Successful REST API call. Response <strong>{message}</strong>.
+        Successful REST API call.
       </p>
     );
   }
@@ -62,7 +62,7 @@ class Message extends PureComponent {
           const messageString = JSON.stringify(callStatus.message);
 
           if (callStatus.status === 'ok') {
-            return this.successCall(messageString);
+            return this.successCall();
           }
           return this.errorCall(messageString);
         })()}
