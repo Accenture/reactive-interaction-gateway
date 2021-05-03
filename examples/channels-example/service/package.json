@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "main": "index.js",
   "dependencies": {
-    "hapi": "^18.1.0",
-    "no-kafka": "^3.4.3"
+    "@hapi/hapi": "^20.1.2",
+    "kafkajs": "^1.15.0"
   },
   "scripts": {
     "start": "node index.js",
     "lint": "eslint ."
+  },
+  "engines": {
+    "node": ">=12"
   }
 }
