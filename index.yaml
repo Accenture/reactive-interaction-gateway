@@ -1,0 +1,41 @@
+apiVersion: v1
+entries:
+  reactive-interaction-gateway:
+  - apiVersion: v2
+    appVersion: 3.0.0-alpha.2
+    created: "2021-05-07T16:51:46.752446714Z"
+    description: A Helm chart for Kubernetes
+    digest: 43e6067a3c0f9c43bb6d9277090a66ca053195aed616cdd6c6d5fa542858073f
+    home: https://github.com/Accenture/reactive-interaction-gateway
+    icon: https://github.com/Accenture/reactive-interaction-gateway/blob/master/logo/Reactive-Interaction-Gateway-logo-cropped.png
+    maintainers:
+    - name: kevinbader
+      url: https://github.com/kevinbader
+    - name: mmacai
+      url: https://github.com/mmacai
+    - name: Knappek
+      url: https://github.com/Knappek
+    name: reactive-interaction-gateway
+    urls:
+    - https://github.com/Accenture/reactive-interaction-gateway/releases/download/reactive-interaction-gateway-2.1.2/reactive-interaction-gateway-2.1.2.tgz
+    version: 2.1.2
+  reactive-interaction-gateway-helm-v2:
+  - apiVersion: v1
+    appVersion: 3.0.0-alpha.2
+    created: "2021-05-07T16:51:47.0206618Z"
+    description: A Helm v2 chart for Kubernetes
+    digest: 3e4af21b9827469855e043c779a1311ce83b383381f197eee62385c469219ca5
+    home: https://github.com/Accenture/reactive-interaction-gateway
+    icon: https://github.com/Accenture/reactive-interaction-gateway/blob/master/logo/Reactive-Interaction-Gateway-logo-cropped.png
+    maintainers:
+    - name: kevinbader
+      url: https://github.com/kevinbader
+    - name: mmacai
+      url: https://github.com/mmacai
+    - name: Knappek
+      url: https://github.com/Knappek
+    name: reactive-interaction-gateway-helm-v2
+    urls:
+    - https://github.com/Accenture/reactive-interaction-gateway/releases/download/reactive-interaction-gateway-helm-v2-2.1.2/reactive-interaction-gateway-helm-v2-2.1.2.tgz
+    version: 2.1.2
+generated: "2021-05-07T16:51:46.293539861Z"
