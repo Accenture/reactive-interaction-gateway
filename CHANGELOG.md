@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - make README smaller, easier to read and highlight features. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
 - Updated Phoenix LiveDashboard setup to show also metrics based on the Prometheus metrics (for now only proxy and events metrics). [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
 - Updated [Channels Example](https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples/channels-example) to use [Kafkajs](https://kafka.js.org/) and NodeJS 14. Updated [Smoke Tests](https://github.com/Accenture/reactive-interaction-gateway/tree/master/smoke_tests) to use NodeJS 14.
+- Updated Kafka SSL configuration to be able to set (skip) only specific SSL certificates. This is needed to allow connection to Azure Event Hubs. See more in the [docs](https://accenture.github.io/reactive-interaction-gateway/docs/azure-event-hubs.html). [#376](https://github.com/Accenture/reactive-interaction-gateway/issues/376)
 
 ### Fixed
 
