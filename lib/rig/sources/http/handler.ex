@@ -11,6 +11,7 @@ defmodule RIG.Sources.HTTP.Handler do
   alias Jason
   alias Plug.Conn
 
+  alias RIG.AuthorizationCheck.Request
   alias RIG.AuthorizationCheck.Submission
   alias Rig.EventFilter
   alias RIG.Plug.BodyReader
@@ -169,7 +170,9 @@ defmodule RIG.Sources.HTTP.Handler do
   defp handle_event(conn, %CloudEvent{} = cloud_event) do
     authorized? =
       if conn.assigns[:check_authorization?] do
-        Submission.check_authorization(conn, cloud_event) == :ok
+        conn
+        |> Request.from_plug_conn()
+        |> Submission.check_authorization(cloud_event) == :ok
       else
         true
       end

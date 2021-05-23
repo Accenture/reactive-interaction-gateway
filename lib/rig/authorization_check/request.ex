@@ -37,7 +37,7 @@ defmodule RIG.AuthorizationCheck.Request do
   def from_plug_conn(conn) do
     [content_type] = Conn.get_req_header(conn, "content-type")
 
-    %{
+    %__MODULE__{
       auth_info: auth_info(conn),
       query_params: conn.query_params,
       content_type: content_type,
@@ -52,7 +52,7 @@ defmodule RIG.AuthorizationCheck.Request do
   defp auth_info(%{assigns: %{auth_tokens: tokens}} = conn) do
     auth_header = for({"authorization", val} <- conn.req_headers, do: val) |> Enum.join(", ")
 
-    %{
+    %AuthInfo{
       auth_header: auth_header,
       auth_tokens: tokens
     }

@@ -40,13 +40,11 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
         %{auth_tokens: [{"bearer", jwt}]} -> jwt
       end
 
-    with {:ok, jwt_subs} <-
-           Subscriptions.from_token(jwt),
+    with :ok <- SubscriptionAuthZ.check_authorization(request),
+         {:ok, jwt_subs} <- Subscriptions.from_token(jwt),
          true = String.starts_with?(request.content_type, "application/json"),
-         {:ok, query_subs} <-
-           Subscriptions.from_json(request.body),
+         {:ok, query_subs} <- Subscriptions.from_json(request.body),
          subscriptions = Enum.uniq(jwt_subs ++ query_subs),
-         :ok <- SubscriptionAuthZ.check_authorization(request),
          {:ok, _n_connections} <- ConnectionLimit.check_rate_limit() do
       # If the JWT is valid and points to a session, we associate this connection with
       # it. If that doesn't work out, we log a warning but don't tell the frontend -
@@ -86,7 +84,7 @@ defmodule RigInboundGatewayWeb.ConnectionInit do
           "Cannot accept #{conn_type} connection #{pid}: #{msg}"
         end)
 
-        on_error.("Subscription denied (not authorized).")
+        on_error.({403, "Subscription denied (not authorized)."})
 
       {:error, %ConnectionLimit.MaxConnectionsError{n_connections: n_connections} = ex} ->
         Logger.warn(fn ->

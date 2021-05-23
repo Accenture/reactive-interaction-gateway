@@ -28,7 +28,7 @@ defmodule RIG.AuthorizationCheck.Submission do
   end
 
   @spec check_authorization(Request.t(), CloudEvent.t()) :: :ok | {:error, :not_authorized}
-  def check_authorization(request, %CloudEvent{}) do
+  def check_authorization(%Request{} = request, %CloudEvent{}) do
     %{validation_type: validation_type} = config()
 
     case validation_type do

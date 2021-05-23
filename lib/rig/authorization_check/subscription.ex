@@ -34,7 +34,7 @@ defmodule RIG.AuthorizationCheck.Subscription do
   # If body is nil, there are no subscriptions to authorize.
   def check_authorization(%{body: nil}), do: :ok
 
-  def check_authorization(request) do
+  def check_authorization(%Request{} = request) do
     %{validation_type: validation_type} = config()
 
     case validation_type do
