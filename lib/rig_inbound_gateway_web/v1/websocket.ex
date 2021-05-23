@@ -9,6 +9,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
   alias Result
 
+  alias RIG.AuthorizationCheck.Request
   alias Rig.EventFilter
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
@@ -50,7 +51,7 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
 
     case ConnectionInit.subscriptions_query_param_to_body(query_params) do
       {:ok, encoded_body_or_nil} ->
-        request = %{
+        request = %Request{
           auth_info: auth_info,
           query_params: "",
           content_type: "application/json; charset=utf-8",
@@ -73,15 +74,22 @@ defmodule RigInboundGatewayWeb.V1.Websocket do
       {:reply, frame(Events.welcome_event()), state, :hibernate}
     end
 
-    on_error = fn _reason ->
+    on_error = fn reason ->
+      Logger.warn(fn -> "websocket error: #{inspect(reason)}" end)
       # WebSocket close frames may include a payload to indicate the error, but we found
       # that error message must be really short; if it isn't, the `{:close, :normal,
       # payload}` is silently converted to `{:close, :abnormal, nil}`. Since there is no
       # limit mentioned in the spec (RFC-6455), we opt for consistent responses,
       # omitting the detailed error.
-      reason = "Bad request."
+      reply =
+        case reason do
+          {403, _} -> "Not authorized."
+          {code, _} -> "#{code}: Bad request."
+          _ -> "Bad request."
+        end
+
       # This will close the connection:
-      {:reply, closing_frame(reason), :no_state}
+      {:reply, closing_frame(reply), :no_state}
     end
 
     ConnectionInit.set_up(

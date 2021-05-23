@@ -44,11 +44,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - make README smaller, easier to read and highlight features. [#284](https://github.com/Accenture/reactive-interaction-gateway/issues/284)
 - Updated Phoenix LiveDashboard setup to show also metrics based on the Prometheus metrics (for now only proxy and events metrics). [#157](https://github.com/Accenture/reactive-interaction-gateway/issues/157)
 - Updated [Channels Example](https://github.com/Accenture/reactive-interaction-gateway/tree/master/examples/channels-example) to use [Kafkajs](https://kafka.js.org/) and NodeJS 14. Updated [Smoke Tests](https://github.com/Accenture/reactive-interaction-gateway/tree/master/smoke_tests) to use NodeJS 14.
+- Response code changed: when connecting and subscribing at the same time, RIG replies with 403 (instead of 400) when not authorized to do so.
+- Ill-formed JWTs no longer cause subscription requests to fail.
 
 ### Fixed
 
 - Fixed a bug where distributed set processes would crash when one of their peers has died but hasn't been removed yet from the pg2 group.
 - Fixed wrong endpoint validation for reverse proxy. Now it should correctly check for `path` or `path_regex`. Before it would require `path` even with `path_regex` in place. [#334](https://github.com/Accenture/reactive-interaction-gateway/issues/334)
+- For subscription requests, JWTs that can't be validated are now ignored. This allows to validate JWTs in an external service as configurable via the SUBMISSION_CHECK and SUBSCRIPTION_CHECK environment variables (which was the intention all along).
+  [#377](https://github.com/Accenture/reactive-interaction-gateway/issues/377)
+- Fixed SUBMISSION_CHECK=jwt_validation - it failed the check anytime, regardless of whether the JWT was valid.
 
 <!-- ### Deprecated -->
 

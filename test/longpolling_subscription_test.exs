@@ -296,26 +296,24 @@ defmodule RigInboundGateway.LongpollingSubscriptionTest do
       assert error.body =~ ~r/could not parse given subscriptions/
     end
 
-    test "An invalid JWT causes the request to fail." do
+    test "An invalid JWT is ignored." do
       invalid_jwt = "this is not a valid JWT"
 
       {:ok, cookies} = LongpollingClient.connect(subscriptions: [])
-      {:ok, events, _cookies} = LongpollingClient.read_events(cookies)
+      {:ok, events, cookies} = LongpollingClient.read_events(cookies)
 
       subscriptions_set_event = Enum.at(events, 1)
       %{"data" => []} = subscriptions_set_event
 
       welcome_event = Enum.at(events, 0)
 
-      error =
-        assert_raise SubscriptionError, fn ->
-          welcome_event
-          |> connection_id()
-          |> update_subscriptions([], invalid_jwt)
-        end
+      welcome_event
+      |> connection_id()
+      |> update_subscriptions([], invalid_jwt)
 
-      assert error.code == 400
-      assert error.body =~ ~r/invalid authorization header/
+      {:ok, events, cookies} = LongpollingClient.read_events(cookies)
+      subscriptions_set_event = Enum.at(events, 0)
+      %{"data" => []} = subscriptions_set_event
     end
   end
 

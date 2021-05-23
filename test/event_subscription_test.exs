@@ -308,7 +308,7 @@ defmodule RigInboundGateway.EventSubscriptionTest do
       end
     end
 
-    test "An invalid JWT causes the request to fail." do
+    test "An invalid JWT is ignored." do
       invalid_jwt = "this is not a valid JWT"
 
       for client <- @clients do
@@ -317,18 +317,11 @@ defmodule RigInboundGateway.EventSubscriptionTest do
 
         {%{"data" => []}, ref} = client.read_subscriptions_set_event(ref)
 
-        error =
-          assert_raise SubscriptionError, fn ->
-            welcome_event
-            |> connection_id()
-            |> update_subscriptions([], invalid_jwt)
-          end
+        welcome_event
+        |> connection_id()
+        |> update_subscriptions([], invalid_jwt)
 
-        assert error.body =~ ~r/invalid authorization header/
-        assert error.code == 400
-
-        # The request has failed, so there should be no subscriptions_set event:
-        {:ok, ref} = client.refute_receive(ref)
+        assert {%{"data" => []}, ref} = client.read_subscriptions_set_event(ref)
 
         client.disconnect(ref)
       end

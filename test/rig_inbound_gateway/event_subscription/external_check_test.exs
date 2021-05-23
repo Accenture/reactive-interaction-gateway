@@ -1,8 +1,8 @@
 defmodule RigInboundGateway.EventSubscription.ExternalCheckTest do
   @moduledoc """
-  An external service can determine, whether or not to allow subscriptions.
+  An external service may be used to allow or deny subscriptions.
   """
-  # Cannot be async because the extractor configuration is modified:
+  # Cannot be async because environment variables are modified:
   use ExUnit.Case, async: false
 
   import FakeServer
@@ -111,7 +111,7 @@ defmodule RigInboundGateway.EventSubscription.ExternalCheckTest do
     end
   end
 
-  test_with_server "The external service receives the Authorization header.",
+  test_with_server "The external service receives the Authorization header, even if the JWT it contains can't be validated.",
     port: @fake_validation_service_port do
     # The fake subscription-validation service accepts anything:
     route("/", fn
@@ -124,7 +124,7 @@ defmodule RigInboundGateway.EventSubscription.ExternalCheckTest do
         )
     end)
 
-    jwt = JWT.encode(%{})
+    jwt = "use case: valid JWT but RIG doesn't have the validation key"
 
     for client <- @clients do
       {:ok, ref} = client.connect()

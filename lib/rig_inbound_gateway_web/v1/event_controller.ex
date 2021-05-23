@@ -31,6 +31,7 @@ defmodule RigInboundGatewayWeb.V1.EventController do
   def publish(%{method: "POST"} = conn, _params) do
     conn
     |> with_allow_origin()
+    |> Plug.Conn.fetch_query_params()
     |> Handler.handle_http_submission(check_authorization?: true)
   end
 end

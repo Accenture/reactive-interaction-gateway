@@ -142,7 +142,7 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
       do_set_subscriptions(conn, socket_pid, subscriptions)
     else
       {:error, :not_authorized} ->
-        conn |> put_status(:forbidden) |> text("Subscription denied.")
+        conn |> put_status(:forbidden) |> text("Subscription denied (not authorized).")
 
       {:error, :not_base64} ->
         Logger.warn(fn -> "Connection token #{connection_id} is not Base64 encoded." end)
@@ -189,10 +189,22 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
   # ---
 
   defp do_set_subscriptions(conn, socket_pid, subscriptions_param) do
-    with {:ok, jwt_subscriptions} <-
-           conn.req_headers
-           |> get_all_claims()
-           |> Result.and_then(fn claims -> Subscriptions.from_jwt_claims(claims) end),
+    jwt_subscriptions_result =
+      conn.req_headers
+      |> JWT.parse_http_header()
+      # We ignore any JWT that RIG can't validate:
+      |> Result.filter_and_unwrap()
+      |> Enum.map(fn claims -> Subscriptions.from_jwt_claims(claims) end)
+      # For each JWT, we now either have a list of subscriptions, or an error;
+      # turn this into either a list of subscription-lists, or a list of errors:
+      |> Result.list_to_result()
+      # Flatten into a list of subscriptions:
+      |> Result.map(&Enum.concat/1)
+      |> Result.map_err(fn errors ->
+        "cannot derive subscriptions from authorization tokens: #{inspect(errors)}"
+      end)
+
+    with {:ok, jwt_subscriptions} <- jwt_subscriptions_result,
          {:ok, passed_subscriptions} <- parse_subscriptions(subscriptions_param) do
       subscriptions = jwt_subscriptions ++ passed_subscriptions
       send(socket_pid, {:set_subscriptions, subscriptions})
@@ -220,22 +232,6 @@ defmodule RigInboundGatewayWeb.V1.SubscriptionController do
       _ ->
         :ok
     end
-  end
-
-  # ---
-
-  # All claims, from all Authorization tokens. Returns a Result.
-  defp get_all_claims(headers) do
-    headers
-    |> JWT.parse_http_header()
-    |> Enum.reduce(%{}, fn
-      {:ok, claims}, acc -> Map.merge(acc, claims)
-      {:error, error}, _acc -> throw(error)
-    end)
-    |> Result.ok()
-  catch
-    %JWT.DecodeError{} = error ->
-      Result.err("invalid authorization header: #{Exception.message(error)}")
   end
 
   # ---

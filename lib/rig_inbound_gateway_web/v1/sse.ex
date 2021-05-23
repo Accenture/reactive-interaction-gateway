@@ -11,6 +11,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
   alias Result
 
+  alias RIG.AuthorizationCheck.Request
   alias Rig.EventFilter
   alias RigCloudEvents.CloudEvent
   alias RigInboundGateway.Events
@@ -39,7 +40,7 @@ defmodule RigInboundGatewayWeb.V1.SSE do
 
     case ConnectionInit.subscriptions_query_param_to_body(query_params) do
       {:ok, encoded_body_or_nil} ->
-        request = %{
+        request = %Request{
           auth_info: auth_info,
           query_params: "",
           content_type: "application/json; charset=utf-8",

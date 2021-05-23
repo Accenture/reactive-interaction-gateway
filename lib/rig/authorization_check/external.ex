@@ -11,10 +11,19 @@ defmodule RIG.AuthorizationCheck.External do
           true | false | {:error, url :: String.t(), error :: any()}
   def check(url, request) do
     case HTTPoison.post(url, request.body || "", http_headers(request)) do
-      {:ok, %HTTPoison.Response{status_code: status}} when status >= 200 and status < 300 -> true
-      {:ok, %HTTPoison.Response{status_code: status}} when status == 401 or status == 403 -> false
-      {:ok, unexpected_response} -> {:error, unexpected_response}
-      {:error, error} -> {:error, {url, error}}
+      {:ok, %HTTPoison.Response{status_code: status}} when status >= 200 and status < 300 ->
+        Logger.debug(fn -> "ALLOW via #{url} (status #{status})" end)
+        true
+
+      {:ok, %HTTPoison.Response{status_code: status}} when status == 401 or status == 403 ->
+        Logger.debug(fn -> "DENY via #{url} (status #{status})" end)
+        false
+
+      {:ok, unexpected_response} ->
+        {:error, unexpected_response}
+
+      {:error, error} ->
+        {:error, {url, error}}
     end
   end
 
