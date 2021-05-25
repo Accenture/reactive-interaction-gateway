@@ -20,7 +20,8 @@
       "api-gateway-management",
       "api-gateway-synchronization",
       "avro",
-      "jwt-blacklisting"
+      "jwt-blacklisting",
+      "azure-event-hubs"
     ],
     "RIG in Production": [
       "rig-ops-guide",

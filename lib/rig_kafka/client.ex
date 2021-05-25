@@ -181,11 +181,11 @@ defmodule RigKafka.Client do
   defp add_ssl_conf(brod_client_conf, nil), do: brod_client_conf
 
   defp add_ssl_conf(brod_client_conf, config) do
-    opts = [
-      keyfile: config.path_to_key_pem |> resolve_path,
-      certfile: config.path_to_cert_pem |> resolve_path,
-      cacertfile: config.path_to_ca_cert_pem |> resolve_path
-    ]
+    opts =
+      []
+      |> add_ssl_cert(:keyfile, config.path_to_key_pem)
+      |> add_ssl_cert(:certfile, config.path_to_cert_pem)
+      |> add_ssl_cert(:cacertfile, config.path_to_ca_cert_pem)
 
     # The Erlang SSL module requires the password to be passed as a charlist:
     opts =
@@ -199,7 +199,20 @@ defmodule RigKafka.Client do
 
   # ---
 
+  @spec add_ssl_cert(opts :: [{atom, String.t()}], key :: String.t(), path :: String.t()) :: [
+          {atom, String.t()}
+        ]
+
+  defp add_ssl_cert(opts, key, path) when is_binary(path) and byte_size(path) > 0 do
+    Keyword.put(opts, key, resolve_path(path))
+  end
+
+  defp add_ssl_cert(opts, key, path), do: opts
+
+  # ---
+
   @spec resolve_path(path :: String.t()) :: String.t()
+
   defp resolve_path(path) do
     working_dir = :code.priv_dir(:rig)
     expanded_path = Path.expand(path, working_dir)

@@ -29,6 +29,10 @@
         "title": "Avro Implementation Details",
         "sidebar_label": "Avro"
       },
+      "azure-event-hubs": {
+        "title": "Azure Event Hubs",
+        "sidebar_label": "Azure Event Hubs"
+      },
       "distributed-tracing": {
         "title": "Distributed Tracing",
         "sidebar_label": "Distributed Tracing"
