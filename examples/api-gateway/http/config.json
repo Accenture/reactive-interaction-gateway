@@ -1,20 +1,21 @@
 [
   {
     "id": "my-service",
+    "name": "my-service",
     "version_data": {
       "default": {
         "endpoints": [
           {
             "id": "my-endpoint",
             "method": "GET",
-            "path_regex": "/"
+            "path_regex": "/foo",
+            "response_from": "http_async"
           }
         ]
       }
     },
     "proxy": {
-      "use_env": true,
-      "target_url": "API_HOST",
+      "target_url": "localhost",
       "port": 3000
     }
   }

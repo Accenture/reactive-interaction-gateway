@@ -1,0 +1,22 @@
+version: "3"
+services:
+
+  rig:
+    image: accenture/reactive-interaction-gateway
+    environment:
+      - PROXY_HTTP_ASYNC_RESPONSE_TIMEOUT=30000
+      - LOG_LEVEL=debug
+      - NODE_APP=node-app
+      - PROXY_CONFIG_FILE=[{"id":"my-service","name":"my-service","version_data":{"default":{"endpoints":[{"id":"my-endpoint","method":"GET","path_regex":"/foo","response_from":"http_async"}]}},"proxy":{"use_env":true,"target_url":"NODE_APP","port":3000}}]
+    ports:
+      - 4000:4000
+      - 4010:4010
+
+  node-app:
+    build:
+      context: .
+    environment:
+      - RIG_RESPONSE_URL=http://rig:4010/v3/responses
+      - RIG_VERSION=3.0.0
+    ports:
+      - 3000:3000
