@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"sync"
 
-	loadtest ".."
+	utils "client.go/utils"
 )
 
 func main() {
 	var wg sync.WaitGroup
 	var mutex = &sync.Mutex{}
 
-	goroutines, timeout := loadtest.GetEnv()
+	goroutines, timeout := utils.GetEnv()
 
 	ctrl := make(chan bool)
 
@@ -20,7 +20,7 @@ func main() {
 	for i := 1; i <= goroutines; i++ {
 		wg.Add(1)
 		go func(i int) {
-			elapsed, _ := loadtest.Receive(0, 3, 1, "to_be_delivered", ctrl)
+			elapsed, _ := utils.Receive(0, 3, 1, "to_be_delivered", ctrl)
 
 			mutex.Lock()
 			fmt.Println("Thread", i, "finished in", elapsed, "s")
@@ -31,11 +31,11 @@ func main() {
 		<-ctrl
 	}
 
-	go loadtest.StatusOk()
+	go utils.StatusOk()
 
 	fmt.Println("Waiting for goroutines to finish...")
 
-	if loadtest.WaitTimeout(&wg, timeout) {
+	if utils.WaitTimeout(&wg, timeout) {
 		fmt.Println("Timed out waiting for wait group")
 	} else {
 		fmt.Println("Wait group finished")

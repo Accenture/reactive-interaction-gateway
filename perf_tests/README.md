@@ -1,3 +1,5 @@
+# Custom Built Performance Tests
+
 ## Requirements
 
 * `docker`
@@ -11,6 +13,7 @@
 Send one message, send 1M ignored messages, send one message again.
 
 ### ENV Variables - Client
+
 ```ini
 CLIENTS=1
 TIMEOUT=10m
@@ -19,6 +22,7 @@ RIG_HOST=rig
 ```
 
 ### Start
+
 ```bash
 ./start_run1.sh
 ```
@@ -28,6 +32,7 @@ RIG_HOST=rig
 Send 100k messages to 100 clients.
 
 ### ENV Variables - Client
+
 ```ini
 CLIENTS=100
 TIMEOUT=30m
@@ -36,6 +41,7 @@ RIG_HOST=rig
 ```
 
 ### Start
+
 ```bash
 ./start_run2.sh
 ```
@@ -45,6 +51,7 @@ RIG_HOST=rig
 Send 1000 messages in 100 different event types to 1000 clients.
 
 ### ENV Variables - Client
+
 ```ini
 CLIENTS=1000
 TIMEOUT=1h
@@ -53,6 +60,7 @@ RIG_HOST=rig
 ```
 
 ### Start
+
 ```bash
 ./start_run6.sh
 ```

@@ -32,29 +32,22 @@ services:
   clients:
     ports:
       - 9999:9999
-    build:
-      context: ..
-      dockerfile: run1/client.Dockerfile
-    depends_on:
-      - rig
+    image: client
     environment:
       CLIENTS: 1
       TIMEOUT: 30m
       RIG_HOST: rig
-  loader:
-    build:
-      context: ..
-      dockerfile: run1/loader.Dockerfile
-    depends_on:
-      - clients
-    environment:
-      KAFKA_HOST: kafka:9092
-      CLIENTS: clients
+
+  # loader:
+  #   build:
+  #     context: ./src
+  #     dockerfile: run1/loader.Dockerfile
+  #   environment:
+  #     KAFKA_HOST: kafka:9092
+  #     CLIENTS: clients
+
   rig:
-    image: "accenture/reactive-interaction-gateway:latest"
-    depends_on:
-      - zk
-      - kafka
+    image: accenture/reactive-interaction-gateway
     environment:
       KAFKA_BROKERS: kafka:9092
       LOG_LEVEL: error

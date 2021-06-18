@@ -27,7 +27,8 @@
       "api-documentation",
       "metrics-details",
       "https",
-      "scaling"
+      "scaling",
+      "performance"
     ],
     "Hacking the Source": [
       "rig-dev-guide"

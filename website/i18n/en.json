@@ -73,6 +73,10 @@
         "title": "Metrics Details",
         "sidebar_label": "Metrics Details"
       },
+      "performance": {
+        "title": "Performance",
+        "sidebar_label": "Performance"
+      },
       "rig-dev-guide": {
         "title": "Developer's Guide to the Reactive Interaction Gateway",
         "sidebar_label": "Developer's Guide"
