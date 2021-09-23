@@ -10,8 +10,8 @@ sidebar_label: Features
 * [Forwarding client requests to backend services](#forwarding-client-requests-to-backend-services)
   * [Synchronously](#synchronously-1)
   * [Asynchronously - Fire&Forget](#asynchronously---fireforget)
-  * [Synchronously - Asnychronous Response](#synchronously---asnychronous-response)
-  * [Asynchronously - Asnychronous Response](#asynchronously---asnychronous-response)
+  * [Synchronously - Asynchronous Response](#synchronously---asynchronous-response)
+  * [Asynchronously - Asynchronous Response](#asynchronously---asynchronous-response)
 * [Out-of-the-box Features](#out-of-the-box-features)
 
 RIG can be used in different scenarios.
@@ -56,7 +56,7 @@ RIG transforms a HTTP request to a message for asynchronous processing and forwa
 
 This enables asynchonous communication between client-side applications and the backend. RIG acts as a bridge between its clients and the messaging system. Similar to above, the authenticity of client requests are validated using JWT signature verification. RIG effectively replaces a custom backend application that would accept client requests and forward them to Kafka, Nats or Kinesis. This additional backend app is a single point of failure, hence it would be necessary to harden it and make it highly available and reliable. With RIG, you don't have to take care of that - RIG is [scalable by design](https://accenture.github.io/reactive-interaction-gateway/docs/features.html#out-of-the-box-features).
 
-### Synchronously - Asnychronous Response
+### Synchronously - Asynchronous Response
 
 RIG forwards the client request to the backend synchronously via HTTP and waits for the backend response by listening to Kafka/NATS and forwarding it to the still open HTTP connection to the frontend.
 
@@ -68,13 +68,13 @@ As you can see in the architecture diagram, the backend service responds to RIG 
 
 Apart from that, the backend service also has the possibility to return a cached response (this will be a `200 OK` response with a corresponding http body) or anything else, e.g. a `400 Bad Request`. In turn, RIG will not listen to the topic and wait for the response. Consequently, the request flow will look similar to the [synchronous approach](#synchronously).
 
-### Asynchronously - Asnychronous Response
+### Asynchronously - Asynchronous Response
 
 RIG forwards the client request to the backend asynchronously via Kafka or NATS and waits for the backend response by listening to Kafka/NATS and forwarding it to the still open HTTP connection to the frontend.
 
 ![client-to-backend-asynchronously-asynchronous-response](./assets/features-client-to-backend-asynchronously-asynchronous-response.png)
 
-Essentially this is a combination of the [asynchronous - fire&forget approach](#asynchronously---fireforget) and the [synchronous - asynchronous response approach](#synchronously---asnychronous-response).
+Essentially this is a combination of the [asynchronous - fire&forget approach](#asynchronously---fireforget) and the [synchronous - asynchronous response approach](#synchronously---asynchronous-response).
 
 ## Out-of-the-box Features  
 
