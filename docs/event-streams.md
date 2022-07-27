@@ -87,6 +87,7 @@ docker run \
 -e KAFKA_SOURCE_TOPICS=my-topic \
 -e PROXY_KAFKA_RESPONSE_TOPICS=my-proxy-topic \
 accenture/reactive-interaction-gateway
+```
 
 As described in the [Event Format](event-format#kafka-transport-binding) Section, the Kafka consumer supports both structured and binary modes, each with JSON as well as Avro encoding (with details described in the [advanced guide on Avro](avro)).
 
