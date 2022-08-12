@@ -2,6 +2,24 @@ apiVersion: v1
 entries:
   reactive-interaction-gateway:
   - apiVersion: v2
+    appVersion: 3.0.0
+    created: "2022-08-12T19:55:13.177148878Z"
+    description: A Helm chart for Kubernetes
+    digest: 17c57e6d62702b1935cad6f953f153ee730e5ba44f925b05228810b8c8927f1f
+    home: https://github.com/Accenture/reactive-interaction-gateway
+    icon: https://github.com/Accenture/reactive-interaction-gateway/blob/master/logo/Reactive-Interaction-Gateway-logo-cropped.png
+    maintainers:
+    - name: kevinbader
+      url: https://github.com/kevinbader
+    - name: mmacai
+      url: https://github.com/mmacai
+    - name: Knappek
+      url: https://github.com/Knappek
+    name: reactive-interaction-gateway
+    urls:
+    - https://github.com/Accenture/reactive-interaction-gateway/releases/download/reactive-interaction-gateway-2.1.3/reactive-interaction-gateway-2.1.3.tgz
+    version: 2.1.3
+  - apiVersion: v2
     appVersion: 3.0.0-alpha.2
     created: "2021-05-07T16:51:46.752446714Z"
     description: A Helm chart for Kubernetes
@@ -20,6 +38,24 @@ entries:
     - https://github.com/Accenture/reactive-interaction-gateway/releases/download/reactive-interaction-gateway-2.1.2/reactive-interaction-gateway-2.1.2.tgz
     version: 2.1.2
   reactive-interaction-gateway-helm-v2:
+  - apiVersion: v1
+    appVersion: 3.0.0
+    created: "2022-08-12T19:55:13.447191354Z"
+    description: A Helm v2 chart for Kubernetes
+    digest: ba28a8b5852f0686978bc1ce86f7c940c2b184f5db85b65b825ecc22673e050f
+    home: https://github.com/Accenture/reactive-interaction-gateway
+    icon: https://github.com/Accenture/reactive-interaction-gateway/blob/master/logo/Reactive-Interaction-Gateway-logo-cropped.png
+    maintainers:
+    - name: kevinbader
+      url: https://github.com/kevinbader
+    - name: mmacai
+      url: https://github.com/mmacai
+    - name: Knappek
+      url: https://github.com/Knappek
+    name: reactive-interaction-gateway-helm-v2
+    urls:
+    - https://github.com/Accenture/reactive-interaction-gateway/releases/download/reactive-interaction-gateway-helm-v2-2.1.3/reactive-interaction-gateway-helm-v2-2.1.3.tgz
+    version: 2.1.3
   - apiVersion: v1
     appVersion: 3.0.0-alpha.2
     created: "2021-05-07T16:51:47.0206618Z"
