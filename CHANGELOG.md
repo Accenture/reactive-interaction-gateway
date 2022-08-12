@@ -437,7 +437,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Disable Origin checking.
   [#12](https://github.com/Accenture/reactive-interaction-gateway/pull/12)
 
-[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.4.0...HEAD
+[unreleased]: https://github.com/Accenture/reactive-interaction-gateway/compare/3.0.0...HEAD
+[3.0.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.4.0...3.0.0
 [2.4.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.3.0...2.4.0
 [2.3.0]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.1...2.3.0
 [2.2.1]: https://github.com/Accenture/reactive-interaction-gateway/compare/2.2.0...2.2.1
