@@ -1,6 +1,6 @@
 # reactive-interaction-gateway-helm-v2
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![AppVersion: 3.0.0-alpha.2](https://img.shields.io/badge/AppVersion-3.0.0-alpha.2-informational?style=flat-square)
+![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![AppVersion: 3.0.0](https://img.shields.io/badge/AppVersion-3.0.0-informational?style=flat-square)
 
 A Helm v2 chart for Kubernetes
 

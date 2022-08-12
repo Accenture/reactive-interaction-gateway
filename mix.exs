@@ -7,7 +7,7 @@ defmodule RIG.MixProject do
   from backend services to connected frontends (and vice versa).
   """
 
-  @rig_version "3.0.0-alpha.2"
+  @rig_version "3.0.0"
 
   def project do
     elixir_version = elixir_version_from_tool_versions_file()

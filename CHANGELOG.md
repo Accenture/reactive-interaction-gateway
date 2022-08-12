@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2022-08-12
+
 ### Added
 
 - Support publishing events consumed from [NATS](https://nats.io) topics. See the [documentation](https://accenture.github.io/reactive-interaction-gateway/docs/event-streams.html#nats) for how to get started. [#297](https://github.com/Accenture/reactive-interaction-gateway/issues/297)
