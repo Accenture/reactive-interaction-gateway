@@ -5,7 +5,7 @@
   "main": "utils.js",
   "dependencies": {
     "artillery": "^1.6.1",
-    "eventsource": "^1.0.7"
+    "eventsource": "^2.0.2"
   },
   "devDependencies": {},
   "scripts": {
