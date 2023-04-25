@@ -52,6 +52,13 @@ defmodule RIG.Subscriptions.Parser.JWT do
     end
     |> Result.filter_and_unwrap()
     |> Enum.into(%{})
+    |> Enum.map(fn {key, value} ->
+         cond do
+           is_list(value) -> Enum.map(value, fn element -> %{key => element} end)
+           is_bitstring(value) -> [%{key => value}]
+         end
+       end)
+    |> Enum.flat_map(& &1)
     |> List.wrap()
   end
 
