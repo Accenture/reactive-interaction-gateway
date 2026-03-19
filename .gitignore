@@ -41,5 +41,13 @@ erl_crash.dump
 *~
 *.orig
 
+# DDE runtime (session-local, not shared)
+.dde/
+.tmp/
+
+# Claude Code (session-local)
+.claude/worktrees/
+.claude/projects/
+
 # Artillery
 /performance_tests/artillery/report*.*

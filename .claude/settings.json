@@ -1,0 +1,74 @@
+{
+  "outputStyle": "dde",
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)/scripts/dde-statusline.sh\""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(dde:*)",
+      "Bash(tools/dde/dde:*)",
+      "Bash(./tools/dde/dde:*)",
+      "Bash(bash scripts/dde-status.sh:*)",
+      "Bash(bash scripts/dde-statusline.sh:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "TaskUpdate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)/scripts/hooks/task-completed.sh\"",
+            "timeout": 120000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)/scripts/hooks/session-start.sh\"",
+            "timeout": 10000
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__dde__dde_emit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)/scripts/hooks/beat-density.sh\"",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)/scripts/hooks/prompt-gate.sh\"",
+            "timeout": 15000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)/scripts/hooks/session-boundary.sh\"",
+            "timeout": 10000
+          }
+        ]
+      }
+    ]
+  }
+}
