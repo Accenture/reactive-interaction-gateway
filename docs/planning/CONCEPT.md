@@ -236,9 +236,9 @@ The primary user journey: a platform engineer sets up RIG to bridge their fronte
 
 ## Next Steps
 
-1. **Contrarian challenge session** — Mandatory challenge gate before proceeding
-2. **Solution Blueprint** — Architecture design: dependency modernization plan, OTP application structure, deployment strategy
-3. **Initial ADRs** — Key architectural decisions: target OTP version, OpenTelemetry migration, Distillery replacement
+1. ~~**Contrarian challenge session**~~ — N/A (existing project retrofit — Concept describes the system as it exists, not a speculative design)
+2. **Solution Blueprint** — Done: [SOLUTION_BLUEPRINT.md](../architecture/SOLUTION_BLUEPRINT.md)
+3. **Initial ADRs** — Outlined in Blueprint (ADR-001 through ADR-006); formal ADR files to be created in Sprint 1
 
 ---
 

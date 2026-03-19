@@ -136,9 +136,9 @@ Built on Erlang/OTP, RIG is inherently fault-tolerant and massively concurrent �
 
 ## Next Steps
 
-1. **Contrarian challenge session** — Mandatory challenge gate before proceeding
-2. **Concept document** — Define the nucleus: core capabilities, modernization priorities, key interactions
-3. **Solution Blueprint** — Architecture design and key technical decisions
+1. ~~**Contrarian challenge session**~~ — N/A (existing project retrofit — Vision derived from codebase analysis, not speculative design)
+2. **Concept document** — Done: [CONCEPT.md](CONCEPT.md)
+3. **Solution Blueprint** — Done: [SOLUTION_BLUEPRINT.md](../architecture/SOLUTION_BLUEPRINT.md)
 
 ---
 
