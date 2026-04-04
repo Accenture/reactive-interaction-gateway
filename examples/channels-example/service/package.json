@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "main": "index.js",
   "dependencies": {
-    "@hapi/hapi": "^20.1.2",
+    "@hapi/hapi": "^21.4.8",
     "kafkajs": "^1.15.0"
   },
   "scripts": {
