@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Close and correctly load the optional Kinesis client logging configuration stream. [#348](https://github.com/Accenture/reactive-interaction-gateway/issues/348)
+
 ## [3.0.0] - 2022-08-12
 
 ### Added
