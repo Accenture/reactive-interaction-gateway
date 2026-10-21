@@ -64,19 +64,25 @@ public final class App {
   }
 
   private static void setupLogging(Level level) throws SecurityException, IOException {
+    setupLogging(level, App.class.getClassLoader());
+  }
+
+  static void setupLogging(Level level, ClassLoader classLoader) throws SecurityException, IOException {
     final LogManager logManager = LogManager.getLogManager();
-    final InputStream propsStream = App.class.getClassLoader().getResourceAsStream("/log-config.properties");
-    if (propsStream != null) {
-      System.out.println("INFO: Logging configured via properties file.");
-      logManager.readConfiguration(propsStream);
-    } else {
-      System.out.format("INFO: Logging configured using defaults for level %s.\n", level.toString());
-      final Logger rootLogger = logManager.getLogger("");
-      rootLogger.setLevel(level);
-      for (final Handler h : rootLogger.getHandlers()) {
-        h.setFormatter(new SimpleFormatter());
-        h.setLevel(level);
+    try (InputStream propsStream = classLoader.getResourceAsStream("log-config.properties")) {
+      if (propsStream != null) {
+        System.out.println("INFO: Logging configured via properties file.");
+        logManager.readConfiguration(propsStream);
+        return;
       }
+    }
+
+    System.out.format("INFO: Logging configured using defaults for level %s.\n", level.toString());
+    final Logger rootLogger = logManager.getLogger("");
+    rootLogger.setLevel(level);
+    for (final Handler h : rootLogger.getHandlers()) {
+      h.setFormatter(new SimpleFormatter());
+      h.setLevel(level);
     }
   }
 
